@@ -108,9 +108,9 @@ public class BulkUploadPresenter extends AbstractPresenter {
      */
     private void setMenuSelectionModel() {
         view.getDraftMenuModel().addSelectionChangeHandler(
-                new MenuSelectionHandler(view.getDraftMenuModel()));
+                new MenuSelectionHandler(view.getDraftMenuModel(), false));
         view.getPendingMenuModel().addSelectionChangeHandler(
-                new MenuSelectionHandler(view.getPendingMenuModel()));
+                new MenuSelectionHandler(view.getPendingMenuModel(), true));
     }
 
     private void setCreateSelectionModel() {
@@ -151,8 +151,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     String name = info.getName();
                     String dateTime = DateUtilities.formatShorterDate(info.getCreated());
                     BulkUploadMenuItem item = new BulkUploadMenuItem(info.getId(), name, info
-                            .getCount(), dateTime, info.getType().toString(), info.getAccount()
-                                                                                  .getEmail());
+                            .getCount(), dateTime, info.getType().toString(), info.getAccount().getEmail());
                     data.add(item);
                 }
 
@@ -178,8 +177,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     String name = info.getName();
                     String dateTime = DateUtilities.formatShorterDate(info.getCreated());
                     BulkUploadMenuItem item = new BulkUploadMenuItem(info.getId(), name, info
-                            .getCount(), dateTime, info.getType().toString(), info.getAccount()
-                                                                                  .getEmail());
+                            .getCount(), dateTime, info.getType().toString(), info.getAccount().getEmail());
                     data.add(item);
                 }
 
@@ -293,73 +291,42 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 return;
             }
 
-            model.saveBulkImportDraftData(currentInput.getImportType(), name, cellData,
-                                          new BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler() {
+            BulkUploadSaveHandler handler = new BulkUploadSaveHandler();
+            model.saveBulkImportDraftData(currentInput.getImportType(), name, cellData, handler);
+        }
+    }
 
-                                              @Override
-                                              public void onSubmit(BulkUploadDraftSubmitEvent event) {
-                                                  if (event == null || event.getDraftInfo() == null)
-                                                      view.showFeedback("Error saving draft", true);
-                                                  else {
-                                                      BulkUploadInfo info = event.getDraftInfo();
-                                                      view.showFeedback("Draft successfully saved", false);
-                                                      String dateTime = DateUtilities.formatShorterDate(
-                                                              info.getCreated());
-                                                      BulkUploadMenuItem item = new BulkUploadMenuItem(info.getId(),
-                                                                                                       info
+    private class BulkUploadSaveHandler implements BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler {
 
+        @Override
+        public void onSubmit(BulkUploadDraftSubmitEvent event) {
+            if (event == null || event.getDraftInfo() == null)
+                view.showFeedback("Error saving draft", true);
+            else {
+                BulkUploadInfo info = event.getDraftInfo();
+                view.showFeedback("Draft successfully saved", false);
+                String dateTime = DateUtilities.formatShorterDate(
+                        info.getCreated());
+                BulkUploadMenuItem item = new BulkUploadMenuItem(info.getId(),
+                                                                 info.getName(),
+                                                                 info.getCount(),
+                                                                 dateTime,
+                                                                 info.getType().toString(),
+                                                                 info.getAccount().getEmail());
 
+                view.addSavedDraftData(item, new DeleteBulkUploadHandler(model.getService(), model.getEventBus()));
 
+                currentInput.setName(info.getName());
+                currentInput.setId(info.getId());
+                currentInput.getSheet().setCurrentInfo(info);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                               .getName(),
-                                                                                                       info.getCount(),
-                                                                                                       dateTime,
-                                                                                                       info.getType()
-                                                                                                           .toString(),
-                                                                                                       info.getAccount()
-                                                                                                           .getEmail());
-
-                                                      view.addSavedDraftData(
-                                                              item,
-                                                              new DeleteBulkUploadHandler(model.getService(),
-                                                                                          model.getEventBus()));
-
-                                                      // check if menu panel is visible
-                                                      if (view.getMenuVisibility() == false)
-                                                          view.setDraftMenuVisibility(true, false);
-
-                                                      currentInput.setName(info.getName());
-                                                      currentInput.setId(info.getId());
-                                                      currentInput.getSheet().setCurrentInfo(info);
-
-                                                      view.setSheet(currentInput, false, false);
-                                                      view.setHeader(currentInput.getImportType().getDisplay()
-                                                                             + " Bulk Import");
-                                                  }
-                                              }
-                                          });
+                view.setSheet(currentInput, false, false);
+                view.setHeader(currentInput.getImportType().getDisplay()
+                                       + " Bulk Import");
+                // check if menu panel is visible
+                if (view.getMenuVisibility() == false)
+                    view.setDraftMenuVisibility(true, false);
+            }
         }
     }
 
@@ -375,30 +342,35 @@ public class BulkUploadPresenter extends AbstractPresenter {
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
                     AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
 
-            model.updateBulkImportDraft(id, type, cellData,
-                                        new BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler() {
+            BulkUploadUpdateHandler handler = new BulkUploadUpdateHandler(type);
+            model.updateBulkImportDraft(id, type, cellData, handler);
+        }
+    }
 
-                                            @Override
-                                            public void onSubmit(BulkUploadDraftSubmitEvent event) {
-                                                if (event == null || event.getDraftInfo() == null)
-                                                    view.showFeedback("Error updating draft", true);
-                                                else {
-                                                    BulkUploadInfo info = event.getDraftInfo();
-                                                    view.showFeedback("Update successful", false);
-                                                    String time = DateUtilities.formatShorterDate(info.getCreated());
-                                                    BulkUploadMenuItem menuItem = new BulkUploadMenuItem(info.getId(),
-                                                                                                         info
-                                                                                                                 .getName(),
-                                                                                                         info.getCount(),
-                                                                                                         time,
-                                                                                                         type.getDisplay(),
-                                                                                                         AppController
-                                                                                                                 .accountInfo
-                                                                                                                 .getEmail());
-                                                    view.updateSavedDraftsMenu(menuItem);
-                                                }
-                                            }
-                                        });
+    private class BulkUploadUpdateHandler implements BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler {
+
+        private final EntryAddType type;
+
+        public BulkUploadUpdateHandler(EntryAddType type) {
+            this.type = type;
+        }
+
+        @Override
+        public void onSubmit(BulkUploadDraftSubmitEvent event) {
+            if (event == null || event.getDraftInfo() == null)
+                view.showFeedback("Error updating draft", true);
+            else {
+                BulkUploadInfo info = event.getDraftInfo();
+                view.showFeedback("Update successful", false);
+                String time = DateUtilities.formatShorterDate(info.getCreated());
+                BulkUploadMenuItem menuItem = new BulkUploadMenuItem(info.getId(),
+                                                                     info.getName(),
+                                                                     info.getCount(),
+                                                                     time,
+                                                                     type.getDisplay(),
+                                                                     AppController.accountInfo.getEmail());
+                view.updateSavedDraftsMenu(menuItem);
+            }
         }
     }
 
@@ -406,9 +378,11 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private class MenuSelectionHandler implements SelectionChangeEvent.Handler {
 
         private final SingleSelectionModel<BulkUploadMenuItem> selection;
+        private final boolean isValidation;
 
-        public MenuSelectionHandler(SingleSelectionModel<BulkUploadMenuItem> selection) {
+        public MenuSelectionHandler(SingleSelectionModel<BulkUploadMenuItem> selection, boolean isValidation) {
             this.selection = selection;
+            this.isValidation = isValidation;
         }
 
         @Override
@@ -436,7 +410,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     }
                     currentInput.setName(name);
 
-                    view.setSheet(currentInput, false, true);
+                    view.setSheet(currentInput, false, isValidation);
                     view.setHeader(info.getType().getDisplay() + " Bulk Import");
                     view.setDraftMenuVisibility(false, false);
                 }
