@@ -119,7 +119,7 @@ public class EntryController {
         createdEntry = EntryFactory.createEntry(account, nextPart, entry);
 
         try {
-            dao.save(entry);
+            dao.saveOrUpdate(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -374,7 +374,7 @@ public class EntryController {
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
-            savedEntry = dao.save(entry);
+            savedEntry = dao.saveOrUpdate(entry);
 
             if (scheduleIndexRebuild) {
                 ApplicationController.scheduleSearchIndexRebuildJob();
@@ -402,7 +402,7 @@ public class EntryController {
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
-            savedEntry = dao.update(entry);
+            savedEntry = dao.saveOrUpdate(entry);
 
             ApplicationController.scheduleSearchIndexRebuildJob();
             ApplicationController.scheduleBlastIndexRebuildJob();
@@ -455,7 +455,7 @@ public class EntryController {
         entry.setModificationTime(Calendar.getInstance().getTime());
 
         try {
-            dao.save(entry);
+            dao.saveOrUpdate(entry);
         } catch (DAOException e1) {
             throw new ControllerException("Failed to save entry deletion", e1);
         }

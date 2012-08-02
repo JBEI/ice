@@ -39,6 +39,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private final HashMap<EntryAddType, NewBulkInput> sheetCache;
     private final BulkUploadModel model;
     private NewBulkInput currentInput;
+    private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>(); // list of
+    // saveddrafts
 
     public BulkUploadPresenter(BulkUploadModel model, final IBulkUploadView display) {
         this.view = display;
@@ -146,18 +148,18 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
             @Override
             public void onDataRetrieval(SavedDraftsEvent event) {
-                ArrayList<BulkUploadMenuItem> data = new ArrayList<BulkUploadMenuItem>();
+                savedDrafts.clear();
                 for (BulkUploadInfo info : event.getData()) {
                     String name = info.getName();
                     String dateTime = DateUtilities.formatShorterDate(info.getCreated());
                     BulkUploadMenuItem item = new BulkUploadMenuItem(info.getId(), name, info
                             .getCount(), dateTime, info.getType().toString(), info.getAccount().getEmail());
-                    data.add(item);
+                    savedDrafts.add(item);
                 }
 
-                if (!data.isEmpty()) {
-                    view.setSavedDraftsData(data, new DeleteBulkUploadHandler(model.getService(),
-                                                                              model.getEventBus()));
+                if (!savedDrafts.isEmpty()) {
+                    view.setSavedDraftsData(savedDrafts, new DeleteBulkUploadHandler(model.getService(),
+                                                                                     model.getEventBus()));
                 } else
                     view.setToggleMenuVisibility(false);
             }
@@ -314,7 +316,9 @@ public class BulkUploadPresenter extends AbstractPresenter {
                                                                  info.getType().toString(),
                                                                  info.getAccount().getEmail());
 
-                view.addSavedDraftData(item, new DeleteBulkUploadHandler(model.getService(), model.getEventBus()));
+                savedDrafts.add(item);
+                view.setSavedDraftsData(savedDrafts,
+                                        new DeleteBulkUploadHandler(model.getService(), model.getEventBus()));
 
                 currentInput.setName(info.getName());
                 currentInput.setId(info.getId());

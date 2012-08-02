@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.bulkupload;
 
-
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +8,8 @@ import javax.persistence.*;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
+
+import org.hibernate.annotations.Cascade;
 
 /**
  * Saved draft of bulk imports. Encapsulates a list of {@link Entry}s that are created and updated
@@ -45,6 +46,7 @@ public class BulkUpload implements IModel {
     private Date lastUpdateTime;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinTable(name = "bulk_upload_entry",
                joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
                inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})

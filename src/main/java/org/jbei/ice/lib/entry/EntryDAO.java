@@ -575,7 +575,7 @@ class EntryDAO extends HibernateRepository<Entry> {
      * @return Saved Entry object.
      * @throws DAOException
      */
-    public Entry save(Entry entry) throws DAOException {
+    public Entry saveOrUpdate(Entry entry) throws DAOException {
         if (entry == null) {
             throw new DAOException("Failed to save null entry!");
         }
@@ -730,9 +730,5 @@ class EntryDAO extends HibernateRepository<Entry> {
         } finally {
             closeSession(session);
         }
-    }
-
-    public Entry update(Entry entry) throws DAOException {
-        return super.saveOrUpdate(entry);
     }
 }

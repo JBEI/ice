@@ -1,12 +1,13 @@
 package org.jbei.ice.client;
 
+import org.jbei.ice.client.event.FeedbackEvent;
+import org.jbei.ice.client.util.Utils;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.jbei.ice.client.event.FeedbackEvent;
-import org.jbei.ice.client.util.Utils;
 
 /**
  * Abstract AsyncCallback that leaves it up to the user
@@ -24,7 +25,7 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
 
     @Override
     public void onFailure(Throwable caught) {
-        Window.alert("Error connecting to the server");
+//        Window.alert("Error connecting to the server");
     }
 
     public void go(HandlerManager eventBus) {
@@ -43,7 +44,7 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
         // Create a timer to abort if the RPC takes too long
         timeoutTimer = new Timer() {
             public void run() {
-                eventBus.fireEvent(new FeedbackEvent(true, "Server call took too long to complete!"));
+                eventBus.fireEvent(new FeedbackEvent(true, "Error executing server call!"));
                 timeoutTimer = null;
                 abortFlag = true;
                 hideBusyIndicator();

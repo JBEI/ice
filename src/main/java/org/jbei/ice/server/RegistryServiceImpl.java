@@ -1186,6 +1186,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         Account account = retrieveAccountForSid(sid);
         BulkUploadController controller = new BulkUploadController();
+        Logger.info(account.getEmail() + ": retrieve user saved drafts");
 
         try {
             return controller.retrieveByUser(account, account);
@@ -1201,6 +1202,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Account account = retrieveAccountForSid(sid);
             BulkUploadController controller = new BulkUploadController();
+            Logger.info(account.getEmail() + ": retrieving drafts pending verification");
             return controller.retrievePendingImports(account);
 
         } catch (ControllerException ce) {
@@ -1217,7 +1219,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             Account account = retrieveAccountForSid(sid);
-            AccountController controller = new AccountController();
             BulkUploadController draftController = new BulkUploadController();
             Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draftId);
 
@@ -1244,6 +1245,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         BulkUploadController controller = new BulkUploadController();
 
         try {
+            Logger.info(account.getEmail() + ": retrieving drafts pending verification");
             return controller.retrieveById(account, id);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1262,6 +1264,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         BulkUploadController controller = new BulkUploadController();
 
         try {
+            Logger.info(account.getEmail() + ": updating bulk upload \"" + draftId + "\"");
             return controller.updateBulkImportDraft(account, draftId, list);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1282,6 +1285,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             BulkUploadController controller = new BulkUploadController();
+            Logger.info(
+                    account.getEmail() + ": saving bulk import \"" + name + "\" of type " + importType + " and size "
+                            + entryList.size());
             return controller.createBulkImportDraft(account, importType, name, entryList);
         } catch (ControllerException e) {
             Logger.error(e);

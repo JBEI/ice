@@ -46,10 +46,6 @@ public class SavedDraftsMenu extends Composite {
         table.setStyleName("collection_menu_table");
         initWidget(table);
 
-        HTMLPanel menuHeaderPanel = new HTMLPanel("<span>" + header + "</span>");
-        table.setWidget(row, 0, menuHeaderPanel);
-        table.getFlexCellFormatter().setStyleName(row, 0, "collections_menu_header");
-
         table.setHTML(row, 0, header);
         table.getFlexCellFormatter().setStyleName(row, 0, "collections_menu_header");
 
@@ -63,6 +59,8 @@ public class SavedDraftsMenu extends Composite {
     public void setMenuItems(ArrayList<BulkUploadMenuItem> items, IDeleteMenuHandler handler) {
         if (items == null || items.isEmpty())
             return;
+
+        row = 0;
 
         for (BulkUploadMenuItem item : items) {
             addMenuItem(item, handler);

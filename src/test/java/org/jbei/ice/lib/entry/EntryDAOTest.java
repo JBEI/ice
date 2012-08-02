@@ -1,18 +1,19 @@
 package org.jbei.ice.lib.entry;
 
-import junit.framework.Assert;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.server.dao.hibernate.HibernateHelper;
+
+import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,7 +42,7 @@ public class EntryDAOTest {
         Entry newEntry = new Strain();
         Account account = Mockito.mock(Account.class);
         newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
-        newEntry = dao.save(newEntry);
+        newEntry = dao.saveOrUpdate(newEntry);
         long savedID = newEntry.getId();
 
         // check that the object exists
@@ -71,7 +72,7 @@ public class EntryDAOTest {
             fakeNames.add(new Name("TEST-" + i, newEntry));
         }
         newEntry.setNames(fakeNames);
-        newEntry = dao.save(newEntry);
+        newEntry = dao.saveOrUpdate(newEntry);
 
         // check that the object exists
         Set<Name> names = newEntry.getNames();
@@ -180,7 +181,7 @@ public class EntryDAOTest {
         Entry newEntry = new Strain();
         Account account = Mockito.mock(Account.class);
         newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
-        newEntry = dao.save(newEntry);
+        newEntry = dao.saveOrUpdate(newEntry);
         long savedID = newEntry.getId();
 
         // check that the object exists
@@ -199,7 +200,7 @@ public class EntryDAOTest {
         Entry newEntry = new Strain();
         Account account = Mockito.mock(Account.class);
         newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
-        Entry savedEntry = dao.save(newEntry);
+        Entry savedEntry = dao.saveOrUpdate(newEntry);
         Assert.assertNotNull(savedEntry);
         Assert.assertFalse(savedEntry.getId() <= 0);
         Assert.assertNotNull(savedEntry.getRecordId());

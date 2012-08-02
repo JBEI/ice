@@ -6,6 +6,7 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.server.dao.hibernate.HibernateHelper;
@@ -332,6 +333,12 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(updatedBulk);
         Assert.assertEquals(1, updatedBulk.getCount());
 
+        // retrieve entry associated with created draft
+        EntryController entryController = new EntryController();
+        Entry entry = entryController.get(account, updatedBulk.getEntryList().get(0).getId());
+        Assert.assertNotNull(entry);
+        Assert.assertTrue(entry.getClass() == ArabidopsisSeed.class);
+
         // delete draft
         Assert.assertNotNull(controller.deleteDraftById(account, updatedBulk.getId()));
 
@@ -341,6 +348,10 @@ public class BulkUploadControllerTest {
         } catch (ControllerException c) {
             // expected
         }
+
+        // ensure no entries left "hanging"
+        entry = entryController.get(account, entry.getId());
+        Assert.assertNull(entry);
     }
 
     @Test
@@ -360,22 +371,43 @@ public class BulkUploadControllerTest {
 
         // starting with clean slate now
         ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
+        PartInfo partInfo = new PartInfo();
+        partInfo.setPrincipalInvestigator("test_PI");
+        entryList.add(partInfo);
 
         // create draft with no entries
         BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.PART, "Test", entryList);
         Assert.assertNotNull(createdDraft);
+        Assert.assertEquals(entryList.size(), createdDraft.getCount());
+        Assert.assertEquals(entryList.size(), createdDraft.getEntryList().size());
+        Assert.assertEquals(partInfo.getPrincipalInvestigator(), createdDraft.getEntryList().get(0)
+                                                                             .getPrincipalInvestigator());
+        Assert.assertEquals(account.getEmail(), createdDraft.getEntryList().get(0).getOwnerEmail());
+        Assert.assertEquals(account.getFullName(), createdDraft.getEntryList().get(0).getOwner());
+
+        createdDraft = controller.retrieveById(account, createdDraft.getId());
+        Assert.assertNotNull(createdDraft);
+        Assert.assertEquals(entryList.size(), createdDraft.getCount());
+        Assert.assertEquals(entryList.size(), createdDraft.getEntryList().size());
+        Assert.assertEquals(partInfo.getPrincipalInvestigator(), createdDraft.getEntryList().get(0)
+                                                                             .getPrincipalInvestigator());
+        Assert.assertEquals(account.getEmail(), createdDraft.getEntryList().get(0).getOwnerEmail());
+        Assert.assertEquals(account.getFullName(), createdDraft.getEntryList().get(0).getOwner());
     }
 
     @Test
     public void testUpdateBulkImportDraft() throws Exception {
+
+        final String email = "tester@test_UpdateBulkImportDraft.org";
+        final String adminEmail = "tester+admin_UpdateBulkImportDraft@test.org";
+
+        // create
         AccountController accountController = new AccountController();
-        String password = accountController.createNewAccount("", "TESTER", "", "tester@test_UpdateBulkImportDraft.org",
-                                                             "LBL", "");
+        String password = accountController.createNewAccount("", "TESTER", "", email, "LBL", "");
         Assert.assertNotNull(password);
-        Account account = accountController.getByEmail("tester@test_UpdateBulkImportDraft.org");
+        Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
-        Account adminAccount = accountController.createAdminAccount("tester+admin_UpdateBulkImportDraft@test.org",
-                                                                    "popop");
+        Account adminAccount = accountController.createAdminAccount(adminEmail, "popop");
         Assert.assertNotNull(adminAccount);
 
         // starting with clean slate now
@@ -395,6 +427,7 @@ public class BulkUploadControllerTest {
         entryList.add(info);
         updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
         Assert.assertTrue(updatedDraft.getCount() == 1);
+        Assert.assertEquals(info.getAlias(), updatedDraft.getEntryList().get(0).getAlias());
 
         // retrieve updated
         updatedDraft = controller.retrieveById(account, createdDraft.getId());
@@ -405,8 +438,9 @@ public class BulkUploadControllerTest {
         // update existing change value
         entryList = updatedDraft.getEntryList();
         added.setAlias("new alias");
+        added.setFundingSource("no funds");
         updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
-        Assert.assertTrue(updatedDraft.getCount() == 1);
+        Assert.assertEquals(1, updatedDraft.getCount());
         Assert.assertEquals(addedId, updatedDraft.getEntryList().get(0).getId());
 
         // check the id of the updated
@@ -414,6 +448,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(updatedDraft.getCount() == 1);
         Assert.assertEquals(addedId, updatedDraft.getEntryList().get(0).getId());
 
+        // retrieve the entry
         EntryController entryController = new EntryController();
         Entry newEntry = entryController.get(account, addedId);
         Assert.assertNotNull(newEntry);
@@ -610,5 +645,35 @@ public class BulkUploadControllerTest {
         entry = entryController.get(account, entry.getId());
         Assert.assertNotNull(entry);
         Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
+    }
+
+    @Test
+    public void testCreateBulkImportDraftWithStrainWithPlasmid() throws Exception {
+        final String email = "tester@test_CreateBulkImportDraftWithStrainWithPlasmid.org";
+
+        // create accounts
+        AccountController accountController = new AccountController();
+        String password = accountController.createNewAccount("", "TESTER", "", email, "LBL", "");
+        Assert.assertNotNull(password);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
+        Account adminAccount = accountController.createAdminAccount(
+                "tester+admin@test_CreateBulkImportDraftWithStrainWithPlasmid.org",
+                "popop");
+        Assert.assertNotNull(adminAccount);
+
+        // starting with clean slate now
+        ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
+        EntryInfo strainInfo = new StrainInfo();
+        strainInfo.setPrincipalInvestigator("pi_Test");
+        EntryInfo plasmidInfo = new PlasmidInfo();
+        plasmidInfo.setPrincipalInvestigator("pi_Test");
+        strainInfo.setInfo(plasmidInfo);
+        entryList.add(strainInfo);
+
+        // create draft with no entries
+        BulkUploadInfo createdDraft = controller.createBulkImportDraft(
+                account, EntryAddType.STRAIN_WITH_PLASMID, "Test", entryList);
+        Assert.assertNotNull(createdDraft);
     }
 }
