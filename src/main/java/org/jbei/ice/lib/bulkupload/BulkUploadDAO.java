@@ -53,7 +53,6 @@ class BulkUploadDAO extends HibernateRepository<BulkUpload> {
 
     public BulkUpload update(BulkUpload draft) throws DAOException {
         return super.saveOrUpdate(draft);
-
     }
 
     public void delete(BulkUpload draft) throws DAOException {

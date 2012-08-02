@@ -1,14 +1,19 @@
 package org.jbei.ice.lib.bulkupload;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.server.EntryToInfoFactory;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
@@ -22,7 +27,8 @@ import org.jbei.ice.shared.dto.EntryInfo;
  */
 public class BulkUploadUtil {
 
-    public static BulkUploadInfo modelToInfo(AttachmentController attachmentController, BulkUpload model) {
+    public static BulkUploadInfo modelToInfo(BulkUpload model) {
+
         BulkUploadInfo info = new BulkUploadInfo();
         Account draftAccount = model.getAccount();
         AccountInfo accountInfo = new AccountInfo();
@@ -38,24 +44,90 @@ public class BulkUploadUtil {
         info.setCreated(model.getCreationTime());
         info.setName(model.getName());
 
-        // retrieve the entries associated with the bulk import
-        for (Entry entry : model.getContents()) {
-            try {
-                ArrayList<Attachment> attachments = attachmentController.getByEntry(model.getAccount(), entry);
-                SequenceController sequenceController = new SequenceController();
-                boolean hasSequence = sequenceController.getByEntry(entry) != null;
+        return info;
+    }
 
-                // convert to info object (no samples or trace sequences since bulk import does not have the ui for
-                // it yet)
-                EntryInfo entryInfo = EntryToInfoFactory.getInfo(model.getAccount(), entry, attachments, null, null,
-                                                                 hasSequence);
-                if (entryInfo != null)
-                    info.getEntryList().add(entryInfo);
-            } catch (ControllerException ce) {
-                Logger.error(ce);
-            }
+    public static EntryInfo toEntryInfo(AttachmentController attachmentController,
+            SequenceController sequenceController, Account account, Entry entry, Entry enclosed) {
+
+        ArrayList<Attachment> attachments = null;
+        try {
+            attachments = attachmentController.getByEntry(account, entry);
+        } catch (ControllerException e) {
+            Logger.error(e);
         }
 
-        return info;
+        boolean hasSequence = false;
+        try {
+            hasSequence = sequenceController.getByEntry(entry) != null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+
+        // convert to info object (no samples or trace sequences since bulk import does not have the ui for
+        // it yet)
+        EntryInfo entryInfo = EntryToInfoFactory.getInfo(account, entry, attachments, null, null, hasSequence);
+        if (entryInfo != null && enclosed != null) {
+            attachments = null;
+            try {
+                attachments = attachmentController.getByEntry(account, entry);
+            } catch (ControllerException e) {
+                Logger.error(e);
+            }
+
+            hasSequence = false;
+            try {
+                hasSequence = sequenceController.getByEntry(entry) != null;
+            } catch (ControllerException e) {
+                Logger.error(e);
+            }
+
+            // convert to info object (no samples or trace sequences since bulk import does not have the ui for
+            // it yet)
+            EntryInfo enclosedInfo = EntryToInfoFactory.getInfo(account, enclosed, attachments, null, null,
+                                                                hasSequence);
+            entryInfo.setInfo(enclosedInfo);
+        }
+        return entryInfo;
+    }
+
+    public static Entry getPartNumberForStrainPlasmid(Account account, EntryController controller, String text) {
+
+        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
+                "WIKILINK_PREFIX") + ":.*?\\]\\]");
+        Pattern partNumberPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
+                "WIKILINK_PREFIX") + ":(.*)\\]\\]");
+        Pattern descriptivePattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
+                "WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
+
+        if (text == null) {
+            return null;
+        }
+
+        Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(text);
+
+        while (basicWikiLinkMatcher.find()) {
+            String partNumber = null;
+
+            Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher.group());
+            Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher.group());
+
+            if (descriptivePatternMatcher.find()) {
+                partNumber = descriptivePatternMatcher.group(1).trim();
+            } else if (partNumberMatcher.find()) {
+                partNumber = partNumberMatcher.group(1).trim();
+            }
+
+            if (partNumber != null) {
+                try {
+                    return controller.getByPartNumber(account, partNumber);
+                } catch (ControllerException e) {
+                    Logger.error(e);
+                } catch (PermissionException e) {
+                    Logger.error(e);
+                }
+            }
+        }
+        return null;
     }
 }

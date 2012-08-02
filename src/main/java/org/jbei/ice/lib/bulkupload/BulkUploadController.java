@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -44,6 +43,7 @@ public class BulkUploadController {
     private AccountController accountController;
     private EntryController entryController;
     private AttachmentController attachmentController;
+    private SequenceController sequenceController;
 
     /**
      * Initialises dao and controller dependencies. These need be injected
@@ -53,6 +53,7 @@ public class BulkUploadController {
         accountController = new AccountController();
         entryController = new EntryController();
         attachmentController = new AttachmentController();
+        sequenceController = new SequenceController();
     }
 
     /**
@@ -146,6 +147,8 @@ public class BulkUploadController {
                                                   + " to view bulk import for " + draft.getAccount().getEmail());
         }
 
+        EntryAddType type = EntryAddType.stringToType(draft.getImportType());
+
         // convert bulk import db object to data transfer object
         BulkUploadInfo draftInfo = new BulkUploadInfo();
         draftInfo.setCount(draft.getContents().size());
@@ -168,11 +171,24 @@ public class BulkUploadController {
         // retrieve the entries associated with the bulk import
         for (Entry entry : draft.getContents()) {
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
-            SequenceController sequenceController = new SequenceController();
             boolean hasSequence = sequenceController.getByEntry(entry) != null;
 
             // convert to info object (no samples or trace sequences since bulk import does not have the ui for it yet)
             EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, null, null, hasSequence);
+            if (type == EntryAddType.STRAIN_WITH_PLASMID) {
+
+                // get plasmids
+                String plasmids = ((Strain) entry).getPlasmids();
+                Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController, plasmids);
+                if (plasmid != null) {
+                    attachments = attachmentController.getByEntry(account, plasmid);
+                    hasSequence = sequenceController.getByEntry(entry) != null;
+                    EntryInfo plasmidInfo = EntryToInfoFactory.getInfo(account, plasmid,
+                                                                       attachments, null, null, hasSequence);
+                    info.setInfo(plasmidInfo);
+                }
+            }
+
             if (info != null)
                 draftInfo.getEntryList().add(info);
         }
@@ -317,75 +333,94 @@ public class BulkUploadController {
         draft.setAccount(draftOwner);
         draft.setImportType(type.toString());
 
+        ArrayList<EntryInfo> contentInfoList = new ArrayList<EntryInfo>();
         ArrayList<Entry> newContents = new ArrayList<Entry>();
         boolean isAdmin = accountController.isAdministrator(draftOwner);
 
         // convert info contents to Entry
         for (EntryInfo info : entryList) {
-
-            Entry entry;
-            Entry enclosedEntry = null;
             info.setVisibility(Visibility.DRAFT);
-
-            boolean exists = false;
-            try {
-                exists = updateIfExists(draftOwner, newContents, info);
-            } catch (PermissionException pe) {
-                Logger.error(pe);
-            }
-
-            if (!exists) {
-
-                // entry does not exist so create new one
-                entry = InfoToModelFactory.infoToEntry(info);
-                entry = entryController.createEntry(draftOwner, entry, isAdmin);
-
-                if (info.getInfo() != null) {
-                    enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
-                    enclosedEntry = entryController.createEntry(draftOwner, enclosedEntry, isAdmin);
-                    String plasmidPartNumberString = "[["
-                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
-                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
-                            + enclosedEntry.getOneName().getName() + "]]";
-                    ((Strain) entry).setPlasmids(plasmidPartNumberString);
-                    entry = entryController.createEntry(draftOwner, entry, isAdmin);
-                }
-                newContents.add(entry);
-
-                // save sequence if any
-                saveSequence(draftOwner, info.getSequenceAnalysis(), entry);
-                if (info.getInfo() != null) {
-                    saveSequence(draftOwner, info.getInfo().getSequenceAnalysis(), enclosedEntry);
-                }
-
-                // check attachment
-                saveAttachments(draftOwner, info.getAttachments(), entry);
-                if (info.getInfo() != null)
-                    saveAttachments(draftOwner, info.getInfo().getAttachments(), enclosedEntry);
-            }
+            processEntryInfo(draftOwner, type, info, newContents, contentInfoList, isAdmin);
         }
 
-        draft.setContents(newContents);
+        // update draft data
         draft.setCreationTime(new Date(System.currentTimeMillis()));
         draft.setLastUpdateTime(draft.getCreationTime());
+        draft.setContents(newContents);
 
         try {
-            return BulkUploadUtil.modelToInfo(attachmentController, dao.save(draft));
+            draft = dao.save(draft);
+            BulkUploadInfo savedUploadInfo = BulkUploadUtil.modelToInfo(draft);
+            savedUploadInfo.setEntryList(contentInfoList);
+            return savedUploadInfo;
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }
 
+    public void processEntryInfo(Account draftOwner, EntryAddType type, EntryInfo info, ArrayList<Entry> contents,
+            ArrayList<EntryInfo> contentInfoList, boolean isAdmin) {
+
+        Entry entry;
+        Entry enclosedEntry = null;
+
+        try {
+            boolean exists = updateIfExists(draftOwner, contents, contentInfoList, info);
+
+            if (!exists) {
+                // entry does not exist so create new one
+                entry = InfoToModelFactory.infoToEntry(info);
+                entry = entryController.createEntry(draftOwner, entry, isAdmin);
+                contents.add(entry);
+                saveSequence(draftOwner, info.getSequenceAnalysis(), entry);
+                saveAttachments(draftOwner, info.getAttachments(), entry);
+
+                if (type == EntryAddType.STRAIN_WITH_PLASMID) {
+                    info.getInfo().setVisibility(info.getVisibility());
+                    enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
+                    enclosedEntry = entryController.createEntry(draftOwner, enclosedEntry, isAdmin);
+
+                    String plasmidPartNumberString = "[["
+                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
+                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
+                            + enclosedEntry.getOneName().getName() + "]]";
+                    ((Strain) entry).setPlasmids(plasmidPartNumberString);
+
+                    try {
+                        // update plasmids for strain
+                        entryController.update(draftOwner, entry);
+                    } catch (PermissionException e) {
+                        Logger.error(e);
+                    }
+
+                    saveSequence(draftOwner, info.getInfo().getSequenceAnalysis(), enclosedEntry);
+                    saveAttachments(draftOwner, info.getInfo().getAttachments(), enclosedEntry);
+                }
+
+                EntryInfo convertedInfo = BulkUploadUtil.toEntryInfo(attachmentController,
+                                                                     sequenceController,
+                                                                     draftOwner,
+                                                                     entry,
+                                                                     enclosedEntry);
+                contentInfoList.add(convertedInfo);
+            }
+        } catch (PermissionException pe) {
+            Logger.error(pe);
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+        }
+    }
+
     /**
-     * @param account
-     * @param draftId
-     * @param entryList
-     * @return
+     * @param account   account of user performing action
+     * @param draftId   unique identifier for bulk upload representing draft
+     * @param entryList entry info data containing the latest data
+     * @return updated bulk info object
      * @throws ControllerException
      * @throws PermissionException
      */
-    public BulkUploadInfo updateBulkImportDraft(Account account, long draftId,
-            ArrayList<EntryInfo> entryList) throws ControllerException, PermissionException {
+    public BulkUploadInfo updateBulkImportDraft(Account account, long draftId, ArrayList<EntryInfo> entryList)
+            throws ControllerException, PermissionException {
 
         BulkUpload draft;
         try {
@@ -401,7 +436,8 @@ public class BulkUploadController {
             throw new PermissionException("User " + account.getEmail()
                                                   + " does not have permission to update draft " + draftId);
 
-        List<Entry> newContents = new ArrayList<Entry>();
+        ArrayList<EntryInfo> contentInfoList = new ArrayList<EntryInfo>();
+        ArrayList<Entry> contentList = new ArrayList<Entry>();
 
         EntryAddType type = EntryAddType.stringToType(draft.getImportType());
         if (type == null)
@@ -409,53 +445,21 @@ public class BulkUploadController {
 
         // convert info contents to Entry
         for (EntryInfo info : entryList) {
-
-            Entry entry;
-            Entry enclosedEntry = null;
             info.setVisibility(Visibility.DRAFT);
-
-            if (!updateIfExists(account, newContents, info)) {
-
-                // entry does not exist so create new one
-                entry = InfoToModelFactory.infoToEntry(info);
-                entry = entryController.createEntry(account, entry, isAdmin);
-
-                if (info.getInfo() != null) {
-                    enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
-                    enclosedEntry = entryController.createEntry(account, enclosedEntry, isAdmin);
-                    String plasmidPartNumberString = "[["
-                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
-                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
-                            + enclosedEntry.getOneName().getName() + "]]";
-                    ((Strain) entry).setPlasmids(plasmidPartNumberString);
-                    entry = entryController.createEntry(account, entry, isAdmin);
-                }
-                newContents.add(entry);
-
-                // save sequence if any
-                saveSequence(account, info.getSequenceAnalysis(), entry);
-                if (info.getInfo() != null) {
-                    saveSequence(account, info.getInfo().getSequenceAnalysis(), enclosedEntry);
-                }
-
-                // check attachment
-                saveAttachments(account, info.getAttachments(), entry);
-                if (info.getInfo() != null)
-                    saveAttachments(account, info.getInfo().getAttachments(), enclosedEntry);
-            }
+            processEntryInfo(account, type, info, contentList, contentInfoList, isAdmin);
         }
 
         // update the draft
         try {
-            draft.setContents(newContents);
             draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
-            dao.update(draft);
+            draft.setContents(contentList);
+            BulkUpload updatedUpload = dao.update(draft);
+            BulkUploadInfo savedUploadInfo = BulkUploadUtil.modelToInfo(updatedUpload);
+            savedUploadInfo.setEntryList(contentInfoList);
+            return savedUploadInfo;
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
-        // convert draft to info
-        return BulkUploadUtil.modelToInfo(attachmentController, draft);
     }
 
     protected void saveAttachments(Account account,
@@ -508,14 +512,14 @@ public class BulkUploadController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    private boolean updateIfExists(Account account, List<Entry> newContents, EntryInfo info)
-            throws ControllerException, PermissionException {
+    private boolean updateIfExists(Account account, ArrayList<Entry> contents, ArrayList<EntryInfo> infoList,
+            EntryInfo info) throws ControllerException, PermissionException {
 
         Entry entry = entryController.get(account, info.getId());
         if (entry == null) // no existing
             return false;
 
-        Entry enclosingEntry;
+        Entry enclosingEntry = null;
 
         // check enclosing info
         if (info.getInfo() != null && info.getType() == EntryType.STRAIN) {
@@ -549,7 +553,13 @@ public class BulkUploadController {
         saveSequence(account, info.getSequenceAnalysis(), entry);
         saveAttachments(account, info.getAttachments(), entry);
 
-        newContents.add(entry);
+        EntryInfo convertedInfo = BulkUploadUtil.toEntryInfo(attachmentController,
+                                                             sequenceController,
+                                                             account,
+                                                             entry,
+                                                             enclosingEntry);
+        infoList.add(convertedInfo);
+        contents.add(entry);
         return true;
     }
 
@@ -589,44 +599,14 @@ public class BulkUploadController {
         else
             visibility = Visibility.OK;
 
-        List<Entry> newContents = new ArrayList<Entry>();
+        ArrayList<EntryInfo> infoList = new ArrayList<EntryInfo>();
+        ArrayList<Entry> newContents = new ArrayList<Entry>();
+        EntryAddType type = EntryAddType.stringToType(draft.getImportType());
 
         // go through passed contents
         for (EntryInfo info : entryList) {
-            Entry entry;
-            Entry enclosedEntry = null;
-
-            // retrieve the entries
             info.setVisibility(visibility);
-            if (!updateIfExists(account, newContents, info)) {
-
-                // entry does not exist so create new one
-                entry = InfoToModelFactory.infoToEntry(info);
-                entry = entryController.createEntry(account, entry, isAdmin);
-
-                if (info.getInfo() != null) {
-                    enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
-                    enclosedEntry = entryController.createEntry(account, enclosedEntry, isAdmin);
-                    String plasmidPartNumberString = "[["
-                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
-                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
-                            + enclosedEntry.getOneName().getName() + "]]";
-                    ((Strain) entry).setPlasmids(plasmidPartNumberString);
-                    entry = entryController.createEntry(account, entry, isAdmin);
-                }
-                newContents.add(entry);
-
-                // save sequence if any
-                saveSequence(account, info.getSequenceAnalysis(), entry);
-                if (info.getInfo() != null) {
-                    saveSequence(account, info.getInfo().getSequenceAnalysis(), enclosedEntry);
-                }
-
-                // check attachment
-                saveAttachments(account, info.getAttachments(), entry);
-                if (info.getInfo() != null)
-                    saveAttachments(account, info.getInfo().getAttachments(), enclosedEntry);
-            }
+            processEntryInfo(account, type, info, newContents, infoList, isAdmin);
         }
 
         // if an admin is submitting this then
@@ -675,50 +655,12 @@ public class BulkUploadController {
             visibility = Visibility.OK;
 
         ArrayList<Entry> contents = new ArrayList<Entry>();
+        ArrayList<EntryInfo> contentList = new ArrayList<EntryInfo>();
 
         // go through passed contents
-        boolean exists = false;
         for (EntryInfo info : entryList) {
-            Entry entry;
-            Entry enclosedEntry = null;
-
-            // retrieve the entries
             info.setVisibility(visibility);
-            try {
-                exists = updateIfExists(entryAccount, contents, info);
-            } catch (PermissionException e) {
-                Logger.error(e);
-            }
-
-            if (!exists) {
-                // entry does not exist so create new one
-                entry = InfoToModelFactory.infoToEntry(info);
-                entry = entryController.createEntry(entryAccount, entry, isAdmin);
-
-                if (info.getInfo() != null) {
-                    enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
-                    enclosedEntry = entryController.createEntry(entryAccount, enclosedEntry,
-                                                                isAdmin);
-                    String plasmidPartNumberString = "[["
-                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
-                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
-                            + enclosedEntry.getOneName().getName() + "]]";
-                    ((Strain) entry).setPlasmids(plasmidPartNumberString);
-                    entry = entryController.createEntry(entryAccount, entry, isAdmin);
-                }
-                contents.add(entry);
-
-                // save sequence if any
-                saveSequence(entryAccount, info.getSequenceAnalysis(), entry);
-                if (info.getInfo() != null) {
-                    saveSequence(entryAccount, info.getInfo().getSequenceAnalysis(), enclosedEntry);
-                }
-
-                // check attachment
-                saveAttachments(entryAccount, info.getAttachments(), entry);
-                if (info.getInfo() != null)
-                    saveAttachments(entryAccount, info.getInfo().getAttachments(), enclosedEntry);
-            }
+            processEntryInfo(entryAccount, type, info, contents, contentList, isAdmin);
         }
 
         if (isAdmin)
@@ -743,6 +685,8 @@ public class BulkUploadController {
 
     public boolean approveBulkImport(Account account, long id, ArrayList<EntryInfo> entryList)
             throws ControllerException, PermissionException {
+
+        // only admins allowed
         if (!accountController.isAdministrator(account)) {
             throw new PermissionException("Only administrators can approve bulk imports");
         }
@@ -760,51 +704,22 @@ public class BulkUploadController {
         }
 
         // approve entries taking note of changes
-        List<Entry> newContents = new ArrayList<Entry>();
+        ArrayList<Entry> newContents = new ArrayList<Entry>();
+        ArrayList<EntryInfo> contentList = new ArrayList<EntryInfo>();
+        EntryAddType type = EntryAddType.stringToType(bulkUpload.getImportType());
 
         // go through passed contents
         for (EntryInfo info : entryList) {
-            Entry entry;
-            Entry enclosedEntry = null;
-
-            // retrieve the entries
             info.setVisibility(Visibility.OK);
-            if (!updateIfExists(account, newContents, info)) {
-
-                // entry does not exist so create new one
-                entry = InfoToModelFactory.infoToEntry(info);
-                entry = entryController.createEntry(account, entry, true);
-
-                if (info.getInfo() != null) {
-                    info.getInfo().setVisibility(Visibility.OK);
-                    enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
-                    enclosedEntry = entryController.createEntry(account, enclosedEntry, true);
-                    String plasmidPartNumberString = "[["
-                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
-                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
-                            + enclosedEntry.getOneName().getName() + "]]";
-                    ((Strain) entry).setPlasmids(plasmidPartNumberString);
-                    entry = entryController.createEntry(account, entry, true);
-                }
-                newContents.add(entry);
-
-                // save sequence if any
-                saveSequence(account, info.getSequenceAnalysis(), entry);
-                if (info.getInfo() != null) {
-                    saveSequence(account, info.getInfo().getSequenceAnalysis(), enclosedEntry);
-                }
-
-                // check attachment
-                saveAttachments(account, info.getAttachments(), entry);
-                if (info.getInfo() != null)
-                    saveAttachments(account, info.getInfo().getAttachments(), enclosedEntry);
-            }
+            processEntryInfo(account, type, info, newContents, contentList, true);
         }
+
+        // TODO : there may be situations where the admin added something
 
         // when done approving, delete the bulk upload record but not the entries associated with it.
         try {
             bulkUpload.setContents(null);
-            dao.delete(bulkUpload); // TODO: update to clear join table first??
+            dao.delete(bulkUpload);
             return true;
         } catch (DAOException e) {
             throw new ControllerException("Could not delete bulk upload " + bulkUpload.getId()

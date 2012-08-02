@@ -13,8 +13,10 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
+import org.jbei.ice.shared.dto.StrainInfo;
 import org.jbei.ice.shared.dto.Visibility;
 
 import junit.framework.Assert;
@@ -94,8 +96,6 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(account);
         Account adminAccount = accountController.createAdminAccount("tester+admin@test.org", "popop");
         Assert.assertNotNull(adminAccount);
-        // create system account
-//        accountController.createNewAccount("System", "Account", "", "system", "", "");
 
         // starting with clean slate now
         ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
@@ -336,6 +336,11 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(controller.deleteDraftById(account, updatedBulk.getId()));
 
         // ensure contents are deleted
+        try {
+            controller.retrieveById(account, updatedBulk.getId());
+        } catch (ControllerException c) {
+            // expected
+        }
     }
 
     @Test
@@ -426,12 +431,184 @@ public class BulkUploadControllerTest {
     }
 
     @Test
-    public void testSubmitBulkImportForVerification() throws Exception {
+    public void testSubmitBulkImportDraft() throws Exception {
+        // test submission of a saved draft
 
+        // create accounts
+        final String email = "tester@test_SubmitBulkImportDraft.org";
+        final String adminEmail = "tester+admin@test_SubmitBulkImportDraft.org";
+
+        // create accounts
+        AccountController accountController = new AccountController();
+        String password = accountController.createNewAccount("", "TESTER", "", email, "LBL", "");
+        Assert.assertNotNull(password);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
+        Account adminAccount = accountController.createAdminAccount(adminEmail, "popop");
+        Assert.assertNotNull(adminAccount);
+
+        // create bulk import (with strain with plasmid)
+        ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
+        StrainInfo strainInfo = new StrainInfo();
+        strainInfo.setGenotypePhenotype("test");
+        strainInfo.setAlias("alias");
+        strainInfo.setHost("A host");
+        PlasmidInfo plasmidInfo = new PlasmidInfo();
+        strainInfo.setInfo(plasmidInfo);
+        plasmidInfo.setCircular(true);
+        plasmidInfo.setBackbone("jawbone");
+        plasmidInfo.setPromoters("+1AwesomePOWA");
+        plasmidInfo.setPartId("ptsN");
+        plasmidInfo.setName("partINPlas");
+
+        entryList.add(strainInfo);
+
+        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account,
+                                                                       EntryAddType.STRAIN_WITH_PLASMID,
+                                                                       "Test",
+                                                                       entryList);
+        Assert.assertNotNull(createdDraft);
+        strainInfo = (StrainInfo) createdDraft.getEntryList().get(0);
+        plasmidInfo = (PlasmidInfo) strainInfo.getInfo();
+        Assert.assertNotNull(strainInfo);
+        Assert.assertNotNull(plasmidInfo);
+        Assert.assertEquals(1, createdDraft.getCount());
+        Assert.assertEquals(createdDraft.getCount(), createdDraft.getEntryList().size());
+        Assert.assertEquals(Visibility.DRAFT, strainInfo.getVisibility());
+        Assert.assertEquals(Visibility.DRAFT, plasmidInfo.getVisibility());
+
+        createdDraft = controller.retrieveById(account, createdDraft.getId());
+
+        Assert.assertNotNull(createdDraft);
+        strainInfo = (StrainInfo) createdDraft.getEntryList().get(0);
+        plasmidInfo = (PlasmidInfo) strainInfo.getInfo();
+        Assert.assertNotNull(strainInfo);
+        Assert.assertNotNull(plasmidInfo);
+        Assert.assertEquals(1, createdDraft.getCount());
+        Assert.assertEquals(createdDraft.getCount(), createdDraft.getEntryList().size());
+
+        Assert.assertEquals(Visibility.DRAFT, strainInfo.getVisibility());
+        Assert.assertEquals(Visibility.DRAFT, plasmidInfo.getVisibility());
+
+        // submit bulk import
+        Assert.assertTrue("failed to submit bulk import draft",
+                          controller.submitBulkImportDraft(account, createdDraft.getId(), createdDraft.getEntryList()));
+
+        // check entry visibility is pending
+        EntryController entryController = new EntryController();
+        Entry strain = entryController.get(account, strainInfo.getId());
+        Entry plasmid = entryController.get(account, plasmidInfo.getId());
+
+        Assert.assertNotNull(strain);
+        Assert.assertNotNull(plasmid);
+
+        Assert.assertEquals(Visibility.PENDING.getValue(), strain.getVisibility().intValue());
+        Assert.assertEquals(Visibility.PENDING.getValue(), plasmid.getVisibility().intValue());
+    }
+
+    @Test
+    public void testSubmitBulkImport() throws Exception {
+        // testing submission without first creating a draft
+
+        // create accounts
+        final String email = "tester@test_SubmitBulkImport.org";
+        final String adminEmail = "tester+admin@test_SubmitBulkImport.org";
+
+        // create accounts
+        AccountController accountController = new AccountController();
+        String password = accountController.createNewAccount("", "TESTER", "", email, "LBL", "");
+        Assert.assertNotNull(password);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
+        Account adminAccount = accountController.createAdminAccount(adminEmail, "popop");
+        Assert.assertNotNull(adminAccount);
+
+        // create entries
+        ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
+        EntryInfo info = new PartInfo();
+        info.setAlias("alias");
+        entryList.add(info);
+
+        // submit bulk import
+        Assert.assertTrue("failed to submit bulk import draft",
+                          controller.submitBulkImport(account, EntryAddType.PART, entryList));
+
+        // check entry visibility is pending
+        EntryController entryController = new EntryController();
+        ArrayList<Long> results = entryController.getEntryIdsByOwner(account.getEmail(), Visibility.PENDING);
+        Assert.assertNotNull(results);
+        Assert.assertEquals(entryList.size(), results.size());
+
+        // user should not have any bulk imports
+        ArrayList<BulkUploadInfo> infos = controller.retrieveByUser(account, account);
+        Assert.assertNotNull(infos);
+        Assert.assertEquals(0, infos.size());
     }
 
     @Test
     public void testApproveBulkImport() throws Exception {
 
+        // create accounts
+        final String email = "tester@test_ApproveBulkImport.org";
+        final String adminEmail = "tester+admin@test_ApproveBulkImport.org";
+
+        // create accounts
+        AccountController accountController = new AccountController();
+        String password = accountController.createNewAccount("", "TESTER", "", email, "LBL", "");
+        Assert.assertNotNull(password);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
+        Account adminAccount = accountController.createAdminAccount(adminEmail, "popop");
+        Assert.assertNotNull(adminAccount);
+
+        // create bulk import
+        ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
+        EntryInfo info = new PartInfo();
+        info.setAlias("alias");
+        entryList.add(info);
+        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.PART, "Test", entryList);
+        Assert.assertNotNull(createdDraft);
+        Assert.assertEquals(1, createdDraft.getCount());
+        Assert.assertEquals(createdDraft.getCount(), createdDraft.getEntryList().size());
+
+        // check entry visibility is draft
+        EntryInfo partInfo = createdDraft.getEntryList().get(0);
+        Assert.assertEquals(partInfo.getType(), EntryType.PART);
+        Assert.assertEquals(Visibility.DRAFT, partInfo.getVisibility());
+
+        // submit bulk import
+        Assert.assertTrue("failed to submit bulk import draft",
+                          controller.submitBulkImportDraft(account, createdDraft.getId(), createdDraft.getEntryList()));
+
+        // check entry visibility is pending
+        EntryController entryController = new EntryController();
+        Entry entry = entryController.get(account, partInfo.getId());
+        Assert.assertNotNull(entry);
+        Assert.assertTrue(entry.getId() == partInfo.getId());
+        Assert.assertEquals(Visibility.PENDING.getValue(), entry.getVisibility().intValue());
+
+        // try to approve bulk import with regular account
+        try {
+            controller.approveBulkImport(account, createdDraft.getId(), createdDraft.getEntryList());
+        } catch (PermissionException pe) {
+            // expected
+        }
+
+        boolean approved = controller.approveBulkImport(adminAccount,
+                                                        createdDraft.getId(),
+                                                        createdDraft.getEntryList());
+        Assert.assertTrue("Failed to approved bulk upload", approved);
+
+        // verify that record does not exist anymore
+        try {
+            controller.retrieveById(account, createdDraft.getId());
+        } catch (ControllerException ce) {
+            // expected
+        }
+
+        // check entry visibility is ok
+        entry = entryController.get(account, entry.getId());
+        Assert.assertNotNull(entry);
+        Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
     }
 }
