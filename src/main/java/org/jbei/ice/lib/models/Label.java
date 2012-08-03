@@ -1,9 +1,11 @@
 package org.jbei.ice.lib.models;
 
+import javax.persistence.*;
+
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 
-import javax.persistence.*;
+import org.hibernate.annotations.Type;
 
 /**
  * Users can tag entries with their own labels. To be implemented.
@@ -26,6 +28,7 @@ public class Label implements IModel {
 
     @Column(name = "body", nullable = false)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String name;
 
     public long getId() {

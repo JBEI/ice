@@ -1,10 +1,12 @@
 package org.jbei.ice.lib.entry.attachment;
 
+import javax.persistence.*;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.interfaces.IAttachmentValueObject;
 
-import javax.persistence.*;
+import org.hibernate.annotations.Type;
 
 /**
  * Store information about attachments.
@@ -26,6 +28,7 @@ public class Attachment implements IAttachmentValueObject, IModel {
 
     @Column(name = "description", nullable = false)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String description;
 
     /**

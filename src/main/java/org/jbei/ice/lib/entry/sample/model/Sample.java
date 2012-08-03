@@ -1,12 +1,14 @@
 package org.jbei.ice.lib.entry.sample.model;
 
+import java.util.Date;
+import javax.persistence.*;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.interfaces.ISampleValueObject;
 
-import javax.persistence.*;
-import java.util.Date;
+import org.hibernate.annotations.Type;
 
 /**
  * Store Sample information.
@@ -38,6 +40,7 @@ public class Sample implements ISampleValueObject, IModel {
 
     @Column(name = "notes")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String notes;
 
     @ManyToOne(fetch = FetchType.EAGER)

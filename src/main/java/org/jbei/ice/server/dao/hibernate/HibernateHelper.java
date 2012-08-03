@@ -1,13 +1,16 @@
 package org.jbei.ice.server.dao.hibernate;
 
+import org.jbei.ice.lib.logging.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.AnnotationConfiguration;
-import org.jbei.ice.lib.logging.Logger;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.ServiceRegistryBuilder;
 
 /**
  * Helper class to Initialize Hibernate, and obtain new sessions.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham, Hector Plahar
  */
 public class HibernateHelper {
@@ -21,7 +24,7 @@ public class HibernateHelper {
 
     /**
      * Open a new {@link Session} from the sessionFactory.
-     * 
+     *
      * @return New Hibernate {@link Session}.
      */
     public static Session newSession() {
@@ -37,32 +40,36 @@ public class HibernateHelper {
 
     private static synchronized void initialize(Type type) {
         if (sessionFactory == null) { // initialize only when there is no previous sessionFactory
-            if (type == Type.MOCK) {
-                try {
-                    sessionFactory = new AnnotationConfiguration().configure(
-                        "mock_hibernate.cfg.xml").buildSessionFactory();
-                } catch (Throwable e) {
-                    String msg = "Could not initialize hibernate!!!";
-                    Logger.error(msg, e);
-                    throw new RuntimeException(e);
-                }
-            } else {
-                try {
+            Configuration configuration;
+            try {
+                if (type == Type.MOCK) {
+                    configuration = new Configuration().configure("mock_hibernate.cfg.xml");
+                } else {
                     // Create the SessionFactory from hibernate.cfg.xml
-                    sessionFactory = new AnnotationConfiguration().configure()
-                            .buildSessionFactory();
-                } catch (Throwable e) {
-                    String msg = "Could not initialize hibernate!!!";
-                    Logger.error(msg, e);
-                    throw new RuntimeException(e);
+                    configuration = new Configuration().configure();
                 }
+
+                ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(
+                        configuration.getProperties()).buildServiceRegistry();
+                sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+
+                //            Session session = newSession();
+//            FullTextSession fullTextSession = Search.getFullTextSession(session);
+//            fullTextSession.createIndexer().start();
+
+            } catch (Throwable e) {
+                String msg = "Could not initialize hibernate!!!";
+                Logger.error(msg, e);
+                throw new RuntimeException(e);
             }
         }
+
+
     }
 
     /**
      * Retrieve the {@link SessionFactory}.
-     * 
+     *
      * @return Hibernate sessionFactory
      */
     private static SessionFactory getSessionFactory() {

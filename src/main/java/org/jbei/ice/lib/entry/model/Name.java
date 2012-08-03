@@ -1,10 +1,13 @@
 package org.jbei.ice.lib.entry.model;
 
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.INameValueObject;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 
 /**
  * Store the friendly name for an {@link org.jbei.ice.lib.entry.model.Entry}.
@@ -12,6 +15,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author Timothy Ham, Zinovii Dmytriv
  */
 @Entity
+@Indexed
 @Table(name = "names")
 @SequenceGenerator(name = "sequence", sequenceName = "names_id_seq", allocationSize = 1)
 public class Name implements INameValueObject, IModel {
@@ -22,6 +26,7 @@ public class Name implements INameValueObject, IModel {
     private long id;
 
     @Column(name = "name", length = 127, nullable = false)
+    @Field
     private String name;
 
     @ManyToOne(fetch = FetchType.EAGER)

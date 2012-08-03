@@ -1,12 +1,14 @@
 package org.jbei.ice.lib.account.model;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.Group;
-
-import javax.persistence.*;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import javax.persistence.*;
+
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.models.Group;
+
+import org.hibernate.annotations.Type;
 
 /**
  * Store the account information for a single user.
@@ -50,6 +52,7 @@ public class Account implements IModel {
 
     @Column(name = "description", nullable = false)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String description;
 
     @Column(name = "is_subscribed", nullable = false)

@@ -1,10 +1,12 @@
 package org.jbei.ice.lib.models;
 
+import java.util.Date;
+import javax.persistence.*;
+
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 
-import javax.persistence.*;
-import java.util.Date;
+import org.hibernate.annotations.Type;
 
 /**
  * Store Project information for user.
@@ -36,10 +38,12 @@ public class Project implements IModel {
 
     @Column(name = "description")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String description;
 
     @Column(name = "data")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String data;
 
     @Column(name = "creation_time")

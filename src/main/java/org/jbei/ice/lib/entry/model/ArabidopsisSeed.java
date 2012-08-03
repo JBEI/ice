@@ -1,7 +1,8 @@
 package org.jbei.ice.lib.entry.model;
 
-import org.jbei.ice.shared.dto.EntryType;
-
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,9 +11,8 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
+import org.jbei.ice.shared.dto.EntryType;
 
 /**
  * Store Arabidopsis Seed specific fields.

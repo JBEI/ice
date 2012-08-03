@@ -1,40 +1,60 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
-        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
 <hibernate-configuration>
+
     <session-factory>
-        <property name="hibernate.connection.url">jdbc:postgresql://localhost/test_registry</property>
+
+        <!-- Database connection settings -->
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost/wregistry</property>
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
-        <property name="hibernate.connection.username">test_user</property>
-        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
-        <property name="hibernate.connection.password">t@stuz@r</property>
+        <property name="hibernate.connection.username">username</property>
+        <property name="hibernate.connection.password">password</property>
 
-        <!-- The settings below uses a file based database with some example test data.
-          <property name="hibernate.connection.url">jdbc:hsqldb:file:src/test/java/example_db/example_db</property>
-          <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
-          <property name="hibernate.connection.username">sa</property>
-          <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
-           -->
+        <!-- JDBC connection pool (using c3p0) -->
+        <property name="hibernate.c3p0.min_size">5</property>
+        <property name="hibernate.c3p0.max_size">20</property>
+        <property name="hibernate.c3p0.timeout">1800</property>
+        <property name="hibernate.c3p0.max_statements">50</property>
 
-        <!-- The setting below uses a memory based database.
-           <property name="hibernate.connection.url">jdbc:hsqldb:mem:ice</property>
-          <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
-          <property name="hibernate.connection.username">sa</property>
-          <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
-          -->
-        <property name="hibernate.connection.pool_size">3</property>
-        <property name="hibernate.c3p0.min_size">3</property>
-        <property name="hibernate.c3p0.max_size">15</property>
-        <property name="hibernate.c3p0.timeout">20</property>
-        <property name="hibernate.c3p0.max_statements">10</property>
+        <!-- SQL dialect: use the correct one for your database -->
+        <property name="dialect">org.hibernate.dialect.PostgreSQL82Dialect</property>
 
-        <!--
-              Use below when table rearrangement is needed:  "create" or "update".
-              Normally, it should be "validate"
-          -->
-        <property name="hbm2ddl.auto">update</property>
-        <!-- this will show us all sql statements -->
-        <property name="hibernate.show_sql">false</property>
+        <!-- Enables Hibernate's automatic session context management -->
+        <!--<property name="current_session_context_class">thread</property>-->
+
+        <!-- Disable the second-level cache  -->
+        <property name="cache.provider_class">org.hibernate.cache.internal.NoCacheProvider</property>
+
+        <!-- Echo all executed SQL to stdout -->
+        <property name="show_sql">false</property>
+
+        <!-- format -->
+        <property name="format_sql">true</property>
+
+
+        <!-- Drop and re-create the database schema on startup (normally it should be validate) -->
+        <property name="hbm2ddl.auto">auto</property>
+
+        <!-- hibernate search -->
+        <property name="hibernate.search.default.directory_provider">filesystem</property>
+        <property name="hibernate.search.default.indexBase">/tmp/ice_search_index</property>
+
+        <!--<mapping resource="org/hibernate/tutorial/domain/Event.hbm.xml"/>-->
+        <!--<hibernate-mapping package="org.jbei.ice.lib.entry">-->
+
+        <!--<class name="Entry" table="entries">-->
+        <!--<id name="id" column="EVENT_ID">-->
+        <!--<generator class="native"/>-->
+        <!--</id>-->
+        <!--<property name="date" type="timestamp" column="EVENT_DATE"/>-->
+        <!--<property name="title"/>-->
+        <!--</class>-->
+
+        <!--</hibernate-mapping>-->
+
         <!-- mapping files -->
         <mapping class="org.jbei.ice.lib.entry.model.Entry"/>
         <mapping class="org.jbei.ice.lib.entry.model.Plasmid"/>

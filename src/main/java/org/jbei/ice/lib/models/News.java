@@ -1,25 +1,16 @@
 package org.jbei.ice.lib.models;
 
 import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 
+import org.hibernate.annotations.Type;
+
 /**
  * Store information about a news item.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 @Entity
 @Table(name = "news")
@@ -39,6 +30,7 @@ public class News implements IModel {
 
     @Column(name = "body", nullable = false)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String body;
 
     @Column(name = "creation_time")

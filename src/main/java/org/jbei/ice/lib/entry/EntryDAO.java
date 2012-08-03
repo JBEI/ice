@@ -195,8 +195,8 @@ class EntryDAO extends HibernateRepository<Entry> {
                         Restrictions.not(Restrictions.in("visibility", visibilities)),
                         Restrictions.isNull("visibility")));
             }
-            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
-                                               .uniqueResult();
+            Long result = (Long) criteria.setProjection(Projections.rowCount())
+                                         .uniqueResult();
 
             session.getTransaction().commit();
             return result.intValue();
@@ -231,8 +231,8 @@ class EntryDAO extends HibernateRepository<Entry> {
 
             Criteria criteria = session.createCriteria(ReadGroup.class.getName()).add(
                     Restrictions.eq("group", everybodyGroup));
-            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
-                                               .uniqueResult();
+            Long result = (Long) criteria.setProjection(Projections.rowCount())
+                                         .uniqueResult();
 
             if (account == null)
                 return result.longValue();
@@ -241,7 +241,7 @@ class EntryDAO extends HibernateRepository<Entry> {
 
             criteria = session.createCriteria(ReadUser.class.getName()).add(
                     Restrictions.eq("account", account));
-            result = (Integer) criteria.setProjection(Projections.rowCount()).uniqueResult();
+            result = (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
             return (groupVisibleCount + result.longValue());
 
         } catch (HibernateException e) {
@@ -322,8 +322,8 @@ class EntryDAO extends HibernateRepository<Entry> {
         Session session = newSession();
         try {
             Criteria criteria = session.createCriteria(Entry.class.getName());
-            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
-                                               .uniqueResult();
+            Long result = (Long) criteria.setProjection(Projections.rowCount())
+                                         .uniqueResult();
             return result.longValue();
         } finally {
             closeSession(session);

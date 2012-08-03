@@ -5,14 +5,13 @@ import org.jbei.ice.lib.utils.JobCue;
 
 /**
  * ABI to manipulate system wide events.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
- * 
  */
 public class ApplicationController {
 
     /**
-     * Interval for processing events in miliseconds.
+     * Interval for processing events in milliseconds.
      */
     public static final long DEFAULT_PROCESS_IN_TIME = 5000; // ms
 
@@ -20,7 +19,7 @@ public class ApplicationController {
      * Schedule to rebuild the full text search index.
      */
     public static void scheduleSearchIndexRebuildJob() {
-        scheduleSearchIndexRebuildJob(DEFAULT_PROCESS_IN_TIME);
+//        scheduleSearchIndexRebuildJob(DEFAULT_PROCESS_IN_TIME);
     }
 
     /**
@@ -32,7 +31,7 @@ public class ApplicationController {
 
     /**
      * Schedule to rebuild the full text search index in the given time interval.
-     * 
+     *
      * @param timeToProcessIn
      */
     public static void scheduleSearchIndexRebuildJob(long timeToProcessIn) {
@@ -43,7 +42,7 @@ public class ApplicationController {
 
     /**
      * Schedule to rebuild the BLAST search index in the given time interval.
-     * 
+     *
      * @param timeToProcessIn
      */
     public static void scheduleBlastIndexRebuildJob(long timeToProcessIn) {

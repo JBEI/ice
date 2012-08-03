@@ -1,6 +1,9 @@
 package org.jbei.ice.lib.models;
 
-import org.hibernate.annotations.Cascade;
+import java.util.Set;
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.interfaces.ISequenceValueObject;
@@ -8,9 +11,7 @@ import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
-import java.util.Set;
+import org.hibernate.annotations.Type;
 
 /**
  * Stores the unique sequence for an {@link org.jbei.ice.lib.entry.model.Entry} object.
@@ -38,10 +39,12 @@ public class Sequence implements ISequenceValueObject, IModel {
 
     @Column(name = "sequence")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String sequence;
 
     @Column(name = "sequence_user")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String sequenceUser;
 
     @Column(name = "fwd_hash", length = 40)
@@ -55,8 +58,6 @@ public class Sequence implements ISequenceValueObject, IModel {
     private Entry entry;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequence")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    @JoinColumn(name = "sequence_id")
     @OrderBy("id")
     private Set<SequenceFeature> sequenceFeatures = new SequenceFeatureCollection();
 

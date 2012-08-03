@@ -1,13 +1,12 @@
 package org.jbei.ice.lib.models;
 
-import org.hibernate.annotations.Cascade;
-import org.jbei.ice.lib.dao.IModel;
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.*;
+
+import org.jbei.ice.lib.dao.IModel;
 
 /**
  * Store sample storage location information as well as the hierarchical structure information.
@@ -101,9 +100,7 @@ public class Storage implements IModel {
     private ArrayList<Storage> schemes;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "parent")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @OrderBy("id")
-    @JoinColumn(name = "parent_id")
     private final Set<Storage> children = null;
 
     public Storage() {

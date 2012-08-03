@@ -14,16 +14,17 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IFeatureValueObject;
 import org.jbei.ice.lib.utils.SequenceUtils;
 
+import org.hibernate.annotations.Type;
+
 /**
  * Represents a unique sequence annotation known to this instance of gd-ice.
- * <p>
+ * <p/>
  * Annotated sequences associated with entries are parsed, and their fields are saved into the
  * database as Features. These features have unique identifiers via hash. In the future, select set
  * of Features will be hand annotated with proper name, identification, genbankType, and then used
  * for automatic identification and annotation of unknown sequences.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 @Entity
 @Table(name = "features")
@@ -46,6 +47,7 @@ public class Feature implements IFeatureValueObject, IModel {
 
     @Column(name = "sequence", nullable = false)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String sequence;
 
     @Column(name = "auto_find")

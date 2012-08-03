@@ -150,11 +150,11 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
         Session session = newSession();
         try {
 
-            Integer itemCount = (Integer) session.createCriteria(Attachment.class)
-                                                 .setProjection(Projections.countDistinct("id"))
-                                                 .add(Restrictions.eq("entry", entry)).uniqueResult();
+            Long itemCount = (Long) session.createCriteria(Attachment.class)
+                                           .setProjection(Projections.countDistinct("id"))
+                                           .add(Restrictions.eq("entry", entry)).uniqueResult();
 
-            return itemCount.intValue() > 0;
+            return itemCount.longValue() > 0;
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(),
                                    e);

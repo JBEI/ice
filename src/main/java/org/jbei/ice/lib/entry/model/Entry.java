@@ -19,7 +19,12 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.shared.dto.Visibility;
 
 import com.google.common.base.Objects;
-import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.DateBridge;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.IndexedEmbedded;
+import org.hibernate.search.annotations.Resolution;
 
 /**
  * Entry class is the most important class in gd-ice. Other record types extend this class.
@@ -76,6 +81,7 @@ import org.hibernate.annotations.Cascade;
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
+@Indexed
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -88,30 +94,38 @@ public class Entry implements IEntryValueObject, IModel {
     private long id;
 
     @Column(name = "record_id", length = 36, nullable = false, unique = true)
+    @Field
     private String recordId;
 
     @Column(name = "version_id", length = 36, nullable = false)
     private String versionId;
 
     @Column(name = "record_type", length = 127, nullable = false)
+    @Field
     private String recordType;
 
     @Column(name = "owner", length = 127)
+    @Field
     private String owner;
 
     @Column(name = "owner_email", length = 127)
+    @Field
     private String ownerEmail;
 
     @Column(name = "creator", length = 127)
+    @Field
     private String creator;
 
     @Column(name = "creator_email", length = 127)
+    @Field
     private String creatorEmail;
 
     @Column(name = "alias", length = 127)
+    @Field
     private String alias;
 
     @Column(name = "keywords", length = 127)
+    @Field
     private String keywords;
 
     @Column(name = "status", length = 127)
@@ -122,10 +136,12 @@ public class Entry implements IEntryValueObject, IModel {
 
     @Column(name = "short_description")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String shortDescription;
 
     @Column(name = "long_description")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String longDescription;
 
     @Column(name = "long_description_type", length = 31, nullable = false)
@@ -133,6 +149,7 @@ public class Entry implements IEntryValueObject, IModel {
 
     @Column(name = "literature_references")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String references;
 
     @Column(name = "creation_time")
@@ -141,6 +158,7 @@ public class Entry implements IEntryValueObject, IModel {
 
     @Column(name = "modification_time")
     @Temporal(TemporalType.TIMESTAMP)
+    @DateBridge(resolution = Resolution.HOUR)
     private Date modificationTime;
 
     @Column(name = "bio_safety_level")
@@ -148,41 +166,34 @@ public class Entry implements IEntryValueObject, IModel {
 
     @Column(name = "intellectual_property")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
+    @Field
     private String intellectualProperty;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    @JoinColumn(name = "entries_id")
     @OrderBy("id")
+//    @IndexedEmbedded
     private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<SelectionMarker>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    @JoinColumn(name = "entries_id")
     @OrderBy("id")
+//    @IndexedEmbedded
     private final Set<Link> links = new LinkedHashSet<Link>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    @JoinColumn(name = "entries_id")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry", targetEntity = Name.class)
     @OrderBy("id")
+    @IndexedEmbedded
     private final Set<Name> names = new LinkedHashSet<Name>();
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    @JoinColumn(name = "entries_id")
     @OrderBy("id")
     private final Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    @JoinColumn(name = "entries_id")
     @OrderBy("id")
     private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    @JoinColumn(name = "entries_id")
     @OrderBy("id")
     private final List<Parameter> parameters = new ArrayList<Parameter>();
 

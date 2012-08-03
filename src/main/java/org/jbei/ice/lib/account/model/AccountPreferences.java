@@ -1,8 +1,10 @@
 package org.jbei.ice.lib.account.model;
 
+import javax.persistence.*;
+
 import org.jbei.ice.lib.dao.IModel;
 
-import javax.persistence.*;
+import org.hibernate.annotations.Type;
 
 /**
  * Store preferences for a user for an {@link Account} object.
@@ -21,10 +23,12 @@ public class AccountPreferences implements IModel {
 
     @Column(name = "preferences")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String preferences;
 
     @Column(name = "restriction_enzymes")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String restrictionEnzymes;
 
     @ManyToOne(fetch = FetchType.EAGER)

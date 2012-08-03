@@ -99,6 +99,7 @@ class AccountDAO extends HibernateRepository<Account> {
      * @return Saved account.
      * @throws DAOException
      */
+
     public Account save(Account account) throws DAOException {
         return super.saveOrUpdate(account);
     }

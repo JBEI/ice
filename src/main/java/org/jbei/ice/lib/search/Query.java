@@ -1,5 +1,14 @@
 package org.jbei.ice.lib.search;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeSet;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -24,15 +33,6 @@ import org.jbei.ice.lib.search.filter.RadioFilter;
 import org.jbei.ice.lib.search.filter.SelectionFilter;
 import org.jbei.ice.lib.search.filter.StringFilter;
 import org.jbei.ice.lib.utils.UtilsController;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeSet;
 
 /*
  * TODO This class was written as a translation from a dynamic language. A cleaner 
@@ -81,12 +81,12 @@ public class Query {
 
         try {
             uniqueSelectionMarkers = new TreeSet<String>(controller.getUniqueSelectionMarkers());
+            for (String selectionMarker : uniqueSelectionMarkers) {
+                selectionMarkersMap.put(selectionMarker, selectionMarker);
+            }
         } catch (ControllerException e) {
             String msg = "Could not get unique selection markers in Query";
             Logger.error(msg, e);
-        }
-        for (String selectionMarker : uniqueSelectionMarkers) {
-            selectionMarkersMap.put(selectionMarker, selectionMarker);
         }
 
         Map<String, String> promotersMap = new LinkedHashMap<String, String>();

@@ -1,12 +1,14 @@
 package org.jbei.ice.lib.models;
 
+import java.util.Calendar;
+import java.util.Date;
+import javax.persistence.*;
+
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 
-import javax.persistence.*;
-import java.util.Calendar;
-import java.util.Date;
+import org.hibernate.annotations.Type;
 
 /**
  * Store comments about an {@link org.jbei.ice.lib.entry.model.Entry} object, with the associated {@link org.jbei.ice
@@ -35,6 +37,7 @@ public class Comment implements IModel {
 
     @Column(name = "body", nullable = false)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String body;
 
     @Column(name = "creation_time")

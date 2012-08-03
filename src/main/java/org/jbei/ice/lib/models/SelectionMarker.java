@@ -1,11 +1,14 @@
 package org.jbei.ice.lib.models;
 
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.interfaces.ISelectionMarkerValueObject;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 
 /**
  * Represents a selection marker for entry.
@@ -13,6 +16,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author Timothy Ham, Zinovii Dmytriv
  */
 @Entity
+@Indexed
 @Table(name = "selection_markers")
 @SequenceGenerator(name = "sequence", sequenceName = "selection_markers_id_seq", allocationSize = 1)
 public class SelectionMarker implements ISelectionMarkerValueObject, IModel {
@@ -23,6 +27,7 @@ public class SelectionMarker implements ISelectionMarkerValueObject, IModel {
     private long id;
 
     @Column(name = "name", length = 50, nullable = false)
+    @Field
     private String name;
 
     @ManyToOne(fetch = FetchType.EAGER)

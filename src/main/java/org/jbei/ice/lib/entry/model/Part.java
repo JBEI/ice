@@ -1,19 +1,19 @@
 package org.jbei.ice.lib.entry.model;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.models.interfaces.IPartValueObject;
-import org.jbei.ice.shared.dto.EntryType;
-
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.lib.models.interfaces.IPartValueObject;
+import org.jbei.ice.shared.dto.EntryType;
 
 /**
  * Store Part specific fields.

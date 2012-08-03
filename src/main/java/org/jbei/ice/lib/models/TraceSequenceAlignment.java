@@ -1,29 +1,17 @@
 package org.jbei.ice.lib.models;
 
 import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
+import org.hibernate.annotations.Type;
+
 /**
  * Store computed trace alignment information.
- * 
+ *
  * @author Zinovii Dmytrv, Timothy Ham
- * 
  */
 @Entity
 @Table(name = "trace_sequence_alignments")
@@ -61,10 +49,12 @@ public class TraceSequenceAlignment implements IModel {
 
     @Column(name = "query_alignment", nullable = false)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String queryAlignment;
 
     @Column(name = "subject_alignment", nullable = false)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String subjectAlignment;
 
     @Column(name = "sequence_hash", length = 40)

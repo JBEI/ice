@@ -1,10 +1,13 @@
 package org.jbei.ice.lib.entry.model;
 
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ILinkValueObject;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 
 /**
  * Store url link information.
@@ -12,6 +15,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author Timothy Ham, Zinovii Dmytriv
  */
 @Entity
+@Indexed
 @Table(name = "links")
 @SequenceGenerator(name = "sequence", sequenceName = "links_id_seq", allocationSize = 1)
 public class Link implements ILinkValueObject, IModel {
@@ -22,6 +26,7 @@ public class Link implements ILinkValueObject, IModel {
     private long id;
 
     @Column(name = "link", length = 1023)
+    @Field
     private String link;
 
     @Column(name = "url", length = 1023)

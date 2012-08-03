@@ -1,5 +1,10 @@
 package org.jbei.ice.lib.search;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -21,11 +26,6 @@ import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
@@ -135,7 +135,6 @@ public class SearchController {
 
         try {
             Logger.info("Searching for \"" + cleanedQuery + "\"");
-            EntryController entryController = new EntryController();
             ArrayList<SearchResult> searchResults = AggregateSearch.query(cleanedQuery, account);
             if (searchResults != null) {
                 for (SearchResult searchResult : searchResults) {

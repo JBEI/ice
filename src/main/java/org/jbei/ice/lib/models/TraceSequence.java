@@ -1,12 +1,13 @@
 package org.jbei.ice.lib.models;
 
-import org.hibernate.annotations.Cascade;
+import java.util.Date;
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
-import java.util.Date;
+import org.hibernate.annotations.Type;
 
 /**
  * Store sequence trace file information.
@@ -39,6 +40,7 @@ public class TraceSequence implements IModel {
 
     @Column(name = "sequence", nullable = false)
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String sequence;
 
     @Column(name = "creation_time", nullable = false)
@@ -46,7 +48,6 @@ public class TraceSequence implements IModel {
     private Date creationTime;
 
     @OneToOne(mappedBy = "traceSequence", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     private TraceSequenceAlignment traceSequenceAlignment;
 
     public TraceSequence() {

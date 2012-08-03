@@ -5,12 +5,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
@@ -20,6 +14,13 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+
 /**
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
@@ -27,7 +28,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
 
     /**
      * Save the given {@link Sample} object in the database.
-     * 
+     *
      * @param sample
      * @return Saved Sample object.
      * @throws DAOException
@@ -39,10 +40,9 @@ public class SampleDAO extends HibernateRepository<Sample> {
     public boolean hasSample(Entry entry) throws DAOException {
         Session session = newSession();
         try {
-
-            Integer itemCount = (Integer) session.createCriteria(Sample.class)
-                    .setProjection(Projections.countDistinct("id"))
-                    .add(Restrictions.eq("entry", entry)).uniqueResult();
+            Long itemCount = (Long) session.createCriteria(Sample.class)
+                                           .setProjection(Projections.countDistinct("id"))
+                                           .add(Restrictions.eq("entry", entry)).uniqueResult();
 
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {
@@ -54,7 +54,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
 
     /**
      * Delete the give {@link Sample} object in the database.
-     * 
+     *
      * @param sample
      * @throws ManagerException
      */
@@ -64,7 +64,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
 
     /**
      * Retrieve {@link Sample} object associated with the given {@link Entry} object.
-     * 
+     *
      * @return ArrayList of Sample objects.
      * @throws ManagerException
      */
@@ -128,7 +128,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
 
     /**
      * Retrieve {@link Sample} objects associated with the given {@link Storage} object.
-     * 
+     *
      * @param storage
      * @return ArrayList of Sample objects.
      * @throws DAOException
@@ -161,7 +161,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
 
     /**
      * Retrieve {@link Sample} objects by its index field.
-     * 
+     *
      * @param code
      * @return ArrayList of Sample objects.
      * @throws DAOException
@@ -184,7 +184,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
 
     /**
      * Retrieve {@link Sample} objects by its depositor field.
-     * 
+     *
      * @param depositor
      * @param offset
      * @param limit
@@ -226,7 +226,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
 
     /**
      * Retrieve the number of samples associated the given depositor (email) string.
-     * 
+     *
      * @param depositor
      * @return Number of samples.
      * @throws DAOException
@@ -286,7 +286,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
         try {
 
             Query query = session.createQuery("from " + Sample.class.getName() + " e WHERE id in ("
-                    + filter + ") " + suffix);
+                                                      + filter + ") " + suffix);
 
             @SuppressWarnings("rawtypes")
             ArrayList list = (ArrayList) query.list();

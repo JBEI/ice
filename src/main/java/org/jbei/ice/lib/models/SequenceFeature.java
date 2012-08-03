@@ -2,39 +2,22 @@ package org.jbei.ice.lib.models;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISequenceFeatureValueObject;
+
+import org.hibernate.annotations.Type;
 
 /**
  * Stores the sequence annotation information, and associates {@link Feature} objects to a
  * {@link Sequence} object.
- * <p>
+ * <p/>
  * SequenceFeature represents is a many-to-many mapping. In addition, this class has fields to store
  * sequence specific annotation information.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 @Entity
 @Table(name = "sequence_feature")
@@ -58,8 +41,6 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     private Feature feature;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    @JoinColumn(name = "sequence_feature_id")
     @OrderBy("id")
     private final Set<AnnotationLocation> annotationLocations = new LinkedHashSet<AnnotationLocation>();
 
@@ -86,6 +67,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @Deprecated
     @Column(name = "description")
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String description;
 
     @Column(name = "genbank_type", length = 127)
@@ -95,11 +77,10 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @Enumerated(EnumType.STRING)
     private AnnotationType annotationType;
 
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    @JoinColumn(name = "sequence_feature_id")
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
     @OrderBy("id")
-    private final Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new LinkedHashSet<SequenceFeatureAttribute>();
+    private final Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new
+            LinkedHashSet<SequenceFeatureAttribute>();
 
     public SequenceFeature() {
         super();
@@ -118,12 +99,11 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     /**
      * Annotation type for "parts".
-     * <p>
+     * <p/>
      * Parts can have a PREFIX, a SUFFIX, a SCAR features. The INNER and SUBINNER features indicate
      * part sequence excluding the prefix and suffix.
-     * 
+     *
      * @author Timothy Ham
-     * 
      */
     public enum AnnotationType {
         PREFIX, SUFFIX, SCAR, INNER, SUBINNER;
@@ -238,7 +218,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     /**
      * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     * 
+     *
      * @return Description.
      */
     @Deprecated
@@ -248,7 +228,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     /**
      * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     * 
+     *
      * @param description
      */
     @Deprecated
