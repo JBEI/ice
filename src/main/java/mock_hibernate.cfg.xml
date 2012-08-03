@@ -16,9 +16,6 @@
         <property name="hibernate.c3p0.timeout">1800</property>
         <property name="hibernate.c3p0.max_statements">50</property>
 
-        <!-- SQL dialect: use the correct one for your database -->
-        <property name="dialect">org.hibernate.dialect.PostgreSQL82Dialect</property>
-
         <!-- Enables Hibernate's automatic session context management -->
         <!--<property name="current_session_context_class">thread</property>-->
 
@@ -31,9 +28,8 @@
         <!-- format -->
         <property name="format_sql">true</property>
 
-
         <!-- Drop and re-create the database schema on startup (normally it should be validate) -->
-        <property name="hbm2ddl.auto">auto</property>
+        <property name="hbm2ddl.auto">update</property>
 
         <!-- hibernate search -->
         <property name="hibernate.search.default.directory_provider">filesystem</property>
