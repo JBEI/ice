@@ -137,12 +137,8 @@ public class EntryPresenter extends AbstractPresenter {
                 new IceAsyncCallback<Boolean>() {
 
                     @Override
-                    protected void callService(AsyncCallback<Boolean> callback) {
-                        try {
-                            service.deleteEntryAttachment(AppController.sessionId, item.getFileId(), callback);
-                        } catch (AuthenticationException e) {
-                            History.newItem(Page.LOGIN.getLink());
-                        }
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        service.deleteEntryAttachment(AppController.sessionId, item.getFileId(), callback);
                     }
 
                     @Override
@@ -179,12 +175,9 @@ public class EntryPresenter extends AbstractPresenter {
         new IceAsyncCallback<ArrayList<PermissionInfo>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<PermissionInfo>> callback) {
-                try {
-                    service.retrievePermissionData(AppController.sessionId, currentContext.getCurrent(), callback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+            protected void callService(AsyncCallback<ArrayList<PermissionInfo>> callback)
+                    throws AuthenticationException {
+                service.retrievePermissionData(AppController.sessionId, currentContext.getCurrent(), callback);
             }
 
             @Override
@@ -344,12 +337,9 @@ public class EntryPresenter extends AbstractPresenter {
         new IceAsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback) {
-                try {
-                    service.retrieveEntryTraceSequences(AppController.sessionId, entryId, callback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+            protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback)
+                    throws AuthenticationException {
+                service.retrieveEntryTraceSequences(AppController.sessionId, entryId, callback);
             }
 
             @Override
@@ -536,22 +526,16 @@ public class EntryPresenter extends AbstractPresenter {
             new IceAsyncCallback<Boolean>() {
 
                 @Override
-                protected void callService(AsyncCallback<Boolean> callback) {
-                    try {
-                        service.addPermission(AppController.sessionId, id, info, callback);
-                    } catch (AuthenticationException e) {
-                        History.newItem(Page.LOGIN.getLink());
-                    }
+                protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                    service.addPermission(AppController.sessionId, id, info, callback);
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
                     if (isWrite) {
-                        display.getPermissionsWidget().addWriteItem(info, service, id,
-                                                                    currentInfo.isCanEdit());
+                        display.getPermissionsWidget().addWriteItem(info, service, id, currentInfo.isCanEdit());
                     } else {
-                        display.getPermissionsWidget().addReadItem(info, service, id,
-                                                                   currentInfo.isCanEdit());
+                        display.getPermissionsWidget().addReadItem(info, service, id, currentInfo.isCanEdit());
                     }
                 }
             }.go(eventBus);
@@ -579,8 +563,7 @@ public class EntryPresenter extends AbstractPresenter {
             switch (selection.getMenu()) {
 
                 case GENERAL:
-                    boolean canEdit = (AppController.accountInfo.isModerator() || currentInfo
-                            .isCanEdit());
+                    boolean canEdit = (AppController.accountInfo.isModerator() || currentInfo.isCanEdit());
                     sequencePresenter = display.showEntryDetailView(currentInfo, canEdit,
                                                                     new DeleteSequenceHandler(service, eventBus,
                                                                                               currentInfo.getId()));
@@ -624,8 +607,7 @@ public class EntryPresenter extends AbstractPresenter {
             FocusWidget focus = formSubmit.validateForm();
             if (focus != null) {
                 focus.setFocus(true);
-                FeedbackEvent feedback = new FeedbackEvent(true,
-                                                           "Please fill out all required fields");
+                FeedbackEvent feedback = new FeedbackEvent(true, "Please fill out all required fields");
                 eventBus.fireEvent(feedback);
                 return;
             }
@@ -644,12 +626,8 @@ public class EntryPresenter extends AbstractPresenter {
             new IceAsyncCallback<Boolean>() {
 
                 @Override
-                protected void callService(AsyncCallback<Boolean> callback) {
-                    try {
-                        service.updateEntry(AppController.sessionId, info, callback);
-                    } catch (AuthenticationException e) {
-                        History.newItem(Page.LOGIN.getLink());
-                    }
+                protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                    service.updateEntry(AppController.sessionId, info, callback);
                 }
 
                 @Override
@@ -705,8 +683,7 @@ public class EntryPresenter extends AbstractPresenter {
         @Override
         public void onClick(ClickEvent event) {
             final long entryId = currentInfo.getId();
-            Set<SequenceAnalysisInfo> selected = display.getSequenceTableSelectionModel()
-                                                        .getSelectedSet();
+            Set<SequenceAnalysisInfo> selected = display.getSequenceTableSelectionModel().getSelectedSet();
             if (selected == null || selected.isEmpty())
                 return;
 
@@ -718,12 +695,9 @@ public class EntryPresenter extends AbstractPresenter {
             new IceAsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
 
                 @Override
-                protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback) {
-                    try {
-                        service.deleteEntryTraceSequences(AppController.sessionId, entryId, fileIds, callback);
-                    } catch (AuthenticationException e) {
-                        History.newItem(Page.LOGIN.getLink());
-                    }
+                protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback)
+                        throws AuthenticationException {
+                    service.deleteEntryTraceSequences(AppController.sessionId, entryId, fileIds, callback);
                 }
 
                 @Override

@@ -39,13 +39,11 @@ public class EntryController {
     private EntryDAO dao;
     private PermissionsController permissionsController;
     private AttachmentController attachmentController;
-    private GroupController groupController;
 
     public EntryController() {
         dao = new EntryDAO();
         permissionsController = new PermissionsController();
         attachmentController = new AttachmentController();
-        groupController = new GroupController();
     }
 
     /**
@@ -54,30 +52,29 @@ public class EntryController {
      * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
      * Sets the record globally visible and schedule an index rebuild.
      *
-     * @param account       account of user creating the record
-     * @param entry         entry record being created
-     * @param addPublicRead make entry readable by the public. The current notion of public is a single per-site group.
-     *                      This is currently maintained for legacy reasons but will be changed in the near future
+     * @param account   account of user creating the record
+     * @param entry     entry record being created
+     * @param readGroup group that can has read access to entry
      * @return entry that was saved in the database.
      * @throws ControllerException // TODO : visibility should be a parameter
      */
-    public Entry createEntry(Account account, Entry entry, boolean addPublicRead) throws ControllerException {
-        return createEntry(account, entry, true, addPublicRead);
+    public Entry createEntry(Account account, Entry entry, Group readGroup) throws ControllerException {
+        return createEntry(account, entry, true, readGroup);
     }
 
-    public HashSet<Entry> createStrainWithPlasmid(Account account, Entry strain, Entry plasmid, boolean makePublic)
+    public HashSet<Entry> createStrainWithPlasmid(Account account, Entry strain, Entry plasmid, Group readGroup)
             throws ControllerException {
 
         HashSet<Entry> results = new HashSet<Entry>();
 
-        plasmid = createEntry(account, plasmid, makePublic);
+        plasmid = createEntry(account, plasmid, readGroup);
         results.add(plasmid);
 
         String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
                 + plasmid.getOnePartNumber().getPartNumber() + "|" + plasmid.getOneName().getName()
                 + "]]";
         ((Strain) strain).setPlasmids(plasmidPartNumberString);
-        strain = createEntry(account, strain, makePublic);
+        strain = createEntry(account, strain, readGroup);
         results.add(strain);
         return results;
     }
@@ -111,7 +108,7 @@ public class EntryController {
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
-    public Entry createEntry(Account account, Entry entry, boolean scheduleIndexRebuild, boolean addPublicRead)
+    public Entry createEntry(Account account, Entry entry, boolean scheduleIndexRebuild, Group readGroup)
             throws ControllerException {
         Entry createdEntry;
 
@@ -124,10 +121,9 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        if (addPublicRead) {
-            Group publicGroup = groupController.createOrRetrievePublicGroup();
+        if (readGroup != null) {
             try {
-                permissionsController.addReadGroup(account, createdEntry, publicGroup);
+                permissionsController.addReadGroup(account, createdEntry, readGroup);
             } catch (PermissionException pe) {
                 Logger.error("Could not make entry " + createdEntry.getId() + " public ", pe);
             }
@@ -404,8 +400,8 @@ public class EntryController {
             entry.setModificationTime(Calendar.getInstance().getTime());
             savedEntry = dao.saveOrUpdate(entry);
 
-            ApplicationController.scheduleSearchIndexRebuildJob();
-            ApplicationController.scheduleBlastIndexRebuildJob();
+//            ApplicationController.scheduleSearchIndexRebuildJob();
+//            ApplicationController.scheduleBlastIndexRebuildJob();
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

@@ -12,6 +12,7 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.server.EntryToInfoFactory;
@@ -19,6 +20,7 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.GroupInfo;
 
 /**
  * Utility class for Bulk Import
@@ -43,7 +45,15 @@ public class BulkUploadUtil {
         info.setType(EntryAddType.stringToType(model.getImportType()));
         info.setCreated(model.getCreationTime());
         info.setName(model.getName());
+        Group group = model.getReadGroup();
 
+        if (group != null) {
+            GroupInfo groupInfo = new GroupInfo();
+            groupInfo.setUuid(group.getUuid());
+            groupInfo.setLabel(group.getLabel());
+            groupInfo.setId(group.getId());
+            info.setGroupInfo(groupInfo);
+        }
         return info;
     }
 

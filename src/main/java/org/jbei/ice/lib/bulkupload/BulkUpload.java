@@ -8,6 +8,7 @@ import javax.persistence.*;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.models.Group;
 
 import org.hibernate.annotations.Cascade;
 
@@ -36,6 +37,10 @@ public class BulkUpload implements IModel {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "group_id", nullable = true)
+    private Group readGroup;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_time", nullable = false)
@@ -105,5 +110,13 @@ public class BulkUpload implements IModel {
 
     public void setImportType(String importType) {
         this.importType = importType;
+    }
+
+    public Group getReadGroup() {
+        return readGroup;
+    }
+
+    public void setReadGroup(Group readGroup) {
+        this.readGroup = readGroup;
     }
 }

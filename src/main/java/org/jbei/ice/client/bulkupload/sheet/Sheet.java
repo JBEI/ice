@@ -59,7 +59,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private SheetCell newCellSelection;
     private boolean cellHasFocus;
 
-    public final static int ROW_COUNT = 100;
+    public final static int ROW_COUNT = 50;
 
     public Sheet(EntryAddType type) {
         this(type, null);

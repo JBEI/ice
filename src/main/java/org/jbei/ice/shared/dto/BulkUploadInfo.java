@@ -16,6 +16,7 @@ public class BulkUploadInfo implements IsSerializable {
     private Date created;
     private Date lastUpdate;
     private AccountInfo account;
+    private GroupInfo group;
     private ArrayList<EntryInfo> entryList;
 
     public BulkUploadInfo() {
@@ -68,6 +69,14 @@ public class BulkUploadInfo implements IsSerializable {
 
     public void setAccount(AccountInfo account) {
         this.account = account;
+    }
+
+    public GroupInfo getGroupInfo() {
+        return this.group;
+    }
+
+    public void setGroupInfo(GroupInfo info) {
+        this.group = info;
     }
 
     public Date getLastUpdate() {

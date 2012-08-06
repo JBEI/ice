@@ -28,6 +28,7 @@ import org.jbei.ice.lib.permissions.model.ReadUser;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.Visibility;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -383,12 +384,15 @@ class EntryDAO extends HibernateRepository<Entry> {
             Criteria criteria = session.createCriteria(Entry.class.getName()).add(
                     Restrictions.eq("ownerEmail", ownerEmail));
 
-            if (visibility != null) {
-                // retrieve visibilities that are null (legacy) or specified in param
-                criteria.add(Restrictions.or(
-                        Restrictions.in("visibility", visibility),
-                        Restrictions.isNull("visibility")));
+            // if nothing is selected, include all
+            if (visibility == null || visibility.length == 0) {
+                visibility = new Integer[]{Visibility.DRAFT.getValue(), Visibility.PENDING.getValue(),
+                        Visibility.OK.getValue()
+                };
             }
+            criteria.add(Restrictions.or(
+                    Restrictions.in("visibility", visibility),
+                    Restrictions.isNull("visibility")));
 
             @SuppressWarnings("rawtypes")
             List list = criteria.setProjection(Projections.id()).list();

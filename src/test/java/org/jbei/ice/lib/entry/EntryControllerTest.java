@@ -1,10 +1,17 @@
 package org.jbei.ice.lib.entry;
 
-import org.jbei.ice.lib.permissions.PermissionsController;
+import java.util.ArrayList;
+
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.server.dao.hibernate.HibernateHelper;
+
+import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Hector Plahar
@@ -14,20 +21,30 @@ public class EntryControllerTest {
 
     @Before
     public void setUp() {
-//        HibernateHelper.initializeMock();
-//        dao = new EntryDAO();
+        HibernateHelper.initializeMock();
         controller = new EntryController();
-        EntryDAO mockDAO = mock(EntryDAO.class);
-        controller.setDAO(mockDAO);
-        PermissionsController permissionsController = mock(PermissionsController.class);
-        controller.setPermissionsController(permissionsController);
     }
 
     @Test
     public void testCreateEntry() throws Exception {
-//        Entry entry = controller.createEntry(new Entry());
-//        Assert.assertNotNull(entry);
+        String email = "testCreateEntry@TESTER.org";
 
+        AccountController accountController = new AccountController();
+        Account account = accountController.createAdminAccount(email, "popop");
+        Assert.assertNotNull(account);
+
+        Entry entry = new Strain();
+        entry = controller.createEntry(account, entry, new GroupController().createOrRetrievePublicGroup());
+        Assert.assertNotNull(entry);
+        Assert.assertTrue(entry.getId() > 0);
+
+        // account should only have a single entry
+        ArrayList<Long> list = controller.getEntryIdsByOwner(email);
+        Assert.assertNotNull(list);
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals(entry.getId(), list.get(0).intValue());
+
+        // check permission
     }
 
     @Test

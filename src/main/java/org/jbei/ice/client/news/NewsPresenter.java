@@ -1,24 +1,23 @@
 package org.jbei.ice.client.news;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SingleSelectionModel;
+import java.util.ArrayList;
+
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.dto.NewsItem;
 
-import java.util.ArrayList;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * Presenter for the news page. Currently relies on the fact that
@@ -66,12 +65,8 @@ public class NewsPresenter extends AbstractPresenter {
 
         new IceAsyncCallback<ArrayList<NewsItem>>() {
             @Override
-            protected void callService(AsyncCallback<ArrayList<NewsItem>> callback) {
-                try {
-                    service.retrieveNewsItems(AppController.sessionId, callback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+            protected void callService(AsyncCallback<ArrayList<NewsItem>> callback) throws AuthenticationException {
+                service.retrieveNewsItems(AppController.sessionId, callback);
             }
 
             @Override
@@ -118,12 +113,8 @@ public class NewsPresenter extends AbstractPresenter {
         new IceAsyncCallback<NewsItem>() {
 
             @Override
-            protected void callService(AsyncCallback<NewsItem> callback) {
-                try {
-                    service.createNewsItem(AppController.sessionId, item, callback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+            protected void callService(AsyncCallback<NewsItem> callback) throws AuthenticationException {
+                service.createNewsItem(AppController.sessionId, item, callback);
             }
 
             @Override

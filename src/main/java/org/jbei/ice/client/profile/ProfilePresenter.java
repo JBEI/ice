@@ -1,15 +1,11 @@
 package org.jbei.ice.client.profile;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.SamplesDataProvider;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
@@ -24,8 +20,11 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
 
 /**
  * Presenter for the profile page
@@ -34,7 +33,6 @@ import java.util.LinkedList;
  */
 public class ProfilePresenter extends AbstractPresenter {
 
-    private final String sid = AppController.sessionId;
     private final SamplesDataProvider samplesDataProvider;
     private final SamplesDataTable samplesDataTable;
 
@@ -80,12 +78,8 @@ public class ProfilePresenter extends AbstractPresenter {
         new IceAsyncCallback<AccountInfo>() {
 
             @Override
-            protected void callService(AsyncCallback<AccountInfo> callback) {
-                try {
-                    service.retrieveProfileInfo(AppController.sessionId, userId, callback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+            protected void callService(AsyncCallback<AccountInfo> callback) throws AuthenticationException {
+                service.retrieveProfileInfo(AppController.sessionId, userId, callback);
             }
 
             @Override
@@ -250,12 +244,8 @@ public class ProfilePresenter extends AbstractPresenter {
             new IceAsyncCallback<AccountInfo>() {
 
                 @Override
-                protected void callService(AsyncCallback<AccountInfo> callback) {
-                    try {
-                        service.updateAccount(AppController.sessionId, currentInfo.getEmail(), currentInfo, callback);
-                    } catch (AuthenticationException e) {
-                        History.newItem(Page.LOGIN.getLink());
-                    }
+                protected void callService(AsyncCallback<AccountInfo> callback) throws AuthenticationException {
+                    service.updateAccount(AppController.sessionId, currentInfo.getEmail(), currentInfo, callback);
                 }
 
                 @Override
@@ -294,13 +284,8 @@ public class ProfilePresenter extends AbstractPresenter {
             new IceAsyncCallback<Boolean>() {
 
                 @Override
-                protected void callService(AsyncCallback<Boolean> callback) {
-                    try {
-                        service.updateAccountPassword(AppController.sessionId, currentInfo.getEmail(),
-                                                      password, callback);
-                    } catch (AuthenticationException e) {
-                        History.newItem(Page.LOGIN.getLink());
-                    }
+                protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                    service.updateAccountPassword(AppController.sessionId, currentInfo.getEmail(), password, callback);
                 }
 
                 @Override

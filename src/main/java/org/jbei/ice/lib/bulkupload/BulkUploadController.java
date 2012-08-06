@@ -16,7 +16,9 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.server.EntryToInfoFactory;
@@ -44,6 +46,7 @@ public class BulkUploadController {
     private EntryController entryController;
     private AttachmentController attachmentController;
     private SequenceController sequenceController;
+    private GroupController groupController;
 
     /**
      * Initialises dao and controller dependencies. These need be injected
@@ -54,6 +57,7 @@ public class BulkUploadController {
         entryController = new EntryController();
         attachmentController = new AttachmentController();
         sequenceController = new SequenceController();
+        groupController = new GroupController();
     }
 
     /**
@@ -147,26 +151,10 @@ public class BulkUploadController {
                                                   + " to view bulk import for " + draft.getAccount().getEmail());
         }
 
-        EntryAddType type = EntryAddType.stringToType(draft.getImportType());
-
         // convert bulk import db object to data transfer object
-        BulkUploadInfo draftInfo = new BulkUploadInfo();
-        draftInfo.setCount(draft.getContents().size());
-        draftInfo.setCreated(draft.getCreationTime());
-        draftInfo.setLastUpdate(draft.getLastUpdateTime());
-        draftInfo.setId(draft.getId());
-        draftInfo.setType(EntryAddType.stringToType(draft.getImportType()));
-        draftInfo.setName(draft.getName());
+        BulkUploadInfo draftInfo = BulkUploadUtil.modelToInfo(draft);
 
-        // convert account db object to info object
-        AccountInfo accountInfo = new AccountInfo();
-        Account draftAccount = draft.getAccount();
-        accountInfo.setEmail(draftAccount.getEmail());
-        accountInfo.setFirstName(draftAccount.getFirstName());
-        accountInfo.setLastName(draftAccount.getLastName());
-
-        // set draft account
-        draftInfo.setAccount(accountInfo);
+        EntryAddType type = EntryAddType.stringToType(draft.getImportType());
 
         // retrieve the entries associated with the bulk import
         for (Entry entry : draft.getContents()) {
@@ -323,7 +311,7 @@ public class BulkUploadController {
      * @throws ControllerException
      */
     public BulkUploadInfo createBulkImportDraft(Account draftOwner, EntryAddType type, String name,
-            ArrayList<EntryInfo> entryList) throws ControllerException {
+            ArrayList<EntryInfo> entryList, String uuid) throws ControllerException {
 
         BulkUpload draft = new BulkUpload();
         draft.setName(name);
@@ -332,18 +320,19 @@ public class BulkUploadController {
 
         ArrayList<EntryInfo> contentInfoList = new ArrayList<EntryInfo>();
         ArrayList<Entry> newContents = new ArrayList<Entry>();
-        boolean isAdmin = accountController.isAdministrator(draftOwner);
+        Group group = groupController.getGroupByUUID(uuid);
 
         // convert info contents to Entry
         for (EntryInfo info : entryList) {
             info.setVisibility(Visibility.DRAFT);
-            processEntryInfo(draftOwner, type, info, newContents, contentInfoList, isAdmin);
+            processEntryInfo(draftOwner, type, info, newContents, contentInfoList, group);
         }
 
         // update draft data
         draft.setCreationTime(new Date(System.currentTimeMillis()));
         draft.setLastUpdateTime(draft.getCreationTime());
         draft.setContents(newContents);
+        draft.setReadGroup(group);
 
         try {
             draft = dao.save(draft);
@@ -357,7 +346,7 @@ public class BulkUploadController {
 
     // TODO : really need transaction rollback here
     public void processEntryInfo(Account draftOwner, EntryAddType type, EntryInfo info, ArrayList<Entry> contents,
-            ArrayList<EntryInfo> contentInfoList, boolean isAdmin) throws ControllerException {
+            ArrayList<EntryInfo> contentInfoList, Group group) throws ControllerException {
 
         Entry entry;
         Entry enclosedEntry = null;
@@ -368,7 +357,7 @@ public class BulkUploadController {
             if (!exists) {
                 // entry does not exist so create new one
                 entry = InfoToModelFactory.infoToEntry(info);
-                entry = entryController.createEntry(draftOwner, entry, isAdmin);
+                entry = entryController.createEntry(draftOwner, entry, false, group);
                 contents.add(entry);
                 saveSequence(draftOwner, info.getSequenceAnalysis(), entry);
                 saveAttachments(draftOwner, info.getAttachments(), entry);
@@ -376,7 +365,7 @@ public class BulkUploadController {
                 if (type == EntryAddType.STRAIN_WITH_PLASMID) {
                     info.getInfo().setVisibility(info.getVisibility());
                     enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
-                    enclosedEntry = entryController.createEntry(draftOwner, enclosedEntry, isAdmin);
+                    enclosedEntry = entryController.createEntry(draftOwner, enclosedEntry, false, group);
 
                     String name = enclosedEntry.getOneName() == null ? "" : enclosedEntry.getOneName().getName();
 
@@ -388,6 +377,7 @@ public class BulkUploadController {
 
                     try {
                         // update plasmids for strain
+                        // TODO : update groups
                         entryController.update(draftOwner, entry);
                     } catch (PermissionException e) {
                         Logger.error(e);
@@ -417,8 +407,8 @@ public class BulkUploadController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public BulkUploadInfo updateBulkImportDraft(Account account, long draftId, ArrayList<EntryInfo> entryList)
-            throws ControllerException, PermissionException {
+    public BulkUploadInfo updateBulkImportDraft(Account account, long draftId, ArrayList<EntryInfo> entryList,
+            String groupUUID) throws ControllerException, PermissionException {
 
         BulkUpload draft;
         try {
@@ -441,11 +431,14 @@ public class BulkUploadController {
         if (type == null)
             throw new ControllerException("Could not determine type for draft " + draftId);
 
+        Group group = groupController.getGroupByUUID(groupUUID);
+
         // convert info contents to Entry
         for (EntryInfo info : entryList) {
             info.setVisibility(Visibility.DRAFT);
-            processEntryInfo(account, type, info, contentList, contentInfoList, isAdmin);
+            processEntryInfo(account, type, info, contentList, contentInfoList, group);
         }
+        draft.setReadGroup(group);
 
         // update the draft
         try {
@@ -578,8 +571,8 @@ public class BulkUploadController {
      * @param draftId unique identifier for saved bulk import
      * @return true, if draft was sa
      */
-    public boolean submitBulkImportDraft(Account account, long draftId,
-            ArrayList<EntryInfo> entryList) throws ControllerException, PermissionException {
+    public boolean submitBulkImportDraft(Account account, long draftId, ArrayList<EntryInfo> entryList,
+            String groupUUID) throws ControllerException, PermissionException {
 
         // retrieve draft
         BulkUpload draft;
@@ -609,10 +602,12 @@ public class BulkUploadController {
         ArrayList<Entry> newContents = new ArrayList<Entry>();
         EntryAddType type = EntryAddType.stringToType(draft.getImportType());
 
+        Group group = groupController.getGroupByUUID(groupUUID);
+
         // go through passed contents
         for (EntryInfo info : entryList) {
             info.setVisibility(visibility);
-            processEntryInfo(account, type, info, newContents, infoList, isAdmin);
+            processEntryInfo(account, type, info, newContents, infoList, group);
         }
 
         // if an admin is submitting this then
@@ -632,6 +627,7 @@ public class BulkUploadController {
         draft.setAccount(accountController.getSystemAccount());
         draft.setContents(newContents);
         draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
+        draft.setReadGroup(group);
 
         try {
             return dao.update(draft) != null;
@@ -650,11 +646,12 @@ public class BulkUploadController {
      * @return true is import was submitted successfully, false otherwise
      * @throws ControllerException
      */
-    public boolean submitBulkImport(Account entryAccount, EntryAddType type,
-            ArrayList<EntryInfo> entryList) throws ControllerException {
+    public boolean submitBulkImport(Account entryAccount, EntryAddType type, ArrayList<EntryInfo> entryList,
+            String groupUUID) throws ControllerException {
 
         boolean isAdmin = accountController.isAdministrator(entryAccount);
         Visibility visibility;
+
         if (!isAdmin)
             visibility = Visibility.PENDING;
         else
@@ -663,10 +660,12 @@ public class BulkUploadController {
         ArrayList<Entry> contents = new ArrayList<Entry>();
         ArrayList<EntryInfo> contentList = new ArrayList<EntryInfo>();
 
+        Group group = groupController.getGroupByUUID(groupUUID);
+
         // go through passed contents
         for (EntryInfo info : entryList) {
             info.setVisibility(visibility);
-            processEntryInfo(entryAccount, type, info, contents, contentList, isAdmin);
+            processEntryInfo(entryAccount, type, info, contents, contentList, group);
         }
 
         if (isAdmin)
@@ -681,15 +680,21 @@ public class BulkUploadController {
         draft.setContents(contents);
         draft.setCreationTime(new Date(System.currentTimeMillis()));
         draft.setLastUpdateTime(draft.getCreationTime());
+        draft.setReadGroup(group);
 
         try {
-            return dao.save(draft) != null;
+            boolean success = dao.save(draft) != null;
+            if (!success)
+                return success;
+
+            // TODO : send notification email
+            return success;
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }
 
-    public boolean approveBulkImport(Account account, long id, ArrayList<EntryInfo> entryList)
+    public boolean approveBulkImport(Account account, long id, ArrayList<EntryInfo> entryList, String groupUUID)
             throws ControllerException, PermissionException {
 
         // only admins allowed
@@ -714,10 +719,12 @@ public class BulkUploadController {
         ArrayList<EntryInfo> contentList = new ArrayList<EntryInfo>();
         EntryAddType type = EntryAddType.stringToType(bulkUpload.getImportType());
 
+        Group group = groupController.getGroupByUUID(groupUUID);
+
         // go through passed contents
         for (EntryInfo info : entryList) {
             info.setVisibility(Visibility.OK);
-            processEntryInfo(account, type, info, newContents, contentList, true);
+            processEntryInfo(account, type, info, newContents, contentList, group);
         }
 
         // TODO : there may be situations where the admin added something

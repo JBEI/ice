@@ -3,17 +3,18 @@ package org.jbei.ice.server.dao.hibernate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.server.dao.IRepository;
 
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+
 /**
  * Hibernate Persistence
- * 
+ *
  * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
  */
 
@@ -21,7 +22,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
 
     /**
      * Start a new Hibernate {@link Session}.
-     * 
+     *
      * @return {@link Session}
      */
     protected static Session newSession() {
@@ -30,7 +31,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
 
     /**
      * Delete an {@link IModel} object from the database.
-     * 
+     *
      * @param model model to delete
      * @throws DAOException
      */
@@ -61,7 +62,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
 
     /**
      * Saves or updates an {@link IModel} object into the database.
-     * 
+     *
      * @param model {@link IModel} object to save
      * @return Object saved object
      * @throws DAOException in the event of a problem saving or null model parameter
@@ -93,7 +94,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
 
     /**
      * Saves or updates an {@link IModel} object into the database.
-     * 
+     *
      * @param model {@link IModel} object to save
      * @return Object saved object
      * @throws DAOException in the event of a problem saving or null model parameter
@@ -125,7 +126,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
 
     /**
      * Retrieve an {@link IModel} object from the database by Class and database id.
-     * 
+     *
      * @param theClass
      * @param id
      * @return IModel object from the database.
@@ -143,7 +144,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
         } catch (HibernateException e) {
             session.getTransaction().rollback();
             throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and id="
-                    + id, e);
+                                           + id, e);
         } catch (Exception e1) {
             // Something really bad happened.
             session.getTransaction().rollback();
@@ -157,8 +158,9 @@ public class HibernateRepository<T extends IModel> implements IRepository {
         return result;
     }
 
-    protected Object getByUUID(Class<? extends IModel> theClass, String uuid) throws DAOException {
-        Object result;
+    @SuppressWarnings("unchecked")
+    protected T getByUUID(Class<T> theClass, String uuid) throws DAOException {
+        T result;
 
         Session session = newSession();
 
@@ -166,12 +168,12 @@ public class HibernateRepository<T extends IModel> implements IRepository {
             session.getTransaction().begin();
             Query query = session.createQuery("from " + theClass.getName() + " where uuid = :uuid");
             query.setString("uuid", uuid);
-            result = query.uniqueResult();
+            result = (T) query.uniqueResult();
             session.getTransaction().commit();
 
         } catch (HibernateException e) {
             throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and uuid="
-                    + uuid, e);
+                                           + uuid, e);
         } catch (Exception e1) {
             // Something really bad happened.
             session.getTransaction().rollback();
@@ -205,7 +207,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
 
     /**
      * Disconnect the session and reset the SessionFactory.
-     * 
+     *
      * @param session reference to session being disconnected and closed
      */
     private static void resetSessionFactory(Session session) {

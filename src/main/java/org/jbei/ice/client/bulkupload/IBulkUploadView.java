@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.GroupInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
@@ -20,8 +21,6 @@ public interface IBulkUploadView {
     void setSavedDraftsData(ArrayList<BulkUploadMenuItem> data, IDeleteMenuHandler handler);
 
     void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, IDeleteMenuHandler handler);
-
-    void addSavedDraftData(BulkUploadMenuItem item, IDeleteMenuHandler handler);
 
     SingleSelectionModel<BulkUploadMenuItem> getDraftMenuModel();
 
@@ -52,4 +51,10 @@ public interface IBulkUploadView {
     SingleSelectionModel<BulkUploadMenuItem> getPendingMenuModel();
 
     void setApproveHandler(ClickHandler handler);
+
+    void setGroupPermissions(ArrayList<GroupInfo> result);
+
+    void setSelectedGroupPermission(GroupInfo groupInfo);
+
+    String getPermissionSelection();
 }

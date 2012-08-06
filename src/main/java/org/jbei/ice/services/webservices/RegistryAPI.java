@@ -28,7 +28,9 @@ import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
@@ -464,7 +466,8 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, plasmid);
-            newEntry = entryController.createEntry(account, remoteEntry, true);
+            Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+            newEntry = entryController.createEntry(account, remoteEntry, publicGroup);
             log("User '" + account.getEmail() + "' created plasmid: '" + plasmid.getRecordId()
                         + "', " + plasmid.getId());
         } catch (ControllerException e) {
@@ -496,7 +499,8 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, strain);
-            newEntry = entryController.createEntry(account, remoteEntry, true);
+            Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+            newEntry = entryController.createEntry(account, remoteEntry, publicGroup);
             log("User '" + account.getEmail() + "' created strain: '" + strain.getRecordId()
                         + "', " + strain.getId());
         } catch (ControllerException e) {
@@ -527,7 +531,8 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, part);
-            newEntry = entryController.createEntry(account, remoteEntry, true);
+            Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+            newEntry = entryController.createEntry(account, remoteEntry, publicGroup);
             log("User '" + account.getEmail() + "' created part: '" + part.getRecordId() + "', "
                         + part.getId());
         } catch (ControllerException e) {

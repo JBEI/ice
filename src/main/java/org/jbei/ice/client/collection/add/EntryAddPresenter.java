@@ -1,11 +1,10 @@
 package org.jbei.ice.client.collection.add;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FocusWidget;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
@@ -23,10 +22,12 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SampleInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 
 /**
  * Presenter for adding entries
@@ -142,12 +143,8 @@ public class EntryAddPresenter {
             new IceAsyncCallback<Long>() {
 
                 @Override
-                protected void callService(AsyncCallback<Long> callback) {
-                    try {
-                        service.createEntry(AppController.sessionId, primary, callback);
-                    } catch (AuthenticationException e) {
-                        History.newItem(Page.LOGIN.getLink());
-                    }
+                protected void callService(AsyncCallback<Long> callback) throws AuthenticationException {
+                    service.createEntry(AppController.sessionId, primary, callback);
                 }
 
                 @Override
@@ -176,12 +173,8 @@ public class EntryAddPresenter {
             new IceAsyncCallback<ArrayList<Long>>() {
 
                 @Override
-                protected void callService(AsyncCallback<ArrayList<Long>> callback) {
-                    try {
-                        service.createStrainWithPlasmid(AppController.sessionId, entrySet, callback);
-                    } catch (AuthenticationException e) {
-                        History.newItem(Page.LOGIN.getLink());
-                    }
+                protected void callService(AsyncCallback<ArrayList<Long>> callback) throws AuthenticationException {
+                    service.createStrainWithPlasmid(AppController.sessionId, entrySet, callback);
                 }
 
                 @Override

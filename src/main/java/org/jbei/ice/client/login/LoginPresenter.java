@@ -16,7 +16,6 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -253,12 +252,8 @@ public class LoginPresenter extends AbstractPresenter {
         new IceAsyncCallback<Boolean>() {
 
             @Override
-            protected void callService(AsyncCallback<Boolean> callback) {
-                try {
-                    service.handleForgotPassword(email, url, callback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+            protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                service.handleForgotPassword(email, url, callback);
             }
 
             @Override

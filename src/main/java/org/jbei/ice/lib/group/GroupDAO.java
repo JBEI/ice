@@ -4,36 +4,37 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+
 /**
  * Manager to manipulate {@link org.jbei.ice.lib.models.Group} objects.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 class GroupDAO extends HibernateRepository<Group> {
 
     /**
      * Retrieve {@link org.jbei.ice.lib.models.Group} object from the database by its uuid.
-     * 
+     *
      * @param uuid
      * @return Group object.
      * @throws ManagerException
      */
     public Group get(String uuid) throws DAOException {
-        return (Group) super.getByUUID(Group.class, uuid);
+        return super.getByUUID(Group.class, uuid);
     }
 
     /**
      * Retrieve {@link Group} object from the database by its id.
-     * 
+     *
      * @param id
      * @return Group object.
      * @throws ManagerException
@@ -44,7 +45,7 @@ class GroupDAO extends HibernateRepository<Group> {
 
     /**
      * Retrieve all the {@link Group} objects in the database.
-     * 
+     *
      * @return SEt of Groups.
      * @throws ManagerException
      */
@@ -97,7 +98,7 @@ class GroupDAO extends HibernateRepository<Group> {
 
     /**
      * Update the given {@link Group} object in the database.
-     * 
+     *
      * @param group
      * @return Saved Group object.
      * @throws ManagerException
@@ -108,7 +109,7 @@ class GroupDAO extends HibernateRepository<Group> {
 
     /**
      * Delete the given {@link Group} object in the database.
-     * 
+     *
      * @param group
      * @throws ManagerException
      */
@@ -118,7 +119,7 @@ class GroupDAO extends HibernateRepository<Group> {
 
     /**
      * Save the given {@link Group} object in the database.
-     * 
+     *
      * @param group
      * @return Saved Group object.
      * @throws ManagerException

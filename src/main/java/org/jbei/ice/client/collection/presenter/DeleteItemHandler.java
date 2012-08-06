@@ -1,10 +1,8 @@
 package org.jbei.ice.client.collection.presenter;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.IceAsyncCallback;
@@ -18,8 +16,11 @@ import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.FolderDetails;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class DeleteItemHandler implements IDeleteMenuHandler {
 
@@ -80,7 +81,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                 new IceAsyncCallback<FolderDetails>() {
 
                     @Override
-                    protected void callService(AsyncCallback<FolderDetails> callback) {
+                    protected void callService(AsyncCallback<FolderDetails> callback) throws AuthenticationException {
                         try {
                             service.createUserCollection(AppController.sessionId, item.getName(), "",
                                                          folder.get(item.getId()), callback);

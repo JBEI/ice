@@ -1,8 +1,7 @@
 package org.jbei.ice.client.collection.model;
 
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
@@ -14,7 +13,9 @@ import org.jbei.ice.client.collection.event.FolderRetrieveEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.FolderDetails;
 
-import java.util.ArrayList;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class CollectionsModel {
     private final RegistryServiceAsync service;
@@ -53,7 +54,8 @@ public class CollectionsModel {
         new IceAsyncCallback<FolderDetails>() {
 
             @Override
-            protected void callService(AsyncCallback<FolderDetails> folderDetailsAsyncCallback) {
+            protected void callService(AsyncCallback<FolderDetails> folderDetailsAsyncCallback)
+                    throws AuthenticationException {
                 try {
                     service.updateFolder(AppController.sessionId, id, newFolder, folderDetailsAsyncCallback);
                 } catch (AuthenticationException e) {
@@ -73,7 +75,8 @@ public class CollectionsModel {
         new IceAsyncCallback<FolderDetails>() {
 
             @Override
-            protected void callService(AsyncCallback<FolderDetails> folderDetailsAsyncCallback) {
+            protected void callService(AsyncCallback<FolderDetails> folderDetailsAsyncCallback)
+                    throws AuthenticationException {
                 try {
                     service.createUserCollection(AppController.sessionId, collectionName, "", null,
                                                  folderDetailsAsyncCallback);
@@ -145,12 +148,13 @@ public class CollectionsModel {
     }
 
     public void addEntriesToFolder(final ArrayList<Long> destinationFolderIds, final ArrayList<Long> ids,
-                                   final FolderRetrieveEventHandler handler) {
+            final FolderRetrieveEventHandler handler) {
 
         new IceAsyncCallback<ArrayList<FolderDetails>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<FolderDetails>> folderDetailsAsyncCallback) {
+            protected void callService(AsyncCallback<ArrayList<FolderDetails>> folderDetailsAsyncCallback)
+                    throws AuthenticationException {
                 try {
                     service.addEntriesToCollection(AppController.sessionId, destinationFolderIds, ids,
                                                    folderDetailsAsyncCallback);
@@ -167,11 +171,12 @@ public class CollectionsModel {
     }
 
     public void moveEntriesToFolder(final long source, final ArrayList<Long> destinationFolderIds,
-                                    final ArrayList<Long> ids, final FolderRetrieveEventHandler handler) {
+            final ArrayList<Long> ids, final FolderRetrieveEventHandler handler) {
         new IceAsyncCallback<ArrayList<FolderDetails>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<FolderDetails>> callback) {
+            protected void callService(AsyncCallback<ArrayList<FolderDetails>> callback)
+                    throws AuthenticationException {
                 try {
                     service.moveToUserCollection(AppController.sessionId, source, destinationFolderIds, ids, callback);
                 } catch (AuthenticationException e) {
@@ -187,12 +192,12 @@ public class CollectionsModel {
     }
 
     public void removeEntriesFromFolder(final long source, final ArrayList<Long> ids,
-                                        final FolderRetrieveEventHandler handler) {
+            final FolderRetrieveEventHandler handler) {
 
         new IceAsyncCallback<FolderDetails>() {
 
             @Override
-            protected void callService(AsyncCallback<FolderDetails> callback) {
+            protected void callService(AsyncCallback<FolderDetails> callback) throws AuthenticationException {
                 try {
                     service.removeFromUserCollection(AppController.sessionId, source, ids, callback);
                 } catch (AuthenticationException e) {

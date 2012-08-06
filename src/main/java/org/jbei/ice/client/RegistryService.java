@@ -62,15 +62,11 @@ public interface RegistryService extends RemoteService {
 
     EntryInfo retrieveEntryDetails(String sid, long id) throws AuthenticationException;
 
-//    AccountInfo retrieveAccountInfoForSession(String sid) throws AuthenticationException;
-
     LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field,
             boolean asc) throws AuthenticationException;
 
     LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds,
             ColumnField sortField, boolean asc) throws AuthenticationException;
-
-//    FolderDetails retrieveFolderDetails(String sid, long folderId) throws AuthenticationException;
 
     // collections
 
@@ -113,9 +109,6 @@ public interface RegistryService extends RemoteService {
     SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId)
             throws AuthenticationException;
 
-    BulkUploadInfo updateBulkImportDraft(String sessionId, long id, ArrayList<EntryInfo> list)
-            throws AuthenticationException;
-
     SuggestOracle.Response getPermissionSuggestions(Request req);
 
     boolean addPermission(String sessionId, long entryId, PermissionInfo permission) throws AuthenticationException;
@@ -144,8 +137,6 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<AccountInfo> retrieveAllUserAccounts(String sid) throws AuthenticationException;
 
-//    HashMap<EntryType, Long> retrieveEntryCounts(String sessionId) throws AuthenticationException;
-
     boolean removeSequence(String sid, long entryId) throws AuthenticationException;
 
     ArrayList<SequenceAnalysisInfo> retrieveEntryTraceSequences(String sid, long entryId)
@@ -169,12 +160,15 @@ public interface RegistryService extends RemoteService {
     ArrayList<Long> createStrainWithPlasmid(String sid, HashSet<EntryInfo> infoSet) throws
             AuthenticationException;
 
-    BulkUploadInfo saveBulkImportDraft(String sid, String name, EntryAddType importType,
-            ArrayList<EntryInfo> entryList) throws AuthenticationException;
+    BulkUploadInfo updateBulkImportDraft(String sessionId, long draftId,
+            ArrayList<EntryInfo> list, String groupUUID) throws AuthenticationException;
 
-    boolean submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList)
-            throws AuthenticationException;
+    BulkUploadInfo saveBulkImportDraft(String sid, String name,
+            EntryAddType importType, ArrayList<EntryInfo> entryList, String groupUUID) throws AuthenticationException;
 
-    boolean approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList)
+    boolean submitBulkImport(String sid, EntryAddType importType,
+            ArrayList<EntryInfo> entryList, String groupUUID) throws AuthenticationException;
+
+    boolean approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList, String groupUUID)
             throws AuthenticationException;
 }
