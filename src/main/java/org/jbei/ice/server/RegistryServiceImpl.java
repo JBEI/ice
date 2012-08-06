@@ -1201,6 +1201,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
+            AccountController accountController = new AccountController();
+            if (!accountController.isAdministrator(account)) {
+                Logger.warn(account.getEmail() + ": attempting to retrieve pending drafts. Admin only function.");
+                return null;
+            }
+
             BulkUploadController controller = new BulkUploadController();
             Logger.info(account.getEmail() + ": retrieving drafts pending verification");
             return controller.retrievePendingImports(account);
@@ -1245,7 +1251,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         BulkUploadController controller = new BulkUploadController();
 
         try {
-            Logger.info(account.getEmail() + ": retrieving drafts pending verification");
+            Logger.info(account.getEmail() + ": retrieving bulk import with id \"" + id + "\"");
             return controller.retrieveById(account, id);
         } catch (ControllerException e) {
             Logger.error(e);

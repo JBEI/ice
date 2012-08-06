@@ -59,7 +59,7 @@ public class PermissionsSelection extends Composite {
 
     public void setSelected(GroupInfo groupInfo) {
 
-        for (int i = 0; i < selection.getItemCount(); i += 0) {
+        for (int i = 0; i < selection.getItemCount(); i += 1) {
 
             // null group implies private selection
             String uuid = "";
