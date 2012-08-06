@@ -400,8 +400,8 @@ public class EntryController {
             entry.setModificationTime(Calendar.getInstance().getTime());
             savedEntry = dao.saveOrUpdate(entry);
 
-            ApplicationController.scheduleSearchIndexRebuildJob();
-            ApplicationController.scheduleBlastIndexRebuildJob();
+//            ApplicationController.scheduleSearchIndexRebuildJob();
+//            ApplicationController.scheduleBlastIndexRebuildJob();
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

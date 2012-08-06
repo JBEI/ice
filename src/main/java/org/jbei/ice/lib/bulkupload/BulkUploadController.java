@@ -373,7 +373,7 @@ public class BulkUploadController {
             if (!exists) {
                 // entry does not exist so create new one
                 entry = InfoToModelFactory.infoToEntry(info);
-                entry = entryController.createEntry(draftOwner, entry, group);
+                entry = entryController.createEntry(draftOwner, entry, false, group);
                 contents.add(entry);
                 saveSequence(draftOwner, info.getSequenceAnalysis(), entry);
                 saveAttachments(draftOwner, info.getAttachments(), entry);
@@ -381,7 +381,7 @@ public class BulkUploadController {
                 if (type == EntryAddType.STRAIN_WITH_PLASMID) {
                     info.getInfo().setVisibility(info.getVisibility());
                     enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
-                    enclosedEntry = entryController.createEntry(draftOwner, enclosedEntry, group);
+                    enclosedEntry = entryController.createEntry(draftOwner, enclosedEntry, false, group);
 
                     String name = enclosedEntry.getOneName() == null ? "" : enclosedEntry.getOneName().getName();
 
