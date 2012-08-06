@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.bulkupload.events.BulkUploadDraftSubmitEvent;
 import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEvent;
@@ -16,14 +17,17 @@ import org.jbei.ice.client.bulkupload.model.BulkUploadModel;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.client.bulkupload.sheet.Sheet;
 import org.jbei.ice.client.event.FeedbackEvent;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.GroupInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -39,8 +43,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private final HashMap<EntryAddType, NewBulkInput> sheetCache;
     private final BulkUploadModel model;
     private NewBulkInput currentInput;
-    private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>(); // list of
-    // saveddrafts
+    private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>(); // list of saved
+    // drafts
 
     public BulkUploadPresenter(BulkUploadModel model, final IBulkUploadView display) {
         this.view = display;
@@ -68,6 +72,26 @@ public class BulkUploadPresenter extends AbstractPresenter {
                                                display.showFeedback(event.getMessage(), event.isError());
                                            }
                                        });
+
+        // retrieve groups
+        retrieveUserGroups();
+    }
+
+    public void retrieveUserGroups() {
+        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+                // TODO : when the group management system is fleshed out, this call should be to retrieve
+                // TODO : groups of users not all of them
+                model.getService().retrieveAllGroups(AppController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<GroupInfo> result) {
+                view.setGroupPermissions(result);
+            }
+        }.go(model.getEventBus());
     }
 
     private void setClickHandlers() {
@@ -135,6 +159,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     // header Panel 
                     sheetCache.put(selection, currentInput);
                 }
+
                 view.setSheet(currentInput, true, false);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
                 view.setDraftMenuVisibility(false, false);
@@ -221,7 +246,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 return;
             }
 
-            model.submitBulkImport(currentInput.getImportType(), cellData,
+            model.submitBulkImport(currentInput.getImportType(), cellData, view.getPermissionSelection(),
                                    new BulkUploadSubmitEventHandler() {
 
                                        @Override
@@ -255,7 +280,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 return;
             }
 
-            model.approvePendingBulkImport(currentInput.getId(), cellData,
+            model.approvePendingBulkImport(currentInput.getId(), cellData, view.getPermissionSelection(),
                                            new BulkUploadSubmitEventHandler() {
 
                                                @Override
@@ -294,7 +319,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
             }
 
             BulkUploadSaveHandler handler = new BulkUploadSaveHandler();
-            model.saveBulkImportDraftData(currentInput.getImportType(), name, cellData, handler);
+            String uuid = view.getPermissionSelection();
+            model.saveBulkImportDraftData(currentInput.getImportType(), name, cellData, uuid, handler);
         }
     }
 
@@ -347,7 +373,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
 
             BulkUploadUpdateHandler handler = new BulkUploadUpdateHandler(type);
-            model.updateBulkImportDraft(id, type, cellData, handler);
+            String uuid = view.getPermissionSelection();
+            model.updateBulkImportDraft(id, type, cellData, uuid, handler);
         }
     }
 
@@ -417,6 +444,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     view.setSheet(currentInput, false, isValidation);
                     view.setHeader(info.getType().getDisplay() + " Bulk Import");
                     view.setDraftMenuVisibility(false, false);
+                    view.setSelectedGroupPermission(info.getGroupInfo());
                 }
             });
         }

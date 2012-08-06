@@ -1924,4 +1924,8 @@ td.datePickerMonth {
     display: inline;
 }
 
+.bulk_upload_visibility {
+    font-size: 0.80em;
+}
+
 

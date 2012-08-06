@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.AdminPanel;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
@@ -12,7 +11,6 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.GroupInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.ListDataProvider;
 
@@ -30,12 +28,8 @@ public class GroupPresenter implements AdminPanelPresenter<GroupInfo> {
         new IceAsyncCallback<ArrayList<GroupInfo>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) {
-                try {
-                    service.retrieveAllGroups(AppController.sessionId, callback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+                service.retrieveAllGroups(AppController.sessionId, callback);
             }
 
             @Override

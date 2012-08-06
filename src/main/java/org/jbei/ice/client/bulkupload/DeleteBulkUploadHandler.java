@@ -29,7 +29,7 @@ public class DeleteBulkUploadHandler implements IDeleteMenuHandler {
         new IceAsyncCallback<BulkUploadInfo>() {
 
             @Override
-            protected void callService(AsyncCallback<BulkUploadInfo> callback) {
+            protected void callService(AsyncCallback<BulkUploadInfo> callback) throws AuthenticationException {
                 try {
                     service.deleteSavedDraft(AppController.sessionId, draftId, callback);
                 } catch (AuthenticationException e) {

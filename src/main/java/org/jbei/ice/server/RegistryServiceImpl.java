@@ -1258,14 +1258,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public BulkUploadInfo updateBulkImportDraft(String sessionId, long draftId,
-            ArrayList<EntryInfo> list) throws AuthenticationException {
+            ArrayList<EntryInfo> list, String groupUUID) throws AuthenticationException {
 
         Account account = retrieveAccountForSid(sessionId);
         BulkUploadController controller = new BulkUploadController();
 
         try {
             Logger.info(account.getEmail() + ": updating bulk upload \"" + draftId + "\"");
-            return controller.updateBulkImportDraft(account, draftId, list);
+            return controller.updateBulkImportDraft(account, draftId, list, groupUUID);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1277,7 +1277,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public BulkUploadInfo saveBulkImportDraft(String sid, String name,
-            EntryAddType importType, ArrayList<EntryInfo> entryList) throws AuthenticationException {
+            EntryAddType importType, ArrayList<EntryInfo> entryList, String groupUUID) throws AuthenticationException {
 
         try {
             Account account = retrieveAccountForSid(sid);
@@ -1288,7 +1288,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(
                     account.getEmail() + ": saving bulk import \"" + name + "\" of type " + importType + " and size "
                             + entryList.size());
-            return controller.createBulkImportDraft(account, importType, name, entryList);
+            return controller.createBulkImportDraft(account, importType, name, entryList, groupUUID);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1297,7 +1297,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean submitBulkImport(String sid, EntryAddType importType,
-            ArrayList<EntryInfo> entryList) throws AuthenticationException {
+            ArrayList<EntryInfo> entryList, String groupUUID) throws AuthenticationException {
 
         try {
             Account account = retrieveAccountForSid(sid);
@@ -1307,7 +1307,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": submitting bulk import of type "
                                 + importType.toString() + " & size " + entryList.size());
             BulkUploadController controller = new BulkUploadController();
-            return controller.submitBulkImport(account, importType, entryList);
+            return controller.submitBulkImport(account, importType, entryList, groupUUID);
 
         } catch (ControllerException ce) {
             Logger.error(ce);
@@ -1316,7 +1316,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList)
+    public boolean approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList, String groupUUID)
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
@@ -1331,7 +1331,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": approving bulk import with id \"" + id + "\"");
             BulkUploadController controller = new BulkUploadController();
-            return controller.approveBulkImport(account, id, entryList);
+            return controller.approveBulkImport(account, id, entryList, groupUUID);
 
         } catch (ControllerException ce) {
             Logger.error(ce);
@@ -1353,6 +1353,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             SampleController sampleController = new SampleController();
             StorageController storageController = new StorageController();
             ArrayList<SampleStorage> sampleMap = info.getSampleStorage();
+
+            GroupController groupController = new GroupController();
+            Group publicGroup = groupController.createOrRetrievePublicGroup(); // tODO group uuid should come from ui
 
             if (sampleMap != null) {
                 for (SampleStorage sampleStorage : sampleMap) {
@@ -1417,7 +1420,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
             }
 
-            return controller.createEntry(account, entry, true).getId();
+            return controller.createEntry(account, entry, publicGroup).getId();
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1434,6 +1437,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": creating strain with plasmid");
             EntryController controller = new EntryController();
+            GroupController groupController = new GroupController();
+            Group publicGroup = groupController.createOrRetrievePublicGroup(); // tODO group uuid should come from ui
 
             Strain strain = null;
             Plasmid plasmid = null;
@@ -1450,7 +1455,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         break;
                 }
             }
-            HashSet<Entry> results = controller.createStrainWithPlasmid(account, strain, plasmid, true);
+            HashSet<Entry> results = controller.createStrainWithPlasmid(account, strain, plasmid, publicGroup);
             ArrayList<Long> ids = new ArrayList<Long>();
 
             for (Entry result : results) {
@@ -1863,12 +1868,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                      "Thank you for sending your feedback.\n\nBest regards,\nRegistry Team");
 
         Emailer.send(JbeirSettings.getSetting("ADMIN_EMAIL"), "Registry site feedback", message);
-        if (!JbeirSettings.getSetting("ADMIN_EMAIL").equals(
-                JbeirSettings.getSetting("MODERATOR_EMAIL"))) {
-            Emailer.send(JbeirSettings.getSetting("MODERATOR_EMAIL"), "Registry site feedback",
-                         message);
-        }
-
         return true;
     }
 
@@ -1876,21 +1875,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public ArrayList<GroupInfo> retrieveAllGroups(String sessionId) throws AuthenticationException {
 
-        Account account;
-        AccountController controller = new AccountController();
         GroupController groupController = new GroupController();
-
-        try {
-            account = retrieveAccountForSid(sessionId);
-            if (!controller.isAdministrator(account)) {
-                Logger.warn(account.getEmail()
-                                    + ": attempting to retrieve admin only feature (groups)");
-                return null;
-            }
-        } catch (ControllerException ce) {
-            Logger.error(ce);
-            return null;
-        }
+        Account account = retrieveAccountForSid(sessionId);
 
         // retrieve all groups
         Logger.info(account.getEmail() + ": retrieving all groups");

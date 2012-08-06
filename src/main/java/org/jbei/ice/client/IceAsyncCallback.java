@@ -1,10 +1,12 @@
 package org.jbei.ice.client;
 
 import org.jbei.ice.client.event.FeedbackEvent;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.Utils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -56,39 +58,44 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
         timeoutTimer.schedule(TIMEOUT * 1000); // timeout is in milliseconds
 
         // call service
-        callService(new AsyncCallback<T>() {
+        try {
+            callService(new AsyncCallback<T>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log(caught.toString(), caught);
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log(caught.toString(), caught);
 
-                if (retryCount <= 0) {
+                    if (retryCount <= 0) {
+                        hideBusyIndicator();
+                        cancelTimer();
+                        IceAsyncCallback.this.onFailure(caught);
+                    } else {
+                        execute(retryCount - 1, eventBus);
+                    }
+                }
+
+                @Override
+                public void onSuccess(T result) {
                     hideBusyIndicator();
                     cancelTimer();
-                    IceAsyncCallback.this.onFailure(caught);
-                } else {
-                    execute(retryCount - 1, eventBus);
+                    if (abortFlag) {
+                        // Timeout already occurred. discard result
+                        return;
+                    }
+                    if (result == null) {
+                        eventBus.fireEvent(new FeedbackEvent(true, "Server returned invalid results!"));
+                        return;
+                    }
+                    IceAsyncCallback.this.onSuccess(result);
                 }
-            }
-
-            @Override
-            public void onSuccess(T result) {
-                hideBusyIndicator();
-                cancelTimer();
-                if (abortFlag) {
-                    // Timeout already occurred. discard result
-                    return;
-                }
-                if (result == null) {
-                    eventBus.fireEvent(new FeedbackEvent(true, "Server returned invalid results!"));
-                    return;
-                }
-                IceAsyncCallback.this.onSuccess(result);
-            }
-        });
+            });
+        } catch (AuthenticationException ae) {
+            GWT.log(ae.getMessage());
+            History.newItem(Page.LOGIN.getLink());
+        }
     }
 
-    protected abstract void callService(AsyncCallback<T> callback);
+    protected abstract void callService(AsyncCallback<T> callback) throws AuthenticationException;
 
     protected void showBusyIndicator() {
         Utils.showWaitCursor(null);

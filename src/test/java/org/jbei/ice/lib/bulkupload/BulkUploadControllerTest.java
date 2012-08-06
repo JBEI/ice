@@ -74,7 +74,7 @@ public class BulkUploadControllerTest {
             info.setPlantType(ArabidopsisSeedInfo.PlantType.OTHER);
             entryList.add(info);
         }
-        boolean success = controller.submitBulkImport(account, EntryAddType.ARABIDOPSIS, entryList);
+        boolean success = controller.submitBulkImport(account, EntryAddType.ARABIDOPSIS, entryList, "");
         Assert.assertTrue("Could not submit bulk import", success);
 
         // 1 pending
@@ -102,11 +102,12 @@ public class BulkUploadControllerTest {
         ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
 
         // create draft with no entries
-        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.PART, "Test", entryList);
+        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.PART, "Test", entryList,
+                                                                       "");
         Assert.assertNotNull(createdDraft);
 
         // update to see behavior (nothing has changed)
-        BulkUploadInfo updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
+        BulkUploadInfo updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
         Assert.assertEquals("Updated draft has a different id from existing", createdDraft.getId(),
                             updatedDraft.getId());
 
@@ -114,7 +115,7 @@ public class BulkUploadControllerTest {
         EntryInfo info = new PartInfo();
         info.setAlias("alias");
         entryList.add(info);
-        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
+        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
         Assert.assertTrue(updatedDraft.getCount() == 1);
 
         // retrieve updated
@@ -126,7 +127,7 @@ public class BulkUploadControllerTest {
         // update existing change value
         entryList = updatedDraft.getEntryList();
         added.setAlias("new alias");
-        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
+        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
         Assert.assertTrue(updatedDraft.getCount() == 1);
         Assert.assertEquals(addedId, updatedDraft.getEntryList().get(0).getId());
 
@@ -147,7 +148,7 @@ public class BulkUploadControllerTest {
         newInfo.setLongDescription("This is a long description");
         entryList = updatedDraft.getEntryList();
         entryList.add(newInfo);
-        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
+        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
         Assert.assertNotNull(updatedDraft);
 
         ArrayList<Long> allEntries = entryController.getEntryIdsByOwner(account.getEmail(), Visibility.DRAFT);
@@ -169,7 +170,7 @@ public class BulkUploadControllerTest {
 
         // submit for approval
         boolean submitted = controller.submitBulkImportDraft(account, verify.getId(), new ArrayList<EntryInfo>(
-                verify.getEntryList()));
+                verify.getEntryList()), "");
         Assert.assertTrue(submitted);
 
         entry = entryController.get(account, partId);
@@ -208,7 +209,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(systemSize >= 1);
 
         // now approve
-        Assert.assertTrue(controller.approveBulkImport(adminAccount, verify.getId(), verify.getEntryList()));
+        Assert.assertTrue(controller.approveBulkImport(adminAccount, verify.getId(), verify.getEntryList(), ""));
 
         entry = entryController.get(account, partId);
         partEntry = entryController.get(account, strainId);
@@ -253,7 +254,7 @@ public class BulkUploadControllerTest {
         }
 
         BulkUploadInfo created = controller.createBulkImportDraft(account, EntryAddType.ARABIDOPSIS, "My Test",
-                                                                  entryList);
+                                                                  entryList, "");
         Assert.assertNotNull(created);
 
         BulkUploadInfo retrieved = controller.retrieveById(account, created.getId());
@@ -291,7 +292,7 @@ public class BulkUploadControllerTest {
         BulkUploadInfo created = controller.createBulkImportDraft(account,
                                                                   EntryAddType.PLASMID,
                                                                   "My Plasmid Test",
-                                                                  entryList);
+                                                                  entryList, "");
         Assert.assertNotNull(created);
         ArrayList<BulkUploadInfo> user = controller.retrieveByUser(account, account);
         Assert.assertNotNull(user);
@@ -316,7 +317,7 @@ public class BulkUploadControllerTest {
 
         // create draft with no entries
         BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.ARABIDOPSIS, "Test",
-                                                                       entryList);
+                                                                       entryList, "");
         Assert.assertNotNull(createdDraft);
 
         // save entry with draft
@@ -329,7 +330,7 @@ public class BulkUploadControllerTest {
         info.setParents("parent");
         info.setPlantType(ArabidopsisSeedInfo.PlantType.OTHER);
         entryList.add(info);
-        BulkUploadInfo updatedBulk = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
+        BulkUploadInfo updatedBulk = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
         Assert.assertNotNull(updatedBulk);
         Assert.assertEquals(1, updatedBulk.getCount());
 
@@ -376,7 +377,8 @@ public class BulkUploadControllerTest {
         entryList.add(partInfo);
 
         // create draft with no entries
-        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.PART, "Test", entryList);
+        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.PART, "Test", entryList,
+                                                                       "");
         Assert.assertNotNull(createdDraft);
         Assert.assertEquals(entryList.size(), createdDraft.getCount());
         Assert.assertEquals(entryList.size(), createdDraft.getEntryList().size());
@@ -414,10 +416,11 @@ public class BulkUploadControllerTest {
         ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
 
         // create draft with no entries
-        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.PART, "Test", entryList);
+        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.PART, "Test", entryList,
+                                                                       "");
 
         // update to see behavior (nothing has changed)
-        BulkUploadInfo updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
+        BulkUploadInfo updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
         Assert.assertEquals("Updated draft has a different id from existing", createdDraft.getId(),
                             updatedDraft.getId());
 
@@ -425,7 +428,7 @@ public class BulkUploadControllerTest {
         EntryInfo info = new PartInfo();
         info.setAlias("alias");
         entryList.add(info);
-        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
+        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
         Assert.assertTrue(updatedDraft.getCount() == 1);
         Assert.assertEquals(info.getAlias(), updatedDraft.getEntryList().get(0).getAlias());
 
@@ -439,7 +442,7 @@ public class BulkUploadControllerTest {
         entryList = updatedDraft.getEntryList();
         added.setAlias("new alias");
         added.setFundingSource("no funds");
-        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
+        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
         Assert.assertEquals(1, updatedDraft.getCount());
         Assert.assertEquals(addedId, updatedDraft.getEntryList().get(0).getId());
 
@@ -461,7 +464,7 @@ public class BulkUploadControllerTest {
         newInfo.setLongDescription("This is a long description");
         entryList = updatedDraft.getEntryList();
         entryList.add(newInfo);
-        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
+        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
         Assert.assertNotNull(updatedDraft);
     }
 
@@ -501,7 +504,7 @@ public class BulkUploadControllerTest {
         BulkUploadInfo createdDraft = controller.createBulkImportDraft(account,
                                                                        EntryAddType.STRAIN_WITH_PLASMID,
                                                                        "Test",
-                                                                       entryList);
+                                                                       entryList, "");
         Assert.assertNotNull(createdDraft);
         strainInfo = (StrainInfo) createdDraft.getEntryList().get(0);
         plasmidInfo = (PlasmidInfo) strainInfo.getInfo();
@@ -527,7 +530,8 @@ public class BulkUploadControllerTest {
 
         // submit bulk import
         Assert.assertTrue("failed to submit bulk import draft",
-                          controller.submitBulkImportDraft(account, createdDraft.getId(), createdDraft.getEntryList()));
+                          controller.submitBulkImportDraft(account, createdDraft.getId(), createdDraft.getEntryList(),
+                                                           ""));
 
         // check entry visibility is pending
         EntryController entryController = new EntryController();
@@ -566,7 +570,7 @@ public class BulkUploadControllerTest {
 
         // submit bulk import
         Assert.assertTrue("failed to submit bulk import draft",
-                          controller.submitBulkImport(account, EntryAddType.PART, entryList));
+                          controller.submitBulkImport(account, EntryAddType.PART, entryList, ""));
 
         // check entry visibility is pending
         EntryController entryController = new EntryController();
@@ -601,7 +605,8 @@ public class BulkUploadControllerTest {
         EntryInfo info = new PartInfo();
         info.setAlias("alias");
         entryList.add(info);
-        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.PART, "Test", entryList);
+        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.PART, "Test", entryList,
+                                                                       "");
         Assert.assertNotNull(createdDraft);
         Assert.assertEquals(1, createdDraft.getCount());
         Assert.assertEquals(createdDraft.getCount(), createdDraft.getEntryList().size());
@@ -613,7 +618,8 @@ public class BulkUploadControllerTest {
 
         // submit bulk import
         Assert.assertTrue("failed to submit bulk import draft",
-                          controller.submitBulkImportDraft(account, createdDraft.getId(), createdDraft.getEntryList()));
+                          controller.submitBulkImportDraft(account, createdDraft.getId(), createdDraft.getEntryList(),
+                                                           ""));
 
         // check entry visibility is pending
         EntryController entryController = new EntryController();
@@ -624,14 +630,14 @@ public class BulkUploadControllerTest {
 
         // try to approve bulk import with regular account
         try {
-            controller.approveBulkImport(account, createdDraft.getId(), createdDraft.getEntryList());
+            controller.approveBulkImport(account, createdDraft.getId(), createdDraft.getEntryList(), "");
         } catch (PermissionException pe) {
             // expected
         }
 
         boolean approved = controller.approveBulkImport(adminAccount,
                                                         createdDraft.getId(),
-                                                        createdDraft.getEntryList());
+                                                        createdDraft.getEntryList(), "");
         Assert.assertTrue("Failed to approved bulk upload", approved);
 
         // verify that record does not exist anymore
@@ -673,7 +679,7 @@ public class BulkUploadControllerTest {
 
         // create draft with no entries
         BulkUploadInfo createdDraft = controller.createBulkImportDraft(
-                account, EntryAddType.STRAIN_WITH_PLASMID, "Test", entryList);
+                account, EntryAddType.STRAIN_WITH_PLASMID, "Test", entryList, "");
         Assert.assertNotNull(createdDraft);
     }
 }

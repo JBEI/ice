@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.AdminPanel;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
@@ -12,7 +11,6 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.ListDataProvider;
 
@@ -30,12 +28,8 @@ public class UserPresenter implements AdminPanelPresenter<AccountInfo> {
         new IceAsyncCallback<ArrayList<AccountInfo>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<AccountInfo>> callback) {
-                try {
-                    service.retrieveAllUserAccounts(AppController.sessionId, callback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+            protected void callService(AsyncCallback<ArrayList<AccountInfo>> callback) throws AuthenticationException {
+                service.retrieveAllUserAccounts(AppController.sessionId, callback);
             }
 
             @Override

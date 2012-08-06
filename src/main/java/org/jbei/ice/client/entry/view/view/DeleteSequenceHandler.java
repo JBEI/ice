@@ -1,16 +1,17 @@
 package org.jbei.ice.client.entry.view.view;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
+
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * Handler for deleting sequence
@@ -39,7 +40,7 @@ public class DeleteSequenceHandler implements ClickHandler {
         new IceAsyncCallback<Boolean>() {
 
             @Override
-            protected void callService(AsyncCallback<Boolean> serviceCallback) {
+            protected void callService(AsyncCallback<Boolean> serviceCallback) throws AuthenticationException {
                 try {
                     service.removeSequence(AppController.sessionId, entryId, serviceCallback);
                 } catch (AuthenticationException e) {

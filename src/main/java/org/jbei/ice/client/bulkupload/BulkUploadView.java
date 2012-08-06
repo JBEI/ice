@@ -3,6 +3,7 @@ package org.jbei.ice.client.bulkupload;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
+import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
 import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkupload.widget.SavedDraftsMenu;
 import org.jbei.ice.client.bulkupload.widget.SelectTypeMenu;
@@ -11,6 +12,7 @@ import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.GroupInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
@@ -38,6 +40,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private Button resetButton;
     private SaveDraftInput draftInput;
     private UpdateDraftInput updateDraftInput;
+    private PermissionsSelection selection;
 
     private HorizontalPanel headerPanel;
     private NewBulkInput sheet;
@@ -63,6 +66,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         approveButton.setStyleName("saved_draft_button");
         draftInput = new SaveDraftInput();
         updateDraftInput = new UpdateDraftInput();
+
+        selection = new PermissionsSelection();
     }
 
     @Override
@@ -97,6 +102,16 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     @Override
     public void setApproveHandler(ClickHandler handler) {
         this.approveButton.addClickHandler(handler);
+    }
+
+    @Override
+    public void setGroupPermissions(ArrayList<GroupInfo> result) {
+        selection.setGroups(result);
+    }
+
+    @Override
+    public void setSelectedGroupPermission(GroupInfo groupInfo) {
+        selection.setSelected(groupInfo);
     }
 
     @Override
@@ -196,8 +211,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         int index = mainContent.getCellCount(0);
         mainContent.getFlexCellFormatter().setColSpan(1, 0, index);
 
-        HTMLPanel bulkImportHeader = new HTMLPanel("<span id=\"bulk_import_header_title\"></span>");
+        HTMLPanel bulkImportHeader = new HTMLPanel(
+                "<span id=\"bulk_import_header_title\"></span><span style=\"float:right\" " +
+                        "id=\"bulk_import_permission_selection\"></span>");
         bulkImportHeader.add(contentHeader, "bulk_import_header_title");
+        bulkImportHeader.add(selection, "bulk_import_permission_selection");
 
         mainContent.setWidget(2, 0, bulkImportHeader);
         mainContent.getCellFormatter().setStyleName(2, 0, "bulk_import_header");
@@ -326,5 +344,10 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     @Override
     public boolean getMenuVisibility() {
         return menuPanel.isVisible();
+    }
+
+    @Override
+    public String getPermissionSelection() {
+        return selection.getSelectedGroupUUID();
     }
 }
