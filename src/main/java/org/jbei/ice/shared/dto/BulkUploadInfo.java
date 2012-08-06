@@ -76,7 +76,7 @@ public class BulkUploadInfo implements IsSerializable {
     }
 
     public void setGroupInfo(GroupInfo info) {
-        this.group = group;
+        this.group = info;
     }
 
     public Date getLastUpdate() {

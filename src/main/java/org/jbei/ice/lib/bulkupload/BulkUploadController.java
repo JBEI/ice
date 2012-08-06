@@ -151,26 +151,10 @@ public class BulkUploadController {
                                                   + " to view bulk import for " + draft.getAccount().getEmail());
         }
 
-        EntryAddType type = EntryAddType.stringToType(draft.getImportType());
-
         // convert bulk import db object to data transfer object
-        BulkUploadInfo draftInfo = new BulkUploadInfo();
-        draftInfo.setCount(draft.getContents().size());
-        draftInfo.setCreated(draft.getCreationTime());
-        draftInfo.setLastUpdate(draft.getLastUpdateTime());
-        draftInfo.setId(draft.getId());
-        draftInfo.setType(EntryAddType.stringToType(draft.getImportType()));
-        draftInfo.setName(draft.getName());
+        BulkUploadInfo draftInfo = BulkUploadUtil.modelToInfo(draft);
 
-        // convert account db object to info object
-        AccountInfo accountInfo = new AccountInfo();
-        Account draftAccount = draft.getAccount();
-        accountInfo.setEmail(draftAccount.getEmail());
-        accountInfo.setFirstName(draftAccount.getFirstName());
-        accountInfo.setLastName(draftAccount.getLastName());
-
-        // set draft account
-        draftInfo.setAccount(accountInfo);
+        EntryAddType type = EntryAddType.stringToType(draft.getImportType());
 
         // retrieve the entries associated with the bulk import
         for (Entry entry : draft.getContents()) {
