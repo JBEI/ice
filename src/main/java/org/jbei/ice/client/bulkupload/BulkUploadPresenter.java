@@ -355,7 +355,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                                        + " Bulk Import");
                 // check if menu panel is visible
                 if (view.getMenuVisibility() == false)
-                    view.setDraftMenuVisibility(true, false);
+                    view.setDraftMenuVisibility(true, true);
             }
         }
     }

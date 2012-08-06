@@ -151,9 +151,9 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                                 + "value for those fields. However, you may save incomplete forms as a named draft "
                                 + "and continue working on it at a later time. "
                                 + "Saved drafts will not be submitted and are only visible to you.</p>"
-                                + "<p>After submitting, an administrator must approve your "
-                                + "submission before it will show up in the search listings. Contact them if you are "
-                                + "in a " + "hurry.</p></div>");
+                                + "<p>After submitting a saved draft or bulk upload, an administrator must approve your"
+                                + " submission before it will show up in the search listings. Contact them if you are "
+                                + "in a hurry.</p></div>");
         return mainContent;
     }
 
@@ -288,13 +288,13 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         draftsMenu.updateMenuItem(item);
     }
 
-    @Override
-    public void addSavedDraftData(BulkUploadMenuItem item, IDeleteMenuHandler handler) {
-        draftsMenu.addMenuItem(item, handler);
-        toggle.setVisible(true);
-        toggle.setDown(true);
-        headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_CENTER);
-    }
+//    @Override
+//    public void addSavedDraftData(BulkUploadMenuItem item, IDeleteMenuHandler handler) {
+//        draftsMenu.addMenuItem(item, handler);
+//        toggle.setVisible(true);
+//        toggle.setDown(true);
+//        headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_CENTER);
+//    }
 
     @Override
     public void setDraftMenuVisibility(boolean visible, boolean isToggleClick) {

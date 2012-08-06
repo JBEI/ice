@@ -22,8 +22,6 @@ public interface IBulkUploadView {
 
     void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, IDeleteMenuHandler handler);
 
-    void addSavedDraftData(BulkUploadMenuItem item, IDeleteMenuHandler handler);
-
     SingleSelectionModel<BulkUploadMenuItem> getDraftMenuModel();
 
     SingleSelectionModel<EntryAddType> getImportCreateModel();
