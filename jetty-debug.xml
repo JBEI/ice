@@ -6,50 +6,51 @@
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.jetty.Server">
 
-	<!-- =========================================================== -->
-	<!-- Server Thread Pool                                          -->
-	<!-- =========================================================== -->
-	<Set name="ThreadPool">
-		<New class="org.mortbay.thread.BoundedThreadPool">
-			<Set name="minThreads">10</Set>
-			<Set name="maxThreads">200</Set>
-		</New>
-	</Set>
+    <!-- =========================================================== -->
+    <!-- Server Thread Pool                                          -->
+    <!-- =========================================================== -->
+    <Set name="ThreadPool">
+        <New class="org.mortbay.thread.QueuedThreadPool">
+            <Set name="minThreads">10</Set>
+            <Set name="maxThreads">200</Set>
+        </New>
+    </Set>
 
-	<!-- =========================================================== -->
-	<!-- Set connectors                                              -->
-	<!-- =========================================================== -->
-	<Set name="connectors">
-		<Array type="org.mortbay.jetty.Connector">
-			<Item>
-				<New class="org.mortbay.jetty.nio.SelectChannelConnector">
-					<Set name="host">localhost</Set>
-					<Set name="port">8080</Set>
-					<Set name="maxIdleTime">30000</Set>
-					<Set name="Acceptors">10</Set>
-					<Set name="confidentialPort">8443</Set>
-				</New>
-			</Item>
-			<Item>
-				<New class="org.mortbay.jetty.security.SslSocketConnector">
-			        <Set name="Port">8443</Set>
-			        <Set name="maxIdleTime">30000</Set>
-			        <Set name="keystore"><SystemProperty name="jetty.home" default="." />/.keystore</Set>
-			        <Set name="password">changeit</Set>
-			        <Set name="keyPassword">changeit</Set>
-      </New>
+    <!-- =========================================================== -->
+    <!-- Set connectors                                              -->
+    <!-- =========================================================== -->
+    <Set name="connectors">
+        <Array type="org.mortbay.jetty.Connector">
+            <Item>
+                <New class="org.mortbay.jetty.nio.SelectChannelConnector">
+                    <Set name="host">localhost</Set>
+                    <Set name="port">8080</Set>
+                    <Set name="maxIdleTime">30000</Set>
+                    <Set name="Acceptors">10</Set>
+                    <Set name="confidentialPort">8443</Set>
+                </New>
+            </Item>
+            <Item>
+                <New class="org.mortbay.jetty.security.SslSocketConnector">
+                    <Set name="Port">8443</Set>
+                    <Set name="maxIdleTime">30000</Set>
+                    <Set name="keystore"><SystemProperty name="jetty.home" default="."/>/.keystore
+                    </Set>
+                    <Set name="password">changeit</Set>
+                    <Set name="keyPassword">changeit</Set>
+                </New>
 
-			</Item>
-		</Array>
-	</Set>
+            </Item>
+        </Array>
+    </Set>
 
-	<!-- =========================================================== -->
-	<!-- Set handlers                                                -->
-	<!-- =========================================================== -->
+    <!-- =========================================================== -->
+    <!-- Set handlers                                                -->
+    <!-- =========================================================== -->
 
-	<!-- =========================================================== -->
-	<!-- extra options                                               -->
-	<!-- =========================================================== -->
-	<Set name="stopAtShutdown">true</Set>
+    <!-- =========================================================== -->
+    <!-- extra options                                               -->
+    <!-- =========================================================== -->
+    <Set name="stopAtShutdown">true</Set>
 
 </Configure>
