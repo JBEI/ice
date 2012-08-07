@@ -1,10 +1,9 @@
 package org.jbei.ice.lib.entry.attachment;
 
+import javax.persistence.*;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.models.interfaces.IAttachmentValueObject;
-
-import javax.persistence.*;
 
 /**
  * Store information about attachments.
@@ -16,7 +15,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "attachments")
 @SequenceGenerator(name = "sequence", sequenceName = "attachments_id_seq", allocationSize = 1)
-public class Attachment implements IAttachmentValueObject, IModel {
+public class Attachment implements IModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -60,52 +59,42 @@ public class Attachment implements IAttachmentValueObject, IModel {
         this.entry = entry;
     }
 
-    @Override
     public long getId() {
         return id;
     }
 
-    @Override
     public void setId(long id) {
         this.id = id;
     }
 
-    @Override
     public void setDescription(String description) {
         this.description = description;
     }
 
-    @Override
     public String getDescription() {
         return description;
     }
 
-    @Override
     public String getFileName() {
         return fileName;
     }
 
-    @Override
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
-    @Override
     public String getFileId() {
         return fileId;
     }
 
-    @Override
     public void setFileId(String fileId) {
         this.fileId = fileId;
     }
 
-    @Override
     public Entry getEntry() {
         return entry;
     }
 
-    @Override
     public void setEntry(Entry entry) {
         this.entry = entry;
     }

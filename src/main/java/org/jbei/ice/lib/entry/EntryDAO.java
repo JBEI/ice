@@ -80,6 +80,10 @@ class EntryDAO extends HibernateRepository<Entry> {
         return super.get(Entry.class, id);
     }
 
+    public Entry save(Entry entry) throws DAOException {
+        return super.save(entry);
+    }
+
     /**
      * Retrieve an {@link Entry} object in the database by recordId field.
      *

@@ -41,7 +41,7 @@ public class EntryDAOTest {
     public void testGet() throws Exception {
         Entry newEntry = new Strain();
         Account account = Mockito.mock(Account.class);
-        newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
+//        newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
         newEntry = dao.saveOrUpdate(newEntry);
         long savedID = newEntry.getId();
 
@@ -63,7 +63,7 @@ public class EntryDAOTest {
     public void testGetByName() throws Exception {
         Entry newEntry = new Strain();
         Account account = Mockito.mock(Account.class);
-        newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
+//        newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
 
         // create random number of fake names
         Set<Name> fakeNames = new HashSet<Name>();
@@ -180,7 +180,7 @@ public class EntryDAOTest {
     public void testDelete() throws Exception {
         Entry newEntry = new Strain();
         Account account = Mockito.mock(Account.class);
-        newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
+//        newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
         newEntry = dao.saveOrUpdate(newEntry);
         long savedID = newEntry.getId();
 
@@ -199,7 +199,7 @@ public class EntryDAOTest {
     public void testSave() throws Exception {
         Entry newEntry = new Strain();
         Account account = Mockito.mock(Account.class);
-        newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
+//        newEntry = EntryFactory.createEntry(account, "JBEI-XOA", newEntry);
         Entry savedEntry = dao.saveOrUpdate(newEntry);
         Assert.assertNotNull(savedEntry);
         Assert.assertFalse(savedEntry.getId() <= 0);

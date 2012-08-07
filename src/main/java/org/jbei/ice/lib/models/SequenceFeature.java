@@ -2,44 +2,26 @@ package org.jbei.ice.lib.models;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.interfaces.ISequenceFeatureValueObject;
+
+import org.hibernate.annotations.Cascade;
 
 /**
  * Stores the sequence annotation information, and associates {@link Feature} objects to a
  * {@link Sequence} object.
- * <p>
+ * <p/>
  * SequenceFeature represents is a many-to-many mapping. In addition, this class has fields to store
  * sequence specific annotation information.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 @Entity
 @Table(name = "sequence_feature")
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_id_seq", allocationSize = 1)
-public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
+public class SequenceFeature implements IModel {
 
     public static final String DESCRIPTION = "description";
 
@@ -95,11 +77,12 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @Enumerated(EnumType.STRING)
     private AnnotationType annotationType;
 
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "sequence_feature_id")
     @OrderBy("id")
-    private final Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new LinkedHashSet<SequenceFeatureAttribute>();
+    private final Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new
+            LinkedHashSet<SequenceFeatureAttribute>();
 
     public SequenceFeature() {
         super();
@@ -118,45 +101,38 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     /**
      * Annotation type for "parts".
-     * <p>
+     * <p/>
      * Parts can have a PREFIX, a SUFFIX, a SCAR features. The INNER and SUBINNER features indicate
      * part sequence excluding the prefix and suffix.
-     * 
+     *
      * @author Timothy Ham
-     * 
      */
     public enum AnnotationType {
         PREFIX, SUFFIX, SCAR, INNER, SUBINNER;
     }
 
-    @Override
     public void setId(long id) {
         this.id = id;
     }
 
-    @Override
     @XmlTransient
     public long getId() {
         return id;
     }
 
-    @Override
     @XmlTransient
     public Sequence getSequence() {
         return sequence;
     }
 
-    @Override
     public void setSequence(Sequence sequence) {
         this.sequence = sequence;
     }
 
-    @Override
     public Feature getFeature() {
         return feature;
     }
 
-    @Override
     public void setFeature(Feature feature) {
         this.feature = feature;
     }
@@ -213,7 +189,6 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.end = end;
     }
 
-    @Override
     public int getStrand() {
         return strand;
     }
@@ -221,39 +196,16 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     /**
      * +1 for forward, -1 for reverse.
      */
-    @Override
     public void setStrand(int strand) {
         this.strand = strand;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     * 
-     * @return Description.
-     */
-    @Deprecated
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     * 
-     * @param description
-     */
-    @Deprecated
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getGenbankType() {

@@ -3,6 +3,7 @@ package org.jbei.ice.lib.entry;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.GroupController;
@@ -23,6 +25,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.EntryViewFactory;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -99,33 +102,46 @@ public class EntryController {
     /**
      * Create an entry in the database.
      * <p/>
-     * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
+     * Generates a new Part Number, the record id (UUID), version id, and timestamps.
      * Optionally set the record globally visible or schedule an index rebuild.
      *
      * @param account              account of user creating entry
      * @param entry                entry record being created
      * @param scheduleIndexRebuild Set true to schedule search index rebuild.
+     * @param readGroup            group that will have read privileges.set to null if private entry
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
     public Entry createEntry(Account account, Entry entry, boolean scheduleIndexRebuild, Group readGroup)
             throws ControllerException {
-        Entry createdEntry;
 
+        PartNumber partNumber = new PartNumber();
         String nextPart = getNextPartNumber();
-        createdEntry = EntryFactory.createEntry(account, nextPart, entry);
+        partNumber.setPartNumber(nextPart);
+        Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
+        partNumbers.add(partNumber);
+        entry.getPartNumbers().add(partNumber);
+
+        partNumber.setEntry(entry);
+
+        entry.setRecordId(Utils.generateUUID());
+        entry.setVersionId(entry.getRecordId());
+        entry.setCreationTime(Calendar.getInstance().getTime());
+        entry.setModificationTime(entry.getCreationTime());
+        entry.setOwner(account.getFullName());
+        entry.setOwnerEmail(account.getEmail());
 
         try {
-            dao.saveOrUpdate(entry);
+            dao.save(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
         if (readGroup != null) {
             try {
-                permissionsController.addReadGroup(account, createdEntry, readGroup);
+                permissionsController.addReadGroup(account, entry, readGroup);
             } catch (PermissionException pe) {
-                Logger.error("Could not make entry " + createdEntry.getId() + " public ", pe);
+                Logger.error("Could add group permissions to entry \"" + entry.getId() + "\"", pe);
             }
         }
 
@@ -134,7 +150,7 @@ public class EntryController {
             ApplicationController.scheduleSearchIndexRebuildJob();
         }
 
-        return createdEntry;
+        return entry;
     }
 
     /**
@@ -592,13 +608,5 @@ public class EntryController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-    }
-
-    public void setDAO(EntryDAO dao) {
-        this.dao = dao;
-    }
-
-    public void setPermissionsController(PermissionsController permissionsController) {
-        this.permissionsController = permissionsController;
     }
 }

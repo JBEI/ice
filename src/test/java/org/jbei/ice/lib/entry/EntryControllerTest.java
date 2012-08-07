@@ -4,10 +4,14 @@ import java.util.ArrayList;
 
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.PartNumber;
+import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.server.dao.hibernate.HibernateHelper;
+import org.jbei.ice.shared.dto.Visibility;
 
 import junit.framework.Assert;
 import org.junit.Before;
@@ -42,24 +46,71 @@ public class EntryControllerTest {
         ArrayList<Long> list = controller.getEntryIdsByOwner(email);
         Assert.assertNotNull(list);
         Assert.assertEquals(1, list.size());
-        Assert.assertEquals(entry.getId(), list.get(0).intValue());
 
-        // check permission
+        long id = list.get(0);
+        Assert.assertEquals(entry.getId(), id);
+        Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
     }
 
     @Test
     public void testGet() throws Exception {
 
+        String email = "testGet@TESTER.org";
+        AccountController accountController = new AccountController();
+        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
+        Assert.assertNotNull(pass);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
+
+        Entry plasmid = new Plasmid();
+        plasmid = controller.createEntry(account, plasmid, new GroupController().createOrRetrievePublicGroup());
+        Entry ret = controller.get(account, plasmid.getId());
+        Assert.assertNotNull(ret);
     }
 
     @Test
     public void testGetByRecordId() throws Exception {
 
+        String email = "testGetByRecordId@TESTER.org";
+        AccountController accountController = new AccountController();
+        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
+        Assert.assertNotNull(pass);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
+
+        ArabidopsisSeed seed = new ArabidopsisSeed();
+        seed.setEcotype("ecotype");
+        seed.setGeneration(ArabidopsisSeed.Generation.M0);
+        seed.setParents("parents");
+        seed.setPlantType(ArabidopsisSeed.PlantType.OVER_EXPRESSION);
+        seed.setHomozygosity("homozygo");
+        controller.createEntry(account, seed, null);
+        ArabidopsisSeed ret = (ArabidopsisSeed) controller.getByRecordId(account, seed.getRecordId());
+        Assert.assertNotNull(ret);
+
+        Assert.assertEquals("ecotype", ret.getEcotype());
+        Assert.assertEquals(ArabidopsisSeed.Generation.M0, ret.getGeneration());
+        Assert.assertEquals("parents", ret.getParents());
+        Assert.assertEquals(ArabidopsisSeed.PlantType.OVER_EXPRESSION, ret.getPlantType());
+        Assert.assertEquals("homozygo", ret.getHomozygosity());
     }
 
     @Test
     public void testGetByPartNumber() throws Exception {
+        String email = "testGetByPartNumber@TESTER.org";
+        AccountController accountController = new AccountController();
+        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
+        Assert.assertNotNull(pass);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
 
+        Strain strain = new Strain();
+        Assert.assertNotNull(controller.createEntry(account, strain, false, null));
+        PartNumber number = strain.getOnePartNumber();
+        Assert.assertNotNull(number);
+
+        Strain ret = (Strain) controller.getByPartNumber(account, number.getPartNumber());
+        Assert.assertNotNull(ret);
     }
 
     @Test

@@ -1,5 +1,8 @@
 package org.jbei.ice.lib.permissions;
 
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -10,18 +13,23 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
-import java.util.List;
-import java.util.Set;
-
 public class PermissionsController {
 
     private final AccountController accountController;
     private final GroupController groupController;
+    private final ReadGroupDAO readGroupDAO;
+    private final WriteGroupDAO writeGroupDAO;
+    private final ReadUserDAO readUserDAO;
+    private final WriteUserDAO writeUserDAO;
     private final PermissionDAO dao;
 
     public PermissionsController() {
         accountController = new AccountController();
         groupController = new GroupController();
+        readGroupDAO = new ReadGroupDAO();
+        writeGroupDAO = new WriteGroupDAO();
+        readUserDAO = new ReadUserDAO();
+        writeUserDAO = new WriteUserDAO();
         dao = new PermissionDAO();
     }
 
@@ -67,9 +75,8 @@ public class PermissionsController {
         } catch (PermissionException pe) {
             Logger.error(pe);
             throw new ControllerException("User " + account.getEmail()
-                                                  + " does not have permissions to modify entry permissions for " +
-                                                  entry
-                                                          .getId());
+                                                  + " does not have permissions to modify entry permissions for "
+                                                  + entry.getId());
         }
     }
 
@@ -120,9 +127,8 @@ public class PermissionsController {
         } catch (PermissionException pe) {
             Logger.error(pe);
             throw new ControllerException("User " + account.getEmail()
-                                                  + " does not have permissions to modify entry permissions for " +
-                                                  entry
-                                                          .getId());
+                                                  + " does not have permissions to modify entry permissions for "
+                                                  + entry.getId());
         }
     }
 
@@ -141,7 +147,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                dao.setReadGroup(entry, groups);
+                readGroupDAO.setReadGroup(entry, groups);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -165,7 +171,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                dao.setWriteGroup(entry, groups);
+                writeGroupDAO.setWriteGroup(entry, groups);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -189,7 +195,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                dao.setReadUser(entry, accounts);
+                readUserDAO.setReadUser(entry, accounts);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -202,7 +208,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(requestingAccount, entry)) {
             try {
-                dao.addReadUser(entry, account);
+                readUserDAO.addReadUser(entry, account);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -216,7 +222,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(requestingAccount, entry)) {
             try {
-                dao.removeReadUser(entry, account);
+                readUserDAO.removeReadUser(entry, account);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -230,7 +236,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                dao.addReadGroup(entry, readGroup);
+                readGroupDAO.addReadGroup(entry, readGroup);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -243,7 +249,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(requestingAccount, entry)) {
             try {
-                dao.removeReadGroup(entry, readGroup);
+                readGroupDAO.removeReadGroup(entry, readGroup);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -256,7 +262,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(requestingAccount, entry)) {
             try {
-                dao.addWriteUser(entry, account);
+                writeUserDAO.addWriteUser(entry, account);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -269,7 +275,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(requestingAccount, entry)) {
             try {
-                dao.removeWriteUser(entry, account);
+                writeUserDAO.removeWriteUser(entry, account);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -282,7 +288,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                dao.removeWriteGroup(entry, writeGroup);
+                writeGroupDAO.removeWriteGroup(entry, writeGroup);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -295,7 +301,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                dao.addWriteGroup(entry, writeGroup);
+                writeGroupDAO.addWriteGroup(entry, writeGroup);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -319,7 +325,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                dao.setWriteUser(entry, accounts);
+                writeUserDAO.setWriteUser(entry, accounts);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -387,108 +393,12 @@ public class PermissionsController {
         return (controller.getSystemAccount().equals(account));
     }
 
-    /**
-     * Check if the {@link Account} associated with the given sessionKey has read permission to the
-     * given {@link Entry} by recordId.
-     *
-     * @param recordId   recordId of the Entry.
-     * @param sessionKey session key.
-     * @return True if the given session account has read permission to the specified entry.
-     */
-//    public boolean hasReadPermission(String recordId, String sessionKey) throws ControllerException {
-//        boolean result = false;
-//
-//        Account account = null;
-//        AccountController controller = new AccountController();
-//
-//        account = controller.getAccountByAuthToken(sessionKey);
-//
-//        if (account != null) {
-//            result = hasReadPermission(recordId, account)
-//                    || groupHasReadPermission(recordId, account);
-//        }
-//
-//        return result;
-//    }
-
-    /**
-     * Check if the {@link Account} has read permission to the specified {@link Entry} by entryId.
-     *
-     * @param recordId recordId of the Entry.
-     * @param account  Account
-     * @return True if the given Account has read permission to the specified Entry.
-     */
-//    public boolean userHasReadPermission(String recordId, Account account) throws ControllerException {
-//        boolean result = false;
-//        AccountController controller = new AccountController();
-//
-//        if (recordId != null && !recordId.isEmpty() && account != null) {
-//            if (controller.isAdministrator(account)) {
-//                result = true;
-//            } else {
-//                result = groupHasReadPermission(recordId, account)
-//                        || userHasReadPermission(recordId, account);
-//            }
-//        }
-//
-//        return result;
-//    }
-
-    /**
-     * Check if the {@link Account} has read permission to the specified {@link Entry}.
-     *
-     * @param entryId id of the specified Entry.
-     * @param account Account
-     * @return True if given Account has read permission to the specified Entry.
-     */
-//    public boolean hasReadPermission(long entryId, Account account) {
-//        boolean result = false;
-//        AccountController controller = new AccountController();
-//
-//        if (entryId > 0 && account != null) {
-//            try {
-//                if (controller.isAdministrator(account)) {
-//                    result = true;
-//                } else {
-//                    result = groupHasReadPermission(entryId, account)
-//                            || userHasReadPermission(entryId, account);
-//                }
-//            } catch (ControllerException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        return result;
-//    }
-
-    /**
-     * Checks if the current {@link Account} logged in has read permission to the given
-     * {@link Entry}.
-     *
-     * @param entry Entry to be queried.
-     * @return True if the current user has read permission.
-     */
-
-//    public boolean hasReadPermission(Entry entry, Account account) throws ControllerException {
-//        boolean result = false;
-//        if (entry != null && account != null) {
-//            AccountController controller = new AccountController();
-//
-//            if (controller.isAdministrator(account)) {
-//                result = true;
-//            } else {
-//                result = userHasReadPermission(entry, account)
-//                        || groupHasReadPermission(entry, account);
-//            }
-//        }
-//        return result;
-//    }
     public Set<Account> getReadUser(Account account, Entry entry) throws ControllerException, PermissionException {
         try {
             if (!hasReadPermission(account, entry))
                 throw new PermissionException(account.getEmail() + " does not have read permission for entry " +
                                                       entry.getRecordId());
-            return dao.getReadUser(entry);
+            return readUserDAO.getReadUser(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -499,7 +409,7 @@ public class PermissionsController {
             if (!hasReadPermission(account, entry))
                 throw new PermissionException(account.getEmail() + " does not have read permission for entry " +
                                                       entry.getRecordId());
-            return dao.getWriteUser(entry);
+            return writeUserDAO.getWriteUser(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -510,7 +420,7 @@ public class PermissionsController {
             if (!hasReadPermission(account, entry))
                 throw new PermissionException(account.getEmail() + " does not have read permission for entry " +
                                                       entry.getRecordId());
-            return dao.getReadGroup(entry);
+            return readGroupDAO.getReadGroup(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -521,7 +431,7 @@ public class PermissionsController {
             if (!hasReadPermission(account, entry))
                 throw new PermissionException(account.getEmail() + " does not have read permission for entry " +
                                                       entry.getRecordId());
-            return dao.getWriteGroup(entry);
+            return writeGroupDAO.getWriteGroup(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

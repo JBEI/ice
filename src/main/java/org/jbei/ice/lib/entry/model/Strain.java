@@ -1,13 +1,11 @@
 package org.jbei.ice.lib.entry.model;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.interfaces.IStrainValueObject;
-import org.jbei.ice.shared.dto.EntryType;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+
+import org.jbei.ice.shared.dto.EntryType;
 
 /**
  * Store Strain specific fields.
@@ -23,7 +21,7 @@ import javax.persistence.Table;
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "strains")
-public class Strain extends Entry implements IStrainValueObject, IModel {
+public class Strain extends Entry {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,34 +38,27 @@ public class Strain extends Entry implements IStrainValueObject, IModel {
         setRecordType(EntryType.STRAIN.getName());
     }
 
-    @Override
     public String getHost() {
         return host;
     }
 
-    @Override
     public void setHost(String host) {
         this.host = host;
     }
 
-    @Override
     public String getGenotypePhenotype() {
         return genotypePhenotype;
     }
 
-    @Override
     public void setGenotypePhenotype(String genotypePhenotype) {
         this.genotypePhenotype = genotypePhenotype;
     }
 
-    @Override
     public String getPlasmids() {
         return plasmids;
     }
 
-    @Override
     public void setPlasmids(String plasmids) {
         this.plasmids = plasmids;
     }
-
 }

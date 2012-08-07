@@ -1,16 +1,16 @@
 package org.jbei.ice.lib.models;
 
-import org.hibernate.annotations.Cascade;
+import java.util.Set;
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.models.interfaces.ISequenceValueObject;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
-import java.util.Set;
+import org.hibernate.annotations.Cascade;
 
 /**
  * Stores the unique sequence for an {@link org.jbei.ice.lib.entry.model.Entry} object.
@@ -29,7 +29,7 @@ import java.util.Set;
 @Entity
 @Table(name = "sequences")
 @SequenceGenerator(name = "sequence", sequenceName = "sequences_id_seq", allocationSize = 1)
-public class Sequence implements ISequenceValueObject, IModel {
+public class Sequence implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -74,23 +74,19 @@ public class Sequence implements ISequenceValueObject, IModel {
         this.entry = entry;
     }
 
-    @Override
     @XmlTransient
     public long getId() {
         return id;
     }
 
-    @Override
     public void setId(long id) {
         this.id = id;
     }
 
-    @Override
     public String getSequence() {
         return sequence;
     }
 
-    @Override
     public void setSequence(String sequence) {
         this.sequence = sequence;
         setFwdHash(SequenceUtils.calculateSequenceHash(sequence));
@@ -102,66 +98,57 @@ public class Sequence implements ISequenceValueObject, IModel {
 
     }
 
-    @Override
     @XmlTransient
     public String getSequenceUser() {
         return sequenceUser;
     }
 
-    @Override
     public void setSequenceUser(String sequenceUser) {
         this.sequenceUser = sequenceUser;
     }
 
-    @Override
     @XmlTransient
     public String getFwdHash() {
         return fwdHash;
     }
 
-    @Override
     public void setFwdHash(String fwdHash) {
         this.fwdHash = fwdHash;
     }
 
-    @Override
     @XmlTransient
     public String getRevHash() {
         return revHash;
     }
 
-    @Override
     public void setRevHash(String revHash) {
         this.revHash = revHash;
     }
 
-    @Override
     @XmlTransient
     public Entry getEntry() {
         return entry;
     }
 
-    @Override
     public void setEntry(Entry entry) {
         this.entry = entry;
     }
 
-    @Override
-    public void setSequenceFeatures(Set<SequenceFeature> inputSequenceFeatures) {
-        // for JAXB webservices should be this way
-        if (inputSequenceFeatures == null) {
-            sequenceFeatures.clear();
+//    @Override
+//    public void setSequenceFeatures(Set<SequenceFeature> inputSequenceFeatures) {
+//        // for JAXB webservices should be this way
+//        if (inputSequenceFeatures == null) {
+//            sequenceFeatures.clear();
+//
+//            return;
+//        }
+//
+//        if (inputSequenceFeatures != sequenceFeatures) {
+//            sequenceFeatures.clear();
+//            sequenceFeatures.addAll(inputSequenceFeatures);
+//        }
+//    }
 
-            return;
-        }
-
-        if (inputSequenceFeatures != sequenceFeatures) {
-            sequenceFeatures.clear();
-            sequenceFeatures.addAll(inputSequenceFeatures);
-        }
-    }
-
-    @Override
     public Set<SequenceFeature> getSequenceFeatures() {
 
         /* Hibernate hack.
