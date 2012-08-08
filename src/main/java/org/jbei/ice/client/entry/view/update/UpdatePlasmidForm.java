@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Form for updating plasmid
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -94,7 +94,6 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         // funding source
         row += 1;
         setLabel(false, "Funding Source", general, row, 0);
-        fundingSource = createStandardTextBox("205px");
         general.setWidget(row, 1, fundingSource);
 
         // status
