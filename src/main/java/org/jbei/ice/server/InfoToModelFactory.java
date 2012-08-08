@@ -165,7 +165,6 @@ public class InfoToModelFactory {
             entry.setVisibility(visibility.getValue());
 
         getFundingSources(info.getFundingSource(), info.getPrincipalInvestigator(), entry);
-//        entry.setEntryFundingSources(entryFundingSources);
         entry.setKeywords(info.getKeywords());
 
         // parameters 

@@ -132,7 +132,7 @@ public class EntryController {
         entry.setOwnerEmail(account.getEmail());
 
         try {
-            dao.save(entry);
+            dao.saveOrUpdate(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -240,7 +240,7 @@ public class EntryController {
      * <p/>
      * Throws exception if multiple entries have the same part number.
      *
-     * @param partNumber
+     * @param partNumber entry part number
      * @return entry retrieved from the database.
      * @throws ControllerException
      * @throws PermissionException
@@ -267,7 +267,7 @@ public class EntryController {
      * <p/>
      * Throws exception if multiple entries have the same name.
      *
-     * @param name
+     * @param name entry name
      * @return entry retrieved from the database.
      * @throws ControllerException
      * @throws PermissionException
@@ -294,9 +294,10 @@ public class EntryController {
      * Checks if the given entry has {@link org.jbei.ice.lib.entry.attachment.Attachment}s
      * associated with it.
      *
-     * @param entry
+     * @param entry entry
      * @return True if there are associated attachments.
      * @throws ControllerException
+     * @deprecated call attachment controller directly
      */
     public boolean hasAttachments(Account account, Entry entry) throws ControllerException {
         return attachmentController.hasAttachment(account, entry);
@@ -305,6 +306,8 @@ public class EntryController {
     public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
 
         Set<Group> accountGroups = new HashSet<Group>(account.getGroups());
+
+        // TODO : retrieve all parent groups
         GroupController controller = new GroupController();
         Group everybodyGroup = controller.createOrRetrievePublicGroup();
         accountGroups.add(everybodyGroup);
@@ -325,17 +328,24 @@ public class EntryController {
     }
 
     /**
-     * Retrieve the number of publicly visible entries (Entries visible to the Everybody group).
+     * Retrieve the number of entries that is visible to a particular user
      *
-     * @param account
-     * @return Number of entries.
+     * @param account user account
+     * @return Number of entries that user with account referenced in the parameter can read.
      * @throws ControllerException
      */
     public long getNumberOfVisibleEntries(Account account) throws ControllerException {
         long numberOfVisibleEntries;
 
+        Set<Group> accountGroups = new HashSet<Group>(account.getGroups());
+
+        // TODO : retrieve all parent groups
+        GroupController controller = new GroupController();
+        Group everybodyGroup = controller.createOrRetrievePublicGroup();
+        accountGroups.add(everybodyGroup);
+
         try {
-            numberOfVisibleEntries = dao.getNumberOfVisibleEntries(account);
+            numberOfVisibleEntries = dao.getNumberOfVisibleEntries(accountGroups, account);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -375,7 +385,6 @@ public class EntryController {
      * @param scheduleIndexRebuild Set True to schedule index rebuild.
      * @return Entry saved into the database.
      * @throws ControllerException
-     * @throws PermissionException
      */
     public Entry save(Entry entry, boolean scheduleIndexRebuild) throws ControllerException {
         if (entry == null) {
@@ -416,8 +425,8 @@ public class EntryController {
             entry.setModificationTime(Calendar.getInstance().getTime());
             savedEntry = dao.saveOrUpdate(entry);
 
-//            ApplicationController.scheduleSearchIndexRebuildJob();
-//            ApplicationController.scheduleBlastIndexRebuildJob();
+            ApplicationController.scheduleSearchIndexRebuildJob();
+            ApplicationController.scheduleBlastIndexRebuildJob();
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -491,7 +500,7 @@ public class EntryController {
             throws ControllerException {
         ArrayList<Long> result = new ArrayList<Long>();
         for (Long id : ids) {
-            Entry entry = null;
+            Entry entry;
             try {
                 entry = dao.get(id);
             } catch (DAOException e) {

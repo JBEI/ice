@@ -199,7 +199,7 @@ public class AccountController {
      * @throws ControllerException
      */
     public Account save(Account account) throws ControllerException {
-        Account result = null;
+        Account result;
 
         try {
             account.setModificationTime(Calendar.getInstance().getTime());

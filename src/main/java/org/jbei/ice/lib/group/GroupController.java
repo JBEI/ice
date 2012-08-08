@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.group;
 
+import java.util.Set;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
-
-import java.util.Set;
 
 public class GroupController {
 
@@ -45,26 +45,6 @@ public class GroupController {
         }
     }
 
-    /**
-     * Create new {@link Group} object in the database, using parameters.
-     *
-     * @param label
-     * @param description
-     * @param parent
-     * @return Saved Group object.
-     * @throws ControllerException
-     */
-    public Group create(String label, String description, Group parent) throws ControllerException {
-
-        String uuid = java.util.UUID.randomUUID().toString();
-        Group newGroup = new Group();
-        newGroup.setUuid(uuid);
-        newGroup.setLabel(label);
-        newGroup.setDescription(description);
-        newGroup.setParent(parent);
-        return save(newGroup);
-    }
-
     public Group createOrRetrievePublicGroup() throws ControllerException {
         Group publicGroup = this.getGroupByUUID(publicGroupUUID);
         if (publicGroup != null)
@@ -94,5 +74,15 @@ public class GroupController {
             Logger.error(e);
             throw new ControllerException(e);
         }
+    }
+
+    /**
+     * retrieves all parent groups for any group in the set.
+     *
+     * @param groups
+     * @return
+     */
+    public Set<Group> getAllGroups(Set<Group> groups) throws ControllerException {
+        return null;
     }
 }

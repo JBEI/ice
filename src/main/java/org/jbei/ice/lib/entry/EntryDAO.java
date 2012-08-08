@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 import javax.persistence.NonUniqueResultException;
 
-import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -17,7 +16,6 @@ import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.FundingSource;
@@ -25,6 +23,8 @@ import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.model.ReadGroup;
 import org.jbei.ice.lib.permissions.model.ReadUser;
+import org.jbei.ice.lib.permissions.model.WriteGroup;
+import org.jbei.ice.lib.permissions.model.WriteUser;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 import org.jbei.ice.shared.ColumnField;
@@ -78,10 +78,6 @@ class EntryDAO extends HibernateRepository<Entry> {
      */
     public Entry get(long id) throws DAOException {
         return super.get(Entry.class, id);
-    }
-
-    public Entry save(Entry entry) throws DAOException {
-        return super.save(entry);
     }
 
     /**
@@ -220,93 +216,63 @@ class EntryDAO extends HibernateRepository<Entry> {
      * @return Number of visible entries.
      * @throws DAOException
      */
-    public long getNumberOfVisibleEntries(Account account) throws DAOException {
-        Group everybodyGroup;
-
-        Session session = null;
-
-        try {
-            GroupController controller = new GroupController();
-            try {
-                everybodyGroup = controller.createOrRetrievePublicGroup();
-            } catch (ControllerException e) {
-                throw new DAOException(e);
-            }
-            session = newSession();
-
-            Criteria criteria = session.createCriteria(ReadGroup.class.getName()).add(
-                    Restrictions.eq("group", everybodyGroup));
-            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
-                                               .uniqueResult();
-
-            if (account == null)
-                return result.longValue();
-
-            long groupVisibleCount = result.longValue();
-
-            criteria = session.createCriteria(ReadUser.class.getName()).add(
-                    Restrictions.eq("account", account));
-            result = (Integer) criteria.setProjection(Projections.rowCount()).uniqueResult();
-            return (groupVisibleCount + result.longValue());
-
-        } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve number of visible entries!", e);
-        } finally {
-            closeSession(session);
-        }
+    @SuppressWarnings({"unchecked"})
+    public long getNumberOfVisibleEntries(Set<Group> groups, Account account) throws DAOException {
+        return getAllVisibleEntries(groups, account).size();
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public Set<Long> getAllVisibleEntries(Set<Group> accountGroups, Account account)
+    public Set<Long> getAllVisibleEntries(Set<Group> groups, Account account)
             throws DAOException {
 
         Session session = null;
-        Set<Long> visibleEntries = new HashSet<Long>();
+        HashSet<Long> results = new HashSet<Long>();
 
         try {
             session = newSession();
-            session.getTransaction().begin();
 
-            if (!accountGroups.isEmpty()) {
-                String queryString = " select readGroup.entry.id from " + ReadGroup.class.getName()
-                        + " readGroup where readGroup.group in (:groups) ";
-                Query query = session.createQuery(queryString);
-                query.setParameterList("groups", accountGroups);
-                List results = query.list();
-                visibleEntries.addAll(((ArrayList<Long>) results));
-            }
+            // check read groups
+            Criteria criteria = session.createCriteria(ReadGroup.class);
+            if (!groups.isEmpty())
+                criteria.add(Restrictions.in("group", groups));
+            List list = criteria.setProjection(Projections.property("entry.id")).list();
+            results.addAll(list);
 
-            if (account == null) {
-                session.getTransaction().commit();
-                return visibleEntries;
-            }
+            // check write groups
+            criteria = session.createCriteria(WriteGroup.class);
+            if (!groups.isEmpty())
+                criteria.add(Restrictions.in("group", groups));
+            list = criteria.setProjection(Projections.property("entry.id")).list();
+            results.addAll(list);
 
-            // get all entries visible to the account
-            String queryString = "select readUser.entry.id from " + ReadUser.class.getName()
-                    + " readUser where readUser.account = :account";
+            // check read user
+            criteria = session.createCriteria(ReadUser.class);
+            criteria.add(Restrictions.eq("account", account));
+            list = criteria.setProjection(Projections.property("entry.id")).list();
+            results.addAll(list);
 
-            Query query = session.createQuery(queryString);
-            query.setParameter("account", account);
-            List accountResults = query.list();
-            visibleEntries.addAll(((ArrayList<Long>) accountResults));
+            // check write user
+            criteria = session.createCriteria(WriteUser.class);
+            criteria.add(Restrictions.eq("account", account));
+            list = criteria.setProjection(Projections.property("entry.id")).list();
+            results.addAll(list);
 
-            // get drafts
-            Criteria c = session.createCriteria(Entry.class)
-                                .add(Restrictions.isNotNull("visibility"))
-                                .add(Restrictions.eq("visibility", new Integer(0)))
-                                .setProjection(Projections.id());
-            ArrayList<Long> results = new ArrayList<Long>(c.list());
-            visibleEntries.removeAll(results);
-
-            session.getTransaction().commit();
-            return visibleEntries;
-
+            // check entries (retrieve only ok or submitted drafts)
+            Integer[] visibility = new Integer[]{Visibility.OK.getValue(), Visibility.PENDING.getValue()};
+            criteria = session.createCriteria(Entry.class)
+                              .add(Restrictions.or(Restrictions.isNull("visibility"),
+                                                   Restrictions.in("visibility", visibility)))
+                              .add(Restrictions.eq("ownerEmail", account.getEmail()))
+                              .setProjection(Projections.id());
+            results.addAll(criteria.list());
         } catch (HibernateException e) {
             session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve number of visible entries!", e);
         } finally {
             closeSession(session);
         }
+
+        return results;
     }
 
     /**

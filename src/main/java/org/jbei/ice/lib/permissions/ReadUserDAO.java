@@ -50,32 +50,7 @@ public class ReadUserDAO extends HibernateRepository<ReadUser> {
             String msg = "Could not set Read User to " + entry.getRecordId();
             throw new DAOException(msg, e);
         } finally {
-            if (session != null)
-                session.close();
-        }
-    }
-
-    /**
-     * Add read permission for the specified {@link Account} to the specified {@link Entry}.
-     * <p/>
-     * This method adds a new {@link ReadUser} object to the database..
-     *
-     * @param entry
-     * @param account
-     * @throws DAOException
-     */
-    public void addReadUser(Entry entry, Account account) throws DAOException {
-        Set<Account> accounts = getReadUser(entry);
-        boolean alreadyAdded = false;
-        for (Account oldAccount : accounts) {
-            if (oldAccount.getId() == account.getId()) {
-                alreadyAdded = true;
-                break;
-            }
-        }
-        if (alreadyAdded == false) {
-            accounts.add(account);
-            setReadUser(entry, accounts);
+            closeSession(session);
         }
     }
 
@@ -96,8 +71,7 @@ public class ReadUserDAO extends HibernateRepository<ReadUser> {
                     + entry.getId() + "\"";
             throw new DAOException(msg, e);
         } finally {
-            if (session != null)
-                session.close();
+            closeSession(session);
         }
     }
 
@@ -125,9 +99,7 @@ public class ReadUserDAO extends HibernateRepository<ReadUser> {
             Logger.error(msg, e);
             throw new DAOException(msg, e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 }

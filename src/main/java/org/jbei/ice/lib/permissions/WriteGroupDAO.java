@@ -20,7 +20,7 @@ public class WriteGroupDAO extends HibernateRepository<WriteGroup> {
 
     public void removeWriteGroup(Entry entry, Group group) throws DAOException {
 
-        String queryString = "delete " + WriteGroup.class.getName() + " where entry = :entry and group = :group";
+        String queryString = "delete " + WriteGroup.class.getName() + " where entry_id = :entry and group_id = :group";
         Session session = newSession();
 
         try {
@@ -51,7 +51,7 @@ public class WriteGroupDAO extends HibernateRepository<WriteGroup> {
      * @throws DAOException
      */
     public void setWriteGroup(Entry entry, Set<Group> groups) throws DAOException {
-        String queryString = "delete " + WriteGroup.class.getName() + " where entry = :entry";
+        String queryString = "delete " + WriteGroup.class.getName() + " where entry_id = :entry";
         Session session = newSession();
 
         try {
@@ -75,30 +75,6 @@ public class WriteGroupDAO extends HibernateRepository<WriteGroup> {
     }
 
     /**
-     * Add write permission for the specified {@link Group} to the specified {@link Entry}.
-     * <p/>
-     * This method adds a new {@link WriteGroup} object to the database..
-     *
-     * @param entry Entry to give write permission to.
-     * @param group Group to give write permission to.
-     * @throws DAOException
-     */
-    public void addWriteGroup(Entry entry, Group group) throws DAOException {
-        Set<Group> groups = getWriteGroup(entry);
-        boolean alreadyAdded = false;
-        for (Group existingGroup : groups) {
-            if (existingGroup.getId() == group.getId()) {
-                alreadyAdded = true;
-                break;
-            }
-        }
-        if (alreadyAdded == false) {
-            groups.add(group);
-            setWriteGroup(entry, groups);
-        }
-    }
-
-    /**
      * Retrieve {@link Group}s with write permissions set for the specified {@link Entry}.
      *
      * @param entry Entry to query on.
@@ -108,7 +84,7 @@ public class WriteGroupDAO extends HibernateRepository<WriteGroup> {
     public Set<Group> getWriteGroup(Entry entry) throws DAOException {
         Session session = newSession();
         try {
-            String queryString = "select group from " + WriteGroup.class.getName() + " where entry = :entry";
+            String queryString = "select group from " + WriteGroup.class.getName() + " where entry_id = :entry";
             Query query = session.createQuery(queryString);
             query.setEntity("entry", entry);
 

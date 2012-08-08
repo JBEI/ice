@@ -6,16 +6,23 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.models.FundingSource;
+import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.server.dao.hibernate.HibernateHelper;
 import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+/**/
 
 /**
  * @author Hector Plahar
@@ -38,7 +45,7 @@ public class EntryControllerTest {
         Assert.assertNotNull(account);
 
         Entry entry = new Strain();
-        entry = controller.createEntry(account, entry, new GroupController().createOrRetrievePublicGroup());
+        entry = controller.createEntry(account, entry, null);
         Assert.assertNotNull(entry);
         Assert.assertTrue(entry.getId() > 0);
 
@@ -63,7 +70,7 @@ public class EntryControllerTest {
         Assert.assertNotNull(account);
 
         Entry plasmid = new Plasmid();
-        plasmid = controller.createEntry(account, plasmid, new GroupController().createOrRetrievePublicGroup());
+        plasmid = controller.createEntry(account, plasmid, null);
         Entry ret = controller.get(account, plasmid.getId());
         Assert.assertNotNull(ret);
     }
@@ -114,6 +121,48 @@ public class EntryControllerTest {
     }
 
     @Test
+    public void testUpdate() throws Exception {
+
+        // create account
+        String email = "testUpdate@TESTER.org";
+
+        AccountController accountController = new AccountController();
+        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
+        Assert.assertNotNull(pass);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
+
+        // create entry
+        Plasmid plasmid = new Plasmid();
+        EntryFundingSource entryFundingSource = new EntryFundingSource();
+        FundingSource fundingSource = new FundingSource();
+        fundingSource.setFundingSource("USA");
+        fundingSource.setPrincipalInvestigator("PI");
+        entryFundingSource.setFundingSource(fundingSource);
+        plasmid.getEntryFundingSources().add(entryFundingSource);
+        entryFundingSource.setEntry(plasmid);
+        Assert.assertNotNull(controller.createEntry(account, plasmid, false, null));
+
+        // retrieve
+        plasmid = (Plasmid) controller.get(account, plasmid.getId());
+        Assert.assertNotNull(plasmid);
+        Assert.assertEquals(1, plasmid.getEntryFundingSources().size());
+        entryFundingSource = (EntryFundingSource) plasmid.getEntryFundingSources().toArray()[0];
+        Assert.assertNotNull(entryFundingSource);
+        Assert.assertEquals("USA", entryFundingSource.getFundingSource().getFundingSource());
+        Assert.assertEquals("PI", entryFundingSource.getFundingSource().getPrincipalInvestigator());
+
+        // update
+        entryFundingSource.getFundingSource().setFundingSource("NEW");
+        plasmid = (Plasmid) controller.update(account, plasmid);
+        Assert.assertNotNull(plasmid);
+
+        entryFundingSource = (EntryFundingSource) plasmid.getEntryFundingSources().toArray()[0];
+        Assert.assertEquals("NEW", entryFundingSource.getFundingSource().getFundingSource());
+        Assert.assertEquals("PI", entryFundingSource.getFundingSource().getPrincipalInvestigator());
+    }
+
+    @Test
     public void testGetByName() throws Exception {
 
     }
@@ -146,6 +195,43 @@ public class EntryControllerTest {
     @Test
     public void testGetNumberOfVisibleEntries() throws Exception {
 
+        String email = "testGetNumberOfVisibleEntries@TESTER.org";
+
+        AccountController accountController = new AccountController();
+        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
+        Assert.assertNotNull(pass);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
+
+        long count = controller.getNumberOfVisibleEntries(account);
+        Assert.assertEquals(0, count);
+
+        GroupController groupController = new GroupController();
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        account.getGroups().add(publicGroup);
+        accountController.save(account);
+
+        count = controller.getNumberOfVisibleEntries(account);
+        Assert.assertEquals(0, count);
+
+        // create some entries
+        Strain strain = new Strain();
+        controller.createEntry(account, strain, false, publicGroup);
+        Assert.assertNotNull(strain);
+
+        count = controller.getNumberOfVisibleEntries(account);
+        Assert.assertEquals(1, count);
+
+        // add write permission
+        PermissionsController permissionsController = new PermissionsController();
+        permissionsController.addPermission(account, PermissionInfo.PermissionType.WRITE_GROUP, strain,
+                                            publicGroup.getId());
+
+        // same entry so it should be one
+        count = controller.getNumberOfVisibleEntries(account);
+        Assert.assertEquals(1, count);
+
+        Assert.assertEquals(count, controller.getAllVisibleEntryIDs(account).size());
     }
 
     @Test

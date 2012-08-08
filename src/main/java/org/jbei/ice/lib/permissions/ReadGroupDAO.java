@@ -22,30 +22,6 @@ import org.hibernate.Session;
 public class ReadGroupDAO extends HibernateRepository<ReadGroup> {
 
     /**
-     * Add read permission for the specified {@link Group} to the specified {@link Entry}.
-     * <p/>
-     * This method adds a new {@link ReadGroup} object to the database..
-     *
-     * @param entry Entry to give read permission to.
-     * @param group Group to give read permission to.
-     * @throws DAOException
-     */
-    public void addReadGroup(Entry entry, Group group) throws DAOException {
-        Set<Group> groups = getReadGroup(entry);
-        boolean alreadyAdded = false;
-        for (Group existingGroup : groups) {
-            if (existingGroup.getId() == group.getId()) {
-                alreadyAdded = true;
-                break;
-            }
-        }
-        if (alreadyAdded == false) {
-            groups.add(group);
-            setReadGroup(entry, groups);
-        }
-    }
-
-    /**
      * Retrieve {@link Group}s with read permissions set for the specified {@link Entry}.
      *
      * @param entry Entry to query on.

@@ -178,11 +178,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public boolean updateAccountPassword(String sid, String email, String password)
             throws AuthenticationException {
-        Account account;
 
         try {
-            account = retrieveAccountForSid(sid);
-
+            Account account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": updating password for account " + email);
             AccountController controller = new AccountController();
             controller.updatePassword(email, password);
