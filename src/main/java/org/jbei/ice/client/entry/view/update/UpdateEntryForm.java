@@ -1,8 +1,10 @@
 package org.jbei.ice.client.entry.view.update;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.TreeSet;
+
 import org.jbei.ice.client.collection.add.form.ParametersPanel;
 import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
@@ -12,10 +14,9 @@ import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.TreeSet;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.*;
 
 /**
  * Parent class for forms used to create new entries
@@ -415,6 +416,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         entryInfo.setBioSafetyLevel(value);
         entryInfo.setIntellectualProperty(ip.getText());
         entryInfo.setPrincipalInvestigator(principalInvestigator.getText());
+        entryInfo.setFundingSource(fundingSource.getText());
     }
 
     @Override
