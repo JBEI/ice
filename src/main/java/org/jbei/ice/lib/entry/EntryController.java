@@ -334,8 +334,10 @@ public class EntryController {
         try {
             Integer[] list = new Integer[visibilityList.length];
             int i = 0;
-            for (Visibility visibility : visibilityList)
+            for (Visibility visibility : visibilityList) {
                 list[i] = visibility.getValue();
+                i += 1;
+            }
 
             return dao.getEntriesByOwner(ownerEmail, list);
         } catch (DAOException e) {
