@@ -47,6 +47,26 @@ public class GroupController {
         }
     }
 
+    /**
+     * Create new {@link Group} object in the database, using parameters.
+     *
+     * @param label       group label
+     * @param description group description
+     * @param parent      group parent
+     * @return Saved Group object.
+     * @throws ControllerException
+     */
+    public Group create(String label, String description, Group parent) throws ControllerException {
+
+        String uuid = java.util.UUID.randomUUID().toString();
+        Group newGroup = new Group();
+        newGroup.setUuid(uuid);
+        newGroup.setLabel(label);
+        newGroup.setDescription(description);
+        newGroup.setParent(parent);
+        return save(newGroup);
+    }
+
     public Group createOrRetrievePublicGroup() throws ControllerException {
         Group publicGroup = this.getGroupByUUID(publicGroupUUID);
         if (publicGroup != null)
