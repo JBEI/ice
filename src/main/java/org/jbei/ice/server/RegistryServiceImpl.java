@@ -1225,13 +1225,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account account = retrieveAccountForSid(sid);
             BulkUploadController draftController = new BulkUploadController();
             Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draftId);
-
-            BulkUploadInfo info = draftController.retrieveById(account, draftId);
-            if (info == null) {
-                Logger.info(account.getEmail() + ": could not locate draft with id " + draftId);
-                return null;
-            }
-
             return draftController.deleteDraftById(account, draftId);
         } catch (ControllerException ce) {
             Logger.error(ce);

@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.permissions;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.account.model.Account;
@@ -10,9 +11,12 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.model.ReadUser;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * @author Hector Plahar
@@ -82,24 +86,20 @@ public class ReadUserDAO extends HibernateRepository<ReadUser> {
      * @return Set of Accounts with read permission for the given Entry.
      * @throws DAOException
      */
-    public Set<Account> getReadUser(Entry entry) throws DAOException {
+    @SuppressWarnings("unchecked")
+    public Set<Account> getReadUsers(Entry entry) throws DAOException {
         Session session = newSession();
+
         try {
-            String queryString = "select readUser.account from ReadUser readUser where readUser.entry = :entry";
-            Query query = session.createQuery(queryString);
-            query.setEntity("entry", entry);
+            Criteria criteria = session.createCriteria(ReadUser.class)
+                                       .add(Restrictions.eq("entry", entry))
+                                       .setProjection(Projections.property("account"));
+            List list = criteria.list();
+            return new HashSet<Account>(list);
 
-            @SuppressWarnings("unchecked")
-            HashSet<Account> result = new HashSet<Account>(query.list());
-            return result;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            String msg = "Could not read ReadUser of " + entry.getRecordId();
-            Logger.error(msg, e);
-            throw new DAOException(msg, e);
-        } finally {
-            closeSession(session);
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
     }
 }

@@ -8,9 +8,11 @@ import org.jbei.ice.lib.permissions.model.ReadUser;
 import org.jbei.ice.lib.permissions.model.WriteUser;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Projections;
 
 /**
  * @author Hector Plahar
@@ -24,29 +26,24 @@ public class PermissionDAO extends HibernateRepository {
      * @return True if given Account has read permission to the given Entry.
      */
     public boolean isReadUserAccount(Account account, Entry entry) throws DAOException {
-        Session session = newSession();
-        ReadUser readUser = new ReadUser(entry, account);
-
-        try {
-            return session.createCriteria(ReadUser.class)
-                          .add(Example.create(readUser))
-                          .list()
-                          .size() >= 1;
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
+        Example example = Example.create(new ReadUser(entry, account));
+        return createCriteriaQuery(ReadUser.class, example);
     }
 
     public boolean isWriteUserAccount(Account account, Entry entry) throws DAOException {
+        Example example = Example.create(new WriteUser(entry, account));
+        return createCriteriaQuery(WriteUser.class, example);
+    }
+
+    protected boolean createCriteriaQuery(Class<?> c, Example example) throws DAOException {
         Session session = newSession();
-        WriteUser writeUser = new WriteUser(entry, account);
 
         try {
-            return session.createCriteria(WriteUser.class)
-                          .add(Example.create(writeUser))
-                          .list()
-                          .size() >= 1;
+            Criteria criteria = session.createCriteria(c)
+                                       .add(example)
+                                       .setProjection(Projections.rowCount());
+            Integer integer = (Integer) criteria.uniqueResult();
+            return integer == 1;
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

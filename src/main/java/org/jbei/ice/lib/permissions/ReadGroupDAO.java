@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.permissions;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.dao.DAOException;
@@ -10,9 +11,12 @@ import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.model.ReadGroup;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Hibernate Data accessor object for {@link org.jbei.ice.lib.permissions.model.ReadGroup}
@@ -28,27 +32,36 @@ public class ReadGroupDAO extends HibernateRepository<ReadGroup> {
      * @return Set of Groups.
      * @throws DAOException
      */
-    public Set<Group> getReadGroup(Entry entry) throws DAOException {
+    @SuppressWarnings("unchecked")
+    public Set<Group> getReadGroups(Entry entry) throws DAOException {
         Session session = newSession();
+
         try {
-            String queryString = "select readGroup.group from ReadGroup readGroup where readGroup.entry = :entry";
+            Criteria criteria = session.createCriteria(ReadGroup.class)
+                                       .add(Restrictions.eq("entry", entry))
+                                       .setProjection(Projections.property("group"));
+            List list = criteria.list();
+            return new HashSet<Group>(list);
 
-            Query query = session.createQuery(queryString);
-            query.setEntity("entry", entry);
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
 
-            @SuppressWarnings("unchecked")
-            HashSet<Group> result = new HashSet<Group>(query.list());
-            return result;
+    public boolean entryHasGroups(Set<Group> groups, Entry entry) throws DAOException {
+        Session session = newSession();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            String msg = "Could not get Read Group of " + entry.getRecordId();
-            Logger.error(msg, e);
-            throw new DAOException(msg, e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+        try {
+            Criteria criteria = session.createCriteria(ReadGroup.class)
+                                       .add(Restrictions.eq("entry", entry))
+                                       .add(Restrictions.in("group", groups))
+                                       .setProjection(Projections.rowCount());
+            return ((Integer) criteria.uniqueResult()) > 0;
+
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
     }
 

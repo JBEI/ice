@@ -472,6 +472,10 @@ public class AccountController {
         }
     }
 
+    /**
+     * @throws ControllerException
+     * @deprecated
+     */
     public void updateModeratorAccounts() throws ControllerException {
         try {
             dao.updateModeratorAccounts();

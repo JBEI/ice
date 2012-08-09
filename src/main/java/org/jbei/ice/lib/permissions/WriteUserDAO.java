@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.permissions;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.account.model.Account;
@@ -10,9 +11,12 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.model.WriteUser;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * @author Hector Plahar
@@ -87,7 +91,7 @@ public class WriteUserDAO extends HibernateRepository<WriteUser> {
      * @throws DAOException
      */
     public void addWriteUser(Entry entry, Account account) throws DAOException {
-        Set<Account> accounts = getWriteUser(entry);
+        Set<Account> accounts = getWriteUsers(entry);
         boolean alreadyAdded = false;
         for (Account existingAccount : accounts) {
             if (existingAccount.getId() == account.getId()) {
@@ -108,27 +112,22 @@ public class WriteUserDAO extends HibernateRepository<WriteUser> {
      * @return Set of Accounts.
      * @throws DAOException
      */
-    public Set<Account> getWriteUser(Entry entry) throws DAOException {
+    @SuppressWarnings("unchecked")
+    public Set<Account> getWriteUsers(Entry entry) throws DAOException {
+
         Session session = newSession();
+
         try {
-            String queryString = "select writeUser.account from WriteUser writeUser where writeUser.entry = :entry";
-            Query query = session.createQuery(queryString);
-            query.setEntity("entry", entry);
+            Criteria criteria = session.createCriteria(WriteUser.class)
+                                       .add(Restrictions.eq("entry", entry))
+                                       .setProjection(Projections.property("account"));
+            List list = criteria.list();
+            return new HashSet<Account>(list);
 
-            @SuppressWarnings("unchecked")
-            HashSet<Account> result = new HashSet<Account>(query.list());
-            return result;
-
-        } catch (Exception e) {
-            String msg = "Could not get Write User of " + entry.getRecordId();
-            Logger.error(msg, e);
-            throw new DAOException(msg, e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
-
     }
 
 }

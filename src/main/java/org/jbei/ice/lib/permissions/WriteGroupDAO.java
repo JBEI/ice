@@ -1,17 +1,22 @@
 package org.jbei.ice.lib.permissions;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.model.WriteGroup;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * @author Hector Plahar
@@ -81,22 +86,37 @@ public class WriteGroupDAO extends HibernateRepository<WriteGroup> {
      * @return Set of Groups.
      * @throws DAOException
      */
-    public Set<Group> getWriteGroup(Entry entry) throws DAOException {
+    @SuppressWarnings("unchecked")
+    public Set<Group> getWriteGroups(Entry entry) throws DAOException {
+
         Session session = newSession();
+
         try {
-            String queryString = "select group from " + WriteGroup.class.getName() + " where entry_id = :entry";
-            Query query = session.createQuery(queryString);
-            query.setEntity("entry", entry);
+            Criteria criteria = session.createCriteria(WriteGroup.class)
+                                       .add(Restrictions.eq("entry", entry))
+                                       .setProjection(Projections.property("group"));
+            List list = criteria.list();
+            return new HashSet<Group>(list);
 
-            @SuppressWarnings("unchecked")
-            HashSet<Group> result = new HashSet<Group>(query.list());
-            return result;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
 
-        } catch (Exception e) {
-            String msg = "Could not get Write Group of " + entry.getRecordId();
-            throw new DAOException(msg, e);
-        } finally {
-            closeSession(session);
+    public boolean entryHasGroups(Set<Group> groups, Entry entry) throws DAOException {
+        Session session = newSession();
+
+        try {
+            Criteria criteria = session.createCriteria(WriteGroup.class)
+                                       .add(Restrictions.eq("entry", entry))
+                                       .add(Restrictions.in("group", groups))
+                                       .setProjection(Projections.rowCount());
+            return ((Integer) criteria.uniqueResult()) > 0;
+
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
     }
 }

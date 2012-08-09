@@ -44,6 +44,8 @@ public class PermissionsControllerTest {
         EntryController entryController = new EntryController();
         Assert.assertNotNull(entryController.createEntry(account, strain, false, null));
 
+        Assert.assertFalse(controller.hasReadPermission(otherAccount, strain));
+
         // add read account permission
         controller.addPermission(account, PermissionInfo.PermissionType.READ_ACCOUNT, strain, otherAccount.getId());
 
@@ -59,10 +61,17 @@ public class PermissionsControllerTest {
         Assert.assertTrue(controller.hasWritePermission(otherAccount, strain));
 
         // remove write permission
-        controller.removePermission(account, PermissionInfo.PermissionType.READ_ACCOUNT, strain, otherAccount.getId());
+        controller.removePermission(account, PermissionInfo.PermissionType.WRITE_ACCOUNT, strain, otherAccount.getId());
 
         // should still have read permission
         Assert.assertTrue(controller.hasReadPermission(otherAccount, strain));
+
+        // remove read permission
+        controller.removePermission(account, PermissionInfo.PermissionType.READ_ACCOUNT, strain, otherAccount.getId());
+
+        // no more read
+        Assert.assertFalse(controller.hasReadPermission(otherAccount, strain));
+
     }
 
     @Test
@@ -152,29 +161,6 @@ public class PermissionsControllerTest {
 
     @Test
     public void testGetReadGroup() throws Exception {
-
-    }
-
-    @Test
-    public void testGetWriteGroup() throws Exception {
-        String email = "testGetWriteGroup@TESTER.org";
-        String email2 = "testGetWriteGroupOther@TESTER.org";
-
-        AccountController accountController = new AccountController();
-        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
-        Assert.assertNotNull(pass);
-        accountController.createNewAccount("", "TEST", "T", email2, null, "");
-        Account account = accountController.getByEmail(email);
-        Assert.assertNotNull(account);
-        Account otherAccount = accountController.getByEmail(email2);
-        Assert.assertNotNull(otherAccount);
-
-        // create entry
-        Strain strain = new Strain();
-        EntryController entryController = new EntryController();
-        Assert.assertNotNull(entryController.createEntry(account, strain, false, null));
-
-        controller.getWriteGroup(account, strain);
 
     }
 }

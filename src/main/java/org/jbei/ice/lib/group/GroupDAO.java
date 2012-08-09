@@ -2,6 +2,7 @@ package org.jbei.ice.lib.group;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.dao.DAOException;
@@ -9,9 +10,11 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Manager to manipulate {@link org.jbei.ice.lib.models.Group} objects.
@@ -40,6 +43,23 @@ class GroupDAO extends HibernateRepository<Group> {
      */
     public Group get(long id) throws DAOException {
         return super.get(Group.class, id);
+    }
+
+    @SuppressWarnings("unchecked")
+    public HashSet<Group> getByIdList(Set<Long> idsSet) throws DAOException {
+        Session session = newSession();
+
+        try {
+            Criteria criteria = session.createCriteria(Group.class)
+                                       .add(Restrictions.in("id", idsSet));
+
+            List list = criteria.list();
+            return new HashSet<Group>(list);
+
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 
     /**

@@ -181,33 +181,7 @@ public class EntryController {
     public ArrayList<PermissionInfo> retrievePermissions(Account account, Entry entry)
             throws ControllerException, PermissionException {
 
-        ArrayList<PermissionInfo> permissionInfos = new ArrayList<PermissionInfo>();
-
-        Set<Account> readAccounts = permissionsController.getReadUser(account, entry);
-        for (Account readAccount : readAccounts) {
-            permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.READ_ACCOUNT,
-                                                   readAccount.getId(), readAccount.getFullName()));
-        }
-
-        Set<Account> writeAccounts = permissionsController.getWriteUser(account, entry);
-        for (Account writeAccount : writeAccounts) {
-            permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.WRITE_ACCOUNT,
-                                                   writeAccount.getId(), writeAccount.getFullName()));
-        }
-
-        Set<Group> readGroups = permissionsController.getReadGroup(account, entry);
-        for (Group group : readGroups) {
-            permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.READ_GROUP, group
-                    .getId(), group.getLabel()));
-        }
-
-        Set<Group> writeGroups = permissionsController.getWriteGroup(account, entry);
-        for (Group group : writeGroups) {
-            permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.WRITE_GROUP, group
-                    .getId(), group.getLabel()));
-        }
-
-        return permissionInfos;
+        return permissionsController.retrieveSetEntryPermissions(account, entry);
     }
 
     /**
@@ -391,7 +365,7 @@ public class EntryController {
             throw new ControllerException("Failed to save null entry!");
         }
 
-        Entry savedEntry = null;
+        Entry savedEntry;
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
