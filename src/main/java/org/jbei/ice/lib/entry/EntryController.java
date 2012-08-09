@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -24,7 +25,6 @@ import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.EntryViewFactory;
 import org.jbei.ice.shared.ColumnField;
@@ -42,11 +42,13 @@ public class EntryController {
     private EntryDAO dao;
     private PermissionsController permissionsController;
     private AttachmentController attachmentController;
+    private AccountController accountController;
 
     public EntryController() {
         dao = new EntryDAO();
         permissionsController = new PermissionsController();
         attachmentController = new AttachmentController();
+        accountController = new AccountController();
     }
 
     /**
@@ -440,13 +442,14 @@ public class EntryController {
         String deletionString = "This entry is deleted. It was owned by " + entry.getOwnerEmail()
                 + "\n";
         entry.setLongDescription(deletionString + entry.getLongDescription());
-        entry.setOwnerEmail(PopulateInitialDatabase.systemAccountEmail);
+        Account sysAccount = accountController.getSystemAccount();
+        entry.setOwnerEmail(sysAccount.getEmail());
         // save(entry, true); // Cannot use save, as owner has changed. Must call manager directly
 
-        permissionsController.setReadGroup(account, entry, new HashSet<Group>());
-        permissionsController.setWriteGroup(account, entry, new HashSet<Group>());
-        permissionsController.setReadUser(account, entry, new HashSet<Account>());
-        permissionsController.setWriteUser(account, entry, new HashSet<Account>());
+        permissionsController.setReadGroup(sysAccount, entry, new HashSet<Group>());
+        permissionsController.setWriteGroup(sysAccount, entry, new HashSet<Group>());
+        permissionsController.setReadUser(sysAccount, entry, new HashSet<Account>());
+        permissionsController.setWriteUser(sysAccount, entry, new HashSet<Account>());
         entry.setModificationTime(Calendar.getInstance().getTime());
 
         try {

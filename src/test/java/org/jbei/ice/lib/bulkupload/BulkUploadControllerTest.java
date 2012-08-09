@@ -8,6 +8,8 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.server.dao.hibernate.HibernateHelper;
 import org.jbei.ice.shared.EntryAddType;
@@ -346,6 +348,35 @@ public class BulkUploadControllerTest {
         // ensure contents are deleted
         try {
             controller.retrieveById(account, updatedBulk.getId());
+        } catch (ControllerException c) {
+            // expected
+        }
+
+        // ensure no entries left "hanging"
+        entry = entryController.get(account, entry.getId());
+        Assert.assertNull(entry);
+
+        // test delete with valid group id
+        GroupController groupController = new GroupController();
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        Assert.assertNotNull(publicGroup);
+
+        entryList.clear();
+        entryList.add(info);
+        createdDraft = controller.createBulkImportDraft(account, EntryAddType.ARABIDOPSIS, "Test",
+                                                        entryList, publicGroup.getUuid());
+
+        Assert.assertNotNull(createdDraft);
+
+        entry = entryController.get(account, createdDraft.getEntryList().get(0).getId());
+        Assert.assertNotNull(entry);
+
+        // delete draft
+        Assert.assertNotNull(controller.deleteDraftById(account, createdDraft.getId()));
+
+        // ensure contents are deleted
+        try {
+            controller.retrieveById(account, createdDraft.getId());
         } catch (ControllerException c) {
             // expected
         }

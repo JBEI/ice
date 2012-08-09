@@ -263,14 +263,13 @@ public class BulkUploadController {
             if (!requesting.equals(draftAccount) && !accountController.isAdministrator(requesting))
                 throw new PermissionException("No permissions to delete draft " + draftId);
 
-//            for (Entry entry : draft.getContents()) {
-//                if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
-//                    entryController.delete(requesting, entry);
-//                }
-//            }
+            for (Entry entry : draft.getContents()) {
+                if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
+                    entryController.delete(requesting, entry);
+                }
+            }
 
             draft.getContents().clear();
-            dao.update(draft);
             dao.delete(draft);
 
         } catch (DAOException e) {
