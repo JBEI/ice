@@ -20,6 +20,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -63,7 +64,6 @@ import org.jbei.ice.shared.dto.*;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
-import org.jbei.ice.web.utils.WebUtils;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
@@ -689,9 +689,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             String parsed = getParsedNotes(html);
             info.setLongDescription(info.getLongDescription());
             info.setParsedDescription(parsed);
-            String parsedShortDesc = WebUtils.linkifyText(account, info.getShortDescription());
+            String parsedShortDesc = EntryUtil.linkifyText(account, info.getShortDescription());
             info.setLinkifiedShortDescription(parsedShortDesc);
-            String parsedLinks = WebUtils.linkifyText(account, info.getLinks());
+            String parsedLinks = EntryUtil.linkifyText(account, info.getLinks());
             info.setLinkifiedLinks(parsedLinks);
 
             // group with write permissions
@@ -760,9 +760,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             String parsed = getParsedNotes(html);
             info.setLongDescription(info.getLongDescription());
             info.setParsedDescription(parsed);
-            String parsedShortDesc = WebUtils.linkifyText(account, info.getShortDescription());
+            String parsedShortDesc = EntryUtil.linkifyText(account, info.getShortDescription());
             info.setLinkifiedShortDescription(parsedShortDesc);
-            String parsedLinks = WebUtils.linkifyText(account, info.getLinks());
+            String parsedLinks = EntryUtil.linkifyText(account, info.getLinks());
             info.setLinkifiedLinks(parsedLinks);
 
             // group with write permissions

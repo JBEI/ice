@@ -27,7 +27,6 @@ import org.jbei.ice.lib.utils.UtilsDAO;
 import org.jbei.ice.shared.dto.*;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
-import org.jbei.ice.web.utils.WebUtils;
 
 /**
  * Factory for converting {@link Entry}s to their corresponding {@link EntryInfo} data transfer
@@ -234,7 +233,7 @@ public class EntryToInfoFactory {
         // strain specific
         info.setGenotypePhenotype(strain.getGenotypePhenotype());
         info.setPlasmids(strain.getPlasmids());
-        info.setLinkifiedPlasmids(WebUtils.linkifyText(account, info.getPlasmids()));
+        info.setLinkifiedPlasmids(EntryUtil.linkifyText(account, info.getPlasmids()));
         info.setHost(strain.getHost());
 
         return info;
