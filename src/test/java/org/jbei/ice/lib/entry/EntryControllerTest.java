@@ -204,15 +204,15 @@ public class EntryControllerTest {
         Assert.assertNotNull(account);
 
         long count = controller.getNumberOfVisibleEntries(account);
-        Assert.assertEquals(0, count);
+        Assert.assertEquals("New account has entry", 0, count);
 
         GroupController groupController = new GroupController();
-        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        Group publicGroup = groupController.create("delete_NUMBERPUBLIC", "TEST", null);
         account.getGroups().add(publicGroup);
         accountController.save(account);
 
         count = controller.getNumberOfVisibleEntries(account);
-        Assert.assertEquals(0, count);
+        Assert.assertEquals("New account has entries", 0, count);
 
         // create some entries
         Strain strain = new Strain();

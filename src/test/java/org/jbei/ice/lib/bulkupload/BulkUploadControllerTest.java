@@ -360,7 +360,7 @@ public class BulkUploadControllerTest {
 
         // test delete with valid group id
         GroupController groupController = new GroupController();
-        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        Group publicGroup = groupController.create("delete_DRAFT", "TEST", null);
         Assert.assertNotNull(publicGroup);
 
         entryList.clear();
@@ -499,7 +499,7 @@ public class BulkUploadControllerTest {
 
         // update existing and add one more and also set the group to public
         GroupController groupController = new GroupController();
-        Group group = groupController.createOrRetrievePublicGroup();
+        Group group = groupController.create("delete_UPDATE", "TEST", null);
         added.setName("Part Test");
         EntryInfo newInfo = new PartInfo();
         newInfo.setLongDescription("This is a long description");
