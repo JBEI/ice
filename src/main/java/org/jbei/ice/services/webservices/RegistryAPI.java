@@ -566,7 +566,7 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
 
-            savedEntry = entryController.update(account, updateEntry(account, plasmid));
+            savedEntry = entryController.update(account, updateEntry(account, plasmid), null);
 
             log("User '" + account.getEmail() + "' update plasmid: '" + savedEntry.getRecordId()
                         + "', " + savedEntry.getId());
@@ -605,7 +605,7 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
 
-            savedEntry = entryController.update(account, updateEntry(account, strain));
+            savedEntry = entryController.update(account, updateEntry(account, strain), null);
 
             log("User '" + account.getEmail() + "' update strain: '" + savedEntry.getRecordId()
                         + "', " + savedEntry.getId());
@@ -643,7 +643,7 @@ public class RegistryAPI {
 
         try {
             EntryController entryController = new EntryController();
-            savedEntry = entryController.update(account, updateEntry(account, part));
+            savedEntry = entryController.update(account, updateEntry(account, part), null);
 
             log("User '" + account.getEmail() + "' update part: '" + savedEntry.getRecordId()
                         + "', " + savedEntry.getId());

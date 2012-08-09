@@ -20,6 +20,7 @@ import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.server.EntryToInfoFactory;
 import org.jbei.ice.server.InfoToModelFactory;
@@ -351,7 +352,7 @@ public class BulkUploadController {
         Entry enclosedEntry = null;
 
         try {
-            boolean exists = updateIfExists(draftOwner, contents, contentInfoList, info);
+            boolean exists = updateIfExists(draftOwner, contents, contentInfoList, info, group);
 
             if (!exists) {
                 // entry does not exist so create new one
@@ -376,8 +377,7 @@ public class BulkUploadController {
 
                     try {
                         // update plasmids for strain
-                        // TODO : update groups
-                        entryController.update(draftOwner, entry);
+                        entryController.update(draftOwner, entry, group);
                     } catch (PermissionException e) {
                         Logger.error(e);
                     }
@@ -503,7 +503,7 @@ public class BulkUploadController {
      * @throws PermissionException
      */
     private boolean updateIfExists(Account account, ArrayList<Entry> contents, ArrayList<EntryInfo> infoList,
-            EntryInfo info) throws ControllerException, PermissionException {
+            EntryInfo info, Group group) throws ControllerException, PermissionException {
 
         Entry entry = entryController.get(account, info.getId());
         if (entry == null) // no existing
@@ -523,7 +523,7 @@ public class BulkUploadController {
                 InfoToModelFactory.infoToEntry(info.getInfo(), enclosedEntry);
 
                 // update enclosing and get the part number
-                enclosedEntry = entryController.update(account, enclosedEntry);
+                enclosedEntry = entryController.update(account, enclosedEntry, null);
                 String name = enclosedEntry.getOneName() == null ? "" : enclosedEntry.getOneName().getName();
                 String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
                         + ":" + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
@@ -532,7 +532,7 @@ public class BulkUploadController {
 
                 try {
                     // update plasmids for strain
-                    entryController.update(account, entry);
+                    entryController.update(account, entry, group);
                 } catch (PermissionException e) {
                     Logger.error(e);
                 }
@@ -545,7 +545,7 @@ public class BulkUploadController {
 
         // perform update for main entry
         entry = InfoToModelFactory.infoToEntry(info, entry);
-        entryController.update(account, entry);
+        entryController.update(account, entry, group);
 
         // update main entry sequence and attachment
         saveSequence(account, info.getSequenceAnalysis(), entry);
@@ -686,7 +686,14 @@ public class BulkUploadController {
             if (!success)
                 return success;
 
-            // TODO : send notification email
+            String email = JbeirSettings.getSetting("BULK_UPLOAD_APPROVER_EMAIL");
+            if (email != null && !email.isEmpty()) {
+                String subject = JbeirSettings.getSetting("PROJECT_NAME") + " Bulk Upload Notification";
+                String body = "A bulk upload has been submitted and is pending verification.\n\n";
+                body += "Please go to the following link to verify.\n\n";
+                body += JbeirSettings.getSetting("URI_PREFIX") + "/#page=bulk";
+                Emailer.send(email, subject, body);
+            }
             return success;
         } catch (DAOException e) {
             throw new ControllerException(e);

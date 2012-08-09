@@ -383,7 +383,7 @@ public class PermissionsController {
         return false;
     }
 
-    protected boolean groupHasWritePermission(Set<Group> groups, Entry entry) throws ControllerException {
+    public boolean groupHasWritePermission(Set<Group> groups, Entry entry) throws ControllerException {
         try {
             if (groups.isEmpty())
                 return false;
@@ -395,7 +395,7 @@ public class PermissionsController {
         return false;
     }
 
-    protected boolean groupHasReadPermission(Set<Group> groups, Entry entry) throws ControllerException {
+    public boolean groupHasReadPermission(Set<Group> groups, Entry entry) throws ControllerException {
         try {
             if (groups.isEmpty())
                 return false;

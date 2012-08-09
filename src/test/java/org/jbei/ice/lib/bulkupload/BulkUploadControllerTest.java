@@ -11,6 +11,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.server.dao.hibernate.HibernateHelper;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
@@ -21,6 +22,7 @@ import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -489,14 +491,34 @@ public class BulkUploadControllerTest {
         Assert.assertEquals(Visibility.DRAFT.getValue(), newEntry.getVisibility().intValue());
         Assert.assertEquals(newEntry.getAlias(), "new alias"); // check updated name
 
-        // update existing and add one more
+        // check group
+        PermissionsController permissionsController = new PermissionsController();
+        ArrayList<PermissionInfo> permissionInfos = permissionsController.retrieveSetEntryPermissions(account,
+                                                                                                      newEntry);
+        Assert.assertTrue(permissionInfos.isEmpty());
+
+        // update existing and add one more and also set the group to public
+        GroupController groupController = new GroupController();
+        Group group = groupController.createOrRetrievePublicGroup();
         added.setName("Part Test");
         EntryInfo newInfo = new PartInfo();
         newInfo.setLongDescription("This is a long description");
         entryList = updatedDraft.getEntryList();
         entryList.add(newInfo);
-        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
+        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, group.getUuid());
         Assert.assertNotNull(updatedDraft);
+        Assert.assertEquals(group.getUuid(), updatedDraft.getGroupInfo().getUuid());
+
+        // both entries should have same permissions
+        newEntry = entryController.get(account, addedId);
+        long id = updatedDraft.getEntryList().get(0).getId();
+        Entry second = entryController.get(account, id);
+        permissionInfos = permissionsController.retrieveSetEntryPermissions(account, newEntry);
+        Assert.assertEquals(1, permissionInfos.size());
+        Assert.assertEquals(PermissionInfo.PermissionType.READ_GROUP, permissionInfos.get(0).getType());
+        permissionInfos = permissionsController.retrieveSetEntryPermissions(account, second);
+        Assert.assertEquals(1, permissionInfos.size());
+        Assert.assertEquals(PermissionInfo.PermissionType.READ_GROUP, permissionInfos.get(0).getType());
     }
 
     @Test

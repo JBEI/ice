@@ -386,7 +386,7 @@ public class EntryController {
         return savedEntry;
     }
 
-    public Entry update(Account account, Entry entry) throws ControllerException,
+    public Entry update(Account account, Entry entry, Group readGroup) throws ControllerException,
             PermissionException {
 
         if (entry == null) {
@@ -402,6 +402,15 @@ public class EntryController {
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
             savedEntry = dao.saveOrUpdate(entry);
+
+            // update read permissions
+            // TODO : until the permissions overhaul, no method is expected to call update on entry
+            // TODO : and update the groups at the same time. a different mechanism is used
+            if (readGroup != null && savedEntry.getVisibility() != Visibility.OK.getValue()) {
+                HashSet<Group> groups = new HashSet<Group>();
+                groups.add(readGroup);
+                permissionsController.setReadGroup(account, entry, groups);
+            }
 
             ApplicationController.scheduleSearchIndexRebuildJob();
             ApplicationController.scheduleBlastIndexRebuildJob();
