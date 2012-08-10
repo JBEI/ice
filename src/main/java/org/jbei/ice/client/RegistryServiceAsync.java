@@ -201,4 +201,7 @@ public interface RegistryServiceAsync {
 
     void approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList, String groupUUID,
             AsyncCallback<Boolean> async);
+
+    void submitBulkImportDraft(String sid, long draftId,
+            ArrayList<EntryInfo> entryList, String groupUUID, AsyncCallback<Boolean> async);
 }

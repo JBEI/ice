@@ -1313,6 +1313,31 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public boolean submitBulkImportDraft(String sid, long draftId,
+            ArrayList<EntryInfo> entryList, String groupUUID) throws AuthenticationException {
+
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (entryList.isEmpty())
+                return false;
+
+            Logger.info(account.getEmail() + ": submitting bulk import draft \""
+                                + draftId + "\" & size " + entryList.size());
+            BulkUploadController controller = new BulkUploadController();
+            try {
+                return controller.submitBulkImportDraft(account, draftId, entryList, groupUUID);
+            } catch (PermissionException e) {
+                Logger.error(e);
+                return false;
+            }
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
+        }
+    }
+
+    @Override
     public boolean approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList, String groupUUID)
             throws AuthenticationException {
         try {

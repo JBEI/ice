@@ -171,4 +171,7 @@ public interface RegistryService extends RemoteService {
 
     boolean approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList, String groupUUID)
             throws AuthenticationException;
+
+    boolean submitBulkImportDraft(String sid, long draftId,
+            ArrayList<EntryInfo> entryList, String groupUUID) throws AuthenticationException;
 }

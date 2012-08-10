@@ -100,6 +100,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
+    public void setDraftSubmitHandler(ClickHandler handler) {
+        this.updateDraftInput.getSaveButton().addClickHandler(handler);
+    }
+
+    @Override
     public void setApproveHandler(ClickHandler handler) {
         this.approveButton.addClickHandler(handler);
     }
@@ -191,7 +196,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 panel.setWidget(0, 2, resetButton);
                 panel.getFlexCellFormatter().setWidth(0, 2, "40px");
 
-                panel.setWidget(0, 3, saveButton);
+                panel.setWidget(0, 3, this.updateDraftInput.getSaveButton());
                 panel.getFlexCellFormatter().setWidth(0, 3, "70px");
             }
         } else {

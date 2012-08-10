@@ -15,6 +15,7 @@ public class UpdateDraftInput extends Composite {
     private final Label inputName;
     private final Button updateButton;
     private HandlerRegistration registration;
+    private final Button saveButton;
 
     public UpdateDraftInput() {
         inputName = new Label();
@@ -33,6 +34,9 @@ public class UpdateDraftInput extends Composite {
         panel.add(updateButton, "save_draft_button");
         layout.setWidget(0, 0, inputName);
         layout.setWidget(0, 1, updateButton);
+
+        saveButton = new Button("Submit");
+        saveButton.setStyleName("saved_draft_button");
     }
 
     public void setUpdateDraftHandler(final ClickHandler handler) {
@@ -44,5 +48,9 @@ public class UpdateDraftInput extends Composite {
 
     public void setDraftName(String name) {
         inputName.setText(name);
+    }
+
+    public Button getSaveButton() {
+        return this.saveButton;
     }
 }

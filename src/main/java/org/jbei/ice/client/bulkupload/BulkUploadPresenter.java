@@ -101,8 +101,12 @@ public class BulkUploadPresenter extends AbstractPresenter {
         view.setDraftUpdateHandler(handler);
 
         // submit
-        SheetSubmitHandler submitHandler = new SheetSubmitHandler();
+        SheetSubmitHandler submitHandler = new SheetSubmitHandler(false);
         view.setSubmitHandler(submitHandler);
+
+        // draft submit
+        SheetSubmitHandler draftSubmitHandler = new SheetSubmitHandler(true);
+        view.setDraftSubmitHandler(draftSubmitHandler);
 
         // reset
         SheetResetHandler resetHandler = new SheetResetHandler();
@@ -231,6 +235,12 @@ public class BulkUploadPresenter extends AbstractPresenter {
     // inner classes
     private class SheetSubmitHandler implements ClickHandler {
 
+        private final boolean isDraftSubmit;
+
+        public SheetSubmitHandler(boolean isDraftSubmit) {
+            this.isDraftSubmit = isDraftSubmit;
+        }
+
         @Override
         public void onClick(ClickEvent event) {
             boolean isValid = currentInput.getSheet().validate();
@@ -246,20 +256,26 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 return;
             }
 
-            model.submitBulkImport(currentInput.getImportType(), cellData, view.getPermissionSelection(),
-                                   new BulkUploadSubmitEventHandler() {
+            BulkUploadSubmitEventHandler eventHandler = new BulkUploadSubmitEventHandler() {
 
-                                       @Override
-                                       public void onSubmit(BulkUploadSubmitEvent event) {
-                                           if (event.isSuccess()) {
-                                               view.showFeedback("Entries submitted successfully for verification.",
-                                                                 false);
-                                               History.newItem(Page.COLLECTIONS.getLink());
-                                           } else {
-                                               view.showFeedback("Error saving entries.", true);
-                                           }
-                                       }
-                                   });
+                @Override
+                public void onSubmit(BulkUploadSubmitEvent event) {
+                    if (event.isSuccess()) {
+                        view.showFeedback("Entries submitted successfully for verification.",
+                                          false);
+                        History.newItem(Page.COLLECTIONS.getLink());
+                    } else {
+                        view.showFeedback("Error saving entries.", true);
+                    }
+                }
+            };
+
+            if (isDraftSubmit)
+                model.submitBulkImportDraft(currentInput.getId(), cellData, view.getPermissionSelection(),
+                                            eventHandler);
+            else
+                model.submitBulkImport(currentInput.getImportType(), cellData, view.getPermissionSelection(),
+                                       eventHandler);
         }
     }
 
