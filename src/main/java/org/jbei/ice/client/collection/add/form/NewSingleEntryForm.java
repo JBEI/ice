@@ -2,7 +2,6 @@ package org.jbei.ice.client.collection.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.TreeSet;
@@ -25,28 +24,15 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 /**
  * Parent class for forms used to create single entries
- * 
+ *
  * @author Hector Plahar
  */
 public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite implements
-        IEntryFormSubmit {
+                                                                                IEntryFormSubmit {
 
     protected final FlexTable layout;
     protected final HashMap<AutoCompleteField, ArrayList<String>> data;
@@ -425,7 +411,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         return box;
     }
 
-    public Widget createAutoCompleteForPromoters(String width) {
+    public SuggestBox createAutoCompleteForPromoters(String width) {
 
         SuggestBox box = createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PROMOTERS)));
         box.setWidth(width);
@@ -434,24 +420,21 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
     public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                .get(AutoCompleteField.SELECTION_MARKERS)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.SELECTION_MARKERS)));
         box.setWidth(width);
         return box;
     }
 
-    public Widget createAutoCompleteForPlasmidNames(String width) {
+    public SuggestBox createAutoCompleteForPlasmidNames(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                .get(AutoCompleteField.PLASMID_NAME)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PLASMID_NAME)));
         box.setWidth(width);
         return box;
     }
 
-    public Widget createAutoCompleteForOriginOfReplication(String width) {
+    public SuggestBox createAutoCompleteForOriginOfReplication(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                .get(AutoCompleteField.ORIGIN_OF_REPLICATION)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.ORIGIN_OF_REPLICATION)));
         box.setWidth(width);
         return box;
     }
@@ -553,7 +536,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
      * populates the entry info fields that are common to all. this is meant to be sub-classed so
      * that the specializations can
      * input their class specific fields.
-     * 
+     *
      * @return
      */
     @Override

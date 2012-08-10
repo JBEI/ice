@@ -282,25 +282,21 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
 
     public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                                                                           .get(AutoCompleteField.SELECTION_MARKERS)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.SELECTION_MARKERS)));
         box.setWidth(width);
         return box;
     }
 
-    public Widget createAutoCompleteForPlasmidNames(String width) {
+    public SuggestBox createAutoCompleteForPlasmidNames(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                                                                           .get(AutoCompleteField.PLASMID_NAME)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PLASMID_NAME)));
         box.setWidth(width);
         return box;
     }
 
-    public Widget createAutoCompleteForOriginOfReplication(String width) {
+    public SuggestBox createAutoCompleteForOriginOfReplication(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                                                                           .get(AutoCompleteField
-                                                                                        .ORIGIN_OF_REPLICATION)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.ORIGIN_OF_REPLICATION)));
         box.setWidth(width);
         return box;
     }

@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Form for creating a new plasmid
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -25,8 +25,8 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
     private CheckBox circular;
     private TextBox backbone;
     private SuggestBox markers;
-    private TextBox origin;
-    private TextBox promoters;
+    private SuggestBox origin;
+    private SuggestBox promoters;
 
     public NewPlasmidForm(HashMap<AutoCompleteField, ArrayList<String>> data, String creatorName,
             String creatorEmail) {
@@ -49,8 +49,8 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
         markers = createAutoCompleteForSelectionMarkers("300px");
         circular = new CheckBox();
-        origin = createStandardTextBox("300px");
-        promoters = createStandardTextBox("300px");
+        origin = createAutoCompleteForOriginOfReplication("300px");
+        promoters = createAutoCompleteForPromoters("300px");
         backbone = createStandardTextBox("300px");
     }
 
@@ -175,8 +175,8 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
         String selectionMarkers = ((MultipleTextBox) markers.getTextBox()).getWholeText();
         info.setSelectionMarkers(selectionMarkers);
         info.setBackbone(this.backbone.getText());
-        info.setOriginOfReplication(this.origin.getText());
-        info.setPromoters(this.promoters.getText());
+        info.setOriginOfReplication(((MultipleTextBox) origin.getTextBox()).getWholeText());
+        info.setPromoters(((MultipleTextBox) promoters.getTextBox()).getWholeText());
         info.setCircular(this.circular.getValue());
     }
 

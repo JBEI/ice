@@ -17,7 +17,7 @@ public class UpdateStrainForm extends UpdateEntryForm<StrainInfo> {
 
     private TextBox host;
     private TextBox genPhen;
-    private TextBox plasmids;
+    private SuggestBox plasmids;
     private SuggestBox markers;
 
     public UpdateStrainForm(HashMap<AutoCompleteField, ArrayList<String>> data, StrainInfo info) {
@@ -36,7 +36,7 @@ public class UpdateStrainForm extends UpdateEntryForm<StrainInfo> {
         host = createStandardTextBox("300px");
         markers = createAutoCompleteForSelectionMarkers("300px");
         genPhen = createStandardTextBox("300px");
-        plasmids = createStandardTextBox("300px");
+        plasmids = createAutoCompleteForPlasmidNames("300px");
     }
 
     @Override
@@ -158,7 +158,7 @@ public class UpdateStrainForm extends UpdateEntryForm<StrainInfo> {
         StrainInfo strain = super.getEntryInfo();
         strain.setHost(host.getText());
         strain.setGenotypePhenotype(genPhen.getText());
-        strain.setPlasmids(plasmids.getText());
+        strain.setPlasmids(((MultipleTextBox) plasmids.getTextBox()).getWholeText());
         String selectionMarkers = ((MultipleTextBox) markers.getTextBox()).getWholeText();
         strain.setSelectionMarkers(selectionMarkers);
     }
