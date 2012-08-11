@@ -2,6 +2,7 @@ package org.jbei.ice.client.bulkupload.sheet;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
@@ -16,6 +17,7 @@ public class MultiSuggestSheetCell extends SheetCell {
     protected final MultiWordSuggestOracle oracle;
     protected final SuggestBox box;
     protected final MultipleTextBox textBox;
+    private final ArrayList<String> oracleData = new ArrayList<String>();
 
     public MultiSuggestSheetCell() {
         super();
@@ -58,6 +60,8 @@ public class MultiSuggestSheetCell extends SheetCell {
     public void addOracleData(ArrayList<String> data) {
         oracle.clear();
         oracle.addAll(data);
+        oracleData.clear();
+        oracleData.addAll(data);
     }
 
     public boolean hasMultiSuggestions() {
@@ -67,5 +71,18 @@ public class MultiSuggestSheetCell extends SheetCell {
     @Override
     public Widget getWidget(int row, boolean isCurrentSelection) {
         return box;
+    }
+
+    @Override
+    public String inputIsValid(int row) {
+        String errorMsg = super.inputIsValid(row);
+        if (!errorMsg.isEmpty())
+            return errorMsg;
+
+        SheetCellData data = getDataForRow(row);
+        if (!oracleData.isEmpty() && !oracleData.contains(data.getValue()))
+            return "Invalid value";
+
+        return "";
     }
 }
