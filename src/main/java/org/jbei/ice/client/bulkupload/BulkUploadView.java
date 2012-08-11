@@ -180,6 +180,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         panel.setCellSpacing(0);
         panel.setWidth("100%");
         sheet = bulkImport;
+        feedback.setVisible(false);
 
         if (!isNew) {
             if (isValidation) {
@@ -200,6 +201,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 panel.getFlexCellFormatter().setWidth(0, 3, "70px");
             }
         } else {
+            draftInput.reset();
             panel.setWidget(0, 0, draftInput);
             panel.setWidget(0, 1, feedback);
 

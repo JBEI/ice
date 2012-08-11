@@ -1,8 +1,6 @@
 package org.jbei.ice.client.bulkupload;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -40,7 +38,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class BulkUploadPresenter extends AbstractPresenter {
 
     private final IBulkUploadView view;
-    private final HashMap<EntryAddType, NewBulkInput> sheetCache;
+    //    private final HashMap<EntryAddType, NewBulkInput> sheetCache;
     private final BulkUploadModel model;
     private NewBulkInput currentInput;
     private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>(); // list of saved
@@ -49,7 +47,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
     public BulkUploadPresenter(BulkUploadModel model, final IBulkUploadView display) {
         this.view = display;
         this.model = model;
-        sheetCache = new HashMap<EntryAddType, NewBulkInput>();
+//        sheetCache = new HashMap<EntryAddType, NewBulkInput>();
 
         setClickHandlers();
 
@@ -62,7 +60,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
         // retrieveData
         retrieveSavedDrafts();
-        retrieveAutoCompleteData();
+//        retrieveAutoCompleteData();
         retrievePendingIfAdmin();
 
         model.getEventBus().addHandler(FeedbackEvent.TYPE,
@@ -153,16 +151,16 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 if (selection == null)
                     return;
 
-                if (sheetCache.containsKey(selection))
-                    currentInput = sheetCache.get(selection);
-                else {
-                    Sheet sheet = new Sheet(selection);
-                    sheet.setAutoCompleteData(AppController.autoCompleteData);
-                    currentInput = new NewBulkInput(selection, sheet);
+//                if (sheetCache.containsKey(selection))
+//                    currentInput = sheetCache.get(selection);
+//                else {
+                Sheet sheet = new Sheet(selection);
+                sheet.setAutoCompleteData(AppController.autoCompleteData);
+                currentInput = new NewBulkInput(selection, sheet);
 
-                    // header Panel 
-                    sheetCache.put(selection, currentInput);
-                }
+                // header Panel
+//                    sheetCache.put(selection, currentInput);
+//                }
 
                 view.setSheet(currentInput, true, false);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
@@ -219,12 +217,12 @@ public class BulkUploadPresenter extends AbstractPresenter {
         });
     }
 
-    private void retrieveAutoCompleteData() {
-        for (Entry<EntryAddType, NewBulkInput> entry : sheetCache.entrySet()) {
-            NewBulkInput input = entry.getValue();
-            input.getSheet().setAutoCompleteData(AppController.autoCompleteData);
-        }
-    }
+//    private void retrieveAutoCompleteData() {
+//        for (Entry<EntryAddType, NewBulkInput> entry : sheetCache.entrySet()) {
+//            NewBulkInput input = entry.getValue();
+//            input.getSheet().setAutoCompleteData(AppController.autoCompleteData);
+//        }
+//    }
 
     @Override
     public void go(HasWidgets container) {
