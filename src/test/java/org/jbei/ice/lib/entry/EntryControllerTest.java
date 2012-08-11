@@ -154,7 +154,7 @@ public class EntryControllerTest {
 
         // update
         entryFundingSource.getFundingSource().setFundingSource("NEW");
-        plasmid = (Plasmid) controller.update(account, plasmid, null);
+        plasmid = (Plasmid) controller.update(account, plasmid, false, null);
         Assert.assertNotNull(plasmid);
 
         entryFundingSource = (EntryFundingSource) plasmid.getEntryFundingSources().toArray()[0];

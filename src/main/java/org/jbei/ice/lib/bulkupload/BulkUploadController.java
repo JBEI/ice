@@ -377,7 +377,7 @@ public class BulkUploadController {
 
                     try {
                         // update plasmids for strain
-                        entryController.update(draftOwner, entry, group);
+                        entryController.update(draftOwner, entry, false, group);
                     } catch (PermissionException e) {
                         Logger.error(e);
                     }
@@ -523,7 +523,7 @@ public class BulkUploadController {
                 InfoToModelFactory.infoToEntry(info.getInfo(), enclosedEntry);
 
                 // update enclosing and get the part number
-                enclosedEntry = entryController.update(account, enclosedEntry, null);
+                enclosedEntry = entryController.update(account, enclosedEntry, false, null);
                 String name = enclosedEntry.getOneName() == null ? "" : enclosedEntry.getOneName().getName();
                 String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
                         + ":" + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
@@ -532,7 +532,7 @@ public class BulkUploadController {
 
                 try {
                     // update plasmids for strain
-                    entryController.update(account, entry, group);
+                    entryController.update(account, entry, false, group);
                 } catch (PermissionException e) {
                     Logger.error(e);
                 }
@@ -545,7 +545,7 @@ public class BulkUploadController {
 
         // perform update for main entry
         entry = InfoToModelFactory.infoToEntry(info, entry);
-        entryController.update(account, entry, group);
+        entryController.update(account, entry, false, group);
 
         // update main entry sequence and attachment
         saveSequence(account, info.getSequenceAnalysis(), entry);

@@ -1460,7 +1460,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": creating strain with plasmid");
             EntryController controller = new EntryController();
             GroupController groupController = new GroupController();
-            Group publicGroup = groupController.createOrRetrievePublicGroup(); // tODO group uuid should come from ui
+            Group publicGroup = groupController.createOrRetrievePublicGroup(); // TODO group uuid should come from ui
 
             Strain strain = null;
             Plasmid plasmid = null;
@@ -1586,7 +1586,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Entry existing = controller.getByRecordId(account, info.getRecordId());
 
             Entry entry = InfoToModelFactory.infoToEntry(info, existing);
-            controller.update(account, entry, null);
+            controller.update(account, entry, true, null);
             return true;
 
         } catch (ControllerException e) {

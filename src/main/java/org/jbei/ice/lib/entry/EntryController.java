@@ -386,8 +386,8 @@ public class EntryController {
         return savedEntry;
     }
 
-    public Entry update(Account account, Entry entry, Group readGroup) throws ControllerException,
-            PermissionException {
+    public Entry update(Account account, Entry entry, boolean scheduleIndexRebuild, Group readGroup)
+            throws ControllerException, PermissionException {
 
         if (entry == null) {
             throw new ControllerException("Failed to update null entry!");
@@ -412,8 +412,10 @@ public class EntryController {
                 permissionsController.setReadGroup(account, entry, groups);
             }
 
-            ApplicationController.scheduleSearchIndexRebuildJob();
-            ApplicationController.scheduleBlastIndexRebuildJob();
+            if (scheduleIndexRebuild) {
+                ApplicationController.scheduleSearchIndexRebuildJob();
+                ApplicationController.scheduleBlastIndexRebuildJob();
+            }
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
