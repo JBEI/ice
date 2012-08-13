@@ -4,6 +4,7 @@ import org.jbei.ice.client.bulkupload.sheet.cell.BioSafetySheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.FileInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.InputSheetCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.SelectionMarkerInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.StatusSheetCell;
@@ -35,7 +36,7 @@ public enum Header {
     ECOTYPE("Ecotype", false, "", new InputSheetCell()),
     HARVEST_DATE("Harvest Date", false, "", new DateInputCell()),
     GENERATION("Generation", true, "", new InputSheetCell()),
-    PLANT_TYPE("Plant Type", true, "", new InputSheetCell()),
+    PLANT_TYPE("Plant Type", true, "", new PlantTypeSheetCell()),
     PARENTS("Parents", false, "", new InputSheetCell()),
     PLASMID_NAME("Plasmid Name", true, "e.g. pTSH117", new InputSheetCell()),
     PLASMID_ALIAS("Plasmid Alias", false, "", new InputSheetCell()),

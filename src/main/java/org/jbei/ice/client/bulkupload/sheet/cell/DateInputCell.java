@@ -17,7 +17,7 @@ public class DateInputCell extends SheetCell {
         dateBox.setStyleName("cell_input");
         dateBox.getDatePicker().setStyleName("font-70em");
 
-        DateTimeFormat dateFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT);
+        DateTimeFormat dateFormat = DateTimeFormat.getFormat("MM/dd/yyyy");
         dateBox.setFormat(new DateBox.DefaultFormat(dateFormat));
     }
 

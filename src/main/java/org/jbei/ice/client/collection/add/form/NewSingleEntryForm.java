@@ -11,7 +11,7 @@ import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
@@ -120,7 +120,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
         bioSafety = new ListBox();
         bioSafety.setVisibleItemCount(1);
-        for (BioSafetyOptions options : BioSafetyOptions.values()) {
+        for (BioSafetyOption options : BioSafetyOption.values()) {
             bioSafety.addItem(options.getDisplayName(), options.getValue());
         }
         bioSafety.setStyleName("pull_down");

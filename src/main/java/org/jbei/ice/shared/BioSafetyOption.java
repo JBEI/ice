@@ -1,22 +1,22 @@
 package org.jbei.ice.shared;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 import java.util.ArrayList;
 
-public enum BioSafetyOptions implements IsSerializable {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public enum BioSafetyOption implements IsSerializable {
 
     LEVEL_ONE("Level 1", "1"), LEVEL_TWO("Level 2", "2");
 
     private String displayName;
     private String value;
 
-    BioSafetyOptions(String name, String value) {
+    BioSafetyOption(String name, String value) {
         this.displayName = name;
         this.value = value;
     }
 
-    BioSafetyOptions() {
+    BioSafetyOption() {
     }
 
     public String getDisplayName() {
@@ -32,8 +32,8 @@ public enum BioSafetyOptions implements IsSerializable {
         return this.value;
     }
 
-    public static BioSafetyOptions enumValue(Integer i) {
-        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+    public static BioSafetyOption enumValue(Integer i) {
+        for (BioSafetyOption option : BioSafetyOption.values()) {
             if (Integer.valueOf(option.value) == i)
                 return option;
         }
@@ -41,7 +41,7 @@ public enum BioSafetyOptions implements IsSerializable {
     }
 
     public static Integer intValue(String value) {
-        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+        for (BioSafetyOption option : BioSafetyOption.values()) {
             if (option.displayName.equalsIgnoreCase(value) || option.getValue().equals(value)) {
                 return Integer.valueOf(option.getValue());
 
@@ -52,9 +52,18 @@ public enum BioSafetyOptions implements IsSerializable {
 
     public static ArrayList<String> getDisplayList() {
         ArrayList<String> list = new ArrayList<String>();
-        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+        for (BioSafetyOption option : BioSafetyOption.values()) {
             list.add(option.displayName);
         }
         return list;
+    }
+
+    public static Object displayToEnum(String value) {
+
+        for (BioSafetyOption option : BioSafetyOption.values()) {
+            if (value.equalsIgnoreCase(option.getDisplayName()))
+                return option;
+        }
+        return null;
     }
 }

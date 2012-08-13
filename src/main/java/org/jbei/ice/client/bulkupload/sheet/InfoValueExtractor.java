@@ -3,7 +3,7 @@ package org.jbei.ice.client.bulkupload.sheet;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
-import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
@@ -48,7 +48,7 @@ abstract class InfoValueExtractor {
                 break;
 
             case BIOSAFETY:
-                BioSafetyOptions option = BioSafetyOptions.enumValue(info.getBioSafetyLevel());
+                BioSafetyOption option = BioSafetyOption.enumValue(info.getBioSafetyLevel());
                 if (option != null)
                     value = option.toString();
                 break;

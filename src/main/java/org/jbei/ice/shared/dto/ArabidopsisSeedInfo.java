@@ -1,5 +1,6 @@
 package org.jbei.ice.shared.dto;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -26,6 +27,23 @@ public class ArabidopsisSeedInfo extends EntryInfo {
         @Override
         public String toString() {
             return this.display;
+        }
+
+        public static ArrayList<String> getDisplayList() {
+            ArrayList<String> list = new ArrayList<String>();
+            for (PlantType option : PlantType.values()) {
+                list.add(option.display);
+            }
+            return list;
+        }
+
+        public static Object displayToEnum(String value) {
+
+            for (PlantType option : PlantType.values()) {
+                if (value.equalsIgnoreCase(option.toString()))
+                    return option;
+            }
+            return null;
         }
     }
 

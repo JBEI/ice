@@ -1,9 +1,11 @@
 package org.jbei.ice.client.bulkupload.model;
 
+import java.util.Date;
+
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 
-import com.google.gwt.user.client.Window;
+import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedInfo> {
 
@@ -31,9 +33,8 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
                 break;
 
             case HARVEST_DATE:
-                Window.alert("Harvest date not implemented: ArabidopsisSheetModel.java:33");
-                // Need a string to date util
-//                  info.setHarvestDate();
+                Date date = DateTimeFormat.getFormat("MM/dd/yyyy").parse(value);
+                info.setHarvestDate(date);
                 break;
 
             case PARENTS:

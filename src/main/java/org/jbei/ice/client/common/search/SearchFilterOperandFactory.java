@@ -7,7 +7,7 @@ import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.client.common.TextInputOperand;
 import org.jbei.ice.client.common.TypeOperand;
 import org.jbei.ice.client.model.OperandValue;
-import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.StatusType;
@@ -67,7 +67,7 @@ public class SearchFilterOperandFactory {
 
             case BIO_SAFETY_LEVEL:
                 operands.clear();
-                for (BioSafetyOptions option : BioSafetyOptions.values())
+                for (BioSafetyOption option : BioSafetyOption.values())
                     operands.add(new OperandValue(option.getDisplayName(), option.getValue()));
                 return new TypeOperand(type, operands, QueryOperator.IS, QueryOperator.IS_NOT);
 
