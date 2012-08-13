@@ -24,5 +24,6 @@ public class ArabidopsisDetailView extends EntryDetailView<ArabidopsisSeedInfo> 
 
     @Override
     protected void addLongFields() {
+        addLongField("Selection Markers", info.getSelectionMarkers());
     }
 }
