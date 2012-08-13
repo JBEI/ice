@@ -1537,7 +1537,6 @@ td.datePickerMonth {
     color: #333;
     font-weight: bold;
     border-left: 1px solid #F1F1F1;
-    text-transform: uppercase;
     font-style: italic;
     background-color: #f4f3e9;
 }

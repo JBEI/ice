@@ -29,7 +29,7 @@ public class PermissionsSelection extends Composite {
     protected void initComponents() {
 
         panel = new HTMLPanel(
-                "<span class=\"bulk_upload_visibility\">Group visibility </span><span " +
+                "<span class=\"bulk_upload_visibility\">GROUP VISIBILITY </span><span " +
                         "id=\"selection_visibility\"></span>");
 
         selection = new ListBox();

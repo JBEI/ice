@@ -197,8 +197,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 panel.setWidget(0, 2, resetButton);
                 panel.getFlexCellFormatter().setWidth(0, 2, "40px");
 
-                panel.setWidget(0, 3, this.updateDraftInput.getSaveButton());
-                panel.getFlexCellFormatter().setWidth(0, 3, "70px");
+                panel.setHTML(0, 3, "");
+                panel.getFlexCellFormatter().setWidth(0, 3, "5px");
+
+                panel.setWidget(0, 4, this.updateDraftInput.getSaveButton());
+                panel.getFlexCellFormatter().setWidth(0, 4, "70px");
             }
         } else {
             draftInput.reset();
@@ -208,8 +211,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             panel.setWidget(0, 2, resetButton);
             panel.getFlexCellFormatter().setWidth(0, 2, "40px");
 
-            panel.setWidget(0, 3, saveButton);
-            panel.getFlexCellFormatter().setWidth(0, 3, "70px");
+            panel.setHTML(0, 3, "");
+            panel.getFlexCellFormatter().setWidth(0, 3, "5px");
+
+            panel.setWidget(0, 4, saveButton);
+            panel.getFlexCellFormatter().setWidth(0, 4, "70px");
         }
 
         mainContent.setWidget(0, 1, panel);
@@ -219,13 +225,13 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         mainContent.getFlexCellFormatter().setColSpan(1, 0, index);
 
         HTMLPanel bulkImportHeader = new HTMLPanel(
-                "<span id=\"bulk_import_header_title\"></span><span style=\"float:right\" " +
-                        "id=\"bulk_import_permission_selection\"></span>");
+                "<span style=\"text-transform: uppercase\" id=\"bulk_import_header_title\"></span>" +
+                        "<span style=\"float:right\" id=\"bulk_import_permission_selection\"></span>");
         bulkImportHeader.add(contentHeader, "bulk_import_header_title");
         bulkImportHeader.add(selection, "bulk_import_permission_selection");
+        bulkImportHeader.setStyleName("bulk_import_header");
 
         mainContent.setWidget(2, 0, bulkImportHeader);
-        mainContent.getCellFormatter().setStyleName(2, 0, "bulk_import_header");
         mainContent.getFlexCellFormatter().setColSpan(2, 0, index);
 
         mainContent.setWidget(3, 0, bulkImport.getSheet());
