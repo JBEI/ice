@@ -3,6 +3,7 @@ package org.jbei.ice.client.bulkupload.sheet;
 import org.jbei.ice.client.bulkupload.sheet.cell.BioSafetySheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.FileInputCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.GenerationSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.InputSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.SelectionMarkerInputCell;
@@ -35,7 +36,7 @@ public enum Header {
     HOMOZYGOSITY("Homozygosity", false, "", new InputSheetCell()),
     ECOTYPE("Ecotype", false, "", new InputSheetCell()),
     HARVEST_DATE("Harvest Date", false, "", new DateInputCell()),
-    GENERATION("Generation", true, "", new InputSheetCell()),
+    GENERATION("Generation", true, "", new GenerationSheetCell()),
     PLANT_TYPE("Plant Type", true, "", new PlantTypeSheetCell()),
     PARENTS("Parents", false, "", new InputSheetCell()),
     PLASMID_NAME("Plasmid Name", true, "e.g. pTSH117", new InputSheetCell()),

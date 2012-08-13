@@ -27,6 +27,12 @@ public class MultiSuggestSheetCell extends SheetCell {
         box.setStyleName("cell_input");
     }
 
+    public MultiSuggestSheetCell(ArrayList<String> data) {
+        this();
+        oracle.addAll(data);
+        oracleData.addAll(data);
+    }
+
     @Override
     public void setText(String text) {
         box.setText(text);

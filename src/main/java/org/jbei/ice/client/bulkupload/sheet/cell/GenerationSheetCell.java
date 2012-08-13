@@ -1,16 +1,17 @@
 package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
-import org.jbei.ice.shared.BioSafetyOption;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 
 /**
+ * Sheet cell for generation field used in importing arabidopsis seeds
+ *
  * @author Hector Plahar
  */
-public class BioSafetySheetCell extends MultiSuggestSheetCell {
+public class GenerationSheetCell extends MultiSuggestSheetCell {
 
-    public BioSafetySheetCell() {
-        super();
-        this.addOracleData(BioSafetyOption.getDisplayList());
+    public GenerationSheetCell() {
+        super(ArabidopsisSeedInfo.Generation.getDisplayList());
     }
 
     @Override
@@ -20,8 +21,8 @@ public class BioSafetySheetCell extends MultiSuggestSheetCell {
             return errMsg;
 
         SheetCellData data = getDataForRow(row);
-        if (BioSafetyOption.displayToEnum(data.getValue()) == null) {
-            return "Valid values: [" + getStatusOptions() + "]";
+        if (ArabidopsisSeedInfo.Generation.displayToEnum(data.getValue()) == null) {
+            return "[" + getStatusOptions() + "]";
         }
 
         return "";
@@ -29,9 +30,9 @@ public class BioSafetySheetCell extends MultiSuggestSheetCell {
 
     public String getStatusOptions() {
         StringBuilder builder = new StringBuilder();
-        int size = BioSafetyOption.getDisplayList().size();
+        int size = ArabidopsisSeedInfo.Generation.getDisplayList().size();
         for (int i = 0; i < size; i += 1) {
-            String item = BioSafetyOption.getDisplayList().get(i);
+            String item = ArabidopsisSeedInfo.Generation.getDisplayList().get(i);
             builder.append(item);
             if (i < size - 1)
                 builder.append(", ");
@@ -39,4 +40,5 @@ public class BioSafetySheetCell extends MultiSuggestSheetCell {
 
         return builder.toString();
     }
+
 }
