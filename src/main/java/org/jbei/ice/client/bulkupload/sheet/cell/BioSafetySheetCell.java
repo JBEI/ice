@@ -1,4 +1,4 @@
-package org.jbei.ice.client.bulkupload.sheet;
+package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import org.jbei.ice.shared.BioSafetyOptions;
 

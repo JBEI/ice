@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.entry.model;
 
-import org.jbei.ice.shared.dto.EntryType;
-
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,9 +9,8 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
+import org.jbei.ice.shared.dto.EntryType;
 
 /**
  * Store Arabidopsis Seed specific fields.
@@ -24,6 +22,7 @@ import java.util.Map;
  * <li><b>parents:</b></li>
  * <li><b>generation:</b></li>
  * <li><b>plantType</b></li>
+ * <li><b>Sent to ABRC</b></li>
  * </ul>
  *
  * @author Timothy Ham
@@ -74,41 +73,11 @@ public class ArabidopsisSeed extends Entry {
     @Enumerated(EnumType.STRING)
     private PlantType plantType;
 
+    @Column(name = "sentToABRC")
+    private Boolean sentToABRC = Boolean.FALSE;
+
     public ArabidopsisSeed() {
         setRecordType(EntryType.ARABIDOPSIS.getName());
-    }
-
-    /**
-     * Return a Map to look up {@link Generation} to its string representation.
-     *
-     * @return Map of generation to names.
-     */
-    public static Map<String, String> getGenerationOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-        for (Generation generation : Generation.values()) {
-            resultMap.put(generation.toString(), generation.toString());
-        }
-
-        return resultMap;
-
-    }
-
-    /**
-     * Return a Map to look up {@link PlantType} to its friendly string representation.
-     *
-     * @return Map to look up Plant type to its string representation.
-     */
-    public static Map<String, String> getPlantTypeOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-
-        resultMap.put(PlantType.EMS.toString(), "EMS");
-        resultMap.put(PlantType.OVER_EXPRESSION.toString(), "Over Expression");
-        resultMap.put(PlantType.RNAI.toString(), "RNAi");
-        resultMap.put(PlantType.REPORTER.toString(), "Reporter");
-        resultMap.put(PlantType.T_DNA.toString(), "T-DNA");
-        resultMap.put(PlantType.OTHER.toString(), "Other");
-
-        return resultMap;
     }
 
     // getters and setters
@@ -160,4 +129,12 @@ public class ArabidopsisSeed extends Entry {
         return plantType;
     }
 
+    public Boolean isSentToABRC() {
+        return sentToABRC;
+    }
+
+    public void setSentToABRC(Boolean sentToABRC) {
+        if (sentToABRC != null)
+            this.sentToABRC = sentToABRC;
+    }
 }

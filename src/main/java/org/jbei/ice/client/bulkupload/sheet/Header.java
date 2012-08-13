@@ -1,5 +1,13 @@
 package org.jbei.ice.client.bulkupload.sheet;
 
+import org.jbei.ice.client.bulkupload.sheet.cell.BioSafetySheetCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.FileInputCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.InputSheetCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.SelectionMarkerInputCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.StatusSheetCell;
+
 public enum Header {
     PI("Principal Investigator", true, "", new InputSheetCell()),
     FUNDING_SOURCE("Funding Source", false, "", new InputSheetCell()),
@@ -25,7 +33,7 @@ public enum Header {
     ORIGIN_OF_REPLICATION("Origin of Replication", false, "", new InputSheetCell()),
     HOMOZYGOSITY("Homozygosity", false, "", new InputSheetCell()),
     ECOTYPE("Ecotype", false, "", new InputSheetCell()),
-    HARVEST_DATE("Harvest Data", false, "", new InputSheetCell()),
+    HARVEST_DATE("Harvest Date", false, "", new DateInputCell()),
     GENERATION("Generation", true, "", new InputSheetCell()),
     PLANT_TYPE("Plant Type", true, "", new InputSheetCell()),
     PARENTS("Parents", false, "", new InputSheetCell()),

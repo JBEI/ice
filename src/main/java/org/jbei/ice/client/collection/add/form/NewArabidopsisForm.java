@@ -11,6 +11,7 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestBox;
@@ -27,6 +28,7 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
     private TextBox ecoType;
     private TextBox parents;
     private DateBox harvestDate;
+    private CheckBox sentToAbrc;
 
     public NewArabidopsisForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             String creatorName, String creatorEmail) {
@@ -60,6 +62,7 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         homozygosity = createStandardTextBox("300px");
         ecoType = createStandardTextBox("300px");
         parents = createStandardTextBox("300px");
+        sentToAbrc = new CheckBox();
     }
 
     protected Widget createGeneralWidget() {
@@ -112,7 +115,10 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         row += 1;
         setLabel(false, "Generation", general, row, 0);
         general.setWidget(row, 1, generation);
-        general.getFlexCellFormatter().setColSpan(row, 1, 3);
+
+        // sent to abrc
+        setLabel(false, "Sent To ABRC", general, row, 2);
+        general.setWidget(row, 3, sentToAbrc);
 
         // plant type
         row += 1;
@@ -202,5 +208,6 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         seed.setEcotype(this.ecoType.getText());
         seed.setHarvestDate(this.harvestDate.getDatePicker().getValue());
         seed.setParents(parents.getText());
+        seed.setSentToAbrc(sentToAbrc.getValue().booleanValue());
     }
 }

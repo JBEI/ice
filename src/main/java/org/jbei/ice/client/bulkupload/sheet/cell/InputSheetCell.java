@@ -1,4 +1,4 @@
-package org.jbei.ice.client.bulkupload.sheet;
+package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;

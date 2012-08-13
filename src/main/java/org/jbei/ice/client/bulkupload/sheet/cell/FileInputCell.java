@@ -1,8 +1,9 @@
-package org.jbei.ice.client.bulkupload.sheet;
+package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
+import org.jbei.ice.client.bulkupload.sheet.CellUploader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

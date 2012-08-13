@@ -11,6 +11,7 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestBox;
@@ -27,6 +28,7 @@ public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
     private TextBox ecoType;
     private TextBox parents;
     private DateBox harvestDate;
+    private CheckBox sentToABRC;
 
     public UpdateArabidopsisForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             ArabidopsisSeedInfo info) {
@@ -59,7 +61,7 @@ public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
         ecoType.setText(info.getEcotype());
         parents.setText(info.getParents());
         harvestDate.setValue(info.getHarvestDate());
-
+        sentToABRC.setValue(info.isSentToAbrc());
     }
 
     @Override
@@ -84,6 +86,7 @@ public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
         homozygosity = createStandardTextBox("300px");
         ecoType = createStandardTextBox("300px");
         parents = createStandardTextBox("300px");
+        sentToABRC = new CheckBox();
     }
 
     @Override
@@ -160,6 +163,11 @@ public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
         general.setWidget(row, 1, homozygosity);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
+        row += 1;
+        setLabel(false, "Sent To ABRC", general, row, 0);
+        general.setWidget(row, 1, sentToABRC);
+        general.getFlexCellFormatter().setColSpan(row, 1, 3);
+
         // links
         row += 1;
         setLabel(false, "Links", general, row, 0);
@@ -231,5 +239,6 @@ public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
         seed.setEcotype(this.ecoType.getText());
         seed.setHarvestDate(this.harvestDate.getDatePicker().getValue());
         seed.setParents(parents.getText());
+        seed.setSentToAbrc(sentToABRC.getValue().booleanValue());
     }
 }

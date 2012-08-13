@@ -222,6 +222,7 @@ public class EntryToInfoFactory {
         info.setEcotype(seed.getEcotype());
         info.setParents(seed.getParents());
         info.setHarvestDate(seed.getHarvestDate());
+        info.setSentToAbrc(seed.isSentToABRC().booleanValue());
 
         return info;
     }

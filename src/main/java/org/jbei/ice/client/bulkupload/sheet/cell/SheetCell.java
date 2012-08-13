@@ -1,4 +1,4 @@
-package org.jbei.ice.client.bulkupload.sheet;
+package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import java.util.HashMap;
 
@@ -55,7 +55,7 @@ public abstract class SheetCell {
         return false;
     }
 
-    protected void setWidgetValue(int inputRow, String value, String id) {
+    public void setWidgetValue(int inputRow, String value, String id) {
         SheetCellData data = rowValues.get(inputRow);
         if (data == null) {
             data = new SheetCellData();

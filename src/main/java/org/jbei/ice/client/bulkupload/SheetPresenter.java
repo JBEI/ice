@@ -9,7 +9,7 @@ import org.jbei.ice.client.bulkupload.model.SheetModel;
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.ImportTypeHeaders;
 import org.jbei.ice.client.bulkupload.sheet.InfoValueExtractorFactory;
-import org.jbei.ice.client.bulkupload.sheet.SheetCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;

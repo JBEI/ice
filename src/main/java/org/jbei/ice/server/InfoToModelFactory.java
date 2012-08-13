@@ -123,6 +123,7 @@ public class InfoToModelFactory {
                                                                                                     .name());
                     seed.setPlantType(plantType);
                 }
+                seed.setSentToABRC(seedInfo.isSentToAbrc());
                 break;
 
             default:

@@ -1,10 +1,8 @@
 package org.jbei.ice.shared.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ArabidopsisSeedInfo extends EntryInfo {
 
@@ -37,31 +35,10 @@ public class ArabidopsisSeedInfo extends EntryInfo {
     private String parents;
     private Generation generation;
     private PlantType plantType;
+    private boolean sentToAbrc;
 
     public ArabidopsisSeedInfo() {
         super(EntryType.ARABIDOPSIS);
-    }
-
-    public static Map<String, String> getGenerationOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-        for (Generation generation : Generation.values()) {
-            resultMap.put(generation.toString(), generation.toString());
-        }
-
-        return resultMap;
-    }
-
-    public static Map<String, String> getPlantTypeOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-
-        resultMap.put(PlantType.EMS.toString(), "EMS");
-        resultMap.put(PlantType.OVER_EXPRESSION.toString(), "Over Expression");
-        resultMap.put(PlantType.RNAI.toString(), "RNAi");
-        resultMap.put(PlantType.REPORTER.toString(), "Reporter");
-        resultMap.put(PlantType.T_DNA.toString(), "T-DNA");
-        resultMap.put(PlantType.OTHER.toString(), "Other");
-
-        return resultMap;
     }
 
     // getters and setters
@@ -111,5 +88,13 @@ public class ArabidopsisSeedInfo extends EntryInfo {
 
     public PlantType getPlantType() {
         return plantType;
+    }
+
+    public boolean isSentToAbrc() {
+        return sentToAbrc;
+    }
+
+    public void setSentToAbrc(boolean sentToAbrc) {
+        this.sentToAbrc = sentToAbrc;
     }
 }
