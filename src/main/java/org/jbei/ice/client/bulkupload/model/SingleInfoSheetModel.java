@@ -41,8 +41,7 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
 
             case BIOSAFETY:
                 Integer optionValue = BioSafetyOptions.intValue(value);
-                if (optionValue != null)
-                    info.setBioSafetyLevel(optionValue);
+                info.setBioSafetyLevel(optionValue);
                 break;
 
             case NAME:

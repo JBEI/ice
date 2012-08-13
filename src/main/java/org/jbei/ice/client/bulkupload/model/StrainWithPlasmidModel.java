@@ -60,8 +60,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
             case BIOSAFETY:
                 Integer optionValue = BioSafetyOptions.intValue(value);
-                if (optionValue != null)
-                    strain.setBioSafetyLevel(optionValue);
+                strain.setBioSafetyLevel(optionValue);
                 break;
 
             case STRAIN_NAME:
@@ -168,8 +167,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
             case BIOSAFETY:
                 Integer optionValue = BioSafetyOptions.intValue(value);
-                if (optionValue != null)
-                    info.setBioSafetyLevel(optionValue);
+                info.setBioSafetyLevel(optionValue);
                 break;
 
             case PLASMID_NAME:
