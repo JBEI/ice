@@ -129,6 +129,14 @@ public class SheetPresenter {
                 existing.setOwner(owner);
                 existing.setCreator(owner);
                 existing.setCreatorEmail(ownerEmail);
+
+                if (existing.getInfo() != null) {
+                    existing.getInfo().setOwnerEmail(ownerEmail);
+                    existing.getInfo().setOwner(owner);
+                    existing.getInfo().setCreator(owner);
+                    existing.getInfo().setCreatorEmail(ownerEmail);
+                }
+
                 infoList.add(existing);
             }
         }

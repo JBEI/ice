@@ -600,11 +600,8 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testSubmitBulkImport() throws Exception {
-        // testing submission without first creating a draft
-
         // create accounts
         final String email = "tester@test_SubmitBulkImport.org";
-        final String adminEmail = "tester+admin@test_SubmitBulkImport.org";
 
         // create accounts
         AccountController accountController = new AccountController();
@@ -612,8 +609,6 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(password);
         Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
-        Account adminAccount = accountController.createAdminAccount(adminEmail, "popop");
-        Assert.assertNotNull(adminAccount);
 
         // create entries
         ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
@@ -630,6 +625,10 @@ public class BulkUploadControllerTest {
         ArrayList<Long> results = entryController.getEntryIdsByOwner(account.getEmail(), Visibility.PENDING);
         Assert.assertNotNull(results);
         Assert.assertEquals(entryList.size(), results.size());
+
+        Entry entry = entryController.get(account, results.get(0));
+        Assert.assertNotNull(entry);
+        Assert.assertEquals("alias", entry.getAlias());
 
         // user should not have any bulk imports
         ArrayList<BulkUploadInfo> infos = controller.retrieveByUser(account, account);
