@@ -14,10 +14,10 @@ public class DateInputCell extends SheetCell {
     public DateInputCell() {
 
         dateBox = new DateBox();
-        dateBox.setStyleName("input_box");
+        dateBox.setStyleName("cell_input");
+        dateBox.getDatePicker().setStyleName("font-70em");
 
         DateTimeFormat dateFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT);
-        dateBox.setWidth("205px");
         dateBox.setFormat(new DateBox.DefaultFormat(dateFormat));
     }
 
@@ -30,7 +30,6 @@ public class DateInputCell extends SheetCell {
      */
     @Override
     public void setText(String text) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     /**
@@ -41,7 +40,11 @@ public class DateInputCell extends SheetCell {
      */
     @Override
     public String setDataForRow(int row) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+
+        String ret = dateBox.getTextBox().getText();
+        setWidgetValue(row, ret, ret);
+        dateBox.getTextBox().setText("");
+        return ret;
     }
 
     /**
@@ -56,6 +59,6 @@ public class DateInputCell extends SheetCell {
 
     @Override
     public Widget getWidget(int row, boolean isCurrentSelection) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return dateBox;
     }
 }

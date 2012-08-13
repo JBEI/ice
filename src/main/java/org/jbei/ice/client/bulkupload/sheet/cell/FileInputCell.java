@@ -5,7 +5,6 @@ import java.util.HashMap;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellUploader;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -84,7 +83,6 @@ public class FileInputCell extends SheetCell {
             rowUploaderMap.put(row, cellUploader);
         }
 
-        GWT.log(cellUploader.getStatus().toString());
         if (isCurrentSelection) {
             cellUploader.asWidget().setStyleName("uploader_cell_selected");
             return cellUploader.asWidget();
