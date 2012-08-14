@@ -61,7 +61,7 @@ public class ImportTypeHeaders {
                 Header.BIOSAFETY, Header.NAME, Header.ALIAS, Header.KEYWORDS, Header.SUMMARY,
                 Header.NOTES, Header.REFERENCES, Header.LINKS, Header.STATUS, Header.HOMOZYGOSITY,
                 Header.ECOTYPE, Header.HARVEST_DATE, Header.GENERATION, Header.PLANT_TYPE,
-                Header.PARENTS
+                Header.PARENTS, Header.SELECTION_MARKERS
         };
         return headers;
     }
