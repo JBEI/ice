@@ -144,10 +144,17 @@ public class InfoToModelFactory {
         entry.setSelectionMarkers(markers);
         entry.setReferences(info.getReferences());
         entry.setRecordId(info.getRecordId());
-        entry.setOwner(info.getOwner());
-        entry.setOwnerEmail(info.getOwnerEmail());
-        entry.setCreator(info.getCreator());
-        entry.setCreatorEmail(info.getCreatorEmail());
+
+        if (info.getOwnerEmail() != null) {
+            entry.setOwner(info.getOwner());
+            entry.setOwnerEmail(info.getOwnerEmail());
+        }
+
+        if (info.getCreatorEmail() != null) {
+            entry.setCreator(info.getCreator());
+            entry.setCreatorEmail(info.getCreatorEmail());
+        }
+
         entry.setStatus(info.getStatus() == null ? "" : info.getStatus());
         entry.setAlias(info.getAlias());
         entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? new Integer(0) : info

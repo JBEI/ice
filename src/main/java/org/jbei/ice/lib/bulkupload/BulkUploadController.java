@@ -708,7 +708,7 @@ public class BulkUploadController {
             throw new PermissionException("Only administrators can approve bulk imports");
         }
 
-        // retrieve bulk upload in question
+        // retrieve bulk upload in question (at this point it is owned by system)
         BulkUpload bulkUpload;
 
         try {

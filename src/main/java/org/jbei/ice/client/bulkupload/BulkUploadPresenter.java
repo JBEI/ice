@@ -287,8 +287,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 return;
             }
 
-            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+            // for approval we do not want to change the owner
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(null, null);
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before submitting", true);
                 return;

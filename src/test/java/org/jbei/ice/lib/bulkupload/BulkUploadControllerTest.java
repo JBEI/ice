@@ -703,6 +703,7 @@ public class BulkUploadControllerTest {
         entry = entryController.get(account, entry.getId());
         Assert.assertNotNull(entry);
         Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
+        Assert.assertEquals(account.getEmail(), entry.getOwnerEmail());
     }
 
     @Test

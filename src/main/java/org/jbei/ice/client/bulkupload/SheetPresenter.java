@@ -125,16 +125,18 @@ public class SheetPresenter {
                 continue;
 
             if (existing != null) {
-                existing.setOwnerEmail(ownerEmail);
-                existing.setOwner(owner);
-                existing.setCreator(owner);
-                existing.setCreatorEmail(ownerEmail);
+                if (ownerEmail != null && owner != null) {
+                    existing.setOwnerEmail(ownerEmail);
+                    existing.setOwner(owner);
+                    existing.setCreator(owner);
+                    existing.setCreatorEmail(ownerEmail);
 
-                if (existing.getInfo() != null) {
-                    existing.getInfo().setOwnerEmail(ownerEmail);
-                    existing.getInfo().setOwner(owner);
-                    existing.getInfo().setCreator(owner);
-                    existing.getInfo().setCreatorEmail(ownerEmail);
+                    if (existing.getInfo() != null) {
+                        existing.getInfo().setOwnerEmail(ownerEmail);
+                        existing.getInfo().setOwner(owner);
+                        existing.getInfo().setCreator(owner);
+                        existing.getInfo().setCreatorEmail(ownerEmail);
+                    }
                 }
 
                 infoList.add(existing);
