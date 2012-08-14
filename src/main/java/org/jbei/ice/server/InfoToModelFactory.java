@@ -105,22 +105,23 @@ public class InfoToModelFactory {
                 seed.setRecordType(EntryType.ARABIDOPSIS.getName());
                 ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
 
-                seed.setHomozygosity(seedInfo.getHomozygosity());
+                String homozygosity = seedInfo.getHomozygosity() == null ? "" : seedInfo.getHomozygosity();
+                seed.setHomozygosity(homozygosity);
                 seed.setHarvestDate(seedInfo.getHarvestDate());
-                seed.setEcotype(seedInfo.getEcotype());
-                seed.setParents(seedInfo.getParents());
+                String ecoType = seedInfo.getEcotype() == null ? "" : seedInfo.getEcotype();
+                seed.setEcotype(ecoType);
+                String parents = seedInfo.getParents() == null ? "" : seedInfo.getParents();
+                seed.setParents(parents);
 
                 if (seedInfo.getGeneration() != null) {
-                    ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo
-                                                                                                       .getGeneration()
-                                                                                                       .name());
+                    ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(
+                            seedInfo.getGeneration().name());
                     seed.setGeneration(generation);
                 }
 
                 if (seedInfo.getPlantType() != null) {
-                    ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo
-                                                                                                    .getPlantType()
-                                                                                                    .name());
+                    ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(
+                            seedInfo.getPlantType().name());
                     seed.setPlantType(plantType);
                 }
                 seed.setSentToABRC(seedInfo.isSentToAbrc());
