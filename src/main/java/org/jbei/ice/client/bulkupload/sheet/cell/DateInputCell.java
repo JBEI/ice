@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet.cell;
 
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -10,6 +12,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 public class DateInputCell extends SheetCell {
 
     private DateBox dateBox;
+    private int currentRow;
 
     public DateInputCell() {
 
@@ -19,6 +22,14 @@ public class DateInputCell extends SheetCell {
 
         DateTimeFormat dateFormat = DateTimeFormat.getFormat("MM/dd/yyyy");
         dateBox.setFormat(new DateBox.DefaultFormat(dateFormat));
+
+        dateBox.getTextBox().addBlurHandler(new BlurHandler() {
+            @Override
+            public void onBlur(BlurEvent event) {
+                String s = setDataForRow(currentRow);
+                dateBox.getTextBox().setText(s);
+            }
+        });
     }
 
     /**
@@ -54,6 +65,7 @@ public class DateInputCell extends SheetCell {
     @Override
     public void setFocus(int row) {
         dateBox.showDatePicker();
+        currentRow = row;
     }
 
     @Override

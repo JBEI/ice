@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -17,6 +19,7 @@ public class MultiSuggestSheetCell extends SheetCell {
     protected final SuggestBox box;
     protected final MultipleTextBox textBox;
     private final ArrayList<String> oracleData = new ArrayList<String>();
+    private int currentRow;
 
     public MultiSuggestSheetCell() {
         super();
@@ -25,6 +28,14 @@ public class MultiSuggestSheetCell extends SheetCell {
         textBox = new MultipleTextBox();
         box = new SuggestBox(oracle, textBox);
         box.setStyleName("cell_input");
+
+        textBox.addBlurHandler(new BlurHandler() {
+            @Override
+            public void onBlur(BlurEvent event) {
+                String s = setDataForRow(currentRow);
+                textBox.setText(s);
+            }
+        });
     }
 
     public MultiSuggestSheetCell(ArrayList<String> data) {
@@ -55,6 +66,7 @@ public class MultiSuggestSheetCell extends SheetCell {
     @Override
     public void setFocus(int row) {
         textBox.setFocus(true);
+        currentRow = row;
     }
 
     /**

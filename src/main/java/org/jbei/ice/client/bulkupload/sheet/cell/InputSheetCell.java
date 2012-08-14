@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet.cell;
 
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -11,11 +13,20 @@ import com.google.gwt.user.client.ui.Widget;
 public class InputSheetCell extends SheetCell {
 
     private final TextBox input;
+    private int currentRow;
 
     public InputSheetCell() {
         super();
         input = new TextBox();
         input.setStyleName("cell_input");
+
+        input.addBlurHandler(new BlurHandler() {
+            @Override
+            public void onBlur(BlurEvent event) {
+                String s = setDataForRow(currentRow);
+                input.setText(s);
+            }
+        });
     }
 
     @Override
@@ -39,6 +50,7 @@ public class InputSheetCell extends SheetCell {
 
     public void setFocus(int row) {
         input.setFocus(true);
+        currentRow = row;
     }
 
     @Override
