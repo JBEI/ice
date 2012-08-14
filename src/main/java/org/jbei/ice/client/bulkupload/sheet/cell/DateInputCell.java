@@ -40,7 +40,6 @@ public class DateInputCell extends SheetCell {
      */
     @Override
     public String setDataForRow(int row) {
-
         String ret = dateBox.getTextBox().getText();
         setWidgetValue(row, ret, ret);
         dateBox.getTextBox().setText("");

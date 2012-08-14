@@ -195,6 +195,7 @@ public class SheetPresenter {
 
             for (int col = 0; col < headers.length; col += 1) {
                 SheetCell cell = headers[col].getCell();
+                view.clearErrorCell(row, col);
                 atLeastOneCellHasRowData = (cell.getDataForRow(row) != null);
                 if (atLeastOneCellHasRowData)
                     break;
