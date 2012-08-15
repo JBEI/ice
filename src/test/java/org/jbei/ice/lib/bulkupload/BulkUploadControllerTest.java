@@ -596,6 +596,10 @@ public class BulkUploadControllerTest {
 
         Assert.assertEquals(Visibility.PENDING.getValue(), strain.getVisibility().intValue());
         Assert.assertEquals(Visibility.PENDING.getValue(), plasmid.getVisibility().intValue());
+
+        // check draft
+        createdDraft = controller.retrieveById(adminAccount, createdDraft.getId());
+        Assert.assertEquals(account.getEmail(), createdDraft.getName());
     }
 
     @Test

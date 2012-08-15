@@ -627,6 +627,7 @@ public class BulkUploadController {
         draft.setContents(newContents);
         draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
         draft.setReadGroup(group);
+        draft.setName(account.getEmail());
 
         try {
             return dao.update(draft) != null;
