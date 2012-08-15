@@ -140,6 +140,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             @Override
             public void onResize(ResizeEvent event) {
+                // 970 is anticipated width of page window (menu?). "proper" way to do this is detect if
+                // window has horizontal scroll bars
+                if (Window.getClientWidth() < 970)
+                    return;
+
                 int delta = event.getWidth() - previousWidth;
                 previousWidth = event.getWidth();
                 sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + delta) + "px");
@@ -224,6 +229,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     private void addPanelHandlers() {
+        focusPanel.setTabIndex(1);
 
         focusPanel.addKeyDownHandler(new KeyDownHandler() {
 
@@ -469,9 +475,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         // 130 is the width of the cell
         if (130 * (nextIndex + 1) > width) {
             int nextScrollPosition = sheetTableFocusPanelWrapper.getHorizontalScrollPosition() + 130;
-            if (nextScrollPosition > max)
-                nextScrollPosition = max;
-            sheetTableFocusPanelWrapper.setHorizontalScrollPosition(nextScrollPosition);
+            if (nextScrollPosition < max)
+                sheetTableFocusPanelWrapper.setHorizontalScrollPosition(nextScrollPosition);
         }
 
         selectCell(currentRow, currentIndex + 1);
@@ -552,7 +557,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             inputRow = inputIndex = -1; // lastReplaced not visible
             lastReplaced = null;
-            focusPanel.setFocus(true); // not in click
+//            focusPanel.setFocus(true); // not in click
         }
 
         // now deal with current selection

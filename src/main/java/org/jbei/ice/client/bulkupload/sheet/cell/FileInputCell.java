@@ -38,6 +38,12 @@ public class FileInputCell extends SheetCell {
     }
 
     @Override
+    public void reset() {
+        super.reset();
+        rowUploaderMap.clear();
+    }
+
+    @Override
     public void setText(String text) {
     }
 

@@ -6,25 +6,41 @@ import org.jbei.ice.shared.EntryAddType;
 public class ImportTypeHeaders {
 
     public static Header[] getHeadersForType(EntryAddType type) {
+        Header[] headers;
+
         switch (type) {
             case STRAIN:
-                return getStrainHeaders();
+                headers = getStrainHeaders();
+                break;
 
             case PLASMID:
-                return getPlasmidHeaders();
+                headers = getPlasmidHeaders();
+                break;
 
             case PART:
-                return getPartHeaders();
+                headers = getPartHeaders();
+                break;
 
             case ARABIDOPSIS:
-                return getSeedHeaders();
+                headers = getSeedHeaders();
+                break;
 
             case STRAIN_WITH_PLASMID:
-                return getStrainWithPlasmidHeaders();
+                headers = getStrainWithPlasmidHeaders();
+                break;
 
             default:
-                return null;
+                headers = null;
         }
+
+        if (headers == null)
+            return headers;
+
+        // this is a bit of a hack due to using an enum
+        for (Header header : headers)
+            header.getCell().reset();
+
+        return headers;
     }
 
     public static Header[] getStrainHeaders() {
