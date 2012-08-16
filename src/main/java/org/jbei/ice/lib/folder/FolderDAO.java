@@ -6,26 +6,27 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+
 /**
  * Manipulate {@link Folder} objects in the database.
- * 
+ *
  * @author Hector Plahar
  */
 class FolderDAO extends HibernateRepository<Folder> {
 
     /**
      * Retrieves stored folder by identifier
-     * 
+     *
      * @param id unique identifier for folder
      * @return retrieved folder
      * @throws DAOException
@@ -36,7 +37,7 @@ class FolderDAO extends HibernateRepository<Folder> {
 
     /**
      * deletes stored folder
-     * 
+     *
      * @param folder folder to delete
      * @throws DAOException
      */
@@ -75,7 +76,7 @@ class FolderDAO extends HibernateRepository<Folder> {
     /**
      * Retrieves the count of the number of contents in the folder.
      * If the folder contains other folders, the it returns the number of sub-folders
-     * 
+     *
      * @param id unique folder identifier
      * @return number of child contents in the folder
      * @throws DAOException on any exception retrieving the folder or its contents
@@ -102,7 +103,7 @@ class FolderDAO extends HibernateRepository<Folder> {
 
     /**
      * Retrieves the entry contents of a folder contents.
-     * 
+     *
      * @param id folder id.
      * @return List of Entry ids.
      * @throws DAOException
@@ -133,6 +134,7 @@ class FolderDAO extends HibernateRepository<Folder> {
         Session session = newSession();
         try {
             session.beginTransaction();
+            folder = (Folder) session.get(Folder.class, folder.getId());
             folder.getContents().addAll(entrys);
             folder.setModificationTime(new Date(System.currentTimeMillis()));
             session.saveOrUpdate(folder);
@@ -165,7 +167,7 @@ class FolderDAO extends HibernateRepository<Folder> {
 
     /**
      * Retrieve all {@link Folder}s owned by given the {@link Account}.
-     * 
+     *
      * @param account
      * @return List of Folder objects.
      * @throws DAOException
@@ -196,7 +198,7 @@ class FolderDAO extends HibernateRepository<Folder> {
         return folders;
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     public List<Folder> getFoldersByEntry(Entry entry) throws DAOException {
         ArrayList<Folder> folders = new ArrayList<Folder>();
         Session session = newSession();
