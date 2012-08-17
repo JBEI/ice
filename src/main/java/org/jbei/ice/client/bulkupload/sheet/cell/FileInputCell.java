@@ -7,12 +7,7 @@ import org.jbei.ice.client.bulkupload.sheet.CellUploader;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -91,11 +86,24 @@ public class FileInputCell extends SheetCell {
         }
 
         if (isCurrentSelection) {
-            FocusPanel panel = new FocusPanel();
+            final FocusPanel panel = new FocusPanel();
             panel.setTabIndex(tabIndex);
             panel.setWidget(cellUploader.asWidget());
             panel.setFocus(isCurrentSelection);
-            panel.setStyleName("cell_border");
+
+            panel.addBlurHandler(new BlurHandler() {
+                @Override
+                public void onBlur(BlurEvent event) {
+                    panel.setStyleName("cell");
+                }
+            });
+
+            panel.addFocusHandler(new FocusHandler() {
+                @Override
+                public void onFocus(FocusEvent event) {
+                    panel.setStyleName("cell_border");
+                }
+            });
             return panel;
 //            return cellUploader.asWidget();
         } else {

@@ -88,8 +88,7 @@ public class EntryToInfoFactory {
                 }
 
                 LinkedList<Storage> storageList = samples.get(sample);
-                SampleStorage sampleStorage = new SampleStorage(key,
-                                                                getStorageListInfo(storageList));
+                SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(storageList));
                 samplesList.add(sampleStorage);
             }
         }

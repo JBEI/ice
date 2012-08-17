@@ -118,8 +118,10 @@ public abstract class BulkUploadHeaders {
             case STRAIN_ATT_FILENAME:
             case PLASMID_ATT_FILENAME:
                 ArrayList<AttachmentInfo> attInfos = info.getAttachments();
-                if (attInfos == null || attInfos.isEmpty())
+                if (attInfos == null || attInfos.isEmpty()) {
+                    value = "";
                     break;
+                }
 
                 // currently support upload of a single attachment only
                 AttachmentInfo attInfo = attInfos.get(0);
@@ -131,8 +133,11 @@ public abstract class BulkUploadHeaders {
             case STRAIN_SEQ_FILENAME:
             case PLASMID_SEQ_FILENAME:
                 ArrayList<SequenceAnalysisInfo> sequenceInfos = info.getSequenceAnalysis();
-                if (sequenceInfos == null || sequenceInfos.isEmpty())
+                if (sequenceInfos == null || sequenceInfos.isEmpty()) {
+
+                    value = "";
                     break;
+                }
 
                 // currently support upload of a single sequence only
                 SequenceAnalysisInfo seqInfo = sequenceInfos.get(0);
@@ -141,12 +146,10 @@ public abstract class BulkUploadHeaders {
                 break;
         }
 
-        SheetCellData data;
-        if ((value == null || value.isEmpty()) && id == null) {
-            data = extractValue(header, info, index);
-            if (data == null)
-                return null;
-        } else {
+        SheetCellData data = null;
+        if (value != null) {
+            if (id == null)
+                id = value;
             data = new SheetCellData(header, id, value);
         }
 
