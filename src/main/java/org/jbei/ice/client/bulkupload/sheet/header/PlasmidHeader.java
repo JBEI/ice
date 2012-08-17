@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet.header;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
@@ -19,14 +21,16 @@ public class PlasmidHeader extends PartHeader {
 
         // plasmid specific headers
         headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS)), null));
-        headers.add(new CellColumnHeader(Header.CIRCULAR));
+                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
+        ArrayList<String> data = new ArrayList<String>();
+        data.add("Yes");
+        data.add("No");
+        headers.add(new CellColumnHeader(Header.CIRCULAR, false, new MultiSuggestSheetCell(data, false), null));
         headers.add(new CellColumnHeader(Header.BACKBONE));
         headers.add(new CellColumnHeader(Header.PROMOTERS, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(
-                        AutoCompleteField.PROMOTERS)), null));
+                AppController.autoCompleteData.get(AutoCompleteField.PROMOTERS), true), null));
         headers.add(new CellColumnHeader(Header.ORIGIN_OF_REPLICATION, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.ORIGIN_OF_REPLICATION)), null));
+                AppController.autoCompleteData.get(AutoCompleteField.ORIGIN_OF_REPLICATION), true), null));
     }
 
     @Override
@@ -55,8 +59,12 @@ public class PlasmidHeader extends PartHeader {
             case CIRCULAR:
                 if (plasmid.getCircular() == null)
                     value = "";
-                else
-                    value = Boolean.toString(plasmid.getCircular());
+                else {
+                    if (plasmid.getCircular().booleanValue())
+                        value = "Yes";
+                    else
+                        value = "No";
+                }
                 break;
         }
 

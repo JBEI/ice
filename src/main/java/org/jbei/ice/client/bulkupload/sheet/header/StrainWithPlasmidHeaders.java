@@ -32,13 +32,14 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(Header.STRAIN_ALIAS));
         headers.add(new CellColumnHeader(Header.STRAIN_LINKS));
         headers.add(new CellColumnHeader(Header.STRAIN_SELECTION_MARKERS, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS)), null));
+                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
         headers.add(new CellColumnHeader(Header.STRAIN_PARENTAL_STRAIN));
         headers.add(new CellColumnHeader(Header.STRAIN_GEN_PHEN));
         headers.add(new CellColumnHeader(
                 Header.STRAIN_PLASMIDS,
                 false,
-                new MultiSuggestSheetCell(AppController.autoCompleteData.get(AutoCompleteField.PLASMID_NAME)), null));
+                new MultiSuggestSheetCell(AppController.autoCompleteData.get(AutoCompleteField.PLASMID_NAME), true),
+                null));
         headers.add(new CellColumnHeader(Header.STRAIN_KEYWORDS));
         headers.add(new CellColumnHeader(Header.STRAIN_SUMMARY));
         headers.add(new CellColumnHeader(Header.STRAIN_NOTES));
@@ -51,14 +52,13 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(Header.PLASMID_ALIAS));
         headers.add(new CellColumnHeader(Header.PLASMID_LINKS));
         headers.add(new CellColumnHeader(Header.PLASMID_SELECTION_MARKERS, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS)), null));
+                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
         headers.add(new CellColumnHeader(Header.CIRCULAR));
         headers.add(new CellColumnHeader(Header.PLASMID_BACKBONE));
         headers.add(new CellColumnHeader(Header.PLASMID_PROMOTERS, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(
-                        AutoCompleteField.PROMOTERS)), null));
+                AppController.autoCompleteData.get(AutoCompleteField.PROMOTERS), true), null));
         headers.add(new CellColumnHeader(Header.PLASMID_ORIGIN_OF_REPLICATION, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.ORIGIN_OF_REPLICATION)), null));
+                AppController.autoCompleteData.get(AutoCompleteField.ORIGIN_OF_REPLICATION), true), null));
         headers.add(new CellColumnHeader(Header.PLASMID_KEYWORDS));
         headers.add(new CellColumnHeader(Header.PLASMID_SUMMARY));
         headers.add(new CellColumnHeader(Header.PLASMID_NOTES));
@@ -111,8 +111,12 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
             case CIRCULAR:
                 if (plasmid.getCircular() == null)
                     value = "";
-                else
-                    value = Boolean.toString(plasmid.getCircular());
+                else {
+                    if (plasmid.getCircular().booleanValue())
+                        value = "Yes";
+                    else
+                        value = "No";
+                }
                 break;
         }
 

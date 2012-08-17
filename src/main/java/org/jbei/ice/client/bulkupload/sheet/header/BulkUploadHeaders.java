@@ -133,7 +133,6 @@ public abstract class BulkUploadHeaders {
             case PLASMID_SEQ_FILENAME:
                 ArrayList<SequenceAnalysisInfo> sequenceInfos = info.getSequenceAnalysis();
                 if (sequenceInfos == null || sequenceInfos.isEmpty()) {
-
                     value = "";
                     break;
                 }

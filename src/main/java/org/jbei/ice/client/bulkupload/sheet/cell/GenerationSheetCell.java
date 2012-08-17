@@ -11,7 +11,7 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 public class GenerationSheetCell extends MultiSuggestSheetCell {
 
     public GenerationSheetCell() {
-        super(ArabidopsisSeedInfo.Generation.getDisplayList());
+        super(ArabidopsisSeedInfo.Generation.getDisplayList(), false);
     }
 
     @Override

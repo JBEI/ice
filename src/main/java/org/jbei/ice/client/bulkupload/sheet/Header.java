@@ -27,6 +27,7 @@ public enum Header {
     ECOTYPE("Ecotype"),
     HARVEST_DATE("Harvest Date"),
     GENERATION("Generation"),
+    SENT_TO_ABRC("Sent to ABRC?"),
     PLANT_TYPE("Plant Type"),
     PARENTS("Parents"),
     PLASMID_NAME("Plasmid Name"),

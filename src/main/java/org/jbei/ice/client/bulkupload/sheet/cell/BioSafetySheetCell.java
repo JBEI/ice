@@ -9,7 +9,7 @@ import org.jbei.ice.shared.BioSafetyOption;
 public class BioSafetySheetCell extends MultiSuggestSheetCell {
 
     public BioSafetySheetCell() {
-        super();
+        super(false);
         this.addOracleData(BioSafetyOption.getDisplayList());
     }
 

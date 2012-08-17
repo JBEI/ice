@@ -60,8 +60,7 @@ public class InfoToModelFactory {
                 plasmid.setBackbone(plasmidInfo.getBackbone());
                 plasmid.setOriginOfReplication(plasmidInfo.getOriginOfReplication());
                 plasmid.setPromoters(plasmidInfo.getPromoters());
-                plasmid.setCircular(plasmidInfo.getCircular() == null ? false : plasmidInfo
-                        .getCircular());
+                plasmid.setCircular(plasmidInfo.getCircular());
 
                 break;
 

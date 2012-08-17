@@ -9,7 +9,7 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 public class PlantTypeSheetCell extends MultiSuggestSheetCell {
 
     public PlantTypeSheetCell() {
-        super();
+        super(false);
         this.addOracleData(ArabidopsisSeedInfo.PlantType.getDisplayList());
     }
 

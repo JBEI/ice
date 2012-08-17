@@ -70,7 +70,7 @@ public class ArabidopsisSeedInfo extends EntryInfo {
     private String parents;
     private Generation generation;
     private PlantType plantType;
-    private boolean sentToAbrc;
+    private Boolean sentToAbrc;
 
     public ArabidopsisSeedInfo() {
         super(EntryType.ARABIDOPSIS);
@@ -125,11 +125,11 @@ public class ArabidopsisSeedInfo extends EntryInfo {
         return plantType;
     }
 
-    public boolean isSentToAbrc() {
+    public Boolean isSentToAbrc() {
         return sentToAbrc;
     }
 
-    public void setSentToAbrc(boolean sentToAbrc) {
+    public void setSentToAbrc(Boolean sentToAbrc) {
         this.sentToAbrc = sentToAbrc;
     }
 }

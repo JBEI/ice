@@ -418,6 +418,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
      * @param newCol user selected column
      */
     private void selectCell(int newRow, int newCol) {
+        if (currentIndex == newCol && currentRow == newRow)
+            return;
 
         highlightHeaders(newRow, newCol);
 

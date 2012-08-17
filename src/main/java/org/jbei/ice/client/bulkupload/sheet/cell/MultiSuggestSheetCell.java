@@ -9,6 +9,8 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -18,15 +20,20 @@ public class MultiSuggestSheetCell extends SheetCell {
 
     protected final MultiWordSuggestOracle oracle;
     protected final SuggestBox box;
-    protected final MultipleTextBox textBox;
+    protected final TextBoxBase textBox;
     private final ArrayList<String> oracleData = new ArrayList<String>();
     private int currentRow;
+    private final boolean commaSeparatedAllowed;
 
-    public MultiSuggestSheetCell() {
+    public MultiSuggestSheetCell(boolean commaSeparatedAllowed) {
         super();
 
         oracle = new MultiWordSuggestOracle();
-        textBox = new MultipleTextBox();
+        this.commaSeparatedAllowed = commaSeparatedAllowed;
+        if (commaSeparatedAllowed)
+            textBox = new MultipleTextBox();
+        else
+            textBox = new TextBox();
         box = new SuggestBox(oracle, textBox);
         box.setStyleName("cell_input");
 
@@ -39,8 +46,8 @@ public class MultiSuggestSheetCell extends SheetCell {
         });
     }
 
-    public MultiSuggestSheetCell(ArrayList<String> data) {
-        this();
+    public MultiSuggestSheetCell(ArrayList<String> data, boolean commaSeparatedAllowed) {
+        this(commaSeparatedAllowed);
         oracle.addAll(data);
         oracleData.addAll(data);
     }
@@ -58,7 +65,11 @@ public class MultiSuggestSheetCell extends SheetCell {
      */
     @Override
     public String setDataForRow(int row) {
-        String ret = textBox.getWholeText();
+        String ret;
+        if (commaSeparatedAllowed)
+            ret = ((MultipleTextBox) textBox).getWholeText();
+        else
+            ret = textBox.getText();
         SheetCellData data = new SheetCellData();
         data.setId(ret);
         data.setValue(ret);

@@ -208,6 +208,6 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         seed.setEcotype(this.ecoType.getText());
         seed.setHarvestDate(this.harvestDate.getDatePicker().getValue());
         seed.setParents(parents.getText());
-        seed.setSentToAbrc(sentToAbrc.getValue().booleanValue());
+        seed.setSentToAbrc(sentToAbrc.getValue());
     }
 }

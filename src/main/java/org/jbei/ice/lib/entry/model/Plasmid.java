@@ -36,7 +36,7 @@ public class Plasmid extends Entry {
     private String promoters;
 
     @Column(name = "circular")
-    private boolean circular;
+    private Boolean circular;
 
     public Plasmid() {
         setRecordType(EntryType.PLASMID.getName());

@@ -11,7 +11,7 @@ import org.jbei.ice.shared.StatusType;
 public class StatusSheetCell extends MultiSuggestSheetCell {
 
     public StatusSheetCell() {
-        super();
+        super(false);
         this.addOracleData(StatusType.getDisplayList());
     }
 

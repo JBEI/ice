@@ -239,6 +239,6 @@ public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
         seed.setEcotype(this.ecoType.getText());
         seed.setHarvestDate(this.harvestDate.getDatePicker().getValue());
         seed.setParents(parents.getText());
-        seed.setSentToAbrc(sentToABRC.getValue().booleanValue());
+        seed.setSentToAbrc(sentToABRC.getValue());
     }
 }

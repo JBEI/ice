@@ -19,13 +19,14 @@ public class StrainHeaders extends PartHeader {
 
         // strain specific headers
         headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS)), null));
+                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
         headers.add(new CellColumnHeader(Header.PARENTAL_STRAIN));
         headers.add(new CellColumnHeader(Header.GEN_PHEN));
         headers.add(new CellColumnHeader(
                 Header.PLASMIDS,
                 false,
-                new MultiSuggestSheetCell(AppController.autoCompleteData.get(AutoCompleteField.PLASMID_NAME)), null));
+                new MultiSuggestSheetCell(AppController.autoCompleteData.get(AutoCompleteField.PLASMID_NAME), true),
+                null));
     }
 
     @Override

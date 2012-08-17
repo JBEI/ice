@@ -1,10 +1,18 @@
 package org.jbei.ice.client.bulkupload.sheet.header;
 
+import java.util.ArrayList;
 import java.util.Date;
 
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
+import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.GenerationSheetCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
 import org.jbei.ice.client.util.DateUtilities;
+import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
@@ -12,6 +20,23 @@ import org.jbei.ice.shared.dto.EntryInfo;
  * @author Hector Plahar
  */
 public class ArabidopsisSeedHeaders extends PartHeader {
+
+    public ArabidopsisSeedHeaders() {
+        super();
+
+        headers.add(new CellColumnHeader(Header.HOMOZYGOSITY));
+        headers.add(new CellColumnHeader(Header.HARVEST_DATE, false, new DateInputCell(), null));
+        headers.add(new CellColumnHeader(Header.ECOTYPE));
+        headers.add(new CellColumnHeader(Header.PARENTS));
+        headers.add(new CellColumnHeader(Header.GENERATION, false, new GenerationSheetCell(), null));
+        headers.add(new CellColumnHeader(Header.PLANT_TYPE, false, new PlantTypeSheetCell(), null));
+        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(
+                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
+        ArrayList<String> data = new ArrayList<String>();
+        data.add("Yes");
+        data.add("No");
+        headers.add(new CellColumnHeader(Header.SENT_TO_ABRC, false, new MultiSuggestSheetCell(data, false), null));
+    }
 
     @Override
     public SheetCellData extractValue(Header header, EntryInfo info) {
@@ -58,6 +83,17 @@ public class ArabidopsisSeedHeaders extends PartHeader {
                     value = "";
                 else
                     value = seed.getPlantType().toString();
+                break;
+
+            case SENT_TO_ABRC:
+                if (seed.isSentToAbrc() == null)
+                    value = "";
+                else {
+                    if (seed.isSentToAbrc().booleanValue())
+                        value = "Yes";
+                    else
+                        value = "No";
+                }
                 break;
         }
 
