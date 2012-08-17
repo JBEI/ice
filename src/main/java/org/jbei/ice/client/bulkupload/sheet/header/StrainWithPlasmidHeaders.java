@@ -5,6 +5,7 @@ import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.cell.BioSafetySheetCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.FileInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.StatusSheetCell;
@@ -53,7 +54,7 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(Header.PLASMID_LINKS));
         headers.add(new CellColumnHeader(Header.PLASMID_SELECTION_MARKERS, false, new MultiSuggestSheetCell(
                 AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
-        headers.add(new CellColumnHeader(Header.CIRCULAR));
+        headers.add(new CellColumnHeader(Header.CIRCULAR, false, new BooleanSheetCell(), null));
         headers.add(new CellColumnHeader(Header.PLASMID_BACKBONE));
         headers.add(new CellColumnHeader(Header.PLASMID_PROMOTERS, false, new MultiSuggestSheetCell(
                 AppController.autoCompleteData.get(AutoCompleteField.PROMOTERS), true), null));

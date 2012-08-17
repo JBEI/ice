@@ -364,6 +364,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
         }
     }
 
+    @Override
+    public void scrollElementToView(int row, int col) {
+        Widget widget = sheetTable.getWidget(row, col);
+        if (widget == null)
+            return;
+        widget.getElement().scrollIntoView();
+    }
+
     /**
      * Replaces the cell with an input widget that is determined by the type of header
      */

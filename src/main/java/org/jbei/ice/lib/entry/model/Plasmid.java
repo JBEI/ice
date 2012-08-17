@@ -66,11 +66,11 @@ public class Plasmid extends Entry {
         this.promoters = promoters;
     }
 
-    public boolean getCircular() {
+    public Boolean getCircular() {
         return circular;
     }
 
-    public void setCircular(boolean circular) {
+    public void setCircular(Boolean circular) {
         this.circular = circular;
     }
 }

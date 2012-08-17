@@ -6,6 +6,7 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -25,7 +26,7 @@ public class PlasmidHeader extends PartHeader {
         ArrayList<String> data = new ArrayList<String>();
         data.add("Yes");
         data.add("No");
-        headers.add(new CellColumnHeader(Header.CIRCULAR, false, new MultiSuggestSheetCell(data, false), null));
+        headers.add(new CellColumnHeader(Header.CIRCULAR, false, new BooleanSheetCell(), null));
         headers.add(new CellColumnHeader(Header.BACKBONE));
         headers.add(new CellColumnHeader(Header.PROMOTERS, false, new MultiSuggestSheetCell(
                 AppController.autoCompleteData.get(AutoCompleteField.PROMOTERS), true), null));

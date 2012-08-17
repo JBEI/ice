@@ -31,6 +31,8 @@ public class SheetPresenter {
         void clearErrorCell(int row, int col);
 
         void setErrorCell(int row, int col, String errMsg);
+
+        void scrollElementToView(int row, int col);
     }
 
     private final View view;
@@ -167,6 +169,7 @@ public class SheetPresenter {
     public boolean validateCells() {
 
         boolean isValid = true;
+        boolean inView = false;
 
         // for each row
         for (int row = 0; row < view.getSheetRowCount(); row += 1) {
@@ -193,11 +196,16 @@ public class SheetPresenter {
                 String errMsg = cell.inputIsValid(row);
                 if (errMsg.isEmpty()) {
                     view.clearErrorCell(row, col);
+                    col += 1;
                     continue;
                 }
 
                 isValid = false;
                 view.setErrorCell(row, col, errMsg);
+                if (!inView) {
+                    view.scrollElementToView(row, col);
+                    inView = true;
+                }
                 col += 1;
             }
         }
