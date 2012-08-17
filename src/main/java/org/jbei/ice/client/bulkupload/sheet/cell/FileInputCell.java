@@ -6,7 +6,6 @@ import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellUploader;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FocusPanel;
@@ -105,13 +104,11 @@ public class FileInputCell extends SheetCell {
                 }
             });
             return panel;
-//            return cellUploader.asWidget();
         } else {
             SheetCellData data = getDataForRow(row);
             String value = "";
             if (data != null)
                 value = data.getValue();
-            GWT.log("Tab index for uploading being set to" + tabIndex);
             CellWidget widget = widgetHashMap.get(row);
             if (widget == null) {
                 widget = new CellWidget(value, tabIndex);

@@ -14,8 +14,8 @@ import org.jbei.ice.shared.dto.EntryInfo;
 public class ArabidopsisSeedHeaders extends PartHeader {
 
     @Override
-    public SheetCellData extractValue(Header header, EntryInfo info, int index) {
-        SheetCellData data = extractCommon(header, info, index);
+    public SheetCellData extractValue(Header header, EntryInfo info) {
+        SheetCellData data = extractCommon(header, info);
         if (data != null)
             return data;
 

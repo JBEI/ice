@@ -600,8 +600,8 @@ a.cell_mouseover:hover {
 }
 
 .tail_cell_column_header_td {
-    background-color: #f1f1f1;
-    border-left: 1px solid #ccc;
+    border-left: 2px solid #cccccc;
+    border-right: 1px solid #cccccc;
 }
 
 /* ENTRY DETAIL VIEW */
@@ -717,7 +717,6 @@ a.cell_mouseover:hover {
     cursor: pointer;
     font-family: sans-serif;
     font-weight: bold;
-    font-smooth: always;
     opacity: 0.8;
     font-size: 0.90em;
 }
@@ -1939,7 +1938,9 @@ td.datePickerMonth {
 }
 
 .bulk_upload_visibility {
-    font-size: 0.80em;
+    font-size: 0.70em;
+    font-weight: normal;
+    font-style: normal;
 }
 
 

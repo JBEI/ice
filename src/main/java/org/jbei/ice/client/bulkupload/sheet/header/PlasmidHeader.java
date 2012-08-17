@@ -30,8 +30,8 @@ public class PlasmidHeader extends PartHeader {
     }
 
     @Override
-    public SheetCellData extractValue(Header header, EntryInfo info, int index) {
-        SheetCellData data = extractCommon(header, info, index);
+    public SheetCellData extractValue(Header header, EntryInfo info) {
+        SheetCellData data = extractCommon(header, info);
         if (data != null)
             return data;
 
@@ -68,5 +68,4 @@ public class PlasmidHeader extends PartHeader {
         data.setId(value);
         return data;
     }
-
 }

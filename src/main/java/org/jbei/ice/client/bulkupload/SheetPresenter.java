@@ -151,7 +151,7 @@ public class SheetPresenter {
                 EntryInfo info = currentInfo.getEntryList().get(index);
 
                 // extractor also sets the header data structure
-                data = getTypeHeaders().extractValue(header.getHeaderType(), info, index);
+                data = getTypeHeaders().extractValue(header.getHeaderType(), info);
                 header.getCell().setWidgetValue(index, data);
             }
 

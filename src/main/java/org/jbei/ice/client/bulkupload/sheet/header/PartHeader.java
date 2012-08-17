@@ -20,7 +20,7 @@ public class PartHeader extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(Header.FUNDING_SOURCE));
         headers.add(new CellColumnHeader(Header.IP));
         headers.add(new CellColumnHeader(Header.BIOSAFETY, true, new BioSafetySheetCell(), null));
-        headers.add(new CellColumnHeader(Header.NAME, true, "e.g. JBEI-0001"));
+        headers.add(new CellColumnHeader(Header.NAME, true));
         headers.add(new CellColumnHeader(Header.ALIAS));
         headers.add(new CellColumnHeader(Header.KEYWORDS));
         headers.add(new CellColumnHeader(Header.SUMMARY, true));
@@ -33,7 +33,7 @@ public class PartHeader extends BulkUploadHeaders {
     }
 
     @Override
-    public SheetCellData extractValue(Header header, EntryInfo info, int index) {
-        return extractCommon(header, info, index);
+    public SheetCellData extractValue(Header header, EntryInfo info) {
+        return extractCommon(header, info);
     }
 }

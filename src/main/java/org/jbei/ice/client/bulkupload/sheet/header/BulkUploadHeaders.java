@@ -34,10 +34,9 @@ public abstract class BulkUploadHeaders {
      *
      * @param header
      * @param info
-     * @param index
      * @return extracted value or null if none is found
      */
-    public SheetCellData extractCommon(Header header, EntryInfo info, int index) {
+    public SheetCellData extractCommon(Header header, EntryInfo info) {
         String value = null;
         String id = null;
 
@@ -156,5 +155,5 @@ public abstract class BulkUploadHeaders {
         return data;
     }
 
-    public abstract SheetCellData extractValue(Header header, EntryInfo info, int index);
+    public abstract SheetCellData extractValue(Header header, EntryInfo info);
 }
