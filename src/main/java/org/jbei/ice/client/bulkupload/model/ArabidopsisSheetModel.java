@@ -3,6 +3,7 @@ package org.jbei.ice.client.bulkupload.model;
 import java.util.Date;
 
 import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -43,6 +44,10 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
 
             case ECOTYPE:
                 info.setEcotype(value);
+                break;
+
+            case SENT_TO_ABRC:
+                info.setSentToAbrc(BooleanSheetCell.getBooleanValue(value));
                 break;
         }
 
