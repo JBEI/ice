@@ -155,7 +155,6 @@ public class BulkUploadPresenter extends AbstractPresenter {
 //                    currentInput = sheetCache.get(selection);
 //                else {
                 Sheet sheet = new Sheet(selection);
-                sheet.setAutoCompleteData(AppController.autoCompleteData);
                 currentInput = new NewBulkInput(selection, sheet);
 
                 // header Panel
@@ -445,7 +444,6 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     BulkUploadInfo info = event.getData().get(0);
                     Sheet sheet = new Sheet(info.getType(), info);
 
-                    sheet.setAutoCompleteData(AppController.autoCompleteData);
                     currentInput = new NewBulkInput(info.getType(), sheet);
                     currentInput.setId(info.getId());
                     String name = info.getName();

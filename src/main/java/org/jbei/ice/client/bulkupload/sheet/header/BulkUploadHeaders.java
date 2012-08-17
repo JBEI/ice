@@ -1,36 +1,43 @@
-package org.jbei.ice.client.bulkupload.sheet;
+package org.jbei.ice.client.bulkupload.sheet.header;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
+import org.jbei.ice.client.bulkupload.model.SheetCellData;
+import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
+import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
 /**
- * Parent class for extracting values from an EntryInfo. This is used in the cases
- * when an existing bulk import is being used to populate the sheet
- *
  * @author Hector Plahar
  */
-abstract class InfoValueExtractor {
+public abstract class BulkUploadHeaders {
+    protected ArrayList<CellColumnHeader> headers = new ArrayList<CellColumnHeader>();
+
+    public ArrayList<CellColumnHeader> getHeaders() {
+        return headers;
+    }
+
+    public int getHeaderSize() {
+        return this.headers.size();
+    }
+
+    public CellColumnHeader getHeaderForIndex(int index) {
+        return headers.get(index);
+    }
 
     /**
-     * Extracts data for common field represented by header. This is expected to be called by all
-     * child classes to retrieve data. If null is returned, then the header represents a child field
-     * which should be handled by that sub-class.
-     * <p/>
-     * The header data structure is also set using the values (and ids if applicable) that are
-     * extracted
+     * Extracts appropriate value from info using the header enum
+     * sets the cell widget value using the index
      *
-     * @param header current Header under consideration (also represents the column)
-     * @param info   entry data
-     * @param index  represents row
-     * @return extracted common field or null
+     * @param header
+     * @param info
+     * @param index
+     * @return extracted value or null if none is found
      */
-    protected String extractCommon(Header header, EntryInfo info, int index) {
-
+    public SheetCellData extractCommon(Header header, EntryInfo info, int index) {
         String value = null;
         String id = null;
 
@@ -134,11 +141,17 @@ abstract class InfoValueExtractor {
                 break;
         }
 
-        if ((value == null || value.isEmpty()) && id == null)
-            return null;
+        SheetCellData data;
+        if ((value == null || value.isEmpty()) && id == null) {
+            data = extractValue(header, info, index);
+            if (data == null)
+                return null;
+        } else {
+            data = new SheetCellData(header, id, value);
+        }
 
-        SheetCell cell = header.getCell();
-        cell.setWidgetValue(index, value, id);
-        return value;
+        return data;
     }
+
+    public abstract SheetCellData extractValue(Header header, EntryInfo info, int index);
 }

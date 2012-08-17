@@ -43,8 +43,6 @@ public class CellUploader implements IsWidget {
         };
 
         uploader.setAutoSubmit(true);
-        uploader.getWidget().setStyleName("uploader_cell_selected");
-
         uploader.addOnStartUploadHandler(new IUploader.OnStartUploaderHandler() {
 
             @Override

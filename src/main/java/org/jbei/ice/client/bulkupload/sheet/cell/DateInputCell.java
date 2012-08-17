@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet.cell;
 
+import org.jbei.ice.client.bulkupload.model.SheetCellData;
+
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -52,7 +54,10 @@ public class DateInputCell extends SheetCell {
     @Override
     public String setDataForRow(int row) {
         String ret = dateBox.getTextBox().getText();
-        setWidgetValue(row, ret, ret);
+        SheetCellData data = new SheetCellData();
+        data.setId(ret);
+        data.setValue(ret);
+        setWidgetValue(row, data);
         dateBox.getTextBox().setText("");
         return ret;
     }
@@ -69,7 +74,8 @@ public class DateInputCell extends SheetCell {
     }
 
     @Override
-    public Widget getWidget(int row, boolean isCurrentSelection) {
+    public Widget getWidget(int row, boolean isCurrentSelection, int tabIndex) {
+        dateBox.setTabIndex(tabIndex);
         return dateBox;
     }
 }

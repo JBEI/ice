@@ -55,7 +55,10 @@ public abstract class SheetCell {
         return false;
     }
 
-    public void setWidgetValue(int inputRow, String value, String id) {
+    public void setWidgetValue(int inputRow, SheetCellData datum) {
+
+        String value = datum.getValue();
+        String id = datum.getId();
 
         if (value.trim().isEmpty() && id.trim().isEmpty()) {
             removeDataForRow(inputRow);
@@ -81,16 +84,6 @@ public abstract class SheetCell {
     }
 
     /**
-     * This attempts to get around the issue of fileinput setting their own data
-     * on file upload and inputcell relying on Sheet.java to set the data when a user clicks on another cell
-     *
-     * @return true if sub-classes handle setting their data, false otherwise
-     */
-    public boolean handlesDataSet() {
-        return false;
-    }
-
-    /**
      * cell notification for selection. in parent class
      * it does not do anything. subclasses that wish to do some something special
      * when a user selects a cell should sub-class and return true after specialization code
@@ -109,10 +102,6 @@ public abstract class SheetCell {
         this.required = required;
     }
 
-    public boolean isRequired() {
-        return this.required;
-    }
-
     /**
      * Checks if there is data for required fields. Sub-classes should override
      * this and validate their content
@@ -127,5 +116,9 @@ public abstract class SheetCell {
     }
 
     // get widget for row
-    public abstract Widget getWidget(int row, boolean isCurrentSelection);
+    public abstract Widget getWidget(int row, boolean isCurrentSelection, int tabIndex);
+
+    public boolean isRequired() {
+        return required;
+    }
 }

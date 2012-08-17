@@ -2,6 +2,7 @@ package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -58,7 +59,10 @@ public class MultiSuggestSheetCell extends SheetCell {
     @Override
     public String setDataForRow(int row) {
         String ret = textBox.getWholeText();
-        setWidgetValue(row, ret, ret);
+        SheetCellData data = new SheetCellData();
+        data.setId(ret);
+        data.setValue(ret);
+        setWidgetValue(row, data);
         box.setText("");
         return ret;
     }
@@ -86,7 +90,8 @@ public class MultiSuggestSheetCell extends SheetCell {
     }
 
     @Override
-    public Widget getWidget(int row, boolean isCurrentSelection) {
+    public Widget getWidget(int row, boolean isCurrentSelection, int tabIndex) {
+        box.setTabIndex(tabIndex);
         return box;
     }
 }

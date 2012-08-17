@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
@@ -10,20 +12,21 @@ import com.google.gwt.user.client.ui.HTML;
  */
 public class SheetHeader {
 
-    public static void createHeaders(Header[] headers, int headerCol, int row, FlexTable headerTable) {
-        for (Header header : headers) {
+    public static void createHeaders(ArrayList<CellColumnHeader> headers, int headerCol, int row,
+            FlexTable headerTable) {
+        for (CellColumnHeader header : headers) {
 
             String label = header.toString();
             String top = label.length() > 15 ? "-2px" : "-8px";
             String html = "";
-            if (!header.getDescription().isEmpty()) {
+            if (header.getDescription() != null) {
                 html = "<div title=\"" + header.getDescription() + "\" style=\"position: relative; top: " + top
                         + "; left: -3px; float: right; font-size: 11px; "
                         + "border-radius: 1em 1em 1em 1em; color: #333; padding: 0 5px; "
                         + "font-weight: bold; background-color: #f8f8f0; cursor: pointer;\">?</div>";
             }
             html += label;
-            if (header.getCell().isRequired())
+            if (header.isRequired())
                 html += (" <span class=\"required\">*</span>");
             HTML cell = new HTML(html);
             cell.setStyleName("cell_column_header");

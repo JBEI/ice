@@ -467,6 +467,19 @@ a.cell_mouseover:hover {
     font-size: 0.75em;
 }
 
+.cell_focus {
+    width: 130px;
+    height: 19px;
+    font-size: 0.75em;
+}
+
+.cell_border:focus {
+    border: 2px solid #0082C0;
+    width: 127px;
+    height: 16px;
+    outline: none;
+}
+
 .cell_input {
     font-size: 0.70em;
     padding: 0;
@@ -546,9 +559,6 @@ a.cell_mouseover:hover {
     border-bottom: 1px solid #ccc;
 }
 
-.focus_panel {
-}
-
 .index_td_cell {
     text-align: center;
     border-bottom: 1px solid #CCC;
@@ -587,6 +597,11 @@ a.cell_mouseover:hover {
 
 .tail_cell_column_header {
     width: 23px;
+}
+
+.tail_cell_column_header_td {
+    background-color: #f1f1f1;
+    border-left: 1px solid #ccc;
 }
 
 /* ENTRY DETAIL VIEW */

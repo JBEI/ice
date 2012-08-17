@@ -4,7 +4,9 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellUploader;
+import org.jbei.ice.client.bulkupload.widget.CellWidget;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -12,6 +14,7 @@ import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -27,14 +30,12 @@ import gwtupload.client.IUploader;
 public class FileInputCell extends SheetCell {
 
     private final HashMap<Integer, CellUploader> rowUploaderMap; // each cell has its own uploader
+    private final HashMap<Integer, CellWidget> widgetHashMap;
 
     public FileInputCell() {
         super();
         rowUploaderMap = new HashMap<Integer, CellUploader>();
-    }
-
-    public boolean handlesDataSet() {
-        return true;
+        widgetHashMap = new HashMap<Integer, CellWidget>();
     }
 
     @Override
@@ -78,7 +79,7 @@ public class FileInputCell extends SheetCell {
     }
 
     @Override
-    public Widget getWidget(int row, boolean isCurrentSelection) {
+    public Widget getWidget(int row, boolean isCurrentSelection, int tabIndex) {
 
         CellUploader cellUploader = rowUploaderMap.get(row);
 
@@ -90,21 +91,28 @@ public class FileInputCell extends SheetCell {
         }
 
         if (isCurrentSelection) {
-            cellUploader.asWidget().setStyleName("uploader_cell_selected");
-            return cellUploader.asWidget();
+            FocusPanel panel = new FocusPanel();
+            panel.setTabIndex(tabIndex);
+            panel.setWidget(cellUploader.asWidget());
+            panel.setFocus(isCurrentSelection);
+            panel.setStyleName("cell_border");
+            return panel;
+//            return cellUploader.asWidget();
         } else {
-            Label label;
             SheetCellData data = getDataForRow(row);
-            if (data != null) {
-                String text = data.getValue();
-                if (text != null && text.length() > 12)
-                    text = (text.substring(0, 9) + "...");
-
-                label = new Label(text);
-            } else
-                label = new Label();
-            label.setStyleName("cell");
-            return label;
+            String value = "";
+            if (data != null)
+                value = data.getValue();
+            GWT.log("Tab index for uploading being set to" + tabIndex);
+            CellWidget widget = widgetHashMap.get(row);
+            if (widget == null) {
+                widget = new CellWidget(value, tabIndex);
+                if (tabIndex != -1)
+                    widgetHashMap.put(row, widget);
+            } else {
+                widget.setValue(value);
+            }
+            return widget;
         }
     }
 
@@ -128,7 +136,10 @@ public class FileInputCell extends SheetCell {
                     return;
                 }
 
-                setWidgetValue(row, info.name, fileId);
+                SheetCellData datum = new SheetCellData();
+                datum.setId(fileId);
+                datum.setValue(info.name);
+                setWidgetValue(row, datum);
                 String name = info.name;
                 if (name != null && name.length() > 16)
                     name = (name.substring(0, 14) + "...");

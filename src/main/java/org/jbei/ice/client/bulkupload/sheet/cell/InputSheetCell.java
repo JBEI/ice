@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet.cell;
 
+import org.jbei.ice.client.bulkupload.model.SheetCellData;
+
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.user.client.ui.TextBox;
@@ -43,7 +45,10 @@ public class InputSheetCell extends SheetCell {
     @Override
     public String setDataForRow(int row) {
         String ret = input.getText();
-        setWidgetValue(row, ret, ret);
+        SheetCellData datum = new SheetCellData();
+        datum.setId(ret);
+        datum.setValue(ret);
+        setWidgetValue(row, datum);
         input.setText("");
         return ret;
     }
@@ -54,7 +59,8 @@ public class InputSheetCell extends SheetCell {
     }
 
     @Override
-    public Widget getWidget(int row, boolean isCurrentSelection) {
+    public Widget getWidget(int row, boolean isCurrentSelection, int tabIndex) {
+        input.setTabIndex(tabIndex);
         return input;
     }
 }
