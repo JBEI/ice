@@ -127,6 +127,6 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         data = new SheetCellData();
         data.setId(value);
         data.setValue(value);
-        return null;
+        return data;
     }
 }
