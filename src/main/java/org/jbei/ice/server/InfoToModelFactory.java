@@ -60,8 +60,7 @@ public class InfoToModelFactory {
                 plasmid.setBackbone(plasmidInfo.getBackbone());
                 plasmid.setOriginOfReplication(plasmidInfo.getOriginOfReplication());
                 plasmid.setPromoters(plasmidInfo.getPromoters());
-                plasmid.setCircular(plasmidInfo.getCircular() == null ? false : plasmidInfo
-                        .getCircular());
+                plasmid.setCircular(plasmidInfo.getCircular());
 
                 break;
 
@@ -105,24 +104,26 @@ public class InfoToModelFactory {
                 seed.setRecordType(EntryType.ARABIDOPSIS.getName());
                 ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
 
-                seed.setHomozygosity(seedInfo.getHomozygosity());
+                String homozygosity = seedInfo.getHomozygosity() == null ? "" : seedInfo.getHomozygosity();
+                seed.setHomozygosity(homozygosity);
                 seed.setHarvestDate(seedInfo.getHarvestDate());
-                seed.setEcotype(seedInfo.getEcotype());
-                seed.setParents(seedInfo.getParents());
+                String ecoType = seedInfo.getEcotype() == null ? "" : seedInfo.getEcotype();
+                seed.setEcotype(ecoType);
+                String parents = seedInfo.getParents() == null ? "" : seedInfo.getParents();
+                seed.setParents(parents);
 
                 if (seedInfo.getGeneration() != null) {
-                    ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo
-                                                                                                       .getGeneration()
-                                                                                                       .name());
+                    ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(
+                            seedInfo.getGeneration().name());
                     seed.setGeneration(generation);
                 }
 
                 if (seedInfo.getPlantType() != null) {
-                    ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo
-                                                                                                    .getPlantType()
-                                                                                                    .name());
+                    ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(
+                            seedInfo.getPlantType().name());
                     seed.setPlantType(plantType);
                 }
+                seed.setSentToABRC(seedInfo.isSentToAbrc());
                 break;
 
             default:
@@ -143,10 +144,17 @@ public class InfoToModelFactory {
         entry.setSelectionMarkers(markers);
         entry.setReferences(info.getReferences());
         entry.setRecordId(info.getRecordId());
-        entry.setOwner(info.getOwner());
-        entry.setOwnerEmail(info.getOwnerEmail());
-        entry.setCreator(info.getCreator());
-        entry.setCreatorEmail(info.getCreatorEmail());
+
+        if (info.getOwnerEmail() != null) {
+            entry.setOwner(info.getOwner());
+            entry.setOwnerEmail(info.getOwnerEmail());
+        }
+
+        if (info.getCreatorEmail() != null) {
+            entry.setCreator(info.getCreator());
+            entry.setCreatorEmail(info.getCreatorEmail());
+        }
+
         entry.setStatus(info.getStatus() == null ? "" : info.getStatus());
         entry.setAlias(info.getAlias());
         entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? new Integer(0) : info
@@ -165,7 +173,6 @@ public class InfoToModelFactory {
             entry.setVisibility(visibility.getValue());
 
         getFundingSources(info.getFundingSource(), info.getPrincipalInvestigator(), entry);
-//        entry.setEntryFundingSources(entryFundingSources);
         entry.setKeywords(info.getKeywords());
 
         // parameters 

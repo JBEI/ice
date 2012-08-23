@@ -11,7 +11,6 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.interfaces.IFeatureValueObject;
 import org.jbei.ice.lib.utils.SequenceUtils;
 
 import org.hibernate.annotations.Type;
@@ -29,7 +28,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "features")
 @SequenceGenerator(name = "sequence", sequenceName = "features_id_seq", allocationSize = 1)
-public class Feature implements IFeatureValueObject, IModel {
+public class Feature implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -73,78 +72,63 @@ public class Feature implements IFeatureValueObject, IModel {
 
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public void setName(String name) {
         this.name = name;
     }
 
-    @Override
     public String getIdentification() {
         return identification;
     }
 
-    @Override
     public void setIdentification(String identification) {
         this.identification = identification;
     }
 
-    @Override
     @XmlTransient
     public int getAutoFind() {
         return autoFind;
     }
 
-    @Override
     public void setAutoFind(int autoFind) {
         this.autoFind = autoFind;
     }
 
-    @Override
     public String getGenbankType() {
         return genbankType;
     }
 
-    @Override
     public void setGenbankType(String genbankType) {
         this.genbankType = genbankType;
     }
 
-    @Override
     public void setId(long id) {
         this.id = id;
     }
 
-    @Override
     @XmlTransient
     public long getId() {
         return id;
     }
 
-    @Override
     public void setHash(String hash) {
         this.hash = hash;
     }
 
-    @Override
     public String getHash() {
         return hash;
     }
 
-    @Override
     public void setSequence(String sequence) {
         if (sequence != null) {
             this.sequence = sequence.toLowerCase();
         }
     }
 
-    @Override
     public String getSequence() {
         return sequence;
     }
-
 }

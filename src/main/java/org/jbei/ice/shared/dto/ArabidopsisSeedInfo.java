@@ -1,15 +1,31 @@
 package org.jbei.ice.shared.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ArabidopsisSeedInfo extends EntryInfo {
 
     public enum Generation implements IsSerializable {
-        M0, M1, M2, T0, T1, T2, T3, T4, T5
+        M0, M1, M2, T0, T1, T2, T3, T4, T5;
+
+        public static ArrayList<String> getDisplayList() {
+            ArrayList<String> list = new ArrayList<String>();
+            for (Generation option : Generation.values()) {
+                list.add(option.name());
+            }
+            return list;
+        }
+
+        public static Object displayToEnum(String value) {
+
+            for (Generation option : Generation.values()) {
+                if (value.equalsIgnoreCase(option.name()))
+                    return option;
+            }
+            return null;
+        }
     }
 
     public enum PlantType implements IsSerializable {
@@ -29,6 +45,23 @@ public class ArabidopsisSeedInfo extends EntryInfo {
         public String toString() {
             return this.display;
         }
+
+        public static ArrayList<String> getDisplayList() {
+            ArrayList<String> list = new ArrayList<String>();
+            for (PlantType option : PlantType.values()) {
+                list.add(option.display);
+            }
+            return list;
+        }
+
+        public static Object displayToEnum(String value) {
+
+            for (PlantType option : PlantType.values()) {
+                if (value.equalsIgnoreCase(option.toString()))
+                    return option;
+            }
+            return null;
+        }
     }
 
     private String homozygosity;
@@ -37,31 +70,10 @@ public class ArabidopsisSeedInfo extends EntryInfo {
     private String parents;
     private Generation generation;
     private PlantType plantType;
+    private Boolean sentToAbrc;
 
     public ArabidopsisSeedInfo() {
         super(EntryType.ARABIDOPSIS);
-    }
-
-    public static Map<String, String> getGenerationOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-        for (Generation generation : Generation.values()) {
-            resultMap.put(generation.toString(), generation.toString());
-        }
-
-        return resultMap;
-    }
-
-    public static Map<String, String> getPlantTypeOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-
-        resultMap.put(PlantType.EMS.toString(), "EMS");
-        resultMap.put(PlantType.OVER_EXPRESSION.toString(), "Over Expression");
-        resultMap.put(PlantType.RNAI.toString(), "RNAi");
-        resultMap.put(PlantType.REPORTER.toString(), "Reporter");
-        resultMap.put(PlantType.T_DNA.toString(), "T-DNA");
-        resultMap.put(PlantType.OTHER.toString(), "Other");
-
-        return resultMap;
     }
 
     // getters and setters
@@ -111,5 +123,13 @@ public class ArabidopsisSeedInfo extends EntryInfo {
 
     public PlantType getPlantType() {
         return plantType;
+    }
+
+    public Boolean isSentToAbrc() {
+        return sentToAbrc;
+    }
+
+    public void setSentToAbrc(Boolean sentToAbrc) {
+        this.sentToAbrc = sentToAbrc;
     }
 }

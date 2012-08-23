@@ -6,7 +6,6 @@ import javax.persistence.*;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.models.interfaces.ISampleValueObject;
 
 import org.hibernate.annotations.Type;
 
@@ -21,7 +20,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "samples")
 @SequenceGenerator(name = "sequence", sequenceName = "samples_id_seq", allocationSize = 1)
-public class Sample implements ISampleValueObject, IModel {
+public class Sample implements IModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -62,82 +61,66 @@ public class Sample implements ISampleValueObject, IModel {
     public Sample() {
     }
 
-    @Override
     public long getId() {
         return id;
     }
 
-    @Override
     public void setId(long id) {
         this.id = id;
     }
 
-    @Override
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
-    @Override
     public String getUuid() {
         return uuid;
     }
 
-    @Override
     public String getDepositor() {
         return depositor;
     }
 
-    @Override
     public void setDepositor(String depositor) {
         this.depositor = depositor;
     }
 
-    @Override
     public String getLabel() {
         return label;
     }
 
-    @Override
     public void setLabel(String label) {
         this.label = label;
     }
 
-    @Override
     public String getNotes() {
         return notes;
     }
 
-    @Override
     public void setNotes(String notes) {
         this.notes = notes;
     }
 
-    @Override
     public Entry getEntry() {
         return entry;
     }
 
-    @Override
     public void setEntry(Entry entry) {
         this.entry = entry;
     }
 
-    @Override
     public Date getCreationTime() {
         return creationTime;
     }
 
-    @Override
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
 
-    @Override
     public Date getModificationTime() {
         return modificationTime;
     }
 
-    @Override
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
     }
@@ -149,5 +132,4 @@ public class Sample implements ISampleValueObject, IModel {
     public void setStorage(Storage locationNew) {
         storage = locationNew;
     }
-
 }

@@ -43,8 +43,8 @@ public class PlasmidInfo extends EntryInfo {
         return circular;
     }
 
-    public void setCircular(boolean circular) {
-        this.circular = new Boolean(circular);
+    public void setCircular(Boolean circular) {
+        this.circular = circular;
     }
 
     public HashMap<Long, String> getStrains() {

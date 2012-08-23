@@ -467,6 +467,19 @@ a.cell_mouseover:hover {
     font-size: 0.75em;
 }
 
+.cell_focus {
+    width: 130px;
+    height: 19px;
+    font-size: 0.75em;
+}
+
+.cell_border:focus {
+    border: 2px solid #0082C0;
+    width: 127px;
+    height: 16px;
+    outline: none;
+}
+
 .cell_input {
     font-size: 0.70em;
     padding: 0;
@@ -546,9 +559,6 @@ a.cell_mouseover:hover {
     border-bottom: 1px solid #ccc;
 }
 
-.focus_panel {
-}
-
 .index_td_cell {
     text-align: center;
     border-bottom: 1px solid #CCC;
@@ -587,6 +597,11 @@ a.cell_mouseover:hover {
 
 .tail_cell_column_header {
     width: 23px;
+}
+
+.tail_cell_column_header_td {
+    border-left: 2px solid #cccccc;
+    border-right: 1px solid #cccccc;
 }
 
 /* ENTRY DETAIL VIEW */
@@ -702,7 +717,6 @@ a.cell_mouseover:hover {
     cursor: pointer;
     font-family: sans-serif;
     font-weight: bold;
-    font-smooth: always;
     opacity: 0.8;
     font-size: 0.90em;
 }
@@ -1537,7 +1551,6 @@ td.datePickerMonth {
     color: #333;
     font-weight: bold;
     border-left: 1px solid #F1F1F1;
-    text-transform: uppercase;
     font-style: italic;
     background-color: #f4f3e9;
 }
@@ -1925,7 +1938,9 @@ td.datePickerMonth {
 }
 
 .bulk_upload_visibility {
-    font-size: 0.80em;
+    font-size: 0.85em;
+    font-weight: normal;
+    font-style: normal;
 }
 
 

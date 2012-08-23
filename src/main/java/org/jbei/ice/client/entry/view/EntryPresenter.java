@@ -30,7 +30,6 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
@@ -390,7 +389,7 @@ public class EntryPresenter extends AbstractPresenter {
                                              // can user edit ?
                                              boolean canEdit = (AppController.accountInfo.isModerator() || result
                                                      .isCanEdit());
-                                             canEdit = (canEdit && result.getVisibility() == Visibility.OK);
+//                                             canEdit = (canEdit && result.getVisibility() == Visibility.OK);
                                              display.getPermissionsWidget().setCanEdit(canEdit);
                                              if (canEdit) {
                                                  display.setSequenceDeleteHandler(new DeleteSequenceTraceHandler());

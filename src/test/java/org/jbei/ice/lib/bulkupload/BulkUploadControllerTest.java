@@ -8,7 +8,10 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.server.dao.hibernate.HibernateHelper;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
@@ -19,6 +22,7 @@ import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -353,6 +357,35 @@ public class BulkUploadControllerTest {
         // ensure no entries left "hanging"
         entry = entryController.get(account, entry.getId());
         Assert.assertNull(entry);
+
+        // test delete with valid group id
+        GroupController groupController = new GroupController();
+        Group publicGroup = groupController.create("delete_DRAFT", "TEST", null);
+        Assert.assertNotNull(publicGroup);
+
+        entryList.clear();
+        entryList.add(info);
+        createdDraft = controller.createBulkImportDraft(account, EntryAddType.ARABIDOPSIS, "Test",
+                                                        entryList, publicGroup.getUuid());
+
+        Assert.assertNotNull(createdDraft);
+
+        entry = entryController.get(account, createdDraft.getEntryList().get(0).getId());
+        Assert.assertNotNull(entry);
+
+        // delete draft
+        Assert.assertNotNull(controller.deleteDraftById(account, createdDraft.getId()));
+
+        // ensure contents are deleted
+        try {
+            controller.retrieveById(account, createdDraft.getId());
+        } catch (ControllerException c) {
+            // expected
+        }
+
+        // ensure no entries left "hanging"
+        entry = entryController.get(account, entry.getId());
+        Assert.assertNull(entry);
     }
 
     @Test
@@ -458,14 +491,34 @@ public class BulkUploadControllerTest {
         Assert.assertEquals(Visibility.DRAFT.getValue(), newEntry.getVisibility().intValue());
         Assert.assertEquals(newEntry.getAlias(), "new alias"); // check updated name
 
-        // update existing and add one more
+        // check group
+        PermissionsController permissionsController = new PermissionsController();
+        ArrayList<PermissionInfo> permissionInfos = permissionsController.retrieveSetEntryPermissions(account,
+                                                                                                      newEntry);
+        Assert.assertTrue(permissionInfos.isEmpty());
+
+        // update existing and add one more and also set the group to public
+        GroupController groupController = new GroupController();
+        Group group = groupController.create("delete_UPDATE", "TEST", null);
         added.setName("Part Test");
         EntryInfo newInfo = new PartInfo();
         newInfo.setLongDescription("This is a long description");
         entryList = updatedDraft.getEntryList();
         entryList.add(newInfo);
-        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
+        updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, group.getUuid());
         Assert.assertNotNull(updatedDraft);
+        Assert.assertEquals(group.getUuid(), updatedDraft.getGroupInfo().getUuid());
+
+        // both entries should have same permissions
+        newEntry = entryController.get(account, addedId);
+        long id = updatedDraft.getEntryList().get(0).getId();
+        Entry second = entryController.get(account, id);
+        permissionInfos = permissionsController.retrieveSetEntryPermissions(account, newEntry);
+        Assert.assertEquals(1, permissionInfos.size());
+        Assert.assertEquals(PermissionInfo.PermissionType.READ_GROUP, permissionInfos.get(0).getType());
+        permissionInfos = permissionsController.retrieveSetEntryPermissions(account, second);
+        Assert.assertEquals(1, permissionInfos.size());
+        Assert.assertEquals(PermissionInfo.PermissionType.READ_GROUP, permissionInfos.get(0).getType());
     }
 
     @Test
@@ -543,15 +596,16 @@ public class BulkUploadControllerTest {
 
         Assert.assertEquals(Visibility.PENDING.getValue(), strain.getVisibility().intValue());
         Assert.assertEquals(Visibility.PENDING.getValue(), plasmid.getVisibility().intValue());
+
+        // check draft
+        createdDraft = controller.retrieveById(adminAccount, createdDraft.getId());
+        Assert.assertEquals(account.getEmail(), createdDraft.getName());
     }
 
     @Test
     public void testSubmitBulkImport() throws Exception {
-        // testing submission without first creating a draft
-
         // create accounts
         final String email = "tester@test_SubmitBulkImport.org";
-        final String adminEmail = "tester+admin@test_SubmitBulkImport.org";
 
         // create accounts
         AccountController accountController = new AccountController();
@@ -559,8 +613,6 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(password);
         Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
-        Account adminAccount = accountController.createAdminAccount(adminEmail, "popop");
-        Assert.assertNotNull(adminAccount);
 
         // create entries
         ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
@@ -577,6 +629,10 @@ public class BulkUploadControllerTest {
         ArrayList<Long> results = entryController.getEntryIdsByOwner(account.getEmail(), Visibility.PENDING);
         Assert.assertNotNull(results);
         Assert.assertEquals(entryList.size(), results.size());
+
+        Entry entry = entryController.get(account, results.get(0));
+        Assert.assertNotNull(entry);
+        Assert.assertEquals("alias", entry.getAlias());
 
         // user should not have any bulk imports
         ArrayList<BulkUploadInfo> infos = controller.retrieveByUser(account, account);
@@ -651,6 +707,7 @@ public class BulkUploadControllerTest {
         entry = entryController.get(account, entry.getId());
         Assert.assertNotNull(entry);
         Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
+        Assert.assertEquals(account.getEmail(), entry.getOwnerEmail());
     }
 
     @Test

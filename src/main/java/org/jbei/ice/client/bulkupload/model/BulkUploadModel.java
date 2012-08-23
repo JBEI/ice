@@ -79,8 +79,7 @@ public class BulkUploadModel {
         }.go(eventBus);
     }
 
-    public void updateBulkImportDraft(final long id, final EntryAddType type,
-            final ArrayList<EntryInfo> entryList, final String groupUUID,
+    public void updateBulkImportDraft(final long id, final ArrayList<EntryInfo> entryList, final String groupUUID,
             final BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler handler) {
 
         new IceAsyncCallback<BulkUploadInfo>() {
@@ -105,6 +104,23 @@ public class BulkUploadModel {
             @Override
             protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
                 service.submitBulkImport(AppController.sessionId, type, data, groupUUID, callback);
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                handler.onSubmit(new BulkUploadSubmitEvent(result));
+            }
+        }.go(eventBus);
+    }
+
+    public void submitBulkImportDraft(final long bulkImport, final ArrayList<EntryInfo> data,
+            final String groupUUID, final BulkUploadSubmitEventHandler handler) {
+
+        new IceAsyncCallback<Boolean>() {
+
+            @Override
+            protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                service.submitBulkImportDraft(AppController.sessionId, bulkImport, data, groupUUID, callback);
             }
 
             @Override

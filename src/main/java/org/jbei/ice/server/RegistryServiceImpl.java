@@ -20,6 +20,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -63,7 +64,6 @@ import org.jbei.ice.shared.dto.*;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
-import org.jbei.ice.web.utils.WebUtils;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
@@ -178,11 +178,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public boolean updateAccountPassword(String sid, String email, String password)
             throws AuthenticationException {
-        Account account;
 
         try {
-            account = retrieveAccountForSid(sid);
-
+            Account account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": updating password for account " + email);
             AccountController controller = new AccountController();
             controller.updatePassword(email, password);
@@ -691,9 +689,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             String parsed = getParsedNotes(html);
             info.setLongDescription(info.getLongDescription());
             info.setParsedDescription(parsed);
-            String parsedShortDesc = WebUtils.linkifyText(account, info.getShortDescription());
+            String parsedShortDesc = EntryUtil.linkifyText(account, info.getShortDescription());
             info.setLinkifiedShortDescription(parsedShortDesc);
-            String parsedLinks = WebUtils.linkifyText(account, info.getLinks());
+            String parsedLinks = EntryUtil.linkifyText(account, info.getLinks());
             info.setLinkifiedLinks(parsedLinks);
 
             // group with write permissions
@@ -762,9 +760,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             String parsed = getParsedNotes(html);
             info.setLongDescription(info.getLongDescription());
             info.setParsedDescription(parsed);
-            String parsedShortDesc = WebUtils.linkifyText(account, info.getShortDescription());
+            String parsedShortDesc = EntryUtil.linkifyText(account, info.getShortDescription());
             info.setLinkifiedShortDescription(parsedShortDesc);
-            String parsedLinks = WebUtils.linkifyText(account, info.getLinks());
+            String parsedLinks = EntryUtil.linkifyText(account, info.getLinks());
             info.setLinkifiedLinks(parsedLinks);
 
             // group with write permissions
@@ -1227,13 +1225,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account account = retrieveAccountForSid(sid);
             BulkUploadController draftController = new BulkUploadController();
             Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draftId);
-
-            BulkUploadInfo info = draftController.retrieveById(account, draftId);
-            if (info == null) {
-                Logger.info(account.getEmail() + ": could not locate draft with id " + draftId);
-                return null;
-            }
-
             return draftController.deleteDraftById(account, draftId);
         } catch (ControllerException ce) {
             Logger.error(ce);
@@ -1314,6 +1305,31 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                                 + importType.toString() + " & size " + entryList.size());
             BulkUploadController controller = new BulkUploadController();
             return controller.submitBulkImport(account, importType, entryList, groupUUID);
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean submitBulkImportDraft(String sid, long draftId,
+            ArrayList<EntryInfo> entryList, String groupUUID) throws AuthenticationException {
+
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (entryList.isEmpty())
+                return false;
+
+            Logger.info(account.getEmail() + ": submitting bulk import draft \""
+                                + draftId + "\" & size " + entryList.size());
+            BulkUploadController controller = new BulkUploadController();
+            try {
+                return controller.submitBulkImportDraft(account, draftId, entryList, groupUUID);
+            } catch (PermissionException e) {
+                Logger.error(e);
+                return false;
+            }
 
         } catch (ControllerException ce) {
             Logger.error(ce);
@@ -1444,7 +1460,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": creating strain with plasmid");
             EntryController controller = new EntryController();
             GroupController groupController = new GroupController();
-            Group publicGroup = groupController.createOrRetrievePublicGroup(); // tODO group uuid should come from ui
+            Group publicGroup = groupController.createOrRetrievePublicGroup(); // TODO group uuid should come from ui
 
             Strain strain = null;
             Plasmid plasmid = null;
@@ -1570,7 +1586,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Entry existing = controller.getByRecordId(account, info.getRecordId());
 
             Entry entry = InfoToModelFactory.infoToEntry(info, existing);
-            controller.update(account, entry);
+            controller.update(account, entry, true, null);
             return true;
 
         } catch (ControllerException e) {

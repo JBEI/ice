@@ -1,11 +1,13 @@
 package org.jbei.ice.lib.group;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
-
-import java.util.Set;
 
 public class GroupController {
 
@@ -48,9 +50,9 @@ public class GroupController {
     /**
      * Create new {@link Group} object in the database, using parameters.
      *
-     * @param label
-     * @param description
-     * @param parent
+     * @param label       group label
+     * @param description group description
+     * @param parent      group parent
      * @return Saved Group object.
      * @throws ControllerException
      */
@@ -95,4 +97,66 @@ public class GroupController {
             throw new ControllerException(e);
         }
     }
+
+    /**
+     * retrieves all parent groups for any group in the set.
+     *
+     * @param account account whose groups are being retrieved
+     * @return set of groups retrieved for account
+     */
+    public Set<Group> getAllGroups(Account account) throws ControllerException {
+
+        Set<Long> groupIds = getAllAccountGroups(account);
+        try {
+            return dao.getByIdList(groupIds);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    /**
+     * Retrieve all parent {@link Group}s of a given {@link org.jbei.ice.lib.account.model.Account}.
+     *
+     * @param account Account to query on.
+     * @return Set of Group ids.
+     */
+    protected Set<Long> getAllAccountGroups(Account account) throws ControllerException {
+        HashSet<Long> accountGroups = new HashSet<Long>();
+
+        for (Group group : account.getGroups()) {
+            accountGroups = getParentGroups(group, accountGroups);
+        }
+
+        // Everyone belongs to the everyone group
+        GroupController controller = new GroupController();
+        try {
+            Group everybodyGroup = controller.createOrRetrievePublicGroup();
+            accountGroups.add(everybodyGroup.getId());
+        } catch (ControllerException e) {
+            Logger.warn("could not get everybody group: " + e.toString());
+        }
+        return accountGroups;
+    }
+
+    /**
+     * Retrieve all parent {@link Group}s of a given group.
+     *
+     * @param group    Group to query on.
+     * @param groupIds optional set of group ids. Can be empty.
+     * @return Set of Parent group ids.
+     */
+    protected HashSet<Long> getParentGroups(Group group, HashSet<Long> groupIds) throws ControllerException {
+        if (groupIds.contains(group.getId())) {
+            return groupIds;
+        } else {
+            groupIds.add(group.getId());
+            Group parentGroup = group.getParent();
+            if (parentGroup != null) {
+                getParentGroups(parentGroup, groupIds);
+            }
+        }
+
+        return groupIds;
+    }
+
 }

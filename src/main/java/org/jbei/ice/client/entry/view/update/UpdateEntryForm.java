@@ -1,21 +1,22 @@
 package org.jbei.ice.client.entry.view.update;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
-import org.jbei.ice.client.collection.add.form.ParametersPanel;
-import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
-import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.BioSafetyOptions;
-import org.jbei.ice.shared.StatusType;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.ParameterInfo;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
+
+import org.jbei.ice.client.collection.add.form.ParametersPanel;
+import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
+import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.BioSafetyOption;
+import org.jbei.ice.shared.StatusType;
+import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.ParameterInfo;
+
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.*;
 
 /**
  * Parent class for forms used to create new entries
@@ -85,7 +86,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         }
 
         bioSafety.setVisibleItemCount(1);
-        for (BioSafetyOptions options : BioSafetyOptions.values()) {
+        for (BioSafetyOption options : BioSafetyOption.values()) {
             bioSafety.addItem(options.getDisplayName(), options.getValue());
         }
         bioSafety.setStyleName("pull_down");
@@ -281,25 +282,21 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
 
     public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                                                                           .get(AutoCompleteField.SELECTION_MARKERS)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.SELECTION_MARKERS)));
         box.setWidth(width);
         return box;
     }
 
-    public Widget createAutoCompleteForPlasmidNames(String width) {
+    public SuggestBox createAutoCompleteForPlasmidNames(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                                                                           .get(AutoCompleteField.PLASMID_NAME)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PLASMID_NAME)));
         box.setWidth(width);
         return box;
     }
 
-    public Widget createAutoCompleteForOriginOfReplication(String width) {
+    public SuggestBox createAutoCompleteForOriginOfReplication(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                                                                           .get(AutoCompleteField
-                                                                                        .ORIGIN_OF_REPLICATION)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.ORIGIN_OF_REPLICATION)));
         box.setWidth(width);
         return box;
     }
@@ -415,6 +412,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         entryInfo.setBioSafetyLevel(value);
         entryInfo.setIntellectualProperty(ip.getText());
         entryInfo.setPrincipalInvestigator(principalInvestigator.getText());
+        entryInfo.setFundingSource(fundingSource.getText());
     }
 
     @Override

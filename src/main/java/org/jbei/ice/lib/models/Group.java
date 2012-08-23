@@ -1,8 +1,10 @@
 package org.jbei.ice.lib.models;
 
-import org.jbei.ice.lib.dao.IModel;
-
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
+
+import org.jbei.ice.lib.dao.IModel;
 
 /**
  * Aggregate users into groups.
@@ -35,6 +37,10 @@ public class Group implements IModel {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent")
     protected Group parent;
+
+    @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER)
+    @JoinColumn(name = "fk_parent")
+    private Set<Group> children = new HashSet<Group>();
 
     // Getters and setters
     public long getId() {
@@ -75,5 +81,9 @@ public class Group implements IModel {
 
     public void setParent(Group parent) {
         this.parent = parent;
+    }
+
+    public Set<Group> getChildren() {
+        return children;
     }
 }

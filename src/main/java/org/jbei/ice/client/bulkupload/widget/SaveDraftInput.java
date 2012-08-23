@@ -53,4 +53,8 @@ public class SaveDraftInput extends Composite {
             }
         });
     }
+
+    public void reset() {
+        inputName.setText("");
+    }
 }

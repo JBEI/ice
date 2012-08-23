@@ -1,84 +1,72 @@
 package org.jbei.ice.client.bulkupload.sheet;
 
 public enum Header {
-    PI("Principal Investigator", true, "", new InputSheetCell()),
-    FUNDING_SOURCE("Funding Source", false, "", new InputSheetCell()),
-    IP("Intellectual Property", false, "", new InputSheetCell()),
-    BIOSAFETY("BioSafety Level", true, "", new BioSafetySheetCell()),
-    NAME("Name", true, "e.g. JBEI-0001", new InputSheetCell()),
-    ALIAS("Alias", false, "", new InputSheetCell()),
-    KEYWORDS("Keywords", false, "", new InputSheetCell()),
-    SUMMARY("Summary", true, "", new InputSheetCell()),
-    NOTES("Notes", false, "", new InputSheetCell()),
-    REFERENCES("References", false, "", new InputSheetCell()),
-    LINKS("Links", false, "", new InputSheetCell()),
-    STATUS("Status", true, "", new StatusSheetCell()),
-    SEQ_FILENAME("Sequence File", false, "", new FileInputCell()),
-    ATT_FILENAME("Attachment File", false, "", new FileInputCell()),
-    SELECTION_MARKERS("Selection Markers", false, "", new SelectionMarkerInputCell()),
-    PARENTAL_STRAIN("Parental Strain", false, "", new InputSheetCell()),
-    GEN_PHEN("Genotype or Phenotype", false, "", new InputSheetCell()),
-    PLASMIDS("Plasmids", false, "", new InputSheetCell()),
-    CIRCULAR("Circular", false, "", new InputSheetCell()),
-    BACKBONE("Backbone", false, "", new InputSheetCell()),
-    PROMOTERS("Promoters", false, "", new InputSheetCell()),
-    ORIGIN_OF_REPLICATION("Origin of Replication", false, "", new InputSheetCell()),
-    HOMOZYGOSITY("Homozygosity", false, "", new InputSheetCell()),
-    ECOTYPE("Ecotype", false, "", new InputSheetCell()),
-    HARVEST_DATE("Harvest Data", false, "", new InputSheetCell()),
-    GENERATION("Generation", true, "", new InputSheetCell()),
-    PLANT_TYPE("Plant Type", true, "", new InputSheetCell()),
-    PARENTS("Parents", false, "", new InputSheetCell()),
-    PLASMID_NAME("Plasmid Name", true, "e.g. pTSH117", new InputSheetCell()),
-    PLASMID_ALIAS("Plasmid Alias", false, "", new InputSheetCell()),
-    PLASMID_KEYWORDS("Keywords", false, "", new InputSheetCell()),
-    PLASMID_SUMMARY("Summary", true, "", new InputSheetCell()),
-    PLASMID_NOTES("Notes", false, "", new InputSheetCell()),
-    PLASMID_REFERENCES("References", false, "", new InputSheetCell()),
-    PLASMID_LINKS("Links", false, "", new InputSheetCell()),
-    PLASMID_STATUS("Status", true, "", new StatusSheetCell()),
-    PLASMID_BACKBONE("Backbone", false, "", new InputSheetCell()),
-    PLASMID_PROMOTERS("Promoters", false, "", new InputSheetCell()),
-    PLASMID_ORIGIN_OF_REPLICATION("Origin of Replication", false, "", new InputSheetCell()),
-    PLASMID_SEQ_FILENAME("Sequence File", false, "", new FileInputCell()),
-    PLASMID_ATT_FILENAME("Attachment File", false, "", new FileInputCell()),
-    PLASMID_SELECTION_MARKERS("Selection Markers", false, "", new InputSheetCell()),
-    STRAIN_NAME("Name", true, "", new InputSheetCell()),
-    STRAIN_ALIAS("Alias", false, "", new InputSheetCell()),
-    STRAIN_KEYWORDS("Keywords", false, "", new InputSheetCell()),
-    STRAIN_SUMMARY("Summary", true, "", new InputSheetCell()),
-    STRAIN_NOTES("Notes", false, "", new InputSheetCell()),
-    STRAIN_REFERENCES("References", false, "", new InputSheetCell()),
-    STRAIN_LINKS("Links", false, "", new InputSheetCell()),
-    STRAIN_STATUS("Status", true, "", new StatusSheetCell()),
-    STRAIN_SELECTION_MARKERS("Selection Markers", false, "", new InputSheetCell()),
-    STRAIN_PARENTAL_STRAIN("Parental Strain", false, "", new InputSheetCell()),
-    STRAIN_GEN_PHEN("Genotype or Phenotype", false, "", new InputSheetCell()),
-    STRAIN_PLASMIDS("Plasmids", false, "", new InputSheetCell()),
-    STRAIN_SEQ_FILENAME("Sequence File", false, "", new FileInputCell()),
-    STRAIN_ATT_FILENAME("Attachment File", false, "", new FileInputCell());
+    PI("Principal Investigator"),
+    FUNDING_SOURCE("Funding Source"),
+    IP("Intellectual Property"),
+    BIOSAFETY("BioSafety Level"),
+    NAME("Name"),
+    ALIAS("Alias"),
+    KEYWORDS("Keywords"),
+    SUMMARY("Summary"),
+    NOTES("Notes"),
+    REFERENCES("References"),
+    LINKS("Links"),
+    STATUS("Status"),
+    SEQ_FILENAME("Sequence File"),
+    ATT_FILENAME("Attachment File"),
+    SELECTION_MARKERS("Selection Markers"),
+    PARENTAL_STRAIN("Parental Strain"),
+    GEN_PHEN("Genotype or Phenotype"),
+    PLASMIDS("Plasmids"),
+    CIRCULAR("Circular"),
+    BACKBONE("Backbone"),
+    PROMOTERS("Promoters"),
+    ORIGIN_OF_REPLICATION("Origin of Replication"),
+    HOMOZYGOSITY("Homozygosity"),
+    ECOTYPE("Ecotype"),
+    HARVEST_DATE("Harvest Date"),
+    GENERATION("Generation"),
+    SENT_TO_ABRC("Sent to ABRC?"),
+    PLANT_TYPE("Plant Type"),
+    PARENTS("Parents"),
+    PLASMID_NAME("Plasmid Name"),
+    PLASMID_ALIAS("Plasmid Alias"),
+    PLASMID_KEYWORDS("Plasmid Keywords"),
+    PLASMID_SUMMARY("Plasmid Summary"),
+    PLASMID_NOTES("Plasmid Notes"),
+    PLASMID_REFERENCES("Plasmid References"),
+    PLASMID_LINKS("Plasmid Links"),
+    PLASMID_STATUS("Plasmid Status"),
+    PLASMID_BACKBONE("Plasmid Backbone"),
+    PLASMID_PROMOTERS("Plasmid Promoters"),
+    PLASMID_ORIGIN_OF_REPLICATION("Plasmid Origin of Replication"),
+    PLASMID_SEQ_FILENAME("Plasmid Sequence File"),
+    PLASMID_ATT_FILENAME("Plasmid Attachment File"),
+    PLASMID_SELECTION_MARKERS("Plasmid Selection Markers"),
+    STRAIN_NAME("Strain Number"),
+    STRAIN_ALIAS("Strain Alias"),
+    STRAIN_KEYWORDS("Strain Keywords"),
+    STRAIN_SUMMARY("Strain Summary"),
+    STRAIN_NOTES("Strain Notes"),
+    STRAIN_REFERENCES("Strain References"),
+    STRAIN_LINKS("Strain Links"),
+    STRAIN_STATUS("Status"),
+    STRAIN_SELECTION_MARKERS("Strain Selection Markers"),
+    STRAIN_PARENTAL_STRAIN("Parental Strain"),
+    STRAIN_GEN_PHEN("Genotype or Phenotype"),
+    STRAIN_PLASMIDS("Strain Plasmids"),
+    STRAIN_SEQ_FILENAME("Strain Sequence File"),
+    STRAIN_ATT_FILENAME("Strain Attachment File");
 
     private String label;
-    private String description;
-    private transient SheetCell cell;
 
-    Header(String label, boolean required, String description, SheetCell sheetCell) {
+    Header(String label) {
         this.label = label;
-        this.description = description;
-        this.cell = sheetCell;
-        this.cell.setRequired(required);
     }
 
     @Override
     public String toString() {
         return this.label;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public SheetCell getCell() {
-        return this.cell;
     }
 }

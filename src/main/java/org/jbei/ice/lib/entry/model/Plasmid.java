@@ -1,13 +1,11 @@
 package org.jbei.ice.lib.entry.model;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.interfaces.IPlasmidValueObject;
-import org.jbei.ice.shared.dto.EntryType;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+
+import org.jbei.ice.shared.dto.EntryType;
 
 /**
  * Store Plasmid specific fields.
@@ -24,7 +22,7 @@ import javax.persistence.Table;
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "plasmids")
-public class Plasmid extends Entry implements IPlasmidValueObject, IModel {
+public class Plasmid extends Entry {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,49 +36,43 @@ public class Plasmid extends Entry implements IPlasmidValueObject, IModel {
     private String promoters;
 
     @Column(name = "circular")
-    private boolean circular;
+    private Boolean circular;
 
     public Plasmid() {
         setRecordType(EntryType.PLASMID.getName());
     }
 
-    @Override
     public String getBackbone() {
         return backbone;
     }
 
-    @Override
     public void setBackbone(String backbone) {
         this.backbone = backbone;
     }
 
-    @Override
     public String getOriginOfReplication() {
         return originOfReplication;
     }
 
-    @Override
     public void setOriginOfReplication(String originOfReplication) {
         this.originOfReplication = originOfReplication;
     }
 
-    @Override
     public String getPromoters() {
         return promoters;
     }
 
-    @Override
     public void setPromoters(String promoters) {
         this.promoters = promoters;
     }
 
-    @Override
-    public boolean getCircular() {
+    public Boolean getCircular() {
         return circular;
     }
 
-    @Override
-    public void setCircular(boolean circular) {
+    public void setCircular(Boolean circular) {
+        if (circular == null)
+            circular = Boolean.TRUE;
         this.circular = circular;
     }
 }

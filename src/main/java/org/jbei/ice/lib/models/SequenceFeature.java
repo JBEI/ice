@@ -6,7 +6,8 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.interfaces.ISequenceFeatureValueObject;
+
+import org.hibernate.annotations.Cascade;
 
 import org.hibernate.annotations.Type;
 
@@ -22,7 +23,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "sequence_feature")
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_id_seq", allocationSize = 1)
-public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
+public class SequenceFeature implements IModel {
 
     public static final String DESCRIPTION = "description";
 
@@ -78,6 +79,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     private AnnotationType annotationType;
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
+    @JoinColumn(name = "sequence_feature_id")
     @OrderBy("id")
     private final Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new
             LinkedHashSet<SequenceFeatureAttribute>();
@@ -109,34 +111,28 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         PREFIX, SUFFIX, SCAR, INNER, SUBINNER;
     }
 
-    @Override
     public void setId(long id) {
         this.id = id;
     }
 
-    @Override
     @XmlTransient
     public long getId() {
         return id;
     }
 
-    @Override
     @XmlTransient
     public Sequence getSequence() {
         return sequence;
     }
 
-    @Override
     public void setSequence(Sequence sequence) {
         this.sequence = sequence;
     }
 
-    @Override
     public Feature getFeature() {
         return feature;
     }
 
-    @Override
     public void setFeature(Feature feature) {
         this.feature = feature;
     }
@@ -193,7 +189,6 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.end = end;
     }
 
-    @Override
     public int getStrand() {
         return strand;
     }
@@ -201,39 +196,16 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     /**
      * +1 for forward, -1 for reverse.
      */
-    @Override
     public void setStrand(int strand) {
         this.strand = strand;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     *
-     * @return Description.
-     */
-    @Deprecated
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     *
-     * @param description
-     */
-    @Deprecated
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getGenbankType() {

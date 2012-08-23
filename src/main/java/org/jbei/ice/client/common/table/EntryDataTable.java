@@ -105,17 +105,26 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return typeCol;
     }
 
-    protected DataTableColumn<String> addNameColumn(double width, Unit unit) {
+    protected DataTableColumn<SafeHtml> addNameColumn(final double width, Unit unit) {
 
-        DataTableColumn<String> nameColumn = new DataTableColumn<String>(new TextCell(),
-                                                                         ColumnField.NAME) {
+        DataTableColumn<SafeHtml> nameColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(),
+                                                                             ColumnField.NAME) {
 
             @Override
-            public String getValue(T object) {
+            public SafeHtml getValue(T object) {
                 String name = object.getName();
-                if (name.length() > 15)
-                    name = name.substring(0, 12) + "...";
-                return name;
+                if (name == null)
+                    return SafeHtmlUtils.EMPTY_SAFE_HTML;
+
+
+                return SafeHtmlUtils
+                        .fromSafeConstant("<div style=\"width: "
+                                                  + width + "px; "
+                                                  + "white-space: nowrap; overflow: hidden; text-overflow: " +
+                                                  "ellipsis;\" title=\""
+                                                  + name.replaceAll("\"", "'") + "\">"
+                                                  + name + "</div>");
+
             }
         };
 
@@ -144,8 +153,8 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
                                                   + size
                                                   + "px; white-space: nowrap; overflow: hidden; text-overflow: " +
                                                   "ellipsis;\" title=\""
-                                                  + object.getShortDescription().replaceAll("\"", "'") + "\">"
-                                                  + object.getShortDescription() + "</div>");
+                                                  + description.replaceAll("\"", "'") + "\">"
+                                                  + description + "</div>");
             }
         };
 

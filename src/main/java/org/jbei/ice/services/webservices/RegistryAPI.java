@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
@@ -48,8 +47,6 @@ import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 import org.jbei.ice.shared.dto.AccountInfo;
-
-import org.apache.commons.lang.NotImplementedException;
 
 /**
  * SOAP API methods.
@@ -514,6 +511,17 @@ public class RegistryAPI {
         return (Strain) newEntry;
     }
 
+    public List<Entry> getAllEntries() throws ServiceException {
+        EntryController controller = new EntryController();
+        try {
+            ArrayList<Long> list = controller.getEntryIdsByOwner("wjholtz@lbl.gov");
+            Account system = new AccountController().getByEmail("system");
+            return controller.getEntriesByIdSet(system, list);
+        } catch (ControllerException e) {
+            throw new ServiceException(e);
+        }
+    }
+
     /**
      * Create a new {@link Part} on the server.
      *
@@ -566,7 +574,7 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
 
-            savedEntry = entryController.update(account, updateEntry(account, plasmid));
+            savedEntry = entryController.update(account, updateEntry(account, plasmid), true, null);
 
             log("User '" + account.getEmail() + "' update plasmid: '" + savedEntry.getRecordId()
                         + "', " + savedEntry.getId());
@@ -605,7 +613,7 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
 
-            savedEntry = entryController.update(account, updateEntry(account, strain));
+            savedEntry = entryController.update(account, updateEntry(account, strain), true, null);
 
             log("User '" + account.getEmail() + "' update strain: '" + savedEntry.getRecordId()
                         + "', " + savedEntry.getId());
@@ -643,7 +651,7 @@ public class RegistryAPI {
 
         try {
             EntryController entryController = new EntryController();
-            savedEntry = entryController.update(account, updateEntry(account, part));
+            savedEntry = entryController.update(account, updateEntry(account, part), true, null);
 
             log("User '" + account.getEmail() + "' update part: '" + savedEntry.getRecordId()
                         + "', " + savedEntry.getId());
@@ -1302,18 +1310,6 @@ public class RegistryAPI {
         }
 
         return savedFeaturedDNASequence;
-    }
-
-    /**
-     * Update Sequence. Not implemented on purpose: Remove and create a new one.
-     *
-     * @param sequence
-     * @return Always throws Exception.
-     */
-    @WebMethod(exclude = true)
-    public FeaturedDNASequence updateSequence(FeaturedDNASequence sequence) {
-        throw new NotImplementedException(
-                "this method not implemented on purpose; remove and create new one");
     }
 
     /**

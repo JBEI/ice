@@ -1,8 +1,6 @@
 package org.jbei.ice.client.bulkupload;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -40,7 +38,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class BulkUploadPresenter extends AbstractPresenter {
 
     private final IBulkUploadView view;
-    private final HashMap<EntryAddType, NewBulkInput> sheetCache;
+    //    private final HashMap<EntryAddType, NewBulkInput> sheetCache;
     private final BulkUploadModel model;
     private NewBulkInput currentInput;
     private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>(); // list of saved
@@ -49,7 +47,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
     public BulkUploadPresenter(BulkUploadModel model, final IBulkUploadView display) {
         this.view = display;
         this.model = model;
-        sheetCache = new HashMap<EntryAddType, NewBulkInput>();
+//        sheetCache = new HashMap<EntryAddType, NewBulkInput>();
 
         setClickHandlers();
 
@@ -62,7 +60,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
         // retrieveData
         retrieveSavedDrafts();
-        retrieveAutoCompleteData();
+//        retrieveAutoCompleteData();
         retrievePendingIfAdmin();
 
         model.getEventBus().addHandler(FeedbackEvent.TYPE,
@@ -101,8 +99,12 @@ public class BulkUploadPresenter extends AbstractPresenter {
         view.setDraftUpdateHandler(handler);
 
         // submit
-        SheetSubmitHandler submitHandler = new SheetSubmitHandler();
+        SheetSubmitHandler submitHandler = new SheetSubmitHandler(false);
         view.setSubmitHandler(submitHandler);
+
+        // draft submit
+        SheetSubmitHandler draftSubmitHandler = new SheetSubmitHandler(true);
+        view.setDraftSubmitHandler(draftSubmitHandler);
 
         // reset
         SheetResetHandler resetHandler = new SheetResetHandler();
@@ -149,16 +151,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 if (selection == null)
                     return;
 
-                if (sheetCache.containsKey(selection))
-                    currentInput = sheetCache.get(selection);
-                else {
-                    Sheet sheet = new Sheet(selection);
-                    sheet.setAutoCompleteData(AppController.autoCompleteData);
-                    currentInput = new NewBulkInput(selection, sheet);
-
-                    // header Panel 
-                    sheetCache.put(selection, currentInput);
-                }
+                Sheet sheet = new Sheet(selection);
+                currentInput = new NewBulkInput(selection, sheet);
 
                 view.setSheet(currentInput, true, false);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
@@ -215,12 +209,12 @@ public class BulkUploadPresenter extends AbstractPresenter {
         });
     }
 
-    private void retrieveAutoCompleteData() {
-        for (Entry<EntryAddType, NewBulkInput> entry : sheetCache.entrySet()) {
-            NewBulkInput input = entry.getValue();
-            input.getSheet().setAutoCompleteData(AppController.autoCompleteData);
-        }
-    }
+//    private void retrieveAutoCompleteData() {
+//        for (Entry<EntryAddType, NewBulkInput> entry : sheetCache.entrySet()) {
+//            NewBulkInput input = entry.getValue();
+//            input.getSheet().setAutoCompleteData(AppController.autoCompleteData);
+//        }
+//    }
 
     @Override
     public void go(HasWidgets container) {
@@ -230,6 +224,12 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
     // inner classes
     private class SheetSubmitHandler implements ClickHandler {
+
+        private final boolean isDraftSubmit;
+
+        public SheetSubmitHandler(boolean isDraftSubmit) {
+            this.isDraftSubmit = isDraftSubmit;
+        }
 
         @Override
         public void onClick(ClickEvent event) {
@@ -246,20 +246,26 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 return;
             }
 
-            model.submitBulkImport(currentInput.getImportType(), cellData, view.getPermissionSelection(),
-                                   new BulkUploadSubmitEventHandler() {
+            BulkUploadSubmitEventHandler eventHandler = new BulkUploadSubmitEventHandler() {
 
-                                       @Override
-                                       public void onSubmit(BulkUploadSubmitEvent event) {
-                                           if (event.isSuccess()) {
-                                               view.showFeedback("Entries submitted successfully for verification.",
-                                                                 false);
-                                               History.newItem(Page.COLLECTIONS.getLink());
-                                           } else {
-                                               view.showFeedback("Error saving entries.", true);
-                                           }
-                                       }
-                                   });
+                @Override
+                public void onSubmit(BulkUploadSubmitEvent event) {
+                    if (event.isSuccess()) {
+                        view.showFeedback("Entries submitted successfully for verification.",
+                                          false);
+                        History.newItem(Page.COLLECTIONS.getLink());
+                    } else {
+                        view.showFeedback("Error saving entries.", true);
+                    }
+                }
+            };
+
+            if (isDraftSubmit)
+                model.submitBulkImportDraft(currentInput.getId(), cellData, view.getPermissionSelection(),
+                                            eventHandler);
+            else
+                model.submitBulkImport(currentInput.getImportType(), cellData, view.getPermissionSelection(),
+                                       eventHandler);
         }
     }
 
@@ -273,8 +279,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 return;
             }
 
-            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+            // for approval we do not want to change the owner
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(null, null);
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before submitting", true);
                 return;
@@ -374,7 +380,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
             BulkUploadUpdateHandler handler = new BulkUploadUpdateHandler(type);
             String uuid = view.getPermissionSelection();
-            model.updateBulkImportDraft(id, type, cellData, uuid, handler);
+            model.updateBulkImportDraft(id, cellData, uuid, handler);
         }
     }
 
@@ -431,7 +437,6 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     BulkUploadInfo info = event.getData().get(0);
                     Sheet sheet = new Sheet(info.getType(), info);
 
-                    sheet.setAutoCompleteData(AppController.autoCompleteData);
                     currentInput = new NewBulkInput(info.getType(), sheet);
                     currentInput.setId(info.getId());
                     String name = info.getName();

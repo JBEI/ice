@@ -1,16 +1,14 @@
 package org.jbei.ice.client.bulkupload;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.model.ModelFactory;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.model.SheetModel;
-import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.ImportTypeHeaders;
-import org.jbei.ice.client.bulkupload.sheet.InfoValueExtractorFactory;
-import org.jbei.ice.client.bulkupload.sheet.SheetCell;
-import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
+import org.jbei.ice.client.bulkupload.sheet.header.BulkUploadHeaders;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -26,29 +24,26 @@ public class SheetPresenter {
 
         void clear();
 
-        void setCellWidgetForCurrentRow(Header header, String value, int row, int col);
+        void setCellWidgetForCurrentRow(String value, int row, int col, int tabIndex);
 
         int getSheetRowCount();
 
         void clearErrorCell(int row, int col);
 
         void setErrorCell(int row, int col, String errMsg);
+
+        void scrollElementToView(int row, int col);
     }
 
     private final View view;
-    private HashMap<AutoCompleteField, ArrayList<String>> data;
     private final EntryAddType type;
     private BulkUploadInfo currentInfo; // used to maintain saved drafts that are loaded
-    private final Header[] headers;
+    private final BulkUploadHeaders headers;
 
     public SheetPresenter(View view, EntryAddType type) {
         this.view = view;
         this.type = type;
         this.headers = ImportTypeHeaders.getHeadersForType(type);
-
-        for (Header header : headers) {
-            header.getCell().reset();
-        }
     }
 
     public SheetPresenter(View view, EntryAddType type, BulkUploadInfo info) {
@@ -63,17 +58,6 @@ public class SheetPresenter {
         }
     }
 
-    public void setAutoCompleteData(HashMap<AutoCompleteField, ArrayList<String>> data) {
-        this.data = data;
-    }
-
-    public ArrayList<String> getAutoCompleteData(AutoCompleteField field) {
-        if (data == null)
-            return null;
-
-        return data.get(field);
-    }
-
     public EntryAddType getType() {
         return this.type;
     }
@@ -82,13 +66,12 @@ public class SheetPresenter {
         this.currentInfo = info;
     }
 
-    public Header[] getTypeHeaders() {
+    public BulkUploadHeaders getTypeHeaders() {
         return headers;
     }
 
     public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner) {
 
-        Header[] headers = getTypeHeaders();
         int rowCount = view.getSheetRowCount();
         SheetModel<? extends EntryInfo> model = ModelFactory.getModelForType(type);
         if (model == null)
@@ -110,13 +93,13 @@ public class SheetPresenter {
             boolean rowHasData = false;
 
             // go through headers (column) for data
-            for (Header header : headers) {
+            for (CellColumnHeader header : headers.getHeaders()) {
                 SheetCellData data = header.getCell().getDataForRow(i);
                 if (data == null)
                     continue;
 
                 rowHasData = true;
-                data.setType(header);
+                data.setType(header.getHeaderType());
                 existing = model.setInfoField(data, existing);
             }
 
@@ -125,10 +108,20 @@ public class SheetPresenter {
                 continue;
 
             if (existing != null) {
-                existing.setOwnerEmail(ownerEmail);
-                existing.setOwner(owner);
-                existing.setCreator(owner);
-                existing.setCreatorEmail(ownerEmail);
+                if (ownerEmail != null && owner != null) {
+                    existing.setOwnerEmail(ownerEmail);
+                    existing.setOwner(owner);
+                    existing.setCreator(owner);
+                    existing.setCreatorEmail(ownerEmail);
+
+                    if (existing.getInfo() != null) {
+                        existing.getInfo().setOwnerEmail(ownerEmail);
+                        existing.getInfo().setOwner(owner);
+                        existing.getInfo().setCreator(owner);
+                        existing.getInfo().setCreatorEmail(ownerEmail);
+                    }
+                }
+
                 infoList.add(existing);
             }
         }
@@ -146,28 +139,27 @@ public class SheetPresenter {
      *         headers for the entry type
      */
     public int getFieldSize() {
-        return getTypeHeaders().length;
+        return headers.getHeaderSize();
     }
 
     public void addRow(int row) {
         int index = row; // row includes the headers but this is 0-indexed
 
-        // type is already set in the constructor
-        Header[] headers = getTypeHeaders();
-        int headersSize = headers.length;
-
-        for (int i = 0; i < headersSize; i += 1) {
-
-            String value = "";
+        int i = 0;
+        for (CellColumnHeader header : getTypeHeaders().getHeaders()) {
+            SheetCellData data = null;
 
             if (currentInfo != null && currentInfo.getCount() > index) {
                 EntryInfo info = currentInfo.getEntryList().get(index);
 
                 // extractor also sets the header data structure
-                value = InfoValueExtractorFactory.extractEntryValue(this.type, headers[i], info, index);
+                data = getTypeHeaders().extractValue(header.getHeaderType(), info);
+                header.getCell().setWidgetValue(index, data);
             }
 
-            view.setCellWidgetForCurrentRow(headers[i], value, row, i);
+            String value = data == null ? "" : data.getValue();
+            view.setCellWidgetForCurrentRow(value, row, i, headers.getHeaderSize());
+            i += 1;
         }
     }
 
@@ -177,33 +169,44 @@ public class SheetPresenter {
     public boolean validateCells() {
 
         boolean isValid = true;
+        boolean inView = false;
 
         // for each row
         for (int row = 0; row < view.getSheetRowCount(); row += 1) {
 
             boolean atLeastOneCellHasRowData = false;
 
-            for (int col = 0; col < headers.length; col += 1) {
-                SheetCell cell = headers[col].getCell();
+            int col = 0;
+            for (CellColumnHeader header : headers.getHeaders()) {
+                SheetCell cell = header.getCell();
+                view.clearErrorCell(row, col);
                 atLeastOneCellHasRowData = (cell.getDataForRow(row) != null);
                 if (atLeastOneCellHasRowData)
                     break;
+                col += 1;
             }
 
             if (!atLeastOneCellHasRowData)
                 continue;
 
             // for each header (col)
-            for (int col = 0; col < headers.length; col += 1) {
-                SheetCell cell = headers[col].getCell();
+            col = 0;
+            for (CellColumnHeader header : headers.getHeaders()) {
+                SheetCell cell = header.getCell();
                 String errMsg = cell.inputIsValid(row);
                 if (errMsg.isEmpty()) {
                     view.clearErrorCell(row, col);
+                    col += 1;
                     continue;
                 }
 
                 isValid = false;
                 view.setErrorCell(row, col, errMsg);
+                if (!inView) {
+                    view.scrollElementToView(row, col);
+                    inView = true;
+                }
+                col += 1;
             }
         }
 
@@ -219,7 +222,7 @@ public class SheetPresenter {
      */
     public SheetCell setCellInputFocus(int currentRow, int currentIndex) {
         // get cell for selection and set it to existing
-        SheetCell newSelection = headers[currentIndex].getCell();
+        SheetCell newSelection = headers.getHeaderForIndex(currentIndex).getCell();
         if (newSelection == null)
             return null;
 

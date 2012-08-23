@@ -17,11 +17,11 @@ import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.SessionData;
+import org.jbei.ice.lib.session.PersistentSessionDataWrapper;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.web.PersistentSessionDataWrapper;
 
 /**
  * ABI to manipulate {@link Account} objects.
@@ -199,7 +199,7 @@ public class AccountController {
      * @throws ControllerException
      */
     public Account save(Account account) throws ControllerException {
-        Account result = null;
+        Account result;
 
         try {
             account.setModificationTime(Calendar.getInstance().getTime());
@@ -472,6 +472,10 @@ public class AccountController {
         }
     }
 
+    /**
+     * @throws ControllerException
+     * @deprecated
+     */
     public void updateModeratorAccounts() throws ControllerException {
         try {
             dao.updateModeratorAccounts();

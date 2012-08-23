@@ -57,4 +57,6 @@ public interface IBulkUploadView {
     void setSelectedGroupPermission(GroupInfo groupInfo);
 
     String getPermissionSelection();
+
+    void setDraftSubmitHandler(ClickHandler handler);
 }

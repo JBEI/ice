@@ -17,7 +17,7 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
 
     private TextBox host;
     private TextBox genPhen;
-    private TextBox plasmids;
+    private SuggestBox plasmids;
     private SuggestBox markers;
 
     public NewStrainForm(HashMap<AutoCompleteField, ArrayList<String>> data, String creatorName,
@@ -32,7 +32,7 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         host = createStandardTextBox("300px");
         markers = createAutoCompleteForSelectionMarkers("300px");
         genPhen = createStandardTextBox("300px");
-        plasmids = createStandardTextBox("300px");
+        plasmids = createAutoCompleteForPlasmidNames("300px");
     }
 
     protected Widget createGeneralWidget() {
@@ -149,7 +149,7 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         StrainInfo strain = super.getEntryInfo();
         strain.setHost(host.getText());
         strain.setGenotypePhenotype(genPhen.getText());
-        strain.setPlasmids(plasmids.getText());
+        strain.setPlasmids(((MultipleTextBox) plasmids.getTextBox()).getWholeText());
         String selectionMarkers = ((MultipleTextBox) markers.getTextBox()).getWholeText();
         strain.setSelectionMarkers(selectionMarkers);
     }

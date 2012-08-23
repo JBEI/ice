@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.models.interfaces.IEntryValueObject;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.shared.dto.Visibility;
@@ -86,7 +85,7 @@ import org.hibernate.search.annotations.Resolution;
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
 @XmlRootElement
-public class Entry implements IEntryValueObject, IModel {
+public class Entry implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -200,55 +199,45 @@ public class Entry implements IEntryValueObject, IModel {
     public Entry() {
     }
 
-    @Override
     @XmlTransient
     public long getId() {
         return id;
     }
 
-    @Override
     public void setId(long id) {
         this.id = id;
     }
 
-    @Override
     public String getRecordId() {
         return recordId;
     }
 
-    @Override
     public void setRecordId(String recordId) {
         this.recordId = recordId;
     }
 
-    @Override
     @XmlTransient
     public String getVersionId() {
         return versionId;
     }
 
-    @Override
     public void setVersionId(String versionId) {
         this.versionId = versionId;
     }
 
-    @Override
     @XmlTransient
     public String getRecordType() {
         return recordType;
     }
 
-    @Override
     public void setRecordType(String recordType) {
         this.recordType = recordType;
     }
 
-    @Override
     public Set<Name> getNames() {
         return names;
     }
 
-    @Override
     public void setNames(Set<Name> inputNames) {
         /*
          * Warning! This is a hibernate workaround. 
@@ -286,7 +275,6 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
-    @Override
     public Set<PartNumber> getPartNumbers() {
         return partNumbers;
     }
@@ -314,82 +302,68 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
-    @Override
-    public void setPartNumbers(Set<PartNumber> inputPartNumbers) {
-        // for JAXB webservices should be this way
-        if (inputPartNumbers == null) {
-            partNumbers.clear();
+//    public void setPartNumbers(Set<PartNumber> inputPartNumbers) {
+//        // for JAXB webservices should be this way
+//        if (inputPartNumbers == null) {
+//            partNumbers.clear();
+//
+//            return;
+//        }
+//
+//        if (inputPartNumbers != partNumbers) {
+//            partNumbers.clear();
+//            partNumbers.addAll(inputPartNumbers);
+//        }
+//    }
 
-            return;
-        }
-
-        if (inputPartNumbers != partNumbers) {
-            partNumbers.clear();
-            partNumbers.addAll(inputPartNumbers);
-        }
-    }
-
-    @Override
     public String getOwner() {
         return owner;
     }
 
-    @Override
     public void setOwner(String owner) {
         this.owner = owner;
     }
 
-    @Override
     public String getOwnerEmail() {
         return ownerEmail;
     }
 
-    @Override
     public void setOwnerEmail(String ownerEmail) {
         this.ownerEmail = ownerEmail;
     }
 
-    @Override
     public String getCreator() {
         return creator;
     }
 
-    @Override
     public void setCreator(String creator) {
         this.creator = creator;
     }
 
-    @Override
     public String getCreatorEmail() {
         return creatorEmail;
     }
 
-    @Override
     public void setCreatorEmail(String creatorEmail) {
         this.creatorEmail = creatorEmail;
     }
 
-    @Override
     public String getStatus() {
         return status;
     }
 
-    @Override
     public void setStatus(String status) {
         this.status = status;
     }
 
-    @Override
     public String getAlias() {
         return alias;
     }
 
-    @Override
     public void setAlias(String alias) {
         this.alias = alias;
     }
 
-    @Override
     public Set<SelectionMarker> getSelectionMarkers() {
         return selectionMarkers;
     }
@@ -410,7 +384,6 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
-    @Override
     public void setSelectionMarkers(Set<SelectionMarker> inputSelectionMarkers) {
         if (inputSelectionMarkers == null) {
             selectionMarkers.clear();
@@ -426,7 +399,6 @@ public class Entry implements IEntryValueObject, IModel {
         }
     }
 
-    @Override
     public Set<Link> getLinks() {
         return links;
     }
@@ -447,7 +419,6 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
-    @Override
     public void setLinks(Set<Link> inputLinks) {
         if (inputLinks == null) {
             links.clear();
@@ -461,32 +432,26 @@ public class Entry implements IEntryValueObject, IModel {
         }
     }
 
-    @Override
     public String getKeywords() {
         return keywords;
     }
 
-    @Override
     public void setKeywords(String keywords) {
         this.keywords = keywords;
     }
 
-    @Override
     public String getShortDescription() {
         return shortDescription;
     }
 
-    @Override
     public void setShortDescription(String shortDescription) {
         this.shortDescription = shortDescription;
     }
 
-    @Override
     public String getLongDescription() {
         return longDescription;
     }
 
-    @Override
     public void setLongDescription(String longDescription) {
         this.longDescription = longDescription;
     }
@@ -499,34 +464,28 @@ public class Entry implements IEntryValueObject, IModel {
         this.longDescriptionType = longDescriptionType;
     }
 
-    @Override
     public String getReferences() {
         return references;
     }
 
-    @Override
     public void setReferences(String references) {
         this.references = references;
     }
 
-    @Override
     @XmlTransient
     public Date getCreationTime() {
         return creationTime;
     }
 
-    @Override
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
 
-    @Override
     @XmlTransient
     public Date getModificationTime() {
         return modificationTime;
     }
 
-    @Override
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
     }

@@ -3,7 +3,7 @@ package org.jbei.ice.client.bulkupload.model;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.sheet.Header;
-import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
@@ -59,9 +59,8 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 break;
 
             case BIOSAFETY:
-                Integer optionValue = BioSafetyOptions.intValue(value);
-                if (optionValue != null)
-                    strain.setBioSafetyLevel(optionValue);
+                Integer optionValue = BioSafetyOption.intValue(value);
+                strain.setBioSafetyLevel(optionValue);
                 break;
 
             case STRAIN_NAME:
@@ -103,27 +102,45 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                     seq = new ArrayList<SequenceAnalysisInfo>();
                     strain.setSequenceAnalysis(seq);
                 }
-                SequenceAnalysisInfo analysisInfo = new SequenceAnalysisInfo();
+
+                String seqFileId = datum.getId();
+                if (seqFileId == null || seqFileId.isEmpty())
+                    break;
+
+                SequenceAnalysisInfo analysisInfo = seq.isEmpty() ? null : seq.get(0);
+                seq.clear();
+
+                if (analysisInfo == null)
+                    analysisInfo = new SequenceAnalysisInfo();
+
                 analysisInfo.setName(value);
                 analysisInfo.setFileId(datum.getId());
                 seq.add(analysisInfo);
                 strain.setHasSequence(true);
-                strain.setSequenceAnalysis(seq);
                 break;
 
             case STRAIN_ATT_FILENAME:
-                ArrayList<AttachmentInfo> attInfo = strain.getAttachments();
-                if (attInfo == null) {
-                    attInfo = new ArrayList<AttachmentInfo>();
-                    strain.setAttachments(attInfo);
+                ArrayList<AttachmentInfo> attachmentInfoList = strain.getAttachments();
+                if (attachmentInfoList == null) {
+                    attachmentInfoList = new ArrayList<AttachmentInfo>();
+                    strain.setAttachments(attachmentInfoList);
                 }
 
-                AttachmentInfo att = new AttachmentInfo();
-                att.setFilename(value);
-                att.setFileId(datum.getId());
-                attInfo.add(att);
+                String fileId = datum.getId();
+                if (fileId == null || fileId.isEmpty())
+                    break;
+
+                AttachmentInfo attachmentInfo = attachmentInfoList.isEmpty() ? null : attachmentInfoList.get(0);
+                attachmentInfoList.clear();
+
+                if (attachmentInfo == null) {
+                    attachmentInfo = new AttachmentInfo();
+                }
+
+                attachmentInfo.setFilename(value);
+                attachmentInfo.setFileId(datum.getId());
+                attachmentInfoList.add(attachmentInfo);
                 strain.setHasAttachment(true);
-                strain.setAttachments(attInfo);
                 break;
 
             case STRAIN_SELECTION_MARKERS:
@@ -167,9 +184,8 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 break;
 
             case BIOSAFETY:
-                Integer optionValue = BioSafetyOptions.intValue(value);
-                if (optionValue != null)
-                    info.setBioSafetyLevel(optionValue);
+                Integer optionValue = BioSafetyOption.intValue(value);
+                info.setBioSafetyLevel(optionValue);
                 break;
 
             case PLASMID_NAME:
@@ -211,12 +227,21 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                     seq = new ArrayList<SequenceAnalysisInfo>();
                     info.setSequenceAnalysis(seq);
                 }
-                SequenceAnalysisInfo analysisInfo = new SequenceAnalysisInfo();
+
+                String seqFileId = datum.getId();
+                if (seqFileId == null || seqFileId.isEmpty())
+                    break;
+
+                SequenceAnalysisInfo analysisInfo = seq.isEmpty() ? null : seq.get(0);
+                seq.clear();
+
+                if (analysisInfo == null)
+                    analysisInfo = new SequenceAnalysisInfo();
+
                 analysisInfo.setName(value);
                 analysisInfo.setFileId(datum.getId());
                 seq.add(analysisInfo);
                 info.setHasSequence(true);
-                info.setSequenceAnalysis(seq);
                 break;
 
             case PLASMID_ATT_FILENAME:
@@ -226,12 +251,20 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                     info.setAttachments(attInfo);
                 }
 
-                AttachmentInfo att = new AttachmentInfo();
+                String fileId = datum.getId();
+                if (fileId == null || fileId.isEmpty())
+                    break;
+
+                AttachmentInfo att = attInfo.isEmpty() ? null : attInfo.get(0);
+                attInfo.clear();
+
+                if (att == null)
+                    att = new AttachmentInfo();
+
                 att.setFilename(value);
                 att.setFileId(datum.getId());
                 attInfo.add(att);
                 info.setHasAttachment(true);
-                info.setAttachments(attInfo);
                 break;
 
             case PLASMID_SELECTION_MARKERS:
@@ -239,7 +272,10 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 break;
 
             case CIRCULAR:
-                boolean circular = Boolean.parseBoolean(value);
+                if (value.isEmpty())
+                    info.setCircular(null);
+
+                boolean circular = "Yes".equalsIgnoreCase(value) || "True".equalsIgnoreCase(value);
                 info.setCircular(circular);
                 break;
 

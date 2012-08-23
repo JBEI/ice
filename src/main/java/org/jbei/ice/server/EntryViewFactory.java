@@ -1,5 +1,10 @@
 package org.jbei.ice.server;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
@@ -28,12 +33,6 @@ import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
-import org.jbei.ice.web.utils.WebUtils;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 public class EntryViewFactory {
 
@@ -198,7 +197,7 @@ public class EntryViewFactory {
                 Strain strain = (Strain) entry;
                 view.setHost(strain.getHost());
                 view.setGenotypePhenotype(strain.getGenotypePhenotype());
-                String link = WebUtils.linkifyText(account, strain.getPlasmids());
+                String link = EntryUtil.linkifyText(account, strain.getPlasmids());
                 view.setPlasmids(link);
                 view.setSelectionMarkers(strain.getSelectionMarkersAsString());
 

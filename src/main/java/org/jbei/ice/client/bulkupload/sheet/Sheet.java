@@ -1,10 +1,10 @@
 package org.jbei.ice.client.bulkupload.sheet;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.SheetPresenter;
-import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
+import org.jbei.ice.client.bulkupload.widget.CellWidget;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -24,23 +24,19 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class Sheet extends Composite implements SheetPresenter.View {
 
-    private final FocusPanel focusPanel;
     protected final FlexTable layout;
     protected FlexTable sheetTable; // table used to represent the spreadsheet
     protected int row; // current row in the spreadsheet
 
-    private Label lastReplaced; // cache of the last widget that was replaced. it is set when a switch to input occurs
     private int currentRow;
     private int currentIndex;
 
@@ -52,14 +48,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
     protected final ScrollPanel colIndexWrapper;
     protected final FlexTable header;
     protected final ScrollPanel headerWrapper;
+    private CellWidget replaced;
 
     private int headerCol;
 
     protected final SheetPresenter presenter;
     private SheetCell newCellSelection;
-    private boolean cellHasFocus;
+    private boolean cellHasFocus;  // whether input widget for a cell has focus
 
-    public final static int ROW_COUNT = 50;
+    public final static int ROW_COUNT = 40;
 
     public Sheet(EntryAddType type) {
         this(type, null);
@@ -86,14 +83,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         sheetTable.setStyleName("sheet_table");
         sheetTable.setWidth("100%");
 
-        // placing sheet in focus focusPanel to be able to add handlers for mouse and keyboard events on the sheet
-        focusPanel = new FocusPanel(sheetTable);
-        focusPanel.setWidth("100%");
-        focusPanel.setHeight("100%");
-        focusPanel.setStyleName("focus_panel");
-
-        // then wrap it in a scroll focusPanel that expands to fill area given by browser
-        sheetTableFocusPanelWrapper = new ScrollPanel(focusPanel);
+        // then wrap it in a scroll panel that expands to fill area given by browser
+        sheetTableFocusPanelWrapper = new ScrollPanel(sheetTable);
         sheetTableFocusPanelWrapper.setWidth((Window.getClientWidth() - 40) + "px");
         sheetTableFocusPanelWrapper.setHeight((Window.getClientHeight() - 340 - 30) + "px");
 
@@ -146,6 +137,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             @Override
             public void onResize(ResizeEvent event) {
+                // 970 is anticipated width of page window (menu?). "proper" way to do this is detect if
+                // window has horizontal scroll bars
+                if (Window.getClientWidth() < 970)
+                    return;
+
                 int delta = event.getWidth() - previousWidth;
                 previousWidth = event.getWidth();
                 sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + delta) + "px");
@@ -225,13 +221,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         }
     }
 
-    public void setAutoCompleteData(HashMap<AutoCompleteField, ArrayList<String>> data) {
-        presenter.setAutoCompleteData(data);
-    }
-
     private void addPanelHandlers() {
-
-        focusPanel.addKeyDownHandler(new KeyDownHandler() {
+        sheetTable.addDomHandler(new KeyDownHandler() {
 
             @Override
             public void onKeyDown(KeyDownEvent event) {
@@ -243,32 +234,39 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     dealWithDownArrowPress();
                     event.preventDefault();
                 } else if (event.isRightArrow()) {
-                    dealWithRightArrowPress();
+                    selectCell(currentRow, currentIndex + 1);
                     event.preventDefault();
                 } else if (event.isLeftArrow()) {
-                    dealWithLeftArrowPress();
+                    selectCell(currentRow, currentIndex - 1);
                     event.preventDefault();
                 } else {
                     int code = event.getNativeKeyCode();
 
                     if (KeyCodes.KEY_TAB == code || KeyCodes.KEY_ENTER == code) {
-                        dealWithRightArrowPress();
+
+                        if (currentIndex == presenter.getFieldSize() - 1) {
+                            selectCell(currentRow + 1, 0);
+                        } else {
+                            selectCell(currentRow, currentIndex + 1);
+                        }
                         event.preventDefault();
                         return;
                     }
+
+                    if (KeyCodes.KEY_SHIFT == code)
+                        return;
+
                     switchToInput();
                 }
             }
-        });
+        }, KeyDownEvent.getType());
     }
 
     protected Widget createHeaderCells() {
         addLeadHeader();
 
-        Header[] headers = presenter.getTypeHeaders();
-        SheetHeader.createHeaders(headers, headerCol, row, header);
-
-        headerCol += headers.length;
+        SheetHeader.createHeaders(presenter.getTypeHeaders().getHeaders(), headerCol, row, header);
+        headerCol += presenter.getTypeHeaders().getHeaderSize();
         addTailHeader();
 
         row += 1;
@@ -289,7 +287,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         HTML cell = new HTML("&nbsp;");
         cell.setStyleName("tail_cell_column_header");
         header.setWidget(row, headerCol, cell);
-        //        header.getFlexCellFormatter().setStyleName(row, headerCol, "tail_cell_column_header_td");
+        header.getFlexCellFormatter().setStyleName(row, headerCol, "tail_cell_column_header_td");
         headerCol += 1;
     }
 
@@ -302,14 +300,13 @@ public class Sheet extends Composite implements SheetPresenter.View {
             if (isEmptyRow(i))
                 continue;
 
-            final int FIELDS = presenter.getFieldSize();
-            Header[] headers = presenter.getTypeHeaders();
-
-            for (int j = 0; j < FIELDS; j += 1) {
+            int j = 0;
+            for (CellColumnHeader header : presenter.getTypeHeaders().getHeaders()) {
                 HasText widget = (HasText) sheetTable.getWidget(i, j);
                 widget.setText("");
                 ((Widget) widget).setStyleName("cell");
-                headers[j].getCell().reset();
+                header.getCell().reset();
+                j += 1;
             }
         }
     }
@@ -338,12 +335,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     // currently goes through each row and cell and checks to cell value
     public boolean isEmptyRow(int row) {
 
-        Header[] headers = presenter.getTypeHeaders();
-        int cellCount = headers.length;
-
-        for (int i = 0; i < cellCount; i += 1) {
-            Header header = headers[i];
-
+        for (CellColumnHeader header : presenter.getTypeHeaders().getHeaders()) {
             if (header.getCell().getDataForRow(row) != null)
                 return false;
         }
@@ -358,10 +350,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
     @Override
     public void clearErrorCell(int row, int col) {
         Widget widget = sheetTable.getWidget(row, col);
-        if (widget != null && widget instanceof Label) {
-            Label label = (Label) widget;
-            label.removeStyleName("cell_error");
-            label.setTitle("");
+        if (widget != null && widget instanceof CellWidget) {
+            ((CellWidget) widget).clearError();
         }
     }
 
@@ -369,11 +359,17 @@ public class Sheet extends Composite implements SheetPresenter.View {
     public void setErrorCell(int row, int col, String errMsg) {
 
         Widget widget = sheetTable.getWidget(row, col);
-        if (widget != null && widget instanceof Label) {
-            Label label = (Label) widget;
-            label.addStyleName("cell_error");
-            label.setTitle(errMsg);
+        if (widget != null && widget instanceof CellWidget) {
+            ((CellWidget) widget).showError(errMsg);
         }
+    }
+
+    @Override
+    public void scrollElementToView(int row, int col) {
+        Widget widget = sheetTable.getWidget(row, col);
+        if (widget == null)
+            return;
+        widget.getElement().scrollIntoView();
     }
 
     /**
@@ -383,105 +379,44 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if (cellHasFocus)
             return;
 
-        Widget widget = sheetTable.getWidget(currentRow, currentIndex);
-        if ((widget instanceof Label)) {
+        inputIndex = currentIndex;
+        inputRow = currentRow;
 
-            // cache the current label we are replacing
-            lastReplaced = (Label) widget;
-            lastReplaced.removeStyleName("cell_selected");
-            inputIndex = currentIndex;
-            inputRow = currentRow;
+        Widget widget = sheetTable.getWidget(currentRow, currentIndex);
+        int tabIndex = -1;
+        if (widget instanceof CellWidget) {
+            replaced = (CellWidget) widget;
+            tabIndex = replaced.getTabIndex();
         }
 
         newCellSelection = presenter.setCellInputFocus(currentRow, currentIndex);
         if (newCellSelection == null)
             return;
 
-        sheetTable.setWidget(currentRow, currentIndex, newCellSelection.getWidget(currentRow, true));
+
+        sheetTable.setWidget(currentRow, currentIndex, newCellSelection.getWidget(currentRow, true, tabIndex));
         // all cell to set focus to whatever their input mechanism is.
         // e.g. if an input box, allow focus on that box
         newCellSelection.setFocus(currentRow);
         cellHasFocus = true;
     }
 
-    private boolean isRowInBounds(int row) {
-        int rowSize = sheetTable.getRowCount();
-        if ((row >= rowSize) || (row < 0))
-            return false;
-        return true;
-    }
-
     private void dealWithUpArrowPress() {
-        if ((currentRow == -1 && currentIndex == -1) || !isRowInBounds(currentRow - 1))
-            return;
-
         // exit for up arrow press in auto complete box
-        Header currentHeader = presenter.getTypeHeaders()[currentIndex];
-        if (currentHeader.getCell().hasMultiSuggestions())
+        CellColumnHeader currentHeader = presenter.getTypeHeaders().getHeaderForIndex(currentIndex);
+        if (currentHeader.getCell().hasMultiSuggestions() && cellHasFocus)
             return;
 
         selectCell(currentRow - 1, currentIndex);
     }
 
     private void dealWithDownArrowPress() {
-        if (currentRow == -1 && currentIndex == -1)
-            return;
-
-        if (!isRowInBounds(currentRow + 1))
-            return;
-
         // exit for down arrow press in auto complete box
-        Header currentHeader = presenter.getTypeHeaders()[currentIndex];
-        if (currentHeader.getCell().hasMultiSuggestions())
+        CellColumnHeader currentHeader = presenter.getTypeHeaders().getHeaderForIndex(currentIndex);
+        if (currentHeader.getCell().hasMultiSuggestions() && cellHasFocus)
             return;
 
         selectCell(currentRow + 1, currentIndex);
-    }
-
-    private void dealWithRightArrowPress() {
-
-        if ((currentRow == -1 && currentIndex == -1))
-            return;
-
-        int cellCount = sheetTable.getCellCount(currentRow);
-        if (currentIndex + 1 >= cellCount)
-            return;
-
-        // auto scroll wrapper
-        int max = sheetTableFocusPanelWrapper.getMaximumHorizontalScrollPosition();
-        int width = sheetTableFocusPanelWrapper.getOffsetWidth();
-        int nextIndex = currentIndex + 1;
-
-        // 130 is the width of the cell
-        if (130 * (nextIndex + 1) > width) {
-            int nextScrollPosition = sheetTableFocusPanelWrapper.getHorizontalScrollPosition() + 130;
-            if (nextScrollPosition > max)
-                nextScrollPosition = max;
-            sheetTableFocusPanelWrapper.setHorizontalScrollPosition(nextScrollPosition);
-        }
-
-        selectCell(currentRow, currentIndex + 1);
-    }
-
-    private void dealWithLeftArrowPress() {
-
-        if ((currentRow == -1 && currentIndex == -1))
-            return;
-
-        int nextIndex = currentIndex - 1;
-        if (nextIndex < 0)
-            return;
-
-        int min = sheetTableFocusPanelWrapper.getMinimumHorizontalScrollPosition();
-        int current = sheetTableFocusPanelWrapper.getHorizontalScrollPosition();
-
-        if (130 * (nextIndex - 1) < current) {
-            int nextScrollPosition = sheetTableFocusPanelWrapper.getHorizontalScrollPosition() - 130;
-            if (nextScrollPosition < min)
-                nextScrollPosition = min;
-            sheetTableFocusPanelWrapper.setHorizontalScrollPosition(nextScrollPosition);
-        }
-        selectCell(currentRow, nextIndex);
     }
 
     /**
@@ -491,99 +426,102 @@ public class Sheet extends Composite implements SheetPresenter.View {
      * @param newCol user selected column
      */
     private void selectCell(int newRow, int newCol) {
-
-        // check if user is clicking on the same cell
-        if (currentRow == newRow && currentIndex == newCol)
+        if (currentIndex == newCol && currentRow == newRow)
             return;
 
         highlightHeaders(newRow, newCol);
 
+        // handle previous selection
         SheetCell prevSelection = newCellSelection;
-        newCellSelection = presenter.getTypeHeaders()[newCol].getCell();
-        cellHasFocus = false;
 
-        if (currentRow >= 0 && currentIndex >= 0) {
-            // remove the blue border around the cell
-            Widget widget = sheetTable.getWidget(currentRow, currentIndex);
-            if (widget != null)
-                widget.removeStyleName("cell_selected");
+        if (prevSelection != null) {
 
-            if (prevSelection.handlesDataSet()) {
-                widget = prevSelection.getWidget(inputRow, false);
-                sheetTable.setWidget(inputRow, inputIndex, widget);
+            if (cellHasFocus && replaced != null) {
+                // switch from input
+
+                String data = prevSelection.setDataForRow(currentRow);
+                if (data == null)
+                    replaced.setValue("");
+                else
+                    replaced.setValue(data);
+
+                sheetTable.setWidget(inputRow, inputIndex, replaced);
+
+                // reset
+                cellHasFocus = false;
+                replaced = null;
+                inputRow = inputIndex = -1;
+            }
+
+            if (currentIndex != -1 && currentRow != -1) {
+                if (prevSelection.handlesSelection()) {
+                    //cell has its own widget on select. this needs to be combined at some point to they all have
+                    // their own
+                    int tabIndex = (currentRow * presenter.getFieldSize()) + currentIndex + 1;
+                    Widget widget = prevSelection.getWidget(currentRow, false, tabIndex);
+                    sheetTable.setWidget(currentRow, currentIndex, widget);
+                } else {
+
+                    Widget cellWidget = sheetTable.getWidget(currentRow, currentIndex);
+                    if (cellWidget instanceof CellWidget)
+                        ((CellWidget) cellWidget).setFocus(false);
+                }
             }
         }
 
-        // determine if user interacted with a cell prior to this cell
-        // if so then retrieve the text for the data and set it to the
-        // label widget, and display that label widget
-        if (lastReplaced != null) {
-            String inputText = prevSelection.setDataForRow(inputRow);
-
-            lastReplaced.setTitle(inputText);
-            if (inputText != null && inputText.length() > 18)
-                inputText = (inputText.substring(0, 16) + "...");
-            lastReplaced.setText(inputText);
-            sheetTable.setWidget(inputRow, inputIndex, lastReplaced);
-
-            inputRow = inputIndex = -1; // lastReplaced not visible
-            lastReplaced = null;
-            focusPanel.setFocus(true); // not in click
-        }
+        // handle current selection
+        newCellSelection = presenter.getTypeHeaders().getHeaderForIndex(newCol).getCell();
+        Widget widget;
 
         // now deal with current selection
-        // check if cell handles selection
         if (newCellSelection.handlesSelection()) {
-            inputIndex = newCol;
-            inputRow = newRow;
-            Widget widget = newCellSelection.getWidget(newRow, true);
+            widget = sheetTable.getWidget(newRow, newCol);
+            int tabIndex = -1;
+
+//            int tabIndex = (currentRow *  presenter.getFieldSize() ) + currentIndex + 1;
+            if (widget instanceof CellWidget) {
+                tabIndex = ((CellWidget) widget).getTabIndex();
+            }
+            widget = newCellSelection.getWidget(newRow, true, tabIndex);
             sheetTable.setWidget(newRow, newCol, widget);
         } else {
-            Widget cellWidget = sheetTable.getWidget(newRow, newCol);
-            cellWidget.addStyleName("cell_selected");
+            widget = sheetTable.getWidget(newRow, newCol);
+            if (widget instanceof CellWidget) {
+                ((CellWidget) widget).setFocus(true);
+            }
+
 
 //            if (cellWidget instanceof Label) {
 //                Label label = (Label) cellWidget;
 //
 //                HTMLPanel panel;
-//                if (label.getText().isEmpty())
+//                if (label.getText().isEmpty()) {
 //                    panel = new HTMLPanel(
-//                            "<div class=\"cell cell_selected\"><div style=\"position: relative; width: 5px; height:
-// " +
-//                                    "5px; background-color: #0082C0; top: "
-//                                    + "12px; right: -122px; border: 3px solid white\"></div></div>");
-//                else
+//                            "<div class=\"cell cell_selected\"><div style=\"position: relative; width: 5px; height:"
+//                                    + "5px; background-color: #0082C0; top: "
+//                                    + "12px; right: -122px; border: 3px solid white; cursor:
+// crosshair\"></div></div>");
+//                }
+//                else {
 //                    panel = new HTMLPanel(
 //                            "<div class=\"cell cell_selected\">"
 //                                    + label.getText()
-//                                    + "<div style=\"position: relative; width: 5px; height: 5px; background-color: " +
-//                                    "#0082C0; top: "
-//                                    + "-2px; right: -124px; border: 3px solid white\"></div></div>");
+//                                    + "<div style=\"position: relative; width: 5px; height: 5px; background-color: "
+//                                    + "#0082C0; top: -2px; right: -124px; border: 3px solid white; cursor:
+// crosshair\"></div></div>");
+//                }
 //                sheetTable.setWidget(newRow, newCol, panel);
-//
-//            } else {
-//
 //            }
         }
-
+        widget.getElement().scrollIntoView();
+        // update current
         currentRow = newRow;
         currentIndex = newCol;
     }
 
     @Override
-    public void setCellWidgetForCurrentRow(Header header, String value, int row, int col) {
-        if (value == null)
-            value = "";
-
-        String display = value;
-        String title = value;
-        if (value.length() > 20)
-            display = (value.substring(0, 18) + "...");
-
-        Widget widget = new HTML(display);
-        widget.setTitle(title);
-        widget.setStyleName("cell");
-        sheetTable.setWidget(row, col, widget);
+    public void setCellWidgetForCurrentRow(String value, int row, int col, int size) {
+        sheetTable.setWidget(row, col, new CellWidget(value, row, col, size));
     }
 
     //

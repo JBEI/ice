@@ -1,5 +1,11 @@
 package org.jbei.ice.client.collection.menu;
 
+import java.util.ArrayList;
+import java.util.Set;
+
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.common.util.ImageUtil;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.*;
@@ -16,12 +22,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.common.util.ImageUtil;
-import org.jbei.ice.shared.FolderDetails;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Left bar menu for showing user collections. Also adds widgets such as
@@ -137,20 +137,6 @@ public class CollectionMenu extends Composite {
         });
     }
 
-    public void showFolderCount(FolderDetails details) {
-        for (int i = 0; i < table.getRowCount(); i += 1) {
-            Widget w = table.getWidget(i, 0);
-            if (!(w instanceof MenuCell))
-                continue;
-
-            MenuCell cell = (MenuCell) w;
-            if (details.getId() == cell.getMenuItem().getId()) {
-                table.setWidget(i, 0, cell);
-                cell.showFolderCount();
-            }
-        }
-    }
-
     public void addQuickAddKeyPressHandler(final KeyPressHandler handler) {
         if (quickAddBox == null)
             return;
@@ -215,31 +201,6 @@ public class CollectionMenu extends Composite {
     }
 
     /**
-     * checks if the user clicked within the menu contents
-     * and not, for eg. the header
-     *
-     * @param event user click event
-     * @return true if a response is required for user selection
-     */
-    public boolean isValidClick(ClickEvent event) {
-        if (event == null)
-            return false;
-
-        Cell cell = this.table.getCellForEvent(event);
-        if (cell == null)
-            return false;
-
-        boolean isValid = (cell.getCellIndex() != 0 || cell.getRowIndex() != 0);
-        if (!isValid)
-            return isValid;
-
-        if (quickAddBox != null && quickAddBox.isVisible())
-            isValid = (cell.getRowIndex() != 1);
-
-        return isValid;
-    }
-
-    /**
      * replaces current edit cell (in menu)
      * with new cell with folder
      */
@@ -261,27 +222,6 @@ public class CollectionMenu extends Composite {
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         row += 1;
         table.setWidget(row, 0, cell);
-    }
-
-    public boolean removeMenuItem(MenuItem item) {
-        if (item == null)
-            return false;
-
-        for (int i = 0; i < table.getRowCount(); i += 1) {
-            Widget w = table.getWidget(i, 0);
-            if (!(w instanceof MenuCell))
-                continue;
-
-            MenuCell cell = (MenuCell) w;
-            if (cell.getMenuItem().getId() != item.getId())
-                continue;
-
-            table.remove(cell);
-            row -= 1;
-            return true;
-        }
-
-        return false;
     }
 
     // currently this is being used for deleted cells only
@@ -337,10 +277,6 @@ public class CollectionMenu extends Composite {
                 }
             }
         }
-    }
-
-    public Widget getQuickAddButton() {
-        return this.quickAddButton;
     }
 
     public TextBox getQuickAddBox() {
@@ -459,7 +395,7 @@ public class CollectionMenu extends Composite {
             }
 
             String name = item.getName();
-            if (name.length() > 22)
+            if (name.length() > 25)
                 name = (name.substring(0, 22) + "...");
 
             html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">" + name

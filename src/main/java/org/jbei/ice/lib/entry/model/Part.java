@@ -10,9 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.models.interfaces.IPartValueObject;
 import org.jbei.ice.shared.dto.EntryType;
 
 /**
@@ -32,7 +30,7 @@ import org.jbei.ice.shared.dto.EntryType;
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "parts")
-public class Part extends Entry implements IPartValueObject, IModel {
+public class Part extends Entry {
     private static final long serialVersionUID = 1L;
 
     public enum AssemblyStandard {
@@ -53,32 +51,26 @@ public class Part extends Entry implements IPartValueObject, IModel {
         setRecordType(EntryType.PART.getName());
     }
 
-    @Override
     public AssemblyStandard getPackageFormat() {
         return packageFormat;
     }
 
-    @Override
     public void setPackageFormat(AssemblyStandard packageFormat) {
         this.packageFormat = packageFormat;
     }
 
-    @Override
     public String getPkgdDnaFwdHash() {
         return pkgdDnaFwdHash;
     }
 
-    @Override
     public void setPkgdDnaFwdHash(String pkgdDnaFwdHash) {
         this.pkgdDnaFwdHash = pkgdDnaFwdHash;
     }
 
-    @Override
     public String getPkgdDnaRevHash() {
         return pkgdDnaRevHash;
     }
 
-    @Override
     public void setPkgdDnaRevHash(String pkgdDnaRevHash) {
         this.pkgdDnaRevHash = pkgdDnaRevHash;
     }

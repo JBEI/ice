@@ -2,17 +2,19 @@ package org.jbei.ice.lib.group;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Manager to manipulate {@link org.jbei.ice.lib.models.Group} objects.
@@ -26,7 +28,7 @@ class GroupDAO extends HibernateRepository<Group> {
      *
      * @param uuid
      * @return Group object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Group get(String uuid) throws DAOException {
         return super.getByUUID(Group.class, uuid);
@@ -37,17 +39,34 @@ class GroupDAO extends HibernateRepository<Group> {
      *
      * @param id
      * @return Group object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Group get(long id) throws DAOException {
-        return (Group) super.get(Group.class, id);
+        return super.get(Group.class, id);
+    }
+
+    @SuppressWarnings("unchecked")
+    public HashSet<Group> getByIdList(Set<Long> idsSet) throws DAOException {
+        Session session = newSession();
+
+        try {
+            Criteria criteria = session.createCriteria(Group.class)
+                                       .add(Restrictions.in("id", idsSet));
+
+            List list = criteria.list();
+            return new HashSet<Group>(list);
+
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 
     /**
      * Retrieve all the {@link Group} objects in the database.
      *
      * @return SEt of Groups.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     public Set<Group> getAll() throws DAOException {
@@ -62,9 +81,7 @@ class GroupDAO extends HibernateRepository<Group> {
             Logger.warn(msg);
             throw new DAOException(msg);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
         return groups;
     }
@@ -90,9 +107,7 @@ class GroupDAO extends HibernateRepository<Group> {
             session.getTransaction().rollback();
             throw new DAOException("Error retrieving matching groups", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
@@ -101,17 +116,17 @@ class GroupDAO extends HibernateRepository<Group> {
      *
      * @param group
      * @return Saved Group object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Group update(Group group) throws DAOException {
-        return (Group) super.saveOrUpdate(group);
+        return super.saveOrUpdate(group);
     }
 
     /**
      * Delete the given {@link Group} object in the database.
      *
      * @param group
-     * @throws ManagerException
+     * @throws DAOException
      */
     public void delete(Group group) throws DAOException {
         super.delete(group);
@@ -122,9 +137,17 @@ class GroupDAO extends HibernateRepository<Group> {
      *
      * @param group
      * @return Saved Group object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Group save(Group group) throws DAOException {
-        return (Group) super.saveOrUpdate(group);
+        return super.saveOrUpdate(group);
     }
+
+//    public Set<Group> retrieveAll(Set<Group> groups) {
+//        Session session = newSession();
+//
+//        String queryStr = "from " + Group.class.getName() + " where group in :group";
+//        Query query = session.createQuery(queryStr);
+//        query.setParameterList("group", groups);
+//    }
 }

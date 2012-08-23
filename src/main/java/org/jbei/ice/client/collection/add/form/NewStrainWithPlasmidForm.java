@@ -1,18 +1,19 @@
 package org.jbei.ice.client.collection.add.form;
 
-import com.google.gwt.user.client.ui.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeSet;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TreeSet;
+import com.google.gwt.user.client.ui.*;
 
 public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSubmit {
 
@@ -64,7 +65,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private final HashMap<AutoCompleteField, ArrayList<String>> data;
 
     public NewStrainWithPlasmidForm(HashMap<AutoCompleteField, ArrayList<String>> data,
-                                    String creatorName, String creatorEmail) {
+            String creatorName, String creatorEmail) {
         this.layout = new FlexTable();
         initWidget(layout);
         this.data = data;
@@ -143,7 +144,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         setLabel(false, "Bio Safety Level", general, row, 2);
         bioSafety = new ListBox();
         bioSafety.setVisibleItemCount(1);
-        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+        for (BioSafetyOption option : BioSafetyOption.values()) {
             bioSafety.addItem(option.getDisplayName(), option.getValue());
         }
 

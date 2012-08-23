@@ -3,7 +3,7 @@ package org.jbei.ice.client.bulkupload.model;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.sheet.Header;
-import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
@@ -40,9 +40,8 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
                 break;
 
             case BIOSAFETY:
-                Integer optionValue = BioSafetyOptions.intValue(value);
-                if (optionValue != null)
-                    info.setBioSafetyLevel(optionValue);
+                Integer optionValue = BioSafetyOption.intValue(value);
+                info.setBioSafetyLevel(optionValue);
                 break;
 
             case NAME:
