@@ -472,18 +472,6 @@ public class AccountController {
         }
     }
 
-    /**
-     * @throws ControllerException
-     * @deprecated
-     */
-    public void updateModeratorAccounts() throws ControllerException {
-        try {
-            dao.updateModeratorAccounts();
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
     public Set<Account> retrieveAllAccounts() throws ControllerException {
         try {
             Set<Account> results = new HashSet<Account>(dao.getAllAccounts());

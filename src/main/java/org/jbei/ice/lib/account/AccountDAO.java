@@ -2,13 +2,10 @@ package org.jbei.ice.lib.account;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
@@ -134,30 +131,5 @@ class AccountDAO extends HibernateRepository<Account> {
         }
 
         return account;
-    }
-
-    @SuppressWarnings("deprecation")
-    public void updateModeratorAccounts() throws DAOException {
-        Session session = newSession();
-
-        try {
-            session.getTransaction().begin();
-            Query query = session.createQuery("from " + Moderator.class.getName());
-            @SuppressWarnings("unchecked")
-            List<Moderator> results = new ArrayList<Moderator>(query.list());
-            for (Moderator moderator : results) {
-                Account account = moderator.getAccount();
-                account.setType(AccountType.ADMIN);
-                session.update(account);
-            }
-            session.getTransaction().commit();
-        } catch (HibernateException he) {
-            session.getTransaction().rollback();
-            throw new DAOException(he);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
     }
 }

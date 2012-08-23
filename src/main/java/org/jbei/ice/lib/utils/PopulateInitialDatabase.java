@@ -1,5 +1,13 @@
 package org.jbei.ice.lib.utils;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -20,14 +28,6 @@ import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * Populate an empty database with necessary objects and values.
  *
@@ -44,8 +44,8 @@ public class PopulateInitialDatabase {
     // naming scheme "custom-[your institute]-[your version]", as
     // the system will try to upgrade schemas of known older versions.
     // Setting the correct parent schema version may help you in the future.
-    public static final String DATABASE_SCHEMA_VERSION = "3.1.0";
-    public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.9.0";
+    public static final String DATABASE_SCHEMA_VERSION = "3.3.0";
+    public static final String PARENT_DATABASE_SCHEMA_VERSION = "3.1.0";
     private static final String ICE_2_DATABASE_SCHEMA_VERSION = "0.8.1";
 
     // This is a global "everyone" uuid
@@ -212,7 +212,7 @@ public class PopulateInitialDatabase {
      * @throws UtilityException
      */
     private static void updateDatabaseSchema(ConfigurationDAO dao) throws UtilityException {
-        Configuration databaseSchema = null;
+        Configuration databaseSchema;
 
         try {
             databaseSchema = dao.get(ConfigurationKey.DATABASE_SCHEMA_VERSION);
@@ -226,7 +226,7 @@ public class PopulateInitialDatabase {
             if (databaseSchema.getValue().equals(PARENT_DATABASE_SCHEMA_VERSION)) {
                 // do schema upgrade from version 3.0 to 3.1, does not capture upgrading from ice2 to ice3.1
                 // (ICE_2_DATABASE_SCHEMA_VERSION)
-                migrateFrom090To310();
+                // TODO migrate from 3.1 to 3.3
                 databaseSchema.setValue(DATABASE_SCHEMA_VERSION);
                 dao.save(databaseSchema);
 //                Logger.error("Could not upgrade database schema. No Code");
@@ -238,14 +238,6 @@ public class PopulateInitialDatabase {
             }
 
         } catch (DAOException e) {
-            throw new UtilityException(e);
-        }
-    }
-
-    private static void migrateFrom090To310() throws UtilityException {
-        try {
-            new AccountController().updateModeratorAccounts();
-        } catch (ControllerException e) {
             throw new UtilityException(e);
         }
     }

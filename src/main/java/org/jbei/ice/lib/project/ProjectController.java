@@ -1,27 +1,24 @@
 package org.jbei.ice.lib.project;
 
-import org.jbei.ice.controllers.common.Controller;
+import java.util.ArrayList;
+import java.util.Date;
+
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.controllers.permissionVerifiers.ProjectPermissionVerifier;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Project;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.Date;
-
 /**
  * ABI to manipulate {@link Project}s.
  *
  * @author Zinovii Dmytriv
  */
-public class ProjectController extends Controller {
+public class ProjectController {
     private final ProjectDAO dao;
 
-    public ProjectController(Account account) {
-        super(account, new ProjectPermissionVerifier());
+    public ProjectController() {
         dao = new ProjectDAO();
     }
 
@@ -61,12 +58,12 @@ public class ProjectController extends Controller {
      * @return True if user has read permission.
      * @throws ControllerException
      */
-    public boolean hasReadPermission(Project project) throws ControllerException {
+    public boolean hasReadPermission(Account account, Project project) throws ControllerException {
         if (project == null) {
             throw new ControllerException("Failed to check read permissions for null project!");
         }
 
-        return getPermissionVerifier().hasReadPermissions(project, getAccount());
+        return project.getAccount().equals(account);
     }
 
     /**
@@ -76,12 +73,12 @@ public class ProjectController extends Controller {
      * @return True if user has write permission.
      * @throws ControllerException
      */
-    public boolean hasWritePermission(Project project) throws ControllerException {
+    public boolean hasWritePermission(Account account, Project project) throws ControllerException {
         if (project == null) {
             throw new ControllerException("Failed to check write permissions for null project!");
         }
 
-        return getProjectPermissionVerifier().hasWritePermissions(project, getAccount());
+        return project.getAccount().equals(account);
     }
 
     /**
@@ -92,12 +89,12 @@ public class ProjectController extends Controller {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Project save(Project project) throws ControllerException, PermissionException {
-        if (!hasWritePermission(project)) {
+    public Project save(Account account, Project project) throws ControllerException, PermissionException {
+        if (!hasWritePermission(account, project)) {
             throw new PermissionException("No permissions to save project!");
         }
 
-        Project savedProject = null;
+        Project savedProject;
 
         try {
             savedProject = dao.saveProject(project);
@@ -115,8 +112,8 @@ public class ProjectController extends Controller {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public void delete(Project project) throws ControllerException, PermissionException {
-        if (!hasWritePermission(project)) {
+    public void delete(Account account, Project project) throws ControllerException, PermissionException {
+        if (!hasWritePermission(account, project)) {
             throw new PermissionException("No permissions to delete project!");
         }
 
@@ -133,11 +130,11 @@ public class ProjectController extends Controller {
      * @return ArrayList of Projects
      * @throws ControllerException
      */
-    public ArrayList<Project> getProjects() throws ControllerException {
+    public ArrayList<Project> getProjects(Account account) throws ControllerException {
         ArrayList<Project> projects = null;
 
         try {
-            projects = dao.getByAccount(getAccount());
+            projects = dao.getByAccount(account);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -153,7 +150,7 @@ public class ProjectController extends Controller {
      * @throws ControllerException
      */
     public Project getProjectByUUID(String uuid) throws ControllerException {
-        Project project = null;
+        Project project;
 
         try {
             project = dao.getByUUID(uuid);
@@ -162,14 +159,5 @@ public class ProjectController extends Controller {
         }
 
         return project;
-    }
-
-    /**
-     * Return the {@link ProjectPermissionVerifier}
-     *
-     * @return projectPermissionVerifier
-     */
-    protected ProjectPermissionVerifier getProjectPermissionVerifier() {
-        return (ProjectPermissionVerifier) getPermissionVerifier();
     }
 }
