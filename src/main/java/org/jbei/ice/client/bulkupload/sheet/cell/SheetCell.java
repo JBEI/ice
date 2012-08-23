@@ -56,9 +56,16 @@ public abstract class SheetCell {
     }
 
     public void setWidgetValue(int inputRow, SheetCellData datum) {
+        String value;
+        String id;
 
-        String value = datum.getValue();
-        String id = datum.getId();
+        if (datum == null) {
+            value = "";
+            id = "";
+        } else {
+            value = datum.getValue();
+            id = datum.getId();
+        }
 
         if (value.trim().isEmpty() && id.trim().isEmpty()) {
             removeDataForRow(inputRow);
