@@ -75,6 +75,8 @@ public class FileUploadServlet extends UploadAction {
         String type = request.getParameter("type");
         String entryId = request.getParameter("eid");
         String sid = request.getParameter("sid");
+        String isSequenceStr = request.getParameter("is_sequence");
+
         Account account;
 
         try {
@@ -170,7 +172,7 @@ public class FileUploadServlet extends UploadAction {
 
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
 
-        IDNASequence dnaSequence = null;
+        IDNASequence dnaSequence;
 
         ArrayList<ByteHolder> byteHolders = new ArrayList<ByteHolder>();
         FileInputStream inputStream = new FileInputStream(file);

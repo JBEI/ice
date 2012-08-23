@@ -28,8 +28,8 @@ public class PartHeader extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(Header.REFERENCES));
         headers.add(new CellColumnHeader(Header.LINKS));
         headers.add(new CellColumnHeader(Header.STATUS, true, new StatusSheetCell(), null));
-        headers.add(new CellColumnHeader(Header.SEQ_FILENAME, false, new FileInputCell(), null));
-        headers.add(new CellColumnHeader(Header.ATT_FILENAME, false, new FileInputCell(), null));
+        headers.add(new CellColumnHeader(Header.SEQ_FILENAME, false, new FileInputCell(true), null));
+        headers.add(new CellColumnHeader(Header.ATT_FILENAME, false, new FileInputCell(false), null));
     }
 
     @Override

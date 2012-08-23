@@ -26,7 +26,7 @@ public class CellUploader implements IsWidget {
     private HorizontalPanel panel;
     private HandlerRegistration finishUploadRegistration;
 
-    public CellUploader() {
+    public CellUploader(final boolean sequenceUpload) {
         fileUploadImg = ImageUtil.getFileUpload();
         fileUploadImg.setHeight((fileUploadImg.getHeight() - 2) + "px");
         fileUploadImg.setStyleName("cursor_pointer");
@@ -47,7 +47,8 @@ public class CellUploader implements IsWidget {
 
             @Override
             public void onStart(IUploader uploader) {
-                uploader.setServletPath("servlet.gupld?type=bulk_file_upload&sid=" + AppController.sessionId);
+                uploader.setServletPath("servlet.gupld?type=bulk_file_upload&is_sequence=" +
+                                                Boolean.toString(sequenceUpload) + "&sid=" + AppController.sessionId);
             }
         });
 

@@ -45,8 +45,8 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(Header.STRAIN_SUMMARY));
         headers.add(new CellColumnHeader(Header.STRAIN_NOTES));
         headers.add(new CellColumnHeader(Header.STRAIN_REFERENCES));
-        headers.add(new CellColumnHeader(Header.STRAIN_SEQ_FILENAME, false, new FileInputCell(), null));
-        headers.add(new CellColumnHeader(Header.STRAIN_ATT_FILENAME, false, new FileInputCell(), null));
+        headers.add(new CellColumnHeader(Header.STRAIN_SEQ_FILENAME, false, new FileInputCell(true), null));
+        headers.add(new CellColumnHeader(Header.STRAIN_ATT_FILENAME, false, new FileInputCell(false), null));
 
         // plasmid information
         headers.add(new CellColumnHeader(Header.PLASMID_NAME, true, "e.g. pTSH117"));
@@ -64,8 +64,8 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(Header.PLASMID_SUMMARY));
         headers.add(new CellColumnHeader(Header.PLASMID_NOTES));
         headers.add(new CellColumnHeader(Header.PLASMID_REFERENCES));
-        headers.add(new CellColumnHeader(Header.PLASMID_SEQ_FILENAME, false, new FileInputCell(), null));
-        headers.add(new CellColumnHeader(Header.PLASMID_ATT_FILENAME, false, new FileInputCell(), null));
+        headers.add(new CellColumnHeader(Header.PLASMID_SEQ_FILENAME, false, new FileInputCell(true), null));
+        headers.add(new CellColumnHeader(Header.PLASMID_ATT_FILENAME, false, new FileInputCell(false), null));
     }
 
     @Override
