@@ -71,6 +71,8 @@ public class Plasmid extends Entry {
     }
 
     public void setCircular(Boolean circular) {
+        if (circular == null)
+            circular = Boolean.TRUE;
         this.circular = circular;
     }
 }
