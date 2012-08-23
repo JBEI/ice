@@ -134,7 +134,8 @@ public class FileUploadServlet extends UploadAction {
                     Logger.error(e);
                 }
             } else if (BULK_UPLOAD_FILE_TYPE.equalsIgnoreCase(type)) {
-                result = uploadFileToTemp(file, saveName);
+                Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
+                result = uploadFileToTemp(file, saveName, isSequence.booleanValue());
             }
 
             break;
@@ -144,7 +145,18 @@ public class FileUploadServlet extends UploadAction {
         return result;
     }
 
-    public String uploadFileToTemp(File file, String saveName) {
+    public String uploadFileToTemp(File file, String saveName, boolean isSequence) {
+//        if( isSequence ) {
+//            try {
+//                String sequenceString = FileUtils.readFileToString(file);
+//                if( SequenceController.parse(sequenceString) == null )
+//                    return "F\tCould not parse";
+//            } catch (IOException e) {
+//                return "F\tCould not upload";
+//            }
+//        }
+
+        // if succeeds return "T\tfileId";
         String fileId = Utils.generateUUID();
         if (file.renameTo(new File(file.getParentFile() + File.separator + fileId)))
             return fileId;
