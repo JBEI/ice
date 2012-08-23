@@ -115,7 +115,6 @@ public abstract class BulkUploadHeaders {
 
             case ATT_FILENAME:
             case STRAIN_ATT_FILENAME:
-            case PLASMID_ATT_FILENAME:
                 ArrayList<AttachmentInfo> attInfos = info.getAttachments();
                 if (attInfos == null || attInfos.isEmpty()) {
                     value = "";
@@ -128,9 +127,21 @@ public abstract class BulkUploadHeaders {
                 id = attInfo.getFileId();
                 break;
 
+            case PLASMID_ATT_FILENAME:
+                ArrayList<AttachmentInfo> plasmidAttachmentList = info.getInfo().getAttachments();
+                if (plasmidAttachmentList == null || plasmidAttachmentList.isEmpty()) {
+                    value = "";
+                    break;
+                }
+
+                // currently support upload of a single attachment only
+                AttachmentInfo plasmidAttachmentInfo = plasmidAttachmentList.get(0);
+                value = plasmidAttachmentInfo.getFilename();
+                id = plasmidAttachmentInfo.getFileId();
+                break;
+
             case SEQ_FILENAME:
             case STRAIN_SEQ_FILENAME:
-            case PLASMID_SEQ_FILENAME:
                 ArrayList<SequenceAnalysisInfo> sequenceInfos = info.getSequenceAnalysis();
                 if (sequenceInfos == null || sequenceInfos.isEmpty()) {
                     value = "";
@@ -141,6 +152,19 @@ public abstract class BulkUploadHeaders {
                 SequenceAnalysisInfo seqInfo = sequenceInfos.get(0);
                 value = seqInfo.getName();
                 id = seqInfo.getFileId();
+                break;
+
+            case PLASMID_SEQ_FILENAME:
+                ArrayList<SequenceAnalysisInfo> plasmidSequenceList = info.getInfo().getSequenceAnalysis();
+                if (plasmidSequenceList == null || plasmidSequenceList.isEmpty()) {
+                    value = "";
+                    break;
+                }
+
+                // currently support upload of a single sequence only
+                SequenceAnalysisInfo plasmidSequenceInfo = plasmidSequenceList.get(0);
+                value = plasmidSequenceInfo.getName();
+                id = plasmidSequenceInfo.getFileId();
                 break;
         }
 

@@ -79,8 +79,7 @@ public class BulkUploadModel {
         }.go(eventBus);
     }
 
-    public void updateBulkImportDraft(final long id, final EntryAddType type,
-            final ArrayList<EntryInfo> entryList, final String groupUUID,
+    public void updateBulkImportDraft(final long id, final ArrayList<EntryInfo> entryList, final String groupUUID,
             final BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler handler) {
 
         new IceAsyncCallback<BulkUploadInfo>() {

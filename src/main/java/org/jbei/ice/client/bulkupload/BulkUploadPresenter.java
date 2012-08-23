@@ -151,15 +151,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 if (selection == null)
                     return;
 
-//                if (sheetCache.containsKey(selection))
-//                    currentInput = sheetCache.get(selection);
-//                else {
                 Sheet sheet = new Sheet(selection);
                 currentInput = new NewBulkInput(selection, sheet);
-
-                // header Panel
-//                    sheetCache.put(selection, currentInput);
-//                }
 
                 view.setSheet(currentInput, true, false);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
@@ -387,7 +380,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
             BulkUploadUpdateHandler handler = new BulkUploadUpdateHandler(type);
             String uuid = view.getPermissionSelection();
-            model.updateBulkImportDraft(id, type, cellData, uuid, handler);
+            model.updateBulkImportDraft(id, cellData, uuid, handler);
         }
     }
 

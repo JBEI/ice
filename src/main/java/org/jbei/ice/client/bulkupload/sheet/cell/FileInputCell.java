@@ -146,8 +146,8 @@ public class FileInputCell extends SheetCell {
                 datum.setValue(info.name);
                 setWidgetValue(row, datum);
                 String name = info.name;
-                if (name != null && name.length() > 16)
-                    name = (name.substring(0, 14) + "...");
+                if (name != null && name.length() > 14)
+                    name = (name.substring(0, 11) + "...");
 
                 Label label = new Label(name);
                 label.setStyleName("display-inline");
