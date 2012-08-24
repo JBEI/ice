@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.model.ReadGroup;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;

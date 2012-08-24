@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.shared.dto.EntryType;
 
+import org.hibernate.search.annotations.Indexed;
+
 /**
  * Store Part specific fields.
  * <p/>
@@ -28,6 +30,7 @@ import org.jbei.ice.shared.dto.EntryType;
  * @author Timothy Ham, Zinovii Dmytriv
  */
 @Entity
+@Indexed
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "parts")
 public class Part extends Entry {

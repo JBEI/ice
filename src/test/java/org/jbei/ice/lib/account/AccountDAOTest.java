@@ -2,7 +2,7 @@ package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.server.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 
 import junit.framework.TestCase;
 import org.hibernate.Session;

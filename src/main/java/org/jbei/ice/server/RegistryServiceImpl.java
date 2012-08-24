@@ -19,6 +19,7 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
@@ -35,14 +36,13 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.folder.FolderController;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.lib.models.News;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.news.News;
 import org.jbei.ice.lib.news.NewsController;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -599,7 +599,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(ce);
         } catch (PermissionException e) {
             Logger.error(e);
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             Logger.error(e);
         }
 
@@ -630,7 +630,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         } catch (ControllerException ce) {
             Logger.error(ce);
-        } catch (ManagerException me) {
+        } catch (DAOException me) {
             Logger.error(me);
         } catch (PermissionException e) {
             Logger.error(e);
@@ -700,7 +700,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             return info;
 
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             Logger.error(e);
             return null;
         } catch (ControllerException e) {
@@ -771,7 +771,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             return info;
 
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             Logger.error(e);
             return null;
         } catch (ControllerException e) {

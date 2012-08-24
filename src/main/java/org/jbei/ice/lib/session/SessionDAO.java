@@ -1,16 +1,16 @@
 package org.jbei.ice.lib.session;
 
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.SessionData;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
-
 import java.util.ArrayList;
 import java.util.Calendar;
+
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.SessionData;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 /**
  * Manipulate {@link SessionData} objects in the database.
@@ -97,9 +97,9 @@ public class SessionDAO extends HibernateRepository {
      *
      * @param sessionData
      * @return Saved SessionData object.
-     * @throws ManagerException
+     * @throws DAOException
      */
-    public SessionData save(SessionData sessionData) throws ManagerException {
+    public SessionData save(SessionData sessionData) throws DAOException {
         SessionData result = null;
         try {
             result = (SessionData) super.saveOrUpdate(sessionData);
@@ -107,7 +107,7 @@ public class SessionDAO extends HibernateRepository {
         } catch (Exception e) {
             String msg = "Could not save SessionData " + sessionData.getSessionKey() + e.toString();
             Logger.error(msg, e);
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
         }
 
         deleteExpiredSessions(); //TODO: Move deleteExpiredSessions mechanism into cron mechanism.
@@ -119,7 +119,7 @@ public class SessionDAO extends HibernateRepository {
      * Delete the given {@link SessionData} object in the database.
      *
      * @param sessionData
-     * @throws ManagerException
+     * @throws DAOException
      */
     public void delete(SessionData sessionData) throws DAOException {
         super.delete(sessionData);

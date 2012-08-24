@@ -1,12 +1,12 @@
-package org.jbei.ice.server.dao.hibernate;
+package org.jbei.ice.lib.dao.hibernate;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IRepository;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.server.dao.IRepository;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;

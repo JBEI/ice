@@ -7,8 +7,6 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
-import org.hibernate.annotations.Cascade;
-
 import org.hibernate.annotations.Type;
 
 /**
@@ -79,7 +77,7 @@ public class SequenceFeature implements IModel {
     private AnnotationType annotationType;
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
-    @JoinColumn(name = "sequence_feature_id")
+//    @JoinColumn(name = "sequence_feature_id")
     @OrderBy("id")
     private final Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new
             LinkedHashSet<SequenceFeatureAttribute>();

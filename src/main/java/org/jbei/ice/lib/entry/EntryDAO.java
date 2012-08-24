@@ -10,23 +10,22 @@ import javax.persistence.NonUniqueResultException;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.FundingSource;
-import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.model.ReadGroup;
 import org.jbei.ice.lib.permissions.model.ReadUser;
 import org.jbei.ice.lib.permissions.model.WriteGroup;
 import org.jbei.ice.lib.permissions.model.WriteUser;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.Visibility;
 
@@ -290,7 +289,7 @@ class EntryDAO extends HibernateRepository<Entry> {
         return entries;
     }
 
-    public long getAllEntryCount() throws ManagerException {
+    public long getAllEntryCount() throws DAOException {
         Session session = newSession();
         try {
             Criteria criteria = session.createCriteria(Entry.class.getName());

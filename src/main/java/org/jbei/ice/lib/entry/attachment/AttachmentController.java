@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -108,10 +107,6 @@ public class AttachmentController {
             throw new ControllerException("Failed to save attachment!", e);
         }
 
-        if (scheduleIndexRebuild) {
-            ApplicationController.scheduleSearchIndexRebuildJob();
-        }
-
         return result;
     }
 
@@ -165,9 +160,6 @@ public class AttachmentController {
 
         try {
             dao.delete(attachment);
-            if (scheduleIndexRebuild) {
-                ApplicationController.scheduleSearchIndexRebuildJob();
-            }
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

@@ -7,6 +7,9 @@ import javax.persistence.Table;
 
 import org.jbei.ice.shared.dto.EntryType;
 
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+
 /**
  * Store Strain specific fields.
  * <p/>
@@ -16,9 +19,10 @@ import org.jbei.ice.shared.dto.EntryType;
  * <li><b>plasmids: </b>Plasmids harbored by this strain.</li>
  * </ul>
  *
- * @author Timothy Ham, Ziovii Dmytriv
+ * @author Timothy Ham, Ziovii Dmytriv, Hector Plahar
  */
 @Entity
+@Indexed
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "strains")
 public class Strain extends Entry {
@@ -26,12 +30,15 @@ public class Strain extends Entry {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "host", length = 255)
+    @Field
     private String host;
 
     @Column(name = "genotype_phenotype", length = 255)
+    @Field
     private String genotypePhenotype;
 
     @Column(name = "plasmids", length = 512)
+    @Field
     private String plasmids;
 
     public Strain() {

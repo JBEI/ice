@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -17,14 +16,14 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 /**
- * Manager to manipulate {@link org.jbei.ice.lib.models.Group} objects.
+ * Manager to manipulate {@link Group} objects.
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 class GroupDAO extends HibernateRepository<Group> {
 
     /**
-     * Retrieve {@link org.jbei.ice.lib.models.Group} object from the database by its uuid.
+     * Retrieve {@link Group} object from the database by its uuid.
      *
      * @param uuid
      * @return Group object.

@@ -6,7 +6,7 @@ import java.util.Set;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.group.Group;
 
 import org.hibernate.annotations.Type;
 

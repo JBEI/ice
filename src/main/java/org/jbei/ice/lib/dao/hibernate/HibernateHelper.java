@@ -1,4 +1,4 @@
-package org.jbei.ice.server.dao.hibernate;
+package org.jbei.ice.lib.dao.hibernate;
 
 import org.jbei.ice.lib.logging.Logger;
 

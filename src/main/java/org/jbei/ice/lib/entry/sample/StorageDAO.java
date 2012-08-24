@@ -6,13 +6,12 @@ import java.util.List;
 
 import org.jbei.ice.lib.config.ConfigurationDAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 import org.jbei.ice.shared.dto.EntryType;
 
 import org.hibernate.Query;
@@ -76,7 +75,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      *
      * @param barcode unique identifier for storage tube
      * @return retrieved Storage
-     * @throws ManagerException on exception
+     * @throws DAOException on exception
      */
     public Storage retrieveStorageTube(String barcode) throws DAOException {
         List<Storage> results = retrieveStorageByIndex(barcode, StorageType.TUBE);
@@ -98,7 +97,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @param index
      * @param type
      * @return List of Storage objects.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     public List<Storage> retrieveStorageByIndex(String index, StorageType type) throws DAOException {
@@ -132,7 +131,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      *
      * @param location
      * @return Saved Storage object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Storage update(Storage location) throws DAOException {
         if (location == null) {
@@ -162,7 +161,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * Delete the given {@link Storage} object in the database.
      *
      * @param location
-     * @throws ManagerException
+     * @throws DAOException
      */
     public void delete(Storage location) throws DAOException {
         super.delete(location);
@@ -281,7 +280,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @param scheme {@link Storage} object with the template scheme.
      * @param labels Text labels, ordered from parent to child.
      * @return Storage object in the database.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Storage getLocation(Storage scheme, String[] labels) throws DAOException {
         Storage result = null;
@@ -313,7 +312,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @param itemLabel
      * @param parent
      * @return Storage object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     private Storage getOrCreateChildLocation(Storage template, String itemLabel, Storage parent)
             throws DAOException {
@@ -341,7 +340,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @param type
      * @param parentId
      * @return Storage object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Storage retrieveStorageBy(String name, String index, StorageType type, long parentId)
             throws DAOException {

@@ -35,7 +35,6 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
@@ -574,6 +573,8 @@ public class IceXmlSerializer {
 
 
 
+
+
                                                                                                        .getPackageFormat()
                                                                                                        .toString())));
         } else if (entry.getRecordType().equals(ARABIDOPSIS)) {
@@ -634,7 +635,7 @@ public class IceXmlSerializer {
         List<TraceSequence> traces = null;
         try {
             traces = TraceSequenceDAO.getByEntry(entry);
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             throw new UtilityException(e);
         }
 

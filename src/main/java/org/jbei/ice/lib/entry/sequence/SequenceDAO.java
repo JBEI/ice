@@ -5,16 +5,15 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -218,10 +217,10 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * Retrieve all {@link Feature} objects in the database.
      *
      * @return ArrayList of Feature objects.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public ArrayList<Feature> getAllFeatures() throws ManagerException {
+    public ArrayList<Feature> getAllFeatures() throws DAOException {
         ArrayList<Feature> features = null;
         Session session = newSession();
         try {
@@ -233,7 +232,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
                 features = (ArrayList<Feature>) list;
             }
         } catch (HibernateException e) {
-            throw new ManagerException(e);
+            throw new DAOException(e);
         } finally {
             closeSession(session);
         }

@@ -1,12 +1,12 @@
-package org.jbei.ice.lib.search.lucene;
-
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.logging.Logger;
+package org.jbei.ice.lib.search;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
 
 /**
  * Hold search results.

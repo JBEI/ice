@@ -1,22 +1,5 @@
 package org.jbei.ice.lib.search.blast;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.biojava.bio.seq.DNATools;
-import org.biojava.bio.seq.RNATools;
-import org.biojava.bio.symbol.IllegalSymbolException;
-import org.biojava.bio.symbol.SymbolList;
-import org.jbei.ice.controllers.ApplicationController;
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.SequenceUtils;
-import org.jbei.ice.lib.utils.Utils;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,6 +14,24 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
+import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Feature;
+import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.utils.Utils;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.biojava.bio.seq.DNATools;
+import org.biojava.bio.seq.RNATools;
+import org.biojava.bio.symbol.IllegalSymbolException;
+import org.biojava.bio.symbol.SymbolList;
 
 /**
  * Manage blast functions.
@@ -66,8 +67,7 @@ public class Blast {
 
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast db for the first time");
-
-            ApplicationController.scheduleBlastIndexRebuildJob(1000);
+            ApplicationController.scheduleBlastIndexRebuildJob();
         }
     }
 
@@ -210,8 +210,7 @@ public class Blast {
 
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast database for the first time");
-
-            ApplicationController.scheduleBlastIndexRebuildJob(5000);
+            ApplicationController.scheduleBlastIndexRebuildJob();
         } else {
             while (isRebuilding()) {
                 try {
@@ -495,7 +494,7 @@ public class Blast {
                 boolean circular = false;
                 if (idLineFields.length == 1) {
                     Logger.info("Old Blast db format detected. Schedule rebuild");
-                    ApplicationController.scheduleBlastIndexRebuildJob(5000);
+                    ApplicationController.scheduleBlastIndexRebuildJob();
                 } else if (idLineFields.length == 3) {
                     idLine = idLineFields[0].trim();
                     sLength = Integer.parseInt(idLineFields[1]);

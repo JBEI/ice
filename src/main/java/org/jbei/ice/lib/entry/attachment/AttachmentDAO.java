@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;

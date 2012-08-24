@@ -8,6 +8,7 @@ import java.util.Set;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
@@ -20,7 +21,6 @@ import org.jbei.ice.lib.entry.sample.StorageDAO;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.UtilsDAO;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
@@ -251,7 +251,7 @@ public class EntryViewFactory {
                                                   strain.getOnePartNumber().getPartNumber());
                         }
                     }
-                } catch (ManagerException e) {
+                } catch (DAOException e) {
                     Logger.error(e);
                 }
 

@@ -24,6 +24,7 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
 import org.hibernate.search.annotations.Resolution;
+import org.hibernate.search.annotations.Store;
 
 /**
  * Entry class is the most important class in gd-ice. Other record types extend this class.
@@ -93,7 +94,7 @@ public class Entry implements IModel {
     private long id;
 
     @Column(name = "record_id", length = 36, nullable = false, unique = true)
-    @Field
+    @Field(store = Store.YES)
     private String recordId;
 
     @Column(name = "version_id", length = 36, nullable = false)
@@ -171,12 +172,12 @@ public class Entry implements IModel {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
     @OrderBy("id")
-//    @IndexedEmbedded
+    @IndexedEmbedded
     private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<SelectionMarker>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
     @OrderBy("id")
-//    @IndexedEmbedded
+    @IndexedEmbedded
     private final Set<Link> links = new LinkedHashSet<Link>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry", targetEntity = Name.class)

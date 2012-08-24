@@ -1,19 +1,20 @@
 package org.jbei.ice.lib.config;
 
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.models.Configuration;
+import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.models.Configuration;
-import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 /**
  * Manage {@link Configuration} objects in the database.
  *
  * @author Timothy Ham
  */
-public class ConfigurationDAO extends HibernateRepository {
+public class ConfigurationDAO extends HibernateRepository<Configuration> {
 
     /**
      * Save the given {@link Configuration} object in the database.
@@ -23,7 +24,7 @@ public class ConfigurationDAO extends HibernateRepository {
      * @throws DAOException
      */
     public Configuration save(Configuration configuration) throws DAOException {
-        return (Configuration) super.saveOrUpdate(configuration);
+        return super.saveOrUpdate(configuration);
     }
 
     /**
@@ -49,9 +50,7 @@ public class ConfigurationDAO extends HibernateRepository {
         } catch (HibernateException e) {
             throw new DAOException("Failed to get Configuration using key: " + key.name(), e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return configuration;

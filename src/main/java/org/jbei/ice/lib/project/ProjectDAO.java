@@ -1,16 +1,16 @@
 package org.jbei.ice.lib.project;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.models.Project;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Project;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Manager to manipulate {@link Project} objects.
@@ -47,7 +47,7 @@ public class ProjectDAO extends HibernateRepository {
      * Delete the given {@link Project} object in the database.
      *
      * @param project
-     * @throws ManagerException
+     * @throws DAOException
      */
     public void deleteProject(Project project) throws DAOException {
         if (project == null) {
@@ -62,7 +62,7 @@ public class ProjectDAO extends HibernateRepository {
      *
      * @param id
      * @return Project object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Project get(long id) throws DAOException {
         Project project = null;
@@ -95,7 +95,7 @@ public class ProjectDAO extends HibernateRepository {
      *
      * @param uuid
      * @return Project object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Project getByUUID(String uuid) throws DAOException {
         Project project = null;

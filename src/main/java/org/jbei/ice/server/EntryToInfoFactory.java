@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
@@ -19,7 +20,6 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.utils.JbeiConstants;
@@ -259,7 +259,7 @@ public class EntryToInfoFactory {
                         .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
                 }
             }
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             Logger.error(e);
         }
 

@@ -12,6 +12,8 @@ import javax.persistence.TemporalType;
 
 import org.jbei.ice.shared.dto.EntryType;
 
+import org.hibernate.search.annotations.Indexed;
+
 /**
  * Store Arabidopsis Seed specific fields.
  * <p/>
@@ -25,9 +27,10 @@ import org.jbei.ice.shared.dto.EntryType;
  * <li><b>Sent to ABRC</b></li>
  * </ul>
  *
- * @author Timothy Ham
+ * @author Timothy Ham, Hector Plahar
  */
 @Entity
+@Indexed
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "arabidopsis_seed")
 public class ArabidopsisSeed extends Entry {

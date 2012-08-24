@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.models;
+package org.jbei.ice.lib.news;
 
 import java.util.Date;
 import javax.persistence.*;

@@ -1,10 +1,9 @@
-package org.jbei.ice.lib.search.lucene;
+package org.jbei.ice.lib.search;
 
 /**
  * Exception class for searches.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 @SuppressWarnings("serial")
 public class SearchException extends Exception {

@@ -7,10 +7,15 @@ import java.util.Enumeration;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.UtilityException;
+
+import org.hibernate.Session;
+import org.hibernate.search.FullTextSession;
+import org.hibernate.search.Search;
 
 /**
  * Ice servlet context listener for running initializing
@@ -26,12 +31,15 @@ public class IceServletContextListener implements ServletContextListener {
     }
 
     public void contextDestroyed(ServletContextEvent event) {
-        Logger.info("DESTROYING CONTEXT");
+        Logger.info("Destroying Servlet Context");
 
         if (jobThread != null) {
             Logger.info("INTERRUPTING JOB THREAD");
             jobThread.interrupt();
         }
+
+        // shutdown executor service
+        IceExecutorService.getInstance().stopService();
 
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
@@ -45,19 +53,19 @@ public class IceServletContextListener implements ServletContextListener {
         }
     }
 
-    /**
-     * Start the job cue thread.
-     */
-    private void initializeQueueingSystem() {
-        JobCue jobCue = JobCue.getInstance();
-        jobThread = new Thread(jobCue);
-        jobThread.setPriority(Thread.MIN_PRIORITY);
-        jobThread.start();
+    private void initializeHibernateSearch() {
+        Session session = HibernateHelper.newSession();
+        FullTextSession fullTextSession = Search.getFullTextSession(session);
+        try {
+            fullTextSession.createIndexer().startAndWait();
+        } catch (InterruptedException e) {
+            Logger.error("Indexer interrupted", e);
+        }
     }
 
     protected void init() {
+        initializeHibernateSearch();
 
-        initializeQueueingSystem();
         try {
             PopulateInitialDatabase.initializeDatabase();
         } catch (UtilityException e) {

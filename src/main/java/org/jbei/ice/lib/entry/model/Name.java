@@ -11,7 +11,7 @@ import org.hibernate.search.annotations.Indexed;
 /**
  * Store the friendly name for an {@link org.jbei.ice.lib.entry.model.Entry}.
  *
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
 @Indexed

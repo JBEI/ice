@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.entry;
 
-import org.jbei.ice.server.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 
 import org.junit.Before;
 import org.junit.Test;

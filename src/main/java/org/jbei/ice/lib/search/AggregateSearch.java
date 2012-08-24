@@ -1,16 +1,15 @@
-package org.jbei.ice.lib.search.lucene;
+package org.jbei.ice.lib.search;
 
-import edu.emory.mathcs.backport.java.util.Collections;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.PartNumber;
-import org.jbei.ice.lib.search.Query;
-import org.jbei.ice.lib.search.QueryException;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Combine different searches into one interface, with heuristics built in to
@@ -103,7 +102,7 @@ public class AggregateSearch {
 
             SearchResult.sumSearchResults(substringResults, exactNameResult);
 
-            result = LuceneSearch.getInstance().query(queryString);
+            LuceneSearch.getInstance().executeSearch(queryString);
 
             SearchResult.sumSearchResults(result, substringResults);
         } catch (ControllerException e) {

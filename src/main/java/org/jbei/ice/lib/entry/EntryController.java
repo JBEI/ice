@@ -18,10 +18,9 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -149,7 +148,6 @@ public class EntryController {
 
         if (scheduleIndexRebuild) {
             ApplicationController.scheduleBlastIndexRebuildJob();
-            ApplicationController.scheduleSearchIndexRebuildJob();
         }
 
         return entry;
@@ -376,7 +374,6 @@ public class EntryController {
             savedEntry = dao.saveOrUpdate(entry);
 
             if (scheduleIndexRebuild) {
-                ApplicationController.scheduleSearchIndexRebuildJob();
                 ApplicationController.scheduleBlastIndexRebuildJob();
             }
         } catch (DAOException e) {
@@ -413,7 +410,6 @@ public class EntryController {
             }
 
             if (scheduleIndexRebuild) {
-                ApplicationController.scheduleSearchIndexRebuildJob();
                 ApplicationController.scheduleBlastIndexRebuildJob();
             }
         } catch (DAOException e) {
@@ -472,7 +468,6 @@ public class EntryController {
         }
 
         if (scheduleIndexRebuild) {
-            ApplicationController.scheduleSearchIndexRebuildJob();
             ApplicationController.scheduleBlastIndexRebuildJob();
         }
     }
@@ -508,7 +503,7 @@ public class EntryController {
     public long getAllEntryCount() throws ControllerException {
         try {
             return dao.getAllEntryCount();
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);
         }

@@ -7,7 +7,6 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.utils.JbeirSettings;
 
@@ -54,9 +53,9 @@ public class PersistentSessionDataWrapper {
      *
      * @param sessionKey
      * @return SessionData object.
-     * @throws ManagerException
+     * @throws DAOException
      */
-    public synchronized SessionData getSessionData(String sessionKey) throws ManagerException {
+    public synchronized SessionData getSessionData(String sessionKey) throws DAOException {
         SessionData sessionData = getCachedInstance(sessionKey);
 
         return sessionData;
@@ -68,9 +67,9 @@ public class PersistentSessionDataWrapper {
      * Save into the database and put into the cache.
      *
      * @return Saved SessionData object.
-     * @throws ManagerException
+     * @throws DAOException
      */
-    public SessionData newSessionData() throws ManagerException {
+    public SessionData newSessionData() throws DAOException {
         SessionData sessionData = new SessionData(JbeirSettings.getSetting("SITE_SECRET"));
 
         persist(sessionData);
@@ -86,9 +85,9 @@ public class PersistentSessionDataWrapper {
      *
      * @param account Account to associate with the new SessionData.
      * @return SessionData.
-     * @throws ManagerException
+     * @throws DAOException
      */
-    public SessionData newSessionData(Account account) throws ManagerException {
+    public SessionData newSessionData(Account account) throws DAOException {
         SessionData sessionData = newSessionData();
         sessionData.setAccount(account);
         persist(sessionData);
@@ -102,9 +101,9 @@ public class PersistentSessionDataWrapper {
      * This method is synchronized. Also performs cache cleaning.
      *
      * @param sessionData
-     * @throws ManagerException
+     * @throws DAOException
      */
-    public synchronized void persist(SessionData sessionData) throws ManagerException {
+    public synchronized void persist(SessionData sessionData) throws DAOException {
         pruneCache();
 
         dao.save(sessionData);
@@ -116,7 +115,7 @@ public class PersistentSessionDataWrapper {
      * Synchronized.
      *
      * @param sessionKey Session key to delete.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public synchronized void delete(String sessionKey) throws ControllerException {
         SessionData sessionData = getSessionDataCache().get(sessionKey);

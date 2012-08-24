@@ -1,11 +1,18 @@
 package org.jbei.ice.lib.entry.sequence;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
@@ -24,14 +31,6 @@ import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
 
 /**
  * ABI to manipulate DNA sequence trace analysis
@@ -186,7 +185,7 @@ public class SequenceAnalysisController {
                     traces = TraceSequenceDAO.getByEntry(entry);
                 }
             }
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 

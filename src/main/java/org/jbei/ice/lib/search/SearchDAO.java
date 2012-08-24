@@ -1,19 +1,20 @@
 package org.jbei.ice.lib.search;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.server.QueryFilterParams;
-import org.jbei.ice.server.SearchFilterCallbackFactory;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
-import org.jbei.ice.shared.QueryOperator;
-import org.jbei.ice.shared.SearchFilterType;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.server.QueryFilterParams;
+import org.jbei.ice.server.SearchFilterCallbackFactory;
+import org.jbei.ice.shared.QueryOperator;
+import org.jbei.ice.shared.SearchFilterType;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 class SearchDAO extends HibernateRepository {
 

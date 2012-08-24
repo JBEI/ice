@@ -1,24 +1,25 @@
 package org.jbei.ice.lib.account;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 /**
  * DAO to manipulate {@link AccountPreferences} objects in the database.
- * 
+ *
  * @author Hector Plahar
  */
 class PreferencesDAO extends HibernateRepository<AccountPreferences> {
 
     /**
      * Retrieve the {@link AccountPreferences} of the given {@link Account}.
-     * 
+     *
      * @param account account whose preferences are being retrieved
      * @return retrieved AccountPreferences
      * @throws DAOException
@@ -31,7 +32,7 @@ class PreferencesDAO extends HibernateRepository<AccountPreferences> {
         try {
             session.beginTransaction();
             Query query = session.createQuery("from " + AccountPreferences.class.getName()
-                    + " where account = :account");
+                                                      + " where account = :account");
             query.setParameter("account", account);
 
             accountPreferences = (AccountPreferences) query.uniqueResult();
@@ -40,7 +41,7 @@ class PreferencesDAO extends HibernateRepository<AccountPreferences> {
             session.getTransaction().rollback();
             Logger.error(e);
             throw new DAOException("Failed to get AccountPreferences by Account: "
-                    + account.getFullName(), e);
+                                           + account.getFullName(), e);
         } finally {
             closeSession(session);
         }
@@ -50,7 +51,7 @@ class PreferencesDAO extends HibernateRepository<AccountPreferences> {
 
     /**
      * Save the given {@link AccountPreferences} into the database.
-     * 
+     *
      * @param accountPreferences preferences to save for account
      * @return Saved AccountPreferences.
      * @throws DAOException

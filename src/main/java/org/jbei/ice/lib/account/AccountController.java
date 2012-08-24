@@ -15,7 +15,6 @@ import org.jbei.ice.lib.authentication.AuthenticationBackendManager.Authenticati
 import org.jbei.ice.lib.authentication.IAuthenticationBackend;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.session.PersistentSessionDataWrapper;
 import org.jbei.ice.lib.utils.Emailer;
@@ -333,7 +332,7 @@ public class AccountController {
             save(account);
             try {
                 result = PersistentSessionDataWrapper.getInstance().newSessionData(account);
-            } catch (ManagerException e) {
+            } catch (DAOException e) {
                 throw new ControllerException(e);
             }
         }
@@ -354,7 +353,7 @@ public class AccountController {
      * @throws ControllerException
      */
     public AccountInfo authenticate(String login, String password)
-            throws InvalidCredentialsException, ControllerException, ManagerException {
+            throws InvalidCredentialsException, ControllerException, DAOException {
         SessionData sessionData = authenticate(login, password, "");
         if (sessionData == null)
             return null;
@@ -385,7 +384,7 @@ public class AccountController {
             if (sessionData != null) {
                 result = true;
             }
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
         return result;

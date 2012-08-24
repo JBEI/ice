@@ -114,12 +114,6 @@
             <version>${jetty.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!--  Other dependencies -->
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>3.6.0</version>
-        </dependency>
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -149,11 +143,6 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-search</artifactId>
             <version>4.1.1.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>4.1.4.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>

@@ -1,27 +1,27 @@
 package org.jbei.ice.lib.utils;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.model.PartNumber;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
-
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.PartNumber;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.permissions.PermissionException;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 /**
  * Manager to deal with various objects in the database for utility purposes.
@@ -199,10 +199,10 @@ public class UtilsDAO extends HibernateRepository {
      *
      * @param plasmid
      * @return LinkedHashSet of Strain objects.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public static LinkedHashSet<Strain> getStrainsForPlasmid(Plasmid plasmid)
-            throws ManagerException {
+            throws DAOException {
         LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
 
 
@@ -229,7 +229,7 @@ public class UtilsDAO extends HibernateRepository {
             account = accountController.getSystemAccount();
         } catch (ControllerException e) {
             Logger.error(e);
-            throw new ManagerException(e);
+            throw new DAOException(e);
         }
 
         for (long strainId : strainIds) {
@@ -237,9 +237,9 @@ public class UtilsDAO extends HibernateRepository {
             try {
                 strain = (Strain) entryController.get(account, strainId);
             } catch (ControllerException e) {
-                throw new ManagerException("Failed retrieving strain");
+                throw new DAOException("Failed retrieving strain");
             } catch (PermissionException e) {
-                throw new ManagerException(e);
+                throw new DAOException(e);
             }
 
             String[] strainPlasmids = strain.getPlasmids().split(",");

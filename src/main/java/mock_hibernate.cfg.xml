@@ -54,7 +54,7 @@
         <mapping class="org.jbei.ice.lib.models.AssemblyRelationship"/>
         <mapping class="org.jbei.ice.lib.entry.model.EntryAssemblyRelationship"/>
         <mapping class="org.jbei.ice.lib.models.Comment"/>
-        <mapping class="org.jbei.ice.lib.models.News"/>
+        <mapping class="org.jbei.ice.lib.news.News"/>
         <mapping class="org.jbei.ice.lib.account.model.Account"/>
         <mapping class="org.jbei.ice.lib.account.model.AccountEntryRelationship"/>
         <mapping class="org.jbei.ice.lib.entry.attachment.Attachment"/>
@@ -62,7 +62,7 @@
         <mapping class="org.jbei.ice.lib.models.Label"/>
         <mapping class="org.jbei.ice.lib.entry.model.EntryLabel"/>
         <mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
-        <mapping class="org.jbei.ice.lib.models.Group"/>
+        <mapping class="org.jbei.ice.lib.group.Group"/>
         <mapping class="org.jbei.ice.lib.permissions.model.ReadUser"/>
         <mapping class="org.jbei.ice.lib.permissions.model.WriteUser"/>
         <mapping class="org.jbei.ice.lib.permissions.model.ReadGroup"/>

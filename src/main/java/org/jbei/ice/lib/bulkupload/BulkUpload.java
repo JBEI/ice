@@ -8,7 +8,7 @@ import javax.persistence.*;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.group.Group;
 
 /**
  * Saved draft of bulk imports. Encapsulates a list of {@link Entry}s that are created and updated

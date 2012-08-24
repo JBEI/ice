@@ -6,13 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -56,7 +55,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
      * Delete the give {@link Sample} object in the database.
      *
      * @param sample
-     * @throws ManagerException
+     * @throws DAOException
      */
     public void deleteSample(Sample sample) throws DAOException {
         super.delete(sample);
@@ -66,7 +65,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
      * Retrieve {@link Sample} object associated with the given {@link Entry} object.
      *
      * @return ArrayList of Sample objects.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     public ArrayList<Long> getSampleIdsByOwner(String ownerId) throws DAOException {
