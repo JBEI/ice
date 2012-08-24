@@ -684,6 +684,16 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(entry.getId() == partInfo.getId());
         Assert.assertEquals(Visibility.PENDING.getValue(), entry.getVisibility().intValue());
 
+        // retrieve bulk import draft
+        createdDraft = controller.retrieveById(adminAccount, createdDraft.getId());
+        Assert.assertNotNull(createdDraft);
+        partInfo = createdDraft.getEntryList().get(0);
+        Assert.assertEquals(partInfo.getType(), EntryType.PART);
+        Assert.assertEquals("alias", partInfo.getAlias());
+
+        // update
+        partInfo.setAlias("alias+updated");
+
         // try to approve bulk import with regular account
         try {
             controller.approveBulkImport(account, createdDraft.getId(), createdDraft.getEntryList(), "");
@@ -708,6 +718,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(entry);
         Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
         Assert.assertEquals(account.getEmail(), entry.getOwnerEmail());
+        Assert.assertEquals("alias+updated", entry.getAlias());
     }
 
     @Test

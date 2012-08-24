@@ -149,7 +149,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                         1,
                         0,
                         "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; "
-                                + "background-color: #f1f1f1\"><p>Select type the "
+                                + "background-color: #f1f1f1\"><p>Select the "
                                 + "of entry you wish to bulk import.</p> <p>Please note that columns"
                                 + " with headers indicated by <span class=\"required\">*</span> "
                                 + "are required. You will not be able to submit the form until you enter a "
@@ -157,8 +157,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                                 + "and continue working on it at a later time. "
                                 + "Saved drafts will not be submitted and are only visible to you.</p>"
                                 + "<p>After submitting a saved draft or bulk upload, an administrator must approve your"
-                                + " submission before it will show up in the search listings. Contact them if you are "
-                                + "in a hurry.</p></div>");
+                                + " submission before they will show up in search listings for others. You will "
+                                + "however still be able to view and modify them on the collections page.</p></div>");
         return mainContent;
     }
 

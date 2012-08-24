@@ -24,6 +24,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HasAlignment;
@@ -229,14 +230,18 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
                 if (event.isUpArrow()) {
                     dealWithUpArrowPress();
-                    event.preventDefault();
+
                 } else if (event.isDownArrow()) {
                     dealWithDownArrowPress();
                     event.preventDefault();
                 } else if (event.isRightArrow()) {
+                    if (cellHasFocus)
+                        return;
                     selectCell(currentRow, currentIndex + 1);
                     event.preventDefault();
                 } else if (event.isLeftArrow()) {
+                    if (cellHasFocus)
+                        return;
                     selectCell(currentRow, currentIndex - 1);
                     event.preventDefault();
                 } else {
@@ -484,6 +489,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
             }
             widget = newCellSelection.getWidget(newRow, true, tabIndex);
             sheetTable.setWidget(newRow, newCol, widget);
+            if (widget instanceof FocusPanel) {
+                ((FocusPanel) widget).setFocus(true);
+            }
         } else {
             widget = sheetTable.getWidget(newRow, newCol);
             if (widget instanceof CellWidget) {

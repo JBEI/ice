@@ -1811,7 +1811,8 @@ public class RegistryAPI {
             //null out entry to reduce output.
             trace.setEntry(null);
             // null out traceSequenceAlignment.traceSequence, as it causes infinite nesting  in xml for some reason.
-            trace.getTraceSequenceAlignment().setTraceSequence(null);
+            if (trace.getTraceSequenceAlignment() != null)
+                trace.getTraceSequenceAlignment().setTraceSequence(null);
             result.add(trace);
         }
 
