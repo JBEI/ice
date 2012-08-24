@@ -39,7 +39,10 @@
         <property name="hbm2ddl.auto">auto</property>
 
         <!-- hibernate search -->
-        <property name="hibernate.search.default.directory_provider">filesystem</property>
+        <!-- use org.hibernate.search.store.RAMDirectoryProvider for testing -->
+        <property name="hibernate.search.default.directory_provider">
+            org.hibernate.search.store.impl.FSDirectoryProvider
+        </property>
         <property name="hibernate.search.default.indexBase">/tmp/ice_search_index</property>
 
         <!--<mapping resource="org/hibernate/tutorial/domain/Event.hbm.xml"/>-->
@@ -74,7 +77,7 @@
         <mapping class="org.jbei.ice.lib.models.AssemblyRelationship"/>
         <mapping class="org.jbei.ice.lib.entry.model.EntryAssemblyRelationship"/>
         <mapping class="org.jbei.ice.lib.models.Comment"/>
-        <mapping class="org.jbei.ice.lib.models.News"/>
+        <mapping class="org.jbei.ice.lib.news.News"/>
         <mapping class="org.jbei.ice.lib.account.model.Account"/>
         <mapping class="org.jbei.ice.lib.account.model.AccountEntryRelationship"/>
         <mapping class="org.jbei.ice.lib.entry.attachment.Attachment"/>
@@ -82,7 +85,7 @@
         <mapping class="org.jbei.ice.lib.models.Label"/>
         <mapping class="org.jbei.ice.lib.entry.model.EntryLabel"/>
         <mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
-        <mapping class="org.jbei.ice.lib.models.Group"/>
+        <mapping class="org.jbei.ice.lib.group.Group"/>
         <mapping class="org.jbei.ice.lib.permissions.model.ReadUser"/>
         <mapping class="org.jbei.ice.lib.permissions.model.WriteUser"/>
         <mapping class="org.jbei.ice.lib.permissions.model.ReadGroup"/>
@@ -91,10 +94,8 @@
         <mapping class="org.jbei.ice.lib.entry.model.EntryFundingSource"/>
         <mapping class="org.jbei.ice.lib.account.model.AccountFundingSource"/>
         <mapping class="org.jbei.ice.lib.models.SessionData"/>
-        <mapping class="org.jbei.ice.lib.models.Moderator"/>
         <mapping class="org.jbei.ice.lib.models.TraceSequence"/>
         <mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment"/>
-        <mapping class="org.jbei.ice.lib.models.Workspace"/>
         <mapping class="org.jbei.ice.lib.models.Project"/>
         <mapping class="org.jbei.ice.lib.models.Configuration"/>
         <mapping class="org.jbei.ice.lib.models.Storage"/>
