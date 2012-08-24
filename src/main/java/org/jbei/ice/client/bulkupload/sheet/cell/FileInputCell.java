@@ -25,11 +25,13 @@ public class FileInputCell extends SheetCell {
 
     private final HashMap<Integer, CellUploader> rowUploaderMap; // each cell has its own uploader
     private final HashMap<Integer, CellWidget> widgetHashMap;
+    private final boolean sequenceUpload;
 
-    public FileInputCell() {
+    public FileInputCell(boolean sequenceUpload) {
         super();
         rowUploaderMap = new HashMap<Integer, CellUploader>();
         widgetHashMap = new HashMap<Integer, CellWidget>();
+        this.sequenceUpload = sequenceUpload;
     }
 
     @Override
@@ -58,7 +60,7 @@ public class FileInputCell extends SheetCell {
         // typically called when user wants to edit cell (e.g. by starting to type)
         CellUploader cellUploader = rowUploaderMap.get(row);
         if (cellUploader == null) {
-            cellUploader = new CellUploader();
+            cellUploader = new CellUploader(sequenceUpload);
             FileFinishHandler handler = new FileFinishHandler(cellUploader, row);
             cellUploader.addOnFinishUploadHandler(handler);
             rowUploaderMap.put(row, cellUploader);
@@ -78,7 +80,7 @@ public class FileInputCell extends SheetCell {
         CellUploader cellUploader = rowUploaderMap.get(row);
 
         if (cellUploader == null) {
-            cellUploader = new CellUploader();
+            cellUploader = new CellUploader(sequenceUpload);
             FileFinishHandler handler = new FileFinishHandler(cellUploader, row);
             cellUploader.addOnFinishUploadHandler(handler);
             rowUploaderMap.put(row, cellUploader);
