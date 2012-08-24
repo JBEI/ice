@@ -229,14 +229,18 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
                 if (event.isUpArrow()) {
                     dealWithUpArrowPress();
-                    event.preventDefault();
+
                 } else if (event.isDownArrow()) {
                     dealWithDownArrowPress();
                     event.preventDefault();
                 } else if (event.isRightArrow()) {
+                    if (cellHasFocus)
+                        return;
                     selectCell(currentRow, currentIndex + 1);
                     event.preventDefault();
                 } else if (event.isLeftArrow()) {
+                    if (cellHasFocus)
+                        return;
                     selectCell(currentRow, currentIndex - 1);
                     event.preventDefault();
                 } else {
