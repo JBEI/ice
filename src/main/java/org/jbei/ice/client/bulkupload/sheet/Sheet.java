@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.SheetPresenter;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
-import org.jbei.ice.client.bulkupload.sheet.header.SampleHeaders;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
 import org.jbei.ice.client.bulkupload.widget.SampleSelectionWidget;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
@@ -63,7 +62,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private SampleSelectionWidget sampleSelectionWidget;
     private HandlerRegistration sampleSelectionRegistration;
 
-    public final static int ROW_COUNT = 40;
+    public final static int ROW_COUNT = 20;
 
     public Sheet(EntryAddType type) {
         this(type, null);
@@ -210,20 +209,13 @@ public class Sheet extends Composite implements SheetPresenter.View {
         createHeaderCells();
 
         // add rows
-        int count = ROW_COUNT;
-        row = 0;
-
-        while (count > 0) {
-
+        for (row = 0; row < ROW_COUNT; row += 1) {
             presenter.addRow(row);
             // index col
             HTML indexCell = new HTML((row + 1) + "");
             colIndex.setWidget(row, 0, indexCell);
             indexCell.setStyleName("index_cell");
             colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
-
-            count -= 1;
-            row += 1;
         }
     }
 
@@ -273,7 +265,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     // header that covers the span of the row index
-    private void addLeadHeader() {
+    private void addLeadHeader(int row) {
         HTML cell = new HTML("&nbsp;");
         cell.setStyleName("leader_cell_column_header");
         header.setWidget(row, headerCol, cell);
@@ -290,26 +282,16 @@ public class Sheet extends Composite implements SheetPresenter.View {
         headerCol += 1;
     }
 
-    protected Widget createHeaderCells() {
-        addLeadHeader();
-
-        SheetHeader.createHeaders(presenter.getTypeHeaders().getHeaders(), headerCol, row, header);
-        headerCol += presenter.getTypeHeaders().getHeaderSize();
-        addTailHeader(row);
-
-        row += 1;
-        return header;
-    }
-
     @Override
-    public void addSampleHeaders() {
-        SampleHeaders sampleHeaders = presenter.getSampleHeaders();
-        if (sampleHeaders == null)
-            return;
-        headerCol -= 1;   // replace tail header
-        SheetHeader.createHeaders(sampleHeaders.getHeaders(), headerCol, 0, header);
-        headerCol += sampleHeaders.getHeaderSize();
+    public void createHeaderCells() {
+        headerCol = 0;
+        header.clear();
+        addLeadHeader(0);
+        SheetHeader.createHeaders(presenter.getAllHeaders(), headerCol, 0, header);
+        headerCol += (presenter.getFieldSize());
         addTailHeader(0);
+
+        // create rows
     }
 
     @Override
@@ -318,7 +300,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             return;
 
         for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
-            if (isEmptyRow(i))
+            if (presenter.isEmptyRow(i))
                 continue;
 
             int j = 0;
@@ -341,6 +323,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
         return sheetTable.getRowCount();
     }
 
+    @Override
+    public int getSheetColumnCount(int row) {
+        return sheetTable.getCellCount(row);
+    }
+
     public void highlightHeaders(int row, int col) {
         SheetHeader.highlightHeader(col, header);
 
@@ -351,17 +338,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
             else
                 colIndex.getFlexCellFormatter().setStyleName(i, 0, "index_td_cell");
         }
-    }
-
-    // currently goes through each row and cell and checks to cell value
-    public boolean isEmptyRow(int row) {
-
-        for (CellColumnHeader header : presenter.getTypeHeaders().getHeaders()) {
-            if (header.getCell().getDataForRow(row) != null)
-                return false;
-        }
-
-        return true;
     }
 
     public boolean validate() {
@@ -546,6 +522,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
     @Override
     public void setCellWidgetForCurrentRow(String value, int row, int col, int size) {
         sheetTable.setWidget(row, col, new CellWidget(value, row, col, size));
+    }
+
+    @Override
+    public void removeCellForCurrentRow(int row, int col, int count) {
+        sheetTable.removeCells(row, col, count);
     }
 
     public void setSampleSelection(EntryAddType addType, SampleSelectionWidget sampleSelectionWidget) {

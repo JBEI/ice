@@ -33,7 +33,11 @@ public class SheetPresenter {
 
         void setCellWidgetForCurrentRow(String value, int row, int col, int tabIndex);
 
+        void removeCellForCurrentRow(int row, int col, int count);
+
         int getSheetRowCount();
+
+        int getSheetColumnCount(int row);
 
         void clearErrorCell(int row, int col);
 
@@ -43,7 +47,7 @@ public class SheetPresenter {
 
         SampleLocation getSampleSelectionLocation();
 
-        void addSampleHeaders();
+        void createHeaderCells();
     }
 
     private final View view;
@@ -68,6 +72,24 @@ public class SheetPresenter {
             this.currentInfo.getEntryList().clear();
             view.clear();
         }
+    }
+
+    // currently goes through each row and cell and checks to cell value
+    public boolean isEmptyRow(int row) {
+
+        for (CellColumnHeader header : getTypeHeaders().getHeaders()) {
+            if (header.getCell().getDataForRow(row) != null)
+                return false;
+        }
+
+        if (sampleHeaders != null) {
+            for (CellColumnHeader header : sampleHeaders.getHeaders()) {
+                if (header.getCell().getDataForRow(row) != null)
+                    return false;
+            }
+        }
+
+        return true;
     }
 
     public EntryAddType getType() {
@@ -161,51 +183,61 @@ public class SheetPresenter {
     }
 
     public void addRow(int row) {
-        int i = 0;
-        for (CellColumnHeader header : getTypeHeaders().getHeaders()) {
-            SheetCellData data = null;
+        int headerSize = headers.getHeaderSize();
+
+        for (int i = 0; i < headerSize; i += 1) {
+            String value = "";
 
             if (currentInfo != null && currentInfo.getCount() > row) {
                 EntryInfo info = currentInfo.getEntryList().get(row);
 
                 // extractor also sets the header data structure
-                data = getTypeHeaders().extractValue(header.getHeaderType(), info);
+                CellColumnHeader header = headers.getHeaderForIndex(i);
+                SheetCellData data = getTypeHeaders().extractValue(header.getHeaderType(), info);
                 header.getCell().setWidgetValue(row, data);
+                value = data.getValue();
             }
-
-            String value = data == null ? "" : data.getValue();
             view.setCellWidgetForCurrentRow(value, row, i, headers.getHeaderSize());
-            i += 1;
         }
 
-        addSampleHeaders(row);
+        addSampleHeaderRows(row);
     }
 
-    public void addSampleHeaders(int row) {
+    public void addSampleHeaderRows(int row) {
 
         if (sampleHeaders == null)
             return;
 
-        int i = headers.getHeaderSize();
+        int i = headers.getHeaderSize();   // starting point
         for (CellColumnHeader header : sampleHeaders.getHeaders()) {
-
-            SheetCellData data = null;
+            String value = "";
 
             if (currentInfo != null && currentInfo.getCount() > row) {
                 EntryInfo info = currentInfo.getEntryList().get(row);
 
                 // extractor also sets the header data structure
                 if (info.isHasSample()) {
-                    // ? TODO ? extract sample info
-//                        data = sampleHeaders.extractValue(header.getHeaderType(), info);
+                    SheetCellData data = sampleHeaders.extractValue(header.getHeaderType(), info);
                     header.getCell().setWidgetValue(row, data);
+                    value = data.getValue();
                 }
             }
 
-            String value = data == null ? "" : data.getValue();
             view.setCellWidgetForCurrentRow(value, row, i, getFieldSize());
             i += 1;
         }
+    }
+
+
+    protected void removeSampleHeaderRows(int row) {
+        int fieldSize = getFieldSize();
+        int colCount = view.getSheetColumnCount(row);
+        int toRemove = colCount - fieldSize;
+
+        if (toRemove <= 0)
+            return;
+
+        view.removeCellForCurrentRow(row, fieldSize - 1, toRemove);
     }
 
     /**
@@ -281,6 +313,16 @@ public class SheetPresenter {
         return newSelection;
     }
 
+    public ArrayList<CellColumnHeader> getAllHeaders() {
+        ArrayList<CellColumnHeader> headers = new ArrayList<CellColumnHeader>();
+        headers.addAll(this.headers.getHeaders());
+
+        if (sampleHeaders != null) {
+            headers.addAll(sampleHeaders.getHeaders());
+        }
+        return headers;
+    }
+
     public HandlerRegistration setSampleSelectionHandler(final EntryAddType addType,
             final SingleSelectionModel<SampleInfo> selectionModel) {
 
@@ -297,17 +339,26 @@ public class SheetPresenter {
 
                 // add sample cols
                 sampleHeaders = ImportTypeHeaders.getSampleHeaders(type, locationList);
-                if (sampleHeaders == null)
+                if (sampleHeaders == null || sampleHeaders.getHeaders().isEmpty())
                     return;
 
-                view.addSampleHeaders();
+                view.createHeaderCells();
 
+                int rowCells = view.getSheetColumnCount(0);
+                int headerCount = getFieldSize();
                 int rowMax = view.getSheetRowCount();
 
-                for (int row = 0; row < rowMax; row += 1) {
-                    addSampleHeaders(row);
-                }
+                if (rowCells < headerCount) {
 
+                    for (int row = 0; row < rowMax; row += 1) {
+                        addSampleHeaderRows(row);
+                    }
+                } else {
+                    // remove
+                    for (int row = 0; row < rowMax; row += 1) {
+                        removeSampleHeaderRows(row);
+                    }
+                }
                 // scroll everything into view
                 view.scrollElementToView(0, getFieldSize() - 1);
             }

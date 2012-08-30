@@ -222,7 +222,9 @@ public class BulkUploadPresenter extends AbstractPresenter {
         container.add(this.view.asWidget());
     }
 
+    //
     // inner classes
+    //
     private class SheetSubmitHandler implements ClickHandler {
 
         private final boolean isDraftSubmit;
@@ -410,7 +412,9 @@ public class BulkUploadPresenter extends AbstractPresenter {
         }
     }
 
-    // inner classes
+    /**
+     * Selection handler for existing bulk upload.
+     */
     private class MenuSelectionHandler implements SelectionChangeEvent.Handler {
 
         private final SingleSelectionModel<BulkUploadMenuItem> selection;
@@ -429,7 +433,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 @Override
                 public void onDataRetrieval(SavedDraftsEvent event) {
                     if (event == null) {
-                        view.showFeedback("Could not retrieve saved draft.", true);
+                        view.showFeedback("Could not retrieve saved draft", true);
                         return;
                     }
 
@@ -438,6 +442,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     currentInput = new NewBulkInput(info.getType(), sheet);
                     currentInput.setId(info.getId());
                     String name = info.getName();
+
+                    // setting name to creation date is none exist
                     if (name == null) {
                         name = DateUtilities.formatDate(info.getCreated());
                         info.setName(name);

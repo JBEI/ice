@@ -55,19 +55,19 @@ public enum Header {
     STRAIN_SELECTION_MARKERS("Strain Selection Markers"),
     STRAIN_PARENTAL_STRAIN("Parental Strain"),
     STRAIN_GEN_PHEN("Genotype or Phenotype"),
-    STRAIN_PLASMIDS("Strain Plasmids"),
     STRAIN_SEQ_FILENAME("Strain Sequence File"),
     STRAIN_ATT_FILENAME("Strain Attachment File"),
 
     // sample headers
-    SAMPLE_SHELF("Shelf"),
-    SAMPLE_BOX("Box"),
-    SAMPLE_TUBE("Tube"),
-    SAMPLE_PLATE("Plate"),
-    SAMPLE_WELL("Well"),
-    SAMPLE_TYPE("Type"),
-    SAMPLE_DRAWER("Drawer"),
-    SAMPLE_STOCK("Stock");
+    SAMPLE_SHELF("Sample Shelf"),
+    SAMPLE_BOX("Sample Box"),
+    SAMPLE_TUBE("Sample Tube"),
+    SAMPLE_PLATE("Sample Plate"),
+    SAMPLE_WELL("Sample Well"),
+    SAMPLE_TYPE("Sample Type"),
+    SAMPLE_DRAWER("Sample Drawer"),
+    SAMPLE_STOCK("Sample Stock"),
+    SAMPLE_JBEI_STRAIN("Sample JBEI Strain");
 
     private String label;
 
