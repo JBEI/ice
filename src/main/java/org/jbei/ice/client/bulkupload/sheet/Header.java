@@ -65,7 +65,9 @@ public enum Header {
     SAMPLE_TUBE("Tube"),
     SAMPLE_PLATE("Plate"),
     SAMPLE_WELL("Well"),
-    SAMPLE_TYPE("Type");
+    SAMPLE_TYPE("Type"),
+    SAMPLE_DRAWER("Drawer"),
+    SAMPLE_STOCK("Stock");
 
     private String label;
 
