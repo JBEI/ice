@@ -242,7 +242,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
             }
 
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName(), view.getCreator(),
+                    view.getCreatorEmail());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before submitting", true);
                 return;
@@ -281,7 +282,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
             }
 
             // for approval we do not want to change the owner
-            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(null, null);
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(null, null, view.getCreator(),
+                                                                                view.getCreatorEmail());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before submitting", true);
                 return;
@@ -319,7 +321,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
             currentInput.setName(name);
 
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName(), view.getCreator(),
+                    view.getCreatorEmail());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data before saving draft", true);
                 return;
@@ -376,7 +379,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
             long id = currentInput.getId();
             final EntryAddType type = currentInput.getImportType();
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName(), view.getCreator(),
+                    view.getCreatorEmail());
 
             BulkUploadUpdateHandler handler = new BulkUploadUpdateHandler(type);
             String uuid = view.getPermissionSelection();

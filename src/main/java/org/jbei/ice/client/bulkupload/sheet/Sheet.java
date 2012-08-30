@@ -313,8 +313,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         return true;
     }
 
-    public ArrayList<EntryInfo> getCellData(String ownerEmail, String owner) {
-        return presenter.getCellEntryList(ownerEmail, owner);
+    public ArrayList<EntryInfo> getCellData(String ownerEmail, String owner, String creator, String creatorEmail) {
+        return presenter.getCellEntryList(ownerEmail, owner, creator, creatorEmail);
     }
 
     @Override

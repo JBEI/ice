@@ -8,10 +8,10 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -20,11 +20,9 @@ import com.google.gwt.user.client.ui.Widget;
 public class CreatorWidget implements IsWidget {
 
     private final FocusPanel parent;
-    private final VerticalPanel panel;
+    private final HTMLPanel panel;
     private TextBox creatorBox;
     private TextBox creatorEmailBox;
-    private final String defaultCreator;
-    private final String defaultCreatorEmail;
 
     public CreatorWidget(String creator, String creatorEmail) {
         Icon creatorIcon = new Icon(FAIconType.USER);
@@ -32,11 +30,12 @@ public class CreatorWidget implements IsWidget {
         parent = new FocusPanel(creatorIcon);
         parent.setStyleName("bulk_upload_creator");
 
-        panel = new VerticalPanel();
+        panel = new HTMLPanel("<span id=\"creator_label\"></span><br><span id=\"creator_input\"></span><br><br>" +
+                                      "<span id=\"creator_email_label\"></span><br><span " +
+                                      "id=\"creator_email_input\"></span>");
         panel.setStyleName("bg_white");
-        this.defaultCreator = creator;
-        this.defaultCreatorEmail = creatorEmail;
-        createTableContents();
+        panel.addStyleName("pad-6");
+        createTableContents(creator, creatorEmail);
 
         final PopupHandler clickHandler = new PopupHandler(panel, creatorIcon.getElement(), 0, 0, false);
         clickHandler.setCloseHandler(new CloseHandler<PopupPanel>() {
@@ -53,50 +52,44 @@ public class CreatorWidget implements IsWidget {
         parent.addClickHandler(clickHandler);
     }
 
-    private void createTableContents() {
-        addLabel(true, "Creator");
+    private void createTableContents(String creator, String creatorEmail) {
+        addLabel(true, "Creator", "creator_label");
         creatorBox = new TextBox();
         creatorBox.getElement().setAttribute("placeholder", "Who made this part?");
         creatorBox.setWidth("150px");
-        creatorBox.setText(defaultCreator);
+        creatorBox.setText(creator);
         creatorBox.setStyleName("input_box");
         creatorBox.setMaxLength(65);
-        panel.add(creatorBox);
 
-        addLabel(false, "Creator's Email");
+        panel.add(creatorBox, "creator_input");
+
+        addLabel(false, "Creator's Email", "creator_email_label");
         creatorEmailBox = new TextBox();
-        creatorEmailBox.setText(defaultCreatorEmail);
+        creatorEmailBox.setText(creatorEmail);
         creatorEmailBox.setStyleName("input_box");
         creatorEmailBox.setWidth("150px");
         creatorEmailBox.setMaxLength(75);
-        panel.add(creatorEmailBox);
+        panel.add(creatorEmailBox, "creator_email_input");
     }
 
-    protected void addLabel(boolean required, String label) {
-        String html = "<span class=\"font-70em\" style=\"white-space:nowrap\"><b>" + label + "</b>";
+    protected void addLabel(boolean required, String label, String elementId) {
+        String html = "<span class=\"font-70em\" style=\"white-space:nowrap\">" + label;
         if (required)
             html += " <span class=\"required\">*</span></span>";
         else
             html += "</span>";
 
         HTML widget = new HTML(html);
-        panel.add(widget);
+        widget.setStyleName("display-inline");
+        panel.add(widget, elementId);
     }
 
     public String getCreator() {
-        String creator = this.creatorBox.getText();
-        if (creator.trim().isEmpty())
-            creator = defaultCreator;
-
-        return creator;
+        return this.creatorBox.getText().trim();
     }
 
     public String getCreatorEmail() {
-        String creatorEmail = this.creatorEmailBox.getText();
-        if (creatorEmail.trim().isEmpty())
-            creatorEmail = defaultCreatorEmail;
-
-        return creatorEmail;
+        return this.creatorEmailBox.getText().trim();
     }
 
     /**

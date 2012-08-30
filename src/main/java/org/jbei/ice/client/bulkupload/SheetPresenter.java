@@ -100,7 +100,7 @@ public class SheetPresenter {
         return headers;
     }
 
-    public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner) {
+    public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner, String creator, String creatorEmail) {
 
         int rowCount = view.getSheetRowCount();
         SheetModel<? extends EntryInfo> model = ModelFactory.getModelForType(type);
@@ -141,15 +141,19 @@ public class SheetPresenter {
                 if (ownerEmail != null && owner != null) {
                     existing.setOwnerEmail(ownerEmail);
                     existing.setOwner(owner);
-                    existing.setCreator(owner);
-                    existing.setCreatorEmail(ownerEmail);
 
                     if (existing.getInfo() != null) {
                         existing.getInfo().setOwnerEmail(ownerEmail);
                         existing.getInfo().setOwner(owner);
-                        existing.getInfo().setCreator(owner);
-                        existing.getInfo().setCreatorEmail(ownerEmail);
                     }
+                }
+
+                // set creator information
+                existing.setCreator(creator);
+                existing.setCreatorEmail(creatorEmail);
+                if (existing.getInfo() != null) {
+                    existing.getInfo().setCreator(creator);
+                    existing.getInfo().setCreatorEmail(creatorEmail);
                 }
 
                 infoList.add(existing);

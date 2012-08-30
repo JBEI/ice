@@ -120,6 +120,16 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
+    public String getCreator() {
+        return this.creator.getCreator();
+    }
+
+    @Override
+    public String getCreatorEmail() {
+        return this.creator.getCreatorEmail();
+    }
+
+    @Override
     public void setSelectedGroupPermission(GroupInfo groupInfo) {
         selection.setSelected(groupInfo);
     }

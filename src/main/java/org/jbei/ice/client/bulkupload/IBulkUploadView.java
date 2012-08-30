@@ -59,4 +59,8 @@ public interface IBulkUploadView {
     String getPermissionSelection();
 
     void setDraftSubmitHandler(ClickHandler handler);
+
+    String getCreator();
+
+    String getCreatorEmail();
 }
