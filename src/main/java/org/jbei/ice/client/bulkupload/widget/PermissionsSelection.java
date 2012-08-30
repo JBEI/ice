@@ -31,6 +31,7 @@ public class PermissionsSelection extends Composite {
         panel = new HTMLPanel(
                 "<span class=\"bulk_upload_visibility\">Group visibility: </span><span " +
                         "id=\"selection_visibility\"></span>");
+        panel.addStyleName("display-inline");
 
         selection = new ListBox();
         selection.setStyleName("pull_down");

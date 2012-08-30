@@ -4,7 +4,10 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.SheetPresenter;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
+import org.jbei.ice.client.bulkupload.sheet.header.SampleHeaders;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
+import org.jbei.ice.client.bulkupload.widget.SampleSelectionWidget;
+import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -31,6 +34,7 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class Sheet extends Composite implements SheetPresenter.View {
 
@@ -56,6 +60,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
     protected final SheetPresenter presenter;
     private SheetCell newCellSelection;
     private boolean cellHasFocus;  // whether input widget for a cell has focus
+    private SampleSelectionWidget sampleSelectionWidget;
+    private HandlerRegistration sampleSelectionRegistration;
 
     public final static int ROW_COUNT = 40;
 
@@ -182,7 +188,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
                     row += 1;
                 }
-
             }
         });
     }
@@ -267,17 +272,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
         }, KeyDownEvent.getType());
     }
 
-    protected Widget createHeaderCells() {
-        addLeadHeader();
-
-        SheetHeader.createHeaders(presenter.getTypeHeaders().getHeaders(), headerCol, row, header);
-        headerCol += presenter.getTypeHeaders().getHeaderSize();
-        addTailHeader();
-
-        row += 1;
-        return header;
-    }
-
     // header that covers the span of the row index
     private void addLeadHeader() {
         HTML cell = new HTML("&nbsp;");
@@ -287,13 +281,35 @@ public class Sheet extends Composite implements SheetPresenter.View {
         headerCol += 1;
     }
 
-    // tail header 
-    private void addTailHeader() {
+    // tail header
+    private void addTailHeader(int row) {
         HTML cell = new HTML("&nbsp;");
         cell.setStyleName("tail_cell_column_header");
         header.setWidget(row, headerCol, cell);
         header.getFlexCellFormatter().setStyleName(row, headerCol, "tail_cell_column_header_td");
         headerCol += 1;
+    }
+
+    protected Widget createHeaderCells() {
+        addLeadHeader();
+
+        SheetHeader.createHeaders(presenter.getTypeHeaders().getHeaders(), headerCol, row, header);
+        headerCol += presenter.getTypeHeaders().getHeaderSize();
+        addTailHeader(row);
+
+        row += 1;
+        return header;
+    }
+
+    @Override
+    public void addSampleHeaders() {
+        SampleHeaders sampleHeaders = presenter.getSampleHeaders();
+        if (sampleHeaders == null)
+            return;
+        headerCol -= 1;   // replace tail header
+        SheetHeader.createHeaders(sampleHeaders.getHeaders(), headerCol, 0, header);
+        headerCol += sampleHeaders.getHeaderSize();
+        addTailHeader(0);
     }
 
     @Override
@@ -530,6 +546,24 @@ public class Sheet extends Composite implements SheetPresenter.View {
     @Override
     public void setCellWidgetForCurrentRow(String value, int row, int col, int size) {
         sheetTable.setWidget(row, col, new CellWidget(value, row, col, size));
+    }
+
+    public void setSampleSelection(EntryAddType addType, SampleSelectionWidget sampleSelectionWidget) {
+        this.sampleSelectionWidget = sampleSelectionWidget;
+        if (sampleSelectionWidget != null) {
+            if (sampleSelectionRegistration != null)
+                sampleSelectionRegistration.removeHandler();
+            sampleSelectionRegistration = presenter.setSampleSelectionHandler(addType, this.sampleSelectionWidget
+                    .getSelectionModel());
+        }
+    }
+
+    @Override
+    public SampleLocation getSampleSelectionLocation() {
+        if (this.sampleSelectionWidget == null)
+            return null;
+
+        return this.sampleSelectionWidget.getCurrentLocation();
     }
 
     //

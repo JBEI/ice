@@ -1,6 +1,8 @@
 package org.jbei.ice.client.bulkupload.model;
 
 import org.jbei.ice.client.bulkupload.sheet.Sheet;
+import org.jbei.ice.client.bulkupload.widget.SampleSelectionWidget;
+import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.user.client.ui.Composite;
@@ -18,13 +20,14 @@ public class NewBulkInput extends Composite {
     private final Sheet sheet;
     private final EntryAddType type;
     private String name;
+    private final SampleSelectionWidget sampleSelectionWidget;
 
     public NewBulkInput(EntryAddType type, Sheet sheet) {
         VerticalPanel layout = new VerticalPanel();
         initWidget(layout);
         this.sheet = sheet;
         this.type = type;
-
+        this.sampleSelectionWidget = new SampleSelectionWidget();
         layout.add(sheet);
     }
 
@@ -50,5 +53,15 @@ public class NewBulkInput extends Composite {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setSampleLocation(SampleLocation sampleLocation) {
+        sampleSelectionWidget.setLocation(sampleLocation);
+        if (sampleLocation != null)
+            sheet.setSampleSelection(type, sampleSelectionWidget);
+    }
+
+    public SampleSelectionWidget getSampleSelectionWidget() {
+        return sampleSelectionWidget;
     }
 }

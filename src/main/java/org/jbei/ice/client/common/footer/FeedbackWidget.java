@@ -24,7 +24,7 @@ public class FeedbackWidget extends Composite {
         layout = new FlexTable();
         layout.setWidth("340px");
         layout.setStyleName("font-80em");
-        layout.addStyleName("bg_f1");
+        layout.addStyleName("bg_f8");
         layout.addStyleName("pad-3");
         initWidget(layout);
 

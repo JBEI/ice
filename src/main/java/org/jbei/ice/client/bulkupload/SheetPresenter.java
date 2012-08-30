@@ -9,11 +9,18 @@ import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.ImportTypeHeaders;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.bulkupload.sheet.header.BulkUploadHeaders;
+import org.jbei.ice.client.bulkupload.sheet.header.SampleHeaders;
+import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.SampleInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class SheetPresenter {
 
@@ -33,12 +40,17 @@ public class SheetPresenter {
         void setErrorCell(int row, int col, String errMsg);
 
         void scrollElementToView(int row, int col);
+
+        SampleLocation getSampleSelectionLocation();
+
+        void addSampleHeaders();
     }
 
     private final View view;
     private final EntryAddType type;
     private BulkUploadInfo currentInfo; // used to maintain saved drafts that are loaded
     private final BulkUploadHeaders headers;
+    private SampleHeaders sampleHeaders;
 
     public SheetPresenter(View view, EntryAddType type) {
         this.view = view;
@@ -68,6 +80,10 @@ public class SheetPresenter {
 
     public BulkUploadHeaders getTypeHeaders() {
         return headers;
+    }
+
+    public SampleHeaders getSampleHeaders() {
+        return sampleHeaders;
     }
 
     public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner) {
@@ -139,26 +155,55 @@ public class SheetPresenter {
      *         headers for the entry type
      */
     public int getFieldSize() {
+        if (sampleHeaders != null)
+            return headers.getHeaderSize() + sampleHeaders.getHeaderSize();
         return headers.getHeaderSize();
     }
 
     public void addRow(int row) {
-        int index = row; // row includes the headers but this is 0-indexed
-
         int i = 0;
         for (CellColumnHeader header : getTypeHeaders().getHeaders()) {
             SheetCellData data = null;
 
-            if (currentInfo != null && currentInfo.getCount() > index) {
-                EntryInfo info = currentInfo.getEntryList().get(index);
+            if (currentInfo != null && currentInfo.getCount() > row) {
+                EntryInfo info = currentInfo.getEntryList().get(row);
 
                 // extractor also sets the header data structure
                 data = getTypeHeaders().extractValue(header.getHeaderType(), info);
-                header.getCell().setWidgetValue(index, data);
+                header.getCell().setWidgetValue(row, data);
             }
 
             String value = data == null ? "" : data.getValue();
             view.setCellWidgetForCurrentRow(value, row, i, headers.getHeaderSize());
+            i += 1;
+        }
+
+        addSampleHeaders(row);
+    }
+
+    public void addSampleHeaders(int row) {
+
+        if (sampleHeaders == null)
+            return;
+
+        int i = headers.getHeaderSize();
+        for (CellColumnHeader header : sampleHeaders.getHeaders()) {
+
+            SheetCellData data = null;
+
+            if (currentInfo != null && currentInfo.getCount() > row) {
+                EntryInfo info = currentInfo.getEntryList().get(row);
+
+                // extractor also sets the header data structure
+                if (info.isHasSample()) {
+                    // ? TODO ? extract sample info
+//                        data = sampleHeaders.extractValue(header.getHeaderType(), info);
+                    header.getCell().setWidgetValue(row, data);
+                }
+            }
+
+            String value = data == null ? "" : data.getValue();
+            view.setCellWidgetForCurrentRow(value, row, i, getFieldSize());
             i += 1;
         }
     }
@@ -234,5 +279,38 @@ public class SheetPresenter {
         newSelection.setText(text);
 
         return newSelection;
+    }
+
+    public HandlerRegistration setSampleSelectionHandler(final EntryAddType addType,
+            final SingleSelectionModel<SampleInfo> selectionModel) {
+
+        GWT.log("Setting sample selection handler for type " + addType);
+        return selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (SheetPresenter.this.type != addType)
+                    return;
+
+                SampleInfo info = selectionModel.getSelectedObject();
+                ArrayList<String> locationList = view.getSampleSelectionLocation().getListForLocation(
+                        info.getLocationId());
+
+                // add sample cols
+                sampleHeaders = ImportTypeHeaders.getSampleHeaders(type, locationList);
+                if (sampleHeaders == null)
+                    return;
+
+                view.addSampleHeaders();
+
+                int rowMax = view.getSheetRowCount();
+
+                for (int row = 0; row < rowMax; row += 1) {
+                    addSampleHeaders(row);
+                }
+
+                // scroll everything into view
+                view.scrollElementToView(0, getFieldSize() - 1);
+            }
+        });
     }
 }

@@ -57,7 +57,15 @@ public enum Header {
     STRAIN_GEN_PHEN("Genotype or Phenotype"),
     STRAIN_PLASMIDS("Strain Plasmids"),
     STRAIN_SEQ_FILENAME("Strain Sequence File"),
-    STRAIN_ATT_FILENAME("Strain Attachment File");
+    STRAIN_ATT_FILENAME("Strain Attachment File"),
+
+    // sample headers
+    SAMPLE_SHELF("Shelf"),
+    SAMPLE_BOX("Box"),
+    SAMPLE_TUBE("Tube"),
+    SAMPLE_PLATE("Plate"),
+    SAMPLE_WELL("Well"),
+    SAMPLE_TYPE("Type");
 
     private String label;
 
