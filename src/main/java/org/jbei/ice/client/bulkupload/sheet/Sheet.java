@@ -62,7 +62,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private SampleSelectionWidget sampleSelectionWidget;
     private HandlerRegistration sampleSelectionRegistration;
 
-    public final static int ROW_COUNT = 20;
+    public final static int ROW_COUNT = 40;
 
     public Sheet(EntryAddType type) {
         this(type, null);
