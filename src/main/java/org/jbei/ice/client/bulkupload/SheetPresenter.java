@@ -16,8 +16,6 @@ import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -29,7 +27,7 @@ public class SheetPresenter {
      */
     public static interface View {
 
-        void clear();
+        boolean clear();
 
         void setCellWidgetForCurrentRow(String value, int row, int col, int tabIndex);
 
@@ -68,16 +66,14 @@ public class SheetPresenter {
     }
 
     public void reset() {
-        if (Window.confirm("Clear all data?")) {
+        if (view.clear())
             this.currentInfo.getEntryList().clear();
-            view.clear();
-        }
     }
 
     // currently goes through each row and cell and checks to cell value
     public boolean isEmptyRow(int row) {
 
-        for (CellColumnHeader header : getTypeHeaders().getHeaders()) {
+        for (CellColumnHeader header : headers.getHeaders()) {
             if (header.getCell().getDataForRow(row) != null)
                 return false;
         }
@@ -102,10 +98,6 @@ public class SheetPresenter {
 
     public BulkUploadHeaders getTypeHeaders() {
         return headers;
-    }
-
-    public SampleHeaders getSampleHeaders() {
-        return sampleHeaders;
     }
 
     public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner) {
@@ -193,7 +185,7 @@ public class SheetPresenter {
 
                 // extractor also sets the header data structure
                 CellColumnHeader header = headers.getHeaderForIndex(i);
-                SheetCellData data = getTypeHeaders().extractValue(header.getHeaderType(), info);
+                SheetCellData data = headers.extractValue(header.getHeaderType(), info);
                 header.getCell().setWidgetValue(row, data);
                 value = data.getValue();
             }
@@ -326,7 +318,6 @@ public class SheetPresenter {
     public HandlerRegistration setSampleSelectionHandler(final EntryAddType addType,
             final SingleSelectionModel<SampleInfo> selectionModel) {
 
-        GWT.log("Setting sample selection handler for type " + addType);
         return selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

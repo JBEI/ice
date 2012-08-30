@@ -290,14 +290,12 @@ public class Sheet extends Composite implements SheetPresenter.View {
         SheetHeader.createHeaders(presenter.getAllHeaders(), headerCol, 0, header);
         headerCol += (presenter.getFieldSize());
         addTailHeader(0);
-
-        // create rows
     }
 
     @Override
-    public void clear() {
+    public boolean clear() {
         if (!Window.confirm("This will clear all data. Continue?"))
-            return;
+            return false;
 
         for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
             if (presenter.isEmptyRow(i))
@@ -312,6 +310,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 j += 1;
             }
         }
+        return true;
     }
 
     public ArrayList<EntryInfo> getCellData(String ownerEmail, String owner) {
@@ -475,7 +474,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
             widget = sheetTable.getWidget(newRow, newCol);
             int tabIndex = -1;
 
-//            int tabIndex = (currentRow *  presenter.getFieldSize() ) + currentIndex + 1;
             if (widget instanceof CellWidget) {
                 tabIndex = ((CellWidget) widget).getTabIndex();
             }
