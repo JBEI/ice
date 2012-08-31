@@ -92,6 +92,14 @@ public class CreatorWidget implements IsWidget {
         return this.creatorEmailBox.getText().trim();
     }
 
+    public void setCreator(String creator) {
+        this.creatorBox.setText(creator);
+    }
+
+    public void setCreatorEmail(String email) {
+        this.creatorEmailBox.setText(email);
+    }
+
     /**
      * Returns the {@link com.google.gwt.user.client.ui.Widget} aspect of the receiver.
      */

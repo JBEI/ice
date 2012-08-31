@@ -458,6 +458,12 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     view.setHeader(info.getType().getDisplay() + " Bulk Import");
                     view.setDraftMenuVisibility(false, false);
                     view.setSelectedGroupPermission(info.getGroupInfo());
+
+                    // assume uniform values for all entries in regards to creator
+                    if (!info.getEntryList().isEmpty()) {
+                        EntryInfo entryInfo = info.getEntryList().get(0);
+                        view.setCreatorInformation(entryInfo.getCreator(), entryInfo.getCreatorEmail());
+                    }
                 }
             });
         }

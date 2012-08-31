@@ -63,4 +63,6 @@ public interface IBulkUploadView {
     String getCreator();
 
     String getCreatorEmail();
+
+    void setCreatorInformation(String name, String email);
 }
