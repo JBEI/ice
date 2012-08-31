@@ -445,6 +445,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     Sheet sheet = new Sheet(info.getType(), info);
                     currentInput = new NewBulkInput(info.getType(), sheet);
                     currentInput.setId(info.getId());
+                    model.retrieveStorageSchemes(EntryAddType.addTypeToType(info.getType()), currentInput);
                     String name = info.getName();
 
                     // setting name to creation date is none exist
