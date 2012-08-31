@@ -191,7 +191,8 @@ public class SheetPresenter {
                 CellColumnHeader header = headers.getHeaderForIndex(i);
                 SheetCellData data = headers.extractValue(header.getHeaderType(), info);
                 header.getCell().setWidgetValue(row, data);
-                value = data.getValue();
+                if (data != null)
+                    value = data.getValue();
             }
             view.setCellWidgetForCurrentRow(value, row, i, headers.getHeaderSize());
         }
@@ -215,7 +216,9 @@ public class SheetPresenter {
                 if (info.isHasSample()) {
                     SheetCellData data = sampleHeaders.extractValue(header.getHeaderType(), info);
                     header.getCell().setWidgetValue(row, data);
-                    value = data.getValue();
+
+                    if (data != null)
+                        value = data.getValue();
                 }
             }
 
