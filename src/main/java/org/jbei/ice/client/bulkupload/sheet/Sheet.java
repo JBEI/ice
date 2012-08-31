@@ -227,19 +227,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
                 if (event.isUpArrow()) {
                     dealWithUpArrowPress();
-
                 } else if (event.isDownArrow()) {
                     dealWithDownArrowPress();
                     event.preventDefault();
                 } else if (event.isRightArrow()) {
-                    if (cellHasFocus)
-                        return;
-                    selectCell(currentRow, currentIndex + 1);
+                    dealWithRightArrowPress();
                     event.preventDefault();
                 } else if (event.isLeftArrow()) {
-                    if (cellHasFocus)
-                        return;
-                    selectCell(currentRow, currentIndex - 1);
+                    dealWithLeftArrowPress();
                     event.preventDefault();
                 } else {
                     int code = event.getNativeKeyCode();
@@ -352,7 +347,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     @Override
     public void setErrorCell(int row, int col, String errMsg) {
-
         Widget widget = sheetTable.getWidget(row, col);
         if (widget != null && widget instanceof CellWidget) {
             ((CellWidget) widget).showError(errMsg);
@@ -388,7 +382,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if (newCellSelection == null)
             return;
 
-
         sheetTable.setWidget(currentRow, currentIndex, newCellSelection.getWidget(currentRow, true, tabIndex));
         // all cell to set focus to whatever their input mechanism is.
         // e.g. if an input box, allow focus on that box
@@ -412,6 +405,26 @@ public class Sheet extends Composite implements SheetPresenter.View {
             return;
 
         selectCell(currentRow + 1, currentIndex);
+    }
+
+    private void dealWithLeftArrowPress() {
+        if (cellHasFocus)
+            return;
+
+        if (currentIndex == 0 && currentRow > 0)
+            selectCell(currentRow - 1, presenter.getFieldSize() - 1);
+        else if (currentIndex > 0)
+            selectCell(currentRow, currentIndex - 1);
+    }
+
+    private void dealWithRightArrowPress() {
+        if (cellHasFocus)
+            return;
+
+        if (currentIndex >= presenter.getFieldSize() - 1)
+            selectCell(currentRow + 1, 0);
+        else
+            selectCell(currentRow, currentIndex + 1);
     }
 
     /**
