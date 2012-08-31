@@ -26,6 +26,10 @@ public abstract class SampleHeaders {
         }
     }
 
+    public CellColumnHeader getHeaderForIndex(int index) {
+        return headers.get(index);
+    }
+
     public ArrayList<CellColumnHeader> getHeaders() {
         return headers;
     }

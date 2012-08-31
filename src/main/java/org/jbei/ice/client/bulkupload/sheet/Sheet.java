@@ -3,6 +3,7 @@ package org.jbei.ice.client.bulkupload.sheet;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.SheetPresenter;
+import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
 import org.jbei.ice.client.bulkupload.widget.SampleSelectionWidget;
@@ -30,7 +31,6 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -297,17 +297,16 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if (!Window.confirm("This will clear all data. Continue?"))
             return false;
 
-        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
-            if (presenter.isEmptyRow(i))
+        for (int row = 0; row < sheetTable.getRowCount(); row += 1) {
+            if (presenter.isEmptyRow(row))
                 continue;
 
-            int j = 0;
-            for (CellColumnHeader header : presenter.getTypeHeaders().getHeaders()) {
-                HasText widget = (HasText) sheetTable.getWidget(i, j);
-                widget.setText("");
-                ((Widget) widget).setStyleName("cell");
-                header.getCell().reset();
-                j += 1;
+            for (int col = 0; col < presenter.getFieldSize(); col += 1) {
+                Widget widget = sheetTable.getWidget(row, col);
+                if (widget instanceof CellWidget) {
+                    CellWidget cellWidget = (CellWidget) widget;
+                    cellWidget.setValue("");
+                }
             }
         }
         return true;
@@ -399,7 +398,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     private void dealWithUpArrowPress() {
         // exit for up arrow press in auto complete box
-        CellColumnHeader currentHeader = presenter.getTypeHeaders().getHeaderForIndex(currentIndex);
+        CellColumnHeader currentHeader = presenter.getHeaderForIndex(currentIndex);
         if (currentHeader.getCell().hasMultiSuggestions() && cellHasFocus)
             return;
 
@@ -408,7 +407,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     private void dealWithDownArrowPress() {
         // exit for down arrow press in auto complete box
-        CellColumnHeader currentHeader = presenter.getTypeHeaders().getHeaderForIndex(currentIndex);
+        CellColumnHeader currentHeader = presenter.getHeaderForIndex(currentIndex);
         if (currentHeader.getCell().hasMultiSuggestions() && cellHasFocus)
             return;
 
@@ -435,11 +434,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
             if (cellHasFocus && replaced != null) {
                 // switch from input
 
-                String data = prevSelection.setDataForRow(currentRow);
+                SheetCellData data = prevSelection.getDataForRow(currentRow);
                 if (data == null)
                     replaced.setValue("");
                 else
-                    replaced.setValue(data);
+                    replaced.setValue(data.getValue());
 
                 sheetTable.setWidget(inputRow, inputIndex, replaced);
 
@@ -466,7 +465,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         }
 
         // handle current selection
-        newCellSelection = presenter.getTypeHeaders().getHeaderForIndex(newCol).getCell();
+        newCellSelection = presenter.getCellForIndex(newCol);
         Widget widget;
 
         // now deal with current selection

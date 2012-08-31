@@ -66,23 +66,20 @@ public class SheetPresenter {
     }
 
     public void reset() {
-        if (view.clear())
+        if (view.clear()) {
             this.currentInfo.getEntryList().clear();
+            for (CellColumnHeader header : getAllHeaders()) {
+                header.getCell().reset();
+            }
+        }
     }
 
     // currently goes through each row and cell and checks to cell value
     public boolean isEmptyRow(int row) {
 
-        for (CellColumnHeader header : headers.getHeaders()) {
+        for (CellColumnHeader header : getAllHeaders()) {
             if (header.getCell().getDataForRow(row) != null)
                 return false;
-        }
-
-        if (sampleHeaders != null) {
-            for (CellColumnHeader header : sampleHeaders.getHeaders()) {
-                if (header.getCell().getDataForRow(row) != null)
-                    return false;
-            }
         }
 
         return true;
@@ -96,8 +93,12 @@ public class SheetPresenter {
         this.currentInfo = info;
     }
 
-    public BulkUploadHeaders getTypeHeaders() {
-        return headers;
+    public SheetCell getCellForIndex(int newCol) {
+        if (newCol < headers.getHeaderSize())
+            return headers.getHeaderForIndex(newCol).getCell();
+
+        int index = newCol - headers.getHeaderSize();
+        return sampleHeaders.getHeaderForIndex(index).getCell();
     }
 
     public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner, String creator, String creatorEmail) {
@@ -298,7 +299,7 @@ public class SheetPresenter {
      */
     public SheetCell setCellInputFocus(int currentRow, int currentIndex) {
         // get cell for selection and set it to existing
-        SheetCell newSelection = headers.getHeaderForIndex(currentIndex).getCell();
+        SheetCell newSelection = getHeaderForIndex(currentIndex).getCell();
         if (newSelection == null)
             return null;
 
@@ -310,6 +311,10 @@ public class SheetPresenter {
         newSelection.setText(text);
 
         return newSelection;
+    }
+
+    public CellColumnHeader getHeaderForIndex(int index) {
+        return getAllHeaders().get(index);
     }
 
     public ArrayList<CellColumnHeader> getAllHeaders() {

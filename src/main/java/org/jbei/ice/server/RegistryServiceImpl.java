@@ -1377,7 +1377,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<SampleStorage> sampleMap = info.getSampleStorage();
 
             GroupController groupController = new GroupController();
-            Group publicGroup = groupController.createOrRetrievePublicGroup(); // tODO group uuid should come from ui
+            Group publicGroup = groupController.createOrRetrievePublicGroup(); // TODO group uuid should come from ui
 
             if (sampleMap != null) {
                 for (SampleStorage sampleStorage : sampleMap) {
