@@ -11,10 +11,13 @@ import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.GenerationSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+
+import com.google.gwt.core.client.GWT;
 
 /**
  * @author Hector Plahar
@@ -91,6 +94,31 @@ public class ArabidopsisSeedHeaders extends PartHeader {
                     else
                         value = "No";
                 }
+                break;
+
+            // TODO : samples
+            case SAMPLE_DRAWER:
+                if (!info.isHasSample()) {
+                    value = "";
+                    break;
+                }
+                SampleStorage sampleStorage = info.getOneSampleStorage();
+                break;
+
+            case SAMPLE_BOX:
+                if (!info.isHasSample()) {
+                    value = "";
+                    break;
+                }
+                GWT.log("Seed: Sample Box");
+                break;
+
+            case SAMPLE_TUBE:
+                if (!info.isHasSample()) {
+                    value = "";
+                    break;
+                }
+                GWT.log("Seed: Sample Tube");
                 break;
         }
 

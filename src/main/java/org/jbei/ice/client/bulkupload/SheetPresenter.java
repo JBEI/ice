@@ -53,6 +53,7 @@ public class SheetPresenter {
     private BulkUploadInfo currentInfo; // used to maintain saved drafts that are loaded
     private final BulkUploadHeaders headers;
     private SampleHeaders sampleHeaders;
+    private String currentSampleLocationId;
 
     public SheetPresenter(View view, EntryAddType type) {
         this.view = view;
@@ -124,10 +125,14 @@ public class SheetPresenter {
             boolean rowHasData = false;
 
             // go through headers (column) for data
-            for (CellColumnHeader header : headers.getHeaders()) {
+            for (CellColumnHeader header : getAllHeaders()) {
                 SheetCellData data = header.getCell().getDataForRow(i);
-                if (data == null)
+                if (data == null) {
+                    // clear the data associated with header
+                    data = new SheetCellData(header.getHeaderType(), "", "");
+                    model.setInfoField(data, existing);
                     continue;
+                }
 
                 rowHasData = true;
                 data.setType(header.getHeaderType());
@@ -155,6 +160,11 @@ public class SheetPresenter {
                 if (existing.getInfo() != null) {
                     existing.getInfo().setCreator(creator);
                     existing.getInfo().setCreatorEmail(creatorEmail);
+                }
+
+                // set sample location
+                if (existing.isHasSample()) {
+                    existing.getSampleStorage().get(0).getSample().setLocationId(currentSampleLocationId);
                 }
 
                 infoList.add(existing);
@@ -339,12 +349,14 @@ public class SheetPresenter {
                 SampleInfo info = selectionModel.getSelectedObject();
                 ArrayList<String> locationList = view.getSampleSelectionLocation().getListForLocation(
                         info.getLocationId());
+                locationList.add(0, "Name");
 
                 // add sample cols
                 sampleHeaders = ImportTypeHeaders.getSampleHeaders(type, locationList);
                 if (sampleHeaders == null || sampleHeaders.getHeaders().isEmpty())
                     return;
 
+                currentSampleLocationId = info.getLocationId();
                 view.createHeaderCells();
 
                 int rowCells = view.getSheetColumnCount(0);
@@ -352,7 +364,6 @@ public class SheetPresenter {
                 int rowMax = view.getSheetRowCount();
 
                 if (rowCells < headerCount) {
-
                     for (int row = 0; row < rowMax; row += 1) {
                         addSampleHeaderRows(row);
                     }

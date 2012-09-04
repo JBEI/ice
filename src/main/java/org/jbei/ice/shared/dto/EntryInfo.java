@@ -1,10 +1,11 @@
 package org.jbei.ice.shared.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import org.jbei.ice.client.entry.view.model.SampleStorage;
-
 import java.util.ArrayList;
 import java.util.Date;
+
+import org.jbei.ice.client.entry.view.model.SampleStorage;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class EntryInfo implements IsSerializable {
 
@@ -271,6 +272,15 @@ public class EntryInfo implements IsSerializable {
     public ArrayList<SampleStorage> getSampleStorage() {
         return sampleStorage;
     }
+
+    public SampleStorage getOneSampleStorage() {
+        if (sampleStorage.isEmpty()) {
+            sampleStorage.add(new SampleStorage());
+        }
+
+        return sampleStorage.get(0);
+    }
+
 
     public void setSampleMap(ArrayList<SampleStorage> sampleStorage) {
         this.sampleStorage.clear();

@@ -59,6 +59,7 @@ public enum Header {
     STRAIN_ATT_FILENAME("Strain Attachment File"),
 
     // sample headers
+    SAMPLE_NAME("Sample Name"),
     SAMPLE_SHELF("Sample Shelf"),
     SAMPLE_BOX("Sample Box"),
     SAMPLE_TUBE("Sample Tube"),

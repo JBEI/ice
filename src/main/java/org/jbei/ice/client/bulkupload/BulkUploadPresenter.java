@@ -63,13 +63,14 @@ public class BulkUploadPresenter extends AbstractPresenter {
         retrieveSavedDrafts();
         retrievePendingIfAdmin();
 
-        model.getEventBus().addHandler(FeedbackEvent.TYPE,
-                                       new FeedbackEvent.IFeedbackEventHandler() {
-                                           @Override
-                                           public void onFeedbackAvailable(FeedbackEvent event) {
-                                               display.showFeedback(event.getMessage(), event.isError());
-                                           }
-                                       });
+        model.getEventBus().addHandler(
+                FeedbackEvent.TYPE,
+                new FeedbackEvent.IFeedbackEventHandler() {
+                    @Override
+                    public void onFeedbackAvailable(FeedbackEvent event) {
+                        display.showFeedback(event.getMessage(), event.isError());
+                    }
+                });
 
         // retrieve groups
         retrieveUserGroups();
