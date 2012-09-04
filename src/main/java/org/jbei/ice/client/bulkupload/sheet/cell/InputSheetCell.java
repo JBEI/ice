@@ -4,6 +4,9 @@ import org.jbei.ice.client.bulkupload.model.SheetCellData;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -27,6 +30,19 @@ public class InputSheetCell extends SheetCell {
             public void onBlur(BlurEvent event) {
                 String s = setDataForRow(currentRow);
                 input.setText(s);
+            }
+        });
+
+        // this is a bit of a hack. When a user presses "Enter" or "Tab" there is no "blur" and so the
+        // event is not handled above. Thus the data is never set. This attempts to take care of that
+        input.addKeyDownHandler(new KeyDownHandler() {
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                int code = event.getNativeKeyCode();
+                if (KeyCodes.KEY_TAB != code && KeyCodes.KEY_ENTER != code)
+                    return;
+
+                input.setFocus(false);
             }
         });
     }

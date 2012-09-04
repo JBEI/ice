@@ -447,6 +447,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
             if (cellHasFocus && replaced != null) {
                 // switch from input
 
+                // this relies on the fact that on blur, individual sheet cells (or the header responsible for them)
+                // set the data so the assumption is that at this point, if there is data, it is already set
+                // and so just retrieved here and displayed in the sheet. Not very intuitive...see InputSheetCell::28
                 SheetCellData data = prevSelection.getDataForRow(currentRow);
                 if (data == null)
                     replaced.setValue("");
