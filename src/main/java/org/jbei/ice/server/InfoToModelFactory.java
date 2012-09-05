@@ -117,7 +117,7 @@ public class InfoToModelFactory {
                             seedInfo.getGeneration().name());
                     seed.setGeneration(generation);
                 } else {
-                    seed.setGeneration(ArabidopsisSeed.Generation.M0);
+                    seed.setGeneration(ArabidopsisSeed.Generation.NULL);
                 }
 
                 if (seedInfo.getPlantType() != null) {
@@ -125,7 +125,7 @@ public class InfoToModelFactory {
                             seedInfo.getPlantType().name());
                     seed.setPlantType(plantType);
                 } else {
-                    seed.setPlantType(ArabidopsisSeed.PlantType.EMS);
+                    seed.setPlantType(ArabidopsisSeed.PlantType.NULL);
                 }
                 seed.setSentToABRC(seedInfo.isSentToAbrc());
                 break;
