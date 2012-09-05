@@ -541,7 +541,7 @@ public class BulkUploadController {
     }
 
     protected void saveSamples(Account account, SampleStorage sampleStorage, Entry entry) throws ControllerException {
-        if (sampleStorage == null)
+        if (sampleStorage == null || sampleStorage.getSample() == null)
             return;
 
         // check is there is an existing sample(s) and delete
