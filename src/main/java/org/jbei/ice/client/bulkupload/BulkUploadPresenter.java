@@ -15,6 +15,7 @@ import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.bulkupload.model.BulkUploadModel;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.client.bulkupload.sheet.Sheet;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.DateUtilities;
@@ -159,7 +160,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     Sheet sheet = new Sheet(selection);
                     currentInput = new NewBulkInput(selection, sheet);
                     sheetCache.put(selection, currentInput);
-                    model.retrieveStorageSchemes(EntryAddType.addTypeToType(selection), currentInput);
+                    model.retrieveStorageSchemes(selection, currentInput, null);
                 }
 
                 view.setSheet(currentInput, true, false);
@@ -446,7 +447,13 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     Sheet sheet = new Sheet(info.getType(), info);
                     currentInput = new NewBulkInput(info.getType(), sheet);
                     currentInput.setId(info.getId());
-                    model.retrieveStorageSchemes(EntryAddType.addTypeToType(info.getType()), currentInput);
+                    SampleStorage sampleStorage = null;
+                    if (!info.getEntryList().isEmpty()) {
+                        EntryInfo entryInfo = info.getEntryList().get(0);
+                        sampleStorage = entryInfo.getOneSampleStorage();
+                    }
+
+                    model.retrieveStorageSchemes(info.getType(), currentInput, sampleStorage);
                     String name = info.getName();
 
                     // setting name to creation date is none exist

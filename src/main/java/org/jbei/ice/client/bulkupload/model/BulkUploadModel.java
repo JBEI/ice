@@ -12,6 +12,7 @@ import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEventHandler;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.EntryAddType;
@@ -19,6 +20,7 @@ import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.StorageInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -177,22 +179,36 @@ public class BulkUploadModel {
         }.go(eventBus);
     }
 
-    public void retrieveStorageSchemes(final EntryType type, final NewBulkInput bulkInput) {
+    public void retrieveStorageSchemes(final EntryAddType type, final NewBulkInput bulkInput,
+            final SampleStorage sampleStorage) {
 
         bulkInput.setSampleLocation(null);  // initialize
         if (type == null) {
             return;
         }
 
-        SampleLocation cacheLocation = locationCache.get(type);
+        final EntryType entryType = EntryAddType.addTypeToType(type);
+        SampleLocation cacheLocation = locationCache.get(entryType);
         if (cacheLocation != null) {
             bulkInput.setSampleLocation(cacheLocation);
+            if (sampleStorage != null) {
+
+                String locationId = sampleStorage.getSample().getLocationId();
+                for (StorageInfo storageInfo : sampleStorage.getStorageList()) {
+                    if (storageInfo.getType().equalsIgnoreCase("scheme")) {
+                        locationId = storageInfo.getId() + "";
+                        break;
+                    }
+                }
+
+                bulkInput.getSheet().selectSample(type, locationId);
+            }
             return;
         }
 
         service.retrieveStorageSchemes(
                 AppController.sessionId,
-                type,
+                entryType,
                 new AsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
 
                     @Override
@@ -206,8 +222,10 @@ public class BulkUploadModel {
                             return;
 
                         SampleLocation sampleLocation = new SampleLocation(result);
-                        locationCache.put(type, sampleLocation);
+                        locationCache.put(entryType, sampleLocation);
                         bulkInput.setSampleLocation(sampleLocation);
+                        if (sampleStorage != null)
+                            bulkInput.getSheet().selectSample(type, sampleStorage.getSample().getLocationId());
                     }
                 });
     }

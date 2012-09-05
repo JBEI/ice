@@ -155,7 +155,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @throws DAOException
      */
     public Storage save(Storage location) throws DAOException {
-        return (Storage) super.saveOrUpdate(location);
+        return super.saveOrUpdate(location);
     }
 
     /**
@@ -328,6 +328,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
             result.setParent(parent);
             result.setStorageType(template.getStorageType());
             result.setOwnerEmail(parent.getOwnerEmail());
+            result.setUuid(Utils.generateUUID());
             result = save(result);
         }
         return result;

@@ -133,7 +133,6 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
                 if (!info.isHasSample())
                     break;
 
-                ArrayList<SampleStorage> storageList = info.getSampleStorage();
                 SampleStorage sampleStorage = info.getOneSampleStorage();
                 if (sampleStorage.getSample() == null)
                     sampleStorage.setSample(new SampleInfo());

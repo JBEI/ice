@@ -560,6 +560,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
         return this.sampleSelectionWidget.getCurrentLocation();
     }
 
+    public void selectSample(EntryAddType type, String locationId) {
+        presenter.selectSample(type, locationId);
+    }
+
     //
     // inner classes
     //

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 /**
@@ -38,11 +39,21 @@ public abstract class SampleHeaders {
         return this.headers.size();
     }
 
-    public SheetCellData extractValue(Header headerType, EntryInfo info) {
+    public abstract SheetCellData extractValue(Header headerType, EntryInfo info);
+
+    SheetCellData extractCommon(Header headerType, EntryInfo info) {
+
+        if (!info.isHasSample())
+            return null;
+
         switch (headerType) {
-            case SAMPLE_BOX:
+            case SAMPLE_NAME:
+                SampleStorage sampleStorage = info.getOneSampleStorage();
+                String value = sampleStorage.getSample().getLabel();
+                return new SheetCellData(headerType, value, value);
+
             default:
-                return new SheetCellData();
+                return null;
         }
     }
 }

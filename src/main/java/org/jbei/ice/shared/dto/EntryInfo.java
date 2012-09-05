@@ -285,6 +285,7 @@ public class EntryInfo implements IsSerializable {
     public void setSampleMap(ArrayList<SampleStorage> sampleStorage) {
         this.sampleStorage.clear();
         this.sampleStorage.addAll(sampleStorage);
+        setHasSample(!sampleStorage.isEmpty());
     }
 
     public boolean isHasAttachment() {

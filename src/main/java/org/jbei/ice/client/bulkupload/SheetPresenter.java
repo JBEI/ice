@@ -11,6 +11,7 @@ import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.bulkupload.sheet.header.BulkUploadHeaders;
 import org.jbei.ice.client.bulkupload.sheet.header.SampleHeaders;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -164,7 +165,9 @@ public class SheetPresenter {
 
                 // set sample location
                 if (existing.isHasSample()) {
-                    existing.getSampleStorage().get(0).getSample().setLocationId(currentSampleLocationId);
+                    SampleStorage sampleStorage = existing.getOneSampleStorage();
+                    sampleStorage.getSample().setLocationId(currentSampleLocationId);
+                    sampleStorage.getSample().setDepositor(owner);
                 }
 
                 infoList.add(existing);
@@ -237,7 +240,6 @@ public class SheetPresenter {
             i += 1;
         }
     }
-
 
     protected void removeSampleHeaderRows(int row) {
         int fieldSize = getFieldSize();
@@ -346,36 +348,47 @@ public class SheetPresenter {
                 if (SheetPresenter.this.type != addType)
                     return;
 
+                // get selected sample info and retrieve storage list options
                 SampleInfo info = selectionModel.getSelectedObject();
-                ArrayList<String> locationList = view.getSampleSelectionLocation().getListForLocation(
-                        info.getLocationId());
-                locationList.add(0, "Name");
-
-                // add sample cols
-                sampleHeaders = ImportTypeHeaders.getSampleHeaders(type, locationList);
-                if (sampleHeaders == null || sampleHeaders.getHeaders().isEmpty())
-                    return;
-
-                currentSampleLocationId = info.getLocationId();
-                view.createHeaderCells();
-
-                int rowCells = view.getSheetColumnCount(0);
-                int headerCount = getFieldSize();
-                int rowMax = view.getSheetRowCount();
-
-                if (rowCells < headerCount) {
-                    for (int row = 0; row < rowMax; row += 1) {
-                        addSampleHeaderRows(row);
-                    }
-                } else {
-                    // remove
-                    for (int row = 0; row < rowMax; row += 1) {
-                        removeSampleHeaderRows(row);
-                    }
+                if (selectSample(addType, info.getLocation())) {
+                    // scroll everything into view
+                    view.scrollElementToView(0, getFieldSize() - 1);
                 }
-                // scroll everything into view
-                view.scrollElementToView(0, getFieldSize() - 1);
             }
         });
+    }
+
+    public boolean selectSample(final EntryAddType addType, String locationId) {
+        if (SheetPresenter.this.type != addType)
+            return false;
+
+        // get selected sample info and retrieve storage list options
+        ArrayList<String> locationList = view.getSampleSelectionLocation().getListForLocation(locationId);
+        locationList.add(0, "Name");
+
+        // add sample cols
+        sampleHeaders = ImportTypeHeaders.getSampleHeaders(type, locationList);
+        if (sampleHeaders == null || sampleHeaders.getHeaders().isEmpty())
+            return false;
+
+        currentSampleLocationId = locationId;
+        view.createHeaderCells();
+
+        int rowCells = view.getSheetColumnCount(0);
+        int headerCount = getFieldSize();
+        int rowMax = view.getSheetRowCount();
+
+        if (rowCells < headerCount) {
+            for (int row = 0; row < rowMax; row += 1) {
+                addSampleHeaderRows(row);
+            }
+        } else {
+            // remove
+            for (int row = 0; row < rowMax; row += 1) {
+                removeSampleHeaderRows(row);
+            }
+        }
+
+        return true;
     }
 }

@@ -51,7 +51,6 @@ import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.RichTextRenderer;
 import org.jbei.ice.lib.utils.UtilsController;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -1634,22 +1633,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 continue;
             }
 
-            switch (type) {
-                case STRAIN:
-                    sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME);
-                    break;
-                case PLASMID:
-                    sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME);
-                    break;
-                case PART:
-                    sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME);
-                    break;
-                case ARABIDOPSIS:
-                    sampleInfo
-                            .setLabel(PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME);
-                    break;
-            }
-
+            sampleInfo.setLabel(scheme.getName());
             schemeMap.put(sampleInfo, schemeOptions);
         }
 

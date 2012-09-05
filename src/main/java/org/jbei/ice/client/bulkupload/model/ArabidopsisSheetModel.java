@@ -6,8 +6,8 @@ import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.StorageInfo;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedInfo> {
@@ -53,16 +53,30 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
                 break;
 
             case SAMPLE_DRAWER:
-                GWT.log("Seed: Sample Drawer");
                 SampleStorage sampleStorage = info.getOneSampleStorage();
+                if (sampleStorage.getStorageList().isEmpty()) {
+                    sampleStorage.getStorageList().add(new StorageInfo());
+                }
+
+                sampleStorage.getStorageList().get(0).setDisplay(value);
                 break;
 
             case SAMPLE_BOX:
-                GWT.log("Seed: Sample Box");
+                sampleStorage = info.getOneSampleStorage();
+                if (sampleStorage.getStorageList().size() < 2) {
+                    sampleStorage.getStorageList().add(new StorageInfo());
+                }
+
+                sampleStorage.getStorageList().get(1).setDisplay(value);
                 break;
 
             case SAMPLE_TUBE:
-                GWT.log("Seed: Sample Tube");
+                sampleStorage = info.getOneSampleStorage();
+                if (sampleStorage.getStorageList().size() < 3) {
+                    sampleStorage.getStorageList().add(new StorageInfo());
+                }
+
+                sampleStorage.getStorageList().get(2).setDisplay(value);
                 break;
 
             // TODO : abrc

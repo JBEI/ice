@@ -154,13 +154,13 @@ public class EntryToInfoFactory {
         return info;
     }
 
-    private static StorageInfo getStorageInfo(Storage storage) {
+    public static StorageInfo getStorageInfo(Storage storage) {
         StorageInfo info = new StorageInfo();
         if (storage == null)
             return info;
 
         //        info.setChildCount(storage.getChildren().size());
-        info.setDisplay(storage.toString());
+        info.setDisplay(storage.getIndex());
         info.setId(storage.getId());
         info.setType(storage.getStorageType().name());
 
