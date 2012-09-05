@@ -40,8 +40,4 @@ public class SampleStorage implements IsSerializable {
     public LinkedList<StorageInfo> getStorageList() {
         return storageList;
     }
-
-    public void setStorageList(LinkedList<StorageInfo> list) {
-        this.storageList = list;
-    }
 }

@@ -20,7 +20,6 @@ import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -191,16 +190,8 @@ public class BulkUploadModel {
         SampleLocation cacheLocation = locationCache.get(entryType);
         if (cacheLocation != null) {
             bulkInput.setSampleLocation(cacheLocation);
-            if (sampleStorage != null) {
-
+            if (sampleStorage != null && sampleStorage.getSample() != null) {
                 String locationId = sampleStorage.getSample().getLocationId();
-                for (StorageInfo storageInfo : sampleStorage.getStorageList()) {
-                    if (storageInfo.getType().equalsIgnoreCase("scheme")) {
-                        locationId = storageInfo.getId() + "";
-                        break;
-                    }
-                }
-
                 bulkInput.getSheet().selectSample(type, locationId);
             }
             return;
@@ -224,8 +215,10 @@ public class BulkUploadModel {
                         SampleLocation sampleLocation = new SampleLocation(result);
                         locationCache.put(entryType, sampleLocation);
                         bulkInput.setSampleLocation(sampleLocation);
-                        if (sampleStorage != null)
-                            bulkInput.getSheet().selectSample(type, sampleStorage.getSample().getLocationId());
+                        if (sampleStorage != null && sampleStorage.getSample() != null) {
+                            String locationId = sampleStorage.getSample().getLocationId();
+                            bulkInput.getSheet().selectSample(type, locationId);
+                        }
                     }
                 });
     }

@@ -55,7 +55,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
         // selection model handlers
         setMenuSelectionModel();
-        setCreateSelectionModel();
+        setCreateBulkUploadSelectionModel();
 
         // toggle menu
         addToggleMenuHandler();
@@ -142,7 +142,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 new MenuSelectionHandler(view.getPendingMenuModel(), true));
     }
 
-    private void setCreateSelectionModel() {
+    private void setCreateBulkUploadSelectionModel() {
         final SingleSelectionModel<EntryAddType> createSelection = view.getImportCreateModel();
         createSelection.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 

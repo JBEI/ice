@@ -350,7 +350,7 @@ public class SheetPresenter {
 
                 // get selected sample info and retrieve storage list options
                 SampleInfo info = selectionModel.getSelectedObject();
-                if (selectSample(addType, info.getLocation())) {
+                if (selectSample(addType, info.getLocationId())) {
                     // scroll everything into view
                     view.scrollElementToView(0, getFieldSize() - 1);
                 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -559,26 +560,32 @@ public class BulkUploadController {
         // create new samples
         SampleInfo sampleInfo = sampleStorage.getSample();
         LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
-        Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(),
-                                                      sampleInfo.getNotes());
+        Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(), sampleInfo.getNotes());
         sample.setEntry(entry);
 
         if (locations == null || locations.isEmpty()) {
             throw new ControllerException("Attempting to create sample without a location");
         }
 
-        // create sample and location
-        String[] labels = new String[locations.size()];
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < labels.length; i++) {
-            labels[i] = locations.get(i).getDisplay();
-            sb.append(labels[i]);
-            if (i - 1 < labels.length)
-                sb.append("/");
-        }
-
         try {
             Storage scheme = storageController.get(Long.parseLong(sampleInfo.getLocationId()), false);
+            // create sample and location
+            List<Storage> schemes = scheme.getSchemes();
+            if (schemes.size() != locations.size())
+                throw new ControllerException("Locations and schemes do not match up");
+
+            String[] labels = new String[locations.size()];
+            for (StorageInfo storageInfo : locations) {
+                int i = 0;
+                for (Storage storage : schemes) {
+                    if (storageInfo.getType().equalsIgnoreCase(storage.getStorageType().name())) {
+                        labels[i] = storageInfo.getDisplay();
+                        break;
+                    }
+                    i += 1;
+                }
+            }
+
             Storage storage = storageController.getLocation(scheme, labels);
             storage = storageController.update(storage);
             sample.setStorage(storage);

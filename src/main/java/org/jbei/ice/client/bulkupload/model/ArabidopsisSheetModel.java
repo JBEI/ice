@@ -52,31 +52,49 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
                 info.setSentToAbrc(BooleanSheetCell.getBooleanValue(value));
                 break;
 
-            case SAMPLE_DRAWER:
+            case SAMPLE_DRAWER: {
                 SampleStorage sampleStorage = info.getOneSampleStorage();
-                if (sampleStorage.getStorageList().isEmpty()) {
-                    sampleStorage.getStorageList().add(new StorageInfo());
+                for (StorageInfo storageInfo : sampleStorage.getStorageList()) {
+                    if (storageInfo.getType().equalsIgnoreCase("shelf")) {
+                        storageInfo.setDisplay(value);
+                        return info;
+                    }
+                }
+                StorageInfo storageInfo = new StorageInfo();
+                storageInfo.setType("shelf");
+                storageInfo.setDisplay(value);
+                sampleStorage.getStorageList().add(storageInfo);
+                break;
+            }
+
+            case SAMPLE_BOX: {
+                SampleStorage sampleStorage = info.getOneSampleStorage();
+                for (StorageInfo storageInfo : sampleStorage.getStorageList()) {
+                    if (storageInfo.getType().equalsIgnoreCase("box_unindexed")) {
+                        storageInfo.setDisplay(value);
+                        return info;
+                    }
                 }
 
-                sampleStorage.getStorageList().get(0).setDisplay(value);
+                StorageInfo storageInfo = new StorageInfo();
+                storageInfo.setType("box_unindexed");
+                storageInfo.setDisplay(value);
+                sampleStorage.getStorageList().add(storageInfo);
                 break;
-
-            case SAMPLE_BOX:
-                sampleStorage = info.getOneSampleStorage();
-                if (sampleStorage.getStorageList().size() < 2) {
-                    sampleStorage.getStorageList().add(new StorageInfo());
-                }
-
-                sampleStorage.getStorageList().get(1).setDisplay(value);
-                break;
+            }
 
             case SAMPLE_TUBE:
-                sampleStorage = info.getOneSampleStorage();
-                if (sampleStorage.getStorageList().size() < 3) {
-                    sampleStorage.getStorageList().add(new StorageInfo());
+                SampleStorage sampleStorage = info.getOneSampleStorage();
+                for (StorageInfo storageInfo : sampleStorage.getStorageList()) {
+                    if (storageInfo.getType().equalsIgnoreCase("tube")) {
+                        storageInfo.setDisplay(value);
+                        return info;
+                    }
                 }
-
-                sampleStorage.getStorageList().get(2).setDisplay(value);
+                StorageInfo storageInfo = new StorageInfo();
+                storageInfo.setType("tube");
+                storageInfo.setDisplay(value);
+                sampleStorage.getStorageList().add(storageInfo);
                 break;
 
             // TODO : abrc
