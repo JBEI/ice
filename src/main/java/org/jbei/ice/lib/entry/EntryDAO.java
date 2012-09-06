@@ -265,8 +265,15 @@ class EntryDAO extends HibernateRepository<Entry> {
                               .add(Restrictions.eq("ownerEmail", account.getEmail()))
                               .setProjection(Projections.id());
             results.addAll(criteria.list());
+
+            // remove drafts
+            criteria = session.createCriteria(Entry.class)
+                              .add(Restrictions.eq("visibility", new Integer(Visibility.DRAFT.getValue())))
+                              .setProjection(Projections.id());
+            List remove = criteria.list();
+            results.removeAll(remove);
+
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve number of visible entries!", e);
         } finally {
             closeSession(session);
