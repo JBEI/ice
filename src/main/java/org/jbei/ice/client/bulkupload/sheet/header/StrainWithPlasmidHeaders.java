@@ -36,11 +36,6 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                 AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
         headers.add(new CellColumnHeader(Header.STRAIN_PARENTAL_STRAIN));
         headers.add(new CellColumnHeader(Header.STRAIN_GEN_PHEN));
-        headers.add(new CellColumnHeader(
-                Header.STRAIN_PLASMIDS,
-                false,
-                new MultiSuggestSheetCell(AppController.autoCompleteData.get(AutoCompleteField.PLASMID_NAME), true),
-                null));
         headers.add(new CellColumnHeader(Header.STRAIN_KEYWORDS));
         headers.add(new CellColumnHeader(Header.STRAIN_SUMMARY, true));
         headers.add(new CellColumnHeader(Header.STRAIN_NOTES));
@@ -90,10 +85,6 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
 
             case STRAIN_GEN_PHEN:
                 value = strain.getGenotypePhenotype();
-                break;
-
-            case STRAIN_PLASMIDS:
-                value = strain.getPlasmids();
                 break;
 
             // plasmid specific

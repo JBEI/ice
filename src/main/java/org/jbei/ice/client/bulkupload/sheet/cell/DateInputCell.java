@@ -4,6 +4,9 @@ import org.jbei.ice.client.bulkupload.model.SheetCellData;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -30,6 +33,17 @@ public class DateInputCell extends SheetCell {
             public void onBlur(BlurEvent event) {
                 String s = setDataForRow(currentRow);
                 dateBox.getTextBox().setText(s);
+            }
+        });
+
+        dateBox.getTextBox().addKeyDownHandler(new KeyDownHandler() {
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                int code = event.getNativeKeyCode();
+                if (KeyCodes.KEY_TAB != code && KeyCodes.KEY_ENTER != code)
+                    return;
+
+                dateBox.getTextBox().setFocus(false);
             }
         });
     }

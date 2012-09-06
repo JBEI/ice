@@ -10,22 +10,21 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * A wrapper for sample info with a bunch of storage data
- * 
+ * <p/>
  * Backend model of using a storage hierarchy makes things difficult to work with
- * 
+ *
  * @author Hector Plahar
  */
 public class SampleStorage implements IsSerializable {
 
     private SampleInfo sample;
-    private LinkedList<StorageInfo> storageList;
+    private LinkedList<StorageInfo> storageList = new LinkedList<StorageInfo>();
 
     public SampleStorage() {
     }
 
     public SampleStorage(SampleInfo sample, List<StorageInfo> storage) {
         this.sample = sample;
-        this.storageList = new LinkedList<StorageInfo>();
         if (storage != null)
             this.storageList.addAll(storage);
     }
@@ -40,9 +39,5 @@ public class SampleStorage implements IsSerializable {
 
     public LinkedList<StorageInfo> getStorageList() {
         return storageList;
-    }
-
-    public void setStorageList(LinkedList<StorageInfo> list) {
-        this.storageList = list;
     }
 }

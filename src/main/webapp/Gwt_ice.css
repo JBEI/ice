@@ -103,7 +103,7 @@ body {
     white-space: nowrap;
 }
 
-.bg_f1 {
+.bg_f8 {
     background-color: #f8f8f0;
 }
 
@@ -1351,6 +1351,10 @@ a:hover {
     background-color: #BBBBBB;
 }
 
+.bg_white {
+    background-color: #fcfcfc;
+}
+
 .popup {
     border: 0;
 }
@@ -1361,22 +1365,6 @@ a:hover {
 
 .cursor_default {
     cursor: default;
-}
-
-/* TABS */
-/* the panel itself */
-.gwt-TabLayoutPanel {
-
-}
-
-/* the tab bar element */
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabs {
-
-}
-
-/* applied to all child content widgets */
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
-
 }
 
 /* an individual tab */
@@ -1553,6 +1541,14 @@ td.datePickerMonth {
     border-left: 1px solid #F1F1F1;
     font-style: italic;
     background-color: #f4f3e9;
+}
+
+.bulk_upload_creator {
+    padding-right: 6px;
+    border: 0;
+    outline: none;
+    display: inline;
+    cursor: pointer;
 }
 
 .add_new_entry_main_content_header {

@@ -3,9 +3,11 @@ package org.jbei.ice.client.bulkupload.model;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
 /**
@@ -123,6 +125,19 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
                 attachmentInfo.setFileId(datum.getId());
                 attachmentInfoList.add(attachmentInfo);
                 info.setHasAttachment(true);
+                break;
+
+            // deal with samples
+            case SAMPLE_NAME:
+                info.setHasSample(!value.trim().isEmpty());
+                if (!info.isHasSample())
+                    break;
+
+                SampleStorage sampleStorage = info.getOneSampleStorage();
+                if (sampleStorage.getSample() == null)
+                    sampleStorage.setSample(new SampleInfo());
+
+                sampleStorage.getSample().setLabel(value);
                 break;
         }
 

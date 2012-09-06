@@ -19,9 +19,12 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Menu selection drop down used when users clicks on "select type"
+ */
 public class SelectTypeMenu implements IsWidget {
-    interface Style extends CellList.Style {
 
+    interface Style extends CellList.Style {
         String subMenuCreateNew();
     }
 
@@ -40,7 +43,6 @@ public class SelectTypeMenu implements IsWidget {
 
     private static final String LABEL = "Select Type";
     private final Button createEntry;
-    private final CellList<EntryAddType> options;
     private final SingleSelectionModel<EntryAddType> optionSelection;
 
     public SelectTypeMenu() {
@@ -49,7 +51,7 @@ public class SelectTypeMenu implements IsWidget {
         createEntry.setStyleName(ExportAsResource.INSTANCE.cellListStyle().subMenuCreateNew());
 
         // renderer for options list
-        options = new CellList<EntryAddType>(new AbstractCell<EntryAddType>() {
+        CellList<EntryAddType> options = new CellList<EntryAddType>(new AbstractCell<EntryAddType>() {
 
             @Override
             public void render(Context context, EntryAddType type, SafeHtmlBuilder sb) {
@@ -59,8 +61,7 @@ public class SelectTypeMenu implements IsWidget {
 
         options.setRowData(Arrays.asList(EntryAddType.values()));
 
-        final PopupHandler clickHandler = new PopupHandler(options, createEntry.getElement(), 0, 0,
-                                                           false);
+        final PopupHandler clickHandler = new PopupHandler(options, createEntry.getElement(), 1, 0, false);
 
         createEntry.addClickHandler(clickHandler);
         optionSelection = new SingleSelectionModel<EntryAddType>();

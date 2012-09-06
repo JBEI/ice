@@ -1,5 +1,7 @@
 package org.jbei.ice.shared;
 
+import org.jbei.ice.shared.dto.EntryType;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum EntryAddType implements IsSerializable {
@@ -29,6 +31,15 @@ public enum EntryAddType implements IsSerializable {
             if (str.equalsIgnoreCase(type.toString()))
                 return type;
         }
+        return null;
+    }
+
+    public static EntryType addTypeToType(EntryAddType type) {
+        for (EntryType entryType : EntryType.values()) {
+            if (type.name().equals(entryType.name()))
+                return entryType;
+        }
+
         return null;
     }
 

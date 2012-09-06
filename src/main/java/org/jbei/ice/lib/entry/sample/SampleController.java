@@ -20,7 +20,7 @@ import org.jbei.ice.shared.ColumnField;
 
 /**
  * ABI to manipulate {@link Sample}s.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 public class SampleController {
@@ -38,46 +38,32 @@ public class SampleController {
      * Create a {@link Sample} object.
      * <p/>
      * Generates the UUID and the time stamps.
-     * 
-     * @param label
-     * @param depositor
-     * @param notes
+     *
+     * @param label     display label for sample
+     * @param depositor name of the depositor
+     * @param notes     associated notes
      * @return {@link Sample}
      */
     public Sample createSample(String label, String depositor, String notes) {
-        return createSample(label, depositor, notes, Utils.generateUUID(), Calendar.getInstance()
-                .getTime(), null);
-    }
+        String uuid = Utils.generateUUID();
+        Date creationTime = Calendar.getInstance().getTime();
 
-    /**
-     * Create a {@link Sample} object.
-     * 
-     * @param label
-     * @param depositor
-     * @param notes
-     * @param uuid
-     * @param creationTime
-     * @param modificationTime
-     * @return {@link Sample}
-     */
-    public Sample createSample(String label, String depositor, String notes, String uuid,
-            Date creationTime, Date modificationTime) {
         Sample sample = new Sample();
-
         sample.setLabel(label);
         sample.setDepositor(depositor);
         sample.setNotes(notes);
         sample.setUuid(uuid);
         sample.setCreationTime(creationTime);
-        sample.setModificationTime(modificationTime);
-
+        sample.setModificationTime(null);
         return sample;
     }
 
     /**
-     * Checks if the user has write permission of the {@link Sample}.
-     * 
-     * @param sample
+     * Checks if the user has write permission of the {@link Sample}. This is based on the entry that is associated
+     * with the sample
+     *
+     * @param account Account of user
+     * @param sample  sample being checked
      * @return True if user has write permission.
      * @throws ControllerException
      */
@@ -91,7 +77,7 @@ public class SampleController {
 
     /**
      * Save the {@link Sample} into the database, then rebuilds the search index.
-     * 
+     *
      * @param sample
      * @return Saved sample.
      * @throws ControllerException
@@ -104,7 +90,8 @@ public class SampleController {
 
     /**
      * Save the {@link Sample} into the database, with the option to rebuild the search index.
-     * 
+     *
+     * @param account              user saving sample.
      * @param sample
      * @param scheduleIndexRebuild
      * @return saved sample.
@@ -135,7 +122,7 @@ public class SampleController {
     /**
      * Delete the {@link Sample} in the database, then rebuild the search index. Also deletes the
      * associated {@link Storage}, if it is a tube.
-     * 
+     *
      * @param sample
      * @throws ControllerException
      * @throws PermissionException
@@ -148,7 +135,7 @@ public class SampleController {
     /**
      * Delete the {@link Sample} in the database, with the option to rebuild the search index. Also
      * deletes the associated {@link Storage}, if it is a tube.
-     * 
+     *
      * @param sample
      * @param scheduleIndexRebuild
      * @throws ControllerException
@@ -178,28 +165,8 @@ public class SampleController {
     }
 
     /**
-     * Retrieve the number of {@link Sample}s associated with the {@link Entry}.
-     * 
-     * @param entry
-     * @return Number of samples associated with the entry.
-     * @throws ControllerException
-     */
-    public long getNumberOfSamples(Entry entry) throws ControllerException {
-        long result = 0;
-        try {
-            ArrayList<Sample> samples = dao.getSamplesByEntry(entry);
-
-            result = (samples == null) ? 0 : samples.size();
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return result;
-    }
-
-    /**
      * Retrieve the {@link Sample}s associated with the {@link Entry}.
-     * 
+     *
      * @param entry
      * @return ArrayList of {@link Sample}s.
      * @throws ControllerException
@@ -217,30 +184,8 @@ public class SampleController {
     }
 
     /**
-     * Retrieve the {@link Sample}s associated with the given depositor's email.
-     * 
-     * @param depositorEmail
-     * @param offset
-     * @param limit
-     * @return ArrayList of {@link Sample}s.
-     * @throws ControllerException
-     */
-    public ArrayList<Sample> getSamplesByDepositor(String depositorEmail, int offset, int limit)
-            throws ControllerException {
-        ArrayList<Sample> samples = null;
-
-        try {
-            samples = dao.getSamplesByDepositor(depositorEmail, offset, limit);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return samples;
-    }
-
-    /**
      * Retrieve the {@link Sample}s associated with the given {@link Storage}.
-     * 
+     *
      * @param storage
      * @return ArrayList of {@link Sample}s.
      * @throws ControllerException
@@ -254,22 +199,6 @@ public class SampleController {
         }
     }
 
-    /**
-     * Retrieve the number of {@link Sample}s by the given depositor's email.
-     * 
-     * @param depositorEmail
-     * @return Number of {@link Sample}s.
-     * @throws ControllerException
-     */
-    public int getNumberOfSamplesByDepositor(String depositorEmail) throws ControllerException {
-
-        try {
-            return dao.getSampleCountBy(depositorEmail);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
     public LinkedList<Long> retrieveSamplesByDepositor(String email, ColumnField field, boolean asc)
             throws ControllerException {
 
@@ -277,11 +206,11 @@ public class SampleController {
         try {
             switch (field) {
 
-            default:
-            case CREATED:
-                results = dao.retrieveSamplesByDepositorSortByCreated(email, asc);
-                //                getSamplePermissionVerifier().hasReadPermissions(model, account) // TODO
-                break;
+                default:
+                case CREATED:
+                    results = dao.retrieveSamplesByDepositorSortByCreated(email, asc);
+                    //                getSamplePermissionVerifier().hasReadPermissions(model, account) // TODO
+                    break;
             }
         } catch (DAOException e) {
             throw new ControllerException(e);

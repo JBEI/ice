@@ -13,20 +13,20 @@ public class SampleLocation {
         this.sampleLocation = sampleLocation;
     }
 
-    public HashMap<SampleInfo, ArrayList<String>> getSampleMap() {
-        return sampleLocation;
-    }
-
     public ArrayList<SampleInfo> getLocations() {
         return new ArrayList<SampleInfo>(this.sampleLocation.keySet());
     }
 
     public ArrayList<String> getListForLocation(String locationId) {
+        ArrayList<String> list = new ArrayList<String>();
+
         for (SampleInfo info : sampleLocation.keySet()) {
-            if (locationId.equalsIgnoreCase(info.getLocationId()))
-                return sampleLocation.get(info);
+            if (locationId.equalsIgnoreCase(info.getLocationId())) {
+                list.addAll(sampleLocation.get(info));
+                break;
+            }
         }
 
-        return null;
+        return list;
     }
 }

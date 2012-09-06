@@ -1,6 +1,7 @@
 package org.jbei.ice.client.bulkupload.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
@@ -10,10 +11,15 @@ import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEvent;
 import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEventHandler;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
+import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -22,10 +28,12 @@ public class BulkUploadModel {
 
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
+    private final HashMap<EntryType, SampleLocation> locationCache;
 
     public BulkUploadModel(RegistryServiceAsync service, HandlerManager eventBus) {
         this.service = service;
         this.eventBus = eventBus;
+        locationCache = new HashMap<EntryType, SampleLocation>();
     }
 
     public void retrieveDraftMenuData(final SavedDraftsEventHandler handler) {
@@ -168,5 +176,50 @@ public class BulkUploadModel {
                 handler.onDataRetrieval(new SavedDraftsEvent(result));
             }
         }.go(eventBus);
+    }
+
+    public void retrieveStorageSchemes(final EntryAddType type, final NewBulkInput bulkInput,
+            final SampleStorage sampleStorage) {
+
+        bulkInput.setSampleLocation(null);  // initialize
+        if (type == null) {
+            return;
+        }
+
+        final EntryType entryType = EntryAddType.addTypeToType(type);
+        SampleLocation cacheLocation = locationCache.get(entryType);
+        if (cacheLocation != null) {
+            bulkInput.setSampleLocation(cacheLocation);
+            if (sampleStorage != null && sampleStorage.getSample() != null) {
+                String locationId = sampleStorage.getSample().getLocationId();
+                bulkInput.getSheet().selectSample(type, locationId);
+            }
+            return;
+        }
+
+        service.retrieveStorageSchemes(
+                AppController.sessionId,
+                entryType,
+                new AsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        eventBus.fireEvent(new FeedbackEvent(true, "Failed to retrieve the sample location data."));
+                    }
+
+                    @Override
+                    public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
+                        if (result == null)
+                            return;
+
+                        SampleLocation sampleLocation = new SampleLocation(result);
+                        locationCache.put(entryType, sampleLocation);
+                        bulkInput.setSampleLocation(sampleLocation);
+                        if (sampleStorage != null && sampleStorage.getSample() != null) {
+                            String locationId = sampleStorage.getSample().getLocationId();
+                            bulkInput.getSheet().selectSample(type, locationId);
+                        }
+                    }
+                });
     }
 }

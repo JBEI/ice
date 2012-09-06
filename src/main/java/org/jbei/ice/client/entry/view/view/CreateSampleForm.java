@@ -41,12 +41,13 @@ public class CreateSampleForm extends Composite {
     private HandlerRegistration saveHandlerRegistration;
     private final SampleLocation sampleLocation;
     private final ListBox locationOptions;
-    private final ArrayList<TextBox> sampleLocationScheme; // list of boxes representing scheme awaiting user input for each selection
+    private final ArrayList<TextBox> sampleLocationScheme; // list of boxes representing scheme awaiting user input
+    // for each selection
 
     public CreateSampleForm(SampleLocation options) {
         table = new FlexTable();
         table.setWidth("100%");
-        table.setStyleName("bg_f1");
+        table.setStyleName("bg_f8");
         table.addStyleName("font-80em");
         table.addStyleName("pad-6");
         initWidget(table);
@@ -136,7 +137,7 @@ public class CreateSampleForm extends Composite {
 
     /**
      * populates {@link SampleStorage}
-     * 
+     *
      * @return null if sample does not pass validation else the populated object
      */
     public SampleStorage populateSample() {

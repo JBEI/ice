@@ -154,10 +154,6 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
             case STRAIN_GEN_PHEN:
                 strain.setGenotypePhenotype(value);
                 break;
-
-            case STRAIN_PLASMIDS:
-                strain.setPlasmids(value);
-                break;
         }
     }
 
