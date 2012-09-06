@@ -39,45 +39,31 @@ public class SampleController {
      * <p/>
      * Generates the UUID and the time stamps.
      *
-     * @param label
-     * @param depositor
-     * @param notes
+     * @param label     display label for sample
+     * @param depositor name of the depositor
+     * @param notes     associated notes
      * @return {@link Sample}
      */
     public Sample createSample(String label, String depositor, String notes) {
-        return createSample(label, depositor, notes, Utils.generateUUID(), Calendar.getInstance()
-                                                                                   .getTime(), null);
-    }
+        String uuid = Utils.generateUUID();
+        Date creationTime = Calendar.getInstance().getTime();
 
-    /**
-     * Create a {@link Sample} object.
-     *
-     * @param label
-     * @param depositor
-     * @param notes
-     * @param uuid
-     * @param creationTime
-     * @param modificationTime
-     * @return {@link Sample}
-     */
-    public Sample createSample(String label, String depositor, String notes, String uuid,
-            Date creationTime, Date modificationTime) {
         Sample sample = new Sample();
-
         sample.setLabel(label);
         sample.setDepositor(depositor);
         sample.setNotes(notes);
         sample.setUuid(uuid);
         sample.setCreationTime(creationTime);
-        sample.setModificationTime(modificationTime);
-
+        sample.setModificationTime(null);
         return sample;
     }
 
     /**
-     * Checks if the user has write permission of the {@link Sample}.
+     * Checks if the user has write permission of the {@link Sample}. This is based on the entry that is associated
+     * with the sample
      *
-     * @param sample
+     * @param account Account of user
+     * @param sample  sample being checked
      * @return True if user has write permission.
      * @throws ControllerException
      */
@@ -105,6 +91,7 @@ public class SampleController {
     /**
      * Save the {@link Sample} into the database, with the option to rebuild the search index.
      *
+     * @param account              user saving sample.
      * @param sample
      * @param scheduleIndexRebuild
      * @return saved sample.
