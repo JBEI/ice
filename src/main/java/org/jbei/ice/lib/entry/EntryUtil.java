@@ -235,12 +235,16 @@ public class EntryUtil {
                 }
 
                 if (partNumber != null) {
-                    Entry entry = entryController.getByPartNumber(account, partNumber);
+                    try {
+                        Entry entry = entryController.getByPartNumber(account, partNumber);
 
-                    if (entry != null) {
-                        jbeiLinks.add(new IceLink(partNumber, descriptive));
-                        starts.add(basicWikiLinkMatcher.start());
-                        ends.add(basicWikiLinkMatcher.end());
+                        if (entry != null) {
+                            jbeiLinks.add(new IceLink(partNumber, descriptive));
+                            starts.add(basicWikiLinkMatcher.start());
+                            ends.add(basicWikiLinkMatcher.end());
+                        }
+                    } catch (PermissionException pe) {
+                        Logger.warn(account.getEmail() + ": No permissions for part_number " + partNumber);
                     }
                 }
             }

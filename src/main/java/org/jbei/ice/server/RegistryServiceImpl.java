@@ -18,6 +18,7 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryUtil;
@@ -106,8 +107,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return info;
         } catch (ControllerException e) {
             Logger.error(e);
-        } catch (Exception e) {
-            Logger.error(e);
+        } catch (InvalidCredentialsException e) {
+            Logger.warn("Invalid credentials provided by " + name);
         }
         return null;
     }

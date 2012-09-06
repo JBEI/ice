@@ -354,7 +354,7 @@ public class AccountController {
      * @throws ControllerException
      */
     public AccountInfo authenticate(String login, String password)
-            throws InvalidCredentialsException, ControllerException, ManagerException {
+            throws InvalidCredentialsException, ControllerException {
         SessionData sessionData = authenticate(login, password, "");
         if (sessionData == null)
             return null;
