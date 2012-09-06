@@ -43,7 +43,7 @@ public class ArabidopsisSeed extends Entry {
      * @author Timothy Ham
      */
     public enum Generation {
-        M0, M1, M2, T0, T1, T2, T3, T4, T5
+        NULL, M0, M1, M2, T0, T1, T2, T3, T4, T5
     }
 
     /**
@@ -52,7 +52,7 @@ public class ArabidopsisSeed extends Entry {
      * @author Timothy Ham
      */
     public enum PlantType {
-        EMS, OVER_EXPRESSION, RNAI, REPORTER, T_DNA, OTHER
+        NULL, EMS, OVER_EXPRESSION, RNAI, REPORTER, T_DNA, OTHER
     }
 
     @Column(name = "homozygosity", nullable = false)

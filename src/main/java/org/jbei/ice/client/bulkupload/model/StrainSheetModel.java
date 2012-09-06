@@ -32,6 +32,8 @@ public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
             case PLASMIDS:
                 strain.setPlasmids(value);
                 break;
+
+            // todo : samples
         }
 
         return strain;

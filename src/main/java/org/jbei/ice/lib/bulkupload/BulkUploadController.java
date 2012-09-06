@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -15,10 +18,14 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.StorageController;
+import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -30,7 +37,9 @@ import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.Visibility;
 
 import org.apache.commons.io.FileUtils;
@@ -48,6 +57,8 @@ public class BulkUploadController {
     private AttachmentController attachmentController;
     private SequenceController sequenceController;
     private GroupController groupController;
+    private SampleController sampleController;
+    private StorageController storageController;
 
     /**
      * Initialises dao and controller dependencies. These need be injected
@@ -59,6 +70,8 @@ public class BulkUploadController {
         attachmentController = new AttachmentController();
         sequenceController = new SequenceController();
         groupController = new GroupController();
+        sampleController = new SampleController();
+        storageController = new StorageController();
     }
 
     /**
@@ -154,13 +167,43 @@ public class BulkUploadController {
 
         // convert bulk import db object to data transfer object
         BulkUploadInfo draftInfo = BulkUploadUtil.modelToInfo(draft);
-
         EntryAddType type = EntryAddType.stringToType(draft.getImportType());
 
         // retrieve the entries associated with the bulk import
         for (Entry entry : draft.getContents()) {
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
             boolean hasSequence = sequenceController.getByEntry(entry) != null;
+            ArrayList<Sample> samples = sampleController.getSamples(entry);
+            SampleStorage sampleStorage = null;
+
+            // TODO : assume there will be only one sample
+            if (!samples.isEmpty()) {
+                Sample sample = samples.get(0);
+                sampleStorage = new SampleStorage();
+
+                // convert sample to info
+                SampleInfo sampleInfo = new SampleInfo();
+                sampleInfo.setCreationTime(sample.getCreationTime());
+                sampleInfo.setLabel(sample.getLabel());
+                sampleInfo.setNotes(sample.getNotes());
+                sampleInfo.setDepositor(sample.getDepositor());
+                sampleStorage.setSample(sampleInfo);
+
+                // convert sample to info
+                Storage storage = sample.getStorage();
+
+                while (storage != null) {
+
+                    if (storage.getStorageType() == Storage.StorageType.SCHEME) {
+                        sampleInfo.setLocationId(storage.getId() + "");
+                        sampleInfo.setLocation(storage.getName());
+                        break;
+                    }
+
+                    sampleStorage.getStorageList().add(EntryToInfoFactory.getStorageInfo(storage));
+                    storage = storage.getParent();
+                }
+            }
 
             // convert to info object (no samples or trace sequences since bulk import does not have the ui for it yet)
             EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, null, null, hasSequence);
@@ -178,8 +221,14 @@ public class BulkUploadController {
                 }
             }
 
-            if (info != null)
+            if (info != null) {
+                if (sampleStorage != null) {
+                    ArrayList<SampleStorage> sampleStorageArrayList = new ArrayList<SampleStorage>();
+                    sampleStorageArrayList.add(sampleStorage);
+                    info.setSampleMap(sampleStorageArrayList);
+                }
                 draftInfo.getEntryList().add(info);
+            }
         }
 
         return draftInfo;
@@ -452,8 +501,7 @@ public class BulkUploadController {
         }
     }
 
-    protected void saveAttachments(Account account,
-            ArrayList<AttachmentInfo> attachmentInfoArrayList, Entry entry)
+    protected void saveAttachments(Account account, ArrayList<AttachmentInfo> attachmentInfoArrayList, Entry entry)
             throws ControllerException {
 
         if (attachmentInfoArrayList == null)
@@ -490,6 +538,62 @@ public class BulkUploadController {
             } catch (PermissionException e) {
                 Logger.error(e);
             }
+        }
+    }
+
+    protected void saveSamples(Account account, SampleStorage sampleStorage, Entry entry) throws ControllerException {
+        if (sampleStorage == null || sampleStorage.getSample() == null)
+            return;
+
+        // check is there is an existing sample(s) and delete
+        ArrayList<Sample> samples = sampleController.getSamples(entry);
+        try {
+            if (samples != null) {
+                for (Sample sample : samples)
+                    sampleController.deleteSample(account, sample);   // TODO : does this delete locations (storage)
+            }
+        } catch (PermissionException pe) {
+            Logger.error(pe);
+            return;
+        }
+
+        // create new samples
+        SampleInfo sampleInfo = sampleStorage.getSample();
+        LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
+        Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(), sampleInfo.getNotes());
+        sample.setEntry(entry);
+
+        if (locations == null || locations.isEmpty()) {
+            throw new ControllerException("Attempting to create sample without a location");
+        }
+
+        try {
+            Storage scheme = storageController.get(Long.parseLong(sampleInfo.getLocationId()), false);
+            // create sample and location
+            List<Storage> schemes = scheme.getSchemes();
+            if (schemes.size() != locations.size())
+                throw new ControllerException("Locations and schemes do not match up");
+
+            String[] labels = new String[locations.size()];
+            for (StorageInfo storageInfo : locations) {
+                int i = 0;
+                for (Storage storage : schemes) {
+                    if (storageInfo.getType().equalsIgnoreCase(storage.getStorageType().name())) {
+                        labels[i] = storageInfo.getDisplay();
+                        break;
+                    }
+                    i += 1;
+                }
+            }
+
+            Storage storage = storageController.getLocation(scheme, labels);
+            storage = storageController.update(storage);
+            sample.setStorage(storage);
+            sampleController.saveSample(account, sample);
+        } catch (NumberFormatException e) {
+            Logger.error(e);
+        } catch (PermissionException e) {
+            Logger.error(e);
         }
     }
 
@@ -540,6 +644,7 @@ public class BulkUploadController {
                 // update sequence and attachment
                 saveSequence(account, info.getInfo().getSequenceAnalysis(), enclosedEntry);
                 saveAttachments(account, info.getInfo().getAttachments(), enclosedEntry);
+                // no samples for strain with plasmid
             }
         }
 
@@ -550,6 +655,7 @@ public class BulkUploadController {
         // update main entry sequence and attachment
         saveSequence(account, info.getSequenceAnalysis(), entry);
         saveAttachments(account, info.getAttachments(), entry);
+        saveSamples(account, info.getOneSampleStorage(), entry);
 
         EntryInfo convertedInfo = BulkUploadUtil.toEntryInfo(attachmentController,
                                                              sequenceController,

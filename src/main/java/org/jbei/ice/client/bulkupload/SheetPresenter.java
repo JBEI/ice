@@ -9,11 +9,17 @@ import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.ImportTypeHeaders;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.bulkupload.sheet.header.BulkUploadHeaders;
+import org.jbei.ice.client.bulkupload.sheet.header.SampleHeaders;
+import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.SampleInfo;
 
-import com.google.gwt.user.client.Window;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class SheetPresenter {
 
@@ -22,23 +28,33 @@ public class SheetPresenter {
      */
     public static interface View {
 
-        void clear();
+        boolean clear();
 
         void setCellWidgetForCurrentRow(String value, int row, int col, int tabIndex);
 
+        void removeCellForCurrentRow(int row, int col, int count);
+
         int getSheetRowCount();
+
+        int getSheetColumnCount(int row);
 
         void clearErrorCell(int row, int col);
 
         void setErrorCell(int row, int col, String errMsg);
 
         void scrollElementToView(int row, int col);
+
+        SampleLocation getSampleSelectionLocation();
+
+        void createHeaderCells();
     }
 
     private final View view;
     private final EntryAddType type;
     private BulkUploadInfo currentInfo; // used to maintain saved drafts that are loaded
     private final BulkUploadHeaders headers;
+    private SampleHeaders sampleHeaders;
+    private String currentSampleLocationId;
 
     public SheetPresenter(View view, EntryAddType type) {
         this.view = view;
@@ -52,10 +68,23 @@ public class SheetPresenter {
     }
 
     public void reset() {
-        if (Window.confirm("Clear all data?")) {
+        if (view.clear()) {
             this.currentInfo.getEntryList().clear();
-            view.clear();
+            for (CellColumnHeader header : getAllHeaders()) {
+                header.getCell().reset();
+            }
         }
+    }
+
+    // currently goes through each row and cell and checks to cell value
+    public boolean isEmptyRow(int row) {
+
+        for (CellColumnHeader header : getAllHeaders()) {
+            if (header.getCell().getDataForRow(row) != null)
+                return false;
+        }
+
+        return true;
     }
 
     public EntryAddType getType() {
@@ -66,11 +95,15 @@ public class SheetPresenter {
         this.currentInfo = info;
     }
 
-    public BulkUploadHeaders getTypeHeaders() {
-        return headers;
+    public SheetCell getCellForIndex(int newCol) {
+        if (newCol < headers.getHeaderSize())
+            return headers.getHeaderForIndex(newCol).getCell();
+
+        int index = newCol - headers.getHeaderSize();
+        return sampleHeaders.getHeaderForIndex(index).getCell();
     }
 
-    public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner) {
+    public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner, String creator, String creatorEmail) {
 
         int rowCount = view.getSheetRowCount();
         SheetModel<? extends EntryInfo> model = ModelFactory.getModelForType(type);
@@ -93,10 +126,14 @@ public class SheetPresenter {
             boolean rowHasData = false;
 
             // go through headers (column) for data
-            for (CellColumnHeader header : headers.getHeaders()) {
+            for (CellColumnHeader header : getAllHeaders()) {
                 SheetCellData data = header.getCell().getDataForRow(i);
-                if (data == null)
+                if (data == null) {
+                    // clear the data associated with header
+                    data = new SheetCellData(header.getHeaderType(), "", "");
+                    model.setInfoField(data, existing);
                     continue;
+                }
 
                 rowHasData = true;
                 data.setType(header.getHeaderType());
@@ -111,15 +148,26 @@ public class SheetPresenter {
                 if (ownerEmail != null && owner != null) {
                     existing.setOwnerEmail(ownerEmail);
                     existing.setOwner(owner);
-                    existing.setCreator(owner);
-                    existing.setCreatorEmail(ownerEmail);
 
                     if (existing.getInfo() != null) {
                         existing.getInfo().setOwnerEmail(ownerEmail);
                         existing.getInfo().setOwner(owner);
-                        existing.getInfo().setCreator(owner);
-                        existing.getInfo().setCreatorEmail(ownerEmail);
                     }
+                }
+
+                // set creator information
+                existing.setCreator(creator);
+                existing.setCreatorEmail(creatorEmail);
+                if (existing.getInfo() != null) {
+                    existing.getInfo().setCreator(creator);
+                    existing.getInfo().setCreatorEmail(creatorEmail);
+                }
+
+                // set sample location
+                if (existing.isHasSample()) {
+                    SampleStorage sampleStorage = existing.getOneSampleStorage();
+                    sampleStorage.getSample().setLocationId(currentSampleLocationId);
+                    sampleStorage.getSample().setDepositor(owner);
                 }
 
                 infoList.add(existing);
@@ -139,28 +187,69 @@ public class SheetPresenter {
      *         headers for the entry type
      */
     public int getFieldSize() {
+        if (sampleHeaders != null)
+            return headers.getHeaderSize() + sampleHeaders.getHeaderSize();
         return headers.getHeaderSize();
     }
 
     public void addRow(int row) {
-        int index = row; // row includes the headers but this is 0-indexed
+        int headerSize = headers.getHeaderSize();
 
-        int i = 0;
-        for (CellColumnHeader header : getTypeHeaders().getHeaders()) {
-            SheetCellData data = null;
+        for (int i = 0; i < headerSize; i += 1) {
+            String value = "";
 
-            if (currentInfo != null && currentInfo.getCount() > index) {
-                EntryInfo info = currentInfo.getEntryList().get(index);
+            if (currentInfo != null && currentInfo.getCount() > row) {
+                EntryInfo info = currentInfo.getEntryList().get(row);
 
                 // extractor also sets the header data structure
-                data = getTypeHeaders().extractValue(header.getHeaderType(), info);
-                header.getCell().setWidgetValue(index, data);
+                CellColumnHeader header = headers.getHeaderForIndex(i);
+                SheetCellData data = headers.extractValue(header.getHeaderType(), info);
+                header.getCell().setWidgetValue(row, data);
+                if (data != null)
+                    value = data.getValue();
+            }
+            view.setCellWidgetForCurrentRow(value, row, i, headers.getHeaderSize());
+        }
+
+        addSampleHeaderRows(row);
+    }
+
+    public void addSampleHeaderRows(int row) {
+
+        if (sampleHeaders == null)
+            return;
+
+        int i = headers.getHeaderSize();   // starting point
+        for (CellColumnHeader header : sampleHeaders.getHeaders()) {
+            String value = "";
+
+            if (currentInfo != null && currentInfo.getCount() > row) {
+                EntryInfo info = currentInfo.getEntryList().get(row);
+
+                // extractor also sets the header data structure
+                if (info.isHasSample()) {
+                    SheetCellData data = sampleHeaders.extractValue(header.getHeaderType(), info);
+                    header.getCell().setWidgetValue(row, data);
+
+                    if (data != null)
+                        value = data.getValue();
+                }
             }
 
-            String value = data == null ? "" : data.getValue();
-            view.setCellWidgetForCurrentRow(value, row, i, headers.getHeaderSize());
+            view.setCellWidgetForCurrentRow(value, row, i, getFieldSize());
             i += 1;
         }
+    }
+
+    protected void removeSampleHeaderRows(int row) {
+        int fieldSize = getFieldSize();
+        int colCount = view.getSheetColumnCount(row);
+        int toRemove = colCount - fieldSize;
+
+        if (toRemove <= 0)
+            return;
+
+        view.removeCellForCurrentRow(row, fieldSize - 1, toRemove);
     }
 
     /**
@@ -222,7 +311,7 @@ public class SheetPresenter {
      */
     public SheetCell setCellInputFocus(int currentRow, int currentIndex) {
         // get cell for selection and set it to existing
-        SheetCell newSelection = headers.getHeaderForIndex(currentIndex).getCell();
+        SheetCell newSelection = getHeaderForIndex(currentIndex).getCell();
         if (newSelection == null)
             return null;
 
@@ -234,5 +323,72 @@ public class SheetPresenter {
         newSelection.setText(text);
 
         return newSelection;
+    }
+
+    public CellColumnHeader getHeaderForIndex(int index) {
+        return getAllHeaders().get(index);
+    }
+
+    public ArrayList<CellColumnHeader> getAllHeaders() {
+        ArrayList<CellColumnHeader> headers = new ArrayList<CellColumnHeader>();
+        headers.addAll(this.headers.getHeaders());
+
+        if (sampleHeaders != null) {
+            headers.addAll(sampleHeaders.getHeaders());
+        }
+        return headers;
+    }
+
+    public HandlerRegistration setSampleSelectionHandler(final EntryAddType addType,
+            final SingleSelectionModel<SampleInfo> selectionModel) {
+
+        return selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (SheetPresenter.this.type != addType)
+                    return;
+
+                // get selected sample info and retrieve storage list options
+                SampleInfo info = selectionModel.getSelectedObject();
+                if (selectSample(addType, info.getLocationId())) {
+                    // scroll everything into view
+                    view.scrollElementToView(0, getFieldSize() - 1);
+                }
+            }
+        });
+    }
+
+    public boolean selectSample(final EntryAddType addType, String locationId) {
+        if (SheetPresenter.this.type != addType)
+            return false;
+
+        // get selected sample info and retrieve storage list options
+        ArrayList<String> locationList = view.getSampleSelectionLocation().getListForLocation(locationId);
+        locationList.add(0, "Name");
+
+        // add sample cols
+        sampleHeaders = ImportTypeHeaders.getSampleHeaders(type, locationList);
+        if (sampleHeaders == null || sampleHeaders.getHeaders().isEmpty())
+            return false;
+
+        currentSampleLocationId = locationId;
+        view.createHeaderCells();
+
+        int rowCells = view.getSheetColumnCount(0);
+        int headerCount = getFieldSize();
+        int rowMax = view.getSheetRowCount();
+
+        if (rowCells < headerCount) {
+            for (int row = 0; row < rowMax; row += 1) {
+                addSampleHeaderRows(row);
+            }
+        } else {
+            // remove
+            for (int row = 0; row < rowMax; row += 1) {
+                removeSampleHeaderRows(row);
+            }
+        }
+
+        return true;
     }
 }

@@ -2,7 +2,9 @@ package org.jbei.ice.client.bulkupload;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
+import org.jbei.ice.client.bulkupload.widget.CreatorWidget;
 import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
 import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkupload.widget.SavedDraftsMenu;
@@ -45,6 +47,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private HorizontalPanel headerPanel;
     private NewBulkInput sheet;
 
+    private CreatorWidget creator;
+
     @Override
     protected void initComponents() {
         super.initComponents();
@@ -68,6 +72,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         updateDraftInput = new UpdateDraftInput();
 
         selection = new PermissionsSelection();
+        creator = new CreatorWidget(AppController.accountInfo.getFullName(), AppController.accountInfo.getEmail());
     }
 
     @Override
@@ -115,6 +120,22 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
+    public String getCreator() {
+        return this.creator.getCreator();
+    }
+
+    @Override
+    public String getCreatorEmail() {
+        return this.creator.getCreatorEmail();
+    }
+
+    @Override
+    public void setCreatorInformation(String name, String email) {
+        this.creator.setCreator(name);
+        this.creator.setCreatorEmail(email);
+    }
+
+    @Override
     public void setSelectedGroupPermission(GroupInfo groupInfo) {
         selection.setSelected(groupInfo);
     }
@@ -149,7 +170,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                         1,
                         0,
                         "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; "
-                                + "background-color: #f1f1f1\"><p>Select the "
+                                + "background-color: #f1f1f1\"><p>Select the type "
                                 + "of entry you wish to bulk import.</p> <p>Please note that columns"
                                 + " with headers indicated by <span class=\"required\">*</span> "
                                 + "are required. You will not be able to submit the form until you enter a "
@@ -225,10 +246,14 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         mainContent.getFlexCellFormatter().setColSpan(1, 0, index);
 
         HTMLPanel bulkImportHeader = new HTMLPanel(
-                "<span style=\"text-transform: uppercase\" id=\"bulk_import_header_title\"></span>" +
-                        "<span style=\"float:right\" id=\"bulk_import_permission_selection\"></span>");
+                "<span id=\"creator\"></span>" +
+                        "<span style=\"text-transform: uppercase\" id=\"bulk_import_header_title\"></span>" +
+                        "<span style=\"float:right\"><span id=\"bulk_import_permission_selection\"></span> " +
+                        "<span id=\"sample_selection_widget\"></span></span>");
+        bulkImportHeader.add(creator.asWidget(), "creator");
         bulkImportHeader.add(contentHeader, "bulk_import_header_title");
         bulkImportHeader.add(selection, "bulk_import_permission_selection");
+        bulkImportHeader.add(bulkImport.getSampleSelectionWidget(), "sample_selection_widget");
         bulkImportHeader.setStyleName("bulk_import_header");
 
         mainContent.setWidget(2, 0, bulkImportHeader);
@@ -300,14 +325,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     public void updateSavedDraftsMenu(BulkUploadMenuItem item) {
         draftsMenu.updateMenuItem(item);
     }
-
-//    @Override
-//    public void addSavedDraftData(BulkUploadMenuItem item, IDeleteMenuHandler handler) {
-//        draftsMenu.addMenuItem(item, handler);
-//        toggle.setVisible(true);
-//        toggle.setDown(true);
-//        headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_CENTER);
-//    }
 
     @Override
     public void setDraftMenuVisibility(boolean visible, boolean isToggleClick) {

@@ -18,12 +18,8 @@ import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.ui.*;
 
 /**
@@ -254,25 +250,9 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
             sample.setWidget(row, 0, new HTML("&nbsp;"));
             sample.getFlexCellFormatter().setWidth(row, 0, "170px");
             final TextBox shelf = new TextBox();
-            shelf.setText(item);
             shelf.setStyleName("input_box");
-            shelf.addFocusHandler(new FocusHandler() {
+            shelf.getElement().setAttribute("placeholder", item);
 
-                @Override
-                public void onFocus(FocusEvent event) {
-                    if (item.equals(shelf.getText().trim()))
-                        shelf.setText("");
-                }
-            });
-
-            shelf.addBlurHandler(new BlurHandler() {
-
-                @Override
-                public void onBlur(BlurEvent event) {
-                    if ("".equals(shelf.getText().trim()))
-                        shelf.setText(item);
-                }
-            });
             sample.setWidget(row, 1, shelf);
             sampleLocationScheme.add(shelf);
         }
@@ -305,25 +285,8 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
                     sample.setWidget(row, 0, new HTML("&nbsp;"));
                     sample.getFlexCellFormatter().setWidth(row, 0, "170px");
                     final TextBox shelf = new TextBox();
-                    shelf.setText(item);
                     shelf.setStyleName("input_box");
-                    shelf.addFocusHandler(new FocusHandler() {
-
-                        @Override
-                        public void onFocus(FocusEvent event) {
-                            if (item.equals(shelf.getText().trim()))
-                                shelf.setText("");
-                        }
-                    });
-
-                    shelf.addBlurHandler(new BlurHandler() {
-
-                        @Override
-                        public void onBlur(BlurEvent event) {
-                            if ("".equals(shelf.getText().trim()))
-                                shelf.setText(item);
-                        }
-                    });
+                    shelf.getElement().setAttribute("placeholder", item);
                     sample.setWidget(row, 1, shelf);
                     sampleLocationScheme.add(shelf);
                 }

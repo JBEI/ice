@@ -7,6 +7,9 @@ import org.jbei.ice.client.common.widget.MultipleTextBox;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -42,6 +45,17 @@ public class MultiSuggestSheetCell extends SheetCell {
             public void onBlur(BlurEvent event) {
                 String s = setDataForRow(currentRow);
                 textBox.setText(s);
+            }
+        });
+
+        textBox.addKeyDownHandler(new KeyDownHandler() {
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                int code = event.getNativeKeyCode();
+                if (KeyCodes.KEY_TAB != code && KeyCodes.KEY_ENTER != code)
+                    return;
+
+                textBox.setFocus(false);
             }
         });
     }

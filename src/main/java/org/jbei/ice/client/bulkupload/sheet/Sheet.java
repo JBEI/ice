@@ -3,8 +3,11 @@ package org.jbei.ice.client.bulkupload.sheet;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.SheetPresenter;
+import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
+import org.jbei.ice.client.bulkupload.widget.SampleSelectionWidget;
+import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -28,9 +31,9 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class Sheet extends Composite implements SheetPresenter.View {
 
@@ -56,6 +59,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
     protected final SheetPresenter presenter;
     private SheetCell newCellSelection;
     private boolean cellHasFocus;  // whether input widget for a cell has focus
+    private SampleSelectionWidget sampleSelectionWidget;
+    private HandlerRegistration sampleSelectionRegistration;
 
     public final static int ROW_COUNT = 40;
 
@@ -182,7 +187,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
                     row += 1;
                 }
-
             }
         });
     }
@@ -205,20 +209,13 @@ public class Sheet extends Composite implements SheetPresenter.View {
         createHeaderCells();
 
         // add rows
-        int count = ROW_COUNT;
-        row = 0;
-
-        while (count > 0) {
-
+        for (row = 0; row < ROW_COUNT; row += 1) {
             presenter.addRow(row);
             // index col
             HTML indexCell = new HTML((row + 1) + "");
             colIndex.setWidget(row, 0, indexCell);
             indexCell.setStyleName("index_cell");
             colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
-
-            count -= 1;
-            row += 1;
         }
     }
 
@@ -230,19 +227,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
                 if (event.isUpArrow()) {
                     dealWithUpArrowPress();
-
                 } else if (event.isDownArrow()) {
                     dealWithDownArrowPress();
                     event.preventDefault();
                 } else if (event.isRightArrow()) {
-                    if (cellHasFocus)
-                        return;
-                    selectCell(currentRow, currentIndex + 1);
+                    dealWithRightArrowPress();
                     event.preventDefault();
                 } else if (event.isLeftArrow()) {
-                    if (cellHasFocus)
-                        return;
-                    selectCell(currentRow, currentIndex - 1);
+                    dealWithLeftArrowPress();
                     event.preventDefault();
                 } else {
                     int code = event.getNativeKeyCode();
@@ -267,19 +259,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         }, KeyDownEvent.getType());
     }
 
-    protected Widget createHeaderCells() {
-        addLeadHeader();
-
-        SheetHeader.createHeaders(presenter.getTypeHeaders().getHeaders(), headerCol, row, header);
-        headerCol += presenter.getTypeHeaders().getHeaderSize();
-        addTailHeader();
-
-        row += 1;
-        return header;
-    }
-
     // header that covers the span of the row index
-    private void addLeadHeader() {
+    private void addLeadHeader(int row) {
         HTML cell = new HTML("&nbsp;");
         cell.setStyleName("leader_cell_column_header");
         header.setWidget(row, headerCol, cell);
@@ -287,8 +268,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         headerCol += 1;
     }
 
-    // tail header 
-    private void addTailHeader() {
+    // tail header
+    private void addTailHeader(int row) {
         HTML cell = new HTML("&nbsp;");
         cell.setStyleName("tail_cell_column_header");
         header.setWidget(row, headerCol, cell);
@@ -297,32 +278,47 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     @Override
-    public void clear() {
-        if (!Window.confirm("This will clear all data. Continue?"))
-            return;
-
-        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
-            if (isEmptyRow(i))
-                continue;
-
-            int j = 0;
-            for (CellColumnHeader header : presenter.getTypeHeaders().getHeaders()) {
-                HasText widget = (HasText) sheetTable.getWidget(i, j);
-                widget.setText("");
-                ((Widget) widget).setStyleName("cell");
-                header.getCell().reset();
-                j += 1;
-            }
-        }
+    public void createHeaderCells() {
+        headerCol = 0;
+        header.clear();
+        addLeadHeader(0);
+        SheetHeader.createHeaders(presenter.getAllHeaders(), headerCol, 0, header);
+        headerCol += (presenter.getFieldSize());
+        addTailHeader(0);
     }
 
-    public ArrayList<EntryInfo> getCellData(String ownerEmail, String owner) {
-        return presenter.getCellEntryList(ownerEmail, owner);
+    @Override
+    public boolean clear() {
+        if (!Window.confirm("This will clear all data. Continue?"))
+            return false;
+
+        for (int row = 0; row < sheetTable.getRowCount(); row += 1) {
+            if (presenter.isEmptyRow(row))
+                continue;
+
+            for (int col = 0; col < presenter.getFieldSize(); col += 1) {
+                Widget widget = sheetTable.getWidget(row, col);
+                if (widget instanceof CellWidget) {
+                    CellWidget cellWidget = (CellWidget) widget;
+                    cellWidget.setValue("");
+                }
+            }
+        }
+        return true;
+    }
+
+    public ArrayList<EntryInfo> getCellData(String ownerEmail, String owner, String creator, String creatorEmail) {
+        return presenter.getCellEntryList(ownerEmail, owner, creator, creatorEmail);
     }
 
     @Override
     public int getSheetRowCount() {
         return sheetTable.getRowCount();
+    }
+
+    @Override
+    public int getSheetColumnCount(int row) {
+        return sheetTable.getCellCount(row);
     }
 
     public void highlightHeaders(int row, int col) {
@@ -335,17 +331,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
             else
                 colIndex.getFlexCellFormatter().setStyleName(i, 0, "index_td_cell");
         }
-    }
-
-    // currently goes through each row and cell and checks to cell value
-    public boolean isEmptyRow(int row) {
-
-        for (CellColumnHeader header : presenter.getTypeHeaders().getHeaders()) {
-            if (header.getCell().getDataForRow(row) != null)
-                return false;
-        }
-
-        return true;
     }
 
     public boolean validate() {
@@ -362,7 +347,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     @Override
     public void setErrorCell(int row, int col, String errMsg) {
-
         Widget widget = sheetTable.getWidget(row, col);
         if (widget != null && widget instanceof CellWidget) {
             ((CellWidget) widget).showError(errMsg);
@@ -398,7 +382,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if (newCellSelection == null)
             return;
 
-
         sheetTable.setWidget(currentRow, currentIndex, newCellSelection.getWidget(currentRow, true, tabIndex));
         // all cell to set focus to whatever their input mechanism is.
         // e.g. if an input box, allow focus on that box
@@ -408,7 +391,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     private void dealWithUpArrowPress() {
         // exit for up arrow press in auto complete box
-        CellColumnHeader currentHeader = presenter.getTypeHeaders().getHeaderForIndex(currentIndex);
+        CellColumnHeader currentHeader = presenter.getHeaderForIndex(currentIndex);
         if (currentHeader.getCell().hasMultiSuggestions() && cellHasFocus)
             return;
 
@@ -417,11 +400,31 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     private void dealWithDownArrowPress() {
         // exit for down arrow press in auto complete box
-        CellColumnHeader currentHeader = presenter.getTypeHeaders().getHeaderForIndex(currentIndex);
+        CellColumnHeader currentHeader = presenter.getHeaderForIndex(currentIndex);
         if (currentHeader.getCell().hasMultiSuggestions() && cellHasFocus)
             return;
 
         selectCell(currentRow + 1, currentIndex);
+    }
+
+    private void dealWithLeftArrowPress() {
+        if (cellHasFocus)
+            return;
+
+        if (currentIndex == 0 && currentRow > 0)
+            selectCell(currentRow - 1, presenter.getFieldSize() - 1);
+        else if (currentIndex > 0)
+            selectCell(currentRow, currentIndex - 1);
+    }
+
+    private void dealWithRightArrowPress() {
+        if (cellHasFocus)
+            return;
+
+        if (currentIndex >= presenter.getFieldSize() - 1)
+            selectCell(currentRow + 1, 0);
+        else
+            selectCell(currentRow, currentIndex + 1);
     }
 
     /**
@@ -444,11 +447,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
             if (cellHasFocus && replaced != null) {
                 // switch from input
 
-                String data = prevSelection.setDataForRow(currentRow);
+                // this relies on the fact that on blur, individual sheet cells (or the header responsible for them)
+                // set the data so the assumption is that at this point, if there is data, it is already set
+                // and so just retrieved here and displayed in the sheet. Not very intuitive...see InputSheetCell::28
+                SheetCellData data = prevSelection.getDataForRow(currentRow);
                 if (data == null)
                     replaced.setValue("");
                 else
-                    replaced.setValue(data);
+                    replaced.setValue(data.getValue());
 
                 sheetTable.setWidget(inputRow, inputIndex, replaced);
 
@@ -475,7 +481,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         }
 
         // handle current selection
-        newCellSelection = presenter.getTypeHeaders().getHeaderForIndex(newCol).getCell();
+        newCellSelection = presenter.getCellForIndex(newCol);
         Widget widget;
 
         // now deal with current selection
@@ -483,7 +489,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
             widget = sheetTable.getWidget(newRow, newCol);
             int tabIndex = -1;
 
-//            int tabIndex = (currentRow *  presenter.getFieldSize() ) + currentIndex + 1;
             if (widget instanceof CellWidget) {
                 tabIndex = ((CellWidget) widget).getTabIndex();
             }
@@ -530,6 +535,33 @@ public class Sheet extends Composite implements SheetPresenter.View {
     @Override
     public void setCellWidgetForCurrentRow(String value, int row, int col, int size) {
         sheetTable.setWidget(row, col, new CellWidget(value, row, col, size));
+    }
+
+    @Override
+    public void removeCellForCurrentRow(int row, int col, int count) {
+        sheetTable.removeCells(row, col, count);
+    }
+
+    public void setSampleSelection(EntryAddType addType, SampleSelectionWidget sampleSelectionWidget) {
+        this.sampleSelectionWidget = sampleSelectionWidget;
+        if (sampleSelectionWidget != null) {
+            if (sampleSelectionRegistration != null)
+                sampleSelectionRegistration.removeHandler();
+            sampleSelectionRegistration = presenter.setSampleSelectionHandler(addType, this.sampleSelectionWidget
+                    .getSelectionModel());
+        }
+    }
+
+    @Override
+    public SampleLocation getSampleSelectionLocation() {
+        if (this.sampleSelectionWidget == null)
+            return null;
+
+        return this.sampleSelectionWidget.getCurrentLocation();
+    }
+
+    public void selectSample(EntryAddType type, String locationId) {
+        presenter.selectSample(type, locationId);
     }
 
     //

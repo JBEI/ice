@@ -18,6 +18,7 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
@@ -51,7 +52,6 @@ import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.RichTextRenderer;
 import org.jbei.ice.lib.utils.UtilsController;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -107,8 +107,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return info;
         } catch (ControllerException e) {
             Logger.error(e);
-        } catch (Exception e) {
-            Logger.error(e);
+        } catch (InvalidCredentialsException e) {
+            Logger.warn("Invalid credentials provided by " + name);
         }
         return null;
     }
@@ -1377,7 +1377,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<SampleStorage> sampleMap = info.getSampleStorage();
 
             GroupController groupController = new GroupController();
-            Group publicGroup = groupController.createOrRetrievePublicGroup(); // tODO group uuid should come from ui
+            Group publicGroup = groupController.createOrRetrievePublicGroup(); // TODO group uuid should come from ui
 
             if (sampleMap != null) {
                 for (SampleStorage sampleStorage : sampleMap) {
@@ -1634,22 +1634,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 continue;
             }
 
-            switch (type) {
-                case STRAIN:
-                    sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME);
-                    break;
-                case PLASMID:
-                    sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME);
-                    break;
-                case PART:
-                    sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME);
-                    break;
-                case ARABIDOPSIS:
-                    sampleInfo
-                            .setLabel(PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME);
-                    break;
-            }
-
+            sampleInfo.setLabel(scheme.getName());
             schemeMap.put(sampleInfo, schemeOptions);
         }
 

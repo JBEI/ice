@@ -154,13 +154,13 @@ public class EntryToInfoFactory {
         return info;
     }
 
-    private static StorageInfo getStorageInfo(Storage storage) {
+    public static StorageInfo getStorageInfo(Storage storage) {
         StorageInfo info = new StorageInfo();
         if (storage == null)
             return info;
 
         //        info.setChildCount(storage.getChildren().size());
-        info.setDisplay(storage.toString());
+        info.setDisplay(storage.getIndex());
         info.setId(storage.getId());
         info.setType(storage.getStorageType().name());
 
@@ -208,12 +208,12 @@ public class EntryToInfoFactory {
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
 
-        if (seed.getPlantType() != null) {
+        if (seed.getPlantType() != null && seed.getPlantType() != ArabidopsisSeed.PlantType.NULL) {
             PlantType type = PlantType.valueOf(seed.getPlantType().name());
             info.setPlantType(type);
         }
 
-        if (seed.getGeneration() != null) {
+        if (seed.getGeneration() != null && seed.getGeneration() != ArabidopsisSeed.Generation.NULL) {
             Generation generation = Generation.valueOf(seed.getGeneration().name());
             info.setGeneration(generation);
         }

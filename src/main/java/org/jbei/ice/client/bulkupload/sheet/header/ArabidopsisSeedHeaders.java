@@ -17,6 +17,8 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 /**
+ * Arabidopsis seed header wrapper
+ *
  * @author Hector Plahar
  */
 public class ArabidopsisSeedHeaders extends PartHeader {
@@ -28,8 +30,8 @@ public class ArabidopsisSeedHeaders extends PartHeader {
         headers.add(new CellColumnHeader(Header.HARVEST_DATE, false, new DateInputCell(), null));
         headers.add(new CellColumnHeader(Header.ECOTYPE));
         headers.add(new CellColumnHeader(Header.PARENTS));
-        headers.add(new CellColumnHeader(Header.GENERATION, false, new GenerationSheetCell(), null));
-        headers.add(new CellColumnHeader(Header.PLANT_TYPE, false, new PlantTypeSheetCell(), null));
+        headers.add(new CellColumnHeader(Header.GENERATION, true, new GenerationSheetCell(), null));
+        headers.add(new CellColumnHeader(Header.PLANT_TYPE, true, new PlantTypeSheetCell(), null));
         headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(
                 AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
         headers.add(new CellColumnHeader(Header.SENT_TO_ABRC, false, new BooleanSheetCell(), null));

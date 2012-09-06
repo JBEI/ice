@@ -1,6 +1,7 @@
 package org.jbei.ice.client.bulkupload;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -14,6 +15,7 @@ import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.bulkupload.model.BulkUploadModel;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.client.bulkupload.sheet.Sheet;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.DateUtilities;
@@ -38,7 +40,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class BulkUploadPresenter extends AbstractPresenter {
 
     private final IBulkUploadView view;
-    //    private final HashMap<EntryAddType, NewBulkInput> sheetCache;
+    private final HashMap<EntryAddType, NewBulkInput> sheetCache;
     private final BulkUploadModel model;
     private NewBulkInput currentInput;
     private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>(); // list of saved
@@ -47,29 +49,29 @@ public class BulkUploadPresenter extends AbstractPresenter {
     public BulkUploadPresenter(BulkUploadModel model, final IBulkUploadView display) {
         this.view = display;
         this.model = model;
-//        sheetCache = new HashMap<EntryAddType, NewBulkInput>();
+        sheetCache = new HashMap<EntryAddType, NewBulkInput>();
 
         setClickHandlers();
 
         // selection model handlers
         setMenuSelectionModel();
-        setCreateSelectionModel();
+        setCreateBulkUploadSelectionModel();
 
         // toggle menu
         addToggleMenuHandler();
 
         // retrieveData
         retrieveSavedDrafts();
-//        retrieveAutoCompleteData();
         retrievePendingIfAdmin();
 
-        model.getEventBus().addHandler(FeedbackEvent.TYPE,
-                                       new FeedbackEvent.IFeedbackEventHandler() {
-                                           @Override
-                                           public void onFeedbackAvailable(FeedbackEvent event) {
-                                               display.showFeedback(event.getMessage(), event.isError());
-                                           }
-                                       });
+        model.getEventBus().addHandler(
+                FeedbackEvent.TYPE,
+                new FeedbackEvent.IFeedbackEventHandler() {
+                    @Override
+                    public void onFeedbackAvailable(FeedbackEvent event) {
+                        display.showFeedback(event.getMessage(), event.isError());
+                    }
+                });
 
         // retrieve groups
         retrieveUserGroups();
@@ -131,8 +133,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
     /**
      * Sets selection model handler for draft menu. Obtains user selection, retrieves information
-     * about it from the
-     * server and then displays the data to the user
+     * about it from the server and then displays the data to the user
      */
     private void setMenuSelectionModel() {
         view.getDraftMenuModel().addSelectionChangeHandler(
@@ -141,7 +142,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 new MenuSelectionHandler(view.getPendingMenuModel(), true));
     }
 
-    private void setCreateSelectionModel() {
+    private void setCreateBulkUploadSelectionModel() {
         final SingleSelectionModel<EntryAddType> createSelection = view.getImportCreateModel();
         createSelection.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
@@ -151,8 +152,16 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 if (selection == null)
                     return;
 
-                Sheet sheet = new Sheet(selection);
-                currentInput = new NewBulkInput(selection, sheet);
+                // check if an existing sheet has been cached and return it if so
+                if (sheetCache.containsKey(selection))
+                    currentInput = sheetCache.get(selection);
+                else {
+                    // otherwise create a new sheet and retrieve associated data
+                    Sheet sheet = new Sheet(selection);
+                    currentInput = new NewBulkInput(selection, sheet);
+                    sheetCache.put(selection, currentInput);
+                    model.retrieveStorageSchemes(selection, currentInput, null);
+                }
 
                 view.setSheet(currentInput, true, false);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
@@ -209,20 +218,15 @@ public class BulkUploadPresenter extends AbstractPresenter {
         });
     }
 
-//    private void retrieveAutoCompleteData() {
-//        for (Entry<EntryAddType, NewBulkInput> entry : sheetCache.entrySet()) {
-//            NewBulkInput input = entry.getValue();
-//            input.getSheet().setAutoCompleteData(AppController.autoCompleteData);
-//        }
-//    }
-
     @Override
     public void go(HasWidgets container) {
         container.clear();
         container.add(this.view.asWidget());
     }
 
+    //
     // inner classes
+    //
     private class SheetSubmitHandler implements ClickHandler {
 
         private final boolean isDraftSubmit;
@@ -240,7 +244,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
             }
 
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName(), view.getCreator(),
+                    view.getCreatorEmail());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before submitting", true);
                 return;
@@ -251,8 +256,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 @Override
                 public void onSubmit(BulkUploadSubmitEvent event) {
                     if (event.isSuccess()) {
-                        view.showFeedback("Entries submitted successfully for verification.",
-                                          false);
+                        view.showFeedback("Entries submitted successfully for verification.", false);
                         History.newItem(Page.COLLECTIONS.getLink());
                     } else {
                         view.showFeedback("Error saving entries.", true);
@@ -280,7 +284,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
             }
 
             // for approval we do not want to change the owner
-            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(null, null);
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(null, null, view.getCreator(),
+                                                                                view.getCreatorEmail());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before submitting", true);
                 return;
@@ -318,7 +323,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
             currentInput.setName(name);
 
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName(), view.getCreator(),
+                    view.getCreatorEmail());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data before saving draft", true);
                 return;
@@ -357,8 +363,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 currentInput.getSheet().setCurrentInfo(info);
 
                 view.setSheet(currentInput, false, false);
-                view.setHeader(currentInput.getImportType().getDisplay()
-                                       + " Bulk Import");
+                view.setHeader(currentInput.getImportType().getDisplay() + " Bulk Import");
                 // check if menu panel is visible
                 if (view.getMenuVisibility() == false)
                     view.setDraftMenuVisibility(true, true);
@@ -376,7 +381,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
             long id = currentInput.getId();
             final EntryAddType type = currentInput.getImportType();
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName(), view.getCreator(),
+                    view.getCreatorEmail());
 
             BulkUploadUpdateHandler handler = new BulkUploadUpdateHandler(type);
             String uuid = view.getPermissionSelection();
@@ -407,11 +413,14 @@ public class BulkUploadPresenter extends AbstractPresenter {
                                                                      type.getDisplay(),
                                                                      AppController.accountInfo.getEmail());
                 view.updateSavedDraftsMenu(menuItem);
+                sheetCache.clear();
             }
         }
     }
 
-    // inner classes
+    /**
+     * Selection handler for existing bulk upload.
+     */
     private class MenuSelectionHandler implements SelectionChangeEvent.Handler {
 
         private final SingleSelectionModel<BulkUploadMenuItem> selection;
@@ -430,16 +439,24 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 @Override
                 public void onDataRetrieval(SavedDraftsEvent event) {
                     if (event == null) {
-                        view.showFeedback("Could not retrieve saved draft.", true);
+                        view.showFeedback("Could not retrieve saved draft", true);
                         return;
                     }
 
                     BulkUploadInfo info = event.getData().get(0);
                     Sheet sheet = new Sheet(info.getType(), info);
-
                     currentInput = new NewBulkInput(info.getType(), sheet);
                     currentInput.setId(info.getId());
+                    SampleStorage sampleStorage = null;
+                    if (!info.getEntryList().isEmpty()) {
+                        EntryInfo entryInfo = info.getEntryList().get(0);
+                        sampleStorage = entryInfo.getOneSampleStorage();
+                    }
+
+                    model.retrieveStorageSchemes(info.getType(), currentInput, sampleStorage);
                     String name = info.getName();
+
+                    // setting name to creation date is none exist
                     if (name == null) {
                         name = DateUtilities.formatDate(info.getCreated());
                         info.setName(name);
@@ -450,6 +467,12 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     view.setHeader(info.getType().getDisplay() + " Bulk Import");
                     view.setDraftMenuVisibility(false, false);
                     view.setSelectedGroupPermission(info.getGroupInfo());
+
+                    // assume uniform values for all entries in regards to creator
+                    if (!info.getEntryList().isEmpty()) {
+                        EntryInfo entryInfo = info.getEntryList().get(0);
+                        view.setCreatorInformation(entryInfo.getCreator(), entryInfo.getCreatorEmail());
+                    }
                 }
             });
         }

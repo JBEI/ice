@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.entry.sample;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.jbei.ice.lib.config.ConfigurationDAO;
@@ -14,6 +13,7 @@ import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.EntryType;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -28,7 +28,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * Retrieve {@link Storage} object from the database by its id. Optionally, retrieve children at
      * this time.
      *
-     * @param id
+     * @param id            unique record identifier
      * @param fetchChildren True if children are to be fetched.
      * @return Storage object.
      * @throws DAOException
@@ -37,21 +37,18 @@ public class StorageDAO extends HibernateRepository<Storage> {
         Storage result = null;
         Session session = newSession();
         try {
-            Query query = session
-                    .createQuery("from " + Storage.class.getName() + " where id = :id");
+            Query query = session.createQuery("from " + Storage.class.getName() + " where id = :id");
             query.setLong("id", id);
             result = (Storage) query.uniqueResult();
             if (fetchChildren && result != null) {
                 result.getChildren().size();
             }
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             String msg = "Could not get Location by id: " + id + " " + e.toString();
             Logger.error(msg, e);
             throw new DAOException(msg);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return result;
@@ -69,7 +66,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
     }
 
     /**
-     * Retrieves {@link Storage} object representing a tube. The 2Dbarcode for a tube is unique
+     * Retrieves {@link Storage} object representing a tube. The 2D barcode for a tube is unique
      * across plates so this method is expected to return a single results. Compare to wells in 96
      * well plate that have same type and index across multiple plates
      *
@@ -85,8 +82,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
         }
 
         if (results.size() > 1)
-            throw new DAOException("Expecting single result, received \"" + results.size()
-                                           + "\" for index " + barcode);
+            throw new DAOException("Expecting single result, received \"" + results.size() + "\" for index " + barcode);
 
         return results.get(0);
     }
@@ -94,8 +90,8 @@ public class StorageDAO extends HibernateRepository<Storage> {
     /**
      * Retrieve a {@link Storage} object by its index and {@link StorageType} fields.
      *
-     * @param index
-     * @param type
+     * @param index index value
+     * @param type  storage type
      * @return List of Storage objects.
      * @throws DAOException
      */
@@ -127,40 +123,44 @@ public class StorageDAO extends HibernateRepository<Storage> {
     }
 
     /**
-     * Save the given {@link Storage} object in the database.
+     * update the given {@link Storage} object in the database.
      *
-     * @param location
-     * @return Saved Storage object.
+     * @param storage storage object to update
+     * @return updated Storage object.
      * @throws DAOException
      */
-    public Storage update(Storage location) throws DAOException {
-        if (location == null) {
+    public Storage update(Storage storage) throws DAOException {
+        if (storage == null) {
             return null;
         }
 
-        if (location.getUuid() == null) {
-            location.setUuid(Utils.generateUUID());
+        if (storage.getUuid() == null) {
+            storage.setUuid(Utils.generateUUID());
         }
 
-        super.saveOrUpdate(location);
-        return location;
+        super.saveOrUpdate(storage);
+        return storage;
     }
 
     /**
      * Save the given {@link Storage} object in the database.
      *
-     * @param location
+     * @param storage storage object to save
      * @return Saved Storage object.
      * @throws DAOException
      */
-    public Storage save(Storage location) throws DAOException {
-        return (Storage) super.saveOrUpdate(location);
+    public Storage save(Storage storage) throws DAOException {
+        return super.saveOrUpdate(storage);
     }
 
     /**
      * Delete the given {@link Storage} object in the database.
      *
+<<<<<<< HEAD
      * @param location
+=======
+     * @param location storage object to delete
+>>>>>>> master
      * @throws DAOException
      */
     public void delete(Storage location) throws DAOException {
@@ -189,37 +189,6 @@ public class StorageDAO extends HibernateRepository<Storage> {
             }
         } catch (Exception e) {
             String msg = "Could not get all schemes " + e.toString();
-            Logger.error(msg, e);
-            throw new DAOException(msg);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Retrieve all {@link Storage} objects with schemes for a given entryType.n
-     *
-     * @return List of Storage objects with schemes.
-     */
-    @SuppressWarnings("unchecked")
-    public List<Storage> getAllStorageRoot() throws DAOException {
-        ArrayList<Storage> result = null;
-        Session session = newSession();
-        try {
-            Query query = session.createQuery("FROM " + Storage.class.getName()
-                                                      + " storage WHERE storage.storageType = :storageType");
-            query.setParameter("storageType", StorageType.GENERIC);
-
-            @SuppressWarnings("rawtypes")
-            List list = query.list();
-            if (list != null)
-                result = (ArrayList<Storage>) list;
-
-        } catch (Exception e) {
-            String msg = "Could not get all generic types: " + e.toString();
             Logger.error(msg, e);
             throw new DAOException(msg);
         } finally {
@@ -327,6 +296,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
             result.setParent(parent);
             result.setStorageType(template.getStorageType());
             result.setOwnerEmail(parent.getOwnerEmail());
+            result.setUuid(Utils.generateUUID());
             result = save(result);
         }
         return result;
@@ -416,54 +386,6 @@ public class StorageDAO extends HibernateRepository<Storage> {
         while (current != null && current.getStorageType() != StorageType.SCHEME) {
             result.add(current);
             current = current.getParent();
-        }
-        return result;
-    }
-
-    /**
-     * Check if the {@link Storage} object given agrees with the scheme as specified by its parents.
-     *
-     * @param storage
-     * @return True if the scheme is in agreement with the hierarchy.
-     */
-    public boolean isStorageSchemeInAgreement(Storage storage) {
-        boolean result = true;
-        if (storage.getStorageType() == StorageType.SCHEME) {
-            // should not compare scheme to itself
-            return false;
-        }
-        Storage supposedScheme = getSchemeContainingParentStorage(storage);
-
-        ArrayList<String> schemeNames = new ArrayList<String>();
-        for (Storage item : supposedScheme.getSchemes()) {
-            schemeNames.add(item.getName());
-        }
-
-        ArrayList<String> actualNames = new ArrayList<String>();
-        Storage currentStorage = storage;
-        while (currentStorage.getId() != supposedScheme.getId()) {
-            actualNames.add(currentStorage.getName());
-            currentStorage = currentStorage.getParent();
-        }
-        Collections.reverse(actualNames);
-
-        String schemeName = null;
-        String actualName = null;
-        if (schemeNames.size() == actualNames.size()) {
-            int index = 0;
-            while (index < actualNames.size()) {
-                schemeName = schemeNames.get(index);
-                actualName = actualNames.get(index);
-                if (actualName.equals(schemeName)) {
-                    index++;
-                } else {
-                    // name doesn't match
-                    result = false;
-                    break;
-                }
-            }
-        } else { // sizes don't match
-            result = false;
         }
         return result;
     }
