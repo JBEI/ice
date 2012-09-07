@@ -1,5 +1,9 @@
 package org.jbei.ice.lib.bulkupload;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +32,7 @@ import org.jbei.ice.shared.dto.GroupInfo;
  * @author Hector Plahar
  */
 public class BulkUploadUtil {
+    private final static String TMP_DIR = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
 
     public static BulkUploadInfo modelToInfo(BulkUpload model) {
 
@@ -139,5 +144,19 @@ public class BulkUploadUtil {
             }
         }
         return null;
+    }
+
+    public static InputStream getFileInputStream(String fileName) {
+
+        File file = new File(TMP_DIR + File.separator + fileName);
+        if (!file.exists())
+            return null;
+
+        try {
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            Logger.error(e);
+            return null;
+        }
     }
 }

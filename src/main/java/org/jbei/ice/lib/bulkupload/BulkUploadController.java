@@ -528,7 +528,8 @@ public class BulkUploadController {
             attachment.setDescription(""); // no way of entering description in bulk import
             attachment.setFileName(attachmentInfo.getFilename());
             attachment.setFileId(attachmentInfo.getFileId());
-            attachmentController.saveExistingFile(account, attachment);
+            attachmentController.saveExistingFile(account, attachment, BulkUploadUtil.getFileInputStream(
+                    attachmentInfo.getFileId()));
         }
 
         // delete whatever files are remaining
