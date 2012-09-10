@@ -10,8 +10,6 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.Group;
 
-import org.hibernate.annotations.Cascade;
-
 /**
  * Saved draft of bulk imports. Encapsulates a list of {@link Entry}s that are created and updated
  * as part of a draft
@@ -50,8 +48,7 @@ public class BulkUpload implements IModel {
     @Column(name = "last_update_time", nullable = false)
     private Date lastUpdateTime;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "bulk_upload_entry",
                joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
                inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})

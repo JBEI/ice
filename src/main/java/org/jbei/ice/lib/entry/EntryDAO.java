@@ -333,6 +333,13 @@ class EntryDAO extends HibernateRepository<Entry> {
             if (list != null) {
                 entries = (ArrayList<Long>) list;
             }
+
+            // remove drafts
+            Criteria criteria = session.createCriteria(Entry.class)
+                                       .add(Restrictions.eq("visibility", new Integer(Visibility.DRAFT.getValue())))
+                                       .setProjection(Projections.id());
+            List remove = criteria.list();
+            entries.removeAll(remove);
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entries!", e);
         } finally {
