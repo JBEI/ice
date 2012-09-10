@@ -96,7 +96,7 @@ public class EntryToInfoFactory {
         info.setHasSample(!samplesList.isEmpty());
 
         // get trace sequences 
-        ArrayList<SequenceAnalysisInfo> analysisInfo = getSequenceAnaylsis(sequences);
+        ArrayList<SequenceAnalysisInfo> analysisInfo = getSequenceAnalysis(sequences);
         info.setSequenceAnalysis(analysisInfo);
 
         // has sequence (different from trace sequence above)
@@ -167,7 +167,7 @@ public class EntryToInfoFactory {
         return info;
     }
 
-    public static ArrayList<SequenceAnalysisInfo> getSequenceAnaylsis(List<TraceSequence> sequences) {
+    public static ArrayList<SequenceAnalysisInfo> getSequenceAnalysis(List<TraceSequence> sequences) {
         ArrayList<SequenceAnalysisInfo> infos = new ArrayList<SequenceAnalysisInfo>();
         if (sequences == null)
             return infos;

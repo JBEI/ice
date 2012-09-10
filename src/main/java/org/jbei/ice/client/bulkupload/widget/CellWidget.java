@@ -39,8 +39,8 @@ public class CellWidget extends Composite {
         String display = value;
         String title = value;
 
-        if (value.length() > 20)
-            display = (value.substring(0, 18) + "...");
+        if (value.length() > 19)
+            display = (value.substring(0, 16) + "...");
 
         widget.setTitle(title);
         widget.setText(display);

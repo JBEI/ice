@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.bulkupload;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -372,6 +373,28 @@ public class BulkUploadControllerTest {
 
         entry = entryController.get(account, createdDraft.getEntryList().get(0).getId());
         Assert.assertNotNull(entry);
+
+        final String assistantTester = "assistantTester@TEST";
+        accountController.createNewAccount("", "TESTER", "", assistantTester, "LBL", "");
+        Account assistant = accountController.getByEmail(assistantTester);
+        Assert.assertNotNull(assistant);
+
+        // add write permission
+        PermissionsController permissionsController = new PermissionsController();
+        Assert.assertFalse(permissionsController.hasReadPermission(assistant, entry));
+        permissionsController.addReadGroup(account, entry, publicGroup);
+
+        assistant.getGroups().add(publicGroup);
+        accountController.save(assistant);
+
+        Set<Long> set = entryController.getAllVisibleEntryIDs(assistant);
+        ArrayList<Entry> setEntries = entryController.getEntriesByIdSet(account, new ArrayList<Long>(set));
+        Assert.assertEquals(set.size(), setEntries.size());
+
+
+        for (Entry entry1 : setEntries) {
+            Assert.assertFalse(entry1.getVisibility() == Visibility.DRAFT.getValue());
+        }
 
         // delete draft
         Assert.assertNotNull(controller.deleteDraftById(account, createdDraft.getId()));
