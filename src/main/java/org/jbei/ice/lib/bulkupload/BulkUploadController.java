@@ -856,15 +856,25 @@ public class BulkUploadController {
 
     protected void saveSequence(Account account, ArrayList<SequenceAnalysisInfo> sequenceInfoList,
             Entry entry) throws ControllerException {
-        if (sequenceInfoList == null || sequenceInfoList.isEmpty())
+        SequenceController controller = new SequenceController();
+
+        if (sequenceInfoList == null || sequenceInfoList.isEmpty()) {
+            Sequence sequence = controller.getByEntry(entry);
+            if (sequence != null) {
+                try {
+                    controller.delete(account, sequence, false);
+                } catch (PermissionException e) {
+                    Logger.error(e);
+                }
+            }
             return;
+        }
 
         String fileId = sequenceInfoList.get(0).getFileId();
-        if (fileId.isEmpty())
+        if (fileId.isEmpty())    // delete sequence?
             return;
 
-        File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar
-                                     + fileId);
+        File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar + fileId);
 
         if (!file.exists()) {
             Logger.error("Could not find sequence file \"" + file.getAbsolutePath() + "\"");
@@ -873,7 +883,6 @@ public class BulkUploadController {
 
         try {
             String sequenceString = FileUtils.readFileToString(file);
-            SequenceController controller = new SequenceController();
             controller.parseAndSaveSequence(account, entry, sequenceString);
         } catch (IOException e) {
             Logger.error(e);

@@ -593,7 +593,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
-            return EntryToInfoFactory.getSequenceAnaylsis(sequences);
+            return EntryToInfoFactory.getSequenceAnalysis(sequences);
 
         } catch (ControllerException ce) {
             Logger.error(ce);
@@ -626,7 +626,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 controller.removeTraceSequence(account, sequence);
             }
             List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
-            return EntryToInfoFactory.getSequenceAnaylsis(sequences);
+            return EntryToInfoFactory.getSequenceAnalysis(sequences);
 
         } catch (ControllerException ce) {
             Logger.error(ce);

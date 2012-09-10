@@ -199,6 +199,20 @@ public class FileInputCell extends SheetCell {
                 final Label delete = new Label("x");
                 delete.setStyleName("x-delete");
 
+                cellUploader.getPanel().addDomHandler(new MouseOverHandler() {
+                    @Override
+                    public void onMouseOver(MouseOverEvent event) {
+                        delete.setVisible(true);
+                    }
+                }, MouseOverEvent.getType());
+
+                cellUploader.getPanel().addDomHandler(new MouseOutHandler() {
+                    @Override
+                    public void onMouseOut(MouseOutEvent event) {
+                        delete.setVisible(false);
+                    }
+                }, MouseOutEvent.getType());
+
                 String html = "<span><span id=\"name_link\"></span> <span id=\"delete_link\"></span></span>";
                 HTMLPanel panel = new HTMLPanel(html);
 
