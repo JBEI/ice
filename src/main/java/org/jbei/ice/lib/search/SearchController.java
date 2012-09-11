@@ -1,5 +1,10 @@
 package org.jbei.ice.lib.search;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -21,11 +26,6 @@ import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
@@ -173,6 +173,7 @@ public class SearchController {
         cleanedQuery = cleanedQuery.replace("^", "\\^");
         cleanedQuery = cleanedQuery.replace("&", "\\&");
 
+        cleanedQuery = cleanedQuery.endsWith("'") ? cleanedQuery.substring(0, cleanedQuery.length() - 1) : cleanedQuery;
         cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
                                                                              cleanedQuery.length() - 1) : cleanedQuery);
         if (cleanedQuery.startsWith("*")) {
