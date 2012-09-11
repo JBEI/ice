@@ -169,6 +169,7 @@ public class SearchController {
         cleanedQuery = cleanedQuery.replace("^", "\\^");
         cleanedQuery = cleanedQuery.replace("&", "\\&");
 
+        cleanedQuery = cleanedQuery.endsWith("'") ? cleanedQuery.substring(0, cleanedQuery.length() - 1) : cleanedQuery;
         cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
                                                                              cleanedQuery.length() - 1) : cleanedQuery);
         if (cleanedQuery.startsWith("*")) {
