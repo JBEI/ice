@@ -41,13 +41,15 @@ public class EntryControllerTest {
         String email = "testCreateEntry@TESTER.org";
 
         AccountController accountController = new AccountController();
-        Account account = accountController.createAdminAccount(email, "popop");
+        accountController.createNewAccount("", "", "", email, "", "");
+        Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
 
         Entry entry = new Strain();
-        entry = controller.createEntry(account, entry, null);
+        entry.setStatus("Complete");
+        entry.setBioSafetyLevel(new Integer(1));
+        entry = controller.createEntry(account, entry, false, null);
         Assert.assertNotNull(entry);
-        Assert.assertTrue(entry.getId() > 0);
 
         // account should only have a single entry
         ArrayList<Long> list = controller.getEntryIdsByOwner(email);

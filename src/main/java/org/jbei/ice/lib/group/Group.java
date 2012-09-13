@@ -39,7 +39,6 @@ public class Group implements IModel {
     protected Group parent;
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER)
-//    @JoinColumn(name = "fk_parent")
     private Set<Group> children = new HashSet<Group>();
 
     // Getters and setters

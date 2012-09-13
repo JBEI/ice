@@ -282,7 +282,8 @@ public class SearchController {
                     try {
                         entry = entryController.getByRecordId(account, blastResult.getSubjectId());
                     } catch (PermissionException e) {
-                        Logger.error(e);
+                        Logger.info(account.getEmail() + " does not have read permission for \"" + blastResult
+                                .getSubjectId() + "\"");
                         continue;
                     }
 

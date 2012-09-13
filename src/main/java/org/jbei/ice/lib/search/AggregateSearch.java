@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.search;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 
 import org.jbei.ice.controllers.common.ControllerException;
@@ -8,8 +9,6 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.PartNumber;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Combine different searches into one interface, with heuristics built in to

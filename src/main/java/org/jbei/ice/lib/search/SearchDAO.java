@@ -19,7 +19,7 @@ import org.hibernate.Session;
 class SearchDAO extends HibernateRepository {
 
     @SuppressWarnings("unchecked")
-    public Set<Long> runHibernateQuery(String queryString) throws DAOException {
+    protected Set<Long> runHibernateQuery(String queryString) throws DAOException {
         Session session = newSession();
         session.beginTransaction();
         Query query = session.createQuery(queryString);

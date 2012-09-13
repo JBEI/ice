@@ -150,9 +150,9 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
         Session session = newSession();
         try {
 
-            Long itemCount = (Long) session.createCriteria(Attachment.class)
-                                           .setProjection(Projections.countDistinct("id"))
-                                           .add(Restrictions.eq("entry", entry)).uniqueResult();
+            Number itemCount = (Number) session.createCriteria(Attachment.class)
+                                               .setProjection(Projections.countDistinct("id"))
+                                               .add(Restrictions.eq("entry", entry)).uniqueResult();
 
             return itemCount.longValue() > 0;
         } catch (HibernateException e) {

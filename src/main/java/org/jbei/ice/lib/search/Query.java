@@ -17,11 +17,7 @@ import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.PartNumber;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
@@ -181,7 +177,7 @@ public class Query {
      * @throws QueryException
      */
     private HashSet<Integer> runFilter(String key, String value) throws QueryException {
-        HashSet<Integer> result = null;
+        HashSet<Integer> result;
 
         try {
             Filter queryType = filterByKey(key);

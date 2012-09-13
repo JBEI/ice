@@ -3,6 +3,10 @@
  */
 package org.jbei.ice.lib.account;
 
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -19,6 +23,7 @@ public class AccountControllerTest {
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        HibernateHelper.initializeMock();
     }
 
     /**
@@ -43,23 +48,40 @@ public class AccountControllerTest {
     }
 
     /**
-     * Test method for {@link org.jbei.ice.lib.account.AccountController#AccountController()}.
-     */
-    @Test
-    public void testAccountController() {
-    }
-
-    /**
      * Test method for {@link org.jbei.ice.lib.account.AccountController#get(long)}.
      */
     @Test
-    public void testGet() {
+    public void testGet() throws Exception {
+        AccountController controller = new AccountController();
+        Account account = controller.get(0);
+        Assert.assertNull(account);
+
+        // create new account
+        account = new Account();
+        account.setFirstName("First");
+        account.setLastName("Last");
+        account.setDescription("Desc");
+        account.setInitials("FL");
+        account.setIsSubscribed(1);
+        account.setPassword("plom");
+        account.setIp("");
+        account.setInstitution("");
+        account.setEmail("testGet@TEST");
+        Assert.assertNotNull(controller.save(account));
+
+        // test get
+        account = controller.get(account.getId());
+        Assert.assertNotNull(account);
+        Assert.assertEquals("First", account.getFirstName());
+        Assert.assertEquals("Last", account.getLastName());
+        Assert.assertEquals("Desc", account.getDescription());
+        Assert.assertEquals("testGet@TEST", account.getEmail());
+        Assert.assertEquals("FL", account.getInitials());
     }
 
     /**
      * Test method for
      * {@link org.jbei.ice.lib.account.AccountController#resetPassword(java.lang.String, boolean, java.lang.String)}
-     * .
      */
     @Test
     public void testResetPassword() {

@@ -13,14 +13,16 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -40,13 +42,11 @@ public class EntryController {
 
     private EntryDAO dao;
     private PermissionsController permissionsController;
-    private AttachmentController attachmentController;
     private AccountController accountController;
 
     public EntryController() {
         dao = new EntryDAO();
         permissionsController = new PermissionsController();
-        attachmentController = new AttachmentController();
         accountController = new AccountController();
     }
 
@@ -132,8 +132,34 @@ public class EntryController {
         entry.setOwner(account.getFullName());
         entry.setOwnerEmail(account.getEmail());
 
+        if (entry.getSelectionMarkers() != null) {
+            for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
+                selectionMarker.setEntry(entry);
+            }
+        }
+
+        if (entry.getLinks() != null) {
+            for (Link link : entry.getLinks()) {
+                link.setEntry(entry);
+            }
+        }
+
+        if (entry.getNames() != null) {
+            for (Name name : entry.getNames()) {
+                name.setEntry(entry);
+            }
+        }
+
+        if (entry.getPartNumbers() != null) {
+            for (PartNumber pNumber : entry.getPartNumbers()) {
+                pNumber.setEntry(entry);
+            }
+        }
+
+        entry.setModificationTime(Calendar.getInstance().getTime());
+
         try {
-            dao.saveOrUpdate(entry);
+            dao.save(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -147,7 +173,7 @@ public class EntryController {
         }
 
         if (scheduleIndexRebuild) {
-            ApplicationController.scheduleBlastIndexRebuildJob();
+            ApplicationController.scheduleBlastIndexRebuildTask();
         }
 
         return entry;
@@ -264,18 +290,6 @@ public class EntryController {
         return entry;
     }
 
-    /**
-     * Checks if the given entry has {@link org.jbei.ice.lib.entry.attachment.Attachment}s
-     * associated with it.
-     *
-     * @param entry entry
-     * @return True if there are associated attachments.
-     * @throws ControllerException
-     * @deprecated call attachment controller directly
-     */
-    public boolean hasAttachments(Account account, Entry entry) throws ControllerException {
-        return attachmentController.hasAttachment(account, entry);
-    }
 
     public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
 
@@ -371,10 +385,10 @@ public class EntryController {
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
-            savedEntry = dao.saveOrUpdate(entry);
+            savedEntry = dao.update(entry);
 
             if (scheduleIndexRebuild) {
-                ApplicationController.scheduleBlastIndexRebuildJob();
+                ApplicationController.scheduleBlastIndexRebuildTask();
             }
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -398,7 +412,7 @@ public class EntryController {
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
-            savedEntry = dao.saveOrUpdate(entry);
+            savedEntry = dao.update(entry);
 
             // update read permissions
             // TODO : until the permissions overhaul, no method is expected to call update on entry
@@ -410,7 +424,7 @@ public class EntryController {
             }
 
             if (scheduleIndexRebuild) {
-                ApplicationController.scheduleBlastIndexRebuildJob();
+                ApplicationController.scheduleBlastIndexRebuildTask();
             }
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -462,13 +476,13 @@ public class EntryController {
         entry.setModificationTime(Calendar.getInstance().getTime());
 
         try {
-            dao.saveOrUpdate(entry);
+            dao.update(entry);
         } catch (DAOException e1) {
             throw new ControllerException("Failed to save entry deletion", e1);
         }
 
         if (scheduleIndexRebuild) {
-            ApplicationController.scheduleBlastIndexRebuildJob();
+            ApplicationController.scheduleBlastIndexRebuildTask();
         }
     }
 

@@ -32,7 +32,11 @@ import org.jbei.ice.shared.dto.AccountInfo;
 
 public class AccountController {
 
-    private static String SYSTEM_ACCOUNT_EMAIL = "system";
+    public static final String SYSTEM_ACCOUNT_EMAIL = "system";
+
+    private static final String ADMIN_ACCOUNT_EMAIL = "Administrator";
+    private static final String ADMIN_ACCOUNT_PASSWORD = "Administrator";
+
     private final AccountDAO dao; // TODO : setter injection
     private final PreferencesDAO preferencesDAO;
 
@@ -150,19 +154,20 @@ public class AccountController {
         return newPassword;
     }
 
-    public Account createAdminAccount(String adminAccountEmail, String adminPassword)
+    public Account createAdminAccount()
             throws ControllerException {
-        if (getByEmail(adminAccountEmail) != null) {
-            throw new ControllerException("Account with email \"" + adminAccountEmail + "\" already exists");
-        }
 
-        Account adminAccount = new Account();
-        adminAccount.setEmail(adminAccountEmail);
+        Account adminAccount = getByEmail(ADMIN_ACCOUNT_EMAIL);
+        if (adminAccount != null)
+            return adminAccount;
+
+        adminAccount = new Account();
+        adminAccount.setEmail(ADMIN_ACCOUNT_EMAIL);
         adminAccount.setLastName("Administrator");
         adminAccount.setFirstName("");
         adminAccount.setInitials("");
         adminAccount.setInstitution("");
-        adminAccount.setPassword(AccountUtils.encryptPassword(adminPassword));
+        adminAccount.setPassword(AccountUtils.encryptPassword(ADMIN_ACCOUNT_PASSWORD));
         adminAccount.setDescription("Administrator Account");
         adminAccount.setIsSubscribed(0);
 
@@ -478,5 +483,26 @@ public class AccountController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public void createSystemAccount() throws ControllerException {
+        if (getSystemAccount() != null)
+            return;
+
+        Account systemAccount = new Account();
+        systemAccount.setEmail(SYSTEM_ACCOUNT_EMAIL);
+        systemAccount.setLastName("");
+        systemAccount.setFirstName("");
+        systemAccount.setInitials("");
+        systemAccount.setInstitution("");
+        systemAccount.setPassword("");
+        systemAccount.setDescription("System Account");
+        systemAccount.setIsSubscribed(0);
+        systemAccount.setIp("");
+        Date currentTime = Calendar.getInstance().getTime();
+        systemAccount.setCreationTime(currentTime);
+        systemAccount.setModificationTime(currentTime);
+        systemAccount.setLastLoginTime(currentTime);
+        save(systemAccount);
     }
 }

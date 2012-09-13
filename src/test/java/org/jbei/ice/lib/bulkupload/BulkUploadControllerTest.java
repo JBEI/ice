@@ -55,7 +55,7 @@ public class BulkUploadControllerTest {
     @Test
     public void testRetrievePendingImports() throws Exception {
         AccountController accountController = new AccountController();
-        Account adminAccount = accountController.createAdminAccount("tester+pending@test.org", "popop");
+        Account adminAccount = accountController.createAdminAccount();
         Assert.assertNotNull(adminAccount);
         accountController.createNewAccount("", "TESTER", "", "regular+pending@test.org", "LBL", "");
 
@@ -100,7 +100,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(password);
         Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
-        Account adminAccount = accountController.createAdminAccount("tester+admin@test.org", "popop");
+        Account adminAccount = accountController.createAdminAccount();
         Assert.assertNotNull(adminAccount);
 
         // starting with clean slate now
@@ -234,7 +234,7 @@ public class BulkUploadControllerTest {
     @Test
     public void testRetrieveById() throws Exception {
         AccountController accountController = new AccountController();
-        Account adminAccount = accountController.createAdminAccount("tester+retrieveById@test.org", "popop");
+        Account adminAccount = accountController.createAdminAccount();
         Assert.assertNotNull(adminAccount);
         accountController.createNewAccount("", "TESTER", "", "regular+retrieveById@test.org", "LBL", "");
 
@@ -274,7 +274,7 @@ public class BulkUploadControllerTest {
     @Test
     public void testRetrieveByUser() throws Exception {
         AccountController accountController = new AccountController();
-        Account adminAccount = accountController.createAdminAccount("tester+retrieveByUser@test.org", "popop");
+        Account adminAccount = accountController.createAdminAccount();
         Assert.assertNotNull(adminAccount);
         accountController.createNewAccount("", "TESTER", "", "regular+retrieveByUser@test.org", "LBL", "");
 
@@ -422,8 +422,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(password);
         Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
-        Account adminAccount = accountController.createAdminAccount("tester+admin@test_CreateBulkImportDraft.org",
-                                                                    "popop");
+        Account adminAccount = accountController.createAdminAccount();
         Assert.assertNotNull(adminAccount);
 
         // starting with clean slate now
@@ -457,7 +456,6 @@ public class BulkUploadControllerTest {
     public void testUpdateBulkImportDraft() throws Exception {
 
         final String email = "tester@test_UpdateBulkImportDraft.org";
-        final String adminEmail = "tester+admin_UpdateBulkImportDraft@test.org";
 
         // create
         AccountController accountController = new AccountController();
@@ -465,7 +463,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(password);
         Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
-        Account adminAccount = accountController.createAdminAccount(adminEmail, "popop");
+        Account adminAccount = accountController.createAdminAccount();
         Assert.assertNotNull(adminAccount);
 
         // starting with clean slate now
@@ -550,7 +548,6 @@ public class BulkUploadControllerTest {
 
         // create accounts
         final String email = "tester@test_SubmitBulkImportDraft.org";
-        final String adminEmail = "tester+admin@test_SubmitBulkImportDraft.org";
 
         // create accounts
         AccountController accountController = new AccountController();
@@ -558,7 +555,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(password);
         Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
-        Account adminAccount = accountController.createAdminAccount(adminEmail, "popop");
+        Account adminAccount = accountController.createAdminAccount();
         Assert.assertNotNull(adminAccount);
 
         // create bulk import (with strain with plasmid)
@@ -668,7 +665,6 @@ public class BulkUploadControllerTest {
 
         // create accounts
         final String email = "tester@test_ApproveBulkImport.org";
-        final String adminEmail = "tester+admin@test_ApproveBulkImport.org";
 
         // create accounts
         AccountController accountController = new AccountController();
@@ -676,7 +672,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(password);
         Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
-        Account adminAccount = accountController.createAdminAccount(adminEmail, "popop");
+        Account adminAccount = accountController.createAdminAccount();
         Assert.assertNotNull(adminAccount);
 
         // create bulk import
@@ -754,9 +750,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(password);
         Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
-        Account adminAccount = accountController.createAdminAccount(
-                "tester+admin@test_CreateBulkImportDraftWithStrainWithPlasmid.org",
-                "popop");
+        Account adminAccount = accountController.createAdminAccount();
         Assert.assertNotNull(adminAccount);
 
         // starting with clean slate now

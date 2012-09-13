@@ -12,7 +12,7 @@ import org.hibernate.Session;
 /**
  * Manage {@link Configuration} objects in the database.
  *
- * @author Timothy Ham
+ * @author Timothy Ham, Hector Plahar
  */
 public class ConfigurationDAO extends HibernateRepository<Configuration> {
 
@@ -39,8 +39,7 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
         Session session = newSession();
 
         try {
-            Query query = session.createQuery("from " + Configuration.class.getName()
-                                                      + " where key = :key");
+            Query query = session.createQuery("from " + Configuration.class.getName() + " where key = :key");
             query.setParameter("key", key);
             Object queryResult = query.uniqueResult();
 

@@ -150,9 +150,9 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         Session session = newSession();
         try {
 
-            Long itemCount = (Long) session.createCriteria(Sequence.class)
-                                           .setProjection(Projections.countDistinct("id"))
-                                           .add(Restrictions.eq("entry", entry)).uniqueResult();
+            Number itemCount = (Number) session.createCriteria(Sequence.class)
+                                               .setProjection(Projections.countDistinct("id"))
+                                               .add(Restrictions.eq("entry", entry)).uniqueResult();
 
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {

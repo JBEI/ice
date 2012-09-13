@@ -3,7 +3,7 @@ package org.jbei.ice.lib.search;
 import java.util.List;
 
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.entry.model.Name;
+import org.jbei.ice.lib.entry.model.Entry;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -44,23 +44,26 @@ public class LuceneSearch {
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         Transaction tx = fullTextSession.beginTransaction();
 
-        // create native Lucene query unsing the query DSL
+        // create native Lucene query using the query DSL
         // alternatively you can write the Lucene query using the Lucene query parser
         // or the Lucene programmatic API. The Hibernate Search DSL is recommended though
 
         // you can create several query builders (for each entity type involved in the root of the query)
-        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Name.class).get();
-
+        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
 
         org.apache.lucene.search.Query query = qb
+//                .phrase()
+//                .onField("owner")
+//                .sentence(queryString)
+//                .createQuery();
                 .keyword()
                 .fuzzy()
-                .onFields("name")
+                .onFields("owner", "creator")
                 .matching(queryString)
                 .createQuery();
 
         // wrap Lucene query in a org.hibernate.Query
-        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(query, Name.class);
+        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(query, Entry.class);
 
         // for paging
 //        fullTextQuery.setFirstResult(15); //start from the 15th element

@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.entry;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,14 +12,12 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
-import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.FundingSource;
-import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.model.ReadGroup;
 import org.jbei.ice.lib.permissions.model.ReadUser;
 import org.jbei.ice.lib.permissions.model.WriteGroup;
@@ -563,7 +560,7 @@ class EntryDAO extends HibernateRepository<Entry> {
      * @return Saved Entry object.
      * @throws DAOException
      */
-    public Entry saveOrUpdate(Entry entry) throws DAOException {
+    public Entry save(Entry entry) throws DAOException {
         if (entry == null) {
             throw new DAOException("Failed to save null entry!");
         }
@@ -577,32 +574,6 @@ class EntryDAO extends HibernateRepository<Entry> {
         session.beginTransaction();
 
         try {
-            if (entry.getSelectionMarkers() != null) {
-                for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
-                    selectionMarker.setEntry(entry);
-                }
-            }
-
-            if (entry.getLinks() != null) {
-                for (Link link : entry.getLinks()) {
-                    link.setEntry(entry);
-                }
-            }
-
-            if (entry.getNames() != null) {
-                for (Name name : entry.getNames()) {
-                    name.setEntry(entry);
-                }
-            }
-
-            if (entry.getPartNumbers() != null) {
-                for (PartNumber partNumber : entry.getPartNumbers()) {
-                    partNumber.setEntry(entry);
-                }
-            }
-
-            entry.setModificationTime(Calendar.getInstance().getTime());
-
             if (entry.getEntryFundingSources() != null) {
                 // Manual cascade of EntryFundingSource. Guarantees unique FundingSource
                 for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
@@ -612,7 +583,43 @@ class EntryDAO extends HibernateRepository<Entry> {
                 }
             }
 
-            session.saveOrUpdate(entry);
+            session.save(entry);
+            session.getTransaction().commit();
+            return entry;
+
+        } catch (HibernateException he) {
+            Logger.error(he);
+            session.getTransaction().rollback();
+            throw new DAOException(he);
+        } finally {
+            closeSession(session);
+        }
+    }
+
+    public Entry update(Entry entry) throws DAOException {
+        if (entry == null) {
+            throw new DAOException("Failed to save null entry!");
+        }
+
+        // deal with associated objects here instead of making individual forms
+        // deal with foreign key checks. Deletion of old values happen through
+        // Set.clear() and
+        // hibernate cascade delete-orphaned in the model.Entry
+
+        Session session = newSession();
+        session.beginTransaction();
+
+        try {
+            if (entry.getEntryFundingSources() != null) {
+                // Manual cascade of EntryFundingSource. Guarantees unique FundingSource
+                for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
+                    FundingSource saveFundingSource = saveFundingSource(session,
+                                                                        entryFundingSource.getFundingSource());
+                    entryFundingSource.setFundingSource(saveFundingSource);
+                }
+            }
+
+            session.update(entry);
             session.getTransaction().commit();
             return entry;
 

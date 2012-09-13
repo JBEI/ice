@@ -14,9 +14,8 @@ import org.jbei.ice.lib.dao.IModel;
 
 /**
  * Place to store installation specific values. For example, uuids for default site install groups.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 @Entity
 @Table(name = "configuration")
@@ -37,12 +36,13 @@ public class Configuration implements IModel {
 
     /**
      * Possible configuration key values.
-     * 
+     *
      * @author Timothy Ham
-     * 
      */
     public enum ConfigurationKey {
-        PLASMID_STORAGE_ROOT, STRAIN_STORAGE_ROOT, PART_STORAGE_ROOT, ARABIDOPSIS_STORAGE_ROOT, PLASMID_STORAGE_DEFAULT, STRAIN_STORAGE_DEFAULT, PART_STORAGE_DEFAULT, ARABIDOPSIS_STORAGE_DEFAULT, DATABASE_SCHEMA_VERSION
+        PLASMID_STORAGE_ROOT, STRAIN_STORAGE_ROOT, PART_STORAGE_ROOT, ARABIDOPSIS_STORAGE_ROOT,
+        PLASMID_STORAGE_DEFAULT, STRAIN_STORAGE_DEFAULT, PART_STORAGE_DEFAULT, ARABIDOPSIS_STORAGE_DEFAULT,
+        DATABASE_SCHEMA_VERSION
     }
 
     public Configuration() {

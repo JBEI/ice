@@ -40,9 +40,9 @@ public class SampleDAO extends HibernateRepository<Sample> {
         Session session = newSession();
         try {
 
-            Integer itemCount = (Integer) session.createCriteria(Sample.class)
-                                                 .setProjection(Projections.countDistinct("id"))
-                                                 .add(Restrictions.eq("entry", entry)).uniqueResult();
+            Number itemCount = (Number) session.createCriteria(Sample.class)
+                                               .setProjection(Projections.countDistinct("id"))
+                                               .add(Restrictions.eq("entry", entry)).uniqueResult();
 
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {

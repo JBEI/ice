@@ -1,20 +1,82 @@
 package org.jbei.ice.controllers;
 
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.executor.IceExecutorService;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 
+import org.hibernate.Session;
+import org.hibernate.search.FullTextSession;
+import org.hibernate.search.Search;
+
 /**
- * ABI to manipulate system wide events.
+ * Application wide controller
  *
- * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
+ * @author Hector Plahar
  */
 public class ApplicationController {
 
+    public static final String RELEASE_DATABASE_SCHEMA_VERSION = "3.3.0";
+    public static final String[] SUPPORTED_PREVIOUS_DB_VERSIONS = {"3.1.0"};
+
     /**
-     * Schedule to rebuild the BLAST search index.
+     * Schedule task to rebuild the blast index
      */
-    public static void scheduleBlastIndexRebuildJob() {
+    public static void scheduleBlastIndexRebuildTask() {
         RebuildBlastIndexTask task = new RebuildBlastIndexTask();
         IceExecutorService.getInstance().runTask(task);
+    }
+
+    public static void initializeHibernateSearch() {
+        Session session = HibernateHelper.newSession();
+        FullTextSession fullTextSession = Search.getFullTextSession(session);
+        try {
+            fullTextSession.createIndexer().startAndWait();
+        } catch (InterruptedException e) {
+            Logger.error("Indexer interrupted", e);
+        }
+    }
+
+    public static void upgradeDatabaseIfNecessary() {
+        ConfigurationController controller = new ConfigurationController();
+        try {
+            String dbVersion = controller.retrieveDatabaseVersion();
+            if (RELEASE_DATABASE_SCHEMA_VERSION.equalsIgnoreCase(dbVersion)) {
+                Logger.info("Application version: " + RELEASE_DATABASE_SCHEMA_VERSION);
+                return;
+            }
+
+            // check if previous supported versions
+            boolean previousVersionSupported = isPreviousVersionSupported(dbVersion);
+            if (!previousVersionSupported) // TODO : fatal db cannot be upgraded
+                return;
+
+            // upgrade the db and save new version
+            initializeHibernateSearch();
+            upgradePermissions();
+            controller.updateDatabaseVersion(RELEASE_DATABASE_SCHEMA_VERSION);
+            Logger.info("Application upgraded from " + dbVersion + " to " + RELEASE_DATABASE_SCHEMA_VERSION);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            // TODO : Fatal exception. Database cannot be updgraded
+        }
+    }
+
+    private static void upgradePermissions() throws ControllerException {
+        // convert all read/write user/group to permission
+        PermissionsController controller = new PermissionsController();
+        controller.upgradePermissions();
+    }
+
+    private static boolean isPreviousVersionSupported(String version) {
+        for (String prevVersion : SUPPORTED_PREVIOUS_DB_VERSIONS) {
+            if (prevVersion.equalsIgnoreCase(version))
+                return true;
+        }
+
+        return false;
     }
 }

@@ -11,6 +11,6 @@ public class LuceneSearchTest {
     @Test
     public void testExecuteSearch() throws Exception {
 
-        LuceneSearch.getInstance().executeSearch("Adrienne");
+        LuceneSearch.getInstance().executeSearch("Hector");
     }
 }

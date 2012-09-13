@@ -62,7 +62,7 @@ public class EntryExportServlet extends HttpServlet {
         if (XML_EXPORT.equalsIgnoreCase(type)) {
             exportXML(account, entries, response);
         } else if (EXCEL_EXPORT.equalsIgnoreCase(type)) {
-            exportExcel(entries, response, controller);
+            exportExcel(entries, response);
         }
     }
 
@@ -110,7 +110,7 @@ public class EntryExportServlet extends HttpServlet {
             OutputStream os = response.getOutputStream();
             DataInputStream is = new DataInputStream(byteInputStream);
 
-            int read = 0;
+            int read;
 
             while ((read = is.read(bytes)) != -1) {
                 os.write(bytes, 0, read);
@@ -125,12 +125,11 @@ public class EntryExportServlet extends HttpServlet {
         }
     }
 
-    private void exportExcel(ArrayList<Entry> entries, HttpServletResponse response,
-            EntryController controller) {
+    private void exportExcel(ArrayList<Entry> entries, HttpServletResponse response) {
         try {
             String data;
             try {
-                data = IceXlsSerializer.serialize(controller, entries);
+                data = IceXlsSerializer.serialize(entries);
             } catch (ControllerException e) {
                 Logger.error(e);
                 return;
@@ -148,7 +147,7 @@ public class EntryExportServlet extends HttpServlet {
             OutputStream os = response.getOutputStream();
             DataInputStream is = new DataInputStream(byteInputStream);
 
-            int read = 0;
+            int read;
             while ((read = is.read(bytes)) != -1) {
                 os.write(bytes, 0, read);
             }

@@ -20,6 +20,7 @@ import org.jbei.ice.lib.group.Group;
  * the Entry.
  *
  * @author Timothy Ham, Zinovii Dmytriv
+ * @deprecated this has been replaced by Permission
  */
 @Entity
 @Table(name = "permission_write_groups")

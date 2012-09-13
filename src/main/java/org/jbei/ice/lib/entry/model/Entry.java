@@ -105,7 +105,7 @@ public class Entry implements IModel {
     private String recordType;
 
     @Column(name = "owner", length = 127)
-    @Field
+    @Field(store = Store.YES)
     private String owner;
 
     @Column(name = "owner_email", length = 127)

@@ -6,8 +6,8 @@ import java.util.Iterator;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryUtil;
+import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
@@ -32,7 +32,7 @@ public class IceXlsSerializer {
         return "";
     }
 
-    public static String serialize(EntryController entryController, ArrayList<Entry> entries)
+    public static String serialize(ArrayList<Entry> entries)
             throws ControllerException {
         int index = 1;
 
@@ -130,8 +130,9 @@ public class IceXlsSerializer {
             AccountController controller = new AccountController();
             SampleController sampleController = new SampleController();
             SequenceController sequenceController = new SequenceController();
-            stringBuilder.append((entryController.hasAttachments(controller.getSystemAccount(),
-                                                                 entry)) ? "Yes" : "No")
+            AttachmentController attachmentController = new AttachmentController();
+            stringBuilder.append((attachmentController.hasAttachment(controller.getSystemAccount(),
+                                                                     entry)) ? "Yes" : "No")
                          .append("\t");
             stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append(
                     "\t");

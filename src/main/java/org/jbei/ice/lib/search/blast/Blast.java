@@ -67,7 +67,7 @@ public class Blast {
 
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast db for the first time");
-            ApplicationController.scheduleBlastIndexRebuildJob();
+            ApplicationController.scheduleBlastIndexRebuildTask();
         }
     }
 
@@ -210,7 +210,7 @@ public class Blast {
 
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast database for the first time");
-            ApplicationController.scheduleBlastIndexRebuildJob();
+            ApplicationController.scheduleBlastIndexRebuildTask();
         } else {
             while (isRebuilding()) {
                 try {
@@ -494,7 +494,7 @@ public class Blast {
                 boolean circular = false;
                 if (idLineFields.length == 1) {
                     Logger.info("Old Blast db format detected. Schedule rebuild");
-                    ApplicationController.scheduleBlastIndexRebuildJob();
+                    ApplicationController.scheduleBlastIndexRebuildTask();
                 } else if (idLineFields.length == 3) {
                     idLine = idLineFields[0].trim();
                     sLength = Integer.parseInt(idLineFields[1]);

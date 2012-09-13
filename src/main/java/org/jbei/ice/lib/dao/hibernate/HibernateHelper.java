@@ -52,11 +52,6 @@ public class HibernateHelper {
                 ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(
                         configuration.getProperties()).buildServiceRegistry();
                 sessionFactory = configuration.buildSessionFactory(serviceRegistry);
-
-                //            Session session = newSession();
-//            FullTextSession fullTextSession = Search.getFullTextSession(session);
-//            fullTextSession.createIndexer().start();
-
             } catch (Throwable e) {
                 String msg = "Could not initialize hibernate!!!";
                 Logger.error(msg, e);

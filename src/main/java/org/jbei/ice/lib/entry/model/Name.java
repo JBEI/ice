@@ -7,6 +7,7 @@ import org.jbei.ice.lib.dao.IModel;
 
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.Store;
 
 /**
  * Store the friendly name for an {@link org.jbei.ice.lib.entry.model.Entry}.
@@ -25,7 +26,7 @@ public class Name implements IModel {
     private long id;
 
     @Column(name = "name", length = 127, nullable = false)
-    @Field
+    @Field(store = Store.YES)
     private String name;
 
     @ManyToOne(fetch = FetchType.EAGER)

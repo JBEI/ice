@@ -44,7 +44,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
                 result.getChildren().size();
             }
         } catch (HibernateException e) {
-            String msg = "Could not get Location by id: " + id + " " + e.toString();
+            String msg = "Could not get location by id: " + id + " " + e.toString();
             Logger.error(msg, e);
             throw new DAOException(msg);
         } finally {
@@ -156,11 +156,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
     /**
      * Delete the given {@link Storage} object in the database.
      *
-<<<<<<< HEAD
-     * @param location
-=======
      * @param location storage object to delete
->>>>>>> master
      * @throws DAOException
      */
     public void delete(Storage location) throws DAOException {

@@ -544,4 +544,12 @@ public class PermissionsController {
 
         return permissionInfos;
     }
+
+    public void upgradePermissions() throws ControllerException {
+        try {
+            dao.upgradePermissions();
+        } catch (DAOException e) {
+            Logger.error(e);
+        }
+    }
 }

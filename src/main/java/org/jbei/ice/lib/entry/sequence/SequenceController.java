@@ -128,7 +128,7 @@ public class SequenceController {
         try {
             result = dao.saveSequence(sequence);
             if (scheduleIndexRebuild) {
-                ApplicationController.scheduleBlastIndexRebuildJob();
+                ApplicationController.scheduleBlastIndexRebuildTask();
             }
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -194,7 +194,7 @@ public class SequenceController {
         }
 
         if (scheduleIndexRebuild) {
-            ApplicationController.scheduleBlastIndexRebuildJob();
+            ApplicationController.scheduleBlastIndexRebuildTask();
         }
 
         return result;
@@ -233,7 +233,7 @@ public class SequenceController {
             dao.deleteSequence(sequence);
 
             if (scheduleIndexRebuild) {
-                ApplicationController.scheduleBlastIndexRebuildJob();
+                ApplicationController.scheduleBlastIndexRebuildTask();
             }
         } catch (DAOException e) {
             throw new ControllerException(e);
