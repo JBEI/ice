@@ -3,11 +3,10 @@ package org.jbei.ice.lib.models;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
-
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
+
+import org.hibernate.search.annotations.Field;
 
 /**
  * Represents a selection marker for entry.
@@ -15,7 +14,6 @@ import org.jbei.ice.lib.entry.model.Entry;
  * @author Timothy Ham, Zinovii Dmytriv
  */
 @Entity
-@Indexed
 @Table(name = "selection_markers")
 @SequenceGenerator(name = "sequence", sequenceName = "selection_markers_id_seq", allocationSize = 1)
 public class SelectionMarker implements IModel {

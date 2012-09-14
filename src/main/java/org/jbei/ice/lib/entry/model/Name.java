@@ -5,8 +5,8 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
+import org.hibernate.search.annotations.Boost;
 import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Store;
 
 /**
@@ -15,7 +15,6 @@ import org.hibernate.search.annotations.Store;
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
-@Indexed
 @Table(name = "names")
 @SequenceGenerator(name = "sequence", sequenceName = "names_id_seq", allocationSize = 1)
 public class Name implements IModel {
@@ -26,7 +25,7 @@ public class Name implements IModel {
     private long id;
 
     @Column(name = "name", length = 127, nullable = false)
-    @Field(store = Store.YES)
+    @Field(store = Store.YES, boost = @Boost(2f))
     private String name;
 
     @ManyToOne(fetch = FetchType.EAGER)

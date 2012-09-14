@@ -130,23 +130,23 @@ public class SearchController {
 
         String cleanedQuery = cleanQuery(query);
 
-        try {
-            Logger.info("Searching for \"" + cleanedQuery + "\"");
-            ArrayList<SearchResult> searchResults = AggregateSearch.query(cleanedQuery, account);
-            if (searchResults != null) {
-                for (SearchResult searchResult : searchResults) {
-                    Entry entry = searchResult.getEntry();
-
-                    if (permissionsController.hasReadPermission(account, entry)) {
-                        results.add(searchResult);
-                    }
-                }
-            }
-
-            Logger.info(results.size() + " visible results found");
-        } catch (SearchException e) {
-            throw new ControllerException(e);
-        }
+//        try {
+//            Logger.info("Searching for \"" + cleanedQuery + "\"");
+//            ArrayList<SearchResult> searchResults = AggregateSearch.query(cleanedQuery, account);
+//            if (searchResults != null) {
+//                for (SearchResult searchResult : searchResults) {
+//                    Entry entry = searchResult.getEntry();
+//
+//                    if (permissionsController.hasReadPermission(account, entry)) {
+//                        results.add(searchResult);
+//                    }
+//                }
+//            }
+//
+//            Logger.info(results.size() + " visible results found");
+//        } catch (SearchException e) {
+//            throw new ControllerException(e);
+//        }
 
         return results;
     }

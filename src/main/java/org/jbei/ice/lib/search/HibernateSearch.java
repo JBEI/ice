@@ -12,29 +12,25 @@ import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
 /**
- * Full text search of the registry using Lucene search engine.
- * <p/>
- * It uses a single instance of the IndexSearcher for efficiency, and most importantly to be able to
- * rebuild the underlying index transparently. When rebuildIndex() is called, the index is rebuilt,
- * after which a new IndexSearcher is instantiated with the updated index.
+ * Apache Lucene full text library functionality in Hibernate
  *
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Hector Plahar
  */
-public class LuceneSearch {
+public class HibernateSearch {
 
-    private LuceneSearch() {
+    private HibernateSearch() {
     }
 
     private static class SingletonHolder {
-        private static final LuceneSearch INSTANCE = new LuceneSearch();
+        private static final HibernateSearch INSTANCE = new HibernateSearch();
     }
 
     /**
      * Retrieve the singleton instance of this classe.
      *
-     * @return LuceneSearch instance.
+     * @return HibernateSearch instance.
      */
-    public static LuceneSearch getInstance() {
+    public static HibernateSearch getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
@@ -81,16 +77,12 @@ public class LuceneSearch {
 //        fquery.setProjection("id");
 //        List results = fquery.list();
 
-
         // execute search
         List result = fullTextQuery.list();
         System.out.println("Found " + result.size() + " for " + fullTextQuery.getQueryString());
 
         // sort
-
         tx.commit();
         session.close();
-
-
     }
 }

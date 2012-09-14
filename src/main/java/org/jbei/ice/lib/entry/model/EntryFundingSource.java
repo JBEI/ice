@@ -1,8 +1,5 @@
 package org.jbei.ice.lib.entry.model;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.FundingSource;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -13,6 +10,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.models.FundingSource;
+
+import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.IndexedEmbedded;
 
 /**
  * Many-to-Many representation between {@link Entry} and {@link org.jbei.ice.lib.models.FundingSource}.
@@ -35,8 +38,10 @@ public class EntryFundingSource implements IModel {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "funding_source_id", nullable = false)
+    @IndexedEmbedded
     private FundingSource fundingSource;
 
+    @ContainedIn
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;

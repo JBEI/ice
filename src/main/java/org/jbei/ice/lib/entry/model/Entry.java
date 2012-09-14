@@ -19,7 +19,10 @@ import org.jbei.ice.shared.dto.Visibility;
 
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.Boost;
 import org.hibernate.search.annotations.DateBridge;
+import org.hibernate.search.annotations.DocumentId;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
@@ -91,41 +94,42 @@ public class Entry implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @DocumentId
     private long id;
 
     @Column(name = "record_id", length = 36, nullable = false, unique = true)
-    @Field(store = Store.YES)
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String recordId;
 
     @Column(name = "version_id", length = 36, nullable = false)
     private String versionId;
 
     @Column(name = "record_type", length = 127, nullable = false)
-    @Field
     private String recordType;
 
     @Column(name = "owner", length = 127)
-    @Field(store = Store.YES)
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String owner;
 
     @Column(name = "owner_email", length = 127)
-    @Field
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String ownerEmail;
 
     @Column(name = "creator", length = 127)
-    @Field
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String creator;
 
     @Column(name = "creator_email", length = 127)
-    @Field
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String creatorEmail;
 
     @Column(name = "alias", length = 127)
-    @Field
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String alias;
 
     @Column(name = "keywords", length = 127)
     @Field
+    @Boost(1.2f)
     private String keywords;
 
     @Column(name = "status", length = 127)
@@ -154,11 +158,12 @@ public class Entry implements IModel {
 
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
+    @DateBridge(resolution = Resolution.SECOND)
     private Date creationTime;
 
     @Column(name = "modification_time")
     @Temporal(TemporalType.TIMESTAMP)
-    @DateBridge(resolution = Resolution.HOUR)
+    @DateBridge(resolution = Resolution.SECOND)
     private Date modificationTime;
 
     @Column(name = "bio_safety_level")
@@ -167,7 +172,6 @@ public class Entry implements IModel {
     @Column(name = "intellectual_property")
     @Lob
     @Type(type = "org.hibernate.type.TextType")
-    @Field
     private String intellectualProperty;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
@@ -187,10 +191,12 @@ public class Entry implements IModel {
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
     @OrderBy("id")
+    @IndexedEmbedded
     private final Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
     @OrderBy("id")
+    @IndexedEmbedded
     private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
