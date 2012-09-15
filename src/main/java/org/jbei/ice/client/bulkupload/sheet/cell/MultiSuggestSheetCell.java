@@ -47,7 +47,10 @@ public class MultiSuggestSheetCell extends SheetCell {
             @Override
             public void onBlur(BlurEvent event) {
                 String s = setDataForRow(currentRow);
-                textBox.setText(s);
+                if (MultiSuggestSheetCell.this.commaSeparatedAllowed)
+                    ((MultipleTextBox) textBox).setBaseText(s);
+                else
+                    box.setText(s);
             }
         });
 
@@ -78,7 +81,10 @@ public class MultiSuggestSheetCell extends SheetCell {
 
     @Override
     public void setText(String text) {
-        box.setText(text);
+        if (commaSeparatedAllowed)
+            ((MultipleTextBox) textBox).setBaseText(text);
+        else
+            textBox.setText(text);
     }
 
     /**
