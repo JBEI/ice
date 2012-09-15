@@ -43,7 +43,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
         Header header = datum.getTypeHeader();
         String value = datum.getValue();
 
-        if (header == null || value == null || value.isEmpty())
+        if (header == null || value == null)
             return;
 
         switch (header) {
@@ -164,7 +164,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
         Header header = datum.getTypeHeader();
         String value = datum.getValue();
 
-        if (header == null || value == null || value.isEmpty())
+        if (header == null || value == null)
             return;
 
         switch (header) {

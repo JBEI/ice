@@ -12,7 +12,7 @@ public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
         Header header = datum.getTypeHeader();
         String value = datum.getValue();
 
-        if (header == null || value == null || value.isEmpty())
+        if (header == null || value == null)
             return info;
 
         switch (header) {
