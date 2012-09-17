@@ -388,7 +388,7 @@ public class EntryPresenter extends AbstractPresenter {
                                              display.setEntryName(name);
 
                                              // can user edit ?
-                                             boolean canEdit = (AppController.accountInfo.isModerator() || result
+                                             boolean canEdit = (AppController.accountInfo.isAdmin() || result
                                                      .isCanEdit());
                                              display.getPermissionsWidget().
                                                      setCanEdit(result.getVisibility() == Visibility.OK);
@@ -563,7 +563,7 @@ public class EntryPresenter extends AbstractPresenter {
             switch (selection.getMenu()) {
 
                 case GENERAL:
-                    boolean canEdit = (AppController.accountInfo.isModerator() || currentInfo.isCanEdit());
+                    boolean canEdit = (AppController.accountInfo.isAdmin() || currentInfo.isCanEdit());
                     sequencePresenter = display.showEntryDetailView(currentInfo, canEdit,
                                                                     new DeleteSequenceHandler(service, eventBus,
                                                                                               currentInfo.getId()));

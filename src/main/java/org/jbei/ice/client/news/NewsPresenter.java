@@ -59,7 +59,7 @@ public class NewsPresenter extends AbstractPresenter {
     private void bind() {
         display.setAddNewsVisibility(false);
 
-        if (!AppController.accountInfo.isModerator()) {
+        if (!AppController.accountInfo.isAdmin()) {
             display.setAddNewsButtonVisibilty(false);
         }
 
@@ -107,7 +107,7 @@ public class NewsPresenter extends AbstractPresenter {
 
     private void save(final NewsItem item) {
 
-        if (!AppController.accountInfo.isModerator())
+        if (!AppController.accountInfo.isAdmin())
             return;
 
         new IceAsyncCallback<NewsItem>() {

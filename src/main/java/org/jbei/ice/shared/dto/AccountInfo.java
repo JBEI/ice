@@ -12,11 +12,10 @@ public class AccountInfo implements IsSerializable {
     private String institution;
     private String description;
     private String since;
-    private int entriesAvailable;
     private long userEntryCount;
     private int userSampleCount;
     private long visibleEntryCount;
-    private boolean isModerator;
+    private boolean isAdmin;
 
     public AccountInfo() {
     }
@@ -81,14 +80,6 @@ public class AccountInfo implements IsSerializable {
         this.sessionId = sessionId;
     }
 
-    public int getEntriesAvailable() {
-        return entriesAvailable;
-    }
-
-    public void setEntriesAvailable(int entriesAvailable) {
-        this.entriesAvailable = entriesAvailable;
-    }
-
     public long getUserEntryCount() {
         return userEntryCount;
     }
@@ -113,12 +104,12 @@ public class AccountInfo implements IsSerializable {
         this.visibleEntryCount = visibleEntryCount;
     }
 
-    public boolean isModerator() {
-        return isModerator;
+    public boolean isAdmin() {
+        return isAdmin;
     }
 
-    public void setModerator(boolean isModerator) {
-        this.isModerator = isModerator;
+    public void setAdmin(boolean isModerator) {
+        this.isAdmin = isModerator;
     }
 
     public String getInitials() {

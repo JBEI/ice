@@ -195,7 +195,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
     }
 
     private void retrievePendingIfAdmin() {
-        if (!AppController.accountInfo.isModerator())
+        if (!AppController.accountInfo.isAdmin())
             return;
 
         this.model.retrieveDraftsPendingVerification(new SavedDraftsEventHandler() {

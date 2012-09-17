@@ -74,40 +74,40 @@ public class HeaderPresenter {
             String operand = currentSelected.getSelectedOperand();
             switch (currentSelected.getType()) {
 
-            case BLAST:
-                final BlastSearchFilter filter = new BlastSearchFilter(operand, currentSelected
-                        .getSelectedOperator().value());
-                filter.setCloseHandler(new ClickHandler() {
+                case BLAST:
+                    final BlastSearchFilter filter = new BlastSearchFilter(operand, currentSelected
+                            .getSelectedOperator().value());
+                    filter.setCloseHandler(new ClickHandler() {
 
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        view.getSearchComposite().removeSearchWidget(filter);
-                        blastInfo = null;
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            view.getSearchComposite().removeSearchWidget(filter);
+                            blastInfo = null;
+                        }
+                    });
+
+                    view.getSearchComposite().addSearchWidget(filter);
+                    blastInfo = new SearchFilterInfo(currentSelected.getSelectedOperator().value(),
+                                                     currentSelected.getSelectedOperator().value(), operand);
+                    break;
+
+                default:
+                    String type = currentSelected.getType().getShortName().toLowerCase();
+                    String operator = currentSelected.getSelectedOperator().value();
+
+                    int indexOfType = view.getSearchInput().indexOf(type);
+                    if (indexOfType == -1) {
+                        String currentFilter = type + operator;
+                        if (operand.contains(" "))
+                            currentFilter += ("\"" + operand + "\"");
+                        else
+                            currentFilter += operand;
+                        view.getSearchComposite().appendFilter(currentFilter);
+                    } else {
+                        String parsed = QuickSearchParser.containsType(view.getSearchInput(),
+                                                                       currentSelected, operand, operator);
+                        view.getSearchComposite().setTextFilter(parsed);
                     }
-                });
-
-                view.getSearchComposite().addSearchWidget(filter);
-                blastInfo = new SearchFilterInfo(currentSelected.getSelectedOperator().value(),
-                        currentSelected.getSelectedOperator().value(), operand);
-                break;
-
-            default:
-                String type = currentSelected.getType().getShortName().toLowerCase();
-                String operator = currentSelected.getSelectedOperator().value();
-
-                int indexOfType = view.getSearchInput().indexOf(type);
-                if (indexOfType == -1) {
-                    String currentFilter = type + operator;
-                    if (operand.contains(" "))
-                        currentFilter += ("\"" + operand + "\"");
-                    else
-                        currentFilter += operand;
-                    view.getSearchComposite().appendFilter(currentFilter);
-                } else {
-                    String parsed = QuickSearchParser.containsType(view.getSearchInput(),
-                        currentSelected, operand, operator);
-                    view.getSearchComposite().setTextFilter(parsed);
-                }
             }
         }
     }
@@ -116,11 +116,7 @@ public class HeaderPresenter {
         return blastInfo;
     }
 
-    public boolean isUserLoggedIn() {
-        return AppController.sessionId != null;
-    }
-
     public boolean isModerator() {
-        return AppController.accountInfo.isModerator();
+        return AppController.accountInfo.isAdmin();
     }
 }

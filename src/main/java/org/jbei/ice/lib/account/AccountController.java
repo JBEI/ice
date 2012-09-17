@@ -369,7 +369,7 @@ public class AccountController {
             return info;
 
         boolean isModerator = isAdministrator(account);
-        info.setModerator(isModerator);
+        info.setAdmin(isModerator);
         info.setSessionId(sessionData.getSessionKey());
         return info;
     }

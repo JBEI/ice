@@ -12,25 +12,15 @@ import org.jbei.ice.shared.dto.SearchFilterInfo;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
-public class HeaderView extends Composite  {
+public class HeaderView extends Composite {
 
     interface Resources extends ClientBundle {
 
@@ -103,14 +93,6 @@ public class HeaderView extends Composite  {
         option.setOptions(options);
     }
 
-    public HasClickHandlers getPullDownArea() {
-        return searchInput.getPullDownArea();
-    }
-
-    public Button getSearchButton() {
-        return this.searchBtn;
-    }
-
     private Widget getImageHeader() {
         Image img = new Image(Resources.INSTANCE.logo());
         return img;
@@ -171,7 +153,7 @@ public class HeaderView extends Composite  {
         // Welcome text
         HTML welcometxt = new HTML("Welcome,&nbsp;");
         Hyperlink link = new Hyperlink(info.getFirstName() + " " + info.getLastName(),
-                "page=profile;id=" + info.getEmail());
+                                       "page=profile;id=" + info.getEmail());
         panel.add(welcometxt);
         panel.add(link);
 
@@ -207,7 +189,7 @@ public class HeaderView extends Composite  {
     public void createPullDownHandler() {
         if (this.searchInput != null) {
             PopupHandler handler = new PopupHandler(option, this.searchInput.getTextBox()
-                    .getElement(), -342, 8, false);
+                                                                            .getElement(), -342, 8, false);
             this.searchInput.getPullDownArea().addClickHandler(handler);
         }
     }

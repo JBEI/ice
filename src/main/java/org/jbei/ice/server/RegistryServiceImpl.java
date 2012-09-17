@@ -148,7 +148,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
 
                 info.setEmail(userAccount.getEmail());
-                info.setModerator(controller.isAdministrator(userAccount));
+                info.setAdmin(controller.isAdministrator(userAccount));
                 info.setFirstName(userAccount.getFirstName());
                 info.setLastName(userAccount.getLastName());
                 infos.add(info);
@@ -311,7 +311,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 info.setUserEntryCount(entryCount);
 
                 boolean isModerator = controller.isAdministrator(account);
-                info.setModerator(isModerator);
+                info.setAdmin(isModerator);
 
                 long visibleEntryCount;
                 if (isModerator)

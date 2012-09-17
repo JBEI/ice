@@ -269,7 +269,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 break;
 
             case ADMIN:
-                if (!AppController.accountInfo.isModerator()) {
+                if (!AppController.accountInfo.isAdmin()) {
                     History.newItem(Page.MAIN.getLink());
                     return;
                 }

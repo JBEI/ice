@@ -179,7 +179,7 @@ public class ProfilePresenter extends AbstractPresenter {
             public void onSuccess(String result) {
                 if ("yes".equalsIgnoreCase(result) || "true".equalsIgnoreCase(result)) {
                     // must be admin or current logged in user
-                    if (AppController.accountInfo.isModerator()
+                    if (AppController.accountInfo.isAdmin()
                             || AppController.accountInfo.getEmail().equals(userId))
                         display.addEditProfileLinkHandler(new EditProfileHandler());
                 }
