@@ -61,55 +61,46 @@ public abstract class BulkUploadHeaders {
 
             case NAME:
             case STRAIN_NAME:
-            case PLASMID_NAME:
                 value = info.getName();
                 break;
 
             case ALIAS:
             case STRAIN_ALIAS:
-            case PLASMID_ALIAS:
                 value = info.getAlias();
                 break;
 
             case KEYWORDS:
             case STRAIN_KEYWORDS:
-            case PLASMID_KEYWORDS:
                 value = info.getKeywords();
                 break;
 
             case SUMMARY:
             case STRAIN_SUMMARY:
-            case PLASMID_SUMMARY:
                 value = info.getShortDescription();
                 break;
 
             case NOTES:
             case STRAIN_NOTES:
-            case PLASMID_NOTES:
                 value = info.getLongDescription();
                 break;
 
             case REFERENCES:
             case STRAIN_REFERENCES:
-            case PLASMID_REFERENCES:
                 value = info.getReferences();
                 break;
 
             case LINKS:
             case STRAIN_LINKS:
-            case PLASMID_LINKS:
                 value = info.getLinks();
                 break;
 
             case STATUS:
             case STRAIN_STATUS:
-            case PLASMID_STATUS:
                 value = info.getStatus();
                 break;
 
             case SELECTION_MARKERS:
             case STRAIN_SELECTION_MARKERS:
-            case PLASMID_SELECTION_MARKERS:
                 value = info.getSelectionMarkers();
                 break;
 

@@ -105,7 +105,7 @@ public class SearchController {
                     try {
                         nextEntry = entryController.get(account, next);
                     } catch (PermissionException e) {
-                        Logger.error(e);
+                        Logger.warn(account.getEmail() + " does not have read permission for entry with id" + next);
                         continue;
                     }
                     if (!permissionsController.hasReadPermission(account, nextEntry))

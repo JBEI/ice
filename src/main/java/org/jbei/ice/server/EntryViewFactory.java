@@ -22,6 +22,7 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.UtilsDAO;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
@@ -90,6 +91,8 @@ public class EntryViewFactory {
             view.setHasSequence(hasSequence);
         } catch (ControllerException e) {
             Logger.error(e);
+        } catch (PermissionException e) {
+            Logger.warn(account.getEmail() + " does not have read permission for " + entry.getRecordId());
         }
     }
 
@@ -160,6 +163,8 @@ public class EntryViewFactory {
             hasAttachment = attachmentController.hasAttachment(account, entry);
         } catch (ControllerException e) {
             Logger.error(e);
+        } catch (PermissionException pe) {
+            Logger.warn(pe.getMessage());
         }
         view.setHasAttachment(hasAttachment);
 

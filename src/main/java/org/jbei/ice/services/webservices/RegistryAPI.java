@@ -197,10 +197,11 @@ public class RegistryAPI {
      */
     public long getNumberOfPublicEntries() throws ServiceException {
         long result = 0;
+        log("getNumberPublicEntries");
 
         try {
             EntryController controller = new EntryController();
-            result = controller.getNumberOfVisibleEntries(null);
+            result = controller.getNumberOfPublicEntries();
         } catch (Exception e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");

@@ -14,6 +14,8 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.permissions.PermissionException;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -130,8 +132,14 @@ public class IceXlsSerializer {
             AccountController controller = new AccountController();
             SampleController sampleController = new SampleController();
             SequenceController sequenceController = new SequenceController();
-            stringBuilder.append((entryController.hasAttachments(controller.getSystemAccount(),
-                                                                 entry)) ? "Yes" : "No")
+            boolean hasAttachments = false;
+            try {
+                hasAttachments = entryController.hasAttachments(controller.getSystemAccount(),
+                                                                entry);
+            } catch (PermissionException e) {
+                Logger.warn(e.getMessage());
+            }
+            stringBuilder.append(hasAttachments ? "Yes" : "No")
                          .append("\t");
             stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append(
                     "\t");

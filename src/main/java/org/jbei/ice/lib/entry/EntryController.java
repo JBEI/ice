@@ -275,7 +275,7 @@ public class EntryController {
      * @throws ControllerException
      * @deprecated call attachment controller directly
      */
-    public boolean hasAttachments(Account account, Entry entry) throws ControllerException {
+    public boolean hasAttachments(Account account, Entry entry) throws ControllerException, PermissionException {
         return attachmentController.hasAttachment(account, entry);
     }
 
@@ -327,6 +327,19 @@ public class EntryController {
         }
 
         return numberOfVisibleEntries;
+    }
+
+    public long getNumberOfPublicEntries() throws ControllerException {
+        GroupController controller = new GroupController();
+        Group everybodyGroup = controller.createOrRetrievePublicGroup();
+        Set<Group> accountGroups = new HashSet<Group>();
+        accountGroups.add(everybodyGroup);
+
+        try {
+            return dao.getNumberOfVisibleEntries(accountGroups, null);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
     }
 
     public ArrayList<Long> getEntryIdsByOwner(String ownerEmail, Visibility... visibilityList)

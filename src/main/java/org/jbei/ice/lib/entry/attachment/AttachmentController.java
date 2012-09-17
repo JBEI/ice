@@ -247,9 +247,9 @@ public class AttachmentController {
         }
     }
 
-    public boolean hasAttachment(Account account, Entry entry) throws ControllerException {
+    public boolean hasAttachment(Account account, Entry entry) throws ControllerException, PermissionException {
         if (!permissionsController.hasReadPermission(account, entry))
-            throw new ControllerException(account.getEmail() + " does not have read permission for entry "
+            throw new PermissionException(account.getEmail() + " does not have read permission for entry "
                                                   + entry.getRecordId());
         try {
             return dao.hasAttachment(entry);
