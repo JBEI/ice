@@ -36,7 +36,7 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
  *
  * @author Hector Plahar
  */
-public class EntryToInfoFactory {
+public class ModelToInfoFactory {
 
     public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
             Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences,

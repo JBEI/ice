@@ -19,7 +19,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.server.EntryToInfoFactory;
+import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
@@ -81,7 +81,7 @@ public class BulkUploadUtil {
 
         // convert to info object (no samples or trace sequences since bulk import does not have the ui for
         // it yet)
-        EntryInfo entryInfo = EntryToInfoFactory.getInfo(account, entry, attachments, null, null, hasSequence);
+        EntryInfo entryInfo = ModelToInfoFactory.getInfo(account, entry, attachments, null, null, hasSequence);
         if (entryInfo != null && enclosed != null) {
             attachments = null;
             try {
@@ -99,7 +99,7 @@ public class BulkUploadUtil {
 
             // convert to info object (no samples or trace sequences since bulk import does not have the ui for
             // it yet)
-            EntryInfo enclosedInfo = EntryToInfoFactory.getInfo(account, enclosed, attachments, null, null,
+            EntryInfo enclosedInfo = ModelToInfoFactory.getInfo(account, enclosed, attachments, null, null,
                                                                 hasSequence);
             entryInfo.setInfo(enclosedInfo);
         }

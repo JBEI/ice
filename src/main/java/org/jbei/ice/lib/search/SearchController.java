@@ -20,7 +20,7 @@ import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.search.lucene.AggregateSearch;
 import org.jbei.ice.lib.search.lucene.SearchException;
 import org.jbei.ice.lib.search.lucene.SearchResult;
-import org.jbei.ice.server.EntryToInfoFactory;
+import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.server.QueryFilter;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
@@ -297,7 +297,7 @@ public class SearchController {
                         BlastResultInfo info = new BlastResultInfo();
                         info.setBitScore(blastResult.getBitScore());
 
-                        EntryInfo view = EntryToInfoFactory.getSummaryInfo(blastResult.getEntry());
+                        EntryInfo view = ModelToInfoFactory.getSummaryInfo(blastResult.getEntry());
                         info.setEntryInfo(view);
 
                         info.seteValue(blastResult.geteValue());

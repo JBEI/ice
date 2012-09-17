@@ -30,8 +30,8 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.server.EntryToInfoFactory;
 import org.jbei.ice.server.InfoToModelFactory;
+import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AttachmentInfo;
@@ -201,12 +201,12 @@ public class BulkUploadController {
                         break;
                     }
 
-                    sampleStorage.getStorageList().add(EntryToInfoFactory.getStorageInfo(storage));
+                    sampleStorage.getStorageList().add(ModelToInfoFactory.getStorageInfo(storage));
                     storage = storage.getParent();
                 }
             }
 
-            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, null, null, sequence != null);
+            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, null, null, sequence != null);
             if (type == EntryAddType.STRAIN_WITH_PLASMID) {
 
                 // get plasmids
@@ -215,7 +215,7 @@ public class BulkUploadController {
                 if (plasmid != null) {
                     attachments = attachmentController.getByEntry(account, plasmid);
                     sequence = sequenceController.getByEntry(entry);
-                    EntryInfo plasmidInfo = EntryToInfoFactory.getInfo(account, plasmid,
+                    EntryInfo plasmidInfo = ModelToInfoFactory.getInfo(account, plasmid,
                                                                        attachments, null, null, sequence != null);
                     info.setInfo(plasmidInfo);
                 }
