@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.permissions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.controllers.common.ControllerException;
@@ -18,19 +19,11 @@ public class PermissionsController {
 
     private final AccountController accountController;
     private final GroupController groupController;
-    private final ReadGroupDAO readGroupDAO;
-    private final WriteGroupDAO writeGroupDAO;
-    private final ReadUserDAO readUserDAO;
-    private final WriteUserDAO writeUserDAO;
     private final PermissionDAO dao;
 
     public PermissionsController() {
         accountController = new AccountController();
         groupController = new GroupController();
-        readGroupDAO = new ReadGroupDAO();
-        writeGroupDAO = new WriteGroupDAO();
-        readUserDAO = new ReadUserDAO();
-        writeUserDAO = new WriteUserDAO();
         dao = new PermissionDAO();
     }
 
@@ -145,7 +138,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                readGroupDAO.setReadGroup(entry, groups);
+                dao.addGroupPermission(entry, groups, false, true);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -169,7 +162,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                writeGroupDAO.setWriteGroup(entry, groups);
+                dao.addGroupPermission(entry, groups, true, false);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -193,7 +186,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                readUserDAO.setReadUser(entry, accounts);
+                dao.addAccountPermission(entry, accounts, false, true);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -205,22 +198,16 @@ public class PermissionsController {
     protected void addReadUser(Account requestingAccount, Entry entry, Account account) throws ControllerException,
             PermissionException {
         if (hasWritePermission(requestingAccount, entry)) {
+            Set<Account> accounts = new HashSet<Account>();
             try {
-                Set<Account> accounts = readUserDAO.getReadUsers(entry);
-                boolean alreadyAdded = false;
-                for (Account oldAccount : accounts) {
-                    if (oldAccount.getId() == account.getId()) {
-                        alreadyAdded = true;
-                        break;
-                    }
-                }
-                if (alreadyAdded == false) {
-                    accounts.add(account);
-                    readUserDAO.setReadUser(entry, accounts);
-                }
+                if (dao.hasAccountPermission(entry, account, false, true))
+                    return;
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
+
+            accounts.add(account);
+            setReadUser(requestingAccount, entry, accounts);
         } else {
             throw new PermissionException("User " + requestingAccount.getEmail()
                                                   + " does not have write permissions for entry " + entry.getId());
@@ -231,7 +218,8 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(requestingAccount, entry)) {
             try {
-                readUserDAO.removeReadUser(entry, account);
+                HashSet<Account> accounts = new HashSet<Account>();
+                dao.removeAccountPermission(entry, accounts, false, true);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -244,22 +232,16 @@ public class PermissionsController {
     public void addReadGroup(Account account, Entry entry, Group readGroup) throws ControllerException,
             PermissionException {
         if (hasWritePermission(account, entry)) {
+            Set<Group> groups = new HashSet<Group>();
             try {
-                Set<Group> groups = readGroupDAO.getReadGroups(entry);
-                boolean alreadyAdded = false;
-                for (Group existingGroup : groups) {
-                    if (existingGroup.getId() == readGroup.getId()) {
-                        alreadyAdded = true;
-                        break;
-                    }
-                }
-                if (alreadyAdded == false) {
-                    groups.add(readGroup);
-                    readGroupDAO.setReadGroup(entry, groups);
-                }
+                if (dao.hasGroupPermission(entry, readGroup, false, true))
+                    return;
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
+
+            groups.add(readGroup);
+            setReadGroup(account, entry, groups);
         } else {
             throw new PermissionException("Write Permission not permitted");
         }
@@ -269,7 +251,9 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(requestingAccount, entry)) {
             try {
-                readGroupDAO.removeReadGroup(entry, readGroup);
+                Set<Group> groups = new HashSet<Group>();
+                groups.add(readGroup);
+                dao.removeGroupPermission(entry, groups, false, true);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -282,7 +266,9 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(requestingAccount, entry)) {
             try {
-                writeUserDAO.addWriteUser(entry, account);
+                Set<Account> accounts = new HashSet<Account>();
+                accounts.add(account);
+                dao.addAccountPermission(entry, accounts, true, false);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -295,7 +281,8 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(requestingAccount, entry)) {
             try {
-                writeUserDAO.removeWriteUser(entry, account);
+                Set<Account> accounts = new HashSet<Account>();
+                dao.removeAccountPermission(entry, accounts, true, false);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -308,7 +295,9 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                writeGroupDAO.removeWriteGroup(entry, writeGroup);
+                Set<Group> groups = new HashSet<Group>();
+                groups.add(writeGroup);
+                dao.removeGroupPermission(entry, groups, true, false);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -321,18 +310,12 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                Set<Group> groups = writeGroupDAO.getWriteGroups(entry);
-                boolean alreadyAdded = false;
-                for (Group existingGroup : groups) {
-                    if (existingGroup.getId() == writeGroup.getId()) {
-                        alreadyAdded = true;
-                        break;
-                    }
-                }
-                if (alreadyAdded == false) {
-                    groups.add(writeGroup);
-                    writeGroupDAO.setWriteGroup(entry, groups);
-                }
+                if (dao.hasGroupPermission(entry, writeGroup, true, false))
+                    return;
+
+                Set<Group> groups = new HashSet<Group>();
+                groups.add(writeGroup);
+                dao.addGroupPermission(entry, groups, true, false);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -356,7 +339,7 @@ public class PermissionsController {
             PermissionException {
         if (hasWritePermission(account, entry)) {
             try {
-                writeUserDAO.setWriteUser(entry, accounts);
+                dao.addAccountPermission(entry, accounts, true, false);
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -367,7 +350,7 @@ public class PermissionsController {
 
     protected boolean accountHasReadPermission(Account account, Entry entry) throws ControllerException {
         try {
-            return dao.isReadUserAccount(account, entry);
+            return dao.hasAccountPermission(entry, account, false, true);
         } catch (DAOException dao) {
             Logger.error(dao);
         }
@@ -376,19 +359,23 @@ public class PermissionsController {
 
     protected boolean accountHasWritePermission(Account account, Entry entry) throws ControllerException {
         try {
-            return dao.isWriteUserAccount(account, entry);
+            return dao.hasAccountPermission(entry, account, true, false);
         } catch (DAOException dao) {
             Logger.error(dao);
         }
         return false;
     }
 
+    // checks if at least one member of the group has read permission
     public boolean groupHasWritePermission(Set<Group> groups, Entry entry) throws ControllerException {
         try {
             if (groups.isEmpty())
                 return false;
 
-            return writeGroupDAO.entryHasGroups(groups, entry);
+            for (Group group : groups) {
+                if (dao.hasGroupPermission(entry, group, true, false))
+                    return true;
+            }
         } catch (DAOException dao) {
             Logger.error(dao);
         }
@@ -400,11 +387,16 @@ public class PermissionsController {
             if (groups.isEmpty())
                 return false;
 
-            return readGroupDAO.entryHasGroups(groups, entry);
+            for (Group group : groups) {
+                if (dao.hasGroupPermission(entry, group, false, true))
+                    return true;
+            }
+
+            return groupHasWritePermission(groups, entry);
         } catch (DAOException dao) {
             Logger.error(dao);
+            return false;
         }
-        return false;
     }
 
     /**
@@ -419,7 +411,7 @@ public class PermissionsController {
     public boolean hasReadPermission(Account account, Entry entry) throws ControllerException {
 
         // check if account is a moderator account of is owner of the entry
-        if (isOwnerOrModerator(account, entry))
+        if (isOwnerOrAdministrator(account, entry))
             return true;
 
         // check explicit read permission
@@ -444,7 +436,7 @@ public class PermissionsController {
     }
 
     public boolean hasWritePermission(Account account, Entry entry) throws ControllerException {
-        if (isOwnerOrModerator(account, entry))
+        if (isOwnerOrAdministrator(account, entry))
             return true;
 
         // check write accounts for entry
@@ -467,7 +459,7 @@ public class PermissionsController {
      * @return true if account is owner of entry or is a moderator, false otherwise
      * @throws ControllerException
      */
-    protected boolean isOwnerOrModerator(Account account, Entry entry) throws ControllerException {
+    protected boolean isOwnerOrAdministrator(Account account, Entry entry) throws ControllerException {
         // first check entry ownership
         if (account.getEmail().equals(entry.getOwnerEmail()))
             return true;
@@ -481,17 +473,6 @@ public class PermissionsController {
         // TODO : adding system account also but this needs to be handled in a better way
         Account systemAccount = controller.getSystemAccount();
         return (systemAccount != null && systemAccount.equals(account));
-    }
-
-    public Set<Group> getReadGroup(Account account, Entry entry) throws ControllerException, PermissionException {
-        try {
-            if (!hasReadPermission(account, entry))
-                throw new PermissionException(account.getEmail() + " does not have read permission for entry " +
-                                                      entry.getRecordId());
-            return readGroupDAO.getReadGroups(entry);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
     }
 
     /**
@@ -512,28 +493,28 @@ public class PermissionsController {
 
         try {
             // read accounts
-            Set<Account> readAccounts = readUserDAO.getReadUsers(entry);
+            Set<Account> readAccounts = dao.retrieveAccountPermissions(false, true);
             for (Account readAccount : readAccounts) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.READ_ACCOUNT,
                                                        readAccount.getId(), readAccount.getFullName()));
             }
 
             // write accounts
-            Set<Account> writeAccounts = writeUserDAO.getWriteUsers(entry);
+            Set<Account> writeAccounts = dao.retrieveAccountPermissions(true, false);
             for (Account writeAccount : writeAccounts) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.WRITE_ACCOUNT,
                                                        writeAccount.getId(), writeAccount.getFullName()));
             }
 
             // read groups
-            Set<Group> readGroups = readGroupDAO.getReadGroups(entry);
+            Set<Group> readGroups = dao.retrieveGroupPermissions(false, true);
             for (Group group : readGroups) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.READ_GROUP, group
                         .getId(), group.getLabel()));
             }
 
             // write groups
-            Set<Group> writeGroups = writeGroupDAO.getWriteGroups(entry);
+            Set<Group> writeGroups = dao.retrieveGroupPermissions(true, false);
             for (Group group : writeGroups) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.WRITE_GROUP, group
                         .getId(), group.getLabel()));

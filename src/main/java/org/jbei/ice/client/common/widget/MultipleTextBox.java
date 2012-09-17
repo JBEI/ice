@@ -31,7 +31,7 @@ public class MultipleTextBox extends TextBoxBase {
 
     @Override
     public void setText(String text) {
-        String wholeString = super.getText();
+        String wholeString = super.getText(); // TODO bug in this method
         if (text != null && text.equals("")) {
             super.setText(text);
         } else {
@@ -52,5 +52,9 @@ public class MultipleTextBox extends TextBoxBase {
                 super.setText(wholeString);
             }
         }
+    }
+
+    public void setBaseText(String text) {
+        super.setText(text);
     }
 }
