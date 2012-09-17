@@ -26,6 +26,7 @@ public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
                         && !"False".equalsIgnoreCase(value))
                         && !"No".equalsIgnoreCase(value)) {
                     info.setCircular(null);
+                    break;
                 }
 
                 boolean circular = "Yes".equalsIgnoreCase(value) || "True".equalsIgnoreCase(value);

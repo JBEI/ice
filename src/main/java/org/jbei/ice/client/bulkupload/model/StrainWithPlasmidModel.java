@@ -273,6 +273,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                         && !"False".equalsIgnoreCase(value))
                         && !"No".equalsIgnoreCase(value)) {
                     info.setCircular(null);
+                    break;
                 }
 
                 boolean circular = "Yes".equalsIgnoreCase(value) || "True".equalsIgnoreCase(value);
