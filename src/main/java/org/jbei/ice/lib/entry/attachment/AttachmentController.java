@@ -124,14 +124,15 @@ public class AttachmentController {
      * @return saved attachment object
      * @throws ControllerException
      */
-    public Attachment saveExistingFile(Account account, Attachment attachment) throws ControllerException {
+    public Attachment saveExistingFile(Account account, Attachment attachment, InputStream inputStream)
+            throws ControllerException {
 
         if (!hasWritePermission(account, attachment)) {
             throw new ControllerException("No permissions to save attachment!");
         }
 
         try {
-            return dao.save(attachment, null);
+            return dao.save(attachment, inputStream);
         } catch (DAOException e) {
             throw new ControllerException("Failed to save attachment!", e);
         }

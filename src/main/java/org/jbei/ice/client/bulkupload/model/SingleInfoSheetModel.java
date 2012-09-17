@@ -87,11 +87,16 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
                     info.setSequenceAnalysis(seq);
                 }
 
-                String seqFileId = datum.getId();
-                if (seqFileId == null || seqFileId.isEmpty())
-                    break;
-
                 SequenceAnalysisInfo analysisInfo = seq.isEmpty() ? null : seq.get(0);
+                String seqFileId = datum.getId();
+                if (seqFileId == null || seqFileId.isEmpty()) {
+                    if (analysisInfo != null) {
+                        analysisInfo.setFileId("");
+                        analysisInfo.setName("");
+                    }
+                    break;
+                }
+
                 seq.clear();
 
                 if (analysisInfo == null)
@@ -110,13 +115,18 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
                     info.setAttachments(attachmentInfoList);
                 }
 
-                String fileId = datum.getId();
-                if (fileId == null || fileId.isEmpty())
-                    break;
-
                 AttachmentInfo attachmentInfo = attachmentInfoList.isEmpty() ? null : attachmentInfoList.get(0);
-                attachmentInfoList.clear();
 
+                String fileId = datum.getId();
+                if (fileId == null || fileId.isEmpty()) {
+                    if (attachmentInfo != null) {
+                        attachmentInfo.setFileId("");
+                        attachmentInfo.setFilename("");
+                    }
+                    break;
+                }
+
+                attachmentInfoList.clear();
                 if (attachmentInfo == null) {
                     attachmentInfo = new AttachmentInfo();
                 }

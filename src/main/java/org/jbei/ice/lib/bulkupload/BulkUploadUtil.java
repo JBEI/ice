@@ -1,5 +1,9 @@
 package org.jbei.ice.lib.bulkupload;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,7 +19,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.server.EntryToInfoFactory;
+import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
@@ -28,6 +32,7 @@ import org.jbei.ice.shared.dto.GroupInfo;
  * @author Hector Plahar
  */
 public class BulkUploadUtil {
+    private final static String TMP_DIR = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
 
     public static BulkUploadInfo modelToInfo(BulkUpload model) {
 
@@ -76,7 +81,7 @@ public class BulkUploadUtil {
 
         // convert to info object (no samples or trace sequences since bulk import does not have the ui for
         // it yet)
-        EntryInfo entryInfo = EntryToInfoFactory.getInfo(account, entry, attachments, null, null, hasSequence);
+        EntryInfo entryInfo = ModelToInfoFactory.getInfo(account, entry, attachments, null, null, hasSequence);
         if (entryInfo != null && enclosed != null) {
             attachments = null;
             try {
@@ -94,7 +99,7 @@ public class BulkUploadUtil {
 
             // convert to info object (no samples or trace sequences since bulk import does not have the ui for
             // it yet)
-            EntryInfo enclosedInfo = EntryToInfoFactory.getInfo(account, enclosed, attachments, null, null,
+            EntryInfo enclosedInfo = ModelToInfoFactory.getInfo(account, enclosed, attachments, null, null,
                                                                 hasSequence);
             entryInfo.setInfo(enclosedInfo);
         }
@@ -139,5 +144,19 @@ public class BulkUploadUtil {
             }
         }
         return null;
+    }
+
+    public static InputStream getFileInputStream(String fileName) {
+
+        File file = new File(TMP_DIR + File.separator + fileName);
+        if (!file.exists())
+            return null;
+
+        try {
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            Logger.error(e);
+            return null;
+        }
     }
 }

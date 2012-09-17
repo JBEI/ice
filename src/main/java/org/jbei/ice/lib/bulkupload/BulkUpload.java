@@ -50,7 +50,7 @@ public class BulkUpload implements IModel {
     @Column(name = "last_update_time", nullable = false)
     private Date lastUpdateTime;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinTable(name = "bulk_upload_entry",
                joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
