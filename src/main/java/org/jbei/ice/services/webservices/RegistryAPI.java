@@ -512,17 +512,6 @@ public class RegistryAPI {
         return (Strain) newEntry;
     }
 
-    public List<Entry> getAllEntries() throws ServiceException {
-        EntryController controller = new EntryController();
-        try {
-            ArrayList<Long> list = controller.getEntryIdsByOwner("wjholtz@lbl.gov");
-            Account system = new AccountController().getByEmail("system");
-            return controller.getEntriesByIdSet(system, list);
-        } catch (ControllerException e) {
-            throw new ServiceException(e);
-        }
-    }
-
     /**
      * Create a new {@link Part} on the server.
      *
