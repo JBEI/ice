@@ -316,10 +316,11 @@ public class BulkUploadController {
             for (Entry entry : draft.getContents()) {
                 if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
                     entryController.delete(requesting, entry);
+                } else {
+                    Logger.info("Encountered non-draft entry while deleting bulk upload " + entry.getId());
                 }
             }
 
-            draft.getContents().clear();
             dao.delete(draft);
 
         } catch (DAOException e) {

@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -120,6 +121,7 @@ public class SavedDraftsMenu extends Composite {
         @Override
         public void onSuccess(BulkUploadMenuItem item) {
             removeMenuItem(item);
+            History.fireCurrentHistoryState();
         }
 
         @Override
@@ -190,7 +192,6 @@ public class SavedDraftsMenu extends Composite {
 
                 @Override
                 public void onMouseOver(MouseOverEvent event) {
-//                    panel.clear();
                     panel.remove(count);
                     panel.add(delete, folderId);
 
@@ -201,7 +202,6 @@ public class SavedDraftsMenu extends Composite {
 
                 @Override
                 public void onMouseOut(MouseOutEvent event) {
-//                    panel.clear();
                     panel.remove(delete);
                     panel.add(count, folderId);
                 }
