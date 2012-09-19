@@ -1,13 +1,14 @@
 package org.jbei.ice.lib.models;
 
-import org.hibernate.annotations.Cascade;
-import org.jbei.ice.lib.dao.IModel;
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.*;
+
+import org.jbei.ice.lib.dao.IModel;
+
+import org.hibernate.annotations.Cascade;
 
 /**
  * Store sample storage location information as well as the hierarchical structure information.
@@ -66,7 +67,7 @@ public class Storage implements IModel {
     private static final long serialVersionUID = 1L;
 
     public enum StorageType {
-        GENERIC, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, WELL, TUBE, SCHEME
+        GENERIC, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, PLATE81, WELL, TUBE, SCHEME
     }
 
     @Id

@@ -1,5 +1,13 @@
 package org.jbei.ice.lib.utils;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -19,14 +27,6 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Populate an empty database with necessary objects and values.
@@ -82,6 +82,43 @@ public class PopulateInitialDatabase {
             }
             updateDatabaseSchema(dao);
 
+            // create the arabidopsisSeed freezer scheme
+            StorageController storageController = new StorageController();
+            Storage storage = null;
+
+            try {
+                Configuration config = dao.get(ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT);
+                storage = storageController.retrieveByUUID(config.getValue());
+                if (storage == null)
+                    return;
+                storage = storageController.get(storage.getId(), true);
+            } catch (DAOException ex) {
+                Logger.error(ex);
+                return;
+            }
+
+            if (storage == null)
+                return;
+
+            for (Storage child : storage.getChildren()) {
+                if (child.getName().equalsIgnoreCase("Arabidopsis Freezer Samples"))
+                    return;
+            }
+
+            //create freezer sample
+            Storage freezerStorage = new Storage("Arabidopsis Freezer Samples", "Arabidopsis Freezer Samples",
+                                                 StorageType.SCHEME, systemAccountEmail, storage);
+            ArrayList<Storage> schemes = new ArrayList<Storage>();
+            schemes.add(new Storage("Plate", "", StorageType.PLATE81, "", null));
+            schemes.add(new Storage("Well", "", StorageType.WELL, "", null));
+            schemes.add(new Storage("Tube", "", StorageType.TUBE, "", null));
+            freezerStorage.setSchemes(schemes);
+            freezerStorage = storageController.save(freezerStorage);
+            if (freezerStorage == null)
+                Logger.error("Could not create freezer storage");
+            else
+                Logger.info("Freezer storage created for sample");
+
         } catch (ControllerException e) {
             throw new UtilityException(e);
         }
@@ -92,14 +129,14 @@ public class PopulateInitialDatabase {
      */
     private static void populateDefaultStorageLocationsAndSchemes() throws UtilityException {
         ConfigurationDAO dao = new ConfigurationDAO();
-        Configuration strainRootConfig = null;
-        Configuration plasmidRootConfig = null;
-        Configuration partRootConfig = null;
-        Configuration arabidopsisRootConfig = null;
-        Storage strainRoot = null;
-        Storage plasmidRoot = null;
-        Storage partRoot = null;
-        Storage arabidopsisSeedRoot = null;
+        Configuration strainRootConfig;
+        Configuration plasmidRootConfig;
+        Configuration partRootConfig;
+        Configuration arabidopsisRootConfig;
+        Storage strainRoot;
+        Storage plasmidRoot;
+        Storage partRoot;
+        Storage arabidopsisSeedRoot;
 
         try {
             // read configuration
