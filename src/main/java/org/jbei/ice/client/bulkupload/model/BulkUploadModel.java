@@ -182,7 +182,7 @@ public class BulkUploadModel {
             final SampleStorage sampleStorage) {
 
         bulkInput.setSampleLocation(null);  // initialize
-        if (type == null) {
+        if (type == null || type == EntryAddType.STRAIN_WITH_PLASMID) {
             return;
         }
 

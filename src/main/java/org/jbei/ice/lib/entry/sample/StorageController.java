@@ -6,10 +6,11 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
+import org.jbei.ice.lib.utils.Utils;
 
 /**
  * ABI to manipulate {@link Storage}.
- * 
+ *
  * @author Hector Plahar
  */
 public class StorageController {
@@ -22,7 +23,7 @@ public class StorageController {
 
     /**
      * Retrieve {@link Storage} object by its name, index, type and the parent id from the database.
-     * 
+     *
      * @param name
      * @param index
      * @param type
@@ -39,9 +40,17 @@ public class StorageController {
         }
     }
 
+    public Storage retrieveByUUID(String uuid) throws ControllerException {
+        try {
+            return dao.get(uuid);
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+    }
+
     /**
      * Retrieve {@link Storage} that are schemas from the database.
-     * 
+     *
      * @return List of {@link Storage} objects that are schemas.
      * @throws ControllerException
      */
@@ -55,7 +64,7 @@ public class StorageController {
 
     /**
      * Retrieve a {@link Storage} object from the database by the bar code from the database.
-     * 
+     *
      * @param barcode
      * @return Storage.
      * @throws ControllerException
@@ -70,7 +79,7 @@ public class StorageController {
 
     /**
      * Update the {@link Storage} object in the database.
-     * 
+     *
      * @param storage
      * @return Saved storage.
      * @throws ControllerException
@@ -85,13 +94,18 @@ public class StorageController {
 
     /**
      * Save the {@link Storage} object in the database.
-     * 
+     *
      * @param storage
      * @return Saved storage.
      * @throws ControllerException
      */
     public Storage save(Storage storage) throws ControllerException {
         try {
+            if (storage.getUuid() == null || storage.getUuid().isEmpty()) {
+                String uuid = Utils.generateUUID();
+                storage.setUuid(uuid);
+            }
+
             return dao.save(storage);
         } catch (DAOException e) {
             throw new ControllerException(e);

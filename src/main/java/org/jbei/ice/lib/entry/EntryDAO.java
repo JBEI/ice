@@ -242,17 +242,19 @@ class EntryDAO extends HibernateRepository<Entry> {
             list = criteria.setProjection(Projections.property("entry.id")).list();
             results.addAll(list);
 
-            // check read user
-            criteria = session.createCriteria(ReadUser.class);
-            criteria.add(Restrictions.eq("account", account));
-            list = criteria.setProjection(Projections.property("entry.id")).list();
-            results.addAll(list);
+            if (account != null) {
+                // check read user
+                criteria = session.createCriteria(ReadUser.class);
+                criteria.add(Restrictions.eq("account", account));
+                list = criteria.setProjection(Projections.property("entry.id")).list();
+                results.addAll(list);
 
-            // check write user
-            criteria = session.createCriteria(WriteUser.class);
-            criteria.add(Restrictions.eq("account", account));
-            list = criteria.setProjection(Projections.property("entry.id")).list();
-            results.addAll(list);
+                // check write user
+                criteria = session.createCriteria(WriteUser.class);
+                criteria.add(Restrictions.eq("account", account));
+                list = criteria.setProjection(Projections.property("entry.id")).list();
+                results.addAll(list);
+            }
 
             // check entries (retrieve only ok or submitted drafts)
             Integer[] visibility = new Integer[]{Visibility.OK.getValue(), Visibility.PENDING.getValue()};

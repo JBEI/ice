@@ -65,7 +65,7 @@ public class Storage implements IModel {
     private static final long serialVersionUID = 1L;
 
     public enum StorageType {
-        GENERIC, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, WELL, TUBE, SCHEME
+        GENERIC, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, PLATE81, WELL, TUBE, SCHEME
     }
 
     @Id

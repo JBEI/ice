@@ -197,10 +197,11 @@ public class RegistryAPI {
      */
     public long getNumberOfPublicEntries() throws ServiceException {
         long result = 0;
+        log("getNumberPublicEntries");
 
         try {
             EntryController controller = new EntryController();
-            result = controller.getNumberOfVisibleEntries(null);
+            result = controller.getNumberOfPublicEntries();
         } catch (Exception e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -509,17 +510,6 @@ public class RegistryAPI {
         }
 
         return (Strain) newEntry;
-    }
-
-    public List<Entry> getAllEntries() throws ServiceException {
-        EntryController controller = new EntryController();
-        try {
-            ArrayList<Long> list = controller.getEntryIdsByOwner("wjholtz@lbl.gov");
-            Account system = new AccountController().getByEmail("system");
-            return controller.getEntriesByIdSet(system, list);
-        } catch (ControllerException e) {
-            throw new ServiceException(e);
-        }
     }
 
     /**
