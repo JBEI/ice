@@ -160,8 +160,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     return;
 
                 int delta = event.getWidth() - previousWidth;
-                if (delta < 0)
-                    delta = 0;
                 previousWidth = event.getWidth();
                 sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + delta) + "px");
                 headerWrapper.setWidth((headerWrapper.getOffsetWidth() + delta) + "px");
