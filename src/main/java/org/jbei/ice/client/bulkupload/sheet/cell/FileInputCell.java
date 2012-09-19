@@ -184,6 +184,12 @@ public class FileInputCell extends SheetCell {
                     return;
                 }
 
+                String[] split = fileId.split("\t");
+                if (split.length == 2 && split[0].charAt(0) == 'F') {
+                    Window.alert(split[1]);
+                    return;
+                }
+
                 SheetCellData datum = new SheetCellData();
                 datum.setId(fileId);
                 datum.setValue(info.name);

@@ -245,10 +245,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     event.preventDefault();
                 } else if (event.isRightArrow()) {
                     dealWithRightArrowPress();
-                    event.preventDefault();
+//                    event.preventDefault();
                 } else if (event.isLeftArrow()) {
                     dealWithLeftArrowPress();
-                    event.preventDefault();
+//                    event.preventDefault();
                 } else {
                     int code = event.getNativeKeyCode();
 
