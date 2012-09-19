@@ -41,8 +41,12 @@ public class BooleanSheetCell extends MultiSuggestSheetCell {
     }
 
     public static Boolean getBooleanValue(String value) {
-        if (value.isEmpty())
+        if (value.isEmpty() || (!"Yes".equalsIgnoreCase(value)
+                && !"True".equalsIgnoreCase(value)
+                && !"False".equalsIgnoreCase(value)
+                && !"No".equalsIgnoreCase(value))) {
             return null;
+        }
 
         return "Yes".equalsIgnoreCase(value) || "True".equalsIgnoreCase(value);
     }

@@ -23,8 +23,8 @@ public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
             case CIRCULAR:
                 if (value.isEmpty() || (!"Yes".equalsIgnoreCase(value)
                         && !"True".equalsIgnoreCase(value)
-                        && !"False".equalsIgnoreCase(value))
-                        && !"No".equalsIgnoreCase(value)) {
+                        && !"False".equalsIgnoreCase(value)
+                        && !"No".equalsIgnoreCase(value))) {
                     info.setCircular(null);
                     break;
                 }

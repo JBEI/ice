@@ -11,10 +11,11 @@ import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.GenerationSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
-import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+
+import com.google.gwt.i18n.client.DateTimeFormat;
 
 /**
  * Arabidopsis seed header wrapper
@@ -60,8 +61,10 @@ public class ArabidopsisSeedHeaders extends PartHeader {
                 Date harvestDate = seed.getHarvestDate();
                 if (harvestDate == null)
                     value = "";
-                else
-                    value = DateUtilities.formatDate(harvestDate);
+                else {
+                    DateTimeFormat format = DateTimeFormat.getFormat("MM/dd/yyyy");
+                    value = format.format(harvestDate);
+                }
                 break;
 
             case PARENTS:

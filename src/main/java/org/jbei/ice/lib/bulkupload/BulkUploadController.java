@@ -315,11 +315,17 @@ public class BulkUploadController {
 
             for (Entry entry : draft.getContents()) {
                 if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
-                    entryController.delete(requesting, entry);
+                    try {
+                        entryController.delete(requesting, entry);
+                    } catch (PermissionException pe) {
+                        Logger.warn("Could not delete entry " + entry.getRecordId() + " for bulk upload " + draftId);
+                    }
+                } else {
+                    Logger.info("Encountered non-draft entry while deleting bulk upload " + entry.getId());
                 }
             }
 
-            draft.getContents().clear();
+            draft.setContents(null);
             dao.delete(draft);
 
         } catch (DAOException e) {
@@ -857,16 +863,16 @@ public class BulkUploadController {
     protected void saveSequence(Account account, ArrayList<SequenceAnalysisInfo> sequenceInfoList,
             Entry entry) throws ControllerException {
         SequenceController controller = new SequenceController();
+        Sequence sequence = controller.getByEntry(entry);
+        if (sequence != null) {
+            try {
+                controller.delete(account, sequence, false);
+            } catch (PermissionException e) {
+                Logger.error(e);
+            }
+        }
 
         if (sequenceInfoList == null || sequenceInfoList.isEmpty()) {
-            Sequence sequence = controller.getByEntry(entry);
-            if (sequence != null) {
-                try {
-                    controller.delete(account, sequence, false);
-                } catch (PermissionException e) {
-                    Logger.error(e);
-                }
-            }
             return;
         }
 

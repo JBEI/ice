@@ -63,6 +63,10 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 strain.setBioSafetyLevel(optionValue);
                 break;
 
+            case STATUS:
+                strain.setStatus(value);
+                break;
+
             case STRAIN_NAME:
                 strain.setName(value);
                 break;
@@ -103,11 +107,16 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                     strain.setSequenceAnalysis(seq);
                 }
 
-                String seqFileId = datum.getId();
-                if (seqFileId == null || seqFileId.isEmpty())
-                    break;
-
                 SequenceAnalysisInfo analysisInfo = seq.isEmpty() ? null : seq.get(0);
+                String seqFileId = datum.getId();
+                if (seqFileId == null || seqFileId.isEmpty()) {
+                    if (analysisInfo != null) {
+                        analysisInfo.setFileId("");
+                        analysisInfo.setName("");
+                    }
+                    break;
+                }
+
                 seq.clear();
 
                 if (analysisInfo == null)
@@ -126,13 +135,18 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                     strain.setAttachments(attachmentInfoList);
                 }
 
-                String fileId = datum.getId();
-                if (fileId == null || fileId.isEmpty())
-                    break;
-
                 AttachmentInfo attachmentInfo = attachmentInfoList.isEmpty() ? null : attachmentInfoList.get(0);
-                attachmentInfoList.clear();
 
+                String fileId = datum.getId();
+                if (fileId == null || fileId.isEmpty()) {
+                    if (attachmentInfo != null) {
+                        attachmentInfo.setFileId("");
+                        attachmentInfo.setFilename("");
+                    }
+                    break;
+                }
+
+                attachmentInfoList.clear();
                 if (attachmentInfo == null) {
                     attachmentInfo = new AttachmentInfo();
                 }
@@ -184,6 +198,10 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 info.setBioSafetyLevel(optionValue);
                 break;
 
+            case STATUS:
+                info.setStatus(value);
+                break;
+
             case PLASMID_NAME:
                 info.setName(value);
                 break;
@@ -224,11 +242,15 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                     info.setSequenceAnalysis(seq);
                 }
 
-                String seqFileId = datum.getId();
-                if (seqFileId == null || seqFileId.isEmpty())
-                    break;
-
                 SequenceAnalysisInfo analysisInfo = seq.isEmpty() ? null : seq.get(0);
+                String seqFileId = datum.getId();
+                if (seqFileId == null || seqFileId.isEmpty()) {
+                    if (analysisInfo != null) {
+                        analysisInfo.setFileId("");
+                        analysisInfo.setName("");
+                    }
+                }
+
                 seq.clear();
 
                 if (analysisInfo == null)
@@ -247,19 +269,25 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                     info.setAttachments(attInfo);
                 }
 
+                AttachmentInfo attachmentInfo = attInfo.isEmpty() ? null : attInfo.get(0);
+
                 String fileId = datum.getId();
-                if (fileId == null || fileId.isEmpty())
+                if (fileId == null || fileId.isEmpty()) {
+                    if (attachmentInfo != null) {
+                        attachmentInfo.setFileId("");
+                        attachmentInfo.setFilename("");
+                    }
                     break;
+                }
 
-                AttachmentInfo att = attInfo.isEmpty() ? null : attInfo.get(0);
                 attInfo.clear();
+                if (attachmentInfo == null) {
+                    attachmentInfo = new AttachmentInfo();
+                }
 
-                if (att == null)
-                    att = new AttachmentInfo();
-
-                att.setFilename(value);
-                att.setFileId(datum.getId());
-                attInfo.add(att);
+                attachmentInfo.setFilename(value);
+                attachmentInfo.setFileId(datum.getId());
+                attInfo.add(attachmentInfo);
                 info.setHasAttachment(true);
                 break;
 
@@ -270,8 +298,8 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
             case CIRCULAR:
                 if (value.isEmpty() || (!"Yes".equalsIgnoreCase(value)
                         && !"True".equalsIgnoreCase(value)
-                        && !"False".equalsIgnoreCase(value))
-                        && !"No".equalsIgnoreCase(value)) {
+                        && !"False".equalsIgnoreCase(value)
+                        && !"No".equalsIgnoreCase(value))) {
                     info.setCircular(null);
                     break;
                 }
