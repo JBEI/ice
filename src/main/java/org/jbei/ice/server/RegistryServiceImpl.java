@@ -498,7 +498,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": retrieving user entries for " + userId);
             EntryController entryController = new EntryController();
             FolderDetails details = new FolderDetails(0, "My Entries", true);
-            ArrayList<Long> entries = entryController.getEntryIdsByOwner(userId, Visibility.OK, Visibility.PENDING);
+            ArrayList<Long> entries = entryController.getEntryIdsByOwner(account, userId, Visibility.OK,
+                                                                         Visibility.PENDING);
             details.setContents(entries);
             return details;
         } catch (ControllerException e) {
