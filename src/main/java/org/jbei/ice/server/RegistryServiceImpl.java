@@ -930,7 +930,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         // sort param
         try {
-            return sampleController.retrieveSamplesByDepositor(depositor, field, asc);
+            return sampleController.retrieveSamplesByDepositor(account, depositor, field, asc);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
