@@ -862,6 +862,15 @@ public class BulkUploadController {
 
     protected void saveSequence(Account account, ArrayList<SequenceAnalysisInfo> sequenceInfoList,
             Entry entry) throws ControllerException {
+
+        // check for has entry
+        if (sequenceInfoList != null && !sequenceInfoList.isEmpty()) {
+            if ("has sequence".equalsIgnoreCase(sequenceInfoList.get(0).getFileId()) && "has sequence".equalsIgnoreCase(
+                    sequenceInfoList.get(0).getName()))
+                return;
+        }
+
+        // get and clear any existing entry
         SequenceController controller = new SequenceController();
         Sequence sequence = controller.getByEntry(entry);
         if (sequence != null) {
