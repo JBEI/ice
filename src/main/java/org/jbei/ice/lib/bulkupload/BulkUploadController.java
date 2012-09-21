@@ -743,7 +743,18 @@ public class BulkUploadController {
         draft.setName(account.getEmail());
 
         try {
-            return dao.update(draft) != null;
+            boolean success = dao.update(draft) != null;
+            if (success) {
+                String email = JbeirSettings.getSetting("BULK_UPLOAD_APPROVER_EMAIL");
+                if (email != null && !email.isEmpty()) {
+                    String subject = JbeirSettings.getSetting("PROJECT_NAME") + " Bulk Upload Notification";
+                    String body = "A bulk upload has been submitted and is pending verification.\n\n";
+                    body += "Please go to the following link to verify.\n\n";
+                    body += JbeirSettings.getSetting("URI_PREFIX") + "/#page=bulk";
+                    Emailer.send(email, subject, body);
+                }
+            }
+            return success;
         } catch (DAOException e) {
             throw new ControllerException("Could not assign draft " + draftId + " to system", e);
         }
