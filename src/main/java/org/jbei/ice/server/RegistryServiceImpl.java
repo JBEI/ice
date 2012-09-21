@@ -1380,6 +1380,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             GroupController groupController = new GroupController();
             Group publicGroup = groupController.createOrRetrievePublicGroup(); // TODO group uuid should come from ui
 
+            entry = controller.createEntry(account, entry, publicGroup);
+
             if (sampleMap != null) {
                 for (SampleStorage sampleStorage : sampleMap) {
                     SampleInfo sampleInfo = sampleStorage.getSample();
@@ -1443,7 +1445,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
             }
 
-            return controller.createEntry(account, entry, publicGroup).getId();
+            return entry.getId();
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
