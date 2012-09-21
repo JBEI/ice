@@ -498,7 +498,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": retrieving user entries for " + userId);
             EntryController entryController = new EntryController();
             FolderDetails details = new FolderDetails(0, "My Entries", true);
-            ArrayList<Long> entries = entryController.getEntryIdsByOwner(userId, Visibility.OK, Visibility.PENDING);
+            ArrayList<Long> entries = entryController.getEntryIdsByOwner(account, userId, Visibility.OK,
+                                                                         Visibility.PENDING);
             details.setContents(entries);
             return details;
         } catch (ControllerException e) {
@@ -929,7 +930,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         // sort param
         try {
-            return sampleController.retrieveSamplesByDepositor(depositor, field, asc);
+            return sampleController.retrieveSamplesByDepositor(account, depositor, field, asc);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1379,6 +1380,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             GroupController groupController = new GroupController();
             Group publicGroup = groupController.createOrRetrievePublicGroup(); // TODO group uuid should come from ui
 
+            entry = controller.createEntry(account, entry, publicGroup);
+
             if (sampleMap != null) {
                 for (SampleStorage sampleStorage : sampleMap) {
                     SampleInfo sampleInfo = sampleStorage.getSample();
@@ -1442,7 +1445,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
             }
 
-            return controller.createEntry(account, entry, publicGroup).getId();
+            return entry.getId();
         } catch (ControllerException e) {
             Logger.error(e);
             return null;

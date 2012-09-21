@@ -102,28 +102,29 @@ public class EntryAddPresenter {
             return;
         }
 
-        service.retrieveStorageSchemes(AppController.sessionId, type,
-                                       new AsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
+        new IceAsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
 
-                                           @Override
-                                           public void onFailure(Throwable caught) {
-                                               eventBus.fireEvent(new FeedbackEvent(true,
-                                                                                    "Failed to retrieve the sample " +
-                                                                                            "location data."));
-                                           }
+            @Override
+            protected void callService(AsyncCallback<HashMap<SampleInfo, ArrayList<String>>> callback)
+                    throws AuthenticationException {
+                service.retrieveStorageSchemes(AppController.sessionId, type, callback);
+            }
 
-                                           @Override
-                                           public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
-                                               if (result == null)
-                                                   return;
+            @Override
+            public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
+                if (result == null)
+                    return;
 
-                                               SampleLocation sampleLocation = new SampleLocation(result);
-                                               locationCache.put(type, sampleLocation);
+                SampleLocation sampleLocation = new SampleLocation(result);
+                locationCache.put(type, sampleLocation);
+                display.getCurrentForm().getEntrySubmitForm().setSampleLocation(sampleLocation);
+            }
 
-                                               display.getCurrentForm().getEntrySubmitForm().setSampleLocation
-                                                       (sampleLocation);
-                                           }
-                                       });
+            @Override
+            public void onFailure(Throwable caught) {
+                eventBus.fireEvent(new FeedbackEvent(true, "Failed to retrieve the sample location data."));
+            }
+        }.go(eventBus);
     }
 
     /**

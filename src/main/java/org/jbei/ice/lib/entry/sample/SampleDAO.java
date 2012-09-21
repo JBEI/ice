@@ -36,6 +36,10 @@ public class SampleDAO extends HibernateRepository<Sample> {
         return super.saveOrUpdate(sample);
     }
 
+    public Sample get(long id) throws DAOException {
+        return super.get(Sample.class, id);
+    }
+
     public boolean hasSample(Entry entry) throws DAOException {
         Session session = newSession();
         try {
