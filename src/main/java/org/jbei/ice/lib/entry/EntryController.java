@@ -3,6 +3,7 @@ package org.jbei.ice.lib.entry;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -354,7 +355,7 @@ public class EntryController {
         }
     }
 
-    public ArrayList<Long> getEntryIdsByOwner(String ownerEmail, Visibility... visibilityList)
+    public ArrayList<Long> getEntryIdsByOwner(Account account, String ownerEmail, Visibility... visibilityList)
             throws ControllerException {
         try {
             Integer[] list = new Integer[visibilityList.length];
@@ -364,7 +365,26 @@ public class EntryController {
                 i += 1;
             }
 
-            return dao.getEntriesByOwner(ownerEmail, list);
+            ArrayList<Long> results = dao.getEntriesByOwner(ownerEmail, list);
+            if (results == null)
+                return results;
+
+            Iterator<Long> resultsIter = results.iterator();
+
+            while (resultsIter.hasNext()) {
+                Long next = resultsIter.next();
+                try {
+                    try {
+                        get(account, next);
+                    } catch (PermissionException e) {
+                        resultsIter.remove();
+                        continue;
+                    }
+                } catch (ControllerException ce) {
+                    Logger.error("Error retrieving permission for entry Id " + next);
+                }
+            }
+            return results;
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -546,6 +566,7 @@ public class EntryController {
             for (int i = 0; i < exclude.length; i += 1)
                 excludeInt[i] = exclude[i].getValue();
             return dao.getOwnerEntryCount(account.getEmail(), excludeInt);
+
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);

@@ -156,7 +156,7 @@ public class BulkUploadControllerTest {
         updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList, "");
         Assert.assertNotNull(updatedDraft);
 
-        ArrayList<Long> allEntries = entryController.getEntryIdsByOwner(account.getEmail(), Visibility.DRAFT);
+        ArrayList<Long> allEntries = entryController.getEntryIdsByOwner(account, account.getEmail(), Visibility.DRAFT);
         Assert.assertNotNull(allEntries);
         Assert.assertEquals(2, allEntries.size());
 
@@ -646,7 +646,7 @@ public class BulkUploadControllerTest {
 
         // check entry visibility is pending
         EntryController entryController = new EntryController();
-        ArrayList<Long> results = entryController.getEntryIdsByOwner(account.getEmail(), Visibility.PENDING);
+        ArrayList<Long> results = entryController.getEntryIdsByOwner(account, account.getEmail(), Visibility.PENDING);
         Assert.assertNotNull(results);
         Assert.assertEquals(entryList.size(), results.size());
 

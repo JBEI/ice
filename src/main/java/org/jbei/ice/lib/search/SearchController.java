@@ -56,8 +56,6 @@ public class SearchController {
                 hasStringQuery = true;
                 ArrayList<SearchResult> searchResults = find(account, operand);
                 if (searchResults != null) {
-
-                    // filter results by permission
                     for (SearchResult searchResult : searchResults) {
                         Entry entry = searchResult.getEntry();
                         stringQueryResult.add(entry.getId());
@@ -98,15 +96,12 @@ public class SearchController {
             while (resultsIter.hasNext()) {
                 Long next = resultsIter.next();
                 try {
-                    Entry nextEntry;
                     try {
-                        nextEntry = entryController.get(account, next);
+                        entryController.get(account, next);
                     } catch (PermissionException e) {
-                        Logger.warn(account.getEmail() + " does not have read permission for entry with id" + next);
+                        resultsIter.remove();
                         continue;
                     }
-                    if (!permissionsController.hasReadPermission(account, nextEntry))
-                        resultsIter.remove();
                 } catch (ControllerException ce) {
                     Logger.error("Error retrieving permission for entry Id " + next);
                 }

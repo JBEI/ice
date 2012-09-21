@@ -3,6 +3,7 @@ package org.jbei.ice.lib.entry.sample;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.jbei.ice.controllers.common.ControllerException;
@@ -246,23 +247,39 @@ public class SampleController {
         }
     }
 
-    public LinkedList<Long> retrieveSamplesByDepositor(String email, ColumnField field, boolean asc)
+    public LinkedList<Long> retrieveSamplesByDepositor(Account account, String email, ColumnField field, boolean asc)
             throws ControllerException {
 
-        LinkedList<Long> results = null;
+        LinkedList<Long> results;
         try {
             switch (field) {
 
                 default:
                 case CREATED:
                     results = dao.retrieveSamplesByDepositorSortByCreated(email, asc);
-                    //                getSamplePermissionVerifier().hasReadPermissions(model, account) // TODO
                     break;
             }
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
+        Iterator<Long> resultsIter = results.iterator();
+
+        while (resultsIter.hasNext()) {
+            Long next = resultsIter.next();
+            try {
+                try {
+                    Sample sample = dao.get(next);
+                    if (!permissionsController.hasReadPermission(account, sample.getEntry()))
+                        resultsIter.remove();
+                } catch (DAOException e) {
+                    Logger.error(e);
+                    resultsIter.remove();
+                }
+            } catch (ControllerException ce) {
+                Logger.error("Error retrieving permission for entry Id " + next);
+            }
+        }
         return results;
     }
 
