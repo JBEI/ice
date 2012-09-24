@@ -15,6 +15,7 @@ import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
@@ -542,6 +543,28 @@ public class RegistryAPI {
         }
 
         return (Part) newEntry;
+    }
+
+    public ArabidopsisSeed createSeed(@WebParam(name = "sessionId") String sessionId, @WebParam(
+            name = "seed") ArabidopsisSeed seed) throws SessionException, ServiceException {
+        log(sessionId, "createSeed");
+        Entry newEntry;
+        Account account = validateAccount(sessionId);
+        try {
+            EntryController controller = new EntryController();
+            Entry remoteEntry = createEntry(sessionId, seed);
+            Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+            newEntry = controller.createEntry(account, remoteEntry, publicGroup);
+            log("User '" + account.getEmail() + "' created arabidopsis seed: '" + seed.getRecordId());
+        } catch (ControllerException e) {
+            Logger.error(e);
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new ServiceException("Registry Service Internal Error!");
+        }
+
+        return (ArabidopsisSeed) newEntry;
     }
 
     /**
