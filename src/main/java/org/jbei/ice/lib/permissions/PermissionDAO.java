@@ -87,10 +87,10 @@ class PermissionDAO extends HibernateRepository<Permission> {
             for (Group group : groups) {
                 Permission permission =
                         (Permission) session.createCriteria(Permission.class)
-                                            .add(Restrictions.eq("can_write", Boolean.valueOf(canWrite)))
-                                            .add(Restrictions.eq("can_read", Boolean.valueOf(canRead)))
-                                            .add(Restrictions.eq("group_id", group))
-                                            .add(Restrictions.eq("entry_id", entry)).uniqueResult();
+                                            .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
+                                            .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)))
+                                            .add(Restrictions.eq("group", group))
+                                            .add(Restrictions.eq("entry", entry)).uniqueResult();
                 session.delete(permission);
             }
             session.getTransaction().commit();
@@ -136,10 +136,10 @@ class PermissionDAO extends HibernateRepository<Permission> {
             for (Account account : accounts) {
                 Permission permission =
                         (Permission) session.createCriteria(Permission.class)
-                                            .add(Restrictions.eq("can_write", Boolean.valueOf(canWrite)))
-                                            .add(Restrictions.eq("can_read", Boolean.valueOf(canRead)))
-                                            .add(Restrictions.eq("account_id", account))
-                                            .add(Restrictions.eq("entry_id", entry)).uniqueResult();
+                                            .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
+                                            .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)))
+                                            .add(Restrictions.eq("account", account))
+                                            .add(Restrictions.eq("entry", entry)).uniqueResult();
                 session.delete(permission);
             }
             session.getTransaction().commit();
@@ -158,8 +158,8 @@ class PermissionDAO extends HibernateRepository<Permission> {
             Criteria criteria = session.createCriteria(Permission.class)
                                        .add(example)
                                        .setProjection(Projections.rowCount());
-            Integer integer = (Integer) criteria.uniqueResult();
-            return integer == 1;
+            Number integer = (Number) criteria.uniqueResult();
+            return integer.intValue() == 1;
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -230,13 +230,15 @@ class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    public Set<Account> retrieveAccountPermissions(boolean canWrite, boolean canRead) throws DAOException {
+    public Set<Account> retrieveAccountPermissions(Entry entry, boolean canWrite, boolean canRead) throws DAOException {
         Session session = newSession();
         try {
             List list = session.createCriteria(Permission.class)
-                               .add(Restrictions.eq("can_write", Boolean.valueOf(canWrite)))
-                               .add(Restrictions.eq("can_read", Boolean.valueOf(canRead)))
-                               .setProjection(Projections.property("account_id"))
+                               .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
+                               .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)))
+                               .add(Restrictions.eq("entry", entry))
+                               .setProjection(Projections.property("account"))
+                               .add(Restrictions.isNotNull("account"))
                                .list();
 
             return new HashSet<Account>(list);
@@ -248,13 +250,15 @@ class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    public Set<Group> retrieveGroupPermissions(boolean canWrite, boolean canRead) throws DAOException {
+    public Set<Group> retrieveGroupPermissions(Entry entry, boolean canWrite, boolean canRead) throws DAOException {
         Session session = newSession();
         try {
             List list = session.createCriteria(Permission.class)
-                               .add(Restrictions.eq("can_write", Boolean.valueOf(canWrite)))
-                               .add(Restrictions.eq("can_read", Boolean.valueOf(canRead)))
-                               .setProjection(Projections.property("account_id"))
+                               .add(Restrictions.eq("entry", entry))
+                               .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
+                               .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)))
+                               .setProjection(Projections.property("group"))
+                               .add(Restrictions.isNotNull("group"))
                                .list();
             return new HashSet<Group>(list);
         } catch (HibernateException he) {

@@ -1,7 +1,7 @@
 package org.jbei.ice.client.search.blast;
 
-import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.dom.client.Style.Unit;
+import java.util.ArrayList;
+
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
@@ -10,7 +10,8 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.HasEntryInfo;
 
-import java.util.ArrayList;
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.dom.client.Style.Unit;
 
 public abstract class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
 
@@ -54,8 +55,7 @@ public abstract class BlastResultsTable extends HasEntryDataTable<BlastResultInf
 
     protected DataTableColumn<String> addAlignedColumn() {
 
-        DataTableColumn<String> alignedCol = new DataTableColumn<String>(new TextCell(),
-                                                                         ColumnField.ALIGNED_BP) {
+        DataTableColumn<String> alignedCol = new DataTableColumn<String>(new TextCell(), ColumnField.ALIGNED_BP) {
 
             @Override
             public String getValue(BlastResultInfo info) {
@@ -69,8 +69,7 @@ public abstract class BlastResultsTable extends HasEntryDataTable<BlastResultInf
     }
 
     protected DataTableColumn<String> addAlignedIdentityColumn() {
-        DataTableColumn<String> alignedCol = new DataTableColumn<String>(new TextCell(),
-                                                                         ColumnField.ALIGNED_IDENTITY) {
+        DataTableColumn<String> alignedCol = new DataTableColumn<String>(new TextCell(), ColumnField.ALIGNED_IDENTITY) {
 
             @Override
             public String getValue(BlastResultInfo info) {
@@ -84,8 +83,7 @@ public abstract class BlastResultsTable extends HasEntryDataTable<BlastResultInf
     }
 
     protected DataTableColumn<String> addBitScoreColumn() {
-        DataTableColumn<String> col = new DataTableColumn<String>(new TextCell(),
-                                                                  ColumnField.BIT_SCORE) {
+        DataTableColumn<String> col = new DataTableColumn<String>(new TextCell(), ColumnField.BIT_SCORE) {
 
             @Override
             public String getValue(BlastResultInfo info) {
@@ -99,8 +97,7 @@ public abstract class BlastResultsTable extends HasEntryDataTable<BlastResultInf
     }
 
     protected DataTableColumn<String> addEValueColumn() {
-        DataTableColumn<String> col = new DataTableColumn<String>(new TextCell(),
-                                                                  ColumnField.E_VALUE) {
+        DataTableColumn<String> col = new DataTableColumn<String>(new TextCell(), ColumnField.E_VALUE) {
 
             @Override
             public String getValue(BlastResultInfo info) {

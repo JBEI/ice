@@ -1,18 +1,19 @@
 package org.jbei.ice.client.search.advanced;
 
-import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
+
 import org.jbei.ice.client.common.header.BlastSearchFilter;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import java.util.ArrayList;
+import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 
 public class AdvancedSearchView extends Composite implements IAdvancedSearchView {
 
@@ -103,7 +104,7 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
         table.setVisible(visible);
 
         if (visible) {
-            table.clearSelection();
+//            table.clearSelection();
             layout.setWidget(2, 0, table);
             layout.setWidget(3, 0, pager);
         }

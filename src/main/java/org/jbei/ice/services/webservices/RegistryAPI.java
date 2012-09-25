@@ -223,21 +223,20 @@ public class RegistryAPI {
             @WebParam(name = "query") String query) throws ServiceException, SessionException {
         Account account = validateAccount(sessionId);
         ArrayList<SearchResult> results = null;
-
+        // TODO
         log(sessionId, "search: " + query);
-        try {
-            SearchController searchController = new SearchController();
+//        try {
+        SearchController searchController = new SearchController();
+//            results = searchController.runTermQuery(account, query);
+//        } catch (ControllerException e) {
+//            Logger.error(e);
 
-            results = searchController.find(account, query);
-        } catch (ControllerException e) {
-            Logger.error(e);
-
-            throw new ServiceException("Registry Service Internal Error!");
-        } catch (Exception e) {
-            Logger.error(e);
-
-            throw new ServiceException("Registry Service Internal Error!");
-        }
+//            throw new ServiceException("Registry Service Internal Error!");
+//        } catch (Exception e) {
+//            Logger.error(e);
+//
+//            throw new ServiceException("Registry Service Internal Error!");
+//        }
 
         return results;
     }

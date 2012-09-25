@@ -1,5 +1,12 @@
 package org.jbei.ice.client.common.table.cell;
 
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
+import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.common.TipViewContentFactory;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.shared.dto.HasEntryInfo;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -11,12 +18,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
-import org.jbei.ice.client.collection.presenter.EntryContext;
-import org.jbei.ice.client.common.TipViewContentFactory;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.shared.dto.HasEntryInfo;
 
 /**
  * @author Hector Plahar
@@ -57,15 +58,15 @@ public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> 
         final String eventType = event.getType();
 
         if (MOUSEOVER_EVENT_NAME.equalsIgnoreCase(eventType)) {
-            if (withinBounds(parent, event))
-                onMouseOver(parent, event, value);
+            if (withinBounds(event))
+                onMouseOver(event, value);
             else
-                onMouseOut(parent);
+                onMouseOut();
 
         } else if (MOUSEOUT_EVENT_NAME.equalsIgnoreCase(eventType)) {
-            onMouseOut(parent);
+            onMouseOut();
         } else if (MOUSE_CLICK.equalsIgnoreCase(eventType)) {
-            if (withinBounds(parent, event))
+            if (withinBounds(event))
                 onMouseClick(value.getEntryInfo().getId());
         }
     }
@@ -91,12 +92,12 @@ public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> 
         });
     }
 
-    protected void onMouseOut(Element parent) {
+    protected void onMouseOut() {
         hidden = true;
         popup.hide();
     }
 
-    protected boolean withinBounds(Element parent, NativeEvent event) {
+    protected boolean withinBounds(NativeEvent event) {
         Element cellElement = event.getEventTarget().cast();
         Element element = cellElement.getFirstChildElement();
         if (element == null)
@@ -104,7 +105,7 @@ public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> 
         return false;
     }
 
-    protected void onMouseOver(Element parent, NativeEvent event, HasEntryInfo value) {
+    protected void onMouseOver(NativeEvent event, HasEntryInfo value) {
 
         hidden = false;
         final int x = event.getClientX() + 30 + Window.getScrollLeft();

@@ -4,16 +4,16 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public abstract class HasEntryInfo implements IsSerializable {
 
-    private EntryInfo dataView;
+    private EntryInfo entryInfo;
 
     public HasEntryInfo() {
     }
 
     public void setEntryInfo(EntryInfo view) {
-        this.dataView = view;
+        this.entryInfo = view;
     }
 
     public EntryInfo getEntryInfo() {
-        return this.dataView;
+        return this.entryInfo;
     }
 }

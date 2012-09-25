@@ -31,7 +31,7 @@ public interface RegistryServiceAsync {
     void logout(String sessionId, AsyncCallback<Boolean> callback);
 
     void retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters,
-            AsyncCallback<ArrayList<Long>> asyncCallback);
+            AsyncCallback<LinkedList<SearchResultInfo>> asyncCallback);
 
     void retrieveEntryData(String sid, ColumnField field, boolean ascending,
             LinkedList<Long> entries, AsyncCallback<LinkedList<EntryInfo>> callback);

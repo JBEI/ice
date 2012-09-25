@@ -2,7 +2,7 @@ package org.jbei.ice.lib.search;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 
 import org.jbei.ice.controllers.common.ControllerException;
@@ -23,9 +23,12 @@ import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.SearchResultInfo;
 
 /**
- * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
+ * Controller for running searches on the ice platform
+ *
+ * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
 public class SearchController {
     private final SearchDAO dao;
@@ -36,38 +39,30 @@ public class SearchController {
         permissionsController = new PermissionsController();
     }
 
-    public Set<Long> runSearch(Account account, ArrayList<QueryFilter> filters) throws ControllerException {
+    public LinkedList<SearchResultInfo> runSearch(Account account, ArrayList<QueryFilter> filters)
+            throws ControllerException {
+
+        LinkedList<SearchResultInfo> searchResults = new LinkedList<SearchResultInfo>();
         if (filters == null || filters.isEmpty())
-            return new HashSet<Long>();
+            return searchResults;
 
         Set<Long> results = null;
-        Set<Long> stringQueryResult = new HashSet<Long>(); // plain text query typed into the search box. has no type
-        EntryController entryController = new EntryController();
-        boolean hasStringQuery = false;
 
         for (QueryFilter filter : filters) {
 
             SearchFilterType type = filter.getSearchType();
             String operand = filter.getOperand();
-            if (operand == null || operand.trim().isEmpty())
+            if (operand == null || operand.trim().isEmpty())     // operand is actual query and it cannot be empty
                 continue;
 
+            // no filter type indicates a term or phrase query
             if (type == null) {
-                hasStringQuery = true;
-                ArrayList<SearchResult> searchResults = find(account, operand);
-                if (searchResults != null) {
-                    for (SearchResult searchResult : searchResults) {
-                        Entry entry = searchResult.getEntry();
-                        stringQueryResult.add(entry.getId());
-                    }
-                }
+                LinkedList<SearchResultInfo> termQueryResults = runTermQuery(account, operand);
+                searchResults.addAll(termQueryResults);
             } else {
-
                 QueryOperator operator = filter.getOperator();
                 try {
-                    Set<Long> intermediateResults = dao.runSearchFilter(type, operator,
-                                                                        operand);
-
+                    Set<Long> intermediateResults = dao.runSearchFilter(type, operator, operand);
                     if (results == null) {
                         results = new HashSet<Long>();
                         results.addAll(intermediateResults);
@@ -82,68 +77,25 @@ public class SearchController {
             }
         }
 
-        // post process
-        if (hasStringQuery) {
-            if (results != null)
-                stringQueryResult.retainAll(results);
-            return stringQueryResult;
-        } else {
-            if (results == null)
-                return new HashSet<Long>();
-
-            Iterator<Long> resultsIter = results.iterator();
-
-            while (resultsIter.hasNext()) {
-                Long next = resultsIter.next();
-                try {
-                    try {
-                        entryController.get(account, next);
-                    } catch (PermissionException e) {
-                        resultsIter.remove();
-                        continue;
-                    }
-                } catch (ControllerException ce) {
-                    Logger.error("Error retrieving permission for entry Id " + next);
-                }
-            }
-            return results;
-        }
+        return searchResults;
     }
 
     /**
      * Perform full text search on the query.
      *
-     * @param query
+     * @param account account of user running the query
+     * @param query   single word termi query
      * @return ArrayList of {@link SearchResult}s.
      * @throws ControllerException
      */
-    public ArrayList<SearchResult> find(Account account, String query) throws ControllerException {
-        ArrayList<SearchResult> results = new ArrayList<SearchResult>();
+    public LinkedList<SearchResultInfo> runTermQuery(Account account, String query) throws ControllerException {
         if (query == null) {
-            return results;
+            return new LinkedList<SearchResultInfo>();
         }
 
         String cleanedQuery = cleanQuery(query);
-
-//        try {
-//            Logger.info("Searching for \"" + cleanedQuery + "\"");
-//            ArrayList<SearchResult> searchResults = AggregateSearch.query(cleanedQuery, account);
-//            if (searchResults != null) {
-//                for (SearchResult searchResult : searchResults) {
-//                    Entry entry = searchResult.getEntry();
-//
-//                    if (permissionsController.hasReadPermission(account, entry)) {
-//                        results.add(searchResult);
-//                    }
-//                }
-//            }
-//
-//            Logger.info(results.size() + " visible results found");
-//        } catch (SearchException e) {
-//            throw new ControllerException(e);
-//        }
-
-        return results;
+        Logger.info(account.getEmail() + ": searching for \"" + cleanedQuery + "\"");
+        return HibernateSearch.getInstance().executeSearch(account, cleanedQuery, permissionsController);
     }
 
     protected String cleanQuery(String query) {
@@ -307,15 +259,5 @@ public class SearchController {
         }
 
         return results;
-    }
-
-    public HashSet<Long> hibernateQuery(String queryString) throws ControllerException {
-        HashSet<Long> rawResults = new HashSet<Long>();
-        try {
-            rawResults.addAll(dao.runHibernateQuery(queryString));
-            return rawResults;
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
     }
 }

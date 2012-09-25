@@ -33,7 +33,7 @@ public class BulkUpload implements IModel {
     private String importType;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "account_id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
     @OneToOne(fetch = FetchType.EAGER)

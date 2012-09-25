@@ -6,7 +6,6 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
-import org.jbei.ice.shared.dto.EntryInfo;
 
 /**
  * Column which has a static image as a header and the same image as content. A boolean condition determines where to
@@ -15,7 +14,7 @@ import org.jbei.ice.shared.dto.EntryInfo;
  * @author Hector Plahar
  */
 
-public class ImageColumn<T extends EntryInfo> extends Column<T, ImageResource> {
+public abstract class ImageColumn<T> extends Column<T, ImageResource> {
 
     private final static Resources resources = GWT.create(Resources.class);
 
@@ -46,27 +45,15 @@ public class ImageColumn<T extends EntryInfo> extends Column<T, ImageResource> {
         header = new ImageHeader(this.type);
     }
 
+    public abstract boolean showImage(T object);
+
     @Override
     public ImageResource getValue(T object) {
 
-        boolean showImage;
-
-        switch (type) {
-            case SAMPLE:
-                showImage = object.isHasSample();
-                break;
-            case ATTACHMENT:
-                showImage = object.isHasAttachment();
-                break;
-            case SEQUENCE:
-                showImage = object.isHasSequence();
-                break;
-            default:
-                showImage = false;
-        }
-
+        boolean showImage = showImage(object);
         if (showImage)
             return this.type.getResource();
+
         return resources.blank();
     }
 

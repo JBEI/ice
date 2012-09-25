@@ -15,6 +15,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.PartNumber;
@@ -157,6 +158,12 @@ public class EntryController {
             }
         }
 
+        if (entry.getEntryFundingSources() != null) {
+            for (EntryFundingSource fundingSource : entry.getEntryFundingSources()) {
+                fundingSource.setEntry(entry);
+            }
+        }
+
         entry.setModificationTime(Calendar.getInstance().getTime());
 
         try {
@@ -290,7 +297,6 @@ public class EntryController {
 
         return entry;
     }
-
 
     public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
 

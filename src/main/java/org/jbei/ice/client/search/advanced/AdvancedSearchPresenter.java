@@ -1,10 +1,9 @@
 package org.jbei.ice.client.search.advanced;
 
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import java.util.ArrayList;
+import java.util.Set;
+
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.common.EntryDataViewDataProvider;
-import org.jbei.ice.client.common.table.EntrySelectionModel;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
@@ -14,8 +13,8 @@ import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import java.util.ArrayList;
-import java.util.Set;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 
 /**
  * Presenter for searches
@@ -29,7 +28,7 @@ public class AdvancedSearchPresenter {
     }
 
     private final AdvancedSearchView display;
-    private final EntryDataViewDataProvider dataProvider;
+    private final AdvancedSearchDataProvider dataProvider;
     private final BlastSearchDataProvider blastProvider;
     private final AdvancedSearchModel model;
     private AdvancedSearchResultsTable table;
@@ -67,19 +66,20 @@ public class AdvancedSearchPresenter {
         };
 
         // hide the results table
-        dataProvider = new EntryDataViewDataProvider(table, rpcService);
+        dataProvider = new AdvancedSearchDataProvider(table, rpcService);
         blastProvider = new BlastSearchDataProvider(blastTable, rpcService);
 
         this.model = new AdvancedSearchModel(rpcService, eventBus);
     }
 
     public void addTableSelectionModelChangeHandler(Handler handler) {
-        final EntrySelectionModel<EntryInfo> selectionModel = this.table.getSelectionModel();
-        selectionModel.addSelectionChangeHandler(handler);
+//        final EntrySelectionModel<EntryInfo> selectionModel = this.table.getSelectionModel();
+//        selectionModel.addSelectionChangeHandler(handler);
     }
 
     public Set<EntryInfo> getResultSelectedSet() {
-        return this.table.getSelectionModel().getSelectedSet();
+//        return this.table.getSelectionModel().getSelectedSet();
+        return null;
     }
 
     public void search(final ArrayList<SearchFilterInfo> searchFilters) {
@@ -108,13 +108,11 @@ public class AdvancedSearchPresenter {
             // show blast table loading
             blastProvider.updateRowCount(0, false);
             display.setBlastVisibility(blastTable, true);
-            blastTable.setVisibleRangeAndClearData(
-                    blastTable.getVisibleRange(), false);
+            blastTable.setVisibleRangeAndClearData(blastTable.getVisibleRange(), false);
 
             // get blast results and filter 
             QueryOperator program = QueryOperator.operatorValueOf(blastInfo.getOperator());
-            this.model.performBlast(filterCopy, blastInfo.getOperand(), program, new EventHandler(
-                    searchFilters));
+            this.model.performBlast(filterCopy, blastInfo.getOperand(), program, new EventHandler(searchFilters));
         } else {
             dataProvider.updateRowCount(0, false);
             display.setSearchVisibility(table, true);
@@ -128,15 +126,14 @@ public class AdvancedSearchPresenter {
         switch (mode) {
             case SEARCH:
             default:
-                if (table.getSelectionModel().isAllSelected()) {
-                    return dataProvider.getData();
-                }
+//                if (table.getSelectionModel().isAllSelected()) {
+//                    return dataProvider.getData();
+//                }
                 return table.getSelectedEntrySet();
 
             case BLAST:
                 return blastTable.getSelectedEntrySet();
         }
-
     }
 
     public AdvancedSearchView getView() {
@@ -157,7 +154,7 @@ public class AdvancedSearchPresenter {
         public void onSearchCompletion(AdvancedSearchEvent event) {
             if (event == null)
                 return;
-            dataProvider.setValues(event.getSearchResults());
+            dataProvider.setData(event.getSearchResults());
             mode = Mode.SEARCH;
         }
 
@@ -169,5 +166,4 @@ public class AdvancedSearchPresenter {
             mode = Mode.BLAST;
         }
     }
-
 }

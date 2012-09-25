@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.client.common.entry.IHasEntryId;
-import org.jbei.ice.client.common.table.cell.EntryOwnerCell;
 import org.jbei.ice.client.common.table.column.ImageColumn;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -162,24 +161,6 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return summaryColumn;
     }
 
-    protected DataTableColumn<EntryInfo> addOwnerColumn() {
-        EntryOwnerCell<EntryInfo> cell = new EntryOwnerCell<EntryInfo>();
-
-        DataTableColumn<EntryInfo> ownerColumn = new DataTableColumn<EntryInfo>(cell,
-                                                                                ColumnField.OWNER) {
-
-            @Override
-            public EntryInfo getValue(T object) {
-                return object;
-            }
-        };
-
-        this.addColumn(ownerColumn, "Owner");
-        ownerColumn.setSortable(false);
-        this.setColumnWidth(ownerColumn, 150, Unit.PX);
-        return ownerColumn;
-    }
-
     protected DataTableColumn<String> addStatusColumn() {
         DataTableColumn<String> statusColumn = new DataTableColumn<String>(new TextCell(),
                                                                            ColumnField.STATUS) {
@@ -203,19 +184,31 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     protected void addHasAttachmentColumn() {
-        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT);
+        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT) {
+            public boolean showImage(EntryInfo info) {
+                return info.isHasAttachment();
+            }
+        };
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
     }
 
     protected void addHasSampleColumn() {
-        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE);
+        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE) {
+            public boolean showImage(EntryInfo info) {
+                return info.isHasSample();
+            }
+        };
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
     }
 
     protected void addHasSequenceColumn() {
-        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE);
+        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE) {
+            public boolean showImage(EntryInfo info) {
+                return info.isHasSequence();
+            }
+        };
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
     }

@@ -587,6 +587,7 @@ class EntryDAO extends HibernateRepository<Entry> {
 
             session.save(entry);
             session.getTransaction().commit();
+            session.flush();
             return entry;
 
         } catch (HibernateException he) {

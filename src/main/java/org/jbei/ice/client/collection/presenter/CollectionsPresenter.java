@@ -117,10 +117,8 @@ public class CollectionsPresenter extends AbstractPresenter {
             }
         };
         this.userListProvider = new ListDataProvider<FolderDetails>(new FolderDetailsKeyProvider());
-        this.systemListProvider = new ListDataProvider<FolderDetails>(
-                new FolderDetailsKeyProvider());
-        this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable,
-                                                               model.getService());
+        this.systemListProvider = new ListDataProvider<FolderDetails>(new FolderDetailsKeyProvider());
+        this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable, model.getService());
 
         // selection models used for menus
         initMenus();
@@ -134,8 +132,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         initCreateCollectionHandlers();
 
         // create entry handler
-        final SingleSelectionModel<EntryAddType> selectionModel = display
-                .getAddEntrySelectionHandler();
+        final SingleSelectionModel<EntryAddType> selectionModel = display.getAddEntrySelectionHandler();
         CreateNewEntrySelectionHandler handler = new CreateNewEntrySelectionHandler(this,
                                                                                     model.getService(),
                                                                                     model.getEventBus(), display,
@@ -526,8 +523,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             @Override
             public void onFolderRetrieve(FolderRetrieveEvent event) {
                 if (event == null || event.getItems() == null) {
-                    display.showFeedbackMessage("Error connecting to server. Please try again",
-                                                true);
+                    display.showFeedbackMessage("Error connecting to server. Please try again", true);
                     entryDataProvider.setValues(null);
                     return;
                 }
@@ -697,24 +693,19 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                 @Override
                 public void onSuccess(ArrayList<FolderDetails> result) {
-                    History.newItem(Page.COLLECTIONS.getLink() + ";id=" +
-                                            currentFolder.getId());
+                    History.newItem(Page.COLLECTIONS.getLink() + ";id=" + currentFolder.getId());
                     ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
-                    FeedbackEvent event = new FeedbackEvent(false,
-                                                            "Entry deleted " +
-                                                                    "successfully");
+                    FeedbackEvent event = new FeedbackEvent(false, "Entry deleted successfully");
                     model.getEventBus().fireEvent(event);
 
                     for (FolderDetails detail : result) {
-                        MenuItem item = new MenuItem(detail.getId(),
-                                                     detail.getName(), detail
-                                .getCount().longValue(), detail.isSystemFolder());
+                        MenuItem item = new MenuItem(detail.getId(), detail.getName(), detail.getCount().longValue(),
+                                                     detail.isSystemFolder());
                         menuItems.add(item);
                     }
 
                     if (currentFolder.getId() == 0) {
-                        AppController.accountInfo.setUserEntryCount(AppController.accountInfo
-                                                                                 .getUserEntryCount() - 1);
+                        AppController.accountInfo.setUserEntryCount(AppController.accountInfo.getUserEntryCount() - 1);
                         MenuItem myItems = new MenuItem(0, "My Entries",
                                                         AppController.accountInfo.getUserEntryCount(), true);
                         menuItems.add(myItems);

@@ -493,28 +493,28 @@ public class PermissionsController {
 
         try {
             // read accounts
-            Set<Account> readAccounts = dao.retrieveAccountPermissions(false, true);
+            Set<Account> readAccounts = dao.retrieveAccountPermissions(entry, false, true);
             for (Account readAccount : readAccounts) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.READ_ACCOUNT,
                                                        readAccount.getId(), readAccount.getFullName()));
             }
 
             // write accounts
-            Set<Account> writeAccounts = dao.retrieveAccountPermissions(true, false);
+            Set<Account> writeAccounts = dao.retrieveAccountPermissions(entry, true, false);
             for (Account writeAccount : writeAccounts) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.WRITE_ACCOUNT,
                                                        writeAccount.getId(), writeAccount.getFullName()));
             }
 
             // read groups
-            Set<Group> readGroups = dao.retrieveGroupPermissions(false, true);
+            Set<Group> readGroups = dao.retrieveGroupPermissions(entry, false, true);
             for (Group group : readGroups) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.READ_GROUP, group
                         .getId(), group.getLabel()));
             }
 
             // write groups
-            Set<Group> writeGroups = dao.retrieveGroupPermissions(true, false);
+            Set<Group> writeGroups = dao.retrieveGroupPermissions(entry, true, false);
             for (Group group : writeGroups) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.WRITE_GROUP, group
                         .getId(), group.getLabel()));

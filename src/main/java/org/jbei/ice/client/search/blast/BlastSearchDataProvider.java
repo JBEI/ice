@@ -1,8 +1,10 @@
 package org.jbei.ice.client.search.blast;
 
-import com.google.gwt.user.cellview.client.ColumnSortList;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.common.IHasNavigableData;
@@ -12,10 +14,9 @@ import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.HasEntryInfo;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
+import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
 
 public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastResultInfo>
         implements IHasNavigableData {
@@ -45,8 +46,7 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
     @Override
     protected void onRangeChanged(HasData<BlastResultInfo> display) {
 
-        if (results
-                .isEmpty()) // problem here is that when the display is added to the dataProvider,
+        if (results.isEmpty()) // problem here is that when the display is added to the dataProvider,
             // onRangeChanged() is triggered
             return;
 
@@ -114,14 +114,11 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
         if (data != null) {
             for (BlastResultInfo info : data) {
                 valueIds.add(info.getEntryInfo().getId());
+                results.add(info);
             }
         }
 
-        this.results.clear();
-        this.results.addAll(data);
-
         updateRowCount(this.valueIds.size(), true);
-
         lastSortAsc = false;
         lastSortField = this.defaultSort;
 

@@ -2,10 +2,8 @@ package org.jbei.ice.lib.entry.model;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -13,7 +11,6 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.shared.dto.Visibility;
 
@@ -108,7 +105,7 @@ public class Entry implements IModel {
     private String recordType;
 
     @Column(name = "owner", length = 127)
-    @Field(store = Store.YES, analyze = Analyze.NO)
+    @Field(store = Store.YES)
     private String owner;
 
     @Column(name = "owner_email", length = 127)
@@ -116,7 +113,7 @@ public class Entry implements IModel {
     private String ownerEmail;
 
     @Column(name = "creator", length = 127)
-    @Field(store = Store.YES, analyze = Analyze.NO)
+    @Field(store = Store.YES)
     private String creator;
 
     @Column(name = "creator_email", length = 127)
@@ -124,7 +121,7 @@ public class Entry implements IModel {
     private String creatorEmail;
 
     @Column(name = "alias", length = 127)
-    @Field(store = Store.YES, analyze = Analyze.NO)
+    @Field(store = Store.YES)
     private String alias;
 
     @Column(name = "keywords", length = 127)
@@ -174,32 +171,32 @@ public class Entry implements IModel {
     @Type(type = "org.hibernate.type.TextType")
     private String intellectualProperty;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry", orphanRemoval = true)
     @OrderBy("id")
     @IndexedEmbedded
     private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<SelectionMarker>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry", orphanRemoval = true)
     @OrderBy("id")
     @IndexedEmbedded
     private final Set<Link> links = new LinkedHashSet<Link>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry", targetEntity = Name.class)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry", orphanRemoval = true)
     @OrderBy("id")
     @IndexedEmbedded
     private final Set<Name> names = new LinkedHashSet<Name>();
 
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry", orphanRemoval = true)
     @OrderBy("id")
     @IndexedEmbedded
     private final Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
 
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry", orphanRemoval = true)
     @OrderBy("id")
     @IndexedEmbedded
     private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
 
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry", orphanRemoval = true)
     @OrderBy("id")
     private final List<Parameter> parameters = new ArrayList<Parameter>();
 
@@ -597,35 +594,6 @@ public class Entry implements IModel {
         }
 
         return fundingSource;
-    }
-
-    /**
-     * Generate the options map of the bioSafetyLevel field containing friendly names for the fields.
-     *
-     * @return Map of biosafety levels and names.
-     */
-    public static Map<String, String> getBioSafetyLevelOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-
-        resultMap.put("1", "Level 1");
-        resultMap.put("2", "Level 2");
-
-        return resultMap;
-    }
-
-    /**
-     * Generate the options map of status options containing friendly names for status field.
-     *
-     * @return Map of options and names.
-     */
-    public static Map<String, String> getStatusOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-
-        resultMap.put("complete", JbeiConstants.getStatus("complete"));
-        resultMap.put("in progress", JbeiConstants.getStatus("in progress"));
-        resultMap.put("planned", JbeiConstants.getStatus("planned"));
-
-        return resultMap;
     }
 
     @Override
