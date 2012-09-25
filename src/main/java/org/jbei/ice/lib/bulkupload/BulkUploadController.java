@@ -317,6 +317,15 @@ public class BulkUploadController {
                 if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
                     try {
                         entryController.delete(requesting, entry);
+                        // delete associated plasmids if bulk import type is strain with plasmid
+                        if (EntryAddType.stringToType(draft.getImportType()) == EntryAddType.STRAIN_WITH_PLASMID) {
+                            String plasmids = ((Strain) entry).getPlasmids();
+                            Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(requesting, entryController,
+                                                                                         plasmids);
+                            if (plasmid != null) {
+                                entryController.delete(requesting, entry);
+                            }
+                        }
                     } catch (PermissionException pe) {
                         Logger.warn("Could not delete entry " + entry.getRecordId() + " for bulk upload " + draftId);
                     }

@@ -250,7 +250,6 @@ public class Entry implements IModel {
         // for JAXB webservices should be this way
         if (inputNames == null) {
             names.clear();
-
             return;
         }
 
@@ -275,7 +274,6 @@ public class Entry implements IModel {
             names.add(name.getName());
         }
         result = org.jbei.ice.lib.utils.Utils.join(", ", names);
-
         return result;
     }
 
@@ -294,9 +292,9 @@ public class Entry implements IModel {
         // prefer local part number prefix over other prefixes
         if (partNumbers.size() > 0) {
             for (PartNumber partNumber : partNumbers) {
-                if (partNumber.getPartNumber().contains(
-                        JbeirSettings.getSetting("PART_NUMBER_PREFIX"))) {
+                if (partNumber.getPartNumber().contains(JbeirSettings.getSetting("PART_NUMBER_PREFIX"))) {
                     result = partNumber;
+                    break;
                 }
             }
             if (result == null) {
@@ -306,19 +304,18 @@ public class Entry implements IModel {
         return result;
     }
 
-//    public void setPartNumbers(Set<PartNumber> inputPartNumbers) {
-//        // for JAXB webservices should be this way
-//        if (inputPartNumbers == null) {
-//            partNumbers.clear();
-//
-//            return;
-//        }
-//
-//        if (inputPartNumbers != partNumbers) {
-//            partNumbers.clear();
-//            partNumbers.addAll(inputPartNumbers);
-//        }
-//    }
+    public void setPartNumbers(Set<PartNumber> inputPartNumbers) {
+        // for JAXB webservices should be this way
+        if (inputPartNumbers == null) {
+            partNumbers.clear();
+            return;
+        }
+
+        if (inputPartNumbers != partNumbers) {
+            partNumbers.clear();
+            partNumbers.addAll(inputPartNumbers);
+        }
+    }
 
     public String getOwner() {
         return owner;
