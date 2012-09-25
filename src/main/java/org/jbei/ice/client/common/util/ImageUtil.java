@@ -41,10 +41,10 @@ public class ImageUtil {
         @Source("org/jbei/ice/client/resource/image/prev.png")
         ImageResource prevImage();
 
-        @Source("org/jbei/ice/client/resource/image/side_expand.png")
+        @Source("org/jbei/ice/client/resource/image/show_menu.png")
         ImageResource showSideImage();
 
-        @Source("org/jbei/ice/client/resource/image/side_expand2.png")
+        @Source("org/jbei/ice/client/resource/image/hide_menu.png")
         ImageResource hideSideImage();
 
         @Source("org/jbei/ice/client/resource/image/upload_file.png")
