@@ -137,7 +137,7 @@ public class JobCue implements Runnable {
             }
 
         } catch (InterruptedException e) {
-            Logger.error("Failed to run jobcue!", e);
+            Logger.warn("Job cue interrupted!");
         }
     }
 

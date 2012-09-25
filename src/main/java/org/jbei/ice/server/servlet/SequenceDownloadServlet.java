@@ -1,5 +1,15 @@
 package org.jbei.ice.server.servlet;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.UUID;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -16,17 +26,6 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionException;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Set;
-import java.util.UUID;
 
 // will eventually attempt to consolidate the servlets
 public class SequenceDownloadServlet extends HttpServlet {
@@ -334,14 +333,13 @@ public class SequenceDownloadServlet extends HttpServlet {
      * @return string to be used as a filename
      */
     private String getFileName(Entry entry) {
-        Set<PartNumber> partNumberSet = entry.getPartNumbers();
+        PartNumber partNumber = entry.getOnePartNumber();
+        if (partNumber != null)
+            return partNumber.getPartNumber();
 
-        if (partNumberSet != null && partNumberSet.size() > 0)
-            return (partNumberSet.toArray()[0].toString());
-
-        Set<Name> nameSet = entry.getNames();
-        if (nameSet != null && nameSet.size() > 0)
-            return nameSet.toArray()[0].toString();
+        Name name = entry.getOneName();
+        if (name != null)
+            return name.getName();
 
         return UUID.randomUUID().toString().split("-")[0];
     }
