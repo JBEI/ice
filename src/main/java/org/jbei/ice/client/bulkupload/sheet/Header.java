@@ -68,7 +68,9 @@ public enum Header {
     SAMPLE_TYPE("Sample Type"),
     SAMPLE_DRAWER("Sample Drawer"),
     SAMPLE_STOCK("Sample Stock"),
-    SAMPLE_JBEI_STRAIN("Sample JBEI Strain");
+    SAMPLE_JBEI_STRAIN("Sample JBEI Strain"),
+    SAMPLE_TUBE_NUMBER("Tube Number"),
+    SAMPLE_TUBE_BARCODE("Tube Barcode");
 
     private String label;
 

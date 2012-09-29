@@ -46,7 +46,7 @@ public class PopulateInitialDatabase {
     // Setting the correct parent schema version may help you in the future.
     public static final String DATABASE_SCHEMA_VERSION = "3.1.0";
     public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.9.0";
-    private static final String ICE_2_DATABASE_SCHEMA_VERSION = "0.8.1";
+//    private static final String ICE_2_DATABASE_SCHEMA_VERSION = "0.8.1";
 
     // This is a global "everyone" uuid
     public static String everyoneGroup = "8746a64b-abd5-4838-a332-02c356bbeac0";
@@ -77,10 +77,10 @@ public class PopulateInitialDatabase {
 
                 createSystemAccount();
                 createAdminAccount();
-
                 populateDefaultStorageLocationsAndSchemes();
             }
             updateDatabaseSchema(dao);
+            modifySeedStorageDefault();
 
             // create the arabidopsisSeed freezer scheme
             StorageController storageController = new StorageController();
@@ -229,8 +229,9 @@ public class PopulateInitialDatabase {
                                                          systemAccountEmail, arabidopsisSeedRoot);
                 ArrayList<Storage> schemes = new ArrayList<Storage>();
                 schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
-                schemes.add(new Storage("Box", "", StorageType.BOX_UNINDEXED, "", null));
-                schemes.add(new Storage("Tube", "", StorageType.TUBE, "", null));
+                schemes.add(new Storage("Box", "", StorageType.BOX_INDEXED, "", null));
+                schemes.add(new Storage("Tube Number", "", StorageType.WELL, "", null));
+                schemes.add(new Storage("Tube Barcode", "", StorageType.TUBE, "", null));
                 defaultArabidopsis.setSchemes(schemes);
                 defaultArabidopsis = storageController.save(defaultArabidopsis);
                 dao.save(new Configuration(ConfigurationKey.ARABIDOPSIS_STORAGE_DEFAULT,
@@ -276,6 +277,37 @@ public class PopulateInitialDatabase {
 
         } catch (DAOException e) {
             throw new UtilityException(e);
+        }
+    }
+
+    private static void modifySeedStorageDefault() {
+        StorageController storageController = new StorageController();
+
+        try {
+            // get arabidopsis storage default
+            List<Storage> storageSchemes = storageController.retrieveAllStorageSchemes();
+            Storage defaultSeedScheme = null;
+
+            for (Storage storage : storageSchemes) {
+                if (DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME.equals(storage.getName())) {
+                    defaultSeedScheme = storage;
+                    break;
+                }
+            }
+
+            if (defaultSeedScheme == null || defaultSeedScheme.getSchemes().size() == 4)
+                return;
+
+            // update schemes
+            ArrayList<Storage> schemes = new ArrayList<Storage>();
+            schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
+            schemes.add(new Storage("Box", "", StorageType.BOX_INDEXED, "", null));
+            schemes.add(new Storage("Tube Number", "", StorageType.WELL, "", null));
+            schemes.add(new Storage("Tube Barcode", "", StorageType.TUBE, "", null));
+            defaultSeedScheme.setSchemes(schemes);
+            storageController.update(defaultSeedScheme);
+        } catch (ControllerException ce) {
+            Logger.error(ce);
         }
     }
 
