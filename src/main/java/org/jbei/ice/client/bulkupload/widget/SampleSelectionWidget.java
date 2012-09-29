@@ -1,5 +1,8 @@
 package org.jbei.ice.client.bulkupload.widget;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.PopupHandler;
@@ -80,7 +83,9 @@ public class SampleSelectionWidget extends Composite {
         if (location == null)
             return;
 
-        options.setRowData(location.getLocations());
+        ArrayList<SampleInfo> locations = location.getLocations();
+        Collections.sort(locations);
+        options.setRowData(locations);
     }
 
     public SingleSelectionModel<SampleInfo> getSelectionModel() {
