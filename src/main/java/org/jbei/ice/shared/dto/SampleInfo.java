@@ -2,7 +2,7 @@ package org.jbei.ice.shared.dto;
 
 import java.util.Date;
 
-public class SampleInfo extends HasEntryInfo {
+public class SampleInfo extends HasEntryInfo implements Comparable<SampleInfo> {
 
     private String sampleId;
     private String label;
@@ -66,5 +66,10 @@ public class SampleInfo extends HasEntryInfo {
 
     public String getDepositor() {
         return this.depositor;
+    }
+
+    @Override
+    public int compareTo(SampleInfo o) {
+        return this.label.compareTo(o.getLabel());
     }
 }

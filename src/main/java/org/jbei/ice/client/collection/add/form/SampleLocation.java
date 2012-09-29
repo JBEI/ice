@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.add.form;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -14,7 +15,9 @@ public class SampleLocation {
     }
 
     public ArrayList<SampleInfo> getLocations() {
-        return new ArrayList<SampleInfo>(this.sampleLocation.keySet());
+        ArrayList<SampleInfo> locations = new ArrayList<SampleInfo>(sampleLocation.keySet());
+        Collections.sort(locations);
+        return locations;
     }
 
     public ArrayList<String> getListForLocation(String locationId) {

@@ -56,7 +56,6 @@ public class PopulateInitialDatabase {
 
                 createSystemAccount();
                 createAdminAccount();
-
                 populateDefaultStorageLocationsAndSchemes();
             }
         } catch (ControllerException e) {
@@ -167,8 +166,9 @@ public class PopulateInitialDatabase {
                                                          AccountController.SYSTEM_ACCOUNT_EMAIL, arabidopsisSeedRoot);
                 ArrayList<Storage> schemes = new ArrayList<Storage>();
                 schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
-                schemes.add(new Storage("Box", "", StorageType.BOX_UNINDEXED, "", null));
-                schemes.add(new Storage("Tube", "", StorageType.TUBE, "", null));
+                schemes.add(new Storage("Box", "", StorageType.BOX_INDEXED, "", null));
+                schemes.add(new Storage("Tube Number", "", StorageType.WELL, "", null));
+                schemes.add(new Storage("Tube Barcode", "", StorageType.TUBE, "", null));
                 defaultArabidopsis.setSchemes(schemes);
                 defaultArabidopsis = storageController.save(defaultArabidopsis);
                 dao.save(new Configuration(ConfigurationKey.ARABIDOPSIS_STORAGE_DEFAULT, defaultArabidopsis.getUuid()));
