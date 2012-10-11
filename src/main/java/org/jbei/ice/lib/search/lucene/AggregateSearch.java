@@ -96,6 +96,15 @@ public class AggregateSearch {
                 substringMatches.addAll(matchedSubstringEntries);
             }
 
+            queries = new ArrayList<String[]>();
+            queries.add(new String[]{"creator", "~" + queryString});
+            queryResultIds = Query.getInstance().query(queries);
+            Collections.reverse(queryResultIds);
+            matchedSubstringEntries = entryController.getEntriesByIdSet(account, queryResultIds);
+            if (matchedSubstringEntries != null) {
+                substringMatches.addAll(matchedSubstringEntries);
+            }
+
             // Remove duplicates
             // If getEntriesByQueris is non-lazy, this may contain duplicates
             ArrayList<Long> seenBefore = new ArrayList<Long>();
