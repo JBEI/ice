@@ -1,15 +1,8 @@
 package org.jbei.ice.client.entry.view.view;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.MultiSelectionModel;
-import gwtupload.client.IUploader;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-import gwtupload.client.IUploader.OnStartUploaderHandler;
-import gwtupload.client.SingleUploader;
+import java.util.ArrayList;
+import java.util.Date;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.util.ImageUtil;
@@ -27,8 +20,16 @@ import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
-import java.util.ArrayList;
-import java.util.Date;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.MultiSelectionModel;
+import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+import gwtupload.client.IUploader.OnStartUploaderHandler;
+import gwtupload.client.SingleUploader;
 
 public class EntryView extends Composite implements IEntryView {
 
@@ -377,6 +378,7 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.setWidget(1, 0, detailView);
         SequenceViewPanel sequencePanel = detailView.getSequencePanel();
 
+        this.permissions.setVisible(showEdit);
         this.permissions.addReadWriteLinks(showEdit);
         sequencePanel.getPresenter().setIsCanEdit(showEdit, deleteHandler);
         return sequencePanel.getPresenter();

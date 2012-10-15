@@ -182,7 +182,7 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onSuccess(ArrayList<PermissionInfo> result) {
-                display.getPermissionsWidget().setPermissionData(result, service,
+                display.getPermissionsWidget().setPermissionData(result, service, eventBus,
                                                                  currentContext.getCurrent());
             }
         }.go(eventBus);
@@ -533,9 +533,11 @@ public class EntryPresenter extends AbstractPresenter {
                 @Override
                 public void onSuccess(Boolean result) {
                     if (isWrite) {
-                        display.getPermissionsWidget().addWriteItem(info, service, id, currentInfo.isCanEdit());
+                        display.getPermissionsWidget().addWriteItem(info, service, eventBus, id,
+                                                                    currentInfo.isCanEdit());
                     } else {
-                        display.getPermissionsWidget().addReadItem(info, service, id, currentInfo.isCanEdit());
+                        display.getPermissionsWidget().addReadItem(info, service, eventBus, id,
+                                                                   currentInfo.isCanEdit());
                     }
                 }
             }.go(eventBus);

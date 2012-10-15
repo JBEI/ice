@@ -1,18 +1,20 @@
 package org.jbei.ice.client.entry.view.view;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.SuggestOracle;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.entry.view.DeletePermissionHandler;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.SuggestOracle;
 
 public class PermissionsPresenter {
 
@@ -71,7 +73,7 @@ public class PermissionsPresenter {
         view.addWriteBoxSelectionHandler(handler);
     }
 
-    public void addReadItem(PermissionInfo info, RegistryServiceAsync service, long entryId,
+    public void addReadItem(PermissionInfo info, RegistryServiceAsync service, HandlerManager eventBus, long entryId,
             boolean canEdit) {
         view.setReadBoxVisibility(false);
         if (inReadList(info))
@@ -79,8 +81,7 @@ public class PermissionsPresenter {
 
         DeletePermissionHandler handler = null;
         if (canEdit) {
-            handler = new DeletePermissionHandler(service, info, entryId,
-                                                  new DeletePermissionCallback());
+            handler = new DeletePermissionHandler(service, eventBus, info, entryId, new DeletePermissionCallback());
         }
 
         boolean isGroup = (info.getType() == PermissionType.READ_GROUP || info.getType() == PermissionType.WRITE_GROUP);
@@ -91,19 +92,18 @@ public class PermissionsPresenter {
         readList.add(info);
     }
 
-    public void addWriteItem(PermissionInfo info, RegistryServiceAsync service, long entryId,
+    public void addWriteItem(PermissionInfo info, RegistryServiceAsync service, HandlerManager eventBus, long entryId,
             boolean canEdit) {
 
         view.setWriteBoxVisibility(false);
-        addReadItem(info, service, entryId, canEdit);
+        addReadItem(info, service, eventBus, entryId, canEdit);
 
         if (inWriteList(info))
             return;
 
         DeletePermissionHandler handler = null;
         if (canEdit) {
-            handler = new DeletePermissionHandler(service, info, entryId,
-                                                  new DeletePermissionCallback());
+            handler = new DeletePermissionHandler(service, eventBus, info, entryId, new DeletePermissionCallback());
         }
 
         boolean isGroup = (info.getType() == PermissionType.READ_GROUP || info.getType() == PermissionType.WRITE_GROUP);
@@ -112,7 +112,6 @@ public class PermissionsPresenter {
         PermissionItem item = new PermissionItem(info.getId(), info.getDisplay(), isGroup, isWrite);
         view.addWriteItem(item, handler);
         writeList.add(info);
-
     }
 
     private boolean inWriteList(PermissionInfo info) {
@@ -132,7 +131,7 @@ public class PermissionsPresenter {
     }
 
     public void setPermissionData(ArrayList<PermissionInfo> infoList, RegistryServiceAsync service,
-            long entryId) {
+            HandlerManager eventBus, long entryId) {
         if (infoList == null)
             return;
 
@@ -144,8 +143,7 @@ public class PermissionsPresenter {
             PermissionItem item = null;
             DeletePermissionHandler handler = null;
             if (isCanEdit())
-                handler = new DeletePermissionHandler(service, info, entryId,
-                                                      new DeletePermissionCallback());
+                handler = new DeletePermissionHandler(service, eventBus, info, entryId, new DeletePermissionCallback());
 
             switch (info.getType()) {
                 case READ_ACCOUNT:
