@@ -1,14 +1,5 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import gwtupload.client.IFileInput.FileInputType;
-import gwtupload.client.IUploadStatus.Status;
-import gwtupload.client.IUploader;
-import gwtupload.client.IUploader.OnChangeUploaderHandler;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-import gwtupload.client.IUploader.OnStartUploaderHandler;
-import gwtupload.client.IUploader.UploadedInfo;
-import gwtupload.client.SingleUploader;
-
 import org.jbei.ice.client.AppController;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -21,6 +12,14 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import gwtupload.client.IFileInput.FileInputType;
+import gwtupload.client.IUploadStatus.Status;
+import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnChangeUploaderHandler;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+import gwtupload.client.IUploader.OnStartUploaderHandler;
+import gwtupload.client.IUploader.UploadedInfo;
+import gwtupload.client.SingleUploader;
 
 public class UploadSequenceFileWidget extends Composite {
 
@@ -119,11 +118,12 @@ public class UploadSequenceFileWidget extends Composite {
             @Override
             public void onStart(IUploader uploader) {
                 uploader.setServletPath("/sequence_upload?eid=" + entryId + "&type=file&sid="
-                        + AppController.sessionId);
+                                                + AppController.sessionId);
             }
         });
 
         uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+
             @Override
             public void onFinish(IUploader uploader) {
                 if (uploader.getStatus() == Status.SUCCESS) {
@@ -145,7 +145,8 @@ public class UploadSequenceFileWidget extends Composite {
                     feedback.setVisible(true);
                     uploader.reset();
                 } else {
-                    feedback.setText("You file could not be uploaded. Please try again. If this error persists, please contact your administrator.");
+                    feedback.setText("Your file could not be uploaded. Please try again. If this error persists, " +
+                                             "please contact your administrator.");
                     feedback.setVisible(true);
                     uploader.reset();
                 }

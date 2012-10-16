@@ -204,4 +204,7 @@ public interface RegistryServiceAsync {
 
     void submitBulkImportDraft(String sid, long draftId,
             ArrayList<EntryInfo> entryList, String groupUUID, AsyncCallback<Boolean> async);
+
+    void importXMLEntries(String sessionId, String fileId, String ownerEmail, String ownerName,
+            AsyncCallback<Boolean> asyncCallback);
 }

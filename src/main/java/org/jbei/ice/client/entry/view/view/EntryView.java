@@ -194,8 +194,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public IEntryFormUpdateSubmit showUpdateForm(EntryInfo info) {
-        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(info,
-                                                                              AppController.autoCompleteData);
+        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(info, AppController.autoCompleteData);
         if (form == null)
             return form;
 
@@ -309,8 +308,7 @@ public class EntryView extends Composite implements IEntryView {
             panel.add(rightBtn, "rightBtn");
 
             entryDetailMenuWrapper.setWidget(0, 0, panel);
-            entryDetailMenuWrapper.getFlexCellFormatter().setHorizontalAlignment(0, 0,
-                                                                                 HasAlignment.ALIGN_CENTER);
+            entryDetailMenuWrapper.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
             entryDetailMenuWrapper.getFlexCellFormatter().setStyleName(0, 0, "pad-6");
         } else {
             entryDetailMenuWrapper.setHTML(0, 0, "");
