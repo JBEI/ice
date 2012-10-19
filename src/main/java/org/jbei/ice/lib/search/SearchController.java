@@ -1,13 +1,9 @@
 package org.jbei.ice.lib.search;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
@@ -19,11 +15,10 @@ import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.server.QueryFilter;
-import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.SearchResultInfo;
+import org.jbei.ice.shared.dto.SearchResults;
 
 /**
  * Controller for running searches on the ice platform
@@ -39,15 +34,10 @@ public class SearchController {
         permissionsController = new PermissionsController();
     }
 
-    public LinkedList<SearchResultInfo> runSearch(Account account, ArrayList<QueryFilter> filters)
+    public SearchResults runSearch(Account account, ArrayList<QueryFilter> filters, int start, int count)
             throws ControllerException {
 
-        LinkedList<SearchResultInfo> searchResults = new LinkedList<SearchResultInfo>();
-        if (filters == null || filters.isEmpty())
-            return searchResults;
-
-        Set<Long> results = null;
-
+        SearchResults searchResults = null;
         for (QueryFilter filter : filters) {
 
             SearchFilterType type = filter.getSearchType();
@@ -57,23 +47,26 @@ public class SearchController {
 
             // no filter type indicates a term or phrase query
             if (type == null) {
-                LinkedList<SearchResultInfo> termQueryResults = runTermQuery(account, operand);
-                searchResults.addAll(termQueryResults);
-            } else {
-                QueryOperator operator = filter.getOperator();
-                try {
-                    Set<Long> intermediateResults = dao.runSearchFilter(type, operator, operand);
-                    if (results == null) {
-                        results = new HashSet<Long>();
-                        results.addAll(intermediateResults);
-                    } else {
-                        results.retainAll(intermediateResults);
-                        if (results.isEmpty())
-                            break;
-                    }
-                } catch (DAOException me) {
-                    throw new ControllerException(me);
+                if (isTerm(operand)) {
+                    searchResults = runTermQuery(account, operand, start, count);
+                } else {
+                    runPhraseQuery(account, operand, start, count);
                 }
+            } else {
+//                QueryOperator operator = filter.getOperator();
+//                try {
+//                    Set<Long> intermediateResults = dao.runSearchFilter(type, operator, operand);
+//                    if (results == null) {
+//                        results = new HashSet<Long>();
+//                        results.addAll(intermediateResults);
+//                    } else {
+//                        results.retainAll(intermediateResults);
+//                        if (results.isEmpty())
+//                            break;
+//                    }
+//                } catch (DAOException me) {
+//                    throw new ControllerException(me);
+//                }
             }
         }
 
@@ -81,21 +74,39 @@ public class SearchController {
     }
 
     /**
+     * determines if a query is a term or phrase. A term is strictly defined as a single word whereas
+     * a phrase
+     *
+     * @param query query string being checked
+     * @return true is term, false is phrase
+     */
+    private boolean isTerm(String query) {
+        return query.split("\\s").length == 1;
+    }
+
+    /**
      * Perform full text search on the query.
      *
      * @param account account of user running the query
      * @param query   single word termi query
-     * @return ArrayList of {@link SearchResult}s.
+     * @return
      * @throws ControllerException
      */
-    public LinkedList<SearchResultInfo> runTermQuery(Account account, String query) throws ControllerException {
+    public SearchResults runTermQuery(Account account, String query, int start, int count) throws ControllerException {
         if (query == null) {
-            return new LinkedList<SearchResultInfo>();
+            throw new ControllerException("Cannot execute null query");
         }
 
         String cleanedQuery = cleanQuery(query);
         Logger.info(account.getEmail() + ": searching for \"" + cleanedQuery + "\"");
-        return HibernateSearch.getInstance().executeSearch(account, cleanedQuery, permissionsController);
+        return HibernateSearch.getInstance().executeSearch(account, cleanedQuery, start, count, permissionsController);
+    }
+
+    public SearchResults runPhraseQuery(Account account, String phrase, int start, int count)
+            throws ControllerException {
+
+        String cleanedQuery = cleanQuery(phrase);
+        return null;
     }
 
     protected String cleanQuery(String query) {

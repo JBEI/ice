@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.SuggestOracle;
 
 public class PermissionSuggestOracle extends SuggestOracle {
 
-    // TODO : this probably should not be here
     private final RegistryServiceAsync service = GWT.create(RegistryService.class);
 
     @Override

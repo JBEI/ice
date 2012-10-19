@@ -123,7 +123,6 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
                                                   "ellipsis;\" title=\""
                                                   + name.replaceAll("\"", "'") + "\">"
                                                   + name + "</div>");
-
             }
         };
 

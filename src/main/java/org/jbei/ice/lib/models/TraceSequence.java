@@ -47,7 +47,7 @@ public class TraceSequence implements IModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
 
-    @OneToOne(mappedBy = "traceSequence", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "traceSequence", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private TraceSequenceAlignment traceSequenceAlignment;
 
     public TraceSequence() {

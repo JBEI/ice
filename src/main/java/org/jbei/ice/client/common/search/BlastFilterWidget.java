@@ -1,9 +1,11 @@
 package org.jbei.ice.client.common.search;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
-import org.jbei.ice.client.common.FilterOperand;
+import org.jbei.ice.client.common.FilterWidget;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 
@@ -11,16 +13,14 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 
-public class BlastFilterOperand extends FilterOperand {
-    private final FlexTable layout;
+public class BlastFilterWidget extends FilterWidget {
     private final TextArea area;
     private final ListBox list;
     private final ArrayList<QueryOperator> operators;
-    private final HashSet<String> operands;
 
-    public BlastFilterOperand() {
+    public BlastFilterWidget() {
         super(SearchFilterType.BLAST);
-        layout = new FlexTable();
+        FlexTable layout = new FlexTable();
         layout.setCellPadding(0);
 
         initWidget(layout);
@@ -34,14 +34,14 @@ public class BlastFilterOperand extends FilterOperand {
         list = new ListBox();
         this.operators = new ArrayList<QueryOperator>();
         this.operators.add(QueryOperator.BLAST_N);
-        list.addItem(QueryOperator.BLAST_N.operator(), QueryOperator.BLAST_N.value());
+        list.addItem(QueryOperator.BLAST_N.operator(), QueryOperator.BLAST_N.symbol());
 
         this.operators.add(QueryOperator.TBLAST_X);
-        list.addItem(QueryOperator.TBLAST_X.operator(), QueryOperator.TBLAST_X.value());
+        list.addItem(QueryOperator.TBLAST_X.operator(), QueryOperator.TBLAST_X.symbol());
 
-        this.operands = new HashSet<String>();
-        this.operands.add(QueryOperator.BLAST_N.value());
-        this.operands.add(QueryOperator.TBLAST_X.value());
+        HashSet<String> operands = new HashSet<String>();
+        operands.add(QueryOperator.BLAST_N.symbol());
+        operands.add(QueryOperator.TBLAST_X.symbol());
 
         layout.setWidget(1, 0, list);
     }
@@ -53,17 +53,11 @@ public class BlastFilterOperand extends FilterOperand {
     }
 
     @Override
-    public ArrayList<QueryOperator> getOperatorList() {
-        return operators;
-    }
-
-    @Override
     public String getSelectedOperand() {
         return area.getText();
     }
 
-    @Override
-    public HashSet<String> getPossibleOperands() {
-        return this.operands;
+    public List<QueryOperator> getOperatorList() {
+        return Arrays.asList(QueryOperator.BLAST_N);
     }
 }

@@ -65,7 +65,6 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         }
 
         sequence = super.saveOrUpdate(sequence);
-
         return sequence;
     }
 
@@ -94,14 +93,10 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
 
         Session session = newSession();
         try {
-            session.getTransaction().begin();
             session.saveOrUpdate(feature);
-            session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
-            session.getTransaction().rollback();
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
@@ -123,10 +118,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
 
         Session session = newSession();
         try {
-            session.beginTransaction();
-            String queryString = "from " + Sequence.class.getName()
-                    + " as sequence where sequence.entry = :entry";
-
+            String queryString = "from " + Sequence.class.getName() + " as sequence where sequence.entry = :entry";
             Query query = session.createQuery(queryString);
             query.setEntity("entry", entry);
             Object queryResult = query.uniqueResult();
@@ -134,10 +126,8 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             if (queryResult != null) {
                 sequence = (Sequence) queryResult;
             }
-            session.getTransaction().commit();
         } catch (HibernateException e) {
             Logger.error(e);
-            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
         } finally {
             closeSession(session);

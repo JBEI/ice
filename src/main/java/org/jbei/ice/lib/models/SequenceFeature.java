@@ -39,7 +39,7 @@ public class SequenceFeature implements IModel {
     @JoinColumn(name = "feature_id")
     private Feature feature;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequenceFeature", orphanRemoval = true)
     @OrderBy("id")
     private final Set<AnnotationLocation> annotationLocations = new LinkedHashSet<AnnotationLocation>();
 

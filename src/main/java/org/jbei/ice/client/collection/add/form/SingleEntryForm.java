@@ -1,14 +1,12 @@
 package org.jbei.ice.client.collection.add.form;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.TreeSet;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
-import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOption;
@@ -27,12 +25,9 @@ import com.google.gwt.user.client.ui.*;
  *
  * @author Hector Plahar
  */
-public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite implements
-                                                                                IEntryFormSubmit {
+public abstract class SingleEntryForm<T extends EntryInfo> extends Composite implements IEntryFormSubmit {
 
     protected final FlexTable layout;
-    protected final HashMap<AutoCompleteField, ArrayList<String>> data;
-
     protected Button cancel;
     protected Button submit;
     protected TextBox creator;
@@ -61,17 +56,56 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     private ListBox sampleLocation;
     private ArrayList<TextBox> sampleLocationScheme;
 
-    public NewSingleEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data,
-            String creatorName, String creatorEmail, T entryInfo) {
+    public SingleEntryForm(T entryInfo) {
         layout = new FlexTable();
         initWidget(layout);
 
-        this.data = data;
         initComponents();
 
+        this.creator.setText(entryInfo.getCreator());
+        this.creatorEmail.setText(entryInfo.getCreatorEmail());
+        this.name.setText(entryInfo.getName());
+        this.alias.setText(entryInfo.getAlias());
+        this.principalInvestigator.setText(entryInfo.getPrincipalInvestigator());
+        this.summary.setText(entryInfo.getShortDescription());
+        this.references.setText(entryInfo.getReferences());
+        this.fundingSource.setText(entryInfo.getFundingSource());
+        status.setVisibleItemCount(1);
+        for (StatusType type : StatusType.values()) {
+            status.addItem(type.getDisplayName());
+        }
+        status.setStyleName("pull_down");
+
+        if (entryInfo.getStatus() != null) {
+            for (int i = 0; i < this.status.getItemCount(); i += 1) {
+                if (status.getValue(i).equalsIgnoreCase(entryInfo.getStatus())) {
+                    status.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+
+        bioSafety.setVisibleItemCount(1);
+        for (BioSafetyOption options : BioSafetyOption.values()) {
+            bioSafety.addItem(options.getDisplayName(), options.getValue());
+        }
+        bioSafety.setStyleName("pull_down");
+        if (entryInfo.getBioSafetyLevel() != null) {
+            for (int i = 0; i < this.bioSafety.getItemCount(); i += 1) {
+                if (bioSafety.getValue(i).equalsIgnoreCase(entryInfo.getBioSafetyLevel().toString())) {
+                    this.bioSafety.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+        links.setText(entryInfo.getLinks());
+        keywords.setText(entryInfo.getKeywords());
+        ip.setText(entryInfo.getIntellectualProperty());
+        this.notesText.setText(entryInfo.getLongDescription());
+
         this.entryInfo = entryInfo;
-        this.creator.setText(creatorName);
-        this.creatorEmail.setText(creatorEmail);
+        this.creator.setText(entryInfo.getCreator());
+        this.creatorEmail.setText(entryInfo.getCreatorEmail());
 
         initLayout();
     }
@@ -94,32 +128,17 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     protected void initComponents() {
         submit = new Button("Submit");
         submit.setStyleName("btn_submit_entry_form");
-        cancel = new Button("Reset");
+        cancel = new Button("Cancel");
         cancel.setStyleName("btn_reset_entry_form");
-
         creator = createStandardTextBox("205px");
         creatorEmail = createStandardTextBox("205px");
         name = createStandardTextBox("205px");
         alias = createStandardTextBox("205px");
         principalInvestigator = createStandardTextBox("205px");
         summary = createTextArea("640px", "50px");
-        sampleLocationScheme = new ArrayList<TextBox>();
-
         fundingSource = createStandardTextBox("205px");
         status = new ListBox();
-        status.setVisibleItemCount(1);
-        for (StatusType type : StatusType.values()) {
-            status.addItem(type.getDisplayName());
-        }
-        status.setStyleName("pull_down");
-
         bioSafety = new ListBox();
-        bioSafety.setVisibleItemCount(1);
-        for (BioSafetyOption options : BioSafetyOption.values()) {
-            bioSafety.addItem(options.getDisplayName(), options.getValue());
-        }
-        bioSafety.setStyleName("pull_down");
-
         links = createStandardTextBox("300px");
         keywords = createStandardTextBox("640px");
         references = createTextArea("640px", "50px");
@@ -142,8 +161,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     }
 
     protected Widget createTextBoxWithHelp(Widget box, String helpText) {
-        String html = "<span id=\"box_id\"></span><span class=\"help_text\">" + helpText
-                + "</span>";
+        String html = "<span id=\"box_id\"></span><span class=\"help_text\">" + helpText + "</span>";
         HTMLPanel panel = new HTMLPanel(html);
         panel.addAndReplaceElement(box, "box_id");
         return panel;
@@ -254,8 +272,8 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
             @Override
             public void onChange(ChangeEvent event) {
 
-                int index = NewSingleEntryForm.this.sampleLocation.getSelectedIndex();
-                String value = NewSingleEntryForm.this.sampleLocation.getValue(index);
+                int index = SingleEntryForm.this.sampleLocation.getSelectedIndex();
+                String value = SingleEntryForm.this.sampleLocation.getValue(index);
                 ArrayList<String> list = sampleLocation.getListForLocation(value);
                 if (list == null) {
                     sampleLocationScheme.clear();
@@ -355,43 +373,29 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     }
 
     /**
-     * @return text input for autocomplete data
+     * @return text input for auto complete data
      */
-    private SuggestBox createSuggestBox(TreeSet<String> data) {
-
-        MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-        oracle.addAll(data);
-        SuggestBox box = new SuggestBox(oracle, new MultipleTextBox());
+    private SuggestBox createSuggestBox(AutoCompleteField field, String width) {
+        SuggestBox box = new SuggestBox(new AutoCompleteSuggestOracle(field));
         box.setStyleName("input_box");
+        box.setWidth(width);
         return box;
     }
 
     public SuggestBox createAutoCompleteForPromoters(String width) {
-
-        SuggestBox box = createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PROMOTERS)));
-        box.setWidth(width);
-        return box;
+        return createSuggestBox(AutoCompleteField.PROMOTERS, width);
     }
 
     public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
-
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.SELECTION_MARKERS)));
-        box.setWidth(width);
-        return box;
+        return createSuggestBox(AutoCompleteField.SELECTION_MARKERS, width);
     }
 
     public SuggestBox createAutoCompleteForPlasmidNames(String width) {
-
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PLASMID_NAME)));
-        box.setWidth(width);
-        return box;
+        return createSuggestBox(AutoCompleteField.PLASMID_NAME, width);
     }
 
     public SuggestBox createAutoCompleteForOriginOfReplication(String width) {
-
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.ORIGIN_OF_REPLICATION)));
-        box.setWidth(width);
-        return box;
+        return createSuggestBox(AutoCompleteField.ORIGIN_OF_REPLICATION, width);
     }
 
     @Override
@@ -463,22 +467,24 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         boolean userEnteredSampleName = !sampleName.getText().trim().isEmpty();
         sampleName.setStyleName("input_box");
 
-        for (TextBox scheme : sampleLocationScheme) {
-            scheme.setStyleName("input_box");
+        if (sampleLocationScheme != null) {
+            for (TextBox scheme : sampleLocationScheme) {
+                scheme.setStyleName("input_box");
 
-            if (userEnteredSampleName) {
-                // if there is a name, all schemes must be filled
-                if (scheme.getText().trim().isEmpty()) {
-                    scheme.setStyleName("entry_input_error");
-                    if (invalid == null)
-                        invalid = scheme;
-                }
-            } else {
-                // there is no name all schemes must be empty
-                if (!scheme.getText().trim().isEmpty()) {
-                    sampleName.setStyleName("entry_input_error");
-                    if (invalid == null)
-                        invalid = sampleName;
+                if (userEnteredSampleName) {
+                    // if there is a name, all schemes must be filled
+                    if (scheme.getText().trim().isEmpty()) {
+                        scheme.setStyleName("entry_input_error");
+                        if (invalid == null)
+                            invalid = scheme;
+                    }
+                } else {
+                    // there is no name all schemes must be empty
+                    if (!scheme.getText().trim().isEmpty()) {
+                        sampleName.setStyleName("entry_input_error");
+                        if (invalid == null)
+                            invalid = sampleName;
+                    }
                 }
             }
         }
@@ -534,7 +540,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         entryInfo.setBioSafetyLevel(value);
         entryInfo.setIntellectualProperty(ip.getText());
         entryInfo.setPrincipalInvestigator(principalInvestigator.getText());
-
     }
 
     protected void populateSamples() {
@@ -564,12 +569,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     }
 
     @Override
-    public EntryInfo getPrimaryEntry() {
+    public EntryInfo getEntry() {
         return getEntryInfo();
-    }
-
-    @Override
-    public EntryInfo getSecondaryEntry() {
-        return null;
     }
 }

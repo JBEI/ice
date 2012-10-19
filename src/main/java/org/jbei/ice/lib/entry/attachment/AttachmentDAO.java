@@ -32,16 +32,13 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
     public Attachment save(Attachment attachment, InputStream inputStream) throws DAOException {
         Session session = newSession();
         try {
-            session.getTransaction().begin();
             session.saveOrUpdate(attachment);
             if (inputStream != null)
                 writeFile(attachment.getFileId(), inputStream);
             session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
-            session.getTransaction().rollback();
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
@@ -63,7 +60,6 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
             throws IOException, DAOException {
         try {
             File file = new File(ATTACHMENTS_DIR + File.separator + fileName);
-
             File fileDir = new File(ATTACHMENTS_DIR);
 
             if (!fileDir.exists()) {
@@ -94,15 +90,11 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
         Session session = newSession();
 
         try {
-            session.getTransaction().begin();
             session.delete(attachment);
             deleteFile(attachment);
-            session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("dbDelete failed!", e);
         } catch (Exception e) {
-            session.getTransaction().rollback();
             Logger.error(e);
             throw new DAOException("Unknown exception ", e);
         } finally {
@@ -124,7 +116,6 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
 
         Session session = newSession();
         try {
-            session.beginTransaction();
             String queryString = "from " + Attachment.class.getName()
                     + " as attachment where attachment.entry = :entry order by attachment.id desc";
 
@@ -135,9 +126,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
             if (list != null) {
                 attachments = (ArrayList<Attachment>) list;
             }
-            session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(), e);
         } finally {
             closeSession(session);
@@ -176,7 +165,6 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
 
         Session session = newSession();
         try {
-            session.beginTransaction();
             Query query = session.createQuery("from " + Attachment.class.getName() + " where fileId = :fileId");
             query.setParameter("fileId", fileId);
             Object queryResult = query.uniqueResult();
@@ -184,9 +172,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
             if (queryResult != null) {
                 attachment = (Attachment) queryResult;
             }
-            session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve attachment by fileId: " + fileId, e);
         } finally {
             closeSession(session);

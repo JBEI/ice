@@ -1,100 +1,76 @@
-package org.jbei.ice.client.entry.view.update;
-
-import java.util.ArrayList;
-import java.util.HashMap;
+package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.dto.PlasmidInfo;
+import org.jbei.ice.shared.dto.StrainInfo;
 
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-/**
- * Form for updating plasmid
- *
- * @author Hector Plahar
- */
+public class StrainForm extends SingleEntryForm<StrainInfo> {
 
-public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
-
-    private CheckBox circular;
-    private TextBox backbone;
-    private TextBox origin;
-    private TextBox promoters;
+    private TextBox host;
+    private TextBox genPhen;
+    private SuggestBox plasmids;
     private SuggestBox markers;
 
-    public UpdatePlasmidForm(HashMap<AutoCompleteField, ArrayList<String>> data, PlasmidInfo info) {
-        super(data, info);
+    public StrainForm(StrainInfo strainInfo) {
+        super(strainInfo);
 
-        circular.setValue(info.getCircular());
-        backbone.setText(info.getBackbone());
-        origin.setText(info.getOriginOfReplication());
-        promoters.setText(info.getPromoters());
-        markers.setText(info.getSelectionMarkers());
+        host.setText(strainInfo.getHost());
+        genPhen.setText(strainInfo.getGenotypePhenotype());
+        plasmids.setText(strainInfo.getPlasmids());
+        markers.setText(strainInfo.getSelectionMarkers());
     }
 
     @Override
     protected void initComponents() {
         super.initComponents();
 
+        host = createStandardTextBox("300px");
         markers = createAutoCompleteForSelectionMarkers("300px");
-        circular = new CheckBox();
-        origin = createStandardTextBox("300px");
-        promoters = createStandardTextBox("300px");
-        backbone = createStandardTextBox("300px");
+        genPhen = createStandardTextBox("300px");
+        plasmids = createAutoCompleteForPlasmidNames("300px");
     }
 
-    private void addField(FlexTable table, String label, int row, int col, TextBox box,
-            String help, boolean required) {
-        setLabel(required, label, table, row, col);
-        if (help != null) {
-            Widget widget = createTextBoxWithHelp(box, help);
-            table.setWidget(row, col + 1, widget);
-        } else
-            table.setWidget(row, col + 1, box);
-    }
-
-    @Override
     protected Widget createGeneralWidget() {
         int row = 0;
         FlexTable general = new FlexTable();
+        general.setStyleName("no_wrap");
         general.setWidth("100%");
-        general.setCellPadding(2);
+        general.setCellPadding(3);
         general.setCellSpacing(0);
 
         // name
-        addField(general, "Name", row, 0, name, "e.g. pTSH117", true);
+        setLabel(true, "Name", general, row, 0);
+        Widget widget = createTextBoxWithHelp(name, "e.g. JBEI-0001");
+        general.setWidget(row, 1, widget);
 
         // alias
-        row += 1;
-        addField(general, "Alias", row, 0, alias, null, false);
+        setLabel(false, "Alias", general, row, 2);
+        general.setWidget(row, 3, alias);
 
         // creator
         row += 1;
         setLabel(true, "Creator", general, row, 0);
-        Widget widget = createTextBoxWithHelp(creator, "Who made this part?");
+        widget = createTextBoxWithHelp(creator, "Who made this part?");
         general.setWidget(row, 1, widget);
 
         // PI
-        row += 1;
-        setLabel(true, "Principal Investigator", general, row, 0);
-        general.setWidget(row, 1, principalInvestigator);
+        setLabel(true, "Principal Investigator", general, row, 2);
+        general.setWidget(row, 3, principalInvestigator);
 
         // creator's email
         row += 1;
-        setLabel(false, "Creator's Email", general, row, 0);
+        setLabel(true, "Creator's Email", general, row, 0);
         widget = createTextBoxWithHelp(creatorEmail, "If known");
         general.setWidget(row, 1, widget);
 
         // funding source
-        row += 1;
-        setLabel(false, "Funding Source", general, row, 0);
-        general.setWidget(row, 1, fundingSource);
+        setLabel(false, "Funding Source", general, row, 2);
+        general.setWidget(row, 3, fundingSource);
 
         // status
         row += 1;
@@ -102,20 +78,13 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         general.setWidget(row, 1, status);
 
         // bio safety level
-        row += 1;
-        setLabel(false, "Bio Safety Level", general, row, 0);
-        general.setWidget(row, 1, bioSafety);
+        setLabel(false, "Bio Safety Level", general, row, 2);
+        general.setWidget(row, 3, bioSafety);
 
-        // circular
+        // host strain
         row += 1;
-        setLabel(false, "Circular", general, row, 0);
-        general.setWidget(row, 1, circular);
-        general.getFlexCellFormatter().setColSpan(row, 1, 3);
-
-        // backbone
-        row += 1;
-        setLabel(false, "Backbone", general, row, 0);
-        general.setWidget(row, 1, backbone);
+        setLabel(false, "Host Strain", general, row, 0);
+        general.setWidget(row, 1, host);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
         // links
@@ -132,17 +101,17 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
-        // origin of replication
+        // Genotype/Phenotype 
         row += 1;
-        setLabel(false, "Origin of Replication", general, row, 0);
-        widget = createTextBoxWithHelp(origin, "Comma separated");
+        setLabel(false, "Genotype/Phenotype", general, row, 0);
+        widget = createTextBoxWithHelp(genPhen, "Comma separated");
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
-        // promoters
+        // plasmids 
         row += 1;
-        setLabel(false, "Promoters", general, row, 0);
-        widget = createTextBoxWithHelp(promoters, "Comma separated");
+        setLabel(false, "Plasmids", general, row, 0);
+        widget = createTextBoxWithHelp(plasmids, "Comma separated");
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -174,18 +143,15 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
     }
 
     @Override
-    public void populateEntry() {
-        super.populateEntry();
+    public void populateEntries() {
+        super.populateEntries();
 
-        // plasmid specific fields
-        PlasmidInfo info = super.getEntryInfo();
-
+        StrainInfo strain = super.getEntryInfo();
+        strain.setHost(host.getText());
+        strain.setGenotypePhenotype(genPhen.getText());
+        strain.setPlasmids(((MultipleTextBox) plasmids.getTextBox()).getWholeText());
         String selectionMarkers = ((MultipleTextBox) markers.getTextBox()).getWholeText();
-        info.setSelectionMarkers(selectionMarkers);
-        info.setBackbone(this.backbone.getText());
-        info.setOriginOfReplication(this.origin.getText());
-        info.setPromoters(this.promoters.getText());
-        info.setCircular(this.circular.getValue());
+        strain.setSelectionMarkers(selectionMarkers);
     }
 
     @Override

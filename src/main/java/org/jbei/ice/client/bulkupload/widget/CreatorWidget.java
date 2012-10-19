@@ -33,7 +33,7 @@ public class CreatorWidget implements IsWidget {
         panel = new HTMLPanel("<span id=\"creator_label\"></span><br><span id=\"creator_input\"></span><br><br>" +
                                       "<span id=\"creator_email_label\"></span><br><span " +
                                       "id=\"creator_email_input\"></span>");
-        panel.setStyleName("bg_white");
+        panel.setStyleName("bg_fc");
         panel.addStyleName("pad-6");
         createTableContents(creator, creatorEmail);
 

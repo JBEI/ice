@@ -8,10 +8,10 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
-import org.jbei.ice.lib.utils.UtilityException;
 
 /**
  * Ice servlet context listener for running initializing
@@ -45,9 +45,12 @@ public class IceServletContextListener implements ServletContextListener {
 
     protected void init() {
         try {
+            HibernateHelper.getSessionFactory().getCurrentSession().beginTransaction();
             PopulateInitialDatabase.initializeDatabase();
             ApplicationController.upgradeDatabaseIfNecessary();
-        } catch (UtilityException e) {
+            HibernateHelper.getSessionFactory().getCurrentSession().getTransaction().commit();
+            // TODO : rollback
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }

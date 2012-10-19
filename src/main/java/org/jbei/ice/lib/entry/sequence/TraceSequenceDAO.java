@@ -49,7 +49,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
 
             writeTraceSequenceToFile(traceSequence.getFileId(), inputStream);
 
-            result = (TraceSequence) super.saveOrUpdate(traceSequence);
+            result = super.saveOrUpdate(traceSequence);
         } catch (DAOException e) {
             try {
                 deleteTraceSequenceToFile(traceSequence);
@@ -120,9 +120,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entry by fileId: " + fileId, e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+
         }
 
         return traceSequence;
@@ -198,7 +196,6 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
             DAOException {
         try {
             File file = new File(traceFilesDirectory + File.separator + traceSequence.getFileId());
-
             file.delete();
         } catch (SecurityException e) {
             throw new DAOException(e);
@@ -236,9 +233,6 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to get trace sequence by entry!", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
         }
 
         return result;
@@ -286,9 +280,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
         } catch (HibernateException e) {
             throw new DAOException(e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return result;

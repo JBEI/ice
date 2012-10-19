@@ -89,8 +89,8 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
     }
 
     private boolean isBlast(SearchFilterInfo filter) {
-        return QueryOperator.BLAST_N.value().equals(filter.getType())
-                || QueryOperator.TBLAST_X.value().equals(filter.getType());
+        return QueryOperator.BLAST_N.symbol().equals(filter.getType())
+                || QueryOperator.TBLAST_X.symbol().equals(filter.getType());
     }
 
     @Override

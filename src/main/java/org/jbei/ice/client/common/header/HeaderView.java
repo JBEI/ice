@@ -4,7 +4,9 @@ import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.common.FilterOperand;
+import org.jbei.ice.client.common.FilterWidget;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -18,7 +20,15 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class HeaderView extends Composite {
 
@@ -33,10 +43,9 @@ public class HeaderView extends Composite {
         ImageResource arrowDown();
     }
 
-    private Hyperlink logout;
     private SearchCompositeBox searchInput;
     private Button searchBtn;
-    private final SearchOption option;
+    private final AdvancedSearchWidget widgetAdvanced;
     private final HeaderPresenter presenter;
 
     public HeaderView() {
@@ -62,18 +71,19 @@ public class HeaderView extends Composite {
         table.setWidget(0, 0, horizontal);
 
         // search Option
-        option = new SearchOption();
-        option.addStyleName("background_white");
-        option.setWidth("350px");
-        option.setHeight("150px");
+        widgetAdvanced = new AdvancedSearchWidget();
+        widgetAdvanced.setWidth("401px");
+        widgetAdvanced.setHeight("150px");
 
         presenter = new HeaderPresenter(this);
     }
 
     public String getSelectedFilterValue() {
-        final ListBox filterOptions = option.getFilterOptions();
-        int index = filterOptions.getSelectedIndex();
-        return filterOptions.getValue(index);
+        return widgetAdvanced.getSelectedFilter();
+    }
+
+    public String[] getSelectedSearchType() {
+        return widgetAdvanced.getSelectedEntrySearch();
     }
 
     // handler for clicking search
@@ -85,12 +95,17 @@ public class HeaderView extends Composite {
         searchBtn.setEnabled(enable);
     }
 
+    public void setEntryTypeChangeHandler(ChangeHandler handler) {
+//        final ListBox entryTypeOptions = widgetAdvanced.getEntryTypeOptions();
+//        entryTypeOptions.addChangeHandler(handler);
+    }
+
     public void setAddFilterHandler(ClickHandler handler) {
-        option.getAddFilter().addClickHandler(handler);
+        widgetAdvanced.getAddFilter().addClickHandler(handler);
     }
 
     public void setSearchOptions(LinkedHashMap<String, String> options) {
-        option.setOptions(options);
+        widgetAdvanced.initializeWidget(options);
     }
 
     private Widget getImageHeader() {
@@ -141,7 +156,8 @@ public class HeaderView extends Composite {
     private Widget createLoggedInContents() {
         HorizontalPanel panel = new HorizontalPanel();
         panel.setStyleName("float_right");
-        panel.addStyleName("font-95em");
+        panel.addStyleName("font-80em");
+        panel.addStyleName("pad-right-10");
 
         if (AppController.accountInfo == null) {
             panel.add(new HTML(SafeHtmlUtils.EMPTY_SAFE_HTML));
@@ -150,20 +166,39 @@ public class HeaderView extends Composite {
 
         AccountInfo info = AppController.accountInfo;
 
-        // Welcome text
-        HTML welcometxt = new HTML("Welcome,&nbsp;");
+        // user
+        panel.add(new Icon(FAIconType.USER));
+        panel.add(new HTML("&nbsp;"));
         Hyperlink link = new Hyperlink(info.getFirstName() + " " + info.getLastName(),
                                        "page=profile;id=" + info.getEmail());
-        panel.add(welcometxt);
         panel.add(link);
+        panel.add(new HTML("&nbsp;"));
+        panel.add(new Icon(FAIconType.CARET_DOWN));
 
         // pipe
-        HTML pipe = new HTML("&nbsp;|&nbsp;");
+        HTML pipe = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
         pipe.addStyleName("color_eee");
         panel.add(pipe);
 
+        // settings
+        panel.add(new Icon(FAIconType.COGS));
+        panel.add(new HTML("&nbsp;Settings"));
+        HTML pipe2 = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
+        pipe2.addStyleName("color_eee");
+        panel.add(pipe2);
+
+        // messages
+        panel.add(new HTML("<span class=\"badge\">2</span>"));
+
+        // pipe
+        HTML pipe3 = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
+        pipe3.addStyleName("color_eee");
+        panel.add(pipe3);
+
         // logout link
-        logout = new Hyperlink("Log Out", Page.LOGOUT.getLink());
+        panel.add(new Icon(FAIconType.SIGNOUT));
+        panel.add(new HTML("&nbsp;"));
+        Hyperlink logout = new Hyperlink("Log Out", Page.LOGOUT.getLink());
         panel.add(logout);
 
         return panel;
@@ -182,19 +217,18 @@ public class HeaderView extends Composite {
     }
 
     public void setFilterChangeHandler(ChangeHandler handler) {
-        final ListBox filterOptions = option.getFilterOptions();
-        filterOptions.addChangeHandler(handler);
+        widgetAdvanced.setOptionChangeHandler(handler);
     }
 
     public void createPullDownHandler() {
         if (this.searchInput != null) {
-            PopupHandler handler = new PopupHandler(option, this.searchInput.getTextBox()
-                                                                            .getElement(), -342, 8, false);
-            this.searchInput.getPullDownArea().addClickHandler(handler);
+            PopupHandler handler = new PopupHandler(widgetAdvanced, this.searchInput.getPullDownAreaElement(),
+                                                    -382, 1, false);
+            this.searchInput.setPullDownClickhandler(handler);
         }
     }
 
-    public void setFilterOperands(FilterOperand currentSelected) {
-        option.setFilterOperands(currentSelected);
+    public void setFilterOperands(FilterWidget currentSelected) {
+        widgetAdvanced.setFilterOperands(currentSelected);
     }
 }

@@ -1,6 +1,7 @@
 package org.jbei.ice.client.common;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -11,16 +12,19 @@ import org.jbei.ice.shared.SearchFilterType;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
 
-public class TypeOperand extends FilterOperand {
+/**
+ * Filter widget for displaying enum operand type options for filtering (e.g. Status is [Complete])
+ * Valid operators are "is" and "is not"
+ *
+ * @author Hector Plahar
+ */
+public class EnumFilterWidget extends FilterWidget {
 
-    private final FlexTable layout;
     private final ListBox operators;
     private final ListBox operands;
-    private final ArrayList<QueryOperator> operatorsList;
-    private final HashSet<String> operandList;
+    private final FlexTable layout;
 
-    public TypeOperand(SearchFilterType filterType, List<OperandValue> operands,
-            QueryOperator... operators) {
+    public EnumFilterWidget(SearchFilterType filterType, List<OperandValue> operands) {
 
         super(filterType);
 
@@ -29,26 +33,32 @@ public class TypeOperand extends FilterOperand {
 
         initWidget(layout);
 
-        operatorsList = new ArrayList<QueryOperator>();
+        ArrayList<QueryOperator> operatorsList = new ArrayList<QueryOperator>();
 
         // entry types
         this.operators = new ListBox();
-        for (QueryOperator operator : operators) {
+        this.operators.setStyleName("pull_down");
+        for (QueryOperator operator : getOperatorList()) {
             this.operators.addItem(operator.operator(), operator.name());
             operatorsList.add(operator);
         }
 
         this.operands = new ListBox();
-        this.operandList = new HashSet<String>();
+        this.operands.setStyleName("pull_down");
+        HashSet<String> operandList = new HashSet<String>();
         for (OperandValue value : operands) {
             this.operands.addItem(value.getDisplay(), value.getValue());
-            this.operandList.add(value.getValue());
+            operandList.add(value.getValue());
         }
 
         // layout options
         layout.setWidget(0, 0, this.operators);
         layout.setWidget(0, 1, this.operands);
+    }
 
+    @Override
+    public void setWidth(String width) {
+        layout.setWidth(width);
     }
 
     @Override
@@ -59,19 +69,14 @@ public class TypeOperand extends FilterOperand {
     }
 
     @Override
+    public List<QueryOperator> getOperatorList() {
+        return Arrays.asList(QueryOperator.IS, QueryOperator.IS_NOT);
+    }
+
+    @Override
     // TODO : this is the type<E>
     public String getSelectedOperand() {
         int index = this.operands.getSelectedIndex();
         return this.operands.getValue(index);
-    }
-
-    @Override
-    public ArrayList<QueryOperator> getOperatorList() {
-        return operatorsList;
-    }
-
-    @Override
-    public HashSet<String> getPossibleOperands() {
-        return this.operandList;
     }
 }

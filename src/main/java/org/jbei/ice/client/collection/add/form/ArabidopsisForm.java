@@ -1,10 +1,6 @@
 package org.jbei.ice.client.collection.add.form;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
@@ -19,7 +15,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> {
+public class ArabidopsisForm extends SingleEntryForm<ArabidopsisSeedInfo> {
 
     private ListBox generation;
     private ListBox plantType;
@@ -30,9 +26,38 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
     private DateBox harvestDate;
     private CheckBox sentToAbrc;
 
-    public NewArabidopsisForm(HashMap<AutoCompleteField, ArrayList<String>> data,
-            String creatorName, String creatorEmail) {
-        super(data, creatorName, creatorEmail, new ArabidopsisSeedInfo());
+    public ArabidopsisForm(ArabidopsisSeedInfo seedInfo) {
+        super(seedInfo);
+
+        // fill out values if any exist
+        for (PlantType type : PlantType.values()) {
+            plantType.addItem(type.toString(), type.name());
+        }
+
+        for (Generation gen : Generation.values()) {
+            generation.addItem(gen.toString(), gen.name());
+        }
+
+        for (int i = 0; i < this.generation.getItemCount(); i += 1) {
+            if (this.generation.getValue(i).equalsIgnoreCase(seedInfo.getGeneration().name())) {
+                this.generation.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        for (int i = 0; i < this.plantType.getItemCount(); i += 1) {
+            if (this.plantType.getValue(i).equalsIgnoreCase(seedInfo.getPlantType().name())) {
+                this.plantType.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        homozygosity.setText(seedInfo.getHomozygosity());
+        markers.setText(seedInfo.getSelectionMarkers());
+        ecoType.setText(seedInfo.getEcotype());
+        parents.setText(seedInfo.getParents());
+        harvestDate.setValue(seedInfo.getHarvestDate());
+        sentToAbrc.setValue(seedInfo.isSentToAbrc());
     }
 
     protected void initComponents() {

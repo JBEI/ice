@@ -22,7 +22,7 @@ public class Group implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     protected long id;
 
     @Column(name = "uuid", length = 36, nullable = false)
@@ -38,8 +38,11 @@ public class Group implements IModel {
     @JoinColumn(name = "parent")
     protected Group parent;
 
-    @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private Set<Group> children = new HashSet<Group>();
+
+    @Enumerated(EnumType.STRING)
+    private GroupType type;
 
     // Getters and setters
     public long getId() {
@@ -84,5 +87,13 @@ public class Group implements IModel {
 
     public Set<Group> getChildren() {
         return children;
+    }
+
+    public GroupType getType() {
+        return type;
+    }
+
+    public void setType(GroupType type) {
+        this.type = type;
     }
 }

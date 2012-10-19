@@ -24,9 +24,7 @@ public interface IEntryFormSubmit {
 
     void populateEntries();
 
-    EntryInfo getPrimaryEntry();
-
-    EntryInfo getSecondaryEntry();
+    EntryInfo getEntry();
 
     void setSampleLocation(SampleLocation sampleLocation);
 }

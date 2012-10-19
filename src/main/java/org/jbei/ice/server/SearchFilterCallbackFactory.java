@@ -41,13 +41,13 @@ public class SearchFilterCallbackFactory {
 
     protected static FilterCallback[] getQueryFilters(SearchFilterType type) {
 
-        if (!type.isComposite()) {
-            FilterCallback nonCompositeCallback = getQueryFilter(type);
-            if (nonCompositeCallback == null)
-                return null;
-
-            return new FilterCallback[]{nonCompositeCallback};
-        }
+//        if (!type.isComposite()) {
+//            FilterCallback nonCompositeCallback = getQueryFilter(type);
+//            if (nonCompositeCallback == null)
+//                return null;
+//
+//            return new FilterCallback[]{nonCompositeCallback};
+//        }
 
         FilterCallback[] callback;
         switch (type) {

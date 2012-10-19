@@ -112,13 +112,14 @@ public class AdvancedSearchPresenter {
 
             // get blast results and filter 
             QueryOperator program = QueryOperator.operatorValueOf(blastInfo.getOperator());
-            this.model.performBlast(filterCopy, blastInfo.getOperand(), program, new EventHandler(searchFilters));
+            this.model.performBlast(filterCopy, blastInfo.getOperand(), program, 0, 15, new EventHandler(
+                    searchFilters));
         } else {
             dataProvider.updateRowCount(0, false);
             display.setSearchVisibility(table, true);
             table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
 
-            this.model.retrieveSearchResults(filterCopy, new EventHandler(searchFilters));
+            this.model.retrieveSearchResults(filterCopy, 0, 15, new EventHandler(searchFilters));
         }
     }
 

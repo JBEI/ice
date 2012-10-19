@@ -1,19 +1,15 @@
 package org.jbei.ice.client.entry.view.view;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.MultiSelectionModel;
-import gwtupload.client.IUploader;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-import gwtupload.client.IUploader.OnStartUploaderHandler;
-import gwtupload.client.SingleUploader;
+import java.util.ArrayList;
+import java.util.Date;
+
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.collection.add.EntryFormFactory;
+import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Flash;
+import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.ViewFactory;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
@@ -22,13 +18,27 @@ import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.client.entry.view.table.EntrySequenceTable;
-import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
-import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
-import java.util.ArrayList;
-import java.util.Date;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.MultiSelectionModel;
+import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+import gwtupload.client.IUploader.OnStartUploaderHandler;
+import gwtupload.client.SingleUploader;
 
 public class EntryView extends Composite implements IEntryView {
 
@@ -61,10 +71,10 @@ public class EntryView extends Composite implements IEntryView {
 
     // navigation buttons for context navigation.
     // TODO : create a widget for it
-    private final Image goBack;
+    private final Icon goBack;
     private final Button leftBtn;
     private final Label navText;
-    private final Button rightBtn;
+    private final Icon rightBtn;
 
     private final Label headerLabel;
     private final EntrySampleTable sampleTable;
@@ -83,16 +93,17 @@ public class EntryView extends Composite implements IEntryView {
         permissions = new PermissionsWidget();
         visibility = new VisibilityWidget();
         headerLabel = new Label();
-        goBack = ImageUtil.getPrevIcon();
+        goBack = new Icon(FAIconType.SHARE_ALT); //ImageUtil.getPrevIcon();
         goBack.setTitle("Back");
-        goBack.setStyleName("cursor_pointer");
+        goBack.addStyleName("cursor_pointer");
 
         leftBtn = new Button("&lt;");
         leftBtn.setStyleName("nav");
         leftBtn.addStyleName("nav-left");
-        rightBtn = new Button("&gt;");
-        rightBtn.setStyleName("nav");
-        rightBtn.addStyleName("nav-right");
+//        rightBtn = new Button(new Icon(FAIconType.CHEVRON_RIGHT).getElement().getInnerHTML());
+//        rightBtn.setStyleName("nav");
+//        rightBtn.addStyleName("nav-right");
+        rightBtn = new Icon(FAIconType.CHEVRON_RIGHT);
         navText = new Label();
         navText.setStyleName("display-inline");
         navText.addStyleName("font-80em");
@@ -161,8 +172,12 @@ public class EntryView extends Composite implements IEntryView {
         // id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
         generalHeaderPanel = new HorizontalPanel();
         generalHeaderPanel.setVerticalAlignment(HasAlignment.ALIGN_MIDDLE);
-        editGeneralButton = new Button("Edit");
-        editGeneralButton.setStyleName("top_menu");
+
+        String html = "<div ><i class=\"" + FAIconType
+                .EDIT.getStyleName() + "\"></i>&nbsp;<label>Edit</label></br></div>";
+        editGeneralButton = new Button(html);
+
+
         deleteLabel = new Label("Delete");
         deleteLabel.setStyleName("entry_delete_link");
         generalHeaderPanel.add(goBack);
@@ -192,13 +207,12 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public IEntryFormUpdateSubmit showUpdateForm(EntryInfo info) {
-        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(info,
-                                                                              AppController.autoCompleteData);
+    public IEntryFormSubmit showUpdateForm(EntryInfo info) {
+        IEntryFormSubmit form = EntryFormFactory.updateForm(info, AppController.autoCompleteData);
         if (form == null)
             return form;
 
-        mainContent.setWidget(1, 0, form);
+        mainContent.setWidget(1, 0, form.asWidget());
         return form;
     }
 
@@ -255,12 +269,13 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void setNextHandler(ClickHandler handler) {
-        rightBtn.addClickHandler(handler);
+        rightBtn.addDomHandler(handler, ClickEvent.getType());
     }
 
     @Override
     public void setGoBackHandler(ClickHandler handler) {
-        goBack.addClickHandler(handler);
+//        goBack.addClickHandler(handler);
+        goBack.addDomHandler(handler, ClickEvent.getType());
     }
 
     @Override
@@ -282,7 +297,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void enableNext(boolean enabled) {
-        rightBtn.setEnabled(enabled);
+//        rightBtn.setEnabled(enabled);
         if (enabled) {
             rightBtn.removeStyleName("nav_disabled");
             rightBtn.addStyleName("nav");

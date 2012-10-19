@@ -32,7 +32,8 @@ public class AdvancedSearchModel {
     }
 
     public void performBlast(final ArrayList<SearchFilterInfo> searchFilters, String operand,
-            QueryOperator program, final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
+            QueryOperator program, final int start, final int limit,
+            final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
 
         service.blastSearch(AppController.sessionId, operand, program,
                             new AsyncCallback<ArrayList<BlastResultInfo>>() {
@@ -43,7 +44,7 @@ public class AdvancedSearchModel {
                                         handler.onBlastCompletion(new AdvancedSearchEvent(blastResult));
                                     } else {
                                         // retrieve other filters
-                                        filterBlastSearchResults(searchFilters, blastResult, handler);
+                                        filterBlastSearchResults(searchFilters, blastResult, start, limit, handler);
                                     }
                                 }
 
@@ -56,9 +57,11 @@ public class AdvancedSearchModel {
 
     public void filterBlastSearchResults(final ArrayList<SearchFilterInfo> searchFilters,
             final ArrayList<BlastResultInfo> blastResult,
+            final int start,
+            final int limit,
             final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
 
-        service.retrieveSearchResults(AppController.sessionId, searchFilters,
+        service.retrieveSearchResults(AppController.sessionId, searchFilters, start, limit,
                                       new AsyncCallback<LinkedList<SearchResultInfo>>() {
 
                                           @Override
@@ -98,10 +101,10 @@ public class AdvancedSearchModel {
                                       });
     }
 
-    public void retrieveSearchResults(final ArrayList<SearchFilterInfo> searchFilters,
+    public void retrieveSearchResults(final ArrayList<SearchFilterInfo> searchFilters, int start, int limit,
             final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
 
-        service.retrieveSearchResults(AppController.sessionId, searchFilters,
+        service.retrieveSearchResults(AppController.sessionId, searchFilters, start, limit,
                                       new AsyncCallback<LinkedList<SearchResultInfo>>() {
 
                                           @Override

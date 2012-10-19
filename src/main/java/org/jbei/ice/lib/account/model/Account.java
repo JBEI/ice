@@ -20,7 +20,7 @@ import org.hibernate.annotations.Type;
  * email field (Entry.ownerEmail to Account.email). This of course means that as far as the system
  * is concerned, email is the identifying value of a user, not the Account's id.
  *
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
 @Table(name = "accounts")
@@ -75,6 +75,12 @@ public class Account implements IModel {
 
     @Enumerated(EnumType.STRING)
     private AccountType type = AccountType.NORMAL;
+
+    @Column(name = "salt")
+    private String salt;
+
+    @Column(name = "email_hash")
+    private String emailHash;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"),
@@ -282,5 +288,21 @@ public class Account implements IModel {
             this.type = AccountType.NORMAL;
         else
             this.type = type;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
+    public String getEmailHash() {
+        return emailHash;
+    }
+
+    public void setEmailHash(String emailHash) {
+        this.emailHash = emailHash;
     }
 }

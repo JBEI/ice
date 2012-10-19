@@ -76,6 +76,10 @@ public class SheetPresenter {
         }
     }
 
+    public int getEntryRowCount() {
+        return currentInfo.getCount();
+    }
+
     // currently goes through each row and cell and checks to cell value
     public boolean isEmptyRow(int row) {
 

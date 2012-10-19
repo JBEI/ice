@@ -5,9 +5,8 @@ import org.jbei.ice.shared.QueryOperator;
 public abstract class FilterCallback {
 
     public String createCriterion(QueryOperator operator, String operand) {
-
         String field = this.getField();
-        return makeCriterion(field, operator.value(), operand);
+        return makeCriterion(field, operator.symbol(), operand);
     }
 
     public abstract String getField();

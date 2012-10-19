@@ -1,19 +1,20 @@
 package org.jbei.ice.client.entry.view.view;
 
+import java.util.ArrayList;
+
+import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
+import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
+import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 import gwtupload.client.IUploader;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
-import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
-import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
-import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-
-import java.util.ArrayList;
 
 public interface IEntryView {
 
@@ -25,7 +26,7 @@ public interface IEntryView {
 
     void showSequenceView(EntryInfo info, boolean showFlash);
 
-    IEntryFormUpdateSubmit showUpdateForm(EntryInfo info);
+    IEntryFormSubmit showUpdateForm(EntryInfo info);
 
     PermissionsPresenter getPermissionsWidget();
 

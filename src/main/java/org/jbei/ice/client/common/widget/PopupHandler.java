@@ -47,6 +47,10 @@ public class PopupHandler implements ClickHandler {
         }
     }
 
+    public boolean popupIsShowing() {
+        return popup.isShowing();
+    }
+
     public void hidePopup() {
         if (this.popup == null || !this.popup.isShowing())
             return;

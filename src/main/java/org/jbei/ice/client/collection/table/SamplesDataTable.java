@@ -1,7 +1,7 @@
 package org.jbei.ice.client.collection.table;
 
-import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.dom.client.Style.Unit;
+import java.util.ArrayList;
+
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.cell.UrlCell;
@@ -9,7 +9,8 @@ import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.SampleInfo;
 
-import java.util.ArrayList;
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.dom.client.Style.Unit;
 
 public abstract class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
@@ -33,7 +34,7 @@ public abstract class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
         columns.add(super.addTypeColumn(true));
 //        columns.add(super.addPartIdColumn(true, null, EntryContext.Type.SAMPLES));
-        columns.add(super.addNameColumn());
+        columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(this.addLabelColumn());
         columns.add(this.addNotesColumn());
         columns.add(this.addLocationColumn());

@@ -42,7 +42,7 @@ public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<Searc
         columns.add(super.addPartIdColumn(false, 120, Unit.PX));
 
         // name column
-        columns.add(super.addNameColumn());
+        columns.add(super.addNameColumn(120, Unit.PX));
 
         columns.add(addSummaryColumn());
         columns.add(addOwnerColumn());
@@ -64,9 +64,9 @@ public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<Searc
                 if (description == null)
                     return SafeHtmlUtils.EMPTY_SAFE_HTML;
 
-                int size = (Window.getClientWidth() - 850);
+                int size = (Window.getClientWidth() - 1200);
                 if (size <= 0)
-                    size = 50;
+                    size = 250;
 
                 return SafeHtmlUtils
                         .fromSafeConstant("<div style=\"width: "
@@ -106,7 +106,7 @@ public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<Searc
 
         this.addColumn(ownerColumn, "Owner");
         ownerColumn.setSortable(false);
-        this.setColumnWidth(ownerColumn, 150, Unit.PX);
+        this.setColumnWidth(ownerColumn, 180, Unit.PX);
         return ownerColumn;
     }
 
@@ -114,7 +114,7 @@ public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<Searc
         DataTableColumn<String> scoreColumn = new DataTableColumn<String>(new TextCell(), ColumnField.RELEVANCE) {
             @Override
             public String getValue(SearchResultInfo object) {
-                return object.getScore() + "";
+                return (object.getScore() + "").substring(0, 6);
             }
         };
 

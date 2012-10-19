@@ -21,6 +21,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
@@ -61,6 +62,7 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.*;
+import org.jbei.ice.shared.dto.autocomplete.AutoCompleteSuggestion;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
@@ -83,10 +85,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public AccountInfo login(String name, String pass) {
 
         try {
+            HibernateHelper.beginTransaction();
             AccountController controller = new AccountController();
             AccountInfo info = controller.authenticate(name, pass);
-            if (info == null)
+            if (info == null) {
+                HibernateHelper.commitTransaction();
                 return null;
+            }
 
             Logger.info("User by login '" + name + "' successfully logged in");
             Account account = controller.getByEmail(info.getEmail());
@@ -104,6 +109,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             // get the count of the user's entries
             long ownerEntryCount = entryController.getOwnerEntryCount(account, Visibility.DRAFT);
             info.setUserEntryCount(ownerEntryCount);
+            HibernateHelper.commitTransaction();
             return info;
         } catch (ControllerException e) {
             Logger.error(e);
@@ -303,6 +309,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         AccountController controller = new AccountController();
         EntryController entryController = new EntryController();
 
+        HibernateHelper.beginTransaction();
+
         try {
             if (AccountController.isAuthenticated(sid)) {
                 Account account = controller.getAccountBySessionKey(sid);
@@ -320,9 +328,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                     visibleEntryCount = entryController.getNumberOfVisibleEntries(account);
 
                 info.setVisibleEntryCount(visibleEntryCount);
+                HibernateHelper.commitTransaction();
                 return info;
             }
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
         }
         return null;
@@ -345,12 +355,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             LinkedList<Long> entryIds) throws AuthenticationException {
 
         try {
+            HibernateHelper.beginTransaction();
             Account account = this.retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": retrieving entry data for " + entryIds.size()
                                 + " entries");
             EntryController entryController = new EntryController();
-            return entryController.retrieveEntriesByIdSetSort(account, entryIds, field, asc);
+            LinkedList<EntryInfo> results = entryController.retrieveEntriesByIdSetSort(account, entryIds, field, asc);
+            HibernateHelper.commitTransaction();
+            return results;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
             return null;
         }
@@ -379,6 +393,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
         try {
+            HibernateHelper.beginTransaction();
             Account account = retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": retrieving  collections");
             AccountController controller = new AccountController();
@@ -408,10 +423,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
             }
 
+            HibernateHelper.commitTransaction();
             return results;
 
         } catch (ControllerException ce) {
             Logger.error(ce);
+            HibernateHelper.rollbackTransaction();
             return null;
         }
     }
@@ -421,6 +438,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
 
         try {
+            HibernateHelper.beginTransaction();
             Account account = this.retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": retrieving entries for folder " + folderId);
             FolderController folderController = new FolderController();
@@ -440,11 +458,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<Long> contents = folderController.getFolderContents(folderId);
 
             details.setContents(contents);
+            HibernateHelper.commitTransaction();
             return details;
         } catch (ControllerException e) {
             Logger.error(e);
+            HibernateHelper.rollbackTransaction();
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -494,12 +514,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
 
         try {
+            HibernateHelper.beginTransaction();
             Account account = this.retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": retrieving user entries for " + userId);
             EntryController entryController = new EntryController();
             FolderDetails details = new FolderDetails(0, "My Entries", true);
+
             ArrayList<Long> entries = entryController.getEntryIdsByOwner(account, userId, Visibility.OK,
                                                                          Visibility.PENDING);
+            HibernateHelper.commitTransaction();
             details.setContents(entries);
             return details;
         } catch (ControllerException e) {
@@ -519,12 +542,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             EntryController entryController = new EntryController();
 
             ArrayList<Long> entries;
+            HibernateHelper.beginTransaction();
             if (controller.isAdministrator(account))
                 entries = entryController.getAllEntryIDs();
             else {
                 entries = new ArrayList<Long>();
                 entries.addAll(entryController.getAllVisibleEntryIDs(account));
             }
+            HibernateHelper.commitTransaction();
 
             FolderDetails details = new FolderDetails(-1, "Available Entries", true);
             details.setContents(entries);
@@ -551,36 +576,24 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public HashMap<AutoCompleteField, ArrayList<String>> retrieveAutoCompleteData(String sid) {
-        HashMap<AutoCompleteField, ArrayList<String>> data = new HashMap<AutoCompleteField, ArrayList<String>>();
+    public SuggestOracle.Response getAutoCompleteSuggestion(AutoCompleteField field, Request request) {
+        SuggestOracle.Response response = new SuggestOracle.Response();
+        List<Suggestion> suggestions = new ArrayList<Suggestion>(request.getLimit());
 
         UtilsController controller = new UtilsController();
-
-        // origin of replication
-        ArrayList<String> origin = new ArrayList<String>();
-        origin.addAll(controller.getUniqueOriginOfReplications());
-        data.put(AutoCompleteField.ORIGIN_OF_REPLICATION, origin);
-
-        // selection markers
         try {
-            ArrayList<String> markers = new ArrayList<String>();
-            markers.addAll(controller.getUniqueSelectionMarkers());
-            data.put(AutoCompleteField.SELECTION_MARKERS, markers);
+            Set<String> results = controller.getMatchingAutoCompleteField(field, request.getQuery(),
+                                                                          request.getLimit());
+            for (String result : results) {
+                AutoCompleteSuggestion suggestion = new AutoCompleteSuggestion(result);
+                suggestions.add(suggestion);
+            }
         } catch (ControllerException e) {
             Logger.error(e);
         }
 
-        // promoters
-        ArrayList<String> promoters = new ArrayList<String>();
-        promoters.addAll(controller.getUniquePromoters());
-        data.put(AutoCompleteField.PROMOTERS, promoters);
-
-        // plasmid names
-        ArrayList<String> plasmidNames = new ArrayList<String>();
-        plasmidNames.addAll(controller.getUniquePublicPlasmidNames());
-        data.put(AutoCompleteField.PLASMID_NAME, plasmidNames);
-
-        return data;
+        response.setSuggestions(suggestions);
+        return response;
     }
 
     @Override
@@ -643,9 +656,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public EntryInfo retrieveEntryDetails(String sid, long id) throws AuthenticationException {
         try {
+            HibernateHelper.beginTransaction();
             Account account = retrieveAccountForSid(sid);
-            Logger.info(account.getEmail() + ": retrieving details for entry with id \"" + id
-                                + "\"");
+            Logger.info(account.getEmail() + ": retrieving details for entry with id \"" + id + "\"");
             Entry entry;
             try {
                 entry = new EntryController().get(account, id);
@@ -679,14 +692,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             SequenceController sequenceController = new SequenceController();
             boolean hasSequence = (sequenceController.getByEntry(entry) != null);
 
-            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap,
-                                                        sequences, hasSequence);
+            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence);
 
             //
             //  the parsed versions are separated out into complementary fields
             //
-            String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(),
-                                                          info.getLongDescription());
+            // todo
+            String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(), info.getLongDescription());
             String parsed = getParsedNotes(html);
             info.setLongDescription(info.getLongDescription());
             info.setParsedDescription(parsed);
@@ -699,13 +711,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             PermissionsController permissionsController = new PermissionsController();
             info.setCanEdit(permissionsController.hasWritePermission(account, entry));
 
+            HibernateHelper.commitTransaction();
             return info;
 
         } catch (DAOException e) {
             Logger.error(e);
+            HibernateHelper.rollbackTransaction();
             return null;
         } catch (ControllerException e) {
             Logger.error(e);
+            HibernateHelper.rollbackTransaction();
             return null;
         }
     }
@@ -713,6 +728,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public EntryInfo retrieveEntryTipDetails(String sid, long id) throws AuthenticationException {
         try {
+            HibernateHelper.beginTransaction();
             Account account = retrieveAccountForSid(sid);
             Entry entry;
             try {
@@ -756,6 +772,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             //
             //  the parsed versions are separated out into complementary fields
             //
+            // todo
             String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(),
                                                           info.getLongDescription());
             String parsed = getParsedNotes(html);
@@ -770,12 +787,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             PermissionsController permissionsController = new PermissionsController();
             info.setCanEdit(permissionsController.hasWritePermission(account, entry));
 
+            HibernateHelper.commitTransaction();
             return info;
 
         } catch (DAOException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
             return null;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
             return null;
         }
@@ -848,12 +868,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     // 
 
     @Override
-    public LinkedList<SearchResultInfo> retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters)
+    public LinkedList<SearchResultInfo> retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters,
+            int start, int limit)
             throws AuthenticationException {
-        LinkedList<SearchResultInfo> results = new LinkedList<SearchResultInfo>();
 
         if (filters == null || filters.isEmpty())
-            return results;
+            return new LinkedList<SearchResultInfo>();
 
         ArrayList<QueryFilter> queryFilters = new ArrayList<QueryFilter>();
         for (SearchFilterInfo filter : filters) {
@@ -862,16 +882,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         try {
-
+            HibernateHelper.getSessionFactory().getCurrentSession().beginTransaction();
             Account account = this.retrieveAccountForSid(sid);
             SearchController search = new SearchController();
-            LinkedList<SearchResultInfo> filterResults = search.runSearch(account,
-                                                                          queryFilters); // TODO : this takes a while
-            results.addAll(filterResults);
-
-            return results;
-        } catch (ControllerException e) {
+            SearchResults searchResults = search.runSearch(account, queryFilters, start, limit);
+            HibernateHelper.getSessionFactory().getCurrentSession().getTransaction().commit();
+            return searchResults.getResults();
+        } catch (Throwable e) {
             Logger.error(e);
+            try {
+                if (HibernateHelper.getSessionFactory().getCurrentSession().getTransaction().isActive()) {
+                    Logger.debug("Trying to rollback database transaction after exception");
+                    HibernateHelper.getSessionFactory().getCurrentSession().getTransaction().rollback();
+                }
+            } catch (Throwable rbEx) {
+                Logger.error("Could not rollback transaction after exception!", rbEx);
+            }
             return null;
         }
     }
@@ -1681,13 +1707,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         final Account account;
         try {
+            HibernateHelper.beginTransaction();
             account = retrieveAccountForSid(sessionId);
             EntryController controller = new EntryController();
             Entry entry = controller.get(account, entryId);
             if (entry == null)
                 return null;
 
-            return controller.retrievePermissions(account, entry);
+            ArrayList<PermissionInfo> results = controller.retrievePermissions(account, entry);
+            HibernateHelper.commitTransaction();
+            return results;
 
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1752,8 +1781,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (folder == null)
                 return null;
 
-            Logger.info(account.getEmail() + ": updating folder " + folder.getName() + " with id "
-                                + folder.getId());
+            Logger.info(account.getEmail() + ": updating folder " + folder.getName() + " with id " + folder.getId());
             folder.setName(update.getName());
             folder.setDescription(update.getDescription());
             Folder updated = folderController.updateFolder(folder);
@@ -1781,8 +1809,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entry == null)
                 return false;
 
-            permissionController.addPermission(account, permissionInfo.getType(), entry,
-                                               permissionInfo.getId());
+            permissionController.addPermission(account, permissionInfo.getType(), entry, permissionInfo.getId());
             return true;
 
         } catch (ControllerException e) {
@@ -1809,8 +1836,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return false;
 
             PermissionsController permissionController = new PermissionsController();
-            permissionController.removePermission(account, permissionInfo.getType(), entry,
-                                                  permissionInfo.getId());
+            permissionController.removePermission(account, permissionInfo.getType(), entry, permissionInfo.getId());
             return true;
 
         } catch (ControllerException e) {

@@ -66,12 +66,14 @@ public class PermissionsControllerTest {
         // should still have read permission
         Assert.assertTrue(controller.hasReadPermission(otherAccount, strain));
 
+        // but not write permission
+        Assert.assertFalse(controller.hasWritePermission(otherAccount, strain));
+
         // remove read permission
         controller.removePermission(account, PermissionInfo.PermissionType.READ_ACCOUNT, strain, otherAccount.getId());
 
         // no more read
         Assert.assertFalse(controller.hasReadPermission(otherAccount, strain));
-
     }
 
     @Test

@@ -2,6 +2,7 @@ package org.jbei.ice.lib.utils;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,6 +34,26 @@ import org.hibernate.Session;
 @SuppressWarnings("unchecked")
 public class UtilsDAO extends HibernateRepository {
 
+    public Set<String> getMatchingSelectionMarkers(String token, int limit) throws DAOException {
+        Session session = newSession();
+
+        try {
+            token = token.toUpperCase();
+            String queryString = "select distinct selectionMarker.name from SelectionMarker selectionMarker where "
+                    + " UPPER(selectionMarker.name) like '%" + token + "%'";
+            Query query = session.createQuery(queryString);
+            if (limit > 0)
+                query.setMaxResults(limit);
+            HashSet<String> results = new HashSet<String>(query.list());
+            return results;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        } finally {
+            closeSession(session);
+        }
+    }
+
     /**
      * Retrieve all the unique {@link SelectionMarker}s as collection of Strings.
      * <p/>
@@ -43,32 +64,32 @@ public class UtilsDAO extends HibernateRepository {
      */
     public TreeSet<String> getUniqueSelectionMarkers() throws DAOException {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        Session session = newSession();
-        Query query = session
-                .createQuery("select distinct selectionMarker.name from SelectionMarker selectionMarker");
-        HashSet<String> rawMarkers = null;
-        try {
-            rawMarkers = new HashSet<String>(query.list());
-        } catch (HibernateException e) {
-            throw new DAOException(e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-        /* Markers are comma separated lists, so must parse them 
-        getting from the database */
-
-        for (String item : rawMarkers) {
-            if (item == null) {
-                continue;
-            }
-
-            LinkedHashSet<String> markers = Utils.toHashSetFromCommaSeparatedString(item);
-            for (String marker : markers) {
-                results.add(marker);
-            }
-        }
+//        Session session = newSession();
+//        Query query = session
+//                .createQuery("select distinct selectionMarker.name from SelectionMarker selectionMarker");
+//        HashSet<String> rawMarkers = null;
+//        try {
+//            rawMarkers = new HashSet<String>(query.list());
+//        } catch (HibernateException e) {
+//            throw new DAOException(e);
+//        } finally {
+//            if (session.isOpen()) {
+//                session.close();
+//            }
+//        }
+//        /* Markers are comma separated lists, so must parse them
+//        getting from the database */
+//
+//        for (String item : rawMarkers) {
+//            if (item == null) {
+//                continue;
+//            }
+//
+//            LinkedHashSet<String> markers = Utils.toHashSetFromCommaSeparatedString(item);
+//            for (String marker : markers) {
+//                results.add(marker);
+//            }
+//        }
 
         return results;
     }
@@ -82,25 +103,25 @@ public class UtilsDAO extends HibernateRepository {
      */
     public TreeSet<String> getUniquePublicPlasmidNames() {
         TreeSet<String> results = new TreeSet<String>();
-        Session session = newSession();
-        Query query = session
-                .createQuery(
-                        "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name" +
-                                ".name <> '' order by name.name asc");
-        HashSet<String> names = new HashSet<String>();
-        try {
-            new HashSet<String>(query.list());
-        } catch (HibernateException e) {
-            Logger.error("Could not get unique public plasmid names " + e.toString(), e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-
-        for (String name : names) {
-            results.add(name);
-        }
+//        Session session = newSession();
+//        Query query = session
+//                .createQuery(
+//                        "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name" +
+//                                ".name <> '' order by name.name asc");
+//        HashSet<String> names = new HashSet<String>();
+//        try {
+//            new HashSet<String>(query.list());
+//        } catch (HibernateException e) {
+//            Logger.error("Could not get unique public plasmid names " + e.toString(), e);
+//        } finally {
+//            if (session.isOpen()) {
+//                session.close();
+//            }
+//        }
+//
+//        for (String name : names) {
+//            results.add(name);
+//        }
 
         return results;
     }
@@ -114,32 +135,30 @@ public class UtilsDAO extends HibernateRepository {
      */
     public TreeSet<String> getUniquePromoters() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        Session session = newSession();
-        Query query = session
-                .createQuery("select distinct plasmid.promoters from Plasmid plasmid ");
-        HashSet<String> rawPromoters = new HashSet<String>();
-        try {
-            rawPromoters = new HashSet<String>(query.list());
-        } catch (HibernateException e) {
-            Logger.error("Could not get unique promoters " + e.toString(), e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-        /* Prometers are comma separated lists, so must parse them 
-        getting from the database */
-
-        for (String item : rawPromoters) {
-            if (item == null) {
-                continue;
-            }
-
-            LinkedHashSet<String> promoters = Utils.toHashSetFromCommaSeparatedString(item);
-            for (String promoter : promoters) {
-                results.add(promoter);
-            }
-        }
+//        Session session = newSession();
+//        Query query = session
+//                .createQuery("select distinct plasmid.promoters from Plasmid plasmid ");
+//        HashSet<String> rawPromoters = new HashSet<String>();
+//        try {
+//            rawPromoters = new HashSet<String>(query.list());
+//        } catch (HibernateException e) {
+//            Logger.error("Could not get unique promoters " + e.toString(), e);
+//        } finally {
+//            closeSession(session);
+//        }
+//        /* Prometers are comma separated lists, so must parse them
+//        getting from the database */
+//
+//        for (String item : rawPromoters) {
+//            if (item == null) {
+//                continue;
+//            }
+//
+//            LinkedHashSet<String> promoters = Utils.toHashSetFromCommaSeparatedString(item);
+//            for (String promoter : promoters) {
+//                results.add(promoter);
+//            }
+//        }
 
         return results;
     }
@@ -153,34 +172,32 @@ public class UtilsDAO extends HibernateRepository {
      */
     public TreeSet<String> getUniqueOriginOfReplications() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        Session session = newSession();
-        Query query = session
-                .createQuery("select distinct plasmid.originOfReplication from Plasmid plasmid ");
-
-        HashSet<String> rawOrigins = new HashSet<String>();
-
-        try {
-            rawOrigins = new HashSet<String>(query.list());
-        } catch (HibernateException e) {
-            Logger.error("Could not get unique origins of replication " + e.toString(), e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-        /* Origin of replications are comma separated lists, so must parse them 
-        getting from the database */
-
-        for (String item : rawOrigins) {
-            if (item == null) {
-                continue;
-            }
-
-            LinkedHashSet<String> origins = Utils.toHashSetFromCommaSeparatedString(item);
-            for (String origin : origins) {
-                results.add(origin);
-            }
-        }
+//        Session session = newSession();
+//        Query query = session
+//                .createQuery("select distinct plasmid.originOfReplication from Plasmid plasmid ");
+//
+//        HashSet<String> rawOrigins = new HashSet<String>();
+//
+//        try {
+//            rawOrigins = new HashSet<String>(query.list());
+//        } catch (HibernateException e) {
+//            Logger.error("Could not get unique origins of replication " + e.toString(), e);
+//        } finally {
+//            closeSession(session);
+//        }
+//        /* Origin of replications are comma separated lists, so must parse them
+//        getting from the database */
+//
+//        for (String item : rawOrigins) {
+//            if (item == null) {
+//                continue;
+//            }
+//
+//            LinkedHashSet<String> origins = Utils.toHashSetFromCommaSeparatedString(item);
+//            for (String origin : origins) {
+//                results.add(origin);
+//            }
+//        }
 
         return results;
     }
@@ -204,19 +221,13 @@ public class UtilsDAO extends HibernateRepository {
     public static LinkedHashSet<Strain> getStrainsForPlasmid(Plasmid plasmid)
             throws DAOException {
         LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
-
-
         EntryController entryController = new EntryController();
 
-
-        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\["
-                                                               + JbeirSettings.getSetting(
+        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
                 "WIKILINK_PREFIX") + ":.*?\\]\\]");
-        Pattern partNumberPattern = Pattern.compile("\\[\\["
-                                                            + JbeirSettings.getSetting(
+        Pattern partNumberPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
                 "WIKILINK_PREFIX") + ":(.*)\\]\\]");
-        Pattern descriptivePattern = Pattern.compile("\\[\\["
-                                                             + JbeirSettings.getSetting(
+        Pattern descriptivePattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
                 "WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
 
         AccountController accountController = new AccountController();
@@ -248,10 +259,8 @@ public class UtilsDAO extends HibernateRepository {
                 Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(strainPlasmid);
                 String strainPlasmidNumber = null;
                 if (basicWikiLinkMatcher.matches()) {
-                    Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher
-                                                                                  .group());
-                    Matcher descriptivePatternMatcher = descriptivePattern
-                            .matcher(basicWikiLinkMatcher.group());
+                    Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher.group());
+                    Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher.group());
 
                     if (descriptivePatternMatcher.find()) {
                         strainPlasmidNumber = descriptivePatternMatcher.group(1).trim();

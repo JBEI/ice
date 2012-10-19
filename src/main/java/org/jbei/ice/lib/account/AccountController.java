@@ -207,6 +207,8 @@ public class AccountController {
 
         try {
             account.setModificationTime(Calendar.getInstance().getTime());
+            if (account.getSalt() == null || account.getSalt().isEmpty())
+                account.setSalt(Utils.generateUUID());
             result = dao.save(account);
         } catch (DAOException e) {
             throw new ControllerException(e);

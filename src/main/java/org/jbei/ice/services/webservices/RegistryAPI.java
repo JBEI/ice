@@ -40,7 +40,6 @@ import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.SearchController;
-import org.jbei.ice.lib.search.SearchResult;
 import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.SerializationUtils;
@@ -48,6 +47,7 @@ import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.SearchResults;
 
 /**
  * SOAP API methods.
@@ -216,14 +216,14 @@ public class RegistryAPI {
      *
      * @param sessionId Session key.
      * @param query     Query string.
-     * @return List of {@link SearchResult}s.
+     * @return List of {@link SearchResults}s.
      * @throws ServiceException
      * @throws SessionException
      */
-    public ArrayList<SearchResult> search(@WebParam(name = "sessionId") String sessionId,
+    public SearchResults search(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "query") String query) throws ServiceException, SessionException {
         Account account = validateAccount(sessionId);
-        ArrayList<SearchResult> results = null;
+        SearchResults results = null;
         // TODO
         log(sessionId, "search: " + query);
 //        try {

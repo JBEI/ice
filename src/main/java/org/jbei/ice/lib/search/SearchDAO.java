@@ -8,9 +8,6 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.server.QueryFilterParams;
-import org.jbei.ice.server.SearchFilterCallbackFactory;
-import org.jbei.ice.shared.QueryOperator;
-import org.jbei.ice.shared.SearchFilterType;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -38,20 +35,20 @@ class SearchDAO extends HibernateRepository {
         }
     }
 
-    public Set<Long> runSearchFilter(SearchFilterType type, QueryOperator operator,
-            String operand) throws DAOException {
-
-        List<QueryFilterParams> params = SearchFilterCallbackFactory.getFilterParameters(type,
-                                                                                         operator, operand);
-
-        switch (operator) {
-            case BOOLEAN:
-                return getIntermediateResultsHasX(params.get(0), Boolean.valueOf(operand));
-
-            default:
-                return getIntermediateResultsUnion(params);
-        }
-    }
+//    public Set<Long> runSearchFilter(SearchFilterType type, QueryOperator operator,
+//            String operand) throws DAOException {
+//
+//        List<QueryFilterParams> params = SearchFilterCallbackFactory.getFilterParameters(type,
+//                                                                                         operator, operand);
+//
+//        switch (operator) {
+//            case BOOLEAN_NO:
+//                return getIntermediateResultsHasX(params.get(0), Boolean.valueOf(operand));
+//
+//            default:
+//                return getIntermediateResultsUnion(params);
+//        }
+//    }
 
     /**
      * Runs query using the specified filter params. If the user is interested in seeing the

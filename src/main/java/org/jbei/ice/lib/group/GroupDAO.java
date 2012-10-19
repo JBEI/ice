@@ -49,9 +49,7 @@ class GroupDAO extends HibernateRepository<Group> {
         Session session = newSession();
 
         try {
-            Criteria criteria = session.createCriteria(Group.class)
-                                       .add(Restrictions.in("id", idsSet));
-
+            Criteria criteria = session.createCriteria(Group.class).add(Restrictions.in("id", idsSet));
             List list = criteria.list();
             return new HashSet<Group>(list);
 
@@ -87,7 +85,6 @@ class GroupDAO extends HibernateRepository<Group> {
 
     public Set<Group> getMatchingGroups(String token, int limit) throws DAOException {
         Session session = newSession();
-        session.beginTransaction();
         try {
             token = token.toUpperCase();
             String queryString = "from " + Group.class.getName() + " where (UPPER(label) like '%"
@@ -98,12 +95,10 @@ class GroupDAO extends HibernateRepository<Group> {
 
             @SuppressWarnings("unchecked")
             HashSet<Group> result = new HashSet<Group>(query.list());
-            session.getTransaction().commit();
             return result;
 
         } catch (HibernateException e) {
             Logger.error(e);
-            session.getTransaction().rollback();
             throw new DAOException("Error retrieving matching groups", e);
         } finally {
             closeSession(session);

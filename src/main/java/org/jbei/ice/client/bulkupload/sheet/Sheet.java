@@ -219,8 +219,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         createHeaderCells();
 
+        int rowCount = presenter.getEntryRowCount() < ROW_COUNT ? ROW_COUNT : presenter.getEntryRowCount();
+
         // add rows
-        for (row = 0; row < ROW_COUNT; row += 1) {
+        for (row = 0; row < rowCount; row += 1) {
             presenter.addRow(row);
             // index col
             HTML indexCell = new HTML((row + 1) + "");

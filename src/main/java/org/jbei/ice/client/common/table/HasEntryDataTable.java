@@ -14,6 +14,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.HasEntryInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -25,6 +26,8 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 
@@ -167,18 +170,31 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 //        return partIdColumn;
 //    }
 
-    protected DataTableColumn<String> addNameColumn() {
-        DataTableColumn<String> nameColumn = new DataTableColumn<String>(new TextCell(), ColumnField.NAME) {
+    protected DataTableColumn<SafeHtml> addNameColumn(final double width, Unit unit) {
+
+        DataTableColumn<SafeHtml> nameColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(),
+                                                                             ColumnField.NAME) {
 
             @Override
-            public String getValue(T object) {
-                return object.getEntryInfo().getName();
+            public SafeHtml getValue(T object) {
+                String name = object.getEntryInfo().getName();
+                if (name == null)
+                    return SafeHtmlUtils.EMPTY_SAFE_HTML;
+
+
+                return SafeHtmlUtils
+                        .fromSafeConstant("<div style=\"width: "
+                                                  + width + "px; "
+                                                  + "white-space: nowrap; overflow: hidden; text-overflow: " +
+                                                  "ellipsis;\" title=\""
+                                                  + name.replaceAll("\"", "'") + "\">"
+                                                  + name + "</div>");
             }
         };
 
-        nameColumn.setSortable(true);
         this.addColumn(nameColumn, "Name");
-        this.setColumnWidth(nameColumn, 150, Unit.PX);
+        nameColumn.setSortable(false);
+        this.setColumnWidth(nameColumn, width, unit);
         return nameColumn;
     }
 
@@ -198,7 +214,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
         createdColumn.setSortable(true);
         this.addColumn(createdColumn, "Created");
-        this.setColumnWidth(createdColumn, 120, Unit.PX);
+        this.setColumnWidth(createdColumn, 100, Unit.PX);
         return createdColumn;
     }
 

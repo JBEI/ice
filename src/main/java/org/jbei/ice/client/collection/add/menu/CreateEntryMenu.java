@@ -7,9 +7,6 @@ import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.resources.client.ImageResource.ImageOptions;
-import com.google.gwt.resources.client.ImageResource.RepeatStyle;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
@@ -21,7 +18,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * Menu widget for creating new entry
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -36,17 +33,12 @@ public class CreateEntryMenu implements IsWidget {
 
         static ExportAsResource INSTANCE = GWT.create(ExportAsResource.class);
 
-        @Source("org/jbei/ice/client/resource/image/arrow_down.png")
-        @ImageOptions(repeatStyle = RepeatStyle.None)
-        ImageResource sortDown();
-
         @Source("org/jbei/ice/client/resource/css/CreateEntry.css")
         Style cellListStyle();
     }
 
     private static final String LABEL = "Create Entry";
     private final Button createEntry;
-    private final CellList<EntryAddType> options;
     private final SingleSelectionModel<EntryAddType> optionSelection;
 
     public CreateEntryMenu() {
@@ -55,7 +47,7 @@ public class CreateEntryMenu implements IsWidget {
         createEntry.setStyleName(ExportAsResource.INSTANCE.cellListStyle().subMenuCreateNew());
 
         // renderer for options list
-        options = new CellList<EntryAddType>(new AbstractCell<EntryAddType>() {
+        CellList<EntryAddType> options = new CellList<EntryAddType>(new AbstractCell<EntryAddType>() {
 
             @Override
             public void render(Context context, EntryAddType type, SafeHtmlBuilder sb) {
@@ -64,9 +56,7 @@ public class CreateEntryMenu implements IsWidget {
         }, ExportAsResource.INSTANCE);
 
         options.setRowData(Arrays.asList(EntryAddType.values()));
-
-        final PopupHandler clickHandler = new PopupHandler(options, createEntry.getElement(), 0, 0,
-                false);
+        final PopupHandler clickHandler = new PopupHandler(options, createEntry.getElement(), 0, 0, false);
 
         createEntry.addClickHandler(clickHandler);
         optionSelection = new SingleSelectionModel<EntryAddType>();

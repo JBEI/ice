@@ -127,22 +127,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 showEntryView(event);
             }
         });
-
-        // retrieve autocomplete data
-        service.retrieveAutoCompleteData(AppController.sessionId,
-                                         new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
-
-                                             @Override
-                                             public void onFailure(Throwable caught) {
-                                             }
-
-                                             @Override
-                                             public void onSuccess(HashMap<AutoCompleteField,
-                                                     ArrayList<String>> result) {
-                                                 autoCompleteData = new HashMap<AutoCompleteField, ArrayList<String>>(
-                                                         result);
-                                             }
-                                         });
     }
 
     private void showSearchResults(ArrayList<SearchFilterInfo> operands) {

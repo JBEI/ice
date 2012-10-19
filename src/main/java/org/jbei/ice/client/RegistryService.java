@@ -35,8 +35,8 @@ public interface RegistryService extends RemoteService {
     //
     // Search
     //
-    LinkedList<SearchResultInfo> retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters)
-            throws AuthenticationException;
+    LinkedList<SearchResultInfo> retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters,
+            int start, int limit) throws AuthenticationException;
 
     ArrayList<BlastResultInfo> blastSearch(String sid, String searchString, QueryOperator program)
             throws AuthenticationException;
@@ -50,20 +50,16 @@ public interface RegistryService extends RemoteService {
      */
     ArrayList<FolderDetails> retrieveCollections(String sessionId) throws AuthenticationException;
 
-//    ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId) throws AuthenticationException;
-
     FolderDetails retrieveEntriesForFolder(String sessionId, long folderId) throws AuthenticationException;
 
     FolderDetails retrieveUserEntries(String sid, String userId) throws AuthenticationException;
 
     FolderDetails retrieveAllVisibleEntryIDs(String sid) throws AuthenticationException;
 
-    HashMap<AutoCompleteField, ArrayList<String>> retrieveAutoCompleteData(String sid) throws AuthenticationException;
-
     EntryInfo retrieveEntryDetails(String sid, long id) throws AuthenticationException;
 
-    LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field,
-            boolean asc) throws AuthenticationException;
+    LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field, boolean asc)
+            throws AuthenticationException;
 
     LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds,
             ColumnField sortField, boolean asc) throws AuthenticationException;
@@ -110,6 +106,8 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     SuggestOracle.Response getPermissionSuggestions(Request req);
+
+    SuggestOracle.Response getAutoCompleteSuggestion(AutoCompleteField field, Request request);
 
     boolean addPermission(String sessionId, long entryId, PermissionInfo permission) throws AuthenticationException;
 

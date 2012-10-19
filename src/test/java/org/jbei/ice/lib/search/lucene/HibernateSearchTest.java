@@ -1,9 +1,7 @@
 package org.jbei.ice.lib.search.lucene;
 
-import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.HibernateSearch;
 
 import junit.framework.Assert;
@@ -53,7 +51,7 @@ public class HibernateSearchTest {
 //
 //        }
 //
-        ApplicationController.initializeHibernateSearch();
-        HibernateSearch.getInstance().executeSearch(account, "Hector", new PermissionsController());
+//        ApplicationController.initializeHibernateSearch();
+        HibernateSearch.getInstance().executeSearchOnField("strain", "recordType");
     }
 }

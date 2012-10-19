@@ -199,14 +199,11 @@ public class EntryUtil {
         try {
             EntryController entryController = new EntryController();
 
-            Pattern basicWikiLinkPattern = Pattern.compile("\\[\\["
-                                                                   + JbeirSettings.getSetting(
+            Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
                     "WIKILINK_PREFIX") + ":.*?\\]\\]");
-            Pattern partNumberPattern = Pattern.compile("\\[\\["
-                                                                + JbeirSettings.getSetting(
+            Pattern partNumberPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
                     "WIKILINK_PREFIX") + ":(.*)\\]\\]");
-            Pattern descriptivePattern = Pattern.compile("\\[\\["
-                                                                 + JbeirSettings.getSetting(
+            Pattern descriptivePattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
                     "WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
 
             if (text == null) {

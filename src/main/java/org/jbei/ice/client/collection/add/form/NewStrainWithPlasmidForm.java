@@ -1,11 +1,8 @@
 package org.jbei.ice.client.collection.add.form;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TreeSet;
-
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.StatusType;
@@ -39,7 +36,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private TextArea strainNotesArea;
 
     // plasmid fields
-    private TextBox plasmidName;
+    private SuggestBox plasmidName;
     private TextBox plasmidAlias;
     private CheckBox circular;
     private TextBox backbone;
@@ -62,21 +59,18 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private final PlasmidInfo plasmid;
 
     private final FlexTable layout;
-    private final HashMap<AutoCompleteField, ArrayList<String>> data;
 
-    public NewStrainWithPlasmidForm(HashMap<AutoCompleteField, ArrayList<String>> data,
-            String creatorName, String creatorEmail) {
+    public NewStrainWithPlasmidForm(StrainInfo strain) {
         this.layout = new FlexTable();
         initWidget(layout);
-        this.data = data;
         initComponents();
         initLayout();
 
-        this.strain = new StrainInfo();
-        this.plasmid = new PlasmidInfo();
+        this.strain = strain;
+        this.plasmid = (PlasmidInfo) strain.getInfo();
 
-        this.creator.setText(creatorName);
-        this.creatorEmail.setText(creatorEmail);
+        this.creator.setText(strain.getCreator());
+        this.creatorEmail.setText(strain.getCreatorEmail());
     }
 
     protected void initComponents() {
@@ -185,7 +179,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         // name
         row += 1;
         setLabel(true, "Plasmid Name", general, row, 0);
-        plasmidName = createStandardTextBox("205px");
+        plasmidName = createAutoCompleteForPlasmidNames("205px");
         Widget widget = createTextBoxWithHelp(plasmidName, "e.g. pTSH117");
         general.setWidget(row, 1, widget);
 
@@ -269,36 +263,27 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         return general;
     }
 
-    private SuggestBox createSuggestBox(TreeSet<String> data) {
-        MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-        oracle.addAll(data);
-        SuggestBox box = new SuggestBox(oracle, new MultipleTextBox());
+    private SuggestBox createSuggestBox(AutoCompleteField field, String width) {
+        SuggestBox box = new SuggestBox(new AutoCompleteSuggestOracle(field));
         box.setStyleName("input_box");
+        box.setWidth(width);
         return box;
     }
 
     public SuggestBox createAutoCompleteForPromoters(String width) {
-        SuggestBox box = createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PROMOTERS)));
-        box.setWidth(width);
-        return box;
+        return createSuggestBox(AutoCompleteField.PROMOTERS, width);
     }
 
     public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.SELECTION_MARKERS)));
-        box.setWidth(width);
-        return box;
+        return createSuggestBox(AutoCompleteField.SELECTION_MARKERS, width);
     }
 
     public SuggestBox createAutoCompleteForPlasmidNames(String width) {
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PLASMID_NAME)));
-        box.setWidth(width);
-        return box;
+        return createSuggestBox(AutoCompleteField.PLASMID_NAME, width);
     }
 
     public SuggestBox createAutoCompleteForOriginOfReplication(String width) {
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.ORIGIN_OF_REPLICATION)));
-        box.setWidth(width);
-        return box;
+        return this.createSuggestBox(AutoCompleteField.ORIGIN_OF_REPLICATION, width);
     }
 
     protected TextArea createTextArea(String width, String height) {
@@ -510,7 +495,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
     @Override
     public Button getCancel() {
-        return cancel;
+        return this.cancel;
     }
 
     @Override
@@ -548,7 +533,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         if (plasmidName.getText().isEmpty()) {
             plasmidName.setStyleName("entry_input_error");
             if (invalid == null)
-                invalid = plasmidName;
+                invalid = plasmidName.getTextBox();
         } else {
             plasmidName.setStyleName("input_box");
         }
@@ -636,8 +621,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         strain.setAlias(strainAlias.getText());
         strain.setLinks(strainLinks.getText());
         strain.setHost(host.getText());
-        String strainSelectionMarkers = ((MultipleTextBox) strainMarkers.getTextBox())
-                .getWholeText();
+        String strainSelectionMarkers = ((MultipleTextBox) strainMarkers.getTextBox()).getWholeText();
         strain.setSelectionMarkers(strainSelectionMarkers);
         strain.setGenotypePhenotype(genPhen.getText());
         strain.setKeywords(strainKeywords.getText());
@@ -645,8 +629,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         strain.setReferences(strainReferences.getText());
         strain.setIntellectualProperty(strainIp.getText());
         strain.setLongDescription(this.strainNotesArea.getText());
-        String longDescType = strainNotesMarkupOptions.getItemText(strainNotesMarkupOptions
-                                                                           .getSelectedIndex());
+        String longDescType = strainNotesMarkupOptions.getItemText(strainNotesMarkupOptions.getSelectedIndex());
         strain.setLongDescriptionType(longDescType);
 
         // plasmid fields
@@ -655,8 +638,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         plasmid.setCircular(circular.isEnabled());
         plasmid.setBackbone(backbone.getText());
         plasmid.setLinks(plasmidLinks.getText());
-        String plasmidSelectionMarkers = ((MultipleTextBox) plasmidMarkers.getTextBox())
-                .getWholeText();
+        String plasmidSelectionMarkers = ((MultipleTextBox) plasmidMarkers.getTextBox()).getWholeText();
         plasmid.setSelectionMarkers(plasmidSelectionMarkers);
         plasmid.setOriginOfReplication(origin.getText());
         plasmid.setPromoters(promoters.getText());
@@ -665,18 +647,13 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         plasmid.setReferences(plasmidReferences.getText());
         plasmid.setIntellectualProperty(plasmidIp.getText());
         plasmid.setLongDescription(this.plasmidNotesArea.getText());
-        longDescType = plasmidNotesMarkupOptions.getItemText(plasmidNotesMarkupOptions
-                                                                     .getSelectedIndex());
+        longDescType = plasmidNotesMarkupOptions.getItemText(plasmidNotesMarkupOptions.getSelectedIndex());
         plasmid.setLongDescriptionType(longDescType);
+        strain.setInfo(plasmid);
     }
 
     @Override
-    public EntryInfo getPrimaryEntry() {
+    public EntryInfo getEntry() {
         return strain;
-    }
-
-    @Override
-    public EntryInfo getSecondaryEntry() {
-        return plasmid;
     }
 }

@@ -47,9 +47,7 @@ public class SessionDAO extends HibernateRepository {
             String msg = "Could not get SessionData by sessionKey: " + sessionKey;
             throw new DAOException(msg, e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return sessionData;
@@ -84,9 +82,7 @@ public class SessionDAO extends HibernateRepository {
             String msg = "Could not get SessionData by account: " + account.getEmail();
             throw new DAOException(msg, e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return sessionData;
@@ -143,9 +139,7 @@ public class SessionDAO extends HibernateRepository {
             String msg = "Could not delete expired sessions: " + e.toString();
             Logger.error(msg, e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 }

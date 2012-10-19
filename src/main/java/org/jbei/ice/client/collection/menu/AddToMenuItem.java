@@ -1,5 +1,10 @@
 package org.jbei.ice.client.collection.menu;
 
+import java.util.List;
+
+import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.client.common.widget.PopupHandler;
+
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -26,13 +31,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
-import org.jbei.ice.client.collection.view.OptionSelect;
-import org.jbei.ice.client.common.widget.PopupHandler;
 
-import java.util.List;
-
-public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implements
-                                                                       SubMenuOptionsPresenter.View<T> {
+public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implements SubMenuOptionsPresenter.View<T> {
 
     /**
      * Resources to access images and styles
@@ -93,7 +93,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
 
         table = new CellTable<T>(30,
                                  SelectionResource.INSTANCE); // TODO : a pager is needed for when the list size
-                                 // exceeds 30
+        // exceeds 30
         addSelectionColumn();
         addNameColumn();
 
@@ -154,7 +154,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
      */
     protected Widget createPopupWidget() {
         FlexTable wrapper = new FlexTable();
-        wrapper.addStyleName("background_white");
+        wrapper.addStyleName("bg_white");
         wrapper.setWidget(0, 0, table);
         wrapper.getFlexCellFormatter().setColSpan(0, 0, 2);
 

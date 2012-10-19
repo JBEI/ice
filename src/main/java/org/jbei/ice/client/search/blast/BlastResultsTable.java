@@ -33,7 +33,7 @@ public abstract class BlastResultsTable extends HasEntryDataTable<BlastResultInf
         DataTableColumn<HasEntryInfo> partIdCol = addPartIdColumn(false, 120, Unit.PX);
         columns.add(partIdCol);
 //        columns.add(super.addPartIdColumn(true, null, EntryContext.Type.SEARCH));
-        columns.add(super.addNameColumn());
+        columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(addAlignedColumn());
         columns.add(addAlignedIdentityColumn());
         columns.add(addBitScoreColumn());

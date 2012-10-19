@@ -90,7 +90,7 @@ public class Entry implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @DocumentId
     private long id;
 
@@ -102,6 +102,7 @@ public class Entry implements IModel {
     private String versionId;
 
     @Column(name = "record_type", length = 127, nullable = false)
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String recordType;
 
     @Column(name = "owner", length = 127)

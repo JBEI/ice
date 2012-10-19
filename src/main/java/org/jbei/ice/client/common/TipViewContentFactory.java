@@ -1,36 +1,40 @@
 package org.jbei.ice.client.common;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.Date;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
-import java.util.Date;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Factory for generating a widget that is used as a tooltip for entrys
  *
  * @author Hector Plahar
  */
-// TODO : need better separation of concerns
 public class TipViewContentFactory {
 
     private static final RegistryServiceAsync service = GWT.create(RegistryService.class);
 
-    public static void getContents(EntryInfo entry, final Callback<Widget> callback) {
+    public static void getContents(final EntryInfo entry, final Callback<Widget> callback) {
 
         try {
             service.retrieveEntryTipDetails(AppController.sessionId, entry.getId(),
@@ -51,10 +55,10 @@ public class TipViewContentFactory {
                                                     callback.onFailure();
                                                 }
                                             });
-        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (AuthenticationException e) {
+            GWT.log(e.getMessage());
+            History.newItem(Page.LOGIN.getLink());
         }
-
     }
 
     private static Widget getContents(EntryInfo entry) {
@@ -63,7 +67,7 @@ public class TipViewContentFactory {
         parent.setWidth("650px");
         parent.setCellPadding(2);
         parent.setCellSpacing(0);
-        parent.setStyleName("background_white");
+        parent.setStyleName("bg_white");
         parent.addStyleName("pad-6");
 
         setHeader(parent, entry);
@@ -110,20 +114,17 @@ public class TipViewContentFactory {
                 "<span id=\"has_attachment_image\"></span><span id=\"has_sample_image\"></span><span " +
                         "id=\"has_sequence_image\"></span>");
 
-        if (hasAttachment)
-            panel.add(ImageUtil.getAttachment(), "has_attachment_image");
-        else
-            panel.add(ImageUtil.getBlankIcon(), "has_attachment_image");
+        // display attachment image?
+        Image attachmentImage = hasAttachment ? ImageUtil.getAttachment() : ImageUtil.getBlankIcon();
+        panel.add(attachmentImage, "has_attachment_image");
 
-        if (hasSample)
-            panel.add(ImageUtil.getSampleIcon(), "has_sample_image");
-        else
-            panel.add(ImageUtil.getBlankIcon(), "has_sample_image");
+        // display sample image?
+        Image sampleImage = hasSample ? ImageUtil.getSampleIcon() : ImageUtil.getBlankIcon();
+        panel.add(sampleImage, "has_sample_image");
 
-        if (hasSequence)
-            panel.add(ImageUtil.getSequenceIcon(), "has_sequence_image");
-        else
-            panel.add(ImageUtil.getBlankIcon(), "has_sequence_image");
+        // display sequence image
+        Image sequenceImage = hasSequence ? ImageUtil.getSequenceIcon() : ImageUtil.getBlankIcon();
+        panel.add(sequenceImage, "has_sequence_image");
 
         layout.setWidget(0, 1, panel);
         layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_RIGHT);
@@ -217,24 +218,7 @@ public class TipViewContentFactory {
         addField(table, 8, 0, "References", entry.getReferences());
         addField(table, 9, 0, "Bio Safety", entry.getBioSafetyLevel() + "");
         addField(table, 10, 0, "IP Information", entry.getIntellectualProperty());
-
-        //        table.setHTML(11, 0, "<b class=\"entry_tooltip_sub_header\">Samples</b>");
-        //        table.getFlexCellFormatter().setColSpan(11, 0, 4);
-
-        //        Widget samplesWidget = createSamplesWidget(entry.getSampleStorage());
-        //        table.setWidget(12, 0, samplesWidget);
-        //        table.getFlexCellFormatter().setColSpan(12, 0, 4);
     }
-
-    //    private static Widget createSamplesWidget(ArrayList<SampleStorage> data) {
-    //        if (data == null || data.isEmpty())
-    //            return new HTML("<span class=\"font-75em\">No samples</span>");
-    //
-    //        EntrySampleTable sampleTable = new EntrySampleTable();
-    //        sampleTable.setData(data);
-    //
-    //        return sampleTable;
-    //    }
 
     private static String generateDate(Date date) {
         if (date == null)

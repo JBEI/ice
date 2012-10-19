@@ -99,7 +99,7 @@ public class Storage implements IModel {
     @Lob
     private ArrayList<Storage> schemes;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "parent")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "parent", orphanRemoval = true)
     @OrderBy("id")
     private final Set<Storage> children = null;
 
@@ -107,8 +107,7 @@ public class Storage implements IModel {
         super();
     }
 
-    public Storage(String name, String description, StorageType storageType, String ownerEmail,
-            Storage parent) {
+    public Storage(String name, String description, StorageType storageType, String ownerEmail, Storage parent) {
         setName(name);
         setDescription(description);
         setStorageType(storageType);

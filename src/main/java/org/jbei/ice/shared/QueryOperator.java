@@ -9,22 +9,28 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public enum QueryOperator implements IsSerializable {
 
-    IS("is", "="), CONTAINS("contains", "~"), DOES_NOT_CONTAIN("doesn't contain", "!~"), BEGINS_WITH(
-            "begins with", "^"), ENDS_WITH("ends with", "$"), IS_NOT("isn't", "!"), BOOLEAN(
-            "yes_no", ":"), BLAST_N("blastn(nucleotide search)", "blastn"), TBLAST_X(
-            "tblastx(translated search)", "tblastx");
+    IS("is", "="),
+    CONTAINS("contains", "~"),
+    DOES_NOT_CONTAIN("doesn't contain", "!~"),
+    BEGINS_WITH("begins with", "^"),
+    ENDS_WITH("ends with", "$"),
+    IS_NOT("isn't", "!="),
+    BOOLEAN_YES("yes", ":"),
+    BOOLEAN_NO("no", ":"),
+    BLAST_N("blastn(nucleotide search)", "blastn"),
+    TBLAST_X("tblastx(translated search)", "tblastx");
 
     // Not properly represented here is "yes" "no"
     private String operator;
-    private String value;
+    private String symbol;
 
     /**
-     * @param operator String value of operator
+     * @param operator String symbol of operator
      * @param value    operator char symbol
      */
     QueryOperator(String operator, String value) {
         this.operator = operator;
-        this.value = value;
+        this.symbol = value;
     }
 
     private QueryOperator() {
@@ -39,8 +45,8 @@ public enum QueryOperator implements IsSerializable {
         return this.operator;
     }
 
-    public String value() {
-        return value;
+    public String symbol() {
+        return symbol;
     }
 
     public static QueryOperator operatorValueOf(String value) {
@@ -51,7 +57,7 @@ public enum QueryOperator implements IsSerializable {
             return QueryOperator.valueOf(value);
         } catch (IllegalArgumentException iae) {
             for (QueryOperator operator : QueryOperator.values()) {
-                if (value.equals(operator.value))
+                if (value.equals(operator.symbol))
                     return operator;
             }
             return null;

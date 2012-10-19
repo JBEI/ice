@@ -9,7 +9,6 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.collection.add.form.EntryCreateWidget;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.collection.menu.MenuItem;
@@ -40,7 +39,7 @@ public class EntryAddPresenter {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final EntryAddView display;
-    private final HashMap<EntryAddType, EntryCreateWidget> formsCache;
+    private final HashMap<EntryAddType, IEntryFormSubmit> formsCache;
     private final HashMap<EntryType, SampleLocation> locationCache;
     private final CollectionsPresenter presenter;
 
@@ -51,7 +50,7 @@ public class EntryAddPresenter {
         this.display = new EntryAddView();
         this.presenter = presenter;
 
-        formsCache = new HashMap<EntryAddType, EntryCreateWidget>();
+        formsCache = new HashMap<EntryAddType, IEntryFormSubmit>();
         locationCache = new HashMap<EntryType, SampleLocation>();
     }
 
@@ -67,8 +66,7 @@ public class EntryAddPresenter {
 
     private void showAddForm(EntryAddType type) {
         getSampleLocation(type);
-        EntryCreateWidget form = getEntryForm(type);
-        display.setCurrentForm(form, ("Create New " + type.getDisplay()));
+        display.setCurrentForm(getEntryForm(type), ("Create New " + type.getDisplay()));
     }
 
     private void getSampleLocation(EntryAddType selected) {
@@ -98,7 +96,7 @@ public class EntryAddPresenter {
 
         SampleLocation cacheLocation = locationCache.get(type);
         if (cacheLocation != null) {
-            display.getCurrentForm().getEntrySubmitForm().setSampleLocation(cacheLocation);
+            display.getCurrentForm().setSampleLocation(cacheLocation);
             return;
         }
 
@@ -117,7 +115,7 @@ public class EntryAddPresenter {
 
                 SampleLocation sampleLocation = new SampleLocation(result);
                 locationCache.put(type, sampleLocation);
-                display.getCurrentForm().getEntrySubmitForm().setSampleLocation(sampleLocation);
+                display.getCurrentForm().setSampleLocation(sampleLocation);
             }
 
             @Override
@@ -215,7 +213,7 @@ public class EntryAddPresenter {
      * @return form specific to type
      */
 
-    protected EntryCreateWidget getEntryForm(EntryAddType type) {
+    protected IEntryFormSubmit getEntryForm(EntryAddType type) {
 
         if (formsCache.containsKey(type))
             return formsCache.get(type);
@@ -223,31 +221,29 @@ public class EntryAddPresenter {
         String creatorName = AppController.accountInfo.getFullName();
         String creatorEmail = AppController.accountInfo.getEmail();
 
-        final EntryCreateWidget form = EntryFormFactory.entryForm(type,
-                                                                  AppController.autoCompleteData, creatorName,
-                                                                  creatorEmail);
+        final IEntryFormSubmit form = EntryFormFactory.entryForm(type,
+                                                                 AppController.autoCompleteData, creatorName,
+                                                                 creatorEmail);
 
         if (form == null)
             return null;
 
-        final IEntryFormSubmit formSubmit = form.getEntrySubmitForm();
-        formSubmit.getSubmit().addClickHandler(new ClickHandler() {
+        form.getSubmit().addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
 
-                FocusWidget focus = formSubmit.validateForm();
+                FocusWidget focus = form.validateForm();
                 if (focus != null) {
                     focus.setFocus(true);
-                    FeedbackEvent feedback = new FeedbackEvent(true,
-                                                               "Please fill out all required fields");
+                    FeedbackEvent feedback = new FeedbackEvent(true, "Please fill out all required fields");
                     eventBus.fireEvent(feedback);
                     return;
                 }
 
-                formSubmit.populateEntries();
-                EntryInfo primary = formSubmit.getPrimaryEntry();
-                EntryInfo secondary = formSubmit.getSecondaryEntry();
+                form.populateEntries();
+                EntryInfo primary = form.getEntry();
+                EntryInfo secondary = primary.getInfo();
                 save(primary, secondary);
             }
         });

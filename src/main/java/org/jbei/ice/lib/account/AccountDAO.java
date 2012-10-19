@@ -39,7 +39,6 @@ class AccountDAO extends HibernateRepository<Account> {
     public Set<Account> getMatchingAccounts(String token, int limit) throws DAOException {
         Session session = newSession();
         try {
-            session.beginTransaction();
             token = token.toUpperCase();
             String queryString = "from " + Account.class.getName()
                     + " where (UPPER(firstName) like '%" + token
@@ -50,10 +49,8 @@ class AccountDAO extends HibernateRepository<Account> {
 
             @SuppressWarnings("unchecked")
             HashSet<Account> result = new HashSet<Account>(query.list());
-            session.getTransaction().commit();
             return result;
         } catch (Exception e) {
-            session.getTransaction().rollback();
             throw new DAOException(e);
         } finally {
             closeSession(session);
@@ -115,16 +112,13 @@ class AccountDAO extends HibernateRepository<Account> {
                 + " sessionData where sessionData.sessionKey = :sessionKey";
         Session session = newSession();
         try {
-            session.getTransaction().begin();
             Query query = session.createQuery(queryString);
             query.setString("sessionKey", authToken);
             SessionData sessionData = (SessionData) query.uniqueResult();
             if (sessionData != null) {
                 account = sessionData.getAccount();
             }
-            session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("Failed to get Account by token: " + authToken);
         } finally {
             closeSession(session);

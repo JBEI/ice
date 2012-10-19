@@ -29,7 +29,7 @@ public class LocalBackend implements IAuthenticationBackend {
             throw new InvalidCredentialsException("Username and Password are mandatory!");
         }
 
-        Account account = null;
+        Account account;
 
         try {
             account = controller.getByEmail(userId);

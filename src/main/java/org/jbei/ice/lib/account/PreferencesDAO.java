@@ -30,15 +30,12 @@ class PreferencesDAO extends HibernateRepository<AccountPreferences> {
         Session session = newSession();
 
         try {
-            session.beginTransaction();
             Query query = session.createQuery("from " + AccountPreferences.class.getName()
                                                       + " where account = :account");
             query.setParameter("account", account);
 
             accountPreferences = (AccountPreferences) query.uniqueResult();
-            session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             Logger.error(e);
             throw new DAOException("Failed to get AccountPreferences by Account: "
                                            + account.getFullName(), e);
@@ -57,6 +54,6 @@ class PreferencesDAO extends HibernateRepository<AccountPreferences> {
      * @throws DAOException
      */
     public AccountPreferences save(AccountPreferences accountPreferences) throws DAOException {
-        return (AccountPreferences) saveOrUpdate(accountPreferences);
+        return saveOrUpdate(accountPreferences);
     }
 }

@@ -1,12 +1,15 @@
 package org.jbei.ice.controllers;
 
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
+import org.jbei.ice.lib.utils.Utils;
 
 import org.hibernate.Session;
 import org.hibernate.search.FullTextSession;
@@ -57,6 +60,7 @@ public class ApplicationController {
             // upgrade the db and save new version
             initializeHibernateSearch();
             upgradePermissions();
+            upgradeAccounts();
             controller.updateDatabaseVersion(RELEASE_DATABASE_SCHEMA_VERSION);
             Logger.info("Application upgraded from " + dbVersion + " to " + RELEASE_DATABASE_SCHEMA_VERSION);
         } catch (ControllerException e) {
@@ -78,5 +82,20 @@ public class ApplicationController {
         }
 
         return false;
+    }
+
+    private static void upgradeAccounts() throws ControllerException {
+        Logger.info("Upgrading accounts....please wait");
+        AccountController accountController = new AccountController();
+        for (Account account : accountController.retrieveAllAccounts()) {
+            if (account.getSalt() == null || account.getSalt().isEmpty()) {
+                account.setSalt(Utils.generateUUID());
+            }
+
+            String sha = Utils.encryptSHA(account.getEmail());
+            account.setEmailHash(sha);
+            accountController.save(account);
+        }
+        Logger.info("Accounts upgrade complete");
     }
 }

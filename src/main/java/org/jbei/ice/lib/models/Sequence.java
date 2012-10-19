@@ -56,7 +56,7 @@ public class Sequence implements IModel {
     @JoinColumn(name = "entries_id", nullable = true, unique = true)
     private Entry entry;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequence")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequence", orphanRemoval = true)
     @OrderBy("id")
     private Set<SequenceFeature> sequenceFeatures = new SequenceFeatureCollection();
 
@@ -133,21 +133,6 @@ public class Sequence implements IModel {
     public void setEntry(Entry entry) {
         this.entry = entry;
     }
-
-//    @Override
-//    public void setSequenceFeatures(Set<SequenceFeature> inputSequenceFeatures) {
-//        // for JAXB webservices should be this way
-//        if (inputSequenceFeatures == null) {
-//            sequenceFeatures.clear();
-//
-//            return;
-//        }
-//
-//        if (inputSequenceFeatures != sequenceFeatures) {
-//            sequenceFeatures.clear();
-//            sequenceFeatures.addAll(inputSequenceFeatures);
-//        }
-//    }
 
     public Set<SequenceFeature> getSequenceFeatures() {
 

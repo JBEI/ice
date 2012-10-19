@@ -13,7 +13,6 @@ import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.shared.EntryAddType;
 
-import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -22,7 +21,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * Interface for view that displays details of entry collections
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -41,11 +40,10 @@ public interface ICollectionView {
     // key handler for the quick add text box
     void addQuickAddKeyHandler(KeyPressHandler handler);
 
+    void addSubmitNewCollectionHandler(ClickHandler handler);
+
     // handler for what happens when the user pressed "enter" in the quick edit input
     void addQuickEditKeyDownHandler(KeyDownHandler handler);
-
-    // handler for on blur on the quick edit box. should be the same as pressing enter
-    void addQuickEditBlurHandler(BlurHandler handler);
 
     // user entered collection name
     String getCollectionInputValue();
@@ -77,9 +75,8 @@ public interface ICollectionView {
 
     /**
      * active data view
-     * 
-     * @param table
-     *            data view table. depends on user selection
+     *
+     * @param table data view table. depends on user selection
      */
     void setDataView(CollectionDataTable table);
 
@@ -112,6 +109,4 @@ public interface ICollectionView {
     SingleSelectionModel<ExportAsOption> getExportAsModel();
 
     void enableExportAs(boolean enable);
-
-    void addQuickAddBlurHandler(BlurHandler blurHandler);
 }

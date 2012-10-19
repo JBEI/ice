@@ -3,7 +3,7 @@ package org.jbei.ice.client.common.header;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import org.jbei.ice.client.common.FilterOperand;
+import org.jbei.ice.client.common.FilterWidget;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -11,9 +11,9 @@ import org.jbei.ice.shared.dto.SearchFilterInfo;
 /**
  * Parser for evaluating advanced queries entered into the quick
  * search field.
- * 
+ * <p/>
  * TODO : candidate for optimization
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -25,7 +25,7 @@ public class QuickSearchParser {
     static {
         operatorSymbol = new HashSet<String>();
         for (QueryOperator operator : QueryOperator.values()) {
-            operatorSymbol.add(operator.value());
+            operatorSymbol.add(operator.symbol());
         }
 
         types = new HashSet<String>();
@@ -140,7 +140,7 @@ public class QuickSearchParser {
         return filters;
     }
 
-    public static String containsType(String text, FilterOperand filterOperand, String operand,
+    public static String containsType(String text, FilterWidget filterOperand, String operand,
             String operator) {
         ArrayList<SearchFilterInfo> parsed = parse(text);
 
@@ -160,7 +160,7 @@ public class QuickSearchParser {
             return text;
 
         SearchFilterInfo info = new SearchFilterInfo(filterOperand.getType().getShortName(),
-                operator, operand);
+                                                     operator, operand);
         parsed.set(index, info);
         return filterToString(parsed);
     }

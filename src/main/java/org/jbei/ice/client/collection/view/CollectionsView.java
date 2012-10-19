@@ -19,7 +19,6 @@ import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.shared.EntryAddType;
 
-import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -30,10 +29,16 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * View for the collections section
+ *
+ * @author Hector Plahar
+ */
 public class CollectionsView extends AbstractLayout implements ICollectionView {
 
     private CollectionMenu systemMenu;
     private CollectionMenu userMenu;
+    private CollectionMenu sharedCollections;
 
     private FlexTable contents;
     private FlexTable rightContents;
@@ -84,11 +89,17 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         contents.setCellPadding(0);
 
         systemMenu = new CollectionMenu(false, "Collections");
+        systemMenu.setEmptyCollectionMessage("No collections available");
         userMenu = new CollectionMenu(true, "My Collections");
+        sharedCollections = new CollectionMenu(false, "Shared Collections");
+        sharedCollections.setEmptyCollectionMessage("No collections have been shared with you");
+
         HTMLPanel menuPanel = new HTMLPanel(
-                "<span id=\"system_menu\"></span><br><span id=\"user_menu\"></span><br>");
+                "<span id=\"system_menu\"></span><br><span id=\"user_menu\"></span><br><span " +
+                        "id=\"shared_collections\"></span><br>");
         menuPanel.add(systemMenu, "system_menu");
         menuPanel.add(userMenu, "user_menu");
+        menuPanel.add(sharedCollections, "shared_collections");
 
         contents.setWidget(0, 0, menuPanel);
         contents.getCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
@@ -116,7 +127,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
 
     @Override
     public String getCollectionInputValue() {
-        return this.userMenu.getQuickAddBox().getValue();
+        return this.userMenu.getQuickAddInputName();
     }
 
     @Override
@@ -179,12 +190,12 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
 
     @Override
     public void setQuickAddVisibility(boolean visible) {
-        this.userMenu.getQuickAddBox().setVisible(visible);
+//        this.userMenu.getQuickAddBox().setVisible(visible);
     }
 
     @Override
     public boolean getQuickAddVisibility() {
-        return this.userMenu.getQuickAddBox().isVisible();
+        return this.userMenu.getQuickAddVisibility();
     }
 
     @Override
@@ -198,8 +209,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void addQuickAddBlurHandler(BlurHandler blurHandler) {
-        this.userMenu.addQuickAddBlurHandler(blurHandler);
+    public void addSubmitNewCollectionHandler(ClickHandler handler) {
+        this.userMenu.addSaveCollectionNameHandler(handler);
     }
 
     @Override
@@ -220,11 +231,6 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public void addQuickEditKeyDownHandler(KeyDownHandler handler) {
         this.userMenu.addQuickEditKeyDownHandler(handler);
-    }
-
-    @Override
-    public void addQuickEditBlurHandler(BlurHandler handler) {
-        this.userMenu.addQuickEditBlurHandler(handler);
     }
 
     @Override

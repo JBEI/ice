@@ -24,7 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Widget for displaying the entry permissions
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -125,7 +125,7 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
     /**
      * Adds links that allows user to modify permissions.
      * User should have write access
-     * 
+     *
      * @param showEdit
      */
     public void addReadWriteLinks(boolean showEdit) {
@@ -291,7 +291,7 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
     }
 
     private class TreeNodeWidget extends Composite implements HasMouseOverHandlers,
-            HasMouseOutHandlers {
+                                                              HasMouseOutHandlers {
         private final Label delete;
 
         public TreeNodeWidget(String display, ClickHandler handler, boolean isGroup) {

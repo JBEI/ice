@@ -1,15 +1,16 @@
 package org.jbei.ice.client.collection.add;
 
+import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
+
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.jbei.ice.client.collection.add.form.EntryCreateWidget;
 
 public class EntryAddView extends Composite {
     private Label contentHeader;
-    private EntryCreateWidget currentForm;
+    private IEntryFormSubmit currentForm;
     private VerticalPanel subContent;
 
     public EntryAddView() {
@@ -43,18 +44,18 @@ public class EntryAddView extends Composite {
         return mainContent;
     }
 
-    public void setCurrentForm(EntryCreateWidget form, String title) {
+    public void setCurrentForm(IEntryFormSubmit form, String title) {
         this.currentForm = form;
         subContent.clear();
-        subContent.add(this.currentForm);
+        subContent.add(this.currentForm.asWidget());
         contentHeader.setText(title);
     }
 
-    public EntryCreateWidget getCurrentForm() {
+    public IEntryFormSubmit getCurrentForm() {
         return this.currentForm;
     }
 
     public void setSubmitEnable(boolean b) {
-        this.currentForm.getEntrySubmitForm().getSubmit().setEnabled(b);
+        this.currentForm.getSubmit().setEnabled(b);
     }
 }

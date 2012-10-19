@@ -8,11 +8,11 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter.DeleteEntryHandler;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
-import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
 import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
@@ -65,8 +65,7 @@ public class EntryPresenter extends AbstractPresenter {
 
     private final EntryModel model;
 
-    public EntryPresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
-            EntryContext context) {
+    public EntryPresenter(final RegistryServiceAsync service, final HandlerManager eventBus, EntryContext context) {
         this.service = service;
         this.eventBus = eventBus;
         this.display = new EntryView();
@@ -102,12 +101,12 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                IEntryFormUpdateSubmit formUpdate = display.showUpdateForm(currentInfo);
+                IEntryFormSubmit formUpdate = display.showUpdateForm(currentInfo);
                 if (formUpdate == null)
                     return;
 
-                formUpdate.addCancelHandler(new UpdateFormCancelHandler());
-                formUpdate.addSubmitHandler(new UpdateFormSubmitHandler(formUpdate));
+                formUpdate.getCancel().addClickHandler(new UpdateFormCancelHandler());
+                formUpdate.getSubmit().addClickHandler(new UpdateFormSubmitHandler(formUpdate));
             }
         });
 
@@ -596,9 +595,9 @@ public class EntryPresenter extends AbstractPresenter {
 
     private class UpdateFormSubmitHandler implements ClickHandler {
 
-        private final IEntryFormUpdateSubmit formSubmit;
+        private final IEntryFormSubmit formSubmit;
 
-        public UpdateFormSubmitHandler(IEntryFormUpdateSubmit formSubmit) {
+        public UpdateFormSubmitHandler(IEntryFormSubmit formSubmit) {
             this.formSubmit = formSubmit;
         }
 
@@ -612,7 +611,7 @@ public class EntryPresenter extends AbstractPresenter {
                 return;
             }
 
-            formSubmit.populateEntry();
+            formSubmit.populateEntries();
             update(formSubmit.getEntry());
         }
 

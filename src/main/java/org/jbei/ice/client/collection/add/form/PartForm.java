@@ -1,31 +1,21 @@
-package org.jbei.ice.client.entry.view.update;
+package org.jbei.ice.client.collection.add.form;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.PartInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Widget;
 
-/**
- * Form for updating parts
- * 
- * @author Hector Plahar
- * 
- */
-public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
+public class PartForm extends SingleEntryForm<PartInfo> {
 
-    public UpdatePartForm(HashMap<AutoCompleteField, ArrayList<String>> data, PartInfo info) {
-        super(data, info);
+    public PartForm(PartInfo partInfo) {
+        super(partInfo);
     }
 
-    @Override
     protected Widget createGeneralWidget() {
         int row = 0;
         FlexTable general = new FlexTable();
         general.setWidth("100%");
+        general.setStyleName("no_wrap");
         general.setCellPadding(3);
         general.setCellSpacing(0);
 
@@ -35,9 +25,8 @@ public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
         general.setWidget(row, 1, widget);
 
         // alias
-        row += 1;
-        setLabel(false, "Alias", general, row, 0);
-        general.setWidget(row, 1, alias);
+        setLabel(false, "Alias", general, row, 2);
+        general.setWidget(row, 3, alias);
 
         // creator
         row += 1;
@@ -45,21 +34,19 @@ public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
         widget = createTextBoxWithHelp(creator, "Who made this part?");
         general.setWidget(row, 1, widget);
 
+        // PI
+        setLabel(true, "Principal Investigator", general, row, 2);
+        general.setWidget(row, 3, principalInvestigator);
+
         // creator's email
         row += 1;
-        setLabel(false, "Creator's Email", general, row, 0);
+        setLabel(true, "Creator's Email", general, row, 0);
         widget = createTextBoxWithHelp(creatorEmail, "If known");
         general.setWidget(row, 1, widget);
 
-        // PI
-        row += 1;
-        setLabel(true, "Principal Investigator", general, row, 0);
-        general.setWidget(row, 1, principalInvestigator);
-
         // funding source
-        row += 1;
-        setLabel(false, "Funding Source", general, row, 0);
-        general.setWidget(row, 1, fundingSource);
+        setLabel(false, "Funding Source", general, row, 2);
+        general.setWidget(row, 3, fundingSource);
 
         // status
         row += 1;
@@ -67,9 +54,8 @@ public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
         general.setWidget(row, 1, status);
 
         // bio safety level
-        row += 1;
-        setLabel(false, "Bio Safety Level", general, row, 0);
-        general.setWidget(row, 1, bioSafety);
+        setLabel(false, "Bio Safety Level", general, row, 2);
+        general.setWidget(row, 3, bioSafety);
 
         // links
         row += 1;

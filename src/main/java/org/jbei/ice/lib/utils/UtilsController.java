@@ -1,9 +1,11 @@
 package org.jbei.ice.lib.utils;
 
+import java.util.Collection;
+import java.util.Set;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
-
-import java.util.Collection;
+import org.jbei.ice.shared.AutoCompleteField;
 
 /**
  * @author Hector Plahar
@@ -14,6 +16,17 @@ public class UtilsController {
 
     public UtilsController() {
         dao = new UtilsDAO();
+    }
+
+    public Set<String> getMatchingAutoCompleteField(AutoCompleteField field, String token, int limit)
+            throws ControllerException {
+
+        // TODO : check the field
+        try {
+            return dao.getMatchingSelectionMarkers(token, limit);
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
     }
 
     public Collection<? extends String> getUniqueSelectionMarkers() throws ControllerException {

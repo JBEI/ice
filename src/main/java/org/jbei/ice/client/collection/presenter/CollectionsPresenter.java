@@ -38,8 +38,6 @@ import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -91,8 +89,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     }
 
     // collections for entry view
-    public CollectionsPresenter(CollectionsModel model, final ICollectionView view,
-            EntryContext event) {
+    public CollectionsPresenter(CollectionsModel model, final ICollectionView view, EntryContext event) {
         this(model, view);
         this.showEntryView(event);
     }
@@ -183,8 +180,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                                        });
 
         // handler for "add to" sub menu
-        AddToHandler addHandler = new AddToHandler(display, new HasEntry(), model,
-                                                   this.collectionsDataTable);
+        AddToHandler addHandler = new AddToHandler(display, new HasEntry(), model, this.collectionsDataTable);
         display.addAddToSubmitHandler(addHandler);
 
         // move to handler
@@ -366,19 +362,6 @@ public class CollectionsPresenter extends AbstractPresenter {
     private void initCreateCollectionHandlers() {
         this.display.setQuickAddVisibility(false);
 
-        this.display.addQuickAddBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (display.getQuickEditVisibility() == false)
-                    return;
-
-                display.setQuickAddVisibility(false);
-                saveCollection(display.getCollectionInputValue());
-                display.hideQuickAddInput();
-            }
-        });
-
         this.display.addQuickAddKeyHandler(new KeyPressHandler() {
 
             @Override
@@ -392,12 +375,12 @@ public class CollectionsPresenter extends AbstractPresenter {
             }
         });
 
-        // quick edit
-        display.addQuickEditBlurHandler(new BlurHandler() {
-
+        this.display.addSubmitNewCollectionHandler(new ClickHandler() {
             @Override
-            public void onBlur(BlurEvent event) {
-                handle();
+            public void onClick(ClickEvent event) {
+                display.setQuickAddVisibility(false);
+                saveCollection(display.getCollectionInputValue());
+                display.hideQuickAddInput();
             }
         });
 
@@ -583,8 +566,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             }
 
             // my entries
-            MenuItem item = new MenuItem(0, "My Entries",
-                                         AppController.accountInfo.getUserEntryCount(), true);
+            MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo.getUserEntryCount(), true);
             userMenuItems.add(0, item);
             MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
                                                    AppController.accountInfo.getVisibleEntryCount(), true);

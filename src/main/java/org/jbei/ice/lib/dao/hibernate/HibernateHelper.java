@@ -31,6 +31,18 @@ public class HibernateHelper {
         return getSessionFactory().openSession();
     }
 
+    public static void beginTransaction() {
+        getSessionFactory().getCurrentSession().beginTransaction();
+    }
+
+    public static void commitTransaction() {
+        getSessionFactory().getCurrentSession().getTransaction().commit();
+    }
+
+    public static void rollbackTransaction() {
+        getSessionFactory().getCurrentSession().getTransaction().rollback();
+    }
+
     /**
      * Initialize a in-memory mock database for testing.
      */
@@ -58,8 +70,6 @@ public class HibernateHelper {
                 throw new RuntimeException(e);
             }
         }
-
-
     }
 
     /**
@@ -67,7 +77,7 @@ public class HibernateHelper {
      *
      * @return Hibernate sessionFactory
      */
-    private static SessionFactory getSessionFactory() {
+    public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             initialize(Type.NORMAL);
         }
@@ -80,5 +90,4 @@ public class HibernateHelper {
     private enum Type {
         NORMAL, MOCK;
     }
-
 }

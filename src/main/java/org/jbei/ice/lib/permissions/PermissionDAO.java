@@ -21,7 +21,6 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
@@ -32,32 +31,60 @@ class PermissionDAO extends HibernateRepository<Permission> {
 
     public boolean hasAccountPermission(Entry entry, Account account, boolean canWrite, boolean canRead)
             throws DAOException {
-        Permission permission = new Permission();
-        permission.setAccount(account);
-        permission.setEntry(entry);
-        permission.setCanRead(canRead);
-        permission.setCanWrite(canWrite);
-        Example example = Example.create(permission);
-        return createCriteriaQuery(example);
+        Session session = currentSession();
+
+        try {
+            Criteria criteria = session.createCriteria(Permission.class)
+                                       .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
+                                       .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)))
+                                       .add(Restrictions.eq("account", account))
+                                       .add(Restrictions.isNull("folder"))
+                                       .add(Restrictions.isNull("group"))
+                                       .add(Restrictions.eq("entry", entry))
+                                       .setProjection(Projections.rowCount());
+
+            Number integer = (Number) criteria.uniqueResult();
+            return integer.intValue() == 1;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        } finally {
+            closeSession(session);
+        }
     }
 
-    public boolean hasGroupPermission(Entry entry, Group group, boolean canWrite, boolean canRead)
+    public boolean hasGroupPermission(Entry entry, Set<Group> groups, boolean canWrite, boolean canRead)
             throws DAOException {
-        Permission permission = new Permission();
-        permission.setEntry(entry);
-        permission.setGroup(group);
-        permission.setCanWrite(canWrite);
-        permission.setCanRead(canRead);
-        Example example = Example.create(permission);
-        return createCriteriaQuery(example);
 
+        Session session = currentSession();
+
+        try {
+            Criteria criteria = session.createCriteria(Permission.class)
+                                       .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
+                                       .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)))
+                                       .add(Restrictions.in("group", groups))
+                                       .add(Restrictions.isNull("folder"))
+                                       .add(Restrictions.isNull("account"))
+                                       .add(Restrictions.eq("entry", entry))
+                                       .setProjection(Projections.rowCount());
+
+            Number integer = (Number) criteria.uniqueResult();
+            return integer.intValue() == 1;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        } finally {
+            closeSession(session);
+        }
     }
 
     public void addGroupPermission(Entry entry, Set<Group> groups, boolean canWrite, boolean canRead)
             throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
-            session.getTransaction().begin();
             for (Group group : groups) {
                 Permission permission = new Permission();
                 permission.setEntry(entry);
@@ -66,12 +93,9 @@ class PermissionDAO extends HibernateRepository<Permission> {
                 permission.setCanWrite(canWrite);
                 session.save(permission);
             }
-            session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
-            session.getTransaction().rollback();
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
@@ -81,9 +105,8 @@ class PermissionDAO extends HibernateRepository<Permission> {
 
     public void removeGroupPermission(Entry entry, Set<Group> groups, boolean canWrite, boolean canRead)
             throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
-            session.getTransaction().begin();
             for (Group group : groups) {
                 Permission permission =
                         (Permission) session.createCriteria(Permission.class)
@@ -93,10 +116,8 @@ class PermissionDAO extends HibernateRepository<Permission> {
                                             .add(Restrictions.eq("entry", entry)).uniqueResult();
                 session.delete(permission);
             }
-            session.getTransaction().commit();
         } catch (HibernateException he) {
             Logger.error(he);
-            session.getTransaction().rollback();
         } finally {
             closeSession(session);
         }
@@ -104,9 +125,8 @@ class PermissionDAO extends HibernateRepository<Permission> {
 
     public void addAccountPermission(Entry entry, Set<Account> accounts, boolean canWrite, boolean canRead)
             throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
-            session.getTransaction().begin();
             for (Account account : accounts) {
                 Permission permission = new Permission();
                 permission.setEntry(entry);
@@ -115,12 +135,9 @@ class PermissionDAO extends HibernateRepository<Permission> {
                 permission.setCanWrite(canWrite);
                 session.save(permission);
             }
-            session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
-            session.getTransaction().rollback();
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
@@ -130,9 +147,8 @@ class PermissionDAO extends HibernateRepository<Permission> {
 
     public void removeAccountPermission(Entry entry, Set<Account> accounts, boolean canWrite, boolean canRead)
             throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
-            session.getTransaction().begin();
             for (Account account : accounts) {
                 Permission permission =
                         (Permission) session.createCriteria(Permission.class)
@@ -142,33 +158,30 @@ class PermissionDAO extends HibernateRepository<Permission> {
                                             .add(Restrictions.eq("entry", entry)).uniqueResult();
                 session.delete(permission);
             }
-            session.getTransaction().commit();
         } catch (HibernateException he) {
             Logger.error(he);
-            session.getTransaction().rollback();
         } finally {
             closeSession(session);
         }
     }
 
-    protected boolean createCriteriaQuery(Example example) throws DAOException {
-        Session session = newSession();
-
-        try {
-            Criteria criteria = session.createCriteria(Permission.class)
-                                       .add(example)
-                                       .setProjection(Projections.rowCount());
-            Number integer = (Number) criteria.uniqueResult();
-            return integer.intValue() == 1;
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-    }
+//    protected boolean createCriteriaQuery(Example example) throws DAOException {
+//        Session session = newSession();
+//
+//        try {
+//            Criteria criteria = session.createCriteria(Permission.class)
+//                                       .add(example)
+//                                       .setProjection(Projections.rowCount());
+//            Number integer = (Number) criteria.uniqueResult();
+//            return integer.intValue() == 1;
+//        } catch (HibernateException he) {
+//            Logger.error(he);
+//            throw new DAOException(he);
+//        }
+//    }
 
     public void upgradePermissions() throws DAOException {
-        Session session = newSession();
-        session.getTransaction().begin();
+        Session session = currentSession();
 
         try {
 
@@ -221,9 +234,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
                 session.delete(writeUser);
             }
             Logger.info("Permissions upgrade complete");
-            session.getTransaction().commit();
         } catch (HibernateException he) {
-            session.getTransaction().rollback();
             throw new DAOException(he);
         } finally {
             closeSession(session);
@@ -231,7 +242,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
     }
 
     public Set<Account> retrieveAccountPermissions(Entry entry, boolean canWrite, boolean canRead) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             List list = session.createCriteria(Permission.class)
                                .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
@@ -251,7 +262,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
     }
 
     public Set<Group> retrieveGroupPermissions(Entry entry, boolean canWrite, boolean canRead) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             List list = session.createCriteria(Permission.class)
                                .add(Restrictions.eq("entry", entry))
