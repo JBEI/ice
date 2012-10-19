@@ -1287,9 +1287,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             BulkUploadController controller = new BulkUploadController();
-            Logger.info(
-                    account.getEmail() + ": saving bulk import \"" + name + "\" of type " + importType + " and size "
-                            + entryList.size());
+            Logger.info(account.getEmail() + ": saving bulk import draft \"" + name + "\" of type "
+                                + importType + " and size " + entryList.size());
             return controller.createBulkImportDraft(account, importType, name, entryList, groupUUID);
         } catch (ControllerException e) {
             Logger.error(e);
