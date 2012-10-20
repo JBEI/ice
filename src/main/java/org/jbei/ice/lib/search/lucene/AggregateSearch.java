@@ -104,6 +104,16 @@ public class AggregateSearch {
             if (matchedSubstringEntries != null) {
                 substringMatches.addAll(matchedSubstringEntries);
             }
+            
+            // add keywords
+            queries = new ArrayList<String[]>();
+            queries.add(new String[]{"keywords", "~" + queryString});
+            queryResultIds = Query.getInstance().query(queries);
+            Collections.reverse(queryResultIds);
+            matchedSubstringEntries = entryController.getEntriesByIdSet(account, queryResultIds);
+            if (matchedSubstringEntries != null) {
+                substringMatches.addAll(matchedSubstringEntries);
+            }
 
             // Remove duplicates
             // If getEntriesByQueris is non-lazy, this may contain duplicates
