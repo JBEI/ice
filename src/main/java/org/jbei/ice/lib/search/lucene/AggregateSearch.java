@@ -10,6 +10,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.search.Query;
 import org.jbei.ice.lib.search.QueryException;
+import org.jbei.ice.shared.dto.Visibility;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -61,7 +62,8 @@ public class AggregateSearch {
             }
 
             for (Entry entry : exactNameMatches) {
-                exactNameResult.add(new SearchResult(entry, 2.0F));
+                if (entry.getVisibility() == Visibility.OK.getValue())
+                    exactNameResult.add(new SearchResult(entry, 2.0F));
             }
 
             // name or alias substring match
@@ -124,24 +126,6 @@ public class AggregateSearch {
                 substringMatches.addAll(matchedSubstringEntries);
             }
 
-//            queries = new ArrayList<String[]>();
-//            queries.add(new String[]{"long_description", "~" + queryString});
-//            queryResultIds = Query.getInstance().query(queries);
-//            Collections.reverse(queryResultIds);
-//            matchedSubstringEntries = entryController.getEntriesByIdSet(account, queryResultIds);
-//            if (matchedSubstringEntries != null) {
-//                substringMatches.addAll(matchedSubstringEntries);
-//            }
-//
-//            queries = new ArrayList<String[]>();
-//            queries.add(new String[]{"literature_references", "~" + queryString});
-//            queryResultIds = Query.getInstance().query(queries);
-//            Collections.reverse(queryResultIds);
-//            matchedSubstringEntries = entryController.getEntriesByIdSet(account, queryResultIds);
-//            if (matchedSubstringEntries != null) {
-//                substringMatches.addAll(matchedSubstringEntries);
-//            }
-
             // Remove duplicates
             // If getEntriesByQueris is non-lazy, this may contain duplicates
             ArrayList<Long> seenBefore = new ArrayList<Long>();
@@ -155,7 +139,8 @@ public class AggregateSearch {
             substringMatches = newSubstringMatches;
 
             for (Entry entry : substringMatches) {
-                substringResults.add(new SearchResult(entry, 1.0F));
+                if (entry.getVisibility() == Visibility.OK.getValue())
+                    substringResults.add(new SearchResult(entry, 1.0F));
             }
 
             return SearchResult.sumSearchResults(substringResults, exactNameResult);
