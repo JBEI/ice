@@ -79,7 +79,7 @@ public class EntryExportServlet extends HttpServlet {
                 entry = controller.get(account, id);
             } catch (NumberFormatException nfe) {
                 try {
-                    entry = controller.getByPartNumber(account, idStr);
+                    entry = controller.getByPartNumber(account, idStr.trim());
                 } catch (ControllerException e) {
                     Logger.error(e);
                     continue;
