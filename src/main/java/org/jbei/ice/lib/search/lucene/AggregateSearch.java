@@ -35,23 +35,22 @@ public class AggregateSearch {
             throws SearchException {
         EntryController entryController = new EntryController();
 
-//        ArrayList<SearchResult> result = new ArrayList<SearchResult>();
-
         try {
             ArrayList<String[]> queries = new ArrayList<String[]>();
 
+            // name or alias exact match
             LinkedHashSet<Entry> exactNameMatches = new LinkedHashSet<Entry>();
             ArrayList<SearchResult> exactNameResult = new ArrayList<SearchResult>();
             queries.add(new String[]{"name_or_alias", "=" + queryString});
             ArrayList<Long> queryResultIds = Query.getInstance().query(queries);
             Collections.reverse(queryResultIds);
-            ArrayList<Entry> matchedEntries = entryController.getEntriesByIdSet(account,
-                                                                                queryResultIds);
+            ArrayList<Entry> matchedEntries = entryController.getEntriesByIdSet(account, queryResultIds);
 
             if (matchedEntries != null) {
                 exactNameMatches.addAll(matchedEntries);
             }
 
+            // part number exact match
             queries = new ArrayList<String[]>();
             queries.add(new String[]{"part_number", "=" + queryString});
             queryResultIds = Query.getInstance().query(queries);
@@ -65,6 +64,7 @@ public class AggregateSearch {
                 exactNameResult.add(new SearchResult(entry, 2.0F));
             }
 
+            // name or alias substring match
             LinkedHashSet<Entry> substringMatches = new LinkedHashSet<Entry>();
             ArrayList<SearchResult> substringResults = new ArrayList<SearchResult>();
             queries = new ArrayList<String[]>();
@@ -104,7 +104,7 @@ public class AggregateSearch {
             if (matchedSubstringEntries != null) {
                 substringMatches.addAll(matchedSubstringEntries);
             }
-            
+
             // add keywords
             queries = new ArrayList<String[]>();
             queries.add(new String[]{"keywords", "~" + queryString});
@@ -114,6 +114,33 @@ public class AggregateSearch {
             if (matchedSubstringEntries != null) {
                 substringMatches.addAll(matchedSubstringEntries);
             }
+
+            queries = new ArrayList<String[]>();
+            queries.add(new String[]{"description", "~" + queryString});
+            queryResultIds = Query.getInstance().query(queries);
+            Collections.reverse(queryResultIds);
+            matchedSubstringEntries = entryController.getEntriesByIdSet(account, queryResultIds);
+            if (matchedSubstringEntries != null) {
+                substringMatches.addAll(matchedSubstringEntries);
+            }
+
+//            queries = new ArrayList<String[]>();
+//            queries.add(new String[]{"long_description", "~" + queryString});
+//            queryResultIds = Query.getInstance().query(queries);
+//            Collections.reverse(queryResultIds);
+//            matchedSubstringEntries = entryController.getEntriesByIdSet(account, queryResultIds);
+//            if (matchedSubstringEntries != null) {
+//                substringMatches.addAll(matchedSubstringEntries);
+//            }
+//
+//            queries = new ArrayList<String[]>();
+//            queries.add(new String[]{"literature_references", "~" + queryString});
+//            queryResultIds = Query.getInstance().query(queries);
+//            Collections.reverse(queryResultIds);
+//            matchedSubstringEntries = entryController.getEntriesByIdSet(account, queryResultIds);
+//            if (matchedSubstringEntries != null) {
+//                substringMatches.addAll(matchedSubstringEntries);
+//            }
 
             // Remove duplicates
             // If getEntriesByQueris is non-lazy, this may contain duplicates
