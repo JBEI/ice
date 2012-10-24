@@ -1,6 +1,5 @@
 package org.jbei.ice.client.collection.presenter;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -406,7 +405,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         // RPC with newName
         FolderDetails editFolder = new FolderDetails();
-        editFolder.setCount(BigInteger.valueOf(item.getCount()));
+        editFolder.setCount(item.getCount());
         editFolder.setName(newName);
         editFolder.setId(item.getId());
 
@@ -423,7 +422,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                 display.updateSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                 MenuItem resultItem = new MenuItem(folder.getId(), folder.getName(), folder
-                        .getCount().longValue(), folder.isSystemFolder());
+                        .getCount(), folder.isSystemFolder());
                 display.setMenuItem(resultItem, deleteHandler);
             }
         });
@@ -446,8 +445,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                 userListProvider.getList().add(folder);
                 display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
-                MenuItem newItem = new MenuItem(folder.getId(), folder.getName(), folder.getCount()
-                                                                                        .longValue(),
+                MenuItem newItem = new MenuItem(folder.getId(), folder.getName(), folder.getCount(),
                                                 folder.isSystemFolder());
 
                 if (!folder.isSystemFolder())
@@ -551,8 +549,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             ArrayList<FolderDetails> systemFolder = new ArrayList<FolderDetails>();
 
             for (FolderDetails folder : folders) {
-                MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder.getCount()
-                                                                                     .longValue(),
+                MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder.getCount(),
                                              folder.isSystemFolder());
 
                 if (folder.isSystemFolder()) {
@@ -634,8 +631,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                                                   ArrayList<MenuItem> items = new ArrayList<MenuItem>();
                                                   MenuItem updateItem = new MenuItem(result.getId(), result.getName(),
-                                                                                     result
-                                                                                             .getCount().longValue(),
+                                                                                     result.getCount(),
                                                                                      result.isSystemFolder());
                                                   items.add(updateItem);
                                                   display.updateMenuItemCounts(items);
@@ -681,7 +677,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     model.getEventBus().fireEvent(event);
 
                     for (FolderDetails detail : result) {
-                        MenuItem item = new MenuItem(detail.getId(), detail.getName(), detail.getCount().longValue(),
+                        MenuItem item = new MenuItem(detail.getId(), detail.getName(), detail.getCount(),
                                                      detail.isSystemFolder());
                         menuItems.add(item);
                     }

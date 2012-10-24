@@ -32,16 +32,19 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
         initComponents();
 
         // add filters
-        CaptionPanel captionPanel = new CaptionPanel(
-                "<span class=\"search_caption_caption\">Search Filters</span>", true);
+        CaptionPanel captionPanel = new CaptionPanel("<span class=\"search_caption_caption\">Search Filters</span>",
+                                                     true);
         captionPanel.setWidth("98%");
         captionPanel.setStyleName("search_caption_display");
         captionPanel.add(filterPanel);
-        layout.setWidget(0, 0, captionPanel);
+//        layout.setWidget(0, 0, captionPanel);
 
         // add a break between filters and results
+        layout.setHTML(0, 0,
+                       "<span style=\" border-bottom: 1px solid #DDD;\"><span style=\"color: #555;" +
+                               "\">Local Results</span><span>Search the web</span></span>");
+
         layout.setHTML(1, 0, "&nbsp;");
-        // TODO : loading indicator?
     }
 
     protected void initComponents() {

@@ -2,6 +2,7 @@ package org.jbei.ice.client.collection.add.menu;
 
 import java.util.Arrays;
 
+import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.EntryAddType;
 
@@ -37,7 +38,8 @@ public class CreateEntryMenu implements IsWidget {
         Style cellListStyle();
     }
 
-    private static final String LABEL = "Create Entry";
+    private static final String LABEL = "Create Entry <i class=\"" + FAIconType.CARET_DOWN.getStyleName()
+            + " font-80em\"></i>";
     private final Button createEntry;
     private final SingleSelectionModel<EntryAddType> optionSelection;
 

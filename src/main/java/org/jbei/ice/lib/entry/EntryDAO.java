@@ -402,9 +402,7 @@ class EntryDAO extends HibernateRepository<Entry> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entries!", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 

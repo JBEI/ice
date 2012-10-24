@@ -14,7 +14,7 @@ import com.google.gwt.view.client.HasRows;
 
 /**
  * Pager for the Entry Table
- * 
+ *
  * @author Hector Plahar
  */
 public class EntryTablePager extends AbstractPager {
@@ -237,21 +237,21 @@ public class EntryTablePager extends AbstractPager {
     protected void setRowCountButtons() {
         HasRows table = this.getDisplay();
         switch (table.getVisibleRange().getLength()) {
-        case 15:
-            btn15Count.setDisabled(true);
-            btn50Count.setDisabled(false);
-            btn100Count.setDisabled(false);
-            break;
-        case 50:
-            btn15Count.setDisabled(false);
-            btn50Count.setDisabled(true);
-            btn100Count.setDisabled(false);
-            break;
-        case 100:
-            btn15Count.setDisabled(false);
-            btn50Count.setDisabled(false);
-            btn100Count.setDisabled(true);
-            break;
+            case 15:
+                btn15Count.setDisabled(true);
+                btn50Count.setDisabled(false);
+                btn100Count.setDisabled(false);
+                break;
+            case 50:
+                btn15Count.setDisabled(false);
+                btn50Count.setDisabled(true);
+                btn100Count.setDisabled(false);
+                break;
+            case 100:
+                btn15Count.setDisabled(false);
+                btn50Count.setDisabled(false);
+                btn100Count.setDisabled(true);
+                break;
         }
     }
 
@@ -272,15 +272,14 @@ public class EntryTablePager extends AbstractPager {
         endIndex = Math.max(pageStart, endIndex);
         boolean exact = display.isRowCountExact();
 
-        return "Showing " + formatter.format(pageStart) + " to " + formatter.format(endIndex)
+        return formatter.format(pageStart) + " - " + formatter.format(endIndex)
                 + (exact ? " of " : " of over ") + formatter.format(dataSize);
     }
 
     /**
      * Enable or disable the previous page buttons.
-     * 
-     * @param disabled
-     *            true to disable, false to enable
+     *
+     * @param disabled true to disable, false to enable
      */
     private void setPrevPageButtonsDisabled(boolean disabled) {
         first.setDisabled(disabled);
@@ -289,9 +288,8 @@ public class EntryTablePager extends AbstractPager {
 
     /**
      * Enable or disable the next page buttons.
-     * 
-     * @param disabled
-     *            true to disable, false to enable
+     *
+     * @param disabled true to disable, false to enable
      */
     private void setNextPageButtonsDisabled(boolean disabled) {
         next.setDisabled(disabled);

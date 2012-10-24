@@ -53,6 +53,14 @@ body {
     padding: 4px;
 }
 
+.pad-8 {
+    padding: 8px;
+}
+
+.pad-left-8 {
+    padding-left: 8px;
+}
+
 .pad-right-10 {
     padding-right: 10px;
 }
@@ -77,9 +85,9 @@ body {
     border-bottom: 1px solid #ccc;
 }
 
-.text-shadow {
-    text-shadow: 0.1em 0.1em 0.1em #CCC;
-}
+/*.text-shadow {*/
+/*text-shadow: 0.1em 0.1em 0.1em #CCC;*/
+/*}*/
 
 .pull_down {
     border: 1px solid #CCC;
@@ -721,15 +729,16 @@ a.cell_mouseover:hover {
 
 .nav {
     border: 1px solid #777;
-    padding: 2px 6px 2px 6px;
+    padding: 1px 5px 0px 5px;
     cursor: pointer;
     font-family: sans-serif;
     font-weight: bold;
     font-size: 0.90em;
+    background-color: #f1f6fb;
 }
 
 .nav_disabled {
-    padding: 2px 6px 2px 6px;
+    padding: 1px 5px 0px 5px;
     opacity: 0.4;
     color: #999;
     cursor: default;
@@ -803,47 +812,6 @@ a.cell_mouseover:hover {
     padding: 5px;
 }
 
-.button_group {
-    background-color: #f1f1f1;
-    border: 1px solid #A5A5A5;
-    -webkit-border-radius: 2px;
-    margin: 0;
-}
-
-.button_group_item {
-    display: inline-block;
-    cursor: pointer;
-    color: #393939;
-    font-weight: bold;
-    font-size: 0.75em;
-    text-align: center;
-    border: 0;
-    border-left: 1px solid #C9C9C9;
-    background-color: #f1f1f1;
-    border-top: 2px solid #f1f1f1;
-    border-bottom: 2px solid #f1f1f1;
-    font-family: Arial, serif;
-}
-
-.button_group_item:hover {
-    border-top: 2px solid #0082C0;
-    background-color: #f2f2f2;
-    color: #0f3f33;
-}
-
-.button_group_item[disabled] {
-    opacity: 0.4;
-}
-
-.button_group_item[disabled]:hover {
-    border-top: 2px solid #f1f1f1;
-    cursor: default;
-}
-
-.firstItem {
-    border-left: 0;
-}
-
 .collection_menu_table {
     border-top: 2px solid #0082c0;
     width: 220px;
@@ -873,14 +841,23 @@ a.cell_mouseover:hover {
     font-size: 0.80em;
 }
 
-.collection_user_menu_row {
+.system_collection_user_menu_row {
     border-right: 1px solid #F2F2F2;
     border-top: 1px solid #F2F2F2;
-    padding: 6px;
     color: #0082c0;
+    line-height: 74%;
+    padding: 8px;
 }
 
-.collection_user_menu_row:hover {
+.user_collection_user_menu_row {
+    border-right: 1px solid #F2F2F2;
+    border-top: 1px solid #F2F2F2;
+    color: #0082c0;
+    line-height: 74%;
+    padding: 4px 8px 4px 8px;
+}
+
+.user_collection_user_menu_row:hover, .system_collection_user_menu_row:hover {
     background-color: #f1f6fb;
     border: 1px solid #aab2bd;
     cursor: pointer;
@@ -892,11 +869,15 @@ a.cell_mouseover:hover {
     font-weight: bold;
     color: #FFC;
     background-color: #08C;
-    border: 1px solid #08C;
+    border: 1px solid #555;
 }
 
 .collection_user_menu_row_selected .menu_count {
     color: #FFC;
+}
+
+.user_collection_user_menu_row .menu_count {
+    margin-top: 3px;
 }
 
 .collection_user_menu_row_selected .font-awesome {
@@ -1324,9 +1305,10 @@ a:hover {
 
 .pager_nav {
     font-weight: bold;
-    font-size: 12px;
+    font-size: 11px;
     font-family: Arial, Helvetica, sans-serif;
     color: #5a4545;
+    text-shadow: 0.2px 0.2px 0.2px #000;
 }
 
 .button_to_link {
@@ -1986,18 +1968,18 @@ td.datePickerMonth {
 }
 
 .badge {
-    font-size: 11.844px;
+    font-size: 11px;
     font-weight: bold;
     line-height: 14px;
     color: #ffffff;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     white-space: nowrap;
     vertical-align: baseline;
-    background-color: #999999;
-    padding: 1px 9px 2px;
-    -webkit-border-radius: 9px;
-    -moz-border-radius: 9px;
-    border-radius: 9px;
+    background-color: #aa0000;
+    padding: 1px 5px 1px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
 }
 
 .collection_options {
@@ -2010,6 +1992,39 @@ td.datePickerMonth {
     color: black;
     border: 1px solid black;
     background-color: #ffffff;
+}
+
+.pull_down_as_link {
+    cursor: pointer;
+    color: #0082C0;
+}
+
+.pull_down_as_link i {
+    opacity: 0.1;
+    color: #000;
+}
+
+.pull_down_as_link:hover {
+    color: #9EC068;
+}
+
+.pull_down_as_link:hover i {
+    opacity: 0.7;
+}
+
+.quick_add_icon {
+    cursor: pointer;
+    border: 1px solid #ccc;
+    opacity: 0.4;
+    padding: 0 2px 0 2px;
+    text-shadow: 0.1em 0.1em #c1c1c1
+}
+
+.quick_add_icon:hover {
+    opacity: 0.9;
+    color: #3f7f00;
+    border: 1px solid #3f7f00;
+    background-color: #fff;
 }
 
 

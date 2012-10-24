@@ -290,7 +290,6 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
 
         private final HTMLPanel panel;
         private final MenuItem item;
-        private final String html;
 
         private Label count;
         private Icon collectionIcon; // icon displayed before the collection name
@@ -408,16 +407,21 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
             if (name.length() > 25)
                 name = (name.substring(0, 22) + "...");
 
-            html = "<span id=\"collection_icon\"></span>"
-                    + "<span class=\"collection_user_menu\">" + name + "</span>"
-                    + "<span class=\"menu_count\" id=\"" + folderId + "\"></span>";
+            String html = "<span id=\"collection_icon\"></span><span class=\"collection_user_menu\">" + name
+                    + "</span><span class=\"menu_count\" id=\"" + folderId + "\"></span>";
+
+            if (!item.isSystem())
+                html += "<br><span style=\"color: #ccc; font-size: 9px\">Private</span>";
 
             panel = new HTMLPanel(html);
             panel.setTitle(item.getName());
-
             count = new Label(formatNumber(item.getCount()));
             panel.add(count, folderId);
-            panel.setStyleName("collection_user_menu_row");
+            if (item.isSystem())
+                panel.setStyleName("system_collection_user_menu_row");
+            else
+                panel.setStyleName("user_collection_user_menu_row");
+
             initWidget(panel);
 
             // mouse handlers

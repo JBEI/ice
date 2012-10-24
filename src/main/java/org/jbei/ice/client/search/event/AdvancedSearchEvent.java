@@ -1,12 +1,10 @@
 package org.jbei.ice.client.search.event;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.jbei.ice.client.search.event.AdvancedSearchEvent.AdvancedSearchEventHandler;
 import org.jbei.ice.shared.dto.BlastResultInfo;
-import org.jbei.ice.shared.dto.SearchResultInfo;
+import org.jbei.ice.shared.dto.SearchResults;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -15,7 +13,7 @@ public class AdvancedSearchEvent extends GwtEvent<AdvancedSearchEventHandler> {
 
     public static Type<AdvancedSearchEventHandler> TYPE = new Type<AdvancedSearchEventHandler>();
     private ArrayList<BlastResultInfo> results;
-    private LinkedList<SearchResultInfo> searchResults;
+    private SearchResults searchResults;
     private final boolean isBlast;
 
     public AdvancedSearchEvent(ArrayList<BlastResultInfo> results) {
@@ -23,8 +21,8 @@ public class AdvancedSearchEvent extends GwtEvent<AdvancedSearchEventHandler> {
         isBlast = true;
     }
 
-    public AdvancedSearchEvent(List<SearchResultInfo> ids) {
-        this.searchResults = new LinkedList<SearchResultInfo>(ids);
+    public AdvancedSearchEvent(SearchResults searchResults) {
+        this.searchResults = searchResults;
         isBlast = false;
     }
 
@@ -32,7 +30,7 @@ public class AdvancedSearchEvent extends GwtEvent<AdvancedSearchEventHandler> {
         return this.results;
     }
 
-    public LinkedList<SearchResultInfo> getSearchResults() {
+    public SearchResults getSearchResults() {
         return this.searchResults;
     }
 

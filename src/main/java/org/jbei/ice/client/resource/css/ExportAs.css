@@ -1,70 +1,61 @@
-@sprite .subMenuExport {
+.subMenuExport {
     height: 26px;
-    width: 92px;
-    gwt-image: 'sortDown';
-    background-position: 75px 9px;
-    padding-right: 13px;    
     cursor: pointer;
     color: #393939;
     font-weight: bold;
     font-size: 0.75em;
     text-align: center;
-    border: 0px;
-    background-color: #f1f1f1;
-    border-top: 2px solid #f1f1f1;
-    
-    border: 1px solid #A5A5A5;
     -webkit-border-radius: 2px;
     border-radius: 2px;
-    margin: 0px;
     font-family: Arial;
+    border-top: 2px solid #f1f1f1;
+    border: 1px solid #A5A5A5;
+    background-image: -webkit-linear-gradient(top, #FEFEFE, #F2F2F2);
+    background-image: -o-linear-gradient(top, #FEFEFE, #F2F2F2);
+    background-image: linear-gradient(to bottom, #FEFEFE, #F2F2F2);
+    background-image: -moz-linear-gradient(top, #FEFEFE, #F2F2F2);
 }
 
 .subMenuExport:hover {
     border-top: 2px solid #0082C0;
     background-color: #f2f2f2;
+    color: #111;
+    box-shadow: 0 0 1px 1px #ddd;
 }
 
 .subMenuExport[disabled] {
-	height: 26px;
-    width: 92px;
-    gwt-image: 'sortDown';
-    background-position: 75px 9px;
-    padding-right: 13px;    
+    height: 26px;
     cursor: pointer;
     color: #393939;
     font-weight: bold;
     font-size: 0.75em;
     text-align: center;
-    border: 0px;
-    background-color: #f1f1f1;
+    background-color: #c2c2c2;
     border-top: 2px solid #f1f1f1;
-    
-    border: 1px solid #A5A5A5;
+    border: 1px solid #c2c2c2;
     -webkit-border-radius: 2px;
     border-radius: 2px;
-    margin: 0px;
     font-family: Arial;
-    
-    opacity: 0.4;
+    opacity: 0.3;
 }
 
 .subMenuExport[disabled]:hover {
     cursor: default;
+    box-shadow: 0 0 0 0 #ddd;
 }
 
 .cellListKeyboardSelectedItem {
 }
 
 .cellListOddItem, .cellListEvenItem {
-	padding: 4px;
+    padding: 4px;
     padding-left: 10px;
     cursor: pointer;
     border-radius: 2px;
 }
 
 .cellListSelectedItem {
-	background-color: #F1F1F1;
+    background-color: #F1F1F1;
     border: 1px solid #BBB;
     color: #333;
 }
@@ -74,8 +65,8 @@
 }
 
 .cellListWidget {
-	background-color: #FFF;
-	padding: 0;
+    background-color: #FFF;
+    padding: 0;
     margin: 0;
     list-style: none;
     width: 120px;

@@ -17,8 +17,7 @@ import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
-public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> extends
-        AsyncDataProvider<T> {
+public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> extends AsyncDataProvider<T> {
 
     protected final LinkedList<Long> valueIds;
     protected final LinkedList<T> results;
@@ -82,7 +81,8 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
     }
 
     // when a user sorts a column, setVisibleRangeAndclearData is called which
-    // triggers a rangeChangeEvent 
+    // triggers a rangeChangeEvent
+    // valueIds contains
     @Override
     protected void onRangeChanged(final HasData<T> display) {
 
@@ -133,13 +133,13 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
         return true;
     }
 
-    protected void fetchHasEntryData(ColumnField sortField, boolean asc, final int rangeStart,
-            final int rangeEnd) {
+    protected void fetchHasEntryData(ColumnField sortField, boolean asc, final int rangeStart, final int rangeEnd) {
 
         if (this.valueIds == null || this.valueIds.isEmpty())
             return;
 
-        int factor = (rangeEnd - rangeStart) * 9; // factor is used to retrieve more data than will be shown; for caching
+        int factor = (rangeEnd - rangeStart) * 9; // factor is used to retrieve more data than will be shown; for
+        // caching
         factor = (factor + rangeEnd) > valueIds.size() ? valueIds.size() : (factor + rangeEnd);
         LinkedList<Long> subList = new LinkedList<Long>(valueIds.subList(rangeStart, factor));
 
@@ -161,14 +161,10 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
     }
 
     /**
-     * @param values
-     *            list of ids for records to retrieve
-     * @param rangeStart
-     *            start of range to show
-     * @param rangeEnd
-     *            end of range to show
-     * @param asc
-     *            sort Type
+     * @param values     list of ids for records to retrieve
+     * @param rangeStart start of range to show
+     * @param rangeEnd   end of range to show
+     * @param asc        sort Type
      */
     protected abstract void retrieveValues(LinkedList<Long> values, int rangeStart, int rangeEnd,
             ColumnField sortField, boolean asc);
@@ -187,8 +183,7 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
         lastSortField = null;
 
         this.dataTable.getColumnSortList().clear();
-        DataTable<T>.DataTableColumn<?> defaultSortField = this.dataTable
-                .getColumn(ColumnField.BIT_SCORE);
+        DataTable<T>.DataTableColumn<?> defaultSortField = this.dataTable.getColumn(ColumnField.BIT_SCORE);
 
         if (defaultSortField != null) {
             ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);

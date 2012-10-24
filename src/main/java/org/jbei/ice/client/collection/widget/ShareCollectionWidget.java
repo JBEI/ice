@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Dialog widget for sharing collections
@@ -39,10 +40,22 @@ public class ShareCollectionWidget extends Composite {
         initComponents();
 
         // set Widgets
-        layout.setHTML(0, 0, "<span style=\"padding: 20px\">test</span>");
-        layout.setWidget(0, 1, closeIcon);
+        layout.setWidget(0, 0, createHeader());
+        layout.getFlexCellFormatter().setColSpan(0, 0, 2);
         layout.setWidget(1, 0, share);
         layout.setWidget(1, 1, cancel);
+    }
+
+    protected Widget createHeader() {
+        FlexTable table = new FlexTable();
+        table.setWidth("100%");
+        table.setCellPadding(0);
+        table.setCellSpacing(0);
+
+        table.setHTML(0, 0, "Share <b><i>" + collectionName + "</b></i>");
+        table.setWidget(0, 1, closeIcon);
+
+        return table;
     }
 
     protected void initComponents() {
@@ -62,7 +75,6 @@ public class ShareCollectionWidget extends Composite {
         box = new PopupPanel();
         box.setWidth("600px");
         box.setModal(true);
-//        box.setHTML("<span>" + collectionName + "</span>");
         box.setGlassEnabled(true);
         box.setGlassStyleName("dialog_box_glass");
         box.setWidget(this);

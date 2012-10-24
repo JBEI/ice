@@ -1,6 +1,5 @@
 package org.jbei.ice.server;
 
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -357,8 +356,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             HibernateHelper.beginTransaction();
             Account account = this.retrieveAccountForSid(sid);
-            Logger.info(account.getEmail() + ": retrieving entry data for " + entryIds.size()
-                                + " entries");
+            Logger.info(account.getEmail() + ": retrieving entry data for " + entryIds.size() + " entries");
             EntryController entryController = new EntryController();
             LinkedList<EntryInfo> results = entryController.retrieveEntriesByIdSetSort(account, entryIds, field, asc);
             HibernateHelper.commitTransaction();
@@ -404,7 +402,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             for (Folder folder : folders) {
                 long id = folder.getId();
                 FolderDetails details = new FolderDetails(id, folder.getName(), true);
-                BigInteger folderSize = folderController.getFolderSize(id);
+                long folderSize = folderController.getFolderSize(id);
                 details.setCount(folderSize);
                 details.setDescription(folder.getDescription());
                 results.add(details);
@@ -416,7 +414,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 for (Folder folder : userFolders) {
                     long id = folder.getId();
                     FolderDetails details = new FolderDetails(id, folder.getName(), false);
-                    BigInteger folderSize = folderController.getFolderSize(id);
+                    long folderSize = folderController.getFolderSize(id);
                     details.setCount(folderSize);
                     details.setDescription(folder.getDescription());
                     results.add(details);
@@ -450,9 +448,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account system = controller.getSystemAccount();
             boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
-
-            BigInteger folderSize = folderController.getFolderSize(folderId);
-
+            long folderSize = folderController.getFolderSize(folderId);
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
             ArrayList<Long> contents = folderController.getFolderContents(folderId);
@@ -487,7 +483,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             }
 
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
-            BigInteger folderSize = folderController.getFolderSize(folderId);
+            long folderSize = folderController.getFolderSize(folderId);
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
             ArrayList<Long> contents = folderController.getFolderContents(folderId);
@@ -798,6 +794,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             HibernateHelper.rollbackTransaction();
             Logger.error(e);
             return null;
+        } catch (Exception e) {
+            HibernateHelper.rollbackTransaction();
+            Logger.error(e);
+            return null;
         }
     }
 
@@ -868,13 +868,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     // 
 
     @Override
-    public LinkedList<SearchResultInfo> retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters,
-            int start, int limit)
+    public SearchResults retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, int start, int limit)
             throws AuthenticationException {
 
         if (filters == null || filters.isEmpty())
-            return new LinkedList<SearchResultInfo>();
+            return null;
 
+        // TODO : this conversion should not be necessary
         ArrayList<QueryFilter> queryFilters = new ArrayList<QueryFilter>();
         for (SearchFilterInfo filter : filters) {
             QueryFilter queryFilter = new QueryFilter(filter);
@@ -882,22 +882,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         try {
-            HibernateHelper.getSessionFactory().getCurrentSession().beginTransaction();
+            HibernateHelper.beginTransaction();
             Account account = this.retrieveAccountForSid(sid);
             SearchController search = new SearchController();
             SearchResults searchResults = search.runSearch(account, queryFilters, start, limit);
-            HibernateHelper.getSessionFactory().getCurrentSession().getTransaction().commit();
-            return searchResults.getResults();
+            HibernateHelper.commitTransaction();
+            searchResults.setSearchFilters(filters);
+            return searchResults;
         } catch (Throwable e) {
             Logger.error(e);
-            try {
-                if (HibernateHelper.getSessionFactory().getCurrentSession().getTransaction().isActive()) {
-                    Logger.debug("Trying to rollback database transaction after exception");
-                    HibernateHelper.getSessionFactory().getCurrentSession().getTransaction().rollback();
-                }
-            } catch (Throwable rbEx) {
-                Logger.error("Could not rollback transaction after exception!", rbEx);
-            }
+            HibernateHelper.rollbackTransaction();
             return null;
         }
     }
@@ -1005,6 +999,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public FolderDetails createUserCollection(String sid, String name, String description,
             ArrayList<Long> contents) throws AuthenticationException {
         try {
+            HibernateHelper.beginTransaction();
             Account account = this.retrieveAccountForSid(sid);
             EntryController entryController = new EntryController();
             FolderController folderController = new FolderController();
@@ -1017,18 +1012,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (contents != null && !contents.isEmpty()) {
 
-                ArrayList<Entry> entrys = new ArrayList<Entry>(entryController.getEntriesByIdSet(
-                        account, contents));
+                ArrayList<Entry> entrys = new ArrayList<Entry>(entryController.getEntriesByIdSet(account, contents));
                 folderController.addFolderContents(folder.getId(), entrys);
                 details.setContents(contents);
-                BigInteger size = BigInteger.valueOf(contents.size());
-                details.setCount(size);
+                details.setCount(contents.size());
             } else {
-                details.setCount(BigInteger.valueOf(0));
+                details.setCount(0l);
             }
 
+            HibernateHelper.commitTransaction();
             return details;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e.getMessage());
             return null;
         }
@@ -1053,14 +1048,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                     Folder folder = folderController.addFolderContents(folderId, entrys);
                     FolderDetails details = new FolderDetails(folder.getId(), folder.getName(),
                                                               false);
-                    BigInteger folderSize = folderController.getFolderSize(folder.getId());
+                    long folderSize = folderController.getFolderSize(folder.getId());
                     details.setCount(folderSize);
                     details.setDescription(folder.getDescription());
                     results.add(details);
                 }
 
                 Folder sourceFolder = folderController.getFolderById(source);
-                BigInteger folderSize = folderController.getFolderSize(source);
+                long folderSize = folderController.getFolderSize(source);
                 FolderDetails sourceDetails = new FolderDetails(sourceFolder.getId(),
                                                                 sourceFolder.getName(), false);
                 sourceDetails.setCount(folderSize);
@@ -1078,6 +1073,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public FolderDetails removeFromUserCollection(String sid, long source, ArrayList<Long> entryIds)
             throws AuthenticationException {
         try {
+            HibernateHelper.beginTransaction();
             Account account = this.retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": removing from user collection.");
             FolderController folderController = new FolderController();
@@ -1087,15 +1083,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
-            BigInteger folderSize = folderController.getFolderSize(source);
+            long folderSize = folderController.getFolderSize(source);
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
+            HibernateHelper.commitTransaction();
             return details;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
+            return null;
         }
-
-        return null;
     }
 
     @Override
@@ -1105,35 +1102,37 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
         try {
+            HibernateHelper.beginTransaction();
             Account account = this.retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": adding entries to collection.");
             EntryController entryController = new EntryController();
             FolderController folderController = new FolderController();
 
-            ArrayList<Entry> entrys = new ArrayList<Entry>(entryController.getEntriesByIdSet(
-                    account, entryIds));
+            ArrayList<Entry> entrys = new ArrayList<Entry>(entryController.getEntriesByIdSet(account, entryIds));
             for (long folderId : destination) {
                 Folder folder = folderController.addFolderContents(folderId, entrys);
                 if (folder == null)
                     folder = folderController.getFolderById(folderId);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
-                BigInteger size = folderController.getFolderSize(folderId);
+                long size = folderController.getFolderSize(folderId);
                 details.setCount(size);
                 details.setDescription(folder.getDescription());
                 results.add(details);
             }
+            HibernateHelper.commitTransaction();
             return results;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
+            return null;
         }
-        return null;
     }
 
     @Override
-    public AccountInfo retrieveProfileInfo(String sid, String userId)
-            throws AuthenticationException {
+    public AccountInfo retrieveProfileInfo(String sid, String userId) throws AuthenticationException {
 
         try {
+            HibernateHelper.beginTransaction();
             Account account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
             AccountController controller = new AccountController();
@@ -1158,8 +1157,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             long entryCount = entryController.getOwnerEntryCount(account, Visibility.DRAFT);
             accountInfo.setUserEntryCount(entryCount);
 
+            HibernateHelper.commitTransaction();
             return accountInfo;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
             return null;
         }
@@ -1170,7 +1171,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             Account account = retrieveAccountForSid(sid);
-
             Entry entry = null;
             EntryController entryController = new EntryController();
 
@@ -1445,8 +1445,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         Logger.info("Creating sample with locations " + sb.toString());
                         Storage storage;
                         try {
-                            Storage scheme = storageController.get(
-                                    Long.parseLong(sampleInfo.getLocationId()), false);
+                            Storage scheme = storageController.get(Long.parseLong(sampleInfo.getLocationId()), false);
                             storage = storageController.getLocation(scheme, labels);
                             storage = storageController.update(storage);
                             sample.setStorage(storage);
@@ -1730,6 +1729,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public ArrayList<NewsItem> retrieveNewsItems(String sessionId) throws AuthenticationException {
 
+        HibernateHelper.beginTransaction();
         retrieveAccountForSid(sessionId);
         ArrayList<NewsItem> items = new ArrayList<NewsItem>();
         ArrayList<News> results;
@@ -1742,7 +1742,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                                              news.getTitle(), news.getBody());
                 items.add(item);
             }
+            HibernateHelper.commitTransaction();
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
         }
 
@@ -1989,12 +1991,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (folders != null) {
                 for (Folder folder : folders) {
                     try {
-                        Folder returned = folderController.removeFolderContents(account,
-                                                                                folder.getId(), entryIds);
+                        Folder returned = folderController.removeFolderContents(account, folder.getId(), entryIds);
                         boolean isSystem = systemEmail.equals(returned.getOwnerEmail());
-                        FolderDetails details = new FolderDetails(returned.getId(),
-                                                                  returned.getName(), isSystem);
-                        BigInteger size = folderController.getFolderSize(folder.getId());
+                        FolderDetails details = new FolderDetails(returned.getId(), returned.getName(), isSystem);
+                        long size = folderController.getFolderSize(folder.getId());
                         details.setCount(size);
                         folderList.add(details);
                     } catch (ControllerException me) {

@@ -1,5 +1,6 @@
 package org.jbei.ice.shared.dto;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -12,10 +13,12 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class SearchResults implements IsSerializable {
     private long resultCount;
-    private final LinkedList<SearchResultInfo> resultInfos;
+    private LinkedList<SearchResultInfo> resultInfos;
+    private ArrayList<SearchFilterInfo> searchFilters;
 
     public SearchResults() {
         this.resultInfos = new LinkedList<SearchResultInfo>();
+        searchFilters = new ArrayList<SearchFilterInfo>();
     }
 
     public LinkedList<SearchResultInfo> getResults() {
@@ -35,7 +38,19 @@ public class SearchResults implements IsSerializable {
         this.resultCount = count;
     }
 
+    public void setSearchFilters(ArrayList<SearchFilterInfo> searchFilters) {
+        this.searchFilters.clear();
+        this.searchFilters.addAll(searchFilters);
+    }
+
+    /**
+     * @return total query result count. not just the count of results returned
+     */
     public long getResultCount() {
         return this.resultCount;
+    }
+
+    public ArrayList<SearchFilterInfo> getSearchFilters() {
+        return this.searchFilters;
     }
 }

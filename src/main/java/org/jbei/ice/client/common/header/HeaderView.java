@@ -38,9 +38,6 @@ public class HeaderView extends Composite {
 
         @Source("org/jbei/ice/client/resource/image/logo.gif")
         ImageResource logo();
-
-        @Source("org/jbei/ice/client/resource/image/arrow_down.png")
-        ImageResource arrowDown();
     }
 
     private SearchCompositeBox searchInput;
@@ -167,25 +164,14 @@ public class HeaderView extends Composite {
         AccountInfo info = AppController.accountInfo;
 
         // user
-        panel.add(new Icon(FAIconType.USER));
         panel.add(new HTML("&nbsp;"));
-        Hyperlink link = new Hyperlink(info.getFirstName() + " " + info.getLastName(),
-                                       "page=profile;id=" + info.getEmail());
-        panel.add(link);
-        panel.add(new HTML("&nbsp;"));
-        panel.add(new Icon(FAIconType.CARET_DOWN));
+        UserOptionsWidget widget = new UserOptionsWidget(info.getEmail(), "");
+        panel.add(widget);
 
         // pipe
         HTML pipe = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
         pipe.addStyleName("color_eee");
         panel.add(pipe);
-
-        // settings
-        panel.add(new Icon(FAIconType.COGS));
-        panel.add(new HTML("&nbsp;Settings"));
-        HTML pipe2 = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
-        pipe2.addStyleName("color_eee");
-        panel.add(pipe2);
 
         // messages
         panel.add(new HTML("<span class=\"badge\">2</span>"));

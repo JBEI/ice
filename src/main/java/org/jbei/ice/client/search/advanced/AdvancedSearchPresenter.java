@@ -115,11 +115,12 @@ public class AdvancedSearchPresenter {
             this.model.performBlast(filterCopy, blastInfo.getOperand(), program, 0, 15, new EventHandler(
                     searchFilters));
         } else {
+
+            // regular search
             dataProvider.updateRowCount(0, false);
             display.setSearchVisibility(table, true);
             table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
-
-            this.model.retrieveSearchResults(filterCopy, 0, 15, new EventHandler(searchFilters));
+            this.model.retrieveSearchResults(filterCopy, 0, 30, new EventHandler(searchFilters));
         }
     }
 
@@ -155,7 +156,7 @@ public class AdvancedSearchPresenter {
         public void onSearchCompletion(AdvancedSearchEvent event) {
             if (event == null)
                 return;
-            dataProvider.setData(event.getSearchResults());
+            dataProvider.setData(event.getSearchResults(), true);
             mode = Mode.SEARCH;
         }
 

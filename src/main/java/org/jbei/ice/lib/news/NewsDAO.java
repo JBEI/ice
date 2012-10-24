@@ -17,7 +17,7 @@ import org.hibernate.Session;
 class NewsDAO extends HibernateRepository<News> {
 
     public News get(long id) throws DAOException {
-        return (News) super.get(News.class, id);
+        return super.get(News.class, id);
     }
 
     @SuppressWarnings("unchecked")
@@ -25,19 +25,14 @@ class NewsDAO extends HibernateRepository<News> {
         Session session = newSession();
         try {
             ArrayList<News> results = new ArrayList<News>();
-
-            Query query = session.createQuery("from " + News.class.getName()
-                                                      + " order by creationTime DESC ");
-
+            Query query = session.createQuery("from " + News.class.getName() + " order by creationTime DESC ");
             results.addAll(query.list());
             return results;
 
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve news", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 

@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.entry.sample;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -202,14 +201,11 @@ public class SampleDAO extends HibernateRepository<Sample> {
     public int getSampleCountBy(String depositor) throws DAOException {
         Session session = newSession();
         try {
-            SQLQuery query = session
-                    .createSQLQuery("SELECT COUNT(id) FROM samples WHERE depositor = :depositor ");
+            SQLQuery query = session.createSQLQuery("SELECT COUNT(id) FROM samples WHERE depositor = :depositor ");
             query.setString("depositor", depositor);
-            return ((BigInteger) query.uniqueResult()).intValue();
+            return ((Number) query.uniqueResult()).intValue();
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 

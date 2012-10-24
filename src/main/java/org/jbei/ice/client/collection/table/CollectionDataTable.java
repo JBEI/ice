@@ -1,9 +1,7 @@
 package org.jbei.ice.client.collection.table;
 
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HandlerRegistration;
+import java.util.ArrayList;
+
 import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.table.DataTable;
@@ -15,7 +13,10 @@ import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import java.util.ArrayList;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Data table for displaying the details of entries in a specified collection
@@ -66,8 +67,7 @@ public abstract class CollectionDataTable extends EntryDataTable<EntryInfo> {
 
     protected abstract EntryViewEventHandler getHandler();
 
-    public class PartIdColumn extends DataTable<EntryInfo>.DataTableColumn<EntryInfo> implements
-                                                                                      IHasEntryHandlers {
+    public class PartIdColumn extends DataTable<EntryInfo>.DataTableColumn<EntryInfo> implements IHasEntryHandlers {
 
         private HandlerManager handlerManager;
 

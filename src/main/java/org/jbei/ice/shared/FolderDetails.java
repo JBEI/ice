@@ -1,13 +1,12 @@
 package org.jbei.ice.shared;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Folder Transfer Object
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -15,7 +14,7 @@ public class FolderDetails implements IsSerializable {
 
     private long id;
     private String folderName;
-    private BigInteger count;
+    private long count;
     private boolean systemFolder;
     private String description;
     private ArrayList<Long> contents;
@@ -45,20 +44,16 @@ public class FolderDetails implements IsSerializable {
         this.folderName = name;
     }
 
-    public BigInteger getCount() {
+    public long getCount() {
         return count;
     }
 
-    public void setCount(BigInteger count) {
+    public void setCount(long count) {
         this.count = count;
     }
 
     public boolean isSystemFolder() {
         return this.systemFolder;
-    }
-
-    public void setIsSystemFolder(boolean isSystemFolder) {
-        this.systemFolder = isSystemFolder;
     }
 
     public String getDescription() {

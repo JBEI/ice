@@ -25,9 +25,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
  */
 
 public class HoverCell extends Composite {
-    private final HTMLPanel panel;
-    private final Icon icon;
-    private final CellList<HoverOptions> options;
     private final PopupHandler popupHandler;
     private final SingleSelectionModel<HoverOptions> optionSelection;
 
@@ -40,14 +37,14 @@ public class HoverCell extends Composite {
     }
 
     public HoverCell() {
-        panel = new HTMLPanel("<span id=\"icon\"></span>");
-        icon = new Icon(FAIconType.CARET_DOWN);
+        HTMLPanel panel = new HTMLPanel("<span id=\"icon\"></span>");
+        Icon icon = new Icon(FAIconType.CARET_DOWN);
         initWidget(panel);
 
         HoverCellListResource.INSTANCE.cellListStyle().ensureInjected();
         panel.add(icon, "icon");
         panel.setStyleName("collection_options");
-        options = new CellList<HoverOptions>(new AbstractCell<HoverOptions>() {
+        CellList<HoverOptions> options = new CellList<HoverOptions>(new AbstractCell<HoverOptions>() {
             @Override
             public void render(Context context, HoverOptions value, SafeHtmlBuilder sb) {
                 sb.appendHtmlConstant(
@@ -56,6 +53,7 @@ public class HoverCell extends Composite {
                                 + "\"></i><span>" + value.toString() + "</span>");
             }
         }, HoverCellListResource.INSTANCE);
+        options.setWidth("80px");
 
         options.setRowData(Arrays.asList(HoverOptions.values()));
 
@@ -92,7 +90,7 @@ public class HoverCell extends Composite {
 
         EDIT(FAIconType.EDIT, "Rename"),
         DELETE(FAIconType.TRASH, "Delete"),
-        SHARE(FAIconType.GROUP, "Share");
+        SHARE(FAIconType.SHARE, "Share");
 
         private final String display;
         private final FAIconType icon;

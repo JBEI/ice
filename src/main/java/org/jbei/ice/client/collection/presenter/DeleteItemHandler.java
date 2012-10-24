@@ -49,8 +49,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                 }
 
                 folder.put(result.getId(), result.getContents());
-                MenuItem item = new MenuItem(result.getId(), result.getName(), result.getCount()
-                                                                                     .longValue(),
+                MenuItem item = new MenuItem(result.getId(), result.getName(), result.getCount(),
                                              result.isSystemFolder());
                 deleteCallback.onSuccess(item);
                 view.removeSubMenuFolder(item);
@@ -94,7 +93,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                     public void onSuccess(FolderDetails result) {
                         timer.cancel();
                         MenuItem newItem = new MenuItem(result.getId(), result.getName(),
-                                                        result.getCount().longValue(), result.isSystemFolder());
+                                                        result.getCount(), result.isSystemFolder());
                         menu.updateMenuItem(item.getId(), newItem, DeleteItemHandler.this);
                         view.addSubMenuFolder(newItem);
                     }

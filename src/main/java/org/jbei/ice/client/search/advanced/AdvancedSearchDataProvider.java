@@ -2,13 +2,20 @@ package org.jbei.ice.client.search.advanced;
 
 import java.util.LinkedList;
 
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.common.IHasNavigableData;
+import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchResultInfo;
+import org.jbei.ice.shared.dto.SearchResults;
 
+import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
 /**
@@ -17,14 +24,13 @@ import com.google.gwt.view.client.Range;
 public class AdvancedSearchDataProvider extends HasEntryDataViewDataProvider<SearchResultInfo>
         implements IHasNavigableData {
 
-    private final AdvancedSearchResultsTable table;
     private final RegistryServiceAsync service;
     private final LinkedList<SearchResultInfo> data;
+    private SearchResults searchResults;
+    private int resultSize;
 
     public AdvancedSearchDataProvider(AdvancedSearchResultsTable table, RegistryServiceAsync rpcService) {
-
         super(table, rpcService, ColumnField.RELEVANCE);
-        this.table = table;
         this.service = rpcService;
         this.data = new LinkedList<SearchResultInfo>();
     }
@@ -50,7 +56,7 @@ public class AdvancedSearchDataProvider extends HasEntryDataViewDataProvider<Sea
 
     @Override
     public int getSize() {
-        return data.size();  //To change body of implemented methods use File | Settings | File Templates.
+        return resultSize;
     }
 
     @Override
@@ -69,56 +75,103 @@ public class AdvancedSearchDataProvider extends HasEntryDataViewDataProvider<Sea
         return results.get(idx - 1).getEntryInfo();
     }
 
+//    protected void fetchHasEntryData(ColumnField sortField, boolean asc, final int rangeStart, final int rangeEnd) {
+//
+//    }
+
+
+    @Override
+    protected void onRangeChanged(final HasData<SearchResultInfo> display) {
+
+        // values of range to display from view
+        final Range range = display.getVisibleRange();
+        final int rangeStart = range.getStart();
+        final int rangeEnd = (rangeStart + range.getLength()) > resultSize ? resultSize
+                : (rangeStart + range.getLength());
+
+        //
+        // sort method start
+        //
+        ColumnSortList sortList = this.dataTable.getColumnSortList();
+        boolean sortAsc = lastSortAsc;
+        final ColumnField sortField;
+        int colIndex = -1;
+        if (sortList.size() > 0) {
+            sortAsc = sortList.get(0).isAscending();
+            colIndex = this.dataTable.getColumns().indexOf(sortList.get(0).getColumn());
+        }
+
+        if (colIndex < 0)
+            sortField = lastSortField;
+        else
+            sortField = this.dataTable.getColumns().get(colIndex).getField();
+
+        // sorting or paging
+        if (lastSortAsc == sortAsc && lastSortField == sortField) {
+            // paging; check if enough records are cached
+            if (results.size() >= rangeEnd) {
+                updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
+            } else {
+                // not so fetch more; fetch more
+                retrieveValues(null, rangeStart, rangeEnd, sortField, sortAsc);
+            }
+        } else {
+            // sort has changed so restart using new sort params
+            results.clear();
+            lastSortAsc = sortAsc;
+            lastSortField = sortField;
+            retrieveValues(null, rangeStart, rangeEnd, sortField, sortAsc);
+        }
+    }
+
     /**
      * @param values     list of ids for records to retrieve
      * @param rangeStart start of range to show
      * @param rangeEnd   end of range to show
      * @param asc        sort Type
      */
-    @Override
     protected void retrieveValues(LinkedList<Long> values, int rangeStart, int rangeEnd, ColumnField sortField,
             boolean asc) {
-        if (results.size() >= rangeEnd) {
-            LinkedList<SearchResultInfo> show = new LinkedList<SearchResultInfo>();
-            show.addAll(results.subList(rangeStart, rangeEnd));
-            updateRowData(rangeStart, show);
-        } else {
+        int factor = (rangeEnd - rangeStart) * 2; // factor is used to retrieve more data than will be shown; for
+        // caching
+        factor = (factor + rangeEnd) > resultSize ? resultSize : (factor + rangeEnd);
+        service.retrieveSearchResults(AppController.sessionId, searchResults.getSearchFilters(), rangeStart, factor,
+                                      new AsyncCallback<SearchResults>() {
 
-            // TODO : with blast, all results are returned need to redo
-            //            Window.alert("Results has size " + results.size() + " but requesting range ["
-            //                    + rangeStart + ", " + rangeEnd + "]");
-        }
+                                          @Override
+                                          public void onSuccess(SearchResults success) {
+                                              reset();
+                                              setData(success, false);
+                                          }
+
+                                          @Override
+                                          public void onFailure(Throwable caught) {
+                                              Window.alert("Failure to retrieve results");
+                                              reset();
+                                          }
+
+                                          public void reset() {
+                                              Utils.showDefaultCursor(null);
+                                          }
+                                      });
     }
 
-//    @Override
-//    protected void onRangeChanged(HasData<SearchResultInfo> display) {
-//
-//        if (results.isEmpty()) // problem here is that when the display is added to the dataProvider,
-//            // onRangeChanged() is triggered
-//            return;
-//
-//        final Range range = display.getVisibleRange();
-//        final ColumnSortList sortList = this.getDataTable().getColumnSortList();
-//        int start = range.getStart();
-//        int end = range.getLength() + start;
-//        if (end > results.size())
-//            end = results.size();
-//
-//        sortByColumn(this.getSortField(), sortList.get(0).isAscending());
-//        this.getDataTable().setRowData(start, results.subList(start, end));
-//    }
+    public void setData(SearchResults searchResults, boolean reset) {
 
-    public void setData(LinkedList<SearchResultInfo> data) {
-        reset();
+        if (reset)
+            reset();
 
-        if (data != null) {
-            for (SearchResultInfo info : data) {  // TODO : user iterator?
-                valueIds.add(info.getEntryInfo().getId());
+        this.searchResults = searchResults;
+        if (searchResults != null) {
+            for (SearchResultInfo info : searchResults.getResults()) {
                 results.add(info);
             }
+
+            // number of search results available
+            resultSize = (int) searchResults.getResultCount();
         }
 
-        updateRowCount(this.valueIds.size(), true);
+        updateRowCount(resultSize, true);
         lastSortAsc = false;
         lastSortField = this.defaultSort;
 
@@ -126,14 +179,17 @@ public class AdvancedSearchDataProvider extends HasEntryDataViewDataProvider<Sea
         final Range range = this.dataTable.getVisibleRange();
         final int rangeStart = range.getStart();
         final int rangeEnd;
-        if ((rangeStart + range.getLength()) > valueIds.size())
-            rangeEnd = valueIds.size();
+        if ((rangeStart + range.getLength()) > resultSize)
+            rangeEnd = resultSize;
         else
             rangeEnd = (rangeStart + range.getLength());
 
-        // TODO : you have access to the sort info from the table
-        // TODO : this goes with the above todo. if we clear all the sort info then we use default else use the top sort
-        // TODO : look at the sort method for an example of how to do this
-        fetchHasEntryData(this.getSortField(), true, rangeStart, rangeEnd);
+//        fetchHasEntryData(this.getSortField(), true, rangeStart, rangeEnd);
+        if (results.size() >= rangeEnd) {
+            updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
+        } else {
+            // not so fetch more; fetch more
+            retrieveValues(null, rangeStart, rangeEnd, this.getSortField(), true);
+        }
     }
 }

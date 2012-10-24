@@ -19,7 +19,7 @@ import org.jbei.ice.shared.FolderDetails;
 
 /**
  * Handler for adding to a collection
- * 
+ *
  * @author Hector Plahar
  */
 public class AddToHandler implements SubmitHandler {
@@ -64,41 +64,41 @@ public class AddToHandler implements SubmitHandler {
             final ArrayList<Long> entryIds) {
 
         model.addEntriesToFolder(new ArrayList<Long>(destinationFolders), entryIds,
-            new FolderRetrieveEventHandler() {
+                                 new FolderRetrieveEventHandler() {
 
-                @Override
-                public void onFolderRetrieve(FolderRetrieveEvent event) {
-                    if (event == null || event.getItems() == null) {
-                        view.showFeedbackMessage(
-                            "An error occured while adding entries. Please try again.", true);
-                        return;
-                    }
+                                     @Override
+                                     public void onFolderRetrieve(FolderRetrieveEvent event) {
+                                         if (event == null || event.getItems() == null) {
+                                             view.showFeedbackMessage(
+                                                     "An error occured while adding entries. Please try again.", true);
+                                             return;
+                                         }
 
-                    ArrayList<FolderDetails> results = event.getItems();
-                    ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                    for (FolderDetails result : results) {
-                        items.add(new MenuItem(result.getId(), result.getName(), result.getCount()
-                                .longValue(), result.isSystemFolder()));
-                    }
-                    view.updateMenuItemCounts(items);
-                    String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";
-                    String msg = "<b>" + entryIds.size() + "</b> " + entryDisp
-                            + " successfully added to ";
+                                         ArrayList<FolderDetails> results = event.getItems();
+                                         ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                                         for (FolderDetails result : results) {
+                                             items.add(new MenuItem(result.getId(), result.getName(), result.getCount(),
+                                                                    result.isSystemFolder()));
+                                         }
+                                         view.updateMenuItemCounts(items);
+                                         String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";
+                                         String msg = "<b>" + entryIds.size() + "</b> " + entryDisp
+                                                 + " successfully added to ";
 
-                    int size = results.size();
-                    if (size == 1) {
-                        String name = results.get(0).getName();
-                        if (name.length() > 24) {
-                            name = "<abbr title=\"" + results.get(0).getName() + "\">"
-                                    + name.substring(0, 21) + "...</abbr>";
-                        }
-                        msg += ("\"<b>" + name + "</b>\" collection.");
-                    } else {
-                        msg += ("\"<b>" + size + "</b> collections.");
-                    }
-                    view.showFeedbackMessage(msg, false);
-                    table.clearSelection();
-                }
-            });
+                                         int size = results.size();
+                                         if (size == 1) {
+                                             String name = results.get(0).getName();
+                                             if (name.length() > 24) {
+                                                 name = "<abbr title=\"" + results.get(0).getName() + "\">"
+                                                         + name.substring(0, 21) + "...</abbr>";
+                                             }
+                                             msg += ("\"<b>" + name + "</b>\" collection.");
+                                         } else {
+                                             msg += ("\"<b>" + size + "</b> collections.");
+                                         }
+                                         view.showFeedbackMessage(msg, false);
+                                         table.clearSelection();
+                                     }
+                                 });
     }
 }

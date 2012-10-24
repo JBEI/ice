@@ -16,7 +16,7 @@ public class MenuHeader extends Composite {
 
     private Icon expandCollapseIcon;    // icon that indicates whether collection has been expanded or collapsed
     private final Label headerLabel;
-    private Icon quickAddButton;
+    private Icon quickAddIcon;
     private boolean collapsed; // this should be saved
 
     public MenuHeader(String header, boolean addQuickEdit) {
@@ -25,23 +25,23 @@ public class MenuHeader extends Composite {
         headerLabel.setStyleName("display-inline");
         headerLabel.addStyleName("cursor_pointer");
         // quick collection add
-        quickAddButton = new Icon(FAIconType.PLUS);
-        quickAddButton.setVisible(addQuickEdit);
-        quickAddButton.addStyleName("cursor_pointer");
+        quickAddIcon = new Icon(FAIconType.PLUS);
+        quickAddIcon.setVisible(addQuickEdit);
+        quickAddIcon.addStyleName("quick_add_icon");
 
         HTMLPanel menuHeaderPanel = new HTMLPanel(
                 "<span style=\"float: left; opacity: 0.65; margin-top: -1px\" "
                         + " id=\"expand_collapse\"></span>&nbsp;&nbsp;"
-                        + "<span id=\"collection_menu_header\" class=\"text-shadow\"></span>"
+                        + "<span id=\"collection_menu_header\"></span>"
                         + "<span style=\"float: right\" id=\"quick_add\"></span>");
         menuHeaderPanel.add(expandCollapseIcon, "expand_collapse");
         menuHeaderPanel.add(headerLabel, "collection_menu_header");
-        menuHeaderPanel.add(quickAddButton, "quick_add");
+        menuHeaderPanel.add(quickAddIcon, "quick_add");
         initWidget(menuHeaderPanel);
     }
 
     public void addQuickAddHandler(ClickHandler handler) {
-        quickAddButton.addClickHandler(handler);
+        quickAddIcon.addClickHandler(handler);
     }
 
     public void addExpandCollapseHandler(final ClickHandler handler) {

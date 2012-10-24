@@ -56,7 +56,7 @@ public class Sequence implements IModel {
     @JoinColumn(name = "entries_id", nullable = true, unique = true)
     private Entry entry;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequence", orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "sequence")
     @OrderBy("id")
     private Set<SequenceFeature> sequenceFeatures = new SequenceFeatureCollection();
 

@@ -4,6 +4,9 @@ import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.event.shared.GwtEvent;
 
+/**
+ * @author Hector Plahar
+ */
 public class FolderEvent extends GwtEvent<FolderEventHandler> {
 
     public static Type<FolderEventHandler> TYPE = new Type<FolderEventHandler>();

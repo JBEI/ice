@@ -9,7 +9,6 @@ import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Flash;
-import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.ViewFactory;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
@@ -70,11 +69,7 @@ public class EntryView extends Composite implements IEntryView {
     private FlexTable entryDetailMenuWrapper; // left side of the page with menu
 
     // navigation buttons for context navigation.
-    // TODO : create a widget for it
-    private final Icon goBack;
-    private final Button leftBtn;
-    private final Label navText;
-    private final Icon rightBtn;
+    private final PagerWidget contextPager;
 
     private final Label headerLabel;
     private final EntrySampleTable sampleTable;
@@ -93,25 +88,10 @@ public class EntryView extends Composite implements IEntryView {
         permissions = new PermissionsWidget();
         visibility = new VisibilityWidget();
         headerLabel = new Label();
-        goBack = new Icon(FAIconType.SHARE_ALT); //ImageUtil.getPrevIcon();
-        goBack.setTitle("Back");
-        goBack.addStyleName("cursor_pointer");
-
-        leftBtn = new Button("&lt;");
-        leftBtn.setStyleName("nav");
-        leftBtn.addStyleName("nav-left");
-//        rightBtn = new Button(new Icon(FAIconType.CHEVRON_RIGHT).getElement().getInnerHTML());
-//        rightBtn.setStyleName("nav");
-//        rightBtn.addStyleName("nav-right");
-        rightBtn = new Icon(FAIconType.CHEVRON_RIGHT);
-        navText = new Label();
-        navText.setStyleName("display-inline");
-        navText.addStyleName("font-80em");
-        navText.addStyleName("pad-6");
-
         uploadPanel = createSequenceUploadPanel();
         uploadPanel.setVisible(false);
         attachmentMenu = new AttachmentListMenu();
+        contextPager = new PagerWidget();
 
         sequenceAddCancelbutton.addClickHandler(new ClickHandler() {
 
@@ -145,6 +125,9 @@ public class EntryView extends Composite implements IEntryView {
 
         // sequence
         initSequencePanel();
+
+        // audit trail
+//        initAuditTrailPanel();
     }
 
     @Override
@@ -177,10 +160,9 @@ public class EntryView extends Composite implements IEntryView {
                 .EDIT.getStyleName() + "\"></i>&nbsp;<label>Edit</label></br></div>";
         editGeneralButton = new Button(html);
 
-
         deleteLabel = new Label("Delete");
         deleteLabel.setStyleName("entry_delete_link");
-        generalHeaderPanel.add(goBack);
+        generalHeaderPanel.add(contextPager.getGoBack());
         generalHeaderPanel.add(headerLabel);
         headerLabel.setStyleName("entry_general_info_header");
         generalHeaderPanel.add(editGeneralButton);
@@ -201,7 +183,8 @@ public class EntryView extends Composite implements IEntryView {
         entryDetailMenuWrapper.setCellPadding(0);
         entryDetailMenuWrapper.setCellSpacing(0);
         this.detailMenu = new EntryDetailViewMenu();
-        entryDetailMenuWrapper.setHTML(0, 0, "");
+        entryDetailMenuWrapper.setWidget(0, 0, contextPager);
+        entryDetailMenuWrapper.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
         entryDetailMenuWrapper.setWidget(1, 0, detailMenu);
         return entryDetailMenuWrapper;
     }
@@ -269,68 +252,37 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void setNextHandler(ClickHandler handler) {
-        rightBtn.addDomHandler(handler, ClickEvent.getType());
+        contextPager.setNextHandler(handler);
     }
 
     @Override
     public void setGoBackHandler(ClickHandler handler) {
-//        goBack.addClickHandler(handler);
-        goBack.addDomHandler(handler, ClickEvent.getType());
+        contextPager.setGoBackHandler(handler);
     }
 
     @Override
     public void setPrevHandler(ClickHandler handler) {
-        leftBtn.addClickHandler(handler);
+        contextPager.setPrevHandler(handler);
     }
 
     @Override
     public void enablePrev(boolean enabled) {
-        leftBtn.setEnabled(enabled);
-        if (enabled) {
-            leftBtn.removeStyleName("nav_disabled");
-            leftBtn.addStyleName("nav");
-        } else {
-            leftBtn.removeStyleName("nav");
-            leftBtn.addStyleName("nav_disabled");
-        }
+        contextPager.enablePrev(enabled);
     }
 
     @Override
     public void enableNext(boolean enabled) {
-//        rightBtn.setEnabled(enabled);
-        if (enabled) {
-            rightBtn.removeStyleName("nav_disabled");
-            rightBtn.addStyleName("nav");
-        } else {
-            rightBtn.removeStyleName("nav");
-            rightBtn.addStyleName("nav_disabled");
-        }
+        contextPager.enableNext(enabled);
     }
 
     @Override
     public void setNavText(String text) {
-        this.navText.setText(text);
+        this.contextPager.setNavText(text);
     }
 
     @Override
     public void showContextNav(boolean show) {
-        if (show) {
-            HTMLPanel panel = new HTMLPanel(
-                    "<span id=\"leftBtn\"></span> <span id=\"navText\" class=\"font-bold\"></span><span " +
-                            "id=\"rightBtn\"></span>");
-            panel.add(leftBtn, "leftBtn");
-            panel.add(navText, "navText");
-            panel.add(rightBtn, "rightBtn");
-
-            entryDetailMenuWrapper.setWidget(0, 0, panel);
-            entryDetailMenuWrapper.getFlexCellFormatter().setHorizontalAlignment(0, 0,
-                                                                                 HasAlignment.ALIGN_CENTER);
-            entryDetailMenuWrapper.getFlexCellFormatter().setStyleName(0, 0, "pad-6");
-        } else {
-            entryDetailMenuWrapper.setHTML(0, 0, "");
-        }
-
-        goBack.setVisible(show);
+        contextPager.setVisible(show);
     }
 
     @Override
@@ -344,7 +296,6 @@ public class EntryView extends Composite implements IEntryView {
 
         sequenceUploader = new SingleUploader();
         sequenceUploader.setAutoSubmit(true);
-
         sequenceUploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
 
             @Override

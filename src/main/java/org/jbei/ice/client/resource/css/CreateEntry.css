@@ -1,19 +1,20 @@
 .subMenuCreateNew {
     height: 26px;
-    width: 106px;
-    /*gwt-image: 'sortDown';*/
-    color: #f3f3f3;
-    /*background-position: 90px 9px;*/
-    /*padding-right: 12px;*/
-    background-color: #709F35;
+    color: #f2f2f2;
     font-weight: bold;
-    border: 1px solid #777;
+    background-color: #709F35;
+    border: 1px solid #3f7f00;
     cursor: pointer;
     font-size: 0.80em;
-    text-align: center;
+    line-height: 10px;
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
+    border-radius: 2px;
     font-family: Arial;
+    background-image: -webkit-linear-gradient(top, #5FBF00, #3F7F00);
+    background-image: -o-linear-gradient(top, #5FBF00, #3F7F00);
+    background-image: linear-gradient(to bottom, #5FBF00, #3F7F00);
+    background-image: -moz-linear-gradient(top, #5FBF00, #3F7F00);
 }
 
 .subMenuCreateNew:hover {

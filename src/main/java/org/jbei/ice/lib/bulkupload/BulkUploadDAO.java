@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 
 import org.jbei.ice.lib.account.model.Account;
@@ -81,7 +80,7 @@ class BulkUploadDAO extends HibernateRepository<BulkUpload> {
             session = newSession();
             Query query = session
                     .createSQLQuery("select count(*) from bulk_upload_entry where bulk_upload_id = " + draftId);
-            int count = ((BigInteger) query.uniqueResult()).intValue();
+            int count = ((Number) query.uniqueResult()).intValue();
             return count;
 
         } catch (HibernateException he) {

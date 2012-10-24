@@ -77,14 +77,13 @@ class FolderDAO extends HibernateRepository<Folder> {
      * @return number of child contents in the folder
      * @throws DAOException on any exception retrieving the folder or its contents
      */
-    public BigInteger getFolderSize(long id) throws DAOException {
+    public Long getFolderSize(long id) throws DAOException {
         Session session = newSession();
         try {
-            SQLQuery query = session
-                    .createSQLQuery("select count(*) from folder_entry where folder_id = :id ");
+            SQLQuery query = session.createSQLQuery("select count(*) from folder_entry where folder_id = :id ");
             query.setLong("id", id);
-            BigInteger result = ((BigInteger) query.uniqueResult());
-            return result;
+            Number result = ((Number) query.uniqueResult());
+            return result.longValue();
         } catch (HibernateException he) {
             throw new DAOException(he);
         } finally {
@@ -103,12 +102,16 @@ class FolderDAO extends HibernateRepository<Folder> {
     public ArrayList<Long> getFolderContents(long id) throws DAOException {
         Session session = newSession();
         try {
-            SQLQuery query = session
-                    .createSQLQuery("SELECT entry_id FROM folder_entry WHERE folder_id = :id");
+            SQLQuery query = session.createSQLQuery("SELECT entry_id FROM folder_entry WHERE folder_id = :id");
             query.setLong("id", id);
             @SuppressWarnings("rawtypes")
             List list = query.list();
-            return (ArrayList<Long>) list;
+            ArrayList<Long> results = new ArrayList<Long>();
+            for (Object object : list) {
+                BigInteger bi = (BigInteger) object;
+                results.add(bi.longValue());
+            }
+            return results;
         } catch (HibernateException he) {
             throw new DAOException(he);
         } finally {

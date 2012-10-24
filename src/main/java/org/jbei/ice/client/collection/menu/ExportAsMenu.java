@@ -2,13 +2,11 @@ package org.jbei.ice.client.collection.menu;
 
 import java.util.Arrays;
 
+import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.resources.client.ImageResource.ImageOptions;
-import com.google.gwt.resources.client.ImageResource.RepeatStyle;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
@@ -29,17 +27,14 @@ public class ExportAsMenu implements IsWidget {
 
         static ExportAsResource INSTANCE = GWT.create(ExportAsResource.class);
 
-        @Source("org/jbei/ice/client/resource/image/arrow_down.png")
-        @ImageOptions(repeatStyle = RepeatStyle.None)
-        ImageResource sortDown();
-
         @Source("org/jbei/ice/client/resource/css/ExportAs.css")
         Style cellListStyle();
     }
 
-    private static final String LABEL = "Export As";
+    private static final String LABEL = "<i class=\"" + FAIconType.DOWNLOAD_ALT.getStyleName()
+            + "\" style=\"opacity:0.85; color: #0082C0\"></i> "
+            + "Export As <i class=\"" + FAIconType.CARET_DOWN.getStyleName() + "\"></i>";
     private final Button exportAs;
-    private final CellList<ExportAsOption> options;
     private final SingleSelectionModel<ExportAsOption> optionSelection;
 
     public ExportAsMenu() {
@@ -48,7 +43,7 @@ public class ExportAsMenu implements IsWidget {
         exportAs.setStyleName(ExportAsResource.INSTANCE.cellListStyle().subMenuExport());
 
         // renderer for options list
-        options = new CellList<ExportAsOption>(new AbstractCell<ExportAsOption>() {
+        CellList<ExportAsOption> options = new CellList<ExportAsOption>(new AbstractCell<ExportAsOption>() {
 
             @Override
             public void render(Context context, ExportAsOption value, SafeHtmlBuilder sb) {
@@ -59,7 +54,7 @@ public class ExportAsMenu implements IsWidget {
         options.setRowData(Arrays.asList(ExportAsOption.values()));
 
         final PopupHandler exportAsClickHandler = new PopupHandler(options, exportAs.getElement(),
-                0, 0, false);
+                                                                   0, 0, false);
 
         exportAs.addClickHandler(exportAsClickHandler);
         optionSelection = new SingleSelectionModel<ExportAsOption>();

@@ -1,15 +1,14 @@
 package org.jbei.ice.lib.folder;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -59,7 +58,7 @@ public class FolderController {
         }
     }
 
-    public BigInteger getFolderSize(long id) throws ControllerException {
+    public Long getFolderSize(long id) throws ControllerException {
         try {
             return dao.getFolderSize(id);
         } catch (DAOException e) {

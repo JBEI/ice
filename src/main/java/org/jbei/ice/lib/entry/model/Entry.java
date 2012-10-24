@@ -137,11 +137,13 @@ public class Entry implements IModel {
     private Integer visibility = Visibility.OK.getValue();
 
     @Column(name = "short_description")
+    @Field
     @Lob
     @Type(type = "org.hibernate.type.TextType")
     private String shortDescription;
 
     @Column(name = "long_description")
+    @Field
     @Lob
     @Type(type = "org.hibernate.type.TextType")
     private String longDescription;
@@ -150,6 +152,7 @@ public class Entry implements IModel {
     private String longDescriptionType = "text";
 
     @Column(name = "literature_references")
+    @Field
     @Lob
     @Type(type = "org.hibernate.type.TextType")
     private String references;
@@ -168,6 +171,7 @@ public class Entry implements IModel {
     private Integer bioSafetyLevel;
 
     @Column(name = "intellectual_property")
+    @Field
     @Lob
     @Type(type = "org.hibernate.type.TextType")
     private String intellectualProperty;

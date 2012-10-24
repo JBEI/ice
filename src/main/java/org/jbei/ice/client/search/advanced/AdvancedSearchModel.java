@@ -1,7 +1,6 @@
 package org.jbei.ice.client.search.advanced;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -10,7 +9,7 @@ import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
-import org.jbei.ice.shared.dto.SearchResultInfo;
+import org.jbei.ice.shared.dto.SearchResults;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -62,31 +61,30 @@ public class AdvancedSearchModel {
             final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
 
         service.retrieveSearchResults(AppController.sessionId, searchFilters, start, limit,
-                                      new AsyncCallback<LinkedList<SearchResultInfo>>() {
+                                      new AsyncCallback<SearchResults>() {
 
                                           @Override
-                                          public void onSuccess(LinkedList<SearchResultInfo> result) {
-                                              if (result == null) {
-                                                  //                        display.setBlastVisibility(false); // TODO
-                                                  reset();
-                                                  return;
-                                              }
-
-                                              // TODO : performance
-                                              // TODO : push to server for filtering. this search can return a very
-                                              // long list
-                                              ArrayList<BlastResultInfo> toRemove = new ArrayList<BlastResultInfo>();
-
-                                              for (BlastResultInfo info : blastResult) {
-                                                  long entryId = info.getEntryInfo().getId();
-                                                  if (!result.contains(entryId)) {
-                                                      toRemove.add(info);
-                                                  }
-                                              }
-
-                                              blastResult.removeAll(toRemove);
-                                              handler.onBlastCompletion(new AdvancedSearchEvent(blastResult));
-                                              reset();
+                                          public void onSuccess(SearchResults result) {
+//                                              if (result == null) {
+//                                                  reset();
+//                                                  return;
+//                                              }
+//
+//                                              // TODO : performance
+//                                              // TODO : push to server for filtering. this search can return a very
+//                                              // long list
+//                                              ArrayList<BlastResultInfo> toRemove = new ArrayList<BlastResultInfo>();
+//
+//                                              for (BlastResultInfo info : blastResult) {
+//                                                  long entryId = info.getEntryInfo().getId();
+//                                                  if (!result.contains(entryId)) {
+//                                                      toRemove.add(info);
+//                                                  }
+//                                              }
+//
+//                                              blastResult.removeAll(toRemove);
+//                                              handler.onBlastCompletion(new AdvancedSearchEvent(blastResult));
+//                                              reset();
                                           }
 
                                           @Override
@@ -105,10 +103,10 @@ public class AdvancedSearchModel {
             final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
 
         service.retrieveSearchResults(AppController.sessionId, searchFilters, start, limit,
-                                      new AsyncCallback<LinkedList<SearchResultInfo>>() {
+                                      new AsyncCallback<SearchResults>() {
 
                                           @Override
-                                          public void onSuccess(LinkedList<SearchResultInfo> result) {
+                                          public void onSuccess(SearchResults result) {
                                               handler.onSearchCompletion(new AdvancedSearchEvent(result));
                                               reset();
                                           }

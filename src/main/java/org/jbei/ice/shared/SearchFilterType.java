@@ -10,35 +10,25 @@ package org.jbei.ice.shared;
  */
 public enum SearchFilterType {
 
-    IDENTIFIER("Identifier", "identifier"),
-    NAME("Name", "name"),
-    ALIAS("Alias", "alias"),
-    PART_ID("Part ID", "part_id"),
-
-    NAME_OR_ALIAS("Name or Alias", "name"),
-    PART_NUMBER("Part ID", "id"),
-    TYPE("Type", "type"),
-    STATUS("Status", "status"),
-    OWNER("Owner", "owner"),
-    CREATOR("Creator", "creator"),
-    KEYWORDS("Keywords", "keywords"),
-    DESCRIPTION("Description", "description"),
+    IDENTIFIER("Identifier", "identifier"),     // name, alias, part_number, rid, part_id
     HAS_ATTACHMENT("Has Attachment", "has_attach"),
     HAS_SEQUENCE("Has Sequence", "has_seq"),
     HAS_SAMPLE("Has Sample", "has_sample"),
+    DESCRIPTION("Description", "description"),  // keywords, intellectual property, summary, notes, references
+    STATUS("Status", "status"),
+    OWNER("Owner", "owner"),
+    CREATOR("Creator", "creator"),
     BIO_SAFETY_LEVEL("Bio Safety Level", "safety_level"),
-    INTELLECTUAL_PROPERTY("Intellectual Property", "ip"),
     PRINCIPAL_INVESTIGATOR("Principal Investigator", "pi"),
     FUNDING_SOURCE("Funding Source", "funding"),
     SELECTION_MARKER("Selection Marker", "marker"),
     BACKBONE("Backbone", "backbone"),
     PROMOTERS("Promoters", "promoters"),
-    ORIGIN("Origin of Replication (Plasmids Only)", "origin"),
+    ORIGIN("Origin of Replication", "origin"),
     HOST("Host", "host"),
     STRAIN_PLASMIDS("Strain Plasmids", "plasmids"),
     GEN_PHEN("Genotype/Phenotype", "gen_phen"),
     PACKAGE_FORMAT("Package Format", "format"),
-    RECORD_ID("Record ID", "rid"),
     BLAST("Blast", "blast");
 
     private String displayName;

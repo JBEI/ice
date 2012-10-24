@@ -386,8 +386,7 @@ public class AccountController {
     public static boolean isAuthenticated(String sessionKey) throws ControllerException {
         boolean result = false;
         try {
-            SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(
-                    sessionKey);
+            SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(sessionKey);
             if (sessionData != null) {
                 result = true;
             }

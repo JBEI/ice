@@ -2,7 +2,7 @@
 }
 
 .cellListOddItem, .cellListEvenItem {
-    padding: 2px;
+    padding: 4px;
     padding-left: 8px;
     cursor: pointer;
     opacity: 0.9;
@@ -25,5 +25,5 @@
     margin: 0;
     list-style: none;
     font-family: sans-serif, Arial;
-    font-size: 11px;
+    font-size: 12px;
 }

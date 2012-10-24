@@ -25,8 +25,7 @@ import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
 // Takes care of retrieving all data page, by page
-public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> implements
-        IHasNavigableData {
+public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> implements IHasNavigableData {
 
     protected final LinkedList<Long> valuesIds;
     protected LinkedList<EntryInfo> results;
@@ -170,7 +169,8 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
 
     public void refresh() {
         table.setVisibleRangeAndClearData(table.getVisibleRange(), true); // triggers onRangeChange() call
-        updateRowCount(this.valuesIds.size(), true); // tODO : this may need to go after the call to updateRowData() in onRangeChanged
+        updateRowCount(this.valuesIds.size(),
+                       true); // tODO : this may need to go after the call to updateRowData() in onRangeChanged
     }
 
     @Override
@@ -196,9 +196,8 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
      * Determines if the sort params have changed and therefore warrants a
      * call to retrieve new data based on those params. Note that the rpc is
      * still made if the cache does not contain enough data;
-     * 
-     * @param rangeStart
-     *            data range start (based on page user is on)
+     *
+     * @param rangeStart data range start (based on page user is on)
      * @param rangeEnd
      * @return true if the data is sorted/rpc is made
      */
@@ -235,7 +234,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
 
     /**
      * Fetches the data user is interested in viewing (usually a page)
-     * 
+     *
      * @param field
      * @param ascending
      * @param rangeStart
@@ -250,21 +249,21 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         // TODO : sort the list on the server
         try {
             service.sortEntryList(AppController.sessionId, valuesIds, field, ascending,
-                new AsyncCallback<LinkedList<Long>>() {
+                                  new AsyncCallback<LinkedList<Long>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO : notify of failure
-                        retrieveEntryData(field, ascending, rangeStart, rangeEnd);
-                    }
+                                      @Override
+                                      public void onFailure(Throwable caught) {
+                                          // TODO : notify of failure
+                                          retrieveEntryData(field, ascending, rangeStart, rangeEnd);
+                                      }
 
-                    @Override
-                    public void onSuccess(LinkedList<Long> result) {
-                        valuesIds.clear();
-                        valuesIds.addAll(result);
-                        retrieveEntryData(field, ascending, rangeStart, rangeEnd);
-                    }
-                });
+                                      @Override
+                                      public void onSuccess(LinkedList<Long> result) {
+                                          valuesIds.clear();
+                                          valuesIds.addAll(result);
+                                          retrieveEntryData(field, ascending, rangeStart, rangeEnd);
+                                      }
+                                  });
         } catch (org.jbei.ice.client.exception.AuthenticationException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -285,26 +284,26 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         final long start = System.currentTimeMillis();
 
         service.retrieveEntryData(AppController.sessionId, field, ascending, realValues,
-            new AsyncCallback<LinkedList<EntryInfo>>() {
+                                  new AsyncCallback<LinkedList<EntryInfo>>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(caught.getMessage());
-                }
+                                      @Override
+                                      public void onFailure(Throwable caught) {
+                                          Window.alert(caught.getMessage());
+                                      }
 
-                @Override
-                public void onSuccess(LinkedList<EntryInfo> result) {
+                                      @Override
+                                      public void onSuccess(LinkedList<EntryInfo> result) {
 
-                    long time = System.currentTimeMillis() - start;
-                    GWT.log("Retrieve took " + time + "ms");
+                                          long time = System.currentTimeMillis() - start;
+                                          GWT.log("Retrieve took " + time + "ms");
 
-                    results.addAll(result);
-                    int end = rangeEnd;
-                    if (rangeEnd > results.size())
-                        end = results.size();
-                    updateRowData(rangeStart, results.subList(rangeStart, end));
-                }
-            });
+                                          results.addAll(result);
+                                          int end = rangeEnd;
+                                          if (rangeEnd > results.size())
+                                              end = results.size();
+                                          updateRowData(rangeStart, results.subList(rangeStart, end));
+                                      }
+                                  });
     }
 
 }

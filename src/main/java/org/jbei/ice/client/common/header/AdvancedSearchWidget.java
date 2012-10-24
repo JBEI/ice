@@ -122,6 +122,8 @@ public class AdvancedSearchWidget extends Composite {
             public void onClick(ClickEvent event) {
                 GWT.log("Adding new filter to row " + currentRow);
                 addNewFilter(currentRow);
+                currentRow += 1;
+
             }
         }, ClickEvent.getType());
         filterOptionsPanel.setWidget(currentRow, 2, icon);
@@ -134,11 +136,10 @@ public class AdvancedSearchWidget extends Composite {
             public void onClick(ClickEvent event) {
                 GWT.log("Removing filter from row " + currentRow);
                 removeFilter(currentRow);
+                currentRow -= 1;
             }
         }, ClickEvent.getType());
         filterOptionsPanel.setWidget(currentRow, 3, removeIcon);
-
-        currentRow += 1;
     }
 
     protected void addNewFilter(int afterRow) {

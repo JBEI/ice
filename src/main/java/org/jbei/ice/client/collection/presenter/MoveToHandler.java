@@ -57,50 +57,52 @@ public abstract class MoveToHandler implements SubmitHandler {
 
     private void moveEntriesToFolder(final Set<Long> destinationFolders,
             final ArrayList<Long> entryIds) {
-        // TODO : both this and "add to" use the wrong handler. this becomes more of an issue when the presenter listens on the event bus
+        // TODO : both this and "add to" use the wrong handler. this becomes more of an issue when the presenter
+        // listens on the event bus
         model.moveEntriesToFolder(getSource(), new ArrayList<Long>(destinationFolders), entryIds,
-            new FolderRetrieveEventHandler() {
+                                  new FolderRetrieveEventHandler() {
 
-                @Override
-                public void onFolderRetrieve(FolderRetrieveEvent event) {
-                    if (event == null || event.getItems() == null) {
-                        view.showFeedbackMessage(
-                            "An error occured while moving entries. Please try again.", true);
-                        return;
-                    }
+                                      @Override
+                                      public void onFolderRetrieve(FolderRetrieveEvent event) {
+                                          if (event == null || event.getItems() == null) {
+                                              view.showFeedbackMessage(
+                                                      "An error occured while moving entries. Please try again.", true);
+                                              return;
+                                          }
 
-                    ArrayList<FolderDetails> results = event.getItems();
-                    ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                    int size = 0;
-                    String name = "";
+                                          ArrayList<FolderDetails> results = event.getItems();
+                                          ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                                          int size = 0;
+                                          String name = "";
 
-                    for (FolderDetails result : results) {
-                        items.add(new MenuItem(result.getId(), result.getName(), result.getCount()
-                                .longValue(), result.isSystemFolder()));
-                        if (result.getId() != getSource()) {
-                            size += 1;
-                            name = result.getName();
-                        }
-                    }
-                    view.updateMenuItemCounts(items);
-                    String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";
-                    String msg = "<b>" + entryIds.size() + "</b> " + entryDisp
-                            + " successfully moved to ";
+                                          for (FolderDetails result : results) {
+                                              items.add(new MenuItem(result.getId(), result.getName(),
+                                                                     result.getCount(),
+                                                                     result.isSystemFolder()));
+                                              if (result.getId() != getSource()) {
+                                                  size += 1;
+                                                  name = result.getName();
+                                              }
+                                          }
+                                          view.updateMenuItemCounts(items);
+                                          String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";
+                                          String msg = "<b>" + entryIds.size() + "</b> " + entryDisp
+                                                  + " successfully moved to ";
 
-                    if (size == 1 && !name.isEmpty()) {
-                        if (name.length() > 24) {
-                            name = "<abbr title=\"" + results.get(0).getName() + "\">"
-                                    + name.substring(0, 21) + "...</abbr>";
-                        }
-                        msg += ("\"<b>" + name + "</b>\" collection.");
-                    } else {
-                        msg += ("<b>" + size + "</b> collections.");
-                    }
+                                          if (size == 1 && !name.isEmpty()) {
+                                              if (name.length() > 24) {
+                                                  name = "<abbr title=\"" + results.get(0).getName() + "\">"
+                                                          + name.substring(0, 21) + "...</abbr>";
+                                              }
+                                              msg += ("\"<b>" + name + "</b>\" collection.");
+                                          } else {
+                                              msg += ("<b>" + size + "</b> collections.");
+                                          }
 
-                    retrieveFolderEntries(getSource(), msg);
-                    clearTableSelection();
-                }
-            });
+                                          retrieveFolderEntries(getSource(), msg);
+                                          clearTableSelection();
+                                      }
+                                  });
     }
 
     protected abstract long getSource();

@@ -30,9 +30,6 @@ public interface RegistryServiceAsync {
      */
     void logout(String sessionId, AsyncCallback<Boolean> callback);
 
-    void retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, int start, int limit,
-            AsyncCallback<LinkedList<SearchResultInfo>> asyncCallback);
-
     void retrieveEntryData(String sid, ColumnField field, boolean ascending,
             LinkedList<Long> entries, AsyncCallback<LinkedList<EntryInfo>> callback);
 
@@ -204,4 +201,10 @@ public interface RegistryServiceAsync {
 
     void getAutoCompleteSuggestion(AutoCompleteField field, SuggestOracle.Request request,
             AsyncCallback<SuggestOracle.Response> async);
+
+    //
+    // Search
+    //
+    void retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, int start, int limit,
+            AsyncCallback<SearchResults> async);
 }

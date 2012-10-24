@@ -80,66 +80,58 @@ public class HibernateSearch {
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         List result;
 
-        try {
+        // create native Lucene query using the query DSL
+        // alternatively you can write the Lucene query using the Lucene query parser
+        // or the Lucene programmatic API. The Hibernate Search DSL is recommended though
 
-//            Transaction tx = fullTextSession.beginTransaction();
-
-            // create native Lucene query using the query DSL
-            // alternatively you can write the Lucene query using the Lucene query parser
-            // or the Lucene programmatic API. The Hibernate Search DSL is recommended though
-
-            // you can create several query builders (for each entity type involved in the root of the query)
-            QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
-            boolean wildCard = queryString.endsWith("*");
+        // you can create several query builders (for each entity type involved in the root of the query)
+        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
+        boolean wildCard = queryString.endsWith("*");
 
 //        TermContext termContext = qb.keyword();
 //        if( wildCard)
 //            termContext = termContext.wildcard();
 
-            // use phrase (instead of keyword) for more than one word
-            org.apache.lucene.search.Query query = qb
-                    .keyword()
-                    .fuzzy().withThreshold(0.8f)
-                    .onFields("owner", "creator", "names.name", "alias", "creator", "keywords")
-                    .matching(queryString)
-                    .createQuery();
+        // use phrase (instead of keyword) for more than one word
+        org.apache.lucene.search.Query query = qb
+                .keyword()
+                .fuzzy().withThreshold(0.8f)
+                .onFields("owner", "creator", "names.name", "alias", "creator", "keywords", "shortDescription",
+                          "references", "longDescription", "intellectualProperty")
+                .matching(queryString)
+                .createQuery();
 
-            // wrap Lucene query in a org.hibernate.Query
-            org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(query, Entry.class);
-            fullTextQuery.setSort(Sort.RELEVANCE);
+        // wrap Lucene query in a org.hibernate.Query
+        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(query, Entry.class);
+        fullTextQuery.setSort(Sort.RELEVANCE);
 
-            // criteria example
+        // criteria example
 //        fullTextQuery.setCriteriaQuery(session.createCriteria(Entry.class.getName()).add(
 //                Restrictions.eq("ownerEmail", account.getEmail())));
 
-            // projection (specified properties must be stored in the index)
-            fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
+        // projection (specified properties must be stored in the index)
+        fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
 
-            // for paging
-            fullTextQuery.setFirstResult(start); //start from the startth element
-            fullTextQuery.setMaxResults(count); //return count elements
+        // for paging
+        fullTextQuery.setFirstResult(start); //start from the startth element
+        fullTextQuery.setMaxResults(count); //return count elements
 
-            // setting sort
+        // setting sort
 //        org.hibernate.search.FullTextQuery fquery = fullTextSession.createFullTextQuery( query);
 //        org.apache.lucene.search.Sort sort = new Sort(new SortField("title"));
 //        fquery.setSort(sort);
 //        List results = fquery.list();
 
-            // instead of returning the full domain object you can return a subset of the properties
+        // instead of returning the full domain object you can return a subset of the properties
 //                org.hibernate.search.FullTextQuery fquery = fullTextSession.createFullTextQuery( query);
-            resultCount = fullTextQuery.getResultSize(); // this is where you are hiding
+        resultCount = fullTextQuery.getResultSize(); // this is where you are hiding
 //        fquery.setProjection("id");
 
-            // execute search
-            result = fullTextQuery.list();
-            Logger.info("Found " + result.size() + " for " + fullTextQuery.getQueryString());
+        // execute search
+        result = fullTextQuery.list();
+        Logger.info("Found " + result.size() + " for " + fullTextQuery.getQueryString());
 
-            // sort
-//            tx.commit();
-        } finally {
-//            fullTextSession.close();
-//            session.close();
-        }
+        // sort
 
         Iterator<Object[]> iterator = result.iterator();
         while (iterator.hasNext()) {

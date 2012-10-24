@@ -62,11 +62,6 @@ public class HeaderPresenter {
 
     private class SearchEntryTypeChangeHandler implements ChangeHandler {
 
-        /**
-         * Called when a change event is fired.
-         *
-         * @param event the {@link com.google.gwt.event.dom.client.ChangeEvent} that was fired
-         */
         @Override
         public void onChange(ChangeEvent event) {
             String value[] = view.getSelectedSearchType();
