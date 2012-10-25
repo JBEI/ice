@@ -16,17 +16,18 @@
         <!-- JDBC connection pool (using c3p0) -->
         <property name="hibernate.c3p0.min_size">5</property>
         <property name="hibernate.c3p0.max_size">20</property>
-        <property name="hibernate.c3p0.timeout">1800</property>
+        <property name="hibernate.c3p0.timeout">300</property>
         <property name="hibernate.c3p0.max_statements">50</property>
 
         <!-- SQL dialect: use the correct one for your database -->
         <property name="dialect">org.hibernate.dialect.PostgreSQL82Dialect</property>
 
         <!-- Enables Hibernate's automatic session context management -->
-        <!--<property name="current_session_context_class">thread</property>-->
+        <property name="current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext
+        </property>
 
         <!-- Disable the second-level cache  -->
-        <property name="cache.provider_class">org.hibernate.cache.internal.NoCacheProvider</property>
+        <property name="cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</property>
 
         <!-- Echo all executed SQL to stdout -->
         <property name="show_sql">false</property>
@@ -65,7 +66,6 @@
         <mapping class="org.jbei.ice.lib.models.Comment"/>
         <mapping class="org.jbei.ice.lib.news.News"/>
         <mapping class="org.jbei.ice.lib.account.model.Account"/>
-        <mapping class="org.jbei.ice.lib.account.model.AccountEntryRelationship"/>
         <mapping class="org.jbei.ice.lib.entry.attachment.Attachment"/>
         <mapping class="org.jbei.ice.lib.entry.sample.model.Sample"/>
         <mapping class="org.jbei.ice.lib.models.Label"/>
@@ -78,7 +78,6 @@
         <mapping class="org.jbei.ice.lib.permissions.model.WriteGroup"/>
         <mapping class="org.jbei.ice.lib.models.FundingSource"/>
         <mapping class="org.jbei.ice.lib.entry.model.EntryFundingSource"/>
-        <mapping class="org.jbei.ice.lib.account.model.AccountFundingSource"/>
         <mapping class="org.jbei.ice.lib.models.SessionData"/>
         <mapping class="org.jbei.ice.lib.models.TraceSequence"/>
         <mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment"/>
