@@ -12,6 +12,7 @@ public class AccountInfo implements IsSerializable {
     private String institution;
     private String description;
     private String since;
+    private String lastLogin;
     private long userEntryCount;
     private int userSampleCount;
     private long visibleEntryCount;
@@ -118,5 +119,13 @@ public class AccountInfo implements IsSerializable {
 
     public void setInitials(String initials) {
         this.initials = initials;
+    }
+
+    public String getLastLogin() {
+        return "Feb 20, 2030";
+    }
+
+    public void setLastLogin(String lastLogin) {
+        this.lastLogin = lastLogin;
     }
 }

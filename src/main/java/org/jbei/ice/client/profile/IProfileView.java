@@ -1,17 +1,15 @@
 package org.jbei.ice.client.profile;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Widget;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
-import org.jbei.ice.client.collection.table.SamplesDataTable;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
+
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Widget;
 
 public interface IProfileView {
 
     Widget asWidget();
-
-    ProfileViewMenu getMenu();
 
     void addEditProfileLinkHandler(ClickHandler editProfileHandler);
 
@@ -19,8 +17,7 @@ public interface IProfileView {
 
     void setContents(AccountInfo info);
 
-    void changePasswordPanel(AccountInfo currentInfo, ClickHandler submitHandler,
-            ClickHandler cancelHandler);
+    void changePasswordPanel(AccountInfo currentInfo, ClickHandler submitHandler, ClickHandler cancelHandler);
 
     RegistrationDetails getUpdatedDetails();
 
@@ -29,6 +26,4 @@ public interface IProfileView {
     void editProfile(AccountInfo currentInfo, ClickHandler submitHandler, ClickHandler cancelHandler);
 
     void setEntryContent(CollectionDataTable collectionsDataTable);
-
-    void setSampleView(SamplesDataTable table);
 }

@@ -1,22 +1,18 @@
 package org.jbei.ice.client.profile;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.collection.SamplesDataProvider;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
-import org.jbei.ice.client.collection.table.SamplesDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.login.RegistrationDetails;
-import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 
@@ -32,9 +28,6 @@ import com.google.gwt.user.client.ui.HasWidgets;
  * @author Hector Plahar
  */
 public class ProfilePresenter extends AbstractPresenter {
-
-    private final SamplesDataProvider samplesDataProvider;
-    private final SamplesDataTable samplesDataTable;
 
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
@@ -52,28 +45,6 @@ public class ProfilePresenter extends AbstractPresenter {
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
-
-        this.display.getMenu().addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                CellEntry selected = display.getMenu().getSelection();
-                switch (selected.getType()) {
-                    default:
-                    case ABOUT:
-                        display.setContents(currentInfo);
-                        break;
-
-                    case ENTRIES:
-                        retrieveUserEntries();
-                        break;
-
-                    case SAMPLES:
-                        retrieveUserSamples();
-                        break;
-                }
-            }
-        });
 
         new IceAsyncCallback<AccountInfo>() {
 
@@ -93,25 +64,9 @@ public class ProfilePresenter extends AbstractPresenter {
                 menu.add(about);
                 menu.add(new CellEntry(MenuType.ENTRIES, currentInfo.getUserEntryCount()));
                 menu.add(new CellEntry(MenuType.SAMPLES, currentInfo.getUserSampleCount()));
-                display.getMenu().setRowData(menu);
+//                display.getMenu().setRowData(menu);
             }
         }.go(eventBus);
-
-
-        samplesDataTable = new SamplesDataTable() {
-            @Override
-            protected EntryViewEventHandler getHandler() {
-                return new EntryViewEventHandler() {
-                    @Override
-                    public void onEntryView(EntryViewEvent event) {
-                        event.setNavigable(samplesDataProvider);
-                        eventBus.fireEvent(event);
-                    }
-                };
-            }
-        };
-
-        samplesDataProvider = new SamplesDataProvider(samplesDataTable, service);
 
         this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
 
@@ -126,6 +81,7 @@ public class ProfilePresenter extends AbstractPresenter {
                 };
             }
         };
+
         this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable, service);
 
         // check
@@ -156,22 +112,6 @@ public class ProfilePresenter extends AbstractPresenter {
                                     });
     }
 
-    private void retrieveUserSamples() {
-        service.retrieveSamplesByDepositor(AppController.sessionId, currentInfo.getEmail(),
-                                           ColumnField.CREATED, false, new AsyncCallback<LinkedList<Long>>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(LinkedList<Long> result) {
-                samplesDataProvider.setValues(new ArrayList<Long>(result));
-                display.setSampleView(samplesDataTable);
-            }
-        });
-    }
-
     private void checkCanEditProfile() {
         service.getSetting("PROFILE_EDIT_ALLOWED", new AsyncCallback<String>() {
 
@@ -179,8 +119,7 @@ public class ProfilePresenter extends AbstractPresenter {
             public void onSuccess(String result) {
                 if ("yes".equalsIgnoreCase(result) || "true".equalsIgnoreCase(result)) {
                     // must be admin or current logged in user
-                    if (AppController.accountInfo.isAdmin()
-                            || AppController.accountInfo.getEmail().equals(userId))
+                    if (AppController.accountInfo.isAdmin() || AppController.accountInfo.getEmail().equals(userId))
                         display.addEditProfileLinkHandler(new EditProfileHandler());
                 }
             }
@@ -268,8 +207,7 @@ public class ProfilePresenter extends AbstractPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-            display.changePasswordPanel(currentInfo, new UpdatePasswordClickHandler(),
-                                        new ShowCurrentInfoHandler());
+            display.changePasswordPanel(currentInfo, new UpdatePasswordClickHandler(), new ShowCurrentInfoHandler());
         }
     }
 

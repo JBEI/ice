@@ -1,4 +1,4 @@
-package org.jbei.ice.client.profile;
+package org.jbei.ice.client.profile.widget;
 
 import org.jbei.ice.client.login.RegistrationDetails;
 
@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Panel for editing user profile
- * 
+ *
  * @author Hector Plahar
  */
 public class EditProfilePanel extends Composite {
@@ -44,6 +44,8 @@ public class EditProfilePanel extends Composite {
 
     private void initComponents() {
         inputTable = new FlexTable();
+        inputTable.setStyleName("margin-top-20");
+
         submit = new Button("Submit");
         cancel = new Label("Cancel");
         cancel.setStyleName("footer_feedback_widget");
@@ -121,9 +123,10 @@ public class EditProfilePanel extends Composite {
         // given name
         inputTable
                 .setHTML(
-                    0,
-                    0,
-                    "<span class=\"font-80em\" style=\"white-space:nowrap\">Given name <span class=\"required\">*</span></span>");
+                        0,
+                        0,
+                        "<span class=\"font-80em\" style=\"white-space:nowrap\">Given name <span " +
+                                "class=\"required\">*</span></span>");
         inputTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
         inputTable.getFlexCellFormatter().setWidth(0, 0, "150px");
         inputTable.setWidget(0, 1, givenName);
@@ -131,16 +134,17 @@ public class EditProfilePanel extends Composite {
         // family name
         inputTable
                 .setHTML(
-                    1,
-                    0,
-                    "<span class=\"font-80em\" style=\"white-space:nowrap\">Family name <span class=\"required\">*</span></span>");
+                        1,
+                        0,
+                        "<span class=\"font-80em\" style=\"white-space:nowrap\">Family name <span " +
+                                "class=\"required\">*</span></span>");
         inputTable.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         inputTable.getFlexCellFormatter().setWidth(1, 0, "150px");
         inputTable.setWidget(1, 1, familyName);
 
         // initials
         inputTable.setHTML(2, 0,
-            "<span class=\"font-80em\" style=\"white-space:nowrap\">Initials</span>");
+                           "<span class=\"font-80em\" style=\"white-space:nowrap\">Initials</span>");
         inputTable.getFlexCellFormatter().setVerticalAlignment(2, 0, HasAlignment.ALIGN_TOP);
         inputTable.getFlexCellFormatter().setWidth(2, 0, "150px");
         inputTable.setWidget(2, 1, initials);
@@ -148,23 +152,24 @@ public class EditProfilePanel extends Composite {
         // email
         inputTable
                 .setHTML(
-                    3,
-                    0,
-                    "<span class=\"font-80em\" style=\"white-space:nowrap\">Email <span class=\"required\">*</span></span>");
+                        3,
+                        0,
+                        "<span class=\"font-80em\" style=\"white-space:nowrap\">Email <span " +
+                                "class=\"required\">*</span></span>");
         inputTable.getFlexCellFormatter().setVerticalAlignment(3, 0, HasAlignment.ALIGN_TOP);
         inputTable.getFlexCellFormatter().setWidth(3, 0, "150px");
         inputTable.setWidget(3, 1, email);
 
         // institution
         inputTable.setHTML(4, 0,
-            "<span class=\"font-80em\" style=\"white-space:nowrap\">Institution</span>");
+                           "<span class=\"font-80em\" style=\"white-space:nowrap\">Institution</span>");
         inputTable.getFlexCellFormatter().setVerticalAlignment(4, 0, HasAlignment.ALIGN_TOP);
         inputTable.getFlexCellFormatter().setWidth(4, 0, "150px");
         inputTable.setWidget(4, 1, institution);
 
         // about yourself
         inputTable.setHTML(5, 0,
-            "<span class=\"font-80em\" style=\"white-space:nowrap\">About yourself</span>");
+                           "<span class=\"font-80em\" style=\"white-space:nowrap\">About yourself</span>");
         inputTable.getFlexCellFormatter().setVerticalAlignment(5, 0, HasAlignment.ALIGN_TOP);
         inputTable.getFlexCellFormatter().setWidth(5, 0, "150px");
         inputTable.setWidget(5, 1, aboutYourself);
