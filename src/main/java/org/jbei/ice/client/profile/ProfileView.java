@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * View for profile page and companion to {@link ProfilePresenter}
@@ -29,7 +29,6 @@ public class ProfileView extends AbstractLayout implements IProfileView {
     private EditProfilePanel panel;
     private ChangePasswordPanel changePasswordPanel;
     private HTML contentHeader;
-    private AccountInfo info;
     private ProfilePanel profilePanel;
 
     @Override
@@ -38,36 +37,12 @@ public class ProfileView extends AbstractLayout implements IProfileView {
         mainContent = new FlexTable();
         menu = new ProfileViewMenu();
         profilePanel = new ProfilePanel();
-
-        menu.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                setViewForOption(menu.getSelectionModel().getSelectedObject());
-            }
-        });
-
         return createMainContent();
     }
 
-    public void setViewForOption(UserOption option) {
-        if (option == null)
-            return;
-
-        Widget widget;
-
-        switch (option) {
-            case PROFILE:
-                profilePanel.setAccountInfo(info);
-                widget = profilePanel;
-                break;
-
-            default:
-                widget = new HTML("&nbsp;");
-                break;
-        }
-
-        mainContent.setWidget(1, 1, widget);
+    @Override
+    public SingleSelectionModel<UserOption> getUserSelectionModel() {
+        return this.menu.getSelectionModel();
     }
 
     public String getUpdatedPassword() {
@@ -109,7 +84,6 @@ public class ProfileView extends AbstractLayout implements IProfileView {
                                           + "text-transform: uppercase; position: relative; top: -6px; color: #999\">"
                                           + info.getInstitution() + "</span>");
 
-            this.info = info;
             profilePanel.setAccountInfo(info);
             if (menu.getSelectionModel().getSelectedObject() == UserOption.PROFILE)
                 mainContent.setWidget(1, 1, profilePanel);
@@ -119,6 +93,7 @@ public class ProfileView extends AbstractLayout implements IProfileView {
     @Override
     public void setEntryContent(CollectionDataTable collectionsDataTable) {
         VerticalPanel panel = new VerticalPanel();
+        panel.setStyleName("margin-top-20");
         panel.setWidth("100%");
         panel.add(collectionsDataTable);
         panel.add(collectionsDataTable.getPager());

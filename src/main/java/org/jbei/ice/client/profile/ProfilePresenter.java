@@ -13,6 +13,7 @@ import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.login.RegistrationDetails;
+import org.jbei.ice.client.profile.widget.UserOption;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 
@@ -21,6 +22,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * Presenter for the profile page
@@ -46,27 +48,6 @@ public class ProfilePresenter extends AbstractPresenter {
         this.eventBus = eventBus;
         this.display = display;
 
-        new IceAsyncCallback<AccountInfo>() {
-
-            @Override
-            protected void callService(AsyncCallback<AccountInfo> callback) throws AuthenticationException {
-                service.retrieveProfileInfo(AppController.sessionId, userId, callback);
-            }
-
-            @Override
-            public void onSuccess(AccountInfo profileInfo) {
-                currentInfo = profileInfo;
-                display.setContents(currentInfo);
-
-                // set menu
-                ArrayList<CellEntry> menu = new ArrayList<CellEntry>();
-                CellEntry about = new CellEntry(MenuType.ABOUT, -1);
-                menu.add(about);
-                menu.add(new CellEntry(MenuType.ENTRIES, currentInfo.getUserEntryCount()));
-                menu.add(new CellEntry(MenuType.SAMPLES, currentInfo.getUserSampleCount()));
-//                display.getMenu().setRowData(menu);
-            }
-        }.go(eventBus);
 
         this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
 
@@ -87,6 +68,50 @@ public class ProfilePresenter extends AbstractPresenter {
         // check
         checkCanEditProfile();
         checkCanChangePassword();
+
+        // handler user menu change
+        handlerUserMenuSelection();
+    }
+
+    private void handlerUserMenuSelection() {
+        this.display.getUserSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                setViewForOption(display.getUserSelectionModel().getSelectedObject());
+            }
+        });
+    }
+
+    public void setViewForOption(UserOption option) {
+        if (option == null)
+            return;
+
+        switch (option) {
+            case PROFILE:
+                retrieveProfileInfo();
+                break;
+
+            case ENTRIES:
+                retrieveUserEntries();
+                break;
+        }
+    }
+
+    private void retrieveProfileInfo() {
+        new IceAsyncCallback<AccountInfo>() {
+
+            @Override
+            protected void callService(AsyncCallback<AccountInfo> callback) throws AuthenticationException {
+                service.retrieveProfileInfo(AppController.sessionId, userId, callback);
+            }
+
+            @Override
+            public void onSuccess(AccountInfo profileInfo) {
+                currentInfo = profileInfo;
+                display.setContents(currentInfo);
+            }
+        }.go(eventBus);
     }
 
     private void retrieveUserEntries() {
