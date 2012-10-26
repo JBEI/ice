@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.common.header.BlastSearchFilter;
 import org.jbei.ice.client.common.table.EntryTablePager;
+import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -12,6 +13,8 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -20,6 +23,7 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
     private FlowPanel filterPanel;
     private EntryTablePager pager;
     private final FlexTable layout;
+    private final HorizontalPanel tableHeader;
 
     public AdvancedSearchView() {
         layout = new FlexTable();
@@ -37,14 +41,17 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
         captionPanel.setWidth("98%");
         captionPanel.setStyleName("search_caption_display");
         captionPanel.add(filterPanel);
-//        layout.setWidget(0, 0, captionPanel);
+
+        // table header
+        tableHeader = new HorizontalPanel();
+        tableHeader.add(new HTML(
+                "<span style=\"padding: 4px; font-size: 12px; border-top: 1px solid #ccc; border-left: 1px solid #ccc; "
+                        + "border-right: 1px solid #ccc\">Local Results</span>"));
+        tableHeader.add(new HTML("<span><i class=\"" + FAIconType.GLOBE.getStyleName() + "\"></i> Web Results</span>"));
 
         // add a break between filters and results
-        layout.setHTML(0, 0,
-                       "<span style=\" border-bottom: 1px solid #DDD;\"><span style=\"color: #555;" +
-                               "\">Local Results</span><span>Search the web</span></span>");
-
-        layout.setHTML(1, 0, "&nbsp;");
+        layout.setWidget(0, 0, captionPanel);
+        layout.setWidget(1, 0, tableHeader);
     }
 
     protected void initComponents() {

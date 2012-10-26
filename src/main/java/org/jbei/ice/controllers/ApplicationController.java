@@ -61,11 +61,12 @@ public class ApplicationController {
             initializeHibernateSearch();
             upgradePermissions();
             upgradeAccounts();
+            upgradeConfiguration();
             controller.updateDatabaseVersion(RELEASE_DATABASE_SCHEMA_VERSION);
             Logger.info("Application upgraded from " + dbVersion + " to " + RELEASE_DATABASE_SCHEMA_VERSION);
         } catch (ControllerException e) {
             Logger.error(e);
-            // TODO : Fatal exception. Database cannot be updgraded
+            // TODO : Fatal exception. Database cannot be upgraded
         }
     }
 
@@ -97,5 +98,11 @@ public class ApplicationController {
             accountController.save(account);
         }
         Logger.info("Accounts upgrade complete");
+    }
+
+    // upgrade to system settings
+    private static void upgradeConfiguration() throws ControllerException {
+        ConfigurationController configurationController = new ConfigurationController();
+        configurationController.upgradeConfiguration();
     }
 }

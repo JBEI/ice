@@ -12,7 +12,6 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
-import org.jbei.ice.lib.utils.JbeirSettings;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
@@ -25,7 +24,6 @@ import org.hibernate.Session;
  * @author Zinovii Dmytriv, Timothy Ham
  */
 public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
-    private static String traceFilesDirectory = JbeirSettings.getSetting("TRACE_FILES_DIRECTORY");
 
     /**
      * Create a new {@link TraceSequence} object in the database, and write the file data to disk.
@@ -35,24 +33,23 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      * @return Saved TraceSequence object.
      * @throws DAOException
      */
-    public TraceSequence create(TraceSequence traceSequence, InputStream inputStream)
+    public TraceSequence create(File tracesFile, TraceSequence traceSequence, InputStream inputStream)
             throws DAOException {
         if (traceSequence == null) {
             throw new DAOException("Couldn't save TraceSequence. TraceSequence is null!");
         }
 
-        TraceSequence result = null;
+        TraceSequence result;
         try {
             if (getByFileId(traceSequence.getFileId()) != null) {
                 throw new DAOException("TraceSequence by this fileId already exists!");
             }
 
-            writeTraceSequenceToFile(traceSequence.getFileId(), inputStream);
-
+            writeTraceSequenceToFile(tracesFile, traceSequence.getFileId(), inputStream);
             result = super.saveOrUpdate(traceSequence);
         } catch (DAOException e) {
             try {
-                deleteTraceSequenceToFile(traceSequence);
+                deleteTraceSequenceToFile(tracesFile, traceSequence);
             } catch (IOException e1) {
                 throw new DAOException(e1);
             }
@@ -77,17 +74,13 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
         TraceSequenceAlignment traceSequenceAlignment = traceSequence.getTraceSequenceAlignment();
         Session session = newSession();
         try {
-            session.getTransaction().begin();
             session.saveOrUpdate(traceSequenceAlignment);
             traceSequence.setTraceSequenceAlignment(traceSequenceAlignment);
             session.saveOrUpdate(traceSequence);
-            session.getTransaction().commit();
             return traceSequence;
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
-            session.getTransaction().rollback();
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
@@ -107,11 +100,8 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
 
         Session session = newSession();
         try {
-            Query query = session.createQuery("from " + TraceSequence.class.getName()
-                                                      + " where fileId = :fileId");
-
+            Query query = session.createQuery("from " + TraceSequence.class.getName() + " where fileId = :fileId");
             query.setParameter("fileId", fileId);
-
             Object queryResult = query.uniqueResult();
 
             if (queryResult != null) {
@@ -133,14 +123,14 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      * @param traceSequence
      * @throws DAOException
      */
-    public void delete(TraceSequence traceSequence) throws DAOException {
+    public void delete(File tracesFile, TraceSequence traceSequence) throws DAOException {
         if (traceSequence == null) {
             throw new DAOException("Failed to delete null Trace Sequence!");
         }
 
         try {
             super.delete(traceSequence);
-            deleteTraceSequenceToFile(traceSequence);
+            deleteTraceSequenceToFile(tracesFile, traceSequence);
         } catch (IOException e) {
             throw new DAOException("Failed to delete Trace Sequence file!", e);
         }
@@ -154,15 +144,13 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      * @throws IOException
      * @throws DAOException
      */
-    private static void writeTraceSequenceToFile(String fileName, InputStream inputStream)
+    private static void writeTraceSequenceToFile(File traceFilesDirectory, String fileName, InputStream inputStream)
             throws IOException, DAOException {
         try {
             File file = new File(traceFilesDirectory + File.separator + fileName);
 
-            File fileDir = new File(traceFilesDirectory);
-
-            if (!fileDir.exists()) {
-                if (!fileDir.mkdirs()) {
+            if (!traceFilesDirectory.exists()) {
+                if (!traceFilesDirectory.mkdirs()) {
                     throw new DAOException("Could not create trace directory");
                 }
             }
@@ -192,7 +180,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      * @throws IOException
      * @throws DAOException
      */
-    private void deleteTraceSequenceToFile(TraceSequence traceSequence) throws IOException,
+    private void deleteTraceSequenceToFile(File traceFilesDirectory, TraceSequence traceSequence) throws IOException,
             DAOException {
         try {
             File file = new File(traceFilesDirectory + File.separator + traceSequence.getFileId());
@@ -247,7 +235,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      * @return Trace file.
      * @throws DAOException
      */
-    public static File getFile(TraceSequence traceSequence) throws DAOException {
+    public static File getFile(File traceFilesDirectory, TraceSequence traceSequence) throws DAOException {
         File file = new File(traceFilesDirectory + File.separator + traceSequence.getFileId());
 
         if (!file.canRead()) {

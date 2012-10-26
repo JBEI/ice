@@ -1012,6 +1012,7 @@ a.cell_mouseover:hover {
 .search_caption_display {
     font-size: 0.75em;
     border: 1px solid #0082c0;
+    margin-bottom: 20px;
 }
 
 .search_caption_caption {

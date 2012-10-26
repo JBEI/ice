@@ -93,6 +93,9 @@ public class ProfilePresenter extends AbstractPresenter {
                 retrieveProfileInfo();
                 break;
 
+            case GROUPS:
+                break;
+
             case ENTRIES:
                 retrieveUserEntries();
                 break;

@@ -29,19 +29,11 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Emailer;
-import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.InfoToModelFactory;
 import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AttachmentInfo;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryType;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
-import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.*;
 
 import org.apache.commons.io.FileUtils;
 
@@ -434,7 +426,7 @@ public class BulkUploadController {
                     String name = enclosedEntry.getOneName() == null ? "" : enclosedEntry.getOneName().getName();
 
                     String plasmidPartNumberString = "[["
-                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
+                            + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX) + ":"
                             + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
                             + name + "]]";
                     ((Strain) entry).setPlasmids(plasmidPartNumberString);
@@ -645,7 +637,7 @@ public class BulkUploadController {
                 // update enclosing and get the part number
                 enclosedEntry = entryController.update(account, enclosedEntry, false, null);
                 String name = enclosedEntry.getOneName() == null ? "" : enclosedEntry.getOneName().getName();
-                String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
+                String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX)
                         + ":" + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
                         + name + "]]";
                 ((Strain) entry).setPlasmids(plasmidPartNumberString);
@@ -754,12 +746,12 @@ public class BulkUploadController {
         try {
             boolean success = dao.update(draft) != null;
             if (success) {
-                String email = JbeirSettings.getSetting("BULK_UPLOAD_APPROVER_EMAIL");
+                String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
                 if (email != null && !email.isEmpty()) {
-                    String subject = JbeirSettings.getSetting("PROJECT_NAME") + " Bulk Upload Notification";
+                    String subject = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME) + " Bulk Upload Notification";
                     String body = "A bulk upload has been submitted and is pending verification.\n\n";
                     body += "Please go to the following link to verify.\n\n";
-                    body += JbeirSettings.getSetting("URI_PREFIX") + "/#page=bulk";
+                    body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/#page=bulk";
                     Emailer.send(email, subject, body);
                 }
             }
@@ -820,12 +812,12 @@ public class BulkUploadController {
             if (!success)
                 return success;
 
-            String email = JbeirSettings.getSetting("BULK_UPLOAD_APPROVER_EMAIL");
+            String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
             if (email != null && !email.isEmpty()) {
-                String subject = JbeirSettings.getSetting("PROJECT_NAME") + " Bulk Upload Notification";
+                String subject = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME) + " Bulk Upload Notification";
                 String body = "A bulk upload has been submitted and is pending verification.\n\n";
                 body += "Please go to the following link to verify.\n\n";
-                body += JbeirSettings.getSetting("URI_PREFIX") + "/#page=bulk";
+                body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/#page=bulk";
                 Emailer.send(email, subject, body);
             }
             return success;
@@ -909,7 +901,7 @@ public class BulkUploadController {
         if (fileId.isEmpty())    // delete sequence?
             return;
 
-        File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar + fileId);
+        File file = new File(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY) + File.separatorChar + fileId);
 
         if (!file.exists()) {
             Logger.error("Could not find sequence file \"" + file.getAbsolutePath() + "\"");

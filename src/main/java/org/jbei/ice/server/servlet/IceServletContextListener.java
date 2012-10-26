@@ -45,12 +45,12 @@ public class IceServletContextListener implements ServletContextListener {
 
     protected void init() {
         try {
-            HibernateHelper.getSessionFactory().getCurrentSession().beginTransaction();
+            HibernateHelper.beginTransaction();
             PopulateInitialDatabase.initializeDatabase();
             ApplicationController.upgradeDatabaseIfNecessary();
-            HibernateHelper.getSessionFactory().getCurrentSession().getTransaction().commit();
-            // TODO : rollback
+            HibernateHelper.commitTransaction();
         } catch (Throwable e) {
+            HibernateHelper.rollbackTransaction();
             throw new RuntimeException(e);
         }
     }

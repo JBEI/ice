@@ -11,7 +11,8 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.Visibility;
 
 import com.google.common.base.Objects;
@@ -297,7 +298,8 @@ public class Entry implements IModel {
         // prefer local part number prefix over other prefixes
         if (partNumbers.size() > 0) {
             for (PartNumber partNumber : partNumbers) {
-                if (partNumber.getPartNumber().contains(JbeirSettings.getSetting("PART_NUMBER_PREFIX"))) {
+                String partNumberPrefix = Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX);
+                if (partNumber.getPartNumber().contains(partNumberPrefix)) {
                     result = partNumber;
                     break;
                 }

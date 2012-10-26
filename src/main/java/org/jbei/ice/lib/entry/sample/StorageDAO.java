@@ -7,10 +7,10 @@ import org.jbei.ice.lib.config.ConfigurationDAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.EntryType;
 
 import org.hibernate.HibernateException;

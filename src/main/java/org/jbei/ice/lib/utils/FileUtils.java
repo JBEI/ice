@@ -10,19 +10,18 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * Utility methods for file handling.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham
- * 
  */
 public class FileUtils {
     /**
      * Read file specified by the path into a string.
-     * 
-     * @param path
-     *            Path of the file.
+     *
+     * @param path Path of the file.
      * @return Content of file as String.
      * @throws IOException
      * @throws FileNotFoundException
@@ -33,9 +32,8 @@ public class FileUtils {
 
     /**
      * Read the given {@link File} into a string.
-     * 
-     * @param file
-     *            File to read.
+     *
+     * @param file File to read.
      * @return File content as string.
      * @throws IOException
      * @throws FileNotFoundException
@@ -66,11 +64,9 @@ public class FileUtils {
 
     /**
      * Write the given string content into a file with the specified path.
-     * 
-     * @param path
-     *            Path of the file to be written.
-     * @param content
-     *            Content of the file.
+     *
+     * @param path    Path of the file to be written.
+     * @param content Content of the file.
      * @throws FileNotFoundException
      * @throws IOException
      * @throws IllegalArgumentException
@@ -82,11 +78,9 @@ public class FileUtils {
 
     /**
      * Write the given string content into the given {@link File}.
-     * 
-     * @param file
-     *            File to write.
-     * @param content
-     *            Content of the file.
+     *
+     * @param file    File to write.
+     * @param content Content of the file.
      * @throws FileNotFoundException
      * @throws IOException
      * @throws IllegalArgumentException
@@ -120,9 +114,9 @@ public class FileUtils {
 
     /**
      * Save the given text to a file in the temporary directory, and alert the admin.
-     * <p>
+     * <p/>
      * Use this to capture interesting files and alert the admin of the fact.
-     * 
+     *
      * @param message
      * @param fileText
      * @param e
@@ -130,7 +124,7 @@ public class FileUtils {
      */
     public static void recordAndReportFile(String message, String fileText, Exception e)
             throws UtilityException {
-        String tempFileDirectory = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+        String tempFileDirectory = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         String filePath = tempFileDirectory + File.separator + Utils.generateUUID();
 
         message = "File has been written to: " + filePath + ". The caller message is :\n" + message;

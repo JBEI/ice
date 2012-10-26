@@ -8,7 +8,8 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SessionData;
-import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * Cache {@link SessionData} information in a memory cache, as well as in the database. Hide this
@@ -70,8 +71,7 @@ public class PersistentSessionDataWrapper {
      * @throws DAOException
      */
     public SessionData newSessionData() throws DAOException {
-        SessionData sessionData = new SessionData(JbeirSettings.getSetting("SITE_SECRET"));
-
+        SessionData sessionData = new SessionData(Utils.getConfigValue(ConfigurationKey.SITE_SECRET));
         persist(sessionData);
         getSessionDataCache().put(sessionData.getSessionKey(), sessionData);
         Long cacheExpirationTime = Calendar.getInstance().getTimeInMillis() + CACHE_TIMEOUT;

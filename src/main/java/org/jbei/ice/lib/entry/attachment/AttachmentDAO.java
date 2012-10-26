@@ -11,7 +11,6 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.utils.JbeirSettings;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
@@ -27,14 +26,12 @@ import org.hibernate.criterion.Restrictions;
  */
 public class AttachmentDAO extends HibernateRepository<Attachment> {
 
-    private static final String ATTACHMENTS_DIR = JbeirSettings.getSetting("ATTACHMENTS_DIRECTORY");
-
-    public Attachment save(Attachment attachment, InputStream inputStream) throws DAOException {
+    public Attachment save(File attDir, Attachment attachment, InputStream inputStream) throws DAOException {
         Session session = newSession();
         try {
             session.saveOrUpdate(attachment);
             if (inputStream != null)
-                writeFile(attachment.getFileId(), inputStream);
+                writeFile(attDir, attachment.getFileId(), inputStream);
             session.getTransaction().commit();
         } catch (HibernateException e) {
             throw new DAOException("dbSave failed!", e);
@@ -56,14 +53,13 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      * @throws java.io.IOException
      * @throws DAOException
      */
-    private void writeFile(String fileName, InputStream inputStream)
+    private void writeFile(File attDir, String fileName, InputStream inputStream)
             throws IOException, DAOException {
         try {
-            File file = new File(ATTACHMENTS_DIR + File.separator + fileName);
-            File fileDir = new File(ATTACHMENTS_DIR);
+            File file = new File(attDir + File.separator + fileName);
 
-            if (!fileDir.exists()) {
-                if (!fileDir.mkdirs()) {
+            if (!attDir.exists()) {
+                if (!attDir.mkdirs()) {
                     throw new DAOException("Could not create attachment directory");
                 }
             }
@@ -86,12 +82,12 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
         }
     }
 
-    public void delete(Attachment attachment) throws DAOException {
+    public void delete(File attDir, Attachment attachment) throws DAOException {
         Session session = newSession();
 
         try {
             session.delete(attachment);
-            deleteFile(attachment);
+            deleteFile(attDir, attachment);
         } catch (HibernateException e) {
             throw new DAOException("dbDelete failed!", e);
         } catch (Exception e) {
@@ -188,9 +184,9 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      * @return File physical attachment file
      * @throws DAOException
      */
-    public File getFile(Attachment attachment) throws DAOException {
+    public File getFile(File attDir, Attachment attachment) throws DAOException {
 
-        File file = new File(ATTACHMENTS_DIR + File.separator + attachment.getFileId());
+        File file = new File(attDir + File.separator + attachment.getFileId());
         if (!file.canRead()) {
             throw new DAOException("Failed to open file for read!");
         }
@@ -198,8 +194,8 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
         return file;
     }
 
-    public void deleteFile(Attachment attachment) throws DAOException {
-        File file = new File(ATTACHMENTS_DIR + File.separator + attachment.getFileId());
+    public void deleteFile(File attDir, Attachment attachment) throws DAOException {
+        File file = new File(attDir + File.separator + attachment.getFileId());
         try {
             file.delete();
         } catch (Exception ioe) {

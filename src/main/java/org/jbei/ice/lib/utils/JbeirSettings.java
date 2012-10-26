@@ -6,17 +6,16 @@ import org.jbei.ice.lib.logging.Logger;
 
 /**
  * Retrieve setting from the external configuration file.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
+ * @deprecated settings have been moved to the database
  */
 public class JbeirSettings {
 
     /**
      * Retrieve the configuration from file.
-     * 
-     * @param key
-     *            key of the configuration.
+     *
+     * @param key key of the configuration.
      * @return - value associated with the given key.
      */
     public static String getSetting(String key) {
@@ -29,7 +28,7 @@ public class JbeirSettings {
             }
         } catch (Exception e) {
             String msg = "Could not read properties file: " + e.toString();
-            Logger.error(msg, e);
+            Logger.error(msg);
         }
         return result;
     }

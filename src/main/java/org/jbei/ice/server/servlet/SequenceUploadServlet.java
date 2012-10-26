@@ -12,7 +12,8 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import gwtupload.server.UploadAction;
 import gwtupload.server.exceptions.UploadActionException;
@@ -21,10 +22,11 @@ import org.apache.commons.fileupload.FileItem;
 public class SequenceUploadServlet extends UploadAction {
 
     private static final long serialVersionUID = 1L;
-    private final String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
 
     private Account isLoggedIn(AccountController controller, Cookie[] cookies)
             throws ControllerException {
+
+        final String COOKIE_NAME = Utils.getConfigValue(ConfigurationKey.COOKIE_NAME);
 
         for (Cookie cookie : cookies) {
             if (COOKIE_NAME.equals(cookie.getName())) {

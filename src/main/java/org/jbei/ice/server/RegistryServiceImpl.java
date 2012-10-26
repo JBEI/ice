@@ -19,6 +19,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.EntryController;
@@ -51,8 +52,8 @@ import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.Emailer;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.RichTextRenderer;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.utils.UtilsController;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.shared.AutoCompleteField;
@@ -77,7 +78,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public String getSetting(String name) {
-        return JbeirSettings.getSetting(name);
+        try {
+            HibernateHelper.beginTransaction();
+            ConfigurationController controller = new ConfigurationController();
+            String value = controller.getPropertyValue(name);
+            HibernateHelper.commitTransaction();
+            return value;
+        } catch (Exception e) {
+            HibernateHelper.rollbackTransaction();
+            Logger.error(e);
+            return null;
+        }
     }
 
     @Override
@@ -219,7 +230,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         .append("Dear " + info.getEmail() + ", ")
                         .append(
                                 "\n\nThank you for creating a "
-                                        + JbeirSettings.getSetting("PROJECT_NAME"))
+                                        + Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
                         .append(" account. \nBy accessing ")
                         .append("this site with the password provided at the bottom ")
                         .append("you agree to the following terms:\n\n");
@@ -433,7 +444,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             HibernateHelper.commitTransaction();
             return results;
 
-        } catch (ControllerException ce) {
+        } catch (Exception ce) {
             Logger.error(ce);
             HibernateHelper.rollbackTransaction();
             return null;
@@ -1917,10 +1928,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean sendFeedback(String email, String message) {
-        Emailer.send(email, JbeirSettings.getSetting("PROJECT_NAME"),
+        Emailer.send(email, Utils.getConfigValue(ConfigurationKey.PROJECT_NAME),
                      "Thank you for sending your feedback.\n\nBest regards,\nRegistry Team");
-
-        Emailer.send(JbeirSettings.getSetting("ADMIN_EMAIL"), "Registry site feedback", message);
+        Emailer.send(Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL), "Registry site feedback", message);
         return true;
     }
 

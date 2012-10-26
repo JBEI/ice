@@ -11,6 +11,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * ABI to manipulate {@link Attachment}s.
@@ -21,11 +22,13 @@ public class AttachmentController {
 
     private final AttachmentDAO dao;
     private final PermissionsController permissionsController;
+    private final File attachmentFile;
 
 
     public AttachmentController() {
         permissionsController = new PermissionsController();
         dao = new AttachmentDAO();
+        attachmentFile = new File(Utils.getConfigValue(ConfigurationKey.ATTACHMENTS_DIRECTORY));
     }
 
     /**
@@ -102,7 +105,7 @@ public class AttachmentController {
         Attachment result;
 
         try {
-            result = dao.save(attachment, inputStream);
+            result = dao.save(attachmentFile, attachment, inputStream);
         } catch (DAOException e) {
             throw new ControllerException("Failed to save attachment!", e);
         }
@@ -127,7 +130,7 @@ public class AttachmentController {
         }
 
         try {
-            return dao.save(attachment, inputStream);
+            return dao.save(attachmentFile, attachment, inputStream);
         } catch (DAOException e) {
             throw new ControllerException("Failed to save attachment!", e);
         }
@@ -160,7 +163,7 @@ public class AttachmentController {
         }
 
         try {
-            dao.delete(attachment);
+            dao.delete(attachmentFile, attachment);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -203,7 +206,7 @@ public class AttachmentController {
         }
 
         try {
-            return dao.getFile(attachment);
+            return dao.getFile(attachmentFile, attachment);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

@@ -13,6 +13,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * Little wrapper for lbl ldap.
@@ -61,7 +62,7 @@ public class LblLdapAuthenticationWrapper {
             String employeeNumber = "";
 
             //has to look up employee number for binding
-            String query = JbeirSettings.getSetting("LDAP_QUERY");
+            String query = Utils.getConfigValue(ConfigurationKey.LDAP_QUERY);
             String filter = "(uid=" + userName + ")";
             SearchControls cons = new SearchControls();
             cons.setSearchScope(SearchControls.SUBTREE_SCOPE);

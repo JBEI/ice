@@ -32,8 +32,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
  * @author Hector Plahar
  */
 
-public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements
-                                                                               IHasEntryId {
+public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements IHasEntryId {
 
     private final EntrySelectionModel<T> selectionModel;
 

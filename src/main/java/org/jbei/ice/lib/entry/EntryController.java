@@ -27,10 +27,10 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.EntryViewFactory;
 import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
@@ -76,7 +76,7 @@ public class EntryController {
         plasmid = createEntry(account, plasmid, readGroup);
         results.add(plasmid);
 
-        String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
+        String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX) + ":"
                 + plasmid.getOnePartNumber().getPartNumber() + "|" + plasmid.getOneName().getName()
                 + "]]";
         ((Strain) strain).setPlasmids(plasmidPartNumberString);
@@ -93,9 +93,9 @@ public class EntryController {
      */
     private String getNextPartNumber() throws ControllerException {
         try {
-            return dao.generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"),
-                                              JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),
-                                              JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
+            return dao.generateNextPartNumber(Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX),
+                                              Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DELIMITER),
+                                              Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX));
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);

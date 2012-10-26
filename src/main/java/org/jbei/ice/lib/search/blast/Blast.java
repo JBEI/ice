@@ -22,9 +22,9 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -47,16 +47,15 @@ public class Blast {
     private static final String BL2SEQ_COMMAND_PATTERN = "%s -p blastn -i %s -j %s -r 2 -F F";
     private static final String BLASTALL_COMMAND_PATTERN = "%s -p %s -d %s -m 8";
 
-    private static String BLASTALL = JbeirSettings.getSetting("BLAST_BLASTALL");
-    private static String BL2SEQ = JbeirSettings.getSetting("BLAST_BL2SEQ");
-    private static String BLAST_DIRECTORY = JbeirSettings.getSetting("BLAST_DIRECTORY");
+    private static String BLASTALL = Utils.getConfigValue(ConfigurationKey.BLAST_BLASTALL);
+    private static String BL2SEQ = Utils.getConfigValue(ConfigurationKey.BLAST_BL2SEQ);
+    private static String BLAST_DIRECTORY = Utils.getConfigValue(ConfigurationKey.BLAST_DIRECTORY);
     private static String BLAST_DATASE_NAME = BLAST_DIRECTORY + File.separator
-            + JbeirSettings.getSetting("BLAST_DATABASE_NAME");
+            + Utils.getConfigValue(ConfigurationKey.BLAST_DATABASE_NAME);
     private static String BIG_FASTA_FILE = "bigfastafile";
-    private static String FORMAT_LOG_FILE = JbeirSettings.getSetting("BLAST_DATABASE_NAME")
-            + ".log";
+    private static String FORMAT_LOG_FILE = Utils.getConfigValue(ConfigurationKey.BLAST_DATABASE_NAME) + ".log";
 
-    private static String FEATURE_BLAST_DIRECTORY = JbeirSettings.getSetting("BLAST_DIRECTORY")
+    private static String FEATURE_BLAST_DIRECTORY = Utils.getConfigValue(ConfigurationKey.BLAST_DIRECTORY)
             + "_FEATURES";
     private static String FEATURE_BLAST_FILE = "featurefastafile";
 
@@ -132,7 +131,7 @@ public class Blast {
         ArrayList<String> result = new ArrayList<String>();
 
         try {
-            File dataDirectory = new File(JbeirSettings.getSetting("DATA_DIRECTORY"));
+            File dataDirectory = new File(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY));
 
             File queryFile = File.createTempFile("query-", ".seq", dataDirectory);
             FileWriter referenceFileWriter = new FileWriter(queryFile);
@@ -298,7 +297,7 @@ public class Blast {
     private static void formatBlastDb(File fastaFileDir, String fastaFileName, String logFileName,
             String databaseName) throws BlastException {
         ArrayList<String> commands = new ArrayList<String>();
-        commands.add(JbeirSettings.getSetting("BLAST_FORMATDB"));
+        commands.add(Utils.getConfigValue(ConfigurationKey.BLAST_FORMATDB));
         commands.add("-i");
         commands.add(fastaFileName);
         commands.add("-l");
@@ -593,7 +592,7 @@ public class Blast {
                 FileWriter bigFastaWriter = new FileWriter(bigFastaFile);
                 writeBigFastaFile(bigFastaWriter);
                 formatBlastDb(newbigFastaFileDir, BIG_FASTA_FILE, FORMAT_LOG_FILE,
-                              JbeirSettings.getSetting("BLAST_DATABASE_NAME"));
+                              Utils.getConfigValue(ConfigurationKey.BLAST_DATABASE_NAME));
                 setRebuilding(true);
                 renameBlastDb(newbigFastaFileDir, BLAST_DIRECTORY);
                 setRebuilding(false);

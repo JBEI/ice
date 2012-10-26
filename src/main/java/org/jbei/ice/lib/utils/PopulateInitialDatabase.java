@@ -10,9 +10,9 @@ import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.Configuration;
-import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * Populate an empty database with necessary objects and values.
@@ -24,14 +24,6 @@ public class PopulateInitialDatabase {
     public static final String DEFAULT_STRAIN_STORAGE_SCHEME_NAME = "Strain Storage (Default)";
     public static final String DEFAULT_PART_STORAGE_SCHEME_NAME = "Part Storage (Default)";
     public static final String DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME = "Arabidopsis Storage (Default)";
-
-    // Database schema version.
-    // If you are extending the existing schema to suit your needs, we suggest using the
-    // naming scheme "custom-[your institute]-[your version]", as
-    // the system will try to upgrade schemas of known older versions.
-    // Setting the correct parent schema version may help you in the future.
-    public static final String DATABASE_SCHEMA_VERSION = "3.3.0";
-    public static final String PARENT_DATABASE_SCHEMA_VERSION = "3.1.0";
 
     // This is a global "everyone" uuid
     public static String everyoneGroup = "8746a64b-abd5-4838-a332-02c356bbeac0";
@@ -94,7 +86,7 @@ public class PopulateInitialDatabase {
                 strainRoot = new Storage("Strain Storage Root", "Default Strain Storage Root",
                                          StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
                 strainRoot = storageController.save(strainRoot);
-                strainRootConfig = new Configuration(ConfigurationKey.STRAIN_STORAGE_ROOT, strainRoot.getUuid());
+                strainRootConfig = new Configuration(ConfigurationKey.STRAIN_STORAGE_ROOT.name(), strainRoot.getUuid());
                 dao.save(strainRootConfig);
 
                 Storage defaultStrain = new Storage(DEFAULT_STRAIN_STORAGE_SCHEME_NAME,
@@ -107,14 +99,14 @@ public class PopulateInitialDatabase {
                 defaultStrain.setSchemes(schemes);
                 defaultStrain = storageController.save(defaultStrain);
                 dao.save(new Configuration(
-                        ConfigurationKey.STRAIN_STORAGE_DEFAULT, defaultStrain.getUuid()));
+                        ConfigurationKey.STRAIN_STORAGE_DEFAULT.name(), defaultStrain.getUuid()));
             }
 
             if (plasmidRootConfig == null) {
                 plasmidRoot = new Storage("Plasmid Storage Root", "Default Plasmid Storage Root",
                                           StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
                 plasmidRoot = storageController.save(plasmidRoot);
-                plasmidRootConfig = new Configuration(ConfigurationKey.PLASMID_STORAGE_ROOT,
+                plasmidRootConfig = new Configuration(ConfigurationKey.PLASMID_STORAGE_ROOT.name(),
                                                       plasmidRoot.getUuid());
                 dao.save(plasmidRootConfig);
 
@@ -128,7 +120,7 @@ public class PopulateInitialDatabase {
                 defaultPlasmid.setSchemes(schemes);
                 defaultPlasmid = storageController.save(defaultPlasmid);
                 dao.save(new Configuration(
-                        ConfigurationKey.PLASMID_STORAGE_DEFAULT, defaultPlasmid.getUuid()));
+                        ConfigurationKey.PLASMID_STORAGE_DEFAULT.name(), defaultPlasmid.getUuid()));
             }
 
             if (partRootConfig == null) {
@@ -136,7 +128,7 @@ public class PopulateInitialDatabase {
                                        StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
                 partRoot = storageController.save(partRoot);
                 partRoot = storageController.save(partRoot);
-                partRootConfig = new Configuration(ConfigurationKey.PART_STORAGE_ROOT,
+                partRootConfig = new Configuration(ConfigurationKey.PART_STORAGE_ROOT.name(),
                                                    partRoot.getUuid());
                 dao.save(partRootConfig);
 
@@ -149,8 +141,7 @@ public class PopulateInitialDatabase {
                 schemes.add(new Storage("Tube", "", StorageType.TUBE, "", null));
                 defaultPart.setSchemes(schemes);
                 defaultPart = storageController.save(defaultPart);
-                dao.save(new Configuration(ConfigurationKey.PART_STORAGE_DEFAULT,
-                                           defaultPart.getUuid()));
+                dao.save(new Configuration(ConfigurationKey.PART_STORAGE_DEFAULT.name(), defaultPart.getUuid()));
             }
             if (arabidopsisRootConfig == null) {
                 arabidopsisSeedRoot = new Storage("Arabidopsis Storage Root",
@@ -158,7 +149,7 @@ public class PopulateInitialDatabase {
                                                   AccountController.SYSTEM_ACCOUNT_EMAIL, null);
                 arabidopsisSeedRoot = storageController.save(arabidopsisSeedRoot);
                 arabidopsisRootConfig = new Configuration(
-                        ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT, arabidopsisSeedRoot.getUuid());
+                        ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT.name(), arabidopsisSeedRoot.getUuid());
                 dao.save(arabidopsisRootConfig);
 
                 Storage defaultArabidopsis = new Storage(DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME,
@@ -171,7 +162,8 @@ public class PopulateInitialDatabase {
                 schemes.add(new Storage("Tube Barcode", "", StorageType.TUBE, "", null));
                 defaultArabidopsis.setSchemes(schemes);
                 defaultArabidopsis = storageController.save(defaultArabidopsis);
-                dao.save(new Configuration(ConfigurationKey.ARABIDOPSIS_STORAGE_DEFAULT, defaultArabidopsis.getUuid()));
+                dao.save(new Configuration(ConfigurationKey.ARABIDOPSIS_STORAGE_DEFAULT.name(),
+                                           defaultArabidopsis.getUuid()));
             }
         } catch (DAOException e) {
             throw new UtilityException(e);

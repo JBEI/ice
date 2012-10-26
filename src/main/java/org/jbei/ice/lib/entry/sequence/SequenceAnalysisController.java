@@ -31,6 +31,7 @@ import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * ABI to manipulate DNA sequence trace analysis
@@ -41,10 +42,12 @@ public class SequenceAnalysisController {
 
     private final TraceSequenceDAO traceDao;
     private final PermissionsController permissionsController;
+    private final File traceSequenceFileDir;
 
     public SequenceAnalysisController() {
         traceDao = new TraceSequenceDAO();
         permissionsController = new PermissionsController();
+        traceSequenceFileDir = new File(Utils.getConfigValue(ConfigurationKey.TRACE_FILES_DIRECTORY));
     }
 
     /**
@@ -91,7 +94,7 @@ public class SequenceAnalysisController {
                                                         date);
 
         try {
-            return traceDao.create(traceSequence, inputStream);
+            return traceDao.create(traceSequenceFileDir, traceSequence, inputStream);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -135,7 +138,7 @@ public class SequenceAnalysisController {
         }
 
         try {
-            traceDao.delete(traceSequence);
+            traceDao.delete(traceSequenceFileDir, traceSequence);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -240,7 +243,7 @@ public class SequenceAnalysisController {
     public File getFile(TraceSequence traceSequence) throws ControllerException {
 
         try {
-            return traceDao.getFile(traceSequence);
+            return TraceSequenceDAO.getFile(traceSequenceFileDir, traceSequence);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

@@ -3,8 +3,6 @@ package org.jbei.ice.lib.entry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,8 +11,8 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import com.google.common.base.Joiner;
 
@@ -24,20 +22,6 @@ import com.google.common.base.Joiner;
  * @author Hector Plahar
  */
 public class EntryUtil {
-
-    /**
-     * Generate the options map of entry types containing friendly names for entryType field.
-     *
-     * @return Map of entry types and names.
-     */
-    public static Map<String, String> getEntryTypeOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-        for (EntryType type : EntryType.values()) {
-            resultMap.put(type.getName(), type.getDisplay());
-        }
-
-        return resultMap;
-    }
 
     /**
      * Generate the comma separated string representation of {@link org.jbei.ice.lib.entry.model.PartNumber}s
@@ -77,7 +61,7 @@ public class EntryUtil {
             id = entry.getId();
         }
 
-        String descriptiveLabel = "";
+        String descriptiveLabel;
         if (iceLink.getDescriptiveLabel() == null) {
             descriptiveLabel = iceLink.getPartNumber();
         } else if (iceLink.getDescriptiveLabel().equals("")) {
@@ -87,7 +71,6 @@ public class EntryUtil {
         }
 
         result = "<a href=/entry/view/" + id + ">" + descriptiveLabel + "</a>";
-
         return result;
     }
 
@@ -198,13 +181,11 @@ public class EntryUtil {
 
         try {
             EntryController entryController = new EntryController();
+            String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
 
-            Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                    "WIKILINK_PREFIX") + ":.*?\\]\\]");
-            Pattern partNumberPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                    "WIKILINK_PREFIX") + ":(.*)\\]\\]");
-            Pattern descriptivePattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                    "WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
+            Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLink + ":.*?\\]\\]");
+            Pattern partNumberPattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\]\\]");
+            Pattern descriptivePattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\|(.*)\\]\\]");
 
             if (text == null) {
                 return "";

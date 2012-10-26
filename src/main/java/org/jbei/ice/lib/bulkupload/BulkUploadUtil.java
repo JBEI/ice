@@ -18,11 +18,12 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.GroupInfo;
 
@@ -32,7 +33,6 @@ import org.jbei.ice.shared.dto.GroupInfo;
  * @author Hector Plahar
  */
 public class BulkUploadUtil {
-    private final static String TMP_DIR = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
 
     public static BulkUploadInfo modelToInfo(BulkUpload model) {
 
@@ -108,12 +108,10 @@ public class BulkUploadUtil {
 
     public static Entry getPartNumberForStrainPlasmid(Account account, EntryController controller, String text) {
 
-        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                "WIKILINK_PREFIX") + ":.*?\\]\\]");
-        Pattern partNumberPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                "WIKILINK_PREFIX") + ":(.*)\\]\\]");
-        Pattern descriptivePattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                "WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
+        String wikiLinkPrefix = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
+        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLinkPrefix + ":.*?\\]\\]");
+        Pattern partNumberPattern = Pattern.compile("\\[\\[" + wikiLinkPrefix + ":(.*)\\]\\]");
+        Pattern descriptivePattern = Pattern.compile("\\[\\[" + wikiLinkPrefix + ":(.*)\\|(.*)\\]\\]");
 
         if (text == null) {
             return null;
@@ -148,7 +146,7 @@ public class BulkUploadUtil {
 
     public static InputStream getFileInputStream(String fileName) {
 
-        File file = new File(TMP_DIR + File.separator + fileName);
+        File file = new File(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY) + File.separator + fileName);
         if (!file.exists())
             return null;
 

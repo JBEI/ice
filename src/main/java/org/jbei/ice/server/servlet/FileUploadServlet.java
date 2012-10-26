@@ -27,9 +27,9 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.FileUtils;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import gwtupload.server.UploadAction;
 import gwtupload.server.exceptions.UploadActionException;
@@ -103,7 +103,7 @@ public class FileUploadServlet extends UploadAction {
         }
 
         String result = "";
-        String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+        String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
 
         // retrieve file
         for (FileItem item : sessionFiles) {

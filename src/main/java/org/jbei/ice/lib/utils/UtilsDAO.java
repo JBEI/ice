@@ -19,6 +19,7 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -222,13 +223,11 @@ public class UtilsDAO extends HibernateRepository {
             throws DAOException {
         LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
         EntryController entryController = new EntryController();
+        String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
 
-        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                "WIKILINK_PREFIX") + ":.*?\\]\\]");
-        Pattern partNumberPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                "WIKILINK_PREFIX") + ":(.*)\\]\\]");
-        Pattern descriptivePattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                "WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
+        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLink + ":.*?\\]\\]");
+        Pattern partNumberPattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\]\\]");
+        Pattern descriptivePattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\|(.*)\\]\\]");
 
         AccountController accountController = new AccountController();
         HashSet<Long> strainIds;

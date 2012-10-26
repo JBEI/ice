@@ -172,8 +172,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
     protected DataTableColumn<SafeHtml> addNameColumn(final double width, Unit unit) {
 
-        DataTableColumn<SafeHtml> nameColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(),
-                                                                             ColumnField.NAME) {
+        DataTableColumn<SafeHtml> nameColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(), ColumnField.NAME) {
 
             @Override
             public SafeHtml getValue(T object) {

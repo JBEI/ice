@@ -75,10 +75,10 @@ public class ProfileView extends AbstractLayout implements IProfileView {
             mainContent.setWidget(1, 0, widget);
         } else {
             String lastLogin = DateUtilities.formatMediumDate(info.getLastLogin());
-            contentHeader.setHTML("<span style=\"margin-left: 12px; font-size: 11px; "
-                                          + " background-color: #92AFD7;"
+            contentHeader.setHTML("<span style=\"margin-left: 12px; font-size: 11px; background-color: #92AFD7; "
+                                          + "text-shadow: #555 1px 1px 1px; color: #fefefe;"
                                           + " padding: 5px; -webkit-border-radius: 2px; border-radius: 2px;"
-                                          + "-moz-border-radius: 2px;\">Last Login: " + lastLogin + "</span>"
+                                          + "-moz-border-radius: 2px; \">Last Login: " + lastLogin + "</span>"
                                           + "<span style=\"margin-left: 65px; font-size: 2em; color: #777; "
                                           + "font-weight: bold;"
                                           + "text-transform: uppercase;\">" + info.getFullName() + "</span>"

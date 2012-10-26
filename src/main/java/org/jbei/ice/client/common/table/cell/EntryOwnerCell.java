@@ -10,17 +10,11 @@ public abstract class EntryOwnerCell<T> extends AbstractCell<T> {
     @Override
     public void render(Context context, T value, SafeHtmlBuilder sb) {
         String owner = getOwnerName(value);
-        String ownerEmail = getOwnerEmail(value);
-
-        if (ownerEmail == null || ownerEmail.isEmpty()) {
-            sb.appendHtmlConstant("<i>" + owner + "</i>");
-            return;
-        }
-
-        sb.appendHtmlConstant("<a href=\"#" + Page.PROFILE.getLink() + ";id=" + ownerEmail + "\">" + owner + "</a>");
+        String ownerId = getOwnerId(value);
+        sb.appendHtmlConstant("<a href=\"#" + Page.PROFILE.getLink() + ";id=" + ownerId + "\">" + owner + "</a>");
     }
 
     public abstract String getOwnerName(T value);
 
-    public abstract String getOwnerEmail(T value);
+    public abstract String getOwnerId(T value);
 }

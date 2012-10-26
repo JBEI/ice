@@ -1,16 +1,18 @@
 package org.jbei.ice.lib.composers.formatters;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
+
 import org.sbolstandard.core.DnaComponent;
 import org.sbolstandard.core.DnaSequence;
 import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
 
 /**
  * Format to SBOL v 1.1 using libSBOLj
@@ -26,7 +28,7 @@ public class SbolFormatter extends AbstractFormatter {
     public void format(Sequence sequence, OutputStream outputStream) throws FormatterException,
             IOException {
         DnaComponent dnaComponent = SBOLFactory.createDnaComponent();
-        String uriString = JbeirSettings.getSetting("URI_PREFIX");
+        String uriString = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
         Entry entry = sequence.getEntry();
 
         // Set required properties

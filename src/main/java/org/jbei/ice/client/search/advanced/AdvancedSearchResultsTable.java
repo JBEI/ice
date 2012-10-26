@@ -92,8 +92,8 @@ public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<Searc
             }
 
             @Override
-            public String getOwnerEmail(SearchResultInfo value) {
-                return value.getEntryInfo().getOwnerEmail();
+            public String getOwnerId(SearchResultInfo value) {
+                return value.getEntryInfo().getId() + "";
             }
         };
 
@@ -120,7 +120,7 @@ public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<Searc
 
         scoreColumn.setSortable(true);
         this.addColumn(scoreColumn, "Relevance");
-        this.setColumnWidth(scoreColumn, 120, Unit.PX);
+        this.setColumnWidth(scoreColumn, 90, Unit.PX);
         return scoreColumn;
     }
 

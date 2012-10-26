@@ -481,6 +481,6 @@
     </reporting>
     <properties>
         <jetty.version>6.1.26</jetty.version>
-        <gwtVersion>2.4.0</gwtVersion>
+        <gwtVersion>2.5.0-rc2</gwtVersion>
     </properties>
 </project>

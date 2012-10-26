@@ -3,7 +3,7 @@ package org.jbei.ice.lib.config;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.models.Configuration;
-import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -28,7 +28,7 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
     }
 
     /**
-     * Retrieve the {@link Configuration} object with the given {@link ConfigurationKey}.
+     * Retrieve the {@link Configuration} object with the given {@link org.jbei.ice.shared.dto.ConfigurationKey}.
      *
      * @param key
      * @return Configuration
@@ -40,7 +40,7 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
 
         try {
             Query query = session.createQuery("from " + Configuration.class.getName() + " where key = :key");
-            query.setParameter("key", key);
+            query.setString("key", key.name());
             Object queryResult = query.uniqueResult();
 
             if (queryResult != null) {
@@ -54,4 +54,26 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
 
         return configuration;
     }
+
+    public Configuration get(String key) throws DAOException {
+        Configuration configuration = null;
+        Session session = newSession();
+
+        try {
+            Query query = session.createQuery("from " + Configuration.class.getName() + " where key = " + key);
+//            query.setParameter("key", key);
+            Object queryResult = query.uniqueResult();
+
+            if (queryResult != null) {
+                configuration = (Configuration) queryResult;
+            }
+        } catch (HibernateException e) {
+            throw new DAOException("Failed to get Configuration using key: " + key, e);
+        } finally {
+            closeSession(session);
+        }
+
+        return configuration;
+    }
 }
+

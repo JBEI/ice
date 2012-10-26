@@ -18,9 +18,9 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.session.PersistentSessionDataWrapper;
 import org.jbei.ice.lib.utils.Emailer;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * ABI to manipulate {@link Account} objects.
@@ -81,7 +81,7 @@ public class AccountController {
         save(account);
 
         if (sendEmail && url != null && !url.isEmpty()) {
-            String subject = JbeirSettings.getSetting("PROJECT_NAME") + " Password Reminder";
+            String subject = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME) + " Password Reminder";
             String body = "Someone (maybe you) have requested to reset your password.\n\n";
             body = body + "Your new password is " + newPassword + ".\n\n";
             body = body + "Please go to the following link and change your password.\n\n";

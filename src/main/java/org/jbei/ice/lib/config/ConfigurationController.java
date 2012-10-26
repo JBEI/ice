@@ -4,6 +4,8 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Configuration;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * @author Hector Plahar
@@ -18,7 +20,7 @@ public class ConfigurationController {
     public String retrieveDatabaseVersion() throws ControllerException {
 
         try {
-            Configuration configuration = dao.get(Configuration.ConfigurationKey.DATABASE_SCHEMA_VERSION);
+            Configuration configuration = dao.get(ConfigurationKey.DATABASE_SCHEMA_VERSION);
             if (configuration == null)
                 throw new ControllerException("Could not retrieve database schema record");
 
@@ -31,9 +33,52 @@ public class ConfigurationController {
 
     public void updateDatabaseVersion(String newVersion) throws ControllerException {
         try {
-            Configuration configuration = dao.get(Configuration.ConfigurationKey.DATABASE_SCHEMA_VERSION);
+            Configuration configuration = dao.get(ConfigurationKey.DATABASE_SCHEMA_VERSION);
             configuration.setValue(newVersion);
             dao.save(configuration);
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+    }
+
+    // upgrade config from pre version 3.3.0. goes through the propery file and just
+    // saves the value in the database
+    public void upgradeConfiguration() throws ControllerException {
+        Logger.info("Upgrading configuration");
+        try {
+            for (ConfigurationKey type : ConfigurationKey.values()) {
+                String value = JbeirSettings.getSetting(type.name());
+                Configuration config = dao.get(type);
+                if (config == null)
+                    config = new Configuration(type.name(), value);
+                else
+                    config.setValue(value);
+                Logger.info("Adding {key, value} -> " + type.name() + ", " + value);
+                dao.save(config);
+            }
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+    }
+
+    public String getPropertyValue(ConfigurationKey key) throws ControllerException {
+
+        try {
+            Configuration config = dao.get(key);
+            if (config == null)
+                throw new ControllerException("Could not retrieve config with key " + key.name());
+            return config.getValue();
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+    }
+
+    public String getPropertyValue(String key) throws ControllerException {
+        try {
+            Configuration config = dao.get(key);
+            if (config == null)
+                throw new ControllerException("Could not retrieve config with key " + key);
+            return config.getValue();
         } catch (DAOException de) {
             throw new ControllerException(de);
         }

@@ -43,6 +43,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.vo.AttachmentData;
 import org.jbei.ice.lib.vo.CompleteEntry;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -575,6 +576,7 @@ public class IceXmlSerializer {
 
 
 
+
                                                                                                        .getPackageFormat()
                                                                                                        .toString())));
         } else if (entry.getRecordType().equals(ARABIDOPSIS)) {
@@ -629,6 +631,8 @@ public class IceXmlSerializer {
      * @throws UtilityException
      */
     private static Element getExperimentElement(Entry entry) throws UtilityException {
+        String traceFilePath = Utils.getConfigValue(ConfigurationKey.TRACE_FILES_DIRECTORY);
+
         Element result = null;
         DefaultElement expElement = new DefaultElement(EXP, expNamespace);
         DefaultElement tracesElement = new DefaultElement(SEQUENCE_TRACES, expNamespace);
@@ -647,7 +651,7 @@ public class IceXmlSerializer {
                 File traceFile;
                 String traceString;
                 try {
-                    traceFile = TraceSequenceDAO.getFile(trace);
+                    traceFile = TraceSequenceDAO.getFile(new File(traceFilePath), trace);
                     traceString = SerializationUtils
                             .serializeBytesToBase64String(org.apache.commons.io.FileUtils
                                                                                .readFileToByteArray(traceFile));

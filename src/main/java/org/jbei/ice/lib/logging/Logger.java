@@ -2,31 +2,31 @@ package org.jbei.ice.lib.logging;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import javax.mail.MessagingException;
 
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.utils.Emailer;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * Logger for gd-ice.
- * <p>
+ * <p/>
  * Contains static methods for different log levels, using the log configuration defined in the
  * settings file.
- * <p>
+ * <p/>
  * For Errors and Fatal levels, send out an email, according to the configuration.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 public class Logger {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
-            .getLogger("org.jbei.ice.system");
+                                                                          .getLogger("org.jbei.ice.system");
 
     /**
      * Log a message at the DEBUG level.
-     * 
+     *
      * @param msg
      */
     public static void debug(String msg) {
@@ -35,7 +35,7 @@ public class Logger {
 
     /**
      * Log a message at the INFO level.
-     * 
+     *
      * @param msg
      */
     public static void info(String msg) {
@@ -44,7 +44,7 @@ public class Logger {
 
     /**
      * Log a message at the WARN level.
-     * 
+     *
      * @param msg
      */
     public static void warn(String msg) {
@@ -53,7 +53,7 @@ public class Logger {
 
     /**
      * Log a message at the ERROR level.
-     * 
+     *
      * @param msg
      */
     public static void error(String msg) {
@@ -63,10 +63,10 @@ public class Logger {
 
     /**
      * Log a message at the ERROR level, with the Throwable e.
-     * <p>
+     * <p/>
      * This method is preferred over error with only the message, as the stack trace is included in
      * the generated error message.
-     * 
+     *
      * @param msg
      * @param e
      */
@@ -78,7 +78,7 @@ public class Logger {
 
     /**
      * Log a Throwable e.
-     * 
+     *
      * @param e
      */
     public static void error(Throwable e) {
@@ -89,7 +89,7 @@ public class Logger {
 
     /**
      * Log a message at the fatal level.
-     * 
+     *
      * @param msg
      */
 
@@ -100,7 +100,7 @@ public class Logger {
 
     /**
      * Log a message at the fatal level, with Throwable e.
-     * 
+     *
      * @param msg
      * @param e
      */
@@ -112,30 +112,29 @@ public class Logger {
 
     /**
      * Send an email to the address in the configuration.
-     * 
+     *
      * @param message
      * @param e
      */
     private static void sendEmail(String message, Throwable e) {
-        if (e instanceof MessagingException) {
+        if (e instanceof MessagingException || e instanceof ControllerException || e instanceof DAOException) {
             // if error is "Can't send email", there is no need to try to send email
         } else {
-            if (JbeirSettings.getSetting("SEND_EMAIL_ON_ERRORS").equals("YES")) {
+            if (Utils.getConfigValue(ConfigurationKey.SEND_EMAIL_ON_ERRORS).equals("YES")) {
 
                 SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
                 body = body + message;
                 String subject = "Error";
-                Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + " "
-                        + subject, body);
-
+                Emailer.error(Utils.getConfigValue(ConfigurationKey.ERROR_EMAIL_EXCEPTION_PREFIX) + " "
+                                      + subject, body);
             }
         }
     }
 
     /**
      * Send an email to the address in the configuration.
-     * 
+     *
      * @param msg
      */
     private static void sendEmail(String msg) {

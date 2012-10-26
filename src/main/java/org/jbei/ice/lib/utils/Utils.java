@@ -10,6 +10,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
 
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.shared.dto.ConfigurationKey;
+
 /**
  * General utility methods.
  *
@@ -139,5 +144,15 @@ public class Utils {
      */
     public static String generateUUID() {
         return UUID.randomUUID().toString();
+    }
+
+    public static String getConfigValue(ConfigurationKey key) {
+        ConfigurationController controller = new ConfigurationController();
+        try {
+            return controller.getPropertyValue(key);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
     }
 }
