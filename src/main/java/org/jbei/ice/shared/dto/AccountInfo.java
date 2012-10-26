@@ -1,9 +1,12 @@
 package org.jbei.ice.shared.dto;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class AccountInfo implements IsSerializable {
 
+    private long id;
     private String sessionId;
     private String email;
     private String initials;
@@ -12,7 +15,7 @@ public class AccountInfo implements IsSerializable {
     private String institution;
     private String description;
     private String since;
-    private String lastLogin;
+    private Date lastLogin;
     private long userEntryCount;
     private int userSampleCount;
     private long visibleEntryCount;
@@ -121,11 +124,19 @@ public class AccountInfo implements IsSerializable {
         this.initials = initials;
     }
 
-    public String getLastLogin() {
-        return "Feb 20, 2030";
+    public Date getLastLogin() {
+        return lastLogin;
     }
 
-    public void setLastLogin(String lastLogin) {
-        this.lastLogin = lastLogin;
+    public void setLastLogin(Date date) {
+        this.lastLogin = date;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

@@ -304,13 +304,7 @@ public class AccountController {
     public SessionData authenticate(String login, String password, String ip)
             throws InvalidCredentialsException, ControllerException {
         SessionData result = null;
-        IAuthenticationBackend authenticationBackend = null;
-
-        try {
-            Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password bruteforce hacking
-        } catch (InterruptedException e) {
-            throw new ControllerException(e);
-        }
+        IAuthenticationBackend authenticationBackend;
 
         try {
             authenticationBackend = AuthenticationBackendManager.loadAuthenticationBackend();
@@ -318,10 +312,15 @@ public class AccountController {
             throw new ControllerException(e);
         }
 
-        Account account = null;
+        Account account;
         try {
             account = authenticationBackend.authenticate(login, password);
         } catch (AuthenticationBackendException e2) {
+            try {
+                Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password bruteforce hacking
+            } catch (InterruptedException e) {
+                throw new ControllerException(e);
+            }
             throw new InvalidCredentialsException(e2);
         }
 
@@ -370,6 +369,8 @@ public class AccountController {
         if (info == null)
             return info;
 
+        info.setLastLogin(account.getLastLoginTime());
+        info.setId(account.getId());
         boolean isModerator = isAdministrator(account);
         info.setAdmin(isModerator);
         info.setSessionId(sessionData.getSessionKey());

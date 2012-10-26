@@ -17,11 +17,11 @@ import org.hibernate.Session;
  *
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
-public class SessionDAO extends HibernateRepository {
+public class SessionDAO extends HibernateRepository<SessionData> {
     /**
      * Retrieve {@link SessionData} object by its sessionKey.
      *
-     * @param sessionKey
+     * @param sessionKey session key
      * @return SessionData object.
      * @throws DAOException
      */
@@ -56,7 +56,7 @@ public class SessionDAO extends HibernateRepository {
     /**
      * Retrieve the {@link SessionData} object associated with the given {@link Account}.
      *
-     * @param account
+     * @param account associated account
      * @return SessionData object. Null if the session does not exist, the user has logged out, or
      *         session has expired.
      * @throws DAOException
@@ -91,14 +91,14 @@ public class SessionDAO extends HibernateRepository {
     /**
      * Save the given {@link SessionData} object in the database.
      *
-     * @param sessionData
+     * @param sessionData object to save
      * @return Saved SessionData object.
      * @throws DAOException
      */
     public SessionData save(SessionData sessionData) throws DAOException {
-        SessionData result = null;
+        SessionData result;
         try {
-            result = (SessionData) super.saveOrUpdate(sessionData);
+            result = super.saveOrUpdate(sessionData);
 
         } catch (Exception e) {
             String msg = "Could not save SessionData " + sessionData.getSessionKey() + e.toString();
@@ -114,7 +114,7 @@ public class SessionDAO extends HibernateRepository {
     /**
      * Delete the given {@link SessionData} object in the database.
      *
-     * @param sessionData
+     * @param sessionData object to delete
      * @throws DAOException
      */
     public void delete(SessionData sessionData) throws DAOException {

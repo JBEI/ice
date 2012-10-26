@@ -6,6 +6,7 @@ import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.client.profile.widget.EditProfilePanel;
 import org.jbei.ice.client.profile.widget.ProfilePanel;
 import org.jbei.ice.client.profile.widget.UserOption;
+import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -73,10 +74,11 @@ public class ProfileView extends AbstractLayout implements IProfileView {
             Label widget = new Label("Could not retrieve user account information. Please try again.");
             mainContent.setWidget(1, 0, widget);
         } else {
+            String lastLogin = DateUtilities.formatMediumDate(info.getLastLogin());
             contentHeader.setHTML("<span style=\"margin-left: 12px; font-size: 11px; "
                                           + " background-color: #92AFD7;"
                                           + " padding: 5px; -webkit-border-radius: 2px; border-radius: 2px;"
-                                          + "-moz-border-radius: 2px;\">Last Login: " + info.getLastLogin() + "</span>"
+                                          + "-moz-border-radius: 2px;\">Last Login: " + lastLogin + "</span>"
                                           + "<span style=\"margin-left: 65px; font-size: 2em; color: #777; "
                                           + "font-weight: bold;"
                                           + "text-transform: uppercase;\">" + info.getFullName() + "</span>"

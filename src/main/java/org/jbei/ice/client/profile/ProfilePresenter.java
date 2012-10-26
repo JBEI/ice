@@ -17,6 +17,7 @@ import org.jbei.ice.client.profile.widget.UserOption;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -144,7 +145,8 @@ public class ProfilePresenter extends AbstractPresenter {
             public void onSuccess(String result) {
                 if ("yes".equalsIgnoreCase(result) || "true".equalsIgnoreCase(result)) {
                     // must be admin or current logged in user
-                    if (AppController.accountInfo.isAdmin() || AppController.accountInfo.getEmail().equals(userId))
+                    String uid = AppController.accountInfo.getId() + "";
+                    if (AppController.accountInfo.isAdmin() || uid.equals(userId))
                         display.addEditProfileLinkHandler(new EditProfileHandler());
                 }
             }
@@ -162,13 +164,15 @@ public class ProfilePresenter extends AbstractPresenter {
             public void onSuccess(String result) {
                 if ("yes".equalsIgnoreCase(result) || "true".equalsIgnoreCase(result)) {
                     // must be currently logged in user to change password
-                    if (AppController.accountInfo.getEmail().equals(userId))
+                    String uid = AppController.accountInfo.getId() + "";
+                    if (uid.equals(userId))
                         display.addChangePasswordLinkHandler(new ChangePasswordHandler());
                 }
             }
 
             @Override
             public void onFailure(Throwable caught) {
+                GWT.log(caught.getMessage());
             }
         });
     }

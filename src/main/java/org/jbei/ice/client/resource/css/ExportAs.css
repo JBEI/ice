@@ -25,7 +25,6 @@
 
 .subMenuExport[disabled] {
     height: 26px;
-    cursor: pointer;
     color: #393939;
     font-weight: bold;
     font-size: 0.75em;
@@ -36,12 +35,18 @@
     -webkit-border-radius: 2px;
     border-radius: 2px;
     font-family: Arial;
-    opacity: 0.3;
+    opacity: 0.4;
+    background-image: -webkit-linear-gradient(top, #f1f1f1, #F2F2F2);
+    background-image: -o-linear-gradient(top, #f1f1f1, #F2F2F2);
+    background-image: linear-gradient(to bottom, #f1f1f1, #F2F2F2);
+    background-image: -moz-linear-gradient(top, #f1f1f1, #F2F2F2);
 }
 
 .subMenuExport[disabled]:hover {
     cursor: default;
     box-shadow: 0 0 0 0 #ddd;
+    border-top: 2px solid #f1f1f1;
+    border-top: 1px solid #c2c2c2;
 }
 
 .cellListKeyboardSelectedItem {

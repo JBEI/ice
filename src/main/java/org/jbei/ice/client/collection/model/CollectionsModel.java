@@ -132,7 +132,7 @@ public class CollectionsModel {
     }
 
     public void retrieveEntriesForCurrentUser(final FolderRetrieveEventHandler handler) {
-        service.retrieveUserEntries(AppController.sessionId, AppController.accountInfo.getEmail(),
+        service.retrieveUserEntries(AppController.sessionId, AppController.accountInfo.getId() + "",
                                     new AsyncCallback<FolderDetails>() {
 
                                         @Override

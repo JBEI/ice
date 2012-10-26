@@ -11,6 +11,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
@@ -20,7 +21,7 @@ public abstract class PullDownOptions<T> extends Composite {
 
     private final CellList<T> options;
     private final PopupHandler popupHandler;
-    private final SingleSelectionModel<T> optionSelection;
+    protected final SingleSelectionModel<T> optionSelection;
 
     interface PullDownListResource extends CellList.Resources {
 
@@ -42,16 +43,26 @@ public abstract class PullDownOptions<T> extends Composite {
         }, PullDownListResource.INSTANCE);
         options.setWidth("110px");
 
-        HTML label = new HTML(labelString + " <i class=\"" + FAIconType.CARET_DOWN.getStyleName()
-                                      + " font-75em\"></i>");
-        label.setStyleName("pull_down_as_link");
-        initWidget(label);
+        HTMLPanel panel = new HTMLPanel("<span id=\"header_user_label\"> <span id=\"header_caret\"></span></span>");
+        panel.setStyleName("pull_down_as_link");
 
-        addClickHandler(label);
+        Icon caret = new Icon(FAIconType.CARET_DOWN);
+        caret.addStyleName("font-75em");
+
+        HTML label = new HTML(labelString);
+        panel.add(label, "header_user_label");
+        panel.add(caret, "header_caret");
+        initWidget(panel);
+
+        addClickHandler(caret);
         optionSelection = new SingleSelectionModel<T>();
         options.setSelectionModel(optionSelection);
 
         popupHandler = new PopupHandler(options, label.getElement(), 0, 0, false);
+    }
+
+    public SingleSelectionModel<T> getSelectionModel() {
+        return this.optionSelection;
     }
 
     protected void addClickHandler(HasClickHandlers label) {

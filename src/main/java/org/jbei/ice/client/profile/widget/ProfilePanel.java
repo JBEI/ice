@@ -44,7 +44,8 @@ public class ProfilePanel extends Composite {
     }
 
     public void setAccountInfo(AccountInfo info) {
-        panel.setHTML("<span style=\"padding-top: 10px; font-size: 0.80em; x\"> " + info.getDescription() + "</span>");
+        panel.setHTML(
+                "<span style=\"padding: 10px 0 0 3px; font-size: 0.95em; x\"> " + info.getDescription() + "</span>");
         table.setWidget(1, 0, panel);
     }
 

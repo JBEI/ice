@@ -13,6 +13,7 @@ import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -20,6 +21,7 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -44,6 +46,7 @@ public class HeaderView extends Composite {
     private Button searchBtn;
     private final AdvancedSearchWidget widgetAdvanced;
     private final HeaderPresenter presenter;
+    private FlexTable loggedInContentsPanel;
 
     public HeaderView() {
         Widget searchPanel = createSearchPanel();
@@ -151,43 +154,55 @@ public class HeaderView extends Composite {
      *         controller/presenter
      */
     private Widget createLoggedInContents() {
-        HorizontalPanel panel = new HorizontalPanel();
-        panel.setStyleName("float_right");
-        panel.addStyleName("font-80em");
-        panel.addStyleName("pad-right-10");
+        loggedInContentsPanel = new FlexTable();
+        loggedInContentsPanel.setCellPadding(0);
+        loggedInContentsPanel.setCellSpacing(0);
+        loggedInContentsPanel.setStyleName("float_right");
+        loggedInContentsPanel.addStyleName("font-80em");
+        loggedInContentsPanel.addStyleName("pad-right-10");
 
         if (AppController.accountInfo == null) {
-            panel.add(new HTML(SafeHtmlUtils.EMPTY_SAFE_HTML));
-            return panel;
+            loggedInContentsPanel.add(new HTML(SafeHtmlUtils.EMPTY_SAFE_HTML));
+            return loggedInContentsPanel;
         }
 
-        AccountInfo info = AppController.accountInfo;
+        final AccountInfo info = AppController.accountInfo;
 
         // user
-        panel.add(new HTML("&nbsp;"));
-        UserOptionsWidget widget = new UserOptionsWidget(info.getEmail(), "");
-        panel.add(widget);
+        HTML label = new HTML(info.getEmail());
+        label.setStyleName("pull_down_as_link");
+        label.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                History.newItem(Page.PROFILE.getLink() + ";id=" + info.getId());
+            }
+        });
+        loggedInContentsPanel.setWidget(0, 0, label);
 
         // pipe
         HTML pipe = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
         pipe.addStyleName("color_eee");
-        panel.add(pipe);
+        loggedInContentsPanel.setWidget(0, 1, pipe);
 
         // messages
-        panel.add(new HTML("<span class=\"badge\">2</span>"));
+        loggedInContentsPanel.setWidget(0, 2, new HTML("<span class=\"badge\">2</span>"));
 
         // pipe
         HTML pipe3 = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
         pipe3.addStyleName("color_eee");
-        panel.add(pipe3);
+        loggedInContentsPanel.setWidget(0, 3, pipe3);
 
         // logout link
-        panel.add(new Icon(FAIconType.SIGNOUT));
-        panel.add(new HTML("&nbsp;"));
+        loggedInContentsPanel.setWidget(0, 4, new Icon(FAIconType.SIGNOUT));
+        loggedInContentsPanel.setWidget(0, 5, new HTML("&nbsp;"));
         Hyperlink logout = new Hyperlink("Log Out", Page.LOGOUT.getLink());
-        panel.add(logout);
+        loggedInContentsPanel.setWidget(0, 6, logout);
 
-        return panel;
+        return loggedInContentsPanel;
+    }
+
+    public void setNewMessages(int newMessageCount) {
+
     }
 
     public String getSearchInput() {

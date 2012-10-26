@@ -111,6 +111,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             HibernateHelper.commitTransaction();
             return info;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by " + name);
@@ -156,6 +157,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 info.setAdmin(controller.isAdministrator(userAccount));
                 info.setFirstName(userAccount.getFirstName());
                 info.setLastName(userAccount.getLastName());
+                info.setLastLogin(userAccount.getLastLoginTime());
+                info.setId(account.getId());
                 infos.add(info);
             }
 
@@ -260,6 +263,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return null;
 
         AccountInfo info = new AccountInfo();
+        info.setLastLogin(account.getLastLoginTime());
+        info.setId(account.getId());
         info.setEmail(account.getEmail());
         info.setFirstName(account.getFirstName());
         info.setLastName(account.getLastName());
@@ -271,6 +276,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
         Account account;
         AccountController controller = new AccountController();
+        HibernateHelper.beginTransaction();
 
         try {
             account = retrieveAccountForSid(sid);
@@ -285,18 +291,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             account.setIsSubscribed(1);
             account.setModificationTime(Calendar.getInstance().getTime());
-
             account.setFirstName(info.getFirstName());
             account.setLastName(info.getLastName());
             account.setInitials(info.getInitials());
             account.setInstitution(info.getInstitution());
             account.setDescription(info.getDescription());
-
             controller.save(account);
+            HibernateHelper.commitTransaction();
 
             return info;
 
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
             return null;
         }
@@ -341,9 +347,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public boolean logout(String sessionId) {
         Logger.info("De-authenticating session \"" + sessionId + "\"");
         try {
+            HibernateHelper.beginTransaction();
             AccountController.deauthenticate(sessionId);
+            HibernateHelper.commitTransaction();
             return true;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
             return false;
         }
@@ -487,7 +496,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
             ArrayList<Long> contents = folderController.getFolderContents(folderId);
-
             details.setContents(contents);
 
             if (contents.size() > 0) {
@@ -512,19 +520,23 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             HibernateHelper.beginTransaction();
             Account account = this.retrieveAccountForSid(sid);
-            Logger.info(account.getEmail() + ": retrieving user entries for " + userId);
             EntryController entryController = new EntryController();
             FolderDetails details = new FolderDetails(0, "My Entries", true);
-
-            ArrayList<Long> entries = entryController.getEntryIdsByOwner(account, userId, Visibility.OK,
+            AccountController controller = new AccountController();
+            Account user = controller.get(Long.decode(userId));
+            Logger.info(account.getEmail() + ": retrieving user entries for " + user.getEmail());
+            ArrayList<Long> entries = entryController.getEntryIdsByOwner(account, user.getEmail(), Visibility.OK,
                                                                          Visibility.PENDING);
             HibernateHelper.commitTransaction();
             details.setContents(entries);
             return details;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
+            Logger.error(e);
+        } catch (Exception e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
         }
-
         return null;
     }
 
@@ -854,6 +866,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         info.setInstitution(account.getInstitution());
         info.setDescription(account.getDescription());
         info.setInitials(account.getInitials());
+        info.setLastLogin(account.getLastLoginTime());
+        info.setId(account.getId());
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d yyyy");
         Date memberSinceDate = account.getCreationTime();
@@ -1137,7 +1151,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
             AccountController controller = new AccountController();
             EntryController entryController = new EntryController();
-            account = controller.getByEmail(userId);
+            account = controller.get(Long.decode(userId));
             if (account == null)
                 return null;
 

@@ -79,7 +79,7 @@ public class Account implements IModel {
     @Column(name = "salt")
     private String salt;
 
-    @Column(name = "email_hash")
+    @Column(name = "email_hash", unique = true)
     private String emailHash;
 
     @ManyToMany(fetch = FetchType.EAGER)

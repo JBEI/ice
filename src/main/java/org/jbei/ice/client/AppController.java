@@ -192,7 +192,9 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             return;
         }
 
-        String param = getParam("id", token);
+        HashMap<String, String> parsed = parseToken(token);
+        String param = parsed.get("id");
+        String selection = parsed.get("s");
 
         // TODO redirect after login
         if (AppController.sessionId == null)
@@ -228,15 +230,15 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
             case PROFILE:
                 ProfileView pView = new ProfileView();
-                presenter = new ProfilePresenter(this.service, this.eventBus, pView, param);
+                presenter = new ProfilePresenter(this.service, this.eventBus, pView, param); //, selection);
                 addHeaderSearchHandler(pView);
                 break;
 
             case COLLECTIONS:
                 CollectionsView collectionsView = new CollectionsView();
                 addHeaderSearchHandler(collectionsView);
-                presenter = new CollectionsPresenter(new CollectionsModel(this.service, this.eventBus),
-                                                     collectionsView, param);
+                CollectionsModel collectionsModel = new CollectionsModel(this.service, this.eventBus);
+                presenter = new CollectionsPresenter(collectionsModel, collectionsView, param);
                 break;
 
             case BULK_IMPORT:
@@ -309,10 +311,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         if (page == null)
             return Page.LOGIN;
         return page;
-    }
-
-    private String getParam(String key, String token) {
-        return parseToken(token).get(key);
     }
 
     private HashMap<String, String> parseToken(String token) {
