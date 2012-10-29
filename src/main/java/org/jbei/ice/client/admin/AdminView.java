@@ -28,12 +28,17 @@ public class AdminView extends AbstractLayout {
                                          + "-moz-border-radius: 2px;\"><b>Site Administration</b></span>");
     }
 
-    public void setTabWidget(AdminTab tab, AdminPanel<?> view) {
-//        panel.insert(view, view.getTabTitle(), tab.ordinal());
+    public void show(AdminOption selected, Widget widget) {
+        mainContent.setWidget(0, 1, createHeaderLabel(selected));
+        mainContent.setWidget(1, 1, widget);
     }
 
     public SingleSelectionModel<AdminOption> getUserSelectionModel() {
         return this.menu.getSelectionModel();
+    }
+
+    public void showMenuSelection(AdminOption option) {
+        menu.showSelected(option);
     }
 
     @Override
@@ -42,15 +47,19 @@ public class AdminView extends AbstractLayout {
         mainContent.setCellPadding(0);
         mainContent.setCellSpacing(0);
         mainContent.setWidget(0, 0, contentHeader);
+
         mainContent.setWidget(1, 0, menu);
-//        mainContent.setHTML(0, 1, "&nbsp;");
-
-        mainContent.getFlexCellFormatter().setRowSpan(0, 1, 2);
         mainContent.getFlexCellFormatter().setWidth(1, 0, "200px");
-
-//        mainContent.getFlexCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
-        mainContent.getFlexCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
-
+        mainContent.getFlexCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
+        mainContent.getFlexCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_TOP);
         return mainContent;
+    }
+
+    private Widget createHeaderLabel(AdminOption selected) {
+        return new HTML("<span style=\"font-size: 1.5em; color: #777; "
+                                + "font-weight: bold; text-transform: uppercase;\">"
+                                + selected.toString() + "</span><br><span style=\"font-size: " +
+                                "11px; font-weight: bold; text-transform: uppercase; position: "
+                                + "relative; top: -6px; color: #999\">" + selected.getDescription() + "</span>");
     }
 }

@@ -9,17 +9,17 @@ public enum AdminOption {
 
     SETTINGS(FAIconType.COGS, "System Settings", "settings"),
     USERS(FAIconType.USER, "Manage Users", "users"),
-    GROUPS(FAIconType.GROUP, "Manage Groups", "groups"),
-    IMPORT_EXPORT(FAIconType.INBOX, "Transfer Entries", "transfer");
+    GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members"),
+    TRANSFER(FAIconType.INBOX, "Transfer Entries", "transfer");
 
     private final String display;
     private final FAIconType iconType;
-    private final String url;
+    private final String description;
 
-    AdminOption(FAIconType icon, String display, String url) {
+    AdminOption(FAIconType icon, String display, String description) {
         this.iconType = icon;
         this.display = display;
-        this.url = url;
+        this.description = description;
     }
 
     public String toString() {
@@ -31,6 +31,21 @@ public enum AdminOption {
     }
 
     public String getUrl() {
-        return this.url;
+        return this.name().toLowerCase();
+    }
+
+    public static AdminOption urlToOption(String url) {
+        if (url == null)
+            return null;
+
+        for (AdminOption option : AdminOption.values()) {
+            if (url.trim().equalsIgnoreCase(option.getUrl()))
+                return option;
+        }
+        return null;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

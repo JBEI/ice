@@ -1,4 +1,4 @@
-package org.jbei.ice.client.admin.usermanagement;
+package org.jbei.ice.client.admin.user;
 
 import org.jbei.ice.shared.dto.AccountInfo;
 
@@ -63,7 +63,7 @@ public class UserTable extends CellTable<AccountInfo> {
         });
 
         setSelectionModel(selectionModel,
-            DefaultSelectionEventManager.<AccountInfo> createCheckboxManager());
+                          DefaultSelectionEventManager.<AccountInfo>createCheckboxManager());
     }
 
     private void createColumns() {

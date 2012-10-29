@@ -1,8 +1,6 @@
-package org.jbei.ice.client.admin.usermanagement;
+package org.jbei.ice.client.admin.user;
 
 import org.jbei.ice.client.admin.AdminPanel;
-import org.jbei.ice.client.admin.AdminTab;
-import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.SimplePager;
@@ -11,9 +9,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.HasData;
 
-public class EditUserPanel extends Composite implements AdminPanel<AccountInfo> {
+public class EditUserPanel extends Composite implements AdminPanel {
 
     private ScrollPanel panel;
     private final UserTable grid;
@@ -38,11 +35,6 @@ public class EditUserPanel extends Composite implements AdminPanel<AccountInfo> 
         panel.add(vPanel);
     }
 
-    @Override
-    public String getTabTitle() {
-        return "User Management";
-    }
-
     //    public void setData(ArrayList<AccountInfo> data) {
     //        ListHandler<AccountInfo> sortHandler = new ListHandler<AccountInfo>(data);
     //        grid.addColumnSortHandler(sortHandler);
@@ -50,14 +42,4 @@ public class EditUserPanel extends Composite implements AdminPanel<AccountInfo> 
     //        grid.setRowCount(data.size(), true);
     //        grid.setRowData(0, data);
     //    }
-
-    @Override
-    public HasData<AccountInfo> getDisplay() {
-        return this.grid;
-    }
-
-    @Override
-    public AdminTab getTab() {
-        return AdminTab.USERS;
-    }
 }

@@ -16,7 +16,7 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class GroupPresenter implements AdminPanelPresenter<GroupInfo> {
 
-    private final AdminPanel<GroupInfo> view;
+    private final EditGroupsPanel view;
     private ListDataProvider<GroupInfo> dataProvider = new ListDataProvider<GroupInfo>();
 
     public GroupPresenter() {
@@ -45,19 +45,14 @@ public class GroupPresenter implements AdminPanelPresenter<GroupInfo> {
 
     @Override
     public void go(RegistryServiceAsync service, HandlerManager eventBus) {
-        if (dataProvider.getDataDisplays().contains(this.view.getDisplay()))
-            return;
-        dataProvider.addDataDisplay(this.view.getDisplay());
-        retrieveAllGroups(service, eventBus);
+//        if (dataProvider.getDataDisplays().contains(this.view.getDataPanel()))
+//            return;
+//        dataProvider.addDataDisplay(this.view.getDataPanel());
+//        retrieveAllGroups(service, eventBus);
     }
 
     @Override
-    public AdminPanel<GroupInfo> getView() {
+    public AdminPanel getView() {
         return this.view;
-    }
-
-    @Override
-    public int getTabIndex() {
-        return this.view.getTab().ordinal();
     }
 }

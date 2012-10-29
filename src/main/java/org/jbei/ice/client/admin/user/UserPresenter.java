@@ -1,4 +1,4 @@
-package org.jbei.ice.client.admin.usermanagement;
+package org.jbei.ice.client.admin.user;
 
 import java.util.ArrayList;
 
@@ -16,7 +16,7 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class UserPresenter implements AdminPanelPresenter<AccountInfo> {
 
-    private final AdminPanel<AccountInfo> view;
+    private final AdminPanel view;
 
     private ListDataProvider<AccountInfo> dataProvider = new ListDataProvider<AccountInfo>();
 
@@ -45,20 +45,15 @@ public class UserPresenter implements AdminPanelPresenter<AccountInfo> {
 
     @Override
     public void go(RegistryServiceAsync service, HandlerManager eventBus) {
-        if (dataProvider.getDataDisplays().contains(view.getDisplay()))
-            return;
-        dataProvider.addDataDisplay(view.getDisplay());
+//        if (dataProvider.getDataDisplays().contains(view.getDisplay()))
+//            return;
+//        dataProvider.addDataDisplay(view.getDisplay());
 
         retrieveAllUsers(service, eventBus);
     }
 
     @Override
-    public AdminPanel<AccountInfo> getView() {
+    public AdminPanel getView() {
         return this.view;
-    }
-
-    @Override
-    public int getTabIndex() {
-        return this.view.getTab().ordinal();
     }
 }

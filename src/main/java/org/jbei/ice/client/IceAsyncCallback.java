@@ -27,7 +27,7 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
 
     @Override
     public void onFailure(Throwable caught) {
-//        Window.alert("Error connecting to the server");
+        GWT.log(caught.getMessage());
     }
 
     public void go(HandlerManager eventBus) {

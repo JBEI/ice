@@ -66,8 +66,7 @@ class GroupTable extends CellTable<GroupInfo> {
             }
         });
 
-        setSelectionModel(selectionModel,
-                          DefaultSelectionEventManager.<GroupInfo>createCheckboxManager());
+        setSelectionModel(selectionModel, DefaultSelectionEventManager.<GroupInfo>createCheckboxManager());
     }
 
     private void createColumns() {

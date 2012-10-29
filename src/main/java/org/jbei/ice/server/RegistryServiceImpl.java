@@ -134,6 +134,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<AccountInfo> retrieveAllUserAccounts(String sid)
             throws AuthenticationException {
         AccountController controller = new AccountController();
+        HibernateHelper.beginTransaction();
 
         try {
             Account account = retrieveAccountForSid(sid);
@@ -172,10 +173,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 info.setId(account.getId());
                 infos.add(info);
             }
+            HibernateHelper.commitTransaction();
 
             return infos;
 
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
         }
         return null;
@@ -1391,6 +1394,27 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public HashMap<String, String> retrieveSystemSettings(String sid) throws AuthenticationException {
+        // must be an admin
+        try {
+            HibernateHelper.beginTransaction();
+            Account account = retrieveAccountForSid(sid);
+            AccountController controller = new AccountController();
+            if (!controller.isAdministrator(account))
+                return null;
+
+            Logger.info(account.getEmail() + " retrieving system settings");
+            ConfigurationController configurationController = new ConfigurationController();
+            HashMap<String, String> settings = configurationController.retrieveSystemSettings();
+            HibernateHelper.commitTransaction();
+            return settings;
+        } catch (Exception e) {
+            HibernateHelper.rollbackTransaction();
+            return null;
+        }
+    }
+
+    @Override
     public boolean approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList, String groupUUID)
             throws AuthenticationException {
         try {
@@ -1938,6 +1962,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public ArrayList<GroupInfo> retrieveAllGroups(String sessionId) throws AuthenticationException {
 
+        HibernateHelper.beginTransaction();
         GroupController groupController = new GroupController();
         Account account = retrieveAccountForSid(sessionId);
 
@@ -1968,6 +1993,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             infos.add(info);
         }
 
+        HibernateHelper.commitTransaction();
         return infos;
     }
 

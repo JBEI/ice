@@ -261,7 +261,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 }
                 AdminView aView = new AdminView();
                 addHeaderSearchHandler(aView);
-                presenter = new AdminPresenter(this.service, this.eventBus, aView);
+                presenter = new AdminPresenter(this.service, this.eventBus, aView, param);
                 break;
 
             case LOGIN:

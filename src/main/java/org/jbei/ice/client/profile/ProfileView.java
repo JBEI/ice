@@ -82,7 +82,7 @@ public class ProfileView extends AbstractLayout implements IProfileView {
                                           + "<span style=\"margin-left: 65px; font-size: 2em; color: #777; "
                                           + "font-weight: bold;"
                                           + "text-transform: uppercase;\">" + info.getFullName() + "</span>"
-                                          + "<br><span style=\"margin-left: 209px; font-size: 11px; font-weight: bold; "
+                                          + "<br><span style=\"margin-left: 209px; font-size: 11px; font-weight: bold;"
                                           + "text-transform: uppercase; position: relative; top: -6px; color: #999\">"
                                           + info.getInstitution() + "</span>");
 

@@ -89,6 +89,10 @@ body {
     margin-top: 20px;
 }
 
+.margin-top-10 {
+    margin-top: 10px;
+}
+
 .pull_down {
     border: 1px solid #CCC;
     background-color: #f1f1f1;
@@ -2032,7 +2036,6 @@ td.datePickerMonth {
     width: 160px;
     color: #0082C0;
     font-size: 0.9em;
-    margin-right: 20px;
 }
 
 .profile_menu:hover {

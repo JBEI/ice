@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.config;
 
+import java.util.List;
+
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.models.Configuration;
@@ -74,6 +76,10 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
         }
 
         return configuration;
+    }
+
+    public List<Configuration> getAllSettings() throws DAOException {
+        return super.retrieveAll(Configuration.class);
     }
 }
 

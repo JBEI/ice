@@ -1,11 +1,14 @@
 package org.jbei.ice.client.admin.widget;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.admin.AdminOption;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLTable;
@@ -44,8 +47,26 @@ public class AdminViewMenu extends Composite {
                 layout.getCellFormatter().setStyleName(currentRowSelection, 0, "selected");
                 AdminOption selectedOption = rowOption.get(cell.getRowIndex());
                 selectionModel.setSelected(selectedOption, true);
+                History.newItem(Page.ADMIN.getLink() + ";id=" + selectedOption.getUrl(), false);
             }
         });
+    }
+
+    // changes view to show selection without using selection handler
+    public void showSelected(AdminOption option) {
+        int i = -1;
+        for (Map.Entry<Integer, AdminOption> row : rowOption.entrySet()) {
+            if (row.getValue() == option) {
+                i = row.getKey();
+                break;
+            }
+        }
+        if (i == -1)
+            return;
+
+        layout.getCellFormatter().removeStyleName(currentRowSelection, 0, "selected");
+        currentRowSelection = i;
+        layout.getCellFormatter().setStyleName(currentRowSelection, 0, "selected");
     }
 
     public SingleSelectionModel<AdminOption> getSelectionModel() {
@@ -59,10 +80,6 @@ public class AdminViewMenu extends Composite {
             String html = "<i style=\"width: 24px; float: left; color: #777\" class=\""
                     + option.getIcon().getStyleName() + " font-awesome font-90em\"></i>" + option.toString();
             layout.setHTML(row, 0, html);
-            if (option == AdminOption.SETTINGS) {
-                layout.getCellFormatter().setStyleName(row, 0, "selected");
-                selectionModel.setSelected(option, true);
-            }
             rowOption.put(row, option);
             row += 1;
         }

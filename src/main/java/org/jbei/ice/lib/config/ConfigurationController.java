@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.config;
 
+import java.util.HashMap;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
@@ -79,6 +81,18 @@ public class ConfigurationController {
             if (config == null)
                 throw new ControllerException("Could not retrieve config with key " + key);
             return config.getValue();
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+    }
+
+    public HashMap<String, String> retrieveSystemSettings() throws ControllerException {
+        try {
+            HashMap<String, String> results = new HashMap<String, String>();
+            for (Configuration configuration : dao.getAllSettings()) {
+                results.put(configuration.getKey(), configuration.getValue());
+            }
+            return results;
         } catch (DAOException de) {
             throw new ControllerException(de);
         }

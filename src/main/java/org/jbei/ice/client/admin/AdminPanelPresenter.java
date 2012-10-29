@@ -8,7 +8,5 @@ public interface AdminPanelPresenter<T> {
 
     void go(RegistryServiceAsync service, HandlerManager eventBus);
 
-    AdminPanel<T> getView();
-
-    int getTabIndex();
+    AdminPanel getView();
 }

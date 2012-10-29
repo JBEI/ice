@@ -172,4 +172,6 @@ public interface RegistryService extends RemoteService {
 
     boolean submitBulkImportDraft(String sid, long draftId,
             ArrayList<EntryInfo> entryList, String groupUUID) throws AuthenticationException;
+
+    HashMap<String, String> retrieveSystemSettings(String sid) throws AuthenticationException;
 }
