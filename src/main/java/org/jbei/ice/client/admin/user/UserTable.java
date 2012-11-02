@@ -11,43 +11,41 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionModel;
 
+/**
+ * Table for displaying list of users
+ *
+ * @author Hector Plahar
+ */
 public class UserTable extends CellTable<AccountInfo> {
 
-    protected interface EntryResources extends Resources {
+    protected interface UserTableResources extends Resources {
 
-        static EntryResources INSTANCE = GWT.create(EntryResources.class);
+        static UserTableResources INSTANCE = GWT.create(UserTableResources.class);
 
-        /**
-         * The styles used in this widget.
-         */
         @Override
-        @Source("org/jbei/ice/client/resource/css/EntryTable.css")
+        @Source("org/jbei/ice/client/admin/css/UserTable.css")
         Style cellTableStyle();
     }
 
     private SelectionModel<AccountInfo> selectionModel;
 
     public UserTable() {
-        super(15, EntryResources.INSTANCE);
-        setStyleName("data_table");
+        super(15, UserTableResources.INSTANCE);
+//        setStyleName("data_table");
         Label empty = new Label();
         empty.setText("No data available");
         empty.setStyleName("no_data_style");
         this.setEmptyTableWidget(empty);
         setSelectionModel();
         createColumns();
-
-        /* 
-         * ListHandler<ContactInfo> sortHandler =
-        new ListHandler<ContactInfo>(ContactDatabase.get().getDataProvider().getList());
-        dataGrid.addColumnSortHandler(sortHandler);
-         */
     }
 
     /**
@@ -62,8 +60,7 @@ public class UserTable extends CellTable<AccountInfo> {
             }
         });
 
-        setSelectionModel(selectionModel,
-                          DefaultSelectionEventManager.<AccountInfo>createCheckboxManager());
+        setSelectionModel(selectionModel, DefaultSelectionEventManager.<AccountInfo>createCheckboxManager());
     }
 
     private void createColumns() {
@@ -83,7 +80,7 @@ public class UserTable extends CellTable<AccountInfo> {
             }
         };
         addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
-        setColumnWidth(checkColumn, 40, Unit.PX);
+        setColumnWidth(checkColumn, 15, Unit.PX);
     }
 
     private void createFirstNameColumn() {
@@ -163,5 +160,16 @@ public class UserTable extends CellTable<AccountInfo> {
         };
         addColumn(entryCount, "Entries");
         setColumnWidth(entryCount, 50, Unit.PX);
+    }
+
+    //
+    // inner classes
+    //
+    private class UserTableFooter extends Composite {
+
+        public UserTableFooter() {
+            HTMLPanel panel = new HTMLPanel("");
+            initWidget(panel);
+        }
     }
 }

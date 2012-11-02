@@ -86,7 +86,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return value;
         } catch (Exception e) {
             HibernateHelper.rollbackTransaction();
-            Logger.error(e);
             return null;
         }
     }
@@ -153,6 +152,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (accounts == null)
                 return null;
 
+            int i = 0;
             ArrayList<AccountInfo> infos = new ArrayList<AccountInfo>();
             for (Account userAccount : accounts) {
                 AccountInfo info = new AccountInfo();
@@ -172,6 +172,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 info.setLastLogin(userAccount.getLastLoginTime());
                 info.setId(account.getId());
                 infos.add(info);
+                i += 1;
+                if (i == 34)
+                    break;
             }
             HibernateHelper.commitTransaction();
             return infos;
@@ -1199,7 +1202,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return accountInfo;
         } catch (ControllerException e) {
             HibernateHelper.rollbackTransaction();
-            Logger.error(e);
             return null;
         }
     }
@@ -1245,11 +1247,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<BulkUploadInfo> retrieveUserSavedDrafts(String sid)
-            throws AuthenticationException {
+    public ArrayList<BulkUploadInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException {
 
         HibernateHelper.beginTransaction();
-
         try {
             Account account = retrieveAccountForSid(sid);
             BulkUploadController controller = new BulkUploadController();
@@ -1259,15 +1259,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             HibernateHelper.commitTransaction();
             return result;
         } catch (Exception ce) {
-            Logger.error(ce);
             HibernateHelper.rollbackTransaction();
             return null;
         }
     }
 
     @Override
-    public ArrayList<BulkUploadInfo> retrieveDraftsPendingVerification(String sid)
-            throws AuthenticationException {
+    public ArrayList<BulkUploadInfo> retrieveDraftsPendingVerification(String sid) throws AuthenticationException {
         try {
             HibernateHelper.beginTransaction();
             Account account = retrieveAccountForSid(sid);
@@ -1282,7 +1280,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<BulkUploadInfo> result = controller.retrievePendingImports(account);
             HibernateHelper.commitTransaction();
             return result;
-
         } catch (Exception ce) {
             HibernateHelper.rollbackTransaction();
             return null;
@@ -1290,9 +1287,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkUploadInfo deleteSavedDraft(String sid, long draftId)
-            throws AuthenticationException {
-
+    public BulkUploadInfo deleteSavedDraft(String sid, long draftId) throws AuthenticationException {
         try {
             HibernateHelper.beginTransaction();
             Account account = retrieveAccountForSid(sid);

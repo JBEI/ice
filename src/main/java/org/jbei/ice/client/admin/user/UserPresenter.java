@@ -14,17 +14,17 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class UserPresenter implements AdminPanelPresenter {
+public class UserPresenter extends AdminPanelPresenter {
 
-    private final AdminPanel view;
-
+    private final UserPanel view;
     private ListDataProvider<AccountInfo> dataProvider = new ListDataProvider<AccountInfo>();
 
-    public UserPresenter() {
-        this.view = new EditUserPanel();
+    public UserPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
+        super(service, eventBus);
+        this.view = new UserPanel();
     }
 
-    private void retrieveAllUsers(final RegistryServiceAsync service, HandlerManager eventBus) {
+    private void retrieveAllUsers() {
         new IceAsyncCallback<ArrayList<AccountInfo>>() {
 
             @Override
@@ -41,6 +41,10 @@ public class UserPresenter implements AdminPanelPresenter {
                 dataProvider.getList().addAll(result);
             }
         }.go(eventBus);
+    }
+
+    public void setData(ArrayList<AccountInfo> data) {
+        this.view.setData(data);
     }
 
     @Override

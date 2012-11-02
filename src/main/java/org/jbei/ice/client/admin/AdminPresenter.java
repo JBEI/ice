@@ -10,19 +10,14 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.group.GroupPresenter;
 import org.jbei.ice.client.admin.setting.SystemSettingsWidget;
 import org.jbei.ice.client.admin.transfer.TransferEntryPanel;
-import org.jbei.ice.client.admin.user.UserTable;
+import org.jbei.ice.client.admin.user.UserPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.GroupInfo;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
@@ -37,6 +32,7 @@ public class AdminPresenter extends AbstractPresenter {
     private final HandlerManager eventBus;
     private AdminOption currentOption;
     private GroupPresenter groupPresenter;
+    private UserPresenter userPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view, String optionStr) {
         this.service = service;
@@ -80,6 +76,8 @@ public class AdminPresenter extends AbstractPresenter {
                 break;
 
             case USERS:
+                if (userPresenter == null)
+                    userPresenter = new UserPresenter(service, eventBus);
                 retrieveUsers();
                 break;
 
@@ -144,21 +142,8 @@ public class AdminPresenter extends AbstractPresenter {
                 if (result == null || currentOption != AdminOption.USERS)
                     return;
 
-                // move most to admin
-                UserTable table = new UserTable();
-                ListDataProvider<AccountInfo> dataProvider = new ListDataProvider<AccountInfo>();
-                dataProvider.setList(result);
-                dataProvider.addDataDisplay(table);
-
-                VerticalPanel vPanel = new VerticalPanel();
-                vPanel.setWidth("100%");
-                vPanel.add(table);
-                SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
-                SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, pagerResources, false, 0, true);
-                pager.setDisplay(table);
-                vPanel.add(pager);
-                vPanel.setCellHorizontalAlignment(pager, HasAlignment.ALIGN_CENTER);
-                view.show(currentOption, vPanel);
+                userPresenter.setData(result);
+                view.show(currentOption, userPresenter.getView().asWidget());
             }
         }.go(eventBus);
     }

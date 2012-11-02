@@ -19,18 +19,14 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class GroupPresenter implements AdminPanelPresenter {
+public class GroupPresenter extends AdminPanelPresenter {
 
     private final GroupsPanel view;
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     private String currentGroupSelection;
     private CreateGroupWidget widget;
 
-    public GroupPresenter(final RegistryServiceAsync service, HandlerManager eventBus) {
-
-        this.service = service;
-        this.eventBus = eventBus;
+    public GroupPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
+        super(service, eventBus);
         this.view = new GroupsPanel(createDelegate());
 
         // handlers
@@ -44,7 +40,7 @@ public class GroupPresenter implements AdminPanelPresenter {
         return new DeleteActionCell.Delegate<AccountInfo>() {
             @Override
             public void execute(AccountInfo object, Callback callback) { // TODO : pass another delete that indicates
-            // success
+                // success
                 // TODO : remove object from group
                 if (object == null)
                     return;

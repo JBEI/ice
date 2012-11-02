@@ -16,22 +16,19 @@ import com.google.gwt.view.client.ListDataProvider;
  * @author Hector Plahar
  */
 public class GroupMembersWidget extends Composite {
+
     private final ArrayList<AccountInfo> infoList;
-    private final GroupMemberTable memberTable;
-    private final ScrollPanel panel;
-    private final VerticalPanel vPanel;
-    private final TablePager pager;
     private final ListDataProvider<AccountInfo> dataProvider;
 
     public GroupMembersWidget(DeleteActionCell.Delegate<AccountInfo> deleteDelegate) {
         infoList = new ArrayList<AccountInfo>();
-        memberTable = new GroupMemberTable(deleteDelegate);
-        panel = new ScrollPanel(memberTable);
+        GroupMemberTable memberTable = new GroupMemberTable(deleteDelegate);
+        ScrollPanel panel = new ScrollPanel(memberTable);
         dataProvider = new ListDataProvider<AccountInfo>();
         dataProvider.addDataDisplay(memberTable);
 
-        vPanel = new VerticalPanel();
-        pager = new TablePager();
+        VerticalPanel vPanel = new VerticalPanel();
+        TablePager pager = new TablePager();
         pager.setDisplay(memberTable);
         initWidget(vPanel);
 

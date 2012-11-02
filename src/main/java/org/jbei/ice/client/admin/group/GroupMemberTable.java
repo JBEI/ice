@@ -18,8 +18,8 @@ import com.google.gwt.view.client.SelectionModel;
  * @author Hector Plahar
  */
 public class GroupMemberTable extends CellTable<AccountInfo> {
-    protected interface TableResources extends Resources {
 
+    protected interface TableResources extends Resources {
         static TableResources INSTANCE = GWT.create(TableResources.class);
 
         @Override
