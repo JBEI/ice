@@ -77,6 +77,8 @@ public class SheetPresenter {
     }
 
     public int getEntryRowCount() {
+        if (currentInfo == null)
+            return 0;
         return currentInfo.getCount();
     }
 
