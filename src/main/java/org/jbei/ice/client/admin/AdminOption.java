@@ -10,7 +10,7 @@ public enum AdminOption {
     SETTINGS(FAIconType.COGS, "System Settings", "settings"),
     USERS(FAIconType.USER, "Manage Users", "users"),
     GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members"),
-    TRANSFER(FAIconType.INBOX, "Transfer Entries", "transfer");
+    TRANSFER(FAIconType.INBOX, "Transfer Entries", "transfer entries between ICE instances");
 
     private final String display;
     private final FAIconType iconType;

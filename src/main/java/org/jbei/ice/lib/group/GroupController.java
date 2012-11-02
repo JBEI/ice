@@ -1,18 +1,22 @@
 package org.jbei.ice.lib.group;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountUtils;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.GroupInfo;
 
 public class GroupController {
 
     private final GroupDAO dao;
-    private final String publicGroupName = "Public";
-    private final String publicGroupDescription = "Provides global public access";
+    private final String publicGroupName = "Global";
+    private final String publicGroupDescription = "All users are members of this group";
     private final String publicGroupUUID = "8746a64b-abd5-4838-a332-02c356bbeac0";
 
     public GroupController() {
@@ -158,4 +162,17 @@ public class GroupController {
         return groupIds;
     }
 
+    public ArrayList<AccountInfo> retrieveGroupMembers(GroupInfo info) throws ControllerException {
+        try {
+            ArrayList<AccountInfo> result = new ArrayList<AccountInfo>();
+            Group group = dao.get(info.getUuid());
+            for (Account account : group.getMembers()) {
+                AccountInfo accountInfo = AccountUtils.accountToInfo(account);
+                result.add(accountInfo);
+            }
+            return result;
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
 }

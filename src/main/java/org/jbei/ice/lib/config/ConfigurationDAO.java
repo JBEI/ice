@@ -37,24 +37,7 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
      * @throws DAOException
      */
     public Configuration get(ConfigurationKey key) throws DAOException {
-        Configuration configuration = null;
-        Session session = newSession();
-
-        try {
-            Query query = session.createQuery("from " + Configuration.class.getName() + " where key = :key");
-            query.setString("key", key.name());
-            Object queryResult = query.uniqueResult();
-
-            if (queryResult != null) {
-                configuration = (Configuration) queryResult;
-            }
-        } catch (HibernateException e) {
-            throw new DAOException("Failed to get Configuration using key: " + key.name(), e);
-        } finally {
-            closeSession(session);
-        }
-
-        return configuration;
+        return get(key.name());
     }
 
     public Configuration get(String key) throws DAOException {
@@ -62,8 +45,8 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
         Session session = newSession();
 
         try {
-            Query query = session.createQuery("from " + Configuration.class.getName() + " where key = " + key);
-//            query.setParameter("key", key);
+            Query query = session.createQuery("from " + Configuration.class.getName() + " where key = :key");
+            query.setParameter("key", key);
             Object queryResult = query.uniqueResult();
 
             if (queryResult != null) {

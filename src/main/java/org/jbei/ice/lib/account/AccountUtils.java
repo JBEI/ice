@@ -13,7 +13,7 @@ import org.jbei.ice.shared.dto.ConfigurationKey;
  *
  * @author Hector Plahar
  */
-class AccountUtils {
+public class AccountUtils {
 
     /**
      * Return the encrypted version of the given password, using the salt from the settings file.
@@ -38,6 +38,7 @@ class AccountUtils {
         info.setInstitution(account.getInstitution());
         info.setDescription(account.getDescription());
         info.setInitials(account.getInitials());
+        info.setId(account.getId());
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d yyyy");
         Date memberSinceDate = account.getCreationTime();

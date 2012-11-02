@@ -224,7 +224,7 @@ public class HeaderView extends Composite {
     public void createPullDownHandler() {
         if (this.searchInput != null) {
             PopupHandler handler = new PopupHandler(widgetAdvanced, this.searchInput.getPullDownAreaElement(),
-                                                    -382, 1, false);
+                                                    false);
             this.searchInput.setPullDownClickhandler(handler);
         }
     }

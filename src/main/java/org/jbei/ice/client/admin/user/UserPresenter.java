@@ -14,7 +14,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class UserPresenter implements AdminPanelPresenter<AccountInfo> {
+public class UserPresenter implements AdminPanelPresenter {
 
     private final AdminPanel view;
 
@@ -41,15 +41,6 @@ public class UserPresenter implements AdminPanelPresenter<AccountInfo> {
                 dataProvider.getList().addAll(result);
             }
         }.go(eventBus);
-    }
-
-    @Override
-    public void go(RegistryServiceAsync service, HandlerManager eventBus) {
-//        if (dataProvider.getDataDisplays().contains(view.getDisplay()))
-//            return;
-//        dataProvider.addDataDisplay(view.getDisplay());
-
-        retrieveAllUsers(service, eventBus);
     }
 
     @Override

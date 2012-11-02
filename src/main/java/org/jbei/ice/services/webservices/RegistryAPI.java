@@ -47,6 +47,7 @@ import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.SearchResults;
 
 /**
@@ -55,7 +56,7 @@ import org.jbei.ice.shared.dto.SearchResults;
  * @author Zinovii Dmytriv, Hector Plahar, Timothy Ham
  */
 @WebService(targetNamespace = "https://api.registry.jbei.org/")
-public class RegistryAPI {
+public class RegistryAPI implements IRegistryAPI {
     /**
      * Login to the ICE SOAP service, with the given login and password. Returns a session key for
      * future authentication.
@@ -66,6 +67,7 @@ public class RegistryAPI {
      * @throws SessionException
      * @throws ServiceException
      */
+    @Override
     public String login(@WebParam(name = "login") String login,
             @WebParam(name = "password") String password) throws SessionException, ServiceException {
         String sessionId = null;
@@ -100,6 +102,7 @@ public class RegistryAPI {
      * @param sessionId Session key to log out.
      * @throws ServiceException
      */
+    @Override
     public void logout(@WebParam(name = "sessionId") String sessionId) throws ServiceException {
         try {
             AccountController.deauthenticate(sessionId);
@@ -122,6 +125,7 @@ public class RegistryAPI {
      * @return True if still authenticated.
      * @throws ServiceException
      */
+    @Override
     public boolean isAuthenticated(@WebParam(name = "sessionId") String sessionId)
             throws ServiceException {
         boolean authenticated = false;
@@ -150,6 +154,7 @@ public class RegistryAPI {
      * @param login     user login being checked for moderator status
      * @return true if user is a designated moderator, false otherwise
      */
+    @Override
     public boolean isModerator(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "login") String login) throws SessionException, ServiceException {
         Account account = validateAccount(sessionId);
@@ -171,6 +176,7 @@ public class RegistryAPI {
      * @return Entry object.
      * @throws ServiceException
      */
+    @Override
     public Entry getEntryByName(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "name") String name) throws ServiceException {
         log(sessionId, "getEntryByName: " + name);
@@ -196,6 +202,7 @@ public class RegistryAPI {
      * @return Number of publicly viewable entries on the server.
      * @throws ServiceException
      */
+    @Override
     public long getNumberOfPublicEntries() throws ServiceException {
         long result = 0;
         log("getNumberPublicEntries");
@@ -220,6 +227,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws SessionException
      */
+    @Override
     public SearchResults search(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "query") String query) throws ServiceException, SessionException {
         Account account = validateAccount(sessionId);
@@ -251,6 +259,7 @@ public class RegistryAPI {
      * @throws SessionException
      * @throws ServiceException
      */
+    @Override
     public ArrayList<BlastResult> blastn(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "querySequence") String querySequence) throws SessionException,
             ServiceException {
@@ -289,6 +298,7 @@ public class RegistryAPI {
      * @throws SessionException
      * @throws ServiceException
      */
+    @Override
     public ArrayList<BlastResult> tblastx(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "querySequence") String querySequence) throws SessionException,
             ServiceException {
@@ -324,6 +334,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public Entry getByRecordId(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -359,6 +370,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public Entry getByPartNumber(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "partNumber") String partNumber) throws SessionException,
             ServiceException, ServicePermissionException {
@@ -393,6 +405,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public boolean hasReadPermissions(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -425,6 +438,7 @@ public class RegistryAPI {
      * @throws SessionException
      * @throws ServiceException
      */
+    @Override
     public boolean hasWritePermissions(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
         log(sessionId, "hasWritePermissions: " + entryId);
@@ -456,6 +470,7 @@ public class RegistryAPI {
      * @throws SessionException
      * @throws ServiceException
      */
+    @Override
     public Plasmid createPlasmid(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException {
         log(sessionId, "createPlasmid");
@@ -488,6 +503,7 @@ public class RegistryAPI {
      * @throws SessionException
      * @throws ServiceException
      */
+    @Override
     public Strain createStrain(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException {
         log(sessionId, "createStrain");
@@ -521,6 +537,7 @@ public class RegistryAPI {
      * @throws SessionException
      * @throws ServiceException
      */
+    @Override
     public Part createPart(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "part") Part part) throws SessionException, ServiceException {
         log(sessionId, "createPart");
@@ -544,6 +561,7 @@ public class RegistryAPI {
         return (Part) newEntry;
     }
 
+    @Override
     public ArabidopsisSeed createSeed(@WebParam(name = "sessionId") String sessionId, @WebParam(
             name = "seed") ArabidopsisSeed seed) throws SessionException, ServiceException {
         log(sessionId, "createSeed");
@@ -576,6 +594,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public Plasmid updatePlasmid(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -615,6 +634,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public Strain updateStrain(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -654,6 +674,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public Part updatePart(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "part") Part part) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1055,6 +1076,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public void removeEntry(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1089,6 +1111,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public FeaturedDNASequence getSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1130,6 +1153,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public String getOriginalGenBankSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1174,6 +1198,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public String getGenBankSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1223,6 +1248,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public String getFastaSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1271,6 +1297,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public FeaturedDNASequence createSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId,
             @WebParam(name = "sequence") FeaturedDNASequence featuredDNASequence)
@@ -1333,6 +1360,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public void removeSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1383,6 +1411,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public FeaturedDNASequence uploadSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId, @WebParam(name = "sequence") String sequence)
             throws SessionException, ServiceException, ServicePermissionException {
@@ -1451,6 +1480,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws ServicePermissionException
      */
+    @Override
     public ArrayList<Sample> retrieveEntrySamples(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1480,6 +1510,7 @@ public class RegistryAPI {
      * @throws SessionException
      * @throws ServiceException
      */
+    @Override
     public ArrayList<Sample> retrieveSamplesByBarcode(
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException {
@@ -1510,6 +1541,7 @@ public class RegistryAPI {
      * @throws SessionException
      * @throws ServiceException
      */
+    @Override
     public String samplePlate(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "samples") Sample[] samples) throws SessionException, ServiceException {
         log(sessionId, "samplePlate");
@@ -1593,6 +1625,7 @@ public class RegistryAPI {
      * @throws PermissionException
      * @throws SessionException
      */
+    @Override
     public void createStrainSample(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "recordId") String recordId, @WebParam(name = "rack") String rack,
             @WebParam(name = "location") String location,
@@ -1686,6 +1719,7 @@ public class RegistryAPI {
      * @throws SessionException
      * @throws ServiceException
      */
+    @Override
     public List<Sample> checkAndUpdateSamplesStorage(
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "samples") Sample[] samples, @WebParam(name = "plateId") String plateId)
@@ -1788,6 +1822,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws SessionException
      */
+    @Override
     public List<TraceSequence> listTraceSequenceFiles(
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "recordId") String recordId) throws ServiceException, SessionException {
@@ -1842,6 +1877,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws SessionException
      */
+    @Override
     public String uploadTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "recordId") String recordId,
             @WebParam(name = "fileName") String fileName,
@@ -1906,6 +1942,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws SessionException
      */
+    @Override
     public SequenceTraceFile getTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
         log(sessionId, "getTraceSequenceFile: " + fileId);
@@ -1935,6 +1972,7 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws SessionException
      */
+    @Override
     public void deleteTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
         log(sessionId, "deleteTraceSequenceFile: " + fileId);
@@ -1975,7 +2013,7 @@ public class RegistryAPI {
             throw new SessionException("Unauthorized access! Authorize first!");
         }
 
-        Account account = null;
+        Account account;
         AccountController controller = new AccountController();
 
         try {
@@ -1991,6 +2029,11 @@ public class RegistryAPI {
         }
 
         return account;
+    }
+
+    public SearchResults runSearch(@WebParam(name = "searchFilters") ArrayList<SearchFilterInfo> searchFilters)
+            throws ServiceException {
+        return null;
     }
 
     /**

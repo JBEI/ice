@@ -57,7 +57,7 @@ public class HoverCell extends Composite {
 
         options.setRowData(Arrays.asList(HoverOptions.values()));
 
-        popupHandler = new PopupHandler(options, panel.getElement(), 0, 0, false);
+        popupHandler = new PopupHandler(options, panel.getElement(), false);
         panel.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

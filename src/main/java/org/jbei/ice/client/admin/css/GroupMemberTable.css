@@ -1,4 +1,5 @@
 .cellTableWidget {
+    border: 1px solid #CCC;
 }
 
 .cellTableFirstColumn {
@@ -20,17 +21,13 @@
     overflow: hidden;
 }
 
-    /**
-    * Applied to headers cells.
-    */
 .cellTableHeader {
     border-bottom: 1px solid #6f7277;
     text-align: left;
     color: #4b4a4a;
-    text-shadow: #ddf 1px 1px 0;
     overflow: hidden;
-    background-color: #eaeaea;
-    font-size: 0.75em;
+    background-color: #e6e6e6;
+    font-size: 0.70em;
     white-space: nowrap;
     border-right: 1px solid #ccc;
     border-top: 1px solid #ccc;
@@ -43,10 +40,10 @@
     padding: 3px;
     font-size: 0.80em;
     color: #333;
-    font-family: arial;
+    font-family: Arial;
     overflow: hidden;
-    border-right: 1px solid #ccc;
-    border-top: 1px solid #ccc;
+    border-right: 1px solid #cecece;
+    border-top: 1px solid #cecece;
 }
 
 .cellTableFirstColumnFooter {
@@ -95,7 +92,7 @@
 }
 
 .cellTableHoveredRow {
-    background-color: #F6F6F6;
+    background-color: #b4d0f8;
 }
 
 .cellTableHoveredRowCell {
@@ -109,7 +106,7 @@
 
 @sprite .cellTableSelectedRow {
     gwt-image: 'cellTableSelectedBackground';
-    background-color: #f3f1d9;
+    background-color: #b4d0f8;
     color: white;
     height: auto;
     overflow: auto;

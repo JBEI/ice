@@ -17,7 +17,8 @@
         <property name="hibernate.c3p0.max_statements">50</property>
 
         <!-- Enables Hibernate's automatic session context management -->
-        <!--<property name="current_session_context_class">thread</property>-->
+        <property name="current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext
+        </property>
 
         <!-- Disable the second-level cache  -->
         <property name="cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</property>

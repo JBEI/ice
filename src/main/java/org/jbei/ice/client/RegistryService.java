@@ -174,4 +174,7 @@ public interface RegistryService extends RemoteService {
             ArrayList<EntryInfo> entryList, String groupUUID) throws AuthenticationException;
 
     HashMap<String, String> retrieveSystemSettings(String sid) throws AuthenticationException;
+
+    ArrayList<AccountInfo> retrieveGroupMembers(String sessionId, GroupInfo info)
+            throws AuthenticationException;
 }

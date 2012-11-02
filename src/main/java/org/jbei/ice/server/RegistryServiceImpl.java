@@ -174,7 +174,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 infos.add(info);
             }
             HibernateHelper.commitTransaction();
-
             return infos;
 
         } catch (ControllerException e) {
@@ -189,9 +188,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         AccountController controller = new AccountController();
         try {
             Logger.info("Resetting password for user " + email);
+            HibernateHelper.beginTransaction();
             controller.resetPassword(email, true, url);
+            HibernateHelper.commitTransaction();
             return true;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error("Error resetting password for user " + email, e);
             return false;
         }
@@ -202,13 +204,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
 
         try {
+            HibernateHelper.beginTransaction();
             Account account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": updating password for account " + email);
             AccountController controller = new AccountController();
             controller.updatePassword(email, password);
+            HibernateHelper.commitTransaction();
             return true;
 
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error(e);
             return false;
         }
@@ -218,6 +223,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public AccountInfo createNewAccount(AccountInfo info, String url) {
 
         try {
+            HibernateHelper.beginTransaction();
             AccountController controller = new AccountController();
             String newPassword = controller.createNewAccount(info.getFirstName(),
                                                              info.getLastName(), info.getInitials(), info.getEmail(),
@@ -255,8 +261,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 Emailer.send(info.getEmail(), subject, stringBuilder.toString());
             }
 
+            HibernateHelper.commitTransaction();
             return info;
         } catch (ControllerException e) {
+            HibernateHelper.rollbackTransaction();
             Logger.error("Error creating new account", e);
             return null;
         }
@@ -266,6 +274,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public AccountInfo retrieveAccount(String email) {
         Account account = null;
         AccountController controller = new AccountController();
+        HibernateHelper.beginTransaction();
 
         try {
             account = controller.getByEmail(email);
@@ -282,6 +291,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         info.setEmail(account.getEmail());
         info.setFirstName(account.getFirstName());
         info.setLastName(account.getLastName());
+        HibernateHelper.commitTransaction();
         return info;
     }
 
@@ -1238,14 +1248,19 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<BulkUploadInfo> retrieveUserSavedDrafts(String sid)
             throws AuthenticationException {
 
-        Account account = retrieveAccountForSid(sid);
-        BulkUploadController controller = new BulkUploadController();
-        Logger.info(account.getEmail() + ": retrieve user saved drafts");
+        HibernateHelper.beginTransaction();
 
         try {
-            return controller.retrieveByUser(account, account);
-        } catch (ControllerException ce) {
+            Account account = retrieveAccountForSid(sid);
+            BulkUploadController controller = new BulkUploadController();
+            Logger.info(account.getEmail() + ": retrieve user saved drafts");
+
+            ArrayList<BulkUploadInfo> result = controller.retrieveByUser(account, account);
+            HibernateHelper.commitTransaction();
+            return result;
+        } catch (Exception ce) {
             Logger.error(ce);
+            HibernateHelper.rollbackTransaction();
             return null;
         }
     }
@@ -1254,6 +1269,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<BulkUploadInfo> retrieveDraftsPendingVerification(String sid)
             throws AuthenticationException {
         try {
+            HibernateHelper.beginTransaction();
             Account account = retrieveAccountForSid(sid);
             AccountController accountController = new AccountController();
             if (!accountController.isAdministrator(account)) {
@@ -1263,14 +1279,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             BulkUploadController controller = new BulkUploadController();
             Logger.info(account.getEmail() + ": retrieving drafts pending verification");
-            return controller.retrievePendingImports(account);
+            ArrayList<BulkUploadInfo> result = controller.retrievePendingImports(account);
+            HibernateHelper.commitTransaction();
+            return result;
 
-        } catch (ControllerException ce) {
-            Logger.error(ce);
-        } catch (PermissionException e) {
-            Logger.error(e);
+        } catch (Exception ce) {
+            HibernateHelper.rollbackTransaction();
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -1278,15 +1294,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
 
         try {
+            HibernateHelper.beginTransaction();
             Account account = retrieveAccountForSid(sid);
             BulkUploadController draftController = new BulkUploadController();
             Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draftId);
-            return draftController.deleteDraftById(account, draftId);
-        } catch (ControllerException ce) {
-            Logger.error(ce);
-            return null;
-        } catch (PermissionException e) {
-            Logger.error(e);
+            BulkUploadInfo result = draftController.deleteDraftById(account, draftId);
+            HibernateHelper.commitTransaction();
+            return result;
+        } catch (Exception ce) {
+            HibernateHelper.rollbackTransaction();
             return null;
         }
     }
@@ -1294,17 +1310,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public BulkUploadInfo retrieveBulkImport(String sid, long id) throws AuthenticationException {
 
+        HibernateHelper.beginTransaction();
         Account account = retrieveAccountForSid(sid);
         BulkUploadController controller = new BulkUploadController();
 
         try {
             Logger.info(account.getEmail() + ": retrieving bulk import with id \"" + id + "\"");
-            return controller.retrieveById(account, id);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        } catch (PermissionException e) {
-            Logger.error(e);
+            BulkUploadInfo result = controller.retrieveById(account, id);
+            HibernateHelper.commitTransaction();
+            return result;
+        } catch (Exception e) {
             return null;
         }
     }
@@ -1408,6 +1423,23 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             HashMap<String, String> settings = configurationController.retrieveSystemSettings();
             HibernateHelper.commitTransaction();
             return settings;
+        } catch (Exception e) {
+            HibernateHelper.rollbackTransaction();
+            return null;
+        }
+    }
+
+    @Override
+    public ArrayList<AccountInfo> retrieveGroupMembers(String sessionId, GroupInfo info)
+            throws AuthenticationException {
+        try {
+            HibernateHelper.beginTransaction();
+            Account account = retrieveAccountForSid(sessionId);
+            Logger.info(account.getEmail() + " retrieving group members for group " + info.getLabel());
+            GroupController controller = new GroupController();
+            ArrayList<AccountInfo> result = controller.retrieveGroupMembers(info);
+            HibernateHelper.commitTransaction();
+            return result;
         } catch (Exception e) {
             HibernateHelper.rollbackTransaction();
             return null;
@@ -2009,10 +2041,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             controller.delete(account, attachment);
             return true;
-        } catch (ControllerException ce) {
+        } catch (Exception ce) {
             Logger.error(ce);
-        } catch (PermissionException e) {
-            Logger.error(e);
         }
         return false;
     }

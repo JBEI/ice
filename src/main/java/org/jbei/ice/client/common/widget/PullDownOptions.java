@@ -58,7 +58,7 @@ public abstract class PullDownOptions<T> extends Composite {
         optionSelection = new SingleSelectionModel<T>();
         options.setSelectionModel(optionSelection);
 
-        popupHandler = new PopupHandler(options, label.getElement(), 0, 0, false);
+        popupHandler = new PopupHandler(options, label.getElement(), false);
     }
 
     public SingleSelectionModel<T> getSelectionModel() {

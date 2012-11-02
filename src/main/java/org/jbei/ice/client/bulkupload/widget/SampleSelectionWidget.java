@@ -55,7 +55,7 @@ public class SampleSelectionWidget extends Composite {
             }
         }, SampleResource.INSTANCE);
 
-        popup = new PopupHandler(options, sampleImg.getElement(), -130, 7, false);
+        popup = new PopupHandler(options, sampleImg.getElement(), false);
         sampleImg.addClickHandler(popup);
         // TODO : set empty Widget for options
 

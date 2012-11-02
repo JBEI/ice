@@ -54,7 +54,7 @@ public class ExportAsMenu implements IsWidget {
         options.setRowData(Arrays.asList(ExportAsOption.values()));
 
         final PopupHandler exportAsClickHandler = new PopupHandler(options, exportAs.getElement(),
-                                                                   0, 0, false);
+                                                                   false);
 
         exportAs.addClickHandler(exportAsClickHandler);
         optionSelection = new SingleSelectionModel<ExportAsOption>();

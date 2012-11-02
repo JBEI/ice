@@ -49,7 +49,15 @@ public class ConfigurationController {
         Logger.info("Upgrading configuration");
         try {
             for (ConfigurationKey type : ConfigurationKey.values()) {
-                String value = JbeirSettings.getSetting(type.name());
+                String value;
+                try {
+                    value = JbeirSettings.getSetting(type.name());
+                } catch (Exception e) {
+                    Logger.warn("Skipping adding " + type.name() + " to configuration database ");
+                    continue;
+                    // assuming it is alread in the db  e.g. plasmid storage types
+                }
+
                 Configuration config = dao.get(type);
                 if (config == null)
                     config = new Configuration(type.name(), value);

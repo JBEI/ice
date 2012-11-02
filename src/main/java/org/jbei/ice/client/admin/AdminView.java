@@ -5,12 +5,12 @@ import org.jbei.ice.client.common.AbstractLayout;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class AdminView extends AbstractLayout {
-
     private FlexTable mainContent;
     private AdminViewMenu menu;
     private HTML contentHeader;
@@ -26,6 +26,7 @@ public class AdminView extends AbstractLayout {
                                          + "text-shadow: #333 1px 1px 1px;"
                                          + " padding: 5px; -webkit-border-radius: 2px; border-radius: 2px;"
                                          + "-moz-border-radius: 2px;\"><b>Site Administration</b></span>");
+        mainContent.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
     }
 
     public void show(AdminOption selected, Widget widget) {

@@ -61,7 +61,7 @@ public class SelectTypeMenu implements IsWidget {
 
         options.setRowData(Arrays.asList(EntryAddType.values()));
 
-        final PopupHandler clickHandler = new PopupHandler(options, createEntry.getElement(), 1, 0, false);
+        final PopupHandler clickHandler = new PopupHandler(options, createEntry.getElement(), false);
 
         createEntry.addClickHandler(clickHandler);
         optionSelection = new SingleSelectionModel<EntryAddType>();

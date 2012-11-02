@@ -38,6 +38,7 @@ public class AccountControllerTest {
      */
     @Before
     public void setUp() throws Exception {
+        HibernateHelper.beginTransaction();
     }
 
     /**
@@ -45,6 +46,7 @@ public class AccountControllerTest {
      */
     @After
     public void tearDown() throws Exception {
+        HibernateHelper.rollbackTransaction();
     }
 
     /**
@@ -104,15 +106,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testCreateNewAccount() {
-    }
-
-    /**
-     * Test method for
-     * {@link org.jbei.ice.lib.account.AccountController#createAdminAccount(java.lang.String, java.lang.String)}
-     * .
-     */
-    @Test
-    public void testCreateAdminAccount() {
     }
 
     /**

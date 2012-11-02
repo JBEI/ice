@@ -6,6 +6,8 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.executor.IceExecutorService;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
@@ -45,6 +47,7 @@ public class ApplicationController {
 
     public static void upgradeDatabaseIfNecessary() {
         ConfigurationController controller = new ConfigurationController();
+
         try {
             String dbVersion = controller.retrieveDatabaseVersion();
             if (RELEASE_DATABASE_SCHEMA_VERSION.equalsIgnoreCase(dbVersion)) {
@@ -88,13 +91,15 @@ public class ApplicationController {
     private static void upgradeAccounts() throws ControllerException {
         Logger.info("Upgrading accounts....please wait");
         AccountController accountController = new AccountController();
+        GroupController groupController = new GroupController();
+
         for (Account account : accountController.retrieveAllAccounts()) {
             if (account.getSalt() == null || account.getSalt().isEmpty()) {
                 account.setSalt(Utils.generateUUID());
             }
 
-            String sha = Utils.encryptSHA(account.getEmail());
-            account.setEmailHash(sha);
+            Group everyoneGroup = groupController.createOrRetrievePublicGroup();
+            account.getGroups().add(everyoneGroup);
             accountController.save(account);
         }
         Logger.info("Accounts upgrade complete");

@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 
 /**
@@ -43,6 +44,9 @@ public class Group implements IModel {
 
     @Enumerated(EnumType.STRING)
     private GroupType type;
+
+    @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY, targetEntity = Account.class)
+    private Set<Account> members = new HashSet<Account>();
 
     // Getters and setters
     public long getId() {
@@ -95,5 +99,9 @@ public class Group implements IModel {
 
     public void setType(GroupType type) {
         this.type = type;
+    }
+
+    public Set<Account> getMembers() {
+        return members;
     }
 }

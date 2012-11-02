@@ -1,7 +1,5 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-
 import java.util.Arrays;
 
 import org.jbei.ice.client.common.widget.PopupHandler;
@@ -21,11 +19,12 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
 /**
  * UI widget that allows users to upload sequence information
  * and associate them with a specified entry (via constructor param).
- * 
+ *
  * @author Hector Plahar
  */
 class SequenceFileUpload implements IsWidget, IView {
@@ -71,7 +70,7 @@ class SequenceFileUpload implements IsWidget, IView {
 
         options.setRowData(Arrays.asList(UploadOption.values()));
 
-        popupHandler = new PopupHandler(options, label.getElement(), 0, 1, false);
+        popupHandler = new PopupHandler(options, label.getElement(), false);
         label.addClickHandler(popupHandler);
 
         optionSelection = new SingleSelectionModel<UploadOption>();

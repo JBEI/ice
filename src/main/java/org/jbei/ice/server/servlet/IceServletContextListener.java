@@ -41,6 +41,13 @@ public class IceServletContextListener implements ServletContextListener {
                 Logger.error("Error de-registering driver: " + driver, e);
             }
         }
+
+//        if( muleContext != null && muleContext.isStarted())
+//            try {
+//                muleContext.stop();
+//            } catch (MuleException e) {
+//                Logger.error(e);
+//            }
     }
 
     protected void init() {
@@ -48,10 +55,26 @@ public class IceServletContextListener implements ServletContextListener {
             HibernateHelper.beginTransaction();
             PopulateInitialDatabase.initializeDatabase();
             ApplicationController.upgradeDatabaseIfNecessary();
+            startMuleESB();
             HibernateHelper.commitTransaction();
         } catch (Throwable e) {
             HibernateHelper.rollbackTransaction();
             throw new RuntimeException(e);
         }
+    }
+
+    private void startMuleESB() {
+//        try {
+//        DefaultMuleContextFactory muleContextFactory = new DefaultMuleContextFactory();
+//        SpringXmlConfigurationBuilder configBuilder = new SpringXmlConfigurationBuilder("mule-config.xml");
+//        muleContext = muleContextFactory.createMuleContext(configBuilder);
+//            muleContext.start();
+//        } catch (ConfigurationException e ) {
+//            Logger.error(e);
+//        } catch (InitialisationException e) {
+//            Logger.error(e);
+//        } catch (MuleException e) {
+//            Logger.error(e);
+//        }
     }
 }

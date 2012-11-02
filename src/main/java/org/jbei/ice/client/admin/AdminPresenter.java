@@ -7,7 +7,8 @@ import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.admin.group.EditGroupsPanel;
+import org.jbei.ice.client.admin.group.GroupPresenter;
+import org.jbei.ice.client.admin.setting.SystemSettingsWidget;
 import org.jbei.ice.client.admin.transfer.TransferEntryPanel;
 import org.jbei.ice.client.admin.user.UserTable;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -18,7 +19,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -36,6 +36,7 @@ public class AdminPresenter extends AbstractPresenter {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private AdminOption currentOption;
+    private GroupPresenter groupPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view, String optionStr) {
         this.service = service;
@@ -73,6 +74,8 @@ public class AdminPresenter extends AbstractPresenter {
                 break;
 
             case GROUPS:
+                if (groupPresenter == null)
+                    groupPresenter = new GroupPresenter(service, eventBus);
                 retrieveGroups();
                 break;
 
@@ -101,12 +104,8 @@ public class AdminPresenter extends AbstractPresenter {
                 if (result == null || currentOption != AdminOption.GROUPS)
                     return;
 
-                EditGroupsPanel panel = new EditGroupsPanel();
-                panel.setGroups(result);
-//                ListDataProvider<GroupInfo> dataProvider = new ListDataProvider<GroupInfo>();
-//                dataProvider.addDataDisplay(panel.getDataPanel());
-//                dataProvider.getList().addAll(result);
-                view.show(currentOption, panel);
+                groupPresenter.setGroups(result);
+                view.show(currentOption, groupPresenter.getView().asWidget());
             }
         }.go(eventBus);
     }
@@ -121,11 +120,13 @@ public class AdminPresenter extends AbstractPresenter {
             }
 
             @Override
-            public void onSuccess(HashMap<String, String> profileInfo) {
-                if (profileInfo == null || currentOption != AdminOption.SETTINGS)
+            public void onSuccess(HashMap<String, String> settings) {
+                if (settings == null || currentOption != AdminOption.SETTINGS)
                     return;
 
-                view.show(currentOption, new HTML("&nbsp;"));
+                SystemSettingsWidget widget = new SystemSettingsWidget();
+                widget.setData(settings);
+                view.show(currentOption, widget);
             }
         }.go(eventBus);
     }

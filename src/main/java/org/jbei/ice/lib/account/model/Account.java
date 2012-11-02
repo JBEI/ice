@@ -79,9 +79,6 @@ public class Account implements IModel {
     @Column(name = "salt")
     private String salt;
 
-    @Column(name = "email_hash", unique = true)
-    private String emailHash;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"),
                inverseJoinColumns = @JoinColumn(name = "group_id"))
@@ -296,13 +293,5 @@ public class Account implements IModel {
 
     public void setSalt(String salt) {
         this.salt = salt;
-    }
-
-    public String getEmailHash() {
-        return emailHash;
-    }
-
-    public void setEmailHash(String emailHash) {
-        this.emailHash = emailHash;
     }
 }

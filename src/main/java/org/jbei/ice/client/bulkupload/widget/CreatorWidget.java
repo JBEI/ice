@@ -37,7 +37,7 @@ public class CreatorWidget implements IsWidget {
         panel.addStyleName("pad-6");
         createTableContents(creator, creatorEmail);
 
-        final PopupHandler clickHandler = new PopupHandler(panel, creatorIcon.getElement(), 0, 0, false);
+        final PopupHandler clickHandler = new PopupHandler(panel, creatorIcon.getElement(), false);
         clickHandler.setCloseHandler(new CloseHandler<PopupPanel>() {
             @Override
             public void onClose(CloseEvent<PopupPanel> event) {

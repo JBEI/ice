@@ -11,17 +11,7 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 public class Footer extends Composite {
 
@@ -123,18 +113,18 @@ public class Footer extends Composite {
 
         HorizontalPanel line3 = new HorizontalPanel();
         Anchor featureReq = new Anchor("Feature Request",
-                "http://code.google.com/p/gd-ice/issues/entry?template=Suggest%20Feature");
+                                       "http://code.google.com/p/gd-ice/issues/entry?template=Suggest%20Feature");
         line3.add(featureReq);
         line3.add(new HTML("&nbsp; | &nbsp; "));
         Anchor bugReport = new Anchor("Report a Bug",
-                "http://code.google.com/p/gd-ice/issues/entry?template=Report%20Bug");
+                                      "http://code.google.com/p/gd-ice/issues/entry?template=Report%20Bug");
         line3.add(bugReport);
         line3.add(new HTML("&nbsp; | &nbsp; "));
         Label feedback = new Label("Feedback");
         feedback.setStyleName("footer_feedback_widget");
 
-        final PopupHandler handler = new PopupHandler(feedbackWidget, feedback.getElement(), -250,
-                -200, true);
+        final PopupHandler handler = new PopupHandler(feedbackWidget, feedback.getElement(),
+                                                      true);
         feedbackWidget.addCloseHandler(new ClickHandler() {
 
             @Override
@@ -172,8 +162,9 @@ public class Footer extends Composite {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert("There was an error submitting your feedback. We apologize for the inconvenience\n\n"
-                                + caught.getMessage());
+                        Window.alert(
+                                "There was an error submitting your feedback. We apologize for the inconvenience\n\n"
+                                        + caught.getMessage());
                     }
                 });
                 handler.hidePopup();

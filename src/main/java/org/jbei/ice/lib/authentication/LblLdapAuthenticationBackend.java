@@ -1,14 +1,14 @@
 package org.jbei.ice.lib.authentication;
 
+import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper;
 import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper.LblLdapAuthenticationWrapperException;
-
-import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Authentication Backend for LDAP authentication at JBEI's home institution (Lawrence Berkeley Lab,
@@ -39,7 +39,7 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
             throw new InvalidCredentialsException("Username and Password are mandatory!");
         }
 
-        Account account = null;
+        Account account;
 
         try {
             LblLdapAuthenticationWrapper lblLdapAuthenticationWrapper = new LblLdapAuthenticationWrapper();

@@ -92,7 +92,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         clearButton.addKeyPressHandler(new EnterClickHandler(submitButton));
 
         final Widget popup = createPopupWidget();
-        addToHandler = new PopupHandler(popup, addWidget.getElement(), -1, 1, false);
+        addToHandler = new PopupHandler(popup, addWidget.getElement(), false);
         addWidget.addClickHandler(addToHandler);
         addToHandler.setCloseHandler(new CloseHandler<PopupPanel>() {
             @Override

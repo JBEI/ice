@@ -1,58 +1,110 @@
 package org.jbei.ice.client.admin.group;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.AdminPanel;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.GroupInfo;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.view.client.ListDataProvider;
 
-public class GroupPresenter implements AdminPanelPresenter<GroupInfo> {
+public class GroupPresenter implements AdminPanelPresenter {
 
-    private final EditGroupsPanel view;
-    private ListDataProvider<GroupInfo> dataProvider = new ListDataProvider<GroupInfo>();
+    private final GroupsPanel view;
+    private final RegistryServiceAsync service;
+    private final HandlerManager eventBus;
+    private String currentGroupSelection;
+    private CreateGroupWidget widget;
 
-    public GroupPresenter() {
-        this.view = new EditGroupsPanel();
+    public GroupPresenter(final RegistryServiceAsync service, HandlerManager eventBus) {
+
+        this.service = service;
+        this.eventBus = eventBus;
+        this.view = new GroupsPanel(createDelegate());
+
+        // handlers
+        addGroupSelectionHandler();
+        addCreateGroupHandler();
+
+        widget = new CreateGroupWidget();
     }
 
-    private void retrieveAllGroups(final RegistryServiceAsync service, HandlerManager eventBus) {
-
-        new IceAsyncCallback<ArrayList<GroupInfo>>() {
-
+    private DeleteActionCell.Delegate<AccountInfo> createDelegate() {
+        return new DeleteActionCell.Delegate<AccountInfo>() {
             @Override
-            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
-                service.retrieveAllGroups(AppController.sessionId, callback);
+            public void execute(AccountInfo object, Callback callback) { // TODO : pass another delete that indicates
+            // success
+                // TODO : remove object from group
+                if (object == null)
+                    return;
             }
+        };
+    }
 
+    private void addGroupSelectionHandler() {
+        this.view.setGroupSelectionHandler(new ClickHandler() {
             @Override
-            public void onSuccess(ArrayList<GroupInfo> result) {
-                if (result == null)
+            public void onClick(ClickEvent event) {
+                GroupInfo info = view.getGroupSelection(event);
+                if (info == null)
                     return;
 
-                dataProvider.getList().clear();
-                dataProvider.getList().addAll(result);
+                currentGroupSelection = info.getUuid();
+                retrieveGroupMembers(info);
             }
-        }.go(eventBus);
+        });
     }
 
-    @Override
-    public void go(RegistryServiceAsync service, HandlerManager eventBus) {
-//        if (dataProvider.getDataDisplays().contains(this.view.getDataPanel()))
-//            return;
-//        dataProvider.addDataDisplay(this.view.getDataPanel());
-//        retrieveAllGroups(service, eventBus);
+    private void addCreateGroupHandler() {
+        this.view.setCreateGroupHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                widget.showPopup(true);
+            }
+        });
     }
 
     @Override
     public AdminPanel getView() {
         return this.view;
+    }
+
+    public void setGroups(ArrayList<GroupInfo> groups) {
+        this.view.setGroups(groups);
+    }
+
+    protected void retrieveGroupMembers(final GroupInfo info) {
+        new IceAsyncCallback<ArrayList<AccountInfo>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<AccountInfo>> callback) throws AuthenticationException {
+                service.retrieveGroupMembers(AppController.sessionId, info, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<AccountInfo> result) {
+                Collections.sort(result, new Comparator<AccountInfo>() {
+                    @Override
+                    public int compare(AccountInfo o1, AccountInfo o2) {
+                        return o1.getFullName().compareTo(o2.getFullName());
+                    }
+                });
+                if (!currentGroupSelection.equalsIgnoreCase(info.getUuid()))
+                    return;
+
+                view.setGroupMembers(result);
+            }
+        }.go(eventBus);
     }
 }

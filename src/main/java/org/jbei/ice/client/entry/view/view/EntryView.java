@@ -24,15 +24,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.MultiSelectionModel;
 import gwtupload.client.IUploader;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
@@ -46,17 +38,16 @@ public class EntryView extends Composite implements IEntryView {
 
     // general header
     private HorizontalPanel generalHeaderPanel;
-    private Button editGeneralButton;
-    private Label deleteLabel;
+    private HTML editGeneralButton;
+    private HTML deleteLabel;
     private HandlerRegistration deleteRegistration;
+    private HTML pipe;
 
     // sequence Analysis
-    private HTMLPanel seqPanel;
-    private Button addSeqButton;
+    private HTML addSeqLabel;
 
     // samples
-    private HTMLPanel samplesPanel;
-    private Button addSampleButton;
+    private HTML addSampleLabel;
     private CreateSampleForm sampleForm;
 
     // permissions
@@ -70,7 +61,6 @@ public class EntryView extends Composite implements IEntryView {
 
     // navigation buttons for context navigation.
     private final PagerWidget contextPager;
-
     private final Label headerLabel;
     private final EntrySampleTable sampleTable;
     private final EntrySequenceTable sequenceTable;
@@ -113,7 +103,6 @@ public class EntryView extends Composite implements IEntryView {
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
 
         // sample panel
-        initSamplePanel();
         sampleTable = new EntrySampleTable();
 
         // sequence panel
@@ -122,9 +111,6 @@ public class EntryView extends Composite implements IEntryView {
 
         // general panel
         initGeneralPanel();
-
-        // sequence
-        initSequencePanel();
 
         // audit trail
 //        initAuditTrailPanel();
@@ -140,42 +126,34 @@ public class EntryView extends Composite implements IEntryView {
         traceHeaderPanel.setDeleteHandler(handler);
     }
 
-    private void initSequencePanel() {
-        seqPanel = new HTMLPanel(
-                "<span class=\"entry_general_info_header\">Sequence Analysis</span> <span " +
-                        "id=\"add_trace_button\"></span>");
-        addSeqButton = new Button("Add");
-        addSeqButton.setStyleName("top_menu");
-        seqPanel.add(addSeqButton, "add_trace_button");
-    }
-
     private void initGeneralPanel() {
-        //        generalHeaderPanel = new HTMLPanel(
-        //                "<span id=\"go_back_button\"></span> <span class=\"entry_general_info_header\"
-        // id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
         generalHeaderPanel = new HorizontalPanel();
         generalHeaderPanel.setVerticalAlignment(HasAlignment.ALIGN_MIDDLE);
 
-        String html = "<div ><i class=\"" + FAIconType
-                .EDIT.getStyleName() + "\"></i>&nbsp;<label>Edit</label></br></div>";
-        editGeneralButton = new Button(html);
-
-        deleteLabel = new Label("Delete");
+        editGeneralButton = new HTML("<i class=\"" + FAIconType.EDIT.getStyleName()
+                                             + "\" style=\"margin-right: 2px\"></i>Edit");
+        editGeneralButton.setStyleName("entry_edit_link");
+        deleteLabel = new HTML("<i class=\"" + FAIconType.REMOVE_SIGN.getStyleName()
+                                       + "\" style=\"margin-right: 2px\"></i>Delete");
         deleteLabel.setStyleName("entry_delete_link");
+        addSampleLabel = new HTML("<i class=\"" + FAIconType.EDIT.getStyleName()
+                                          + "\" style=\"margin-right: 2px\"></i>Add Sample");
+        addSampleLabel.setStyleName("entry_edit_link");
+        addSeqLabel = new HTML("<i class=\"" + FAIconType.EDIT.getStyleName()
+                                       + "\" style=\"margin-right: 2px\"></i>Add Sequence");
+        addSeqLabel.setStyleName("entry_edit_link");
+        headerLabel.setStyleName("entry_general_info_header");
+        pipe = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
+        pipe.addStyleName("color_eee");
+
         generalHeaderPanel.add(contextPager.getGoBack());
         generalHeaderPanel.add(headerLabel);
-        headerLabel.setStyleName("entry_general_info_header");
         generalHeaderPanel.add(editGeneralButton);
+        generalHeaderPanel.add(pipe);
         generalHeaderPanel.add(deleteLabel);
-    }
 
-    private void initSamplePanel() {
-        samplesPanel = new HTMLPanel(
-                "<span class=\"entry_general_info_header\">Samples</span> &nbsp; <span " +
-                        "id=\"add_sample_button\"></span>");
-        addSampleButton = new Button("Add");
-        addSampleButton.setStyleName("top_menu");
-        samplesPanel.add(addSampleButton, "add_sample_button");
+        mainContent.setWidget(0, 0, generalHeaderPanel);
+        mainContent.getCellFormatter().setHeight(0, 0, "30px");
     }
 
     protected Widget createMenu() {
@@ -338,8 +316,12 @@ public class EntryView extends Composite implements IEntryView {
         detailView.getSequencePanel().setDeleteHandler(deleteHandler);
         editGeneralButton.setVisible(showEdit);
         deleteLabel.setVisible(showEdit);
-        mainContent.setWidget(0, 0, generalHeaderPanel);
-        mainContent.getCellFormatter().setHeight(0, 0, "30px");
+        generalHeaderPanel.remove(addSampleLabel);
+        generalHeaderPanel.remove(addSeqLabel);
+        generalHeaderPanel.add(editGeneralButton);
+        generalHeaderPanel.add(pipe);
+        generalHeaderPanel.add(deleteLabel);
+
         mainContent.setWidget(1, 0, detailView);
         SequenceViewPanel sequencePanel = detailView.getSequencePanel();
 
@@ -350,7 +332,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void addSampleButtonHandler(ClickHandler handler) {
-        addSampleButton.addClickHandler(handler);
+        addSampleLabel.addClickHandler(handler);
     }
 
     @Override
@@ -368,7 +350,11 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void showSampleView() {
-        mainContent.setWidget(0, 0, samplesPanel);
+        generalHeaderPanel.remove(editGeneralButton);
+        generalHeaderPanel.remove(deleteLabel);
+        generalHeaderPanel.remove(addSeqLabel);
+        generalHeaderPanel.remove(pipe);
+        generalHeaderPanel.add(addSampleLabel);
         mainContent.setWidget(1, 0, sampleTable);
     }
 
@@ -379,8 +365,11 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void showSequenceView(EntryInfo info, boolean showFlash) {
-
-        mainContent.setWidget(0, 0, seqPanel);
+        generalHeaderPanel.remove(editGeneralButton);
+        generalHeaderPanel.remove(deleteLabel);
+        generalHeaderPanel.remove(addSampleLabel);
+        generalHeaderPanel.remove(pipe);
+        generalHeaderPanel.add(addSeqLabel);
 
         VerticalPanel panel = new VerticalPanel();
         panel.setWidth("100%");
@@ -403,10 +392,6 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.setWidget(1, 0, panel);
     }
 
-    public void addSequenceButtonHandler(ClickHandler handler) {
-        addSeqButton.addClickHandler(handler);
-    }
-
     @Override
     public void setEntryName(String name) {
         headerLabel.setText(name);
@@ -421,9 +406,12 @@ public class EntryView extends Composite implements IEntryView {
     public void setSampleOptions(SampleLocation options) {
         sampleForm = new CreateSampleForm(options);
         sampleForm.setVisible(false);
-        mainContent.setWidget(0, 0, samplesPanel);
-        HTMLPanel panel = new HTMLPanel(
-                "<div id=\"create_sample_form\"></div><div id=\"sample_table\"></div>");
+        generalHeaderPanel.remove(editGeneralButton);
+        generalHeaderPanel.remove(deleteLabel);
+        generalHeaderPanel.remove(addSeqLabel);
+        generalHeaderPanel.remove(pipe);
+        generalHeaderPanel.add(addSampleLabel);
+        HTMLPanel panel = new HTMLPanel("<div id=\"create_sample_form\"></div><div id=\"sample_table\"></div>");
         panel.add(sampleForm, "create_sample_form");
         panel.add(sampleTable, "sample_table");
 
@@ -507,7 +495,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void addSequenceAddButtonHandler(ClickHandler clickHandler) {
-        addSeqButton.addClickHandler(clickHandler);
+        addSeqLabel.addClickHandler(clickHandler);
     }
 
     @Override

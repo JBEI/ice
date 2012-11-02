@@ -171,6 +171,9 @@ public interface RegistryServiceAsync {
     void retrieveAllGroups(String sessionId, AsyncCallback<ArrayList<GroupInfo>> callback)
             throws AuthenticationException;
 
+    void retrieveGroupMembers(String sessionId, GroupInfo info, AsyncCallback<ArrayList<AccountInfo>> callback)
+            throws AuthenticationException;
+
     void deleteEntry(String sessionId, EntryInfo info,
             AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
 
