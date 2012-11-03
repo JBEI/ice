@@ -173,21 +173,21 @@ public class PlasmidForm extends SingleEntryForm<PlasmidInfo> {
         // plasmid specific fields
         PlasmidInfo info = super.getEntryInfo();
 
-        String selectionMarkers = ((MultipleTextBox) markers.getTextBox()).getWholeText();
+        String selectionMarkers = ((MultipleTextBox) markers.getValueBox()).getWholeText();
         info.setSelectionMarkers(selectionMarkers);
         info.setBackbone(this.backbone.getText());
-        info.setOriginOfReplication(((MultipleTextBox) origin.getTextBox()).getWholeText());
-        info.setPromoters(((MultipleTextBox) promoters.getTextBox()).getWholeText());
+        info.setOriginOfReplication(((MultipleTextBox) origin.getValueBox()).getWholeText());
+        info.setPromoters(((MultipleTextBox) promoters.getValueBox()).getWholeText());
         info.setCircular(this.circular.getValue());
     }
 
     @Override
     public FocusWidget validateForm() {
         FocusWidget widget = super.validateForm();
-        if (markers.getTextBox().getText().isEmpty()) {
+        if (markers.getValueBox().getText().isEmpty()) {
             markers.setStyleName("entry_input_error");
             if (widget == null)
-                widget = markers.getTextBox();
+                widget = markers.getValueBox();
         } else {
             markers.setStyleName("input_box");
         }
