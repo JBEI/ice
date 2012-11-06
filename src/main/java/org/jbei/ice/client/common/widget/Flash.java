@@ -7,9 +7,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Widget for display flash objects.
- * 
+ *
  * @author Hector Plahar
- * 
  */
 public class Flash implements IsWidget {
 
@@ -18,7 +17,9 @@ public class Flash implements IsWidget {
 
     public Flash(Parameters params) {
         String url = GWT.getHostPageBaseURL();
-        String html = "<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540002\" id=\"VectorEditor\" width=\"100%\" height=\"100%\" codebase=\"https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab\"> "
+        String html = "<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540002\" id=\"VectorEditor\" " +
+                "width=\"100%\" height=\"100%\" codebase=\"https://fpdownload.macromedia" +
+                ".com/get/flashplayer/current/swflash.cab\"> "
                 + "<param name=\"movie\" value=\""
                 + params.getMovieName()
                 + "\">"
@@ -34,7 +35,10 @@ public class Flash implements IsWidget {
                 + params.getEntryId()
                 + "&amp;sessionId="
                 + params.getSessiondId()
-                + "\" quality=\"high\" bgcolor=\"#869ca7\" width=\"100%\" wmode=\"opaque\" height=\"100%\" name=\"VectorEditor\" align=\"middle\" play=\"true\" loop=\"false\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></object>";
+                + "\" quality=\"high\" bgcolor=\"#869ca7\" width=\"100%\" wmode=\"opaque\" height=\"100%\" " +
+                "name=\"VectorEditor\" align=\"middle\" play=\"true\" loop=\"false\" " +
+                "type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe" +
+                ".com/go/getflashplayer\"></object>";
         widget = new HTML(html);
         widget.setStyleName("z-index-low");
         widget.setHeight("100%");

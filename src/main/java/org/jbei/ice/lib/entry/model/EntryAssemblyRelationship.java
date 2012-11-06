@@ -1,8 +1,5 @@
 package org.jbei.ice.lib.entry.model;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.AssemblyRelationship;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -12,6 +9,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.models.AssemblyRelationship;
 
 /**
  * Many-to-Many relationship table between two {@link Entry} and {@link org.jbei.ice.lib.models.AssemblyRelationship}.

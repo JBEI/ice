@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 /**
  * wraps collection action menu and the "export as menu"
  * as a single unit
- * 
+ *
  * @author Hector Plahar
  */
 public class EntrySelectionModelMenu extends Composite {

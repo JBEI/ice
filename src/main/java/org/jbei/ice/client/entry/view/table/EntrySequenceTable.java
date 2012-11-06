@@ -1,5 +1,11 @@
 package org.jbei.ice.client.entry.view.table;
 
+import java.util.ArrayList;
+
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.util.DateUtilities;
+import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -22,11 +28,6 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
-import org.jbei.ice.client.Page;
-import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-
-import java.util.ArrayList;
 
 /**
  * Table for displaying sequence trace files

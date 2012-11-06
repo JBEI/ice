@@ -10,9 +10,8 @@ import org.biojava.bio.molbio.RestrictionEnzymeManager;
 
 /**
  * Methods for dealing with {@link RestrictionEnzyme}s.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class RestrictionEnzymesManager {
     private static final String REBASE_DATABASE_RESOURCE_FILE = "/org/jbei/ice/bio/enzymes/link_withrefm";
@@ -27,9 +26,10 @@ public class RestrictionEnzymesManager {
 
     /**
      * Retrieve a singleton instance of RestrictionEnzymesManager.
-     * 
+     *
      * @return RestrictionEnzymesManager instance.
      * @throws RestrictionEnzymesManagerException
+     *
      */
     public static RestrictionEnzymesManager getInstance() throws RestrictionEnzymesManagerException {
         if (instance == null) {
@@ -41,7 +41,7 @@ public class RestrictionEnzymesManager {
 
     /**
      * Retrieve known {@link RestrictionEnzyme}s.
-     * 
+     *
      * @return Collection of RestrictionEnzymes.
      */
     public Collection<RestrictionEnzyme> getEnzymes() {
@@ -50,9 +50,8 @@ public class RestrictionEnzymesManager {
 
     /**
      * Retrieve {@link RestrictionEnzyme} by its name.
-     * 
-     * @param enzymeName
-     *            Name of the enzyme to query.
+     *
+     * @param enzymeName Name of the enzyme to query.
      * @return RestrictionEnzyme. Null if not found.
      */
     public RestrictionEnzyme getEnzymeByName(String enzymeName) {
@@ -71,9 +70,8 @@ public class RestrictionEnzymesManager {
 
     /**
      * Retrieve biojava RestrictionEnzyme by name.
-     * 
-     * @param name
-     *            Name of the enzyme to query.
+     *
+     * @param name Name of the enzyme to query.
      * @return biojava RestrictionEnzyme.
      */
     public org.biojava.bio.molbio.RestrictionEnzyme getBioJavaEnzyme(String name) {
@@ -82,10 +80,11 @@ public class RestrictionEnzymesManager {
 
     /**
      * Load enzymes into memory.
-     * <p>
+     * <p/>
      * Read the REBASE database from file.
-     * 
+     *
      * @throws RestrictionEnzymesManagerException
+     *
      */
     @SuppressWarnings("unchecked")
     private void loadEnzymes() throws RestrictionEnzymesManagerException {
@@ -103,15 +102,17 @@ public class RestrictionEnzymesManager {
 
                 if (re.getCutType() == org.biojava.bio.molbio.RestrictionEnzyme.CUT_COMPOUND) {
                     restrictionEnzyme = new RestrictionEnzyme(re.getName(), re.getRecognitionSite()
-                            .seqString(), re.getCutType(), re.getForwardRegex(),
-                            re.getReverseRegex(), re.getDownstreamCut()[0],
-                            re.getDownstreamCut()[1], re.getUpstreamCut()[0],
-                            re.getUpstreamCut()[1]);
+                                                                              .seqString(), re.getCutType(),
+                                                              re.getForwardRegex(),
+                                                              re.getReverseRegex(), re.getDownstreamCut()[0],
+                                                              re.getDownstreamCut()[1], re.getUpstreamCut()[0],
+                                                              re.getUpstreamCut()[1]);
                 } else {
                     restrictionEnzyme = new RestrictionEnzyme(re.getName(), re.getRecognitionSite()
-                            .seqString(), re.getCutType(), re.getForwardRegex(),
-                            re.getReverseRegex(), re.getDownstreamCut()[0],
-                            re.getDownstreamCut()[1], -1, -1);
+                                                                              .seqString(), re.getCutType(),
+                                                              re.getForwardRegex(),
+                                                              re.getReverseRegex(), re.getDownstreamCut()[0],
+                                                              re.getDownstreamCut()[1], -1, -1);
                 }
 
                 enzymesMap.put(restrictionEnzyme.getName(), restrictionEnzyme);

@@ -45,14 +45,14 @@ public class SequenceFileUploadPresenter {
                 return;
 
             switch (selected) {
-            case FILE:
-                view.showUploadFileDialog();
-                break;
+                case FILE:
+                    view.showUploadFileDialog();
+                    break;
 
-            case PASTE:
-            default:
-                view.showPasteSequenceDialog();
-                break;
+                case PASTE:
+                default:
+                    view.showPasteSequenceDialog();
+                    break;
             }
 
             model.setSelected(selected, false);

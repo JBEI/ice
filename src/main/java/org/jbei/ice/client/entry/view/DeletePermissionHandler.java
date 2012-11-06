@@ -1,12 +1,13 @@
 package org.jbei.ice.client.entry.view;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
+
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class DeletePermissionHandler implements ClickHandler {
 

@@ -9,7 +9,7 @@ import com.google.gwt.user.client.Window;
 
 /**
  * Presenter for the attachment list menu
- * 
+ *
  * @author Hector Plahar
  */
 public class AttachmentListMenuPresenter {
@@ -54,8 +54,7 @@ public class AttachmentListMenuPresenter {
     }
 
     /**
-     * @param item
-     *            attachment item in the cell being clicked on
+     * @param item attachment item in the cell being clicked on
      * @return Clickhandler for each cell in the attachment list menu
      *         to download
      */
@@ -65,7 +64,7 @@ public class AttachmentListMenuPresenter {
             @Override
             public void onClick(ClickEvent event) {
                 Window.Location.replace("/download?type=attachment&name=" + item.getName() + "&id="
-                        + item.getFileId());
+                                                + item.getFileId());
             }
         };
     }

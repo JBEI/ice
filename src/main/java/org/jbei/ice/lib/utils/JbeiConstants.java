@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.utils;
 
+import java.util.Map;
+
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
-
-import java.util.Map;
 
 /**
  * Constants used in gd-ice.

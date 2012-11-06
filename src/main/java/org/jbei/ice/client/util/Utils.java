@@ -29,7 +29,7 @@ public class Utils {
 
     /**
      * splits a string around commas. TODO : current version is the quick and dirty one
-     * 
+     *
      * @param line
      * @return
      */
@@ -41,9 +41,9 @@ public class Utils {
     }
 
     public native boolean isValidEmail(String email) /*-{
-		var reg1 = /(@.*@)|(\.\.)|(@\.)|(\.@)|(^\.)/; // not valid 
-		var reg2 = /^.+\@(\[?)[a-zA-Z0-9\-\.]+\.([a-zA-Z]{2,3}|[0-9]{1,3}) (\]?)$/; // valid 
-		return !reg1.test(email) && reg2.test(email);
+        var reg1 = /(@.*@)|(\.\.)|(@\.)|(\.@)|(^\.)/; // not valid
+        var reg2 = /^.+\@(\[?)[a-zA-Z0-9\-\.]+\.([a-zA-Z]{2,3}|[0-9]{1,3}) (\]?)$/; // valid
+        return !reg1.test(email) && reg2.test(email);
     }-*/;
 
 }

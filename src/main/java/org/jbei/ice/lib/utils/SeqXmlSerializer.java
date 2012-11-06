@@ -1,12 +1,8 @@
 package org.jbei.ice.lib.utils;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.Namespace;
-import org.dom4j.QName;
-import org.dom4j.tree.DefaultElement;
+import java.util.HashSet;
+import java.util.List;
+
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -19,8 +15,13 @@ import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
-import java.util.HashSet;
-import java.util.List;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.Namespace;
+import org.dom4j.QName;
+import org.dom4j.tree.DefaultElement;
 
 /**
  * SeqXML serializer/deserializer.
@@ -120,6 +121,13 @@ public class SeqXmlSerializer {
                     locations.add(new DefaultElement(GENBANK_START, seqNamespace).addText(String
                                                                                                   .valueOf(
                                                                                                           location
+
+
+
+
+
+
+
 
 
 

@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.entry.model;
 
-import org.jbei.ice.lib.dao.IModel;
-
-import javax.persistence.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.persistence.*;
+
+import org.jbei.ice.lib.dao.IModel;
 
 // TODO Make advanced search filter for parameters
 

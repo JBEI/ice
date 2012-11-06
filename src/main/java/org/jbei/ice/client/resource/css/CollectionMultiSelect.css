@@ -15,7 +15,7 @@
 }
 
 .cellTableCell {
-	padding: 2px;
+    padding: 2px;
     overflow: hidden;
     border-bottom: 1px solid #F3F3F3;
     color: #333333;
@@ -25,21 +25,20 @@
 }
 
 .cellTableFirstColumnFooter {
-  
+
 }
 
 .cellTableFirstColumnHeader {
-  
+
 }
 
 .cellTableLastColumnFooter {
-  
+
 }
 
 .cellTableLastColumnHeader {
-  
-}
 
+}
 
 .cellTableSortableHeader {
 }
@@ -56,11 +55,11 @@
 }
 
 .cellTableEvenRow {
-	background-color: #FcFcFc;
+    background-color: #FcFcFc;
 }
 
 .cellTableEvenRowCell {
-	
+
 }
 
 .cellTableOddRow {
@@ -70,9 +69,9 @@
 }
 
 .cellTableHoveredRow {
-  background-color: #F1F1F1;
-  cursor: pointer;
-  border: 1px solid #EEE;
+    background-color: #F1F1F1;
+    cursor: pointer;
+    border: 1px solid #EEE;
 }
 
 .cellTableHoveredRowCell {
@@ -85,19 +84,19 @@
 }
 
 .cellTableSelectedRow {
-  color: #0082C0;
-  font-weight: bold;
-  height: auto;
-  overflow: auto;
+    color: #0082C0;
+    font-weight: bold;
+    height: auto;
+    overflow: auto;
 }
 
 .cellTableSelectedRowCell {
-	background-color: #f3f1d9;
+    background-color: #f3f1d9;
 }
 
-/**
- * The keyboard selected cell is visible over selection.
- */
+    /**
+    * The keyboard selected cell is visible over selection.
+    */
 .cellTableKeyboardSelectedCell {
 }
 

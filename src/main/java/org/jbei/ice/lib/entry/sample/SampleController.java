@@ -38,6 +38,7 @@ public class SampleController {
      * Create a {@link Sample} object.
      * <p/>
      * Generates the UUID and the time stamps.
+     *
      * @param label     display label for sample
      * @param depositor name of the depositor
      * @param notes     associated notes
@@ -58,17 +59,16 @@ public class SampleController {
     }
 
     /**
-<<<<<<< HEAD
+     * <<<<<<< HEAD
      * Checks if the user has write permission of the {@link Sample}.
      *
-     * @param sample
-=======
-     * Checks if the user has write permission of the {@link Sample}. This is based on the entry that is associated
-     * with the sample
-     *
+     * @param sample  =======
+     *                Checks if the user has write permission of the {@link Sample}. This is based on the entry that is
+     *                associated
+     *                with the sample
      * @param account Account of user
      * @param sample  sample being checked
->>>>>>> master
+     *                >>>>>>> master
      * @return True if user has write permission.
      * @throws ControllerException
      */
@@ -95,11 +95,12 @@ public class SampleController {
 
     /**
      * Save the {@link Sample} into the database, with the option to rebuild the search index.
+     * <p/>
+     * <<<<<<< HEAD
+     * =======
      *
-<<<<<<< HEAD
-=======
      * @param account              user saving sample.
->>>>>>> master
+     *                             >>>>>>> master
      * @param sample
      * @param scheduleIndexRebuild
      * @return saved sample.
@@ -165,7 +166,7 @@ public class SampleController {
     }
 
     /**
-<<<<<<< HEAD
+     * <<<<<<< HEAD
      * Retrieve the number of {@link Sample}s associated with the {@link Entry}.
      *
      * @param entry
@@ -186,8 +187,8 @@ public class SampleController {
     }
 
     /**
-=======
->>>>>>> master
+     * =======
+     * >>>>>>> master
      * Retrieve the {@link Sample}s associated with the {@link Entry}.
      *
      * @param entry
@@ -207,7 +208,7 @@ public class SampleController {
     }
 
     /**
-<<<<<<< HEAD
+     * <<<<<<< HEAD
      * Retrieve the {@link Sample}s associated with the given depositor's email.
      *
      * @param depositorEmail
@@ -230,8 +231,8 @@ public class SampleController {
     }
 
     /**
-=======
->>>>>>> master
+     * =======
+     * >>>>>>> master
      * Retrieve the {@link Sample}s associated with the given {@link Storage}.
      *
      * @param storage

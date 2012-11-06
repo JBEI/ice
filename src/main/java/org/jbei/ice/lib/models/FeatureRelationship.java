@@ -13,9 +13,8 @@ import org.jbei.ice.lib.dao.IModel;
 /**
  * Represents the relationship between {@link Feature}s. For example, "mutant of" would be a
  * FeatureRelationship.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 @Entity
 @Table(name = "feature_relationship")

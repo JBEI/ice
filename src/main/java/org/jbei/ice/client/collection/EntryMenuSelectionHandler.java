@@ -6,14 +6,16 @@ class EntryMenuSelectionHandler implements SelectionChangeEvent.Handler {
 
     @Override
     public void onSelectionChange(SelectionChangeEvent event) {/*
-                                                               final EntryMenu selection = menuSelectionModel.getSelectedObject();
+                                                               final EntryMenu selection = menuSelectionModel
+                                                               .getSelectedObject();
                                                                if (selection == null)
                                                                return;
 
                                                                switch (selection) {
                                                                case MINE:
 
-                                                               service.retrieveUserEntries(sid, null, new AsyncCallback<ArrayList<Long>>() {
+                                                               service.retrieveUserEntries(sid, null,
+                                                               new AsyncCallback<ArrayList<Long>>() {
 
                                                                @Override
                                                                public void onFailure(Throwable caught) {
@@ -42,7 +44,8 @@ class EntryMenuSelectionHandler implements SelectionChangeEvent.Handler {
 
                                                                case ALL:
 
-                                                               service.retrieveAllEntryIDs(sid, new AsyncCallback<ArrayList<Long>>() {
+                                                               service.retrieveAllEntryIDs(sid,
+                                                               new AsyncCallback<ArrayList<Long>>() {
 
                                                                @Override
                                                                public void onFailure(Throwable caught) {
@@ -70,7 +73,8 @@ class EntryMenuSelectionHandler implements SelectionChangeEvent.Handler {
                                                                break;
 
                                                                case RECENTLY_VIEWED:
-                                                               service.retrieveRecentlyViewed(sid, new AsyncCallback<ArrayList<Long>>() {
+                                                               service.retrieveRecentlyViewed(sid,
+                                                               new AsyncCallback<ArrayList<Long>>() {
 
                                                                @Override
                                                                public void onFailure(Throwable caught) {
@@ -98,30 +102,38 @@ class EntryMenuSelectionHandler implements SelectionChangeEvent.Handler {
                                                                break;
 
                                                                case SAMPLES:
-                                                               //                    service.retrieveSamples(sid, new AsyncCallback<ArrayList<Long>>() {
+                                                               //                    service.retrieveSamples(sid,
+                                                               new AsyncCallback<ArrayList<Long>>() {
                                                                //
                                                                //                        @Override
-                                                               //                        public void onFailure(Throwable caught) {
-                                                               //                            Window.alert("Error: " + caught.getMessage());
+                                                               //                        public void onFailure
+                                                               (Throwable caught) {
+                                                               //                            Window.alert("Error: " +
+                                                                c aught.getMessage());
                                                                //                        }
                                                                //
                                                                //                        @Override
-                                                               //                        public void onSuccess(ArrayList<Long> result) {
+                                                               //                        public void onSuccess
+                                                               (ArrayList<Long> result) {
                                                                //                            if (result == null)
                                                                //                                return;
                                                                //
-                                                               //                            if (folderSelection != null)
-                                                               //                                folderModel.setSelected(folderSelection, false);
+                                                               //                            if (folderSelection !=
+                                                               null)
+                                                               //                                folderModel
+                                                               .setSelected(folderSelection, false);
                                                                //
                                                                //                            menuSelection = selection;
-                                                               //                            entryDataProvider.setValues(result);
+                                                               //                            entryDataProvider
+                                                               .setValues(result);
                                                                //                        }
                                                                //                    });
 
                                                                break;
 
                                                                case WORKSPACE:
-                                                               service.retrieveWorkspaceEntries(sid, new AsyncCallback<ArrayList<Long>>() {
+                                                               service.retrieveWorkspaceEntries(sid,
+                                                               new AsyncCallback<ArrayList<Long>>() {
 
                                                                @Override
                                                                public void onFailure(Throwable caught) {

@@ -5,9 +5,8 @@ import java.util.ArrayList;
 
 /**
  * Value object to store user's restriction enzyme group for flex apps.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class UserRestrictionEnzymeGroup implements Serializable {
     private static final long serialVersionUID = 1L;

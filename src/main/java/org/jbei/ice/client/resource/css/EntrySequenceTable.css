@@ -7,32 +7,32 @@
 .cellTableLastColumn {
 }
 
-@sprite .cellTableFooter {  
-  gwt-image: 'cellTableFooterBackground';
+@sprite .cellTableFooter {
+    gwt-image: 'cellTableFooterBackground';
 }
 
-/**
- * Applied to headers cells. Entry table does not have headers
- */
+    /**
+    * Applied to headers cells. Entry table does not have headers
+    */
 .cellTableHeader {
 }
 
-/* Applied to every cell */
+    /* Applied to every cell */
 .cellTableCell {
-  padding: 2px; 
-  font-size: 0.75em;
-  color: #333;
-  font-family: arial;
-  overflow: hidden;
-  border-bottom: 1px solid #f3f3f3;  
+    padding: 2px;
+    font-size: 0.75em;
+    color: #333;
+    font-family: arial;
+    overflow: hidden;
+    border-bottom: 1px solid #f3f3f3;
 }
 
 .cellTableFirstColumnFooter {
-  border-left: 0px;
+    border-left: 0px;
 }
 
 .cellTableFirstColumnHeader {
-  border-left: 0px;
+    border-left: 0px;
 }
 
 .cellTableLastColumnFooter {

@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * View for list of collections.
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -98,10 +98,11 @@ public class CollectionsListView extends AbstractLayout implements ICollectionLi
         // system description
         systemTable
                 .setWidget(
-                    0,
-                    1,
-                    new HTML(
-                            "<span style=\"color: #aaa; padding-left: 20px\" class=\"font-85em\">Collection of entries created by your administrator and available to all users.</span>"));
+                        0,
+                        1,
+                        new HTML(
+                                "<span style=\"color: #aaa; padding-left: 20px\" class=\"font-85em\">Collection of " +
+                                        "entries created by your administrator and available to all users.</span>"));
         systemTable.getFlexCellFormatter().setStyleName(0, 1, "collection_list_header_description");
 
         // pager
@@ -131,8 +132,10 @@ public class CollectionsListView extends AbstractLayout implements ICollectionLi
         userTable.getFlexCellFormatter().setWidth(0, 0, "160px");
 
         // description
-        String html = "<span style=\"color: #aaa; padding-left: 20px\" class=\"font-85em\">Collection of entries created by you."
-                + " These are available only to you.</span> &nbsp; &nbsp; <span id=\"collection_user_add_button\"></span>";
+        String html = "<span style=\"color: #aaa; padding-left: 20px\" class=\"font-85em\">Collection of entries " +
+                "created by you."
+                + " These are available only to you.</span> &nbsp; &nbsp; <span " +
+                "id=\"collection_user_add_button\"></span>";
         HTMLPanel panel = new HTMLPanel(html);
         panel.add(addCollectionButton, "collection_user_add_button");
         userTable.setWidget(0, 1, panel);

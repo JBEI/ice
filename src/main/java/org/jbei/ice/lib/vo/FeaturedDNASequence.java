@@ -2,14 +2,12 @@ package org.jbei.ice.lib.vo;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Value object to hold {@link DNAFeature}s and some genbank file information.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 @XmlRootElement
 public class FeaturedDNASequence extends SimpleDNASequence {

@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.search.blast;
 
-import org.jbei.ice.lib.entry.model.Entry;
-
 import java.io.Serializable;
+
+import org.jbei.ice.lib.entry.model.Entry;
 
 /**
  * Store blast output result.

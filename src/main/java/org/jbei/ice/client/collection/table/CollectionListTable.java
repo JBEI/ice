@@ -19,10 +19,10 @@ import com.google.gwt.view.client.Range;
 
 /**
  * Table for displaying meta data about the list of collections.
- * 
+ *
+ * @author Hector Plahar
  * @see CollectionDataTable which is responsible for displaying the contents of each
  *      collection
- * @author Hector Plahar
  */
 public class CollectionListTable extends DataTable<FolderDetails> {
 
@@ -59,7 +59,7 @@ public class CollectionListTable extends DataTable<FolderDetails> {
         };
 
         DataTableColumn<FolderDetails> nameColumn = new DataTableColumn<FolderDetails>(nameCell,
-                ColumnField.NAME) {
+                                                                                       ColumnField.NAME) {
 
             @Override
             public FolderDetails getValue(FolderDetails object) {
@@ -75,7 +75,7 @@ public class CollectionListTable extends DataTable<FolderDetails> {
 
     protected DataTableColumn<String> createDescriptionColumn() {
         DataTableColumn<String> descriptionColumn = new DataTableColumn<String>(new TextCell(),
-                ColumnField.DESCRIPTION) {
+                                                                                ColumnField.DESCRIPTION) {
 
             @Override
             public String getValue(FolderDetails object) {
@@ -92,7 +92,7 @@ public class CollectionListTable extends DataTable<FolderDetails> {
 
     protected DataTableColumn<String> createCountColumn() {
         DataTableColumn<String> countColumn = new DataTableColumn<String>(new TextCell(),
-                ColumnField.COUNT) {
+                                                                          ColumnField.COUNT) {
 
             @Override
             public String getValue(FolderDetails object) {
@@ -159,7 +159,7 @@ public class CollectionListTable extends DataTable<FolderDetails> {
 
         /**
          * Sorts the data based on params
-         * 
+         *
          * @param field
          * @param asc
          */
@@ -170,7 +170,7 @@ public class CollectionListTable extends DataTable<FolderDetails> {
         protected ColumnField getSortField() {
             ColumnSortList sortList = CollectionListTable.this.getColumnSortList();
             int colIndex = CollectionListTable.this.getColumns().indexOf(
-                sortList.get(0).getColumn());
+                    sortList.get(0).getColumn());
             if (colIndex == -1)
                 return null; // TODO : this will be pretty unusual
 

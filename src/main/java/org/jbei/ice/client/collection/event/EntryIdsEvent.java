@@ -6,9 +6,8 @@ import com.google.gwt.event.shared.GwtEvent;
 
 /**
  * Event for availability of entry ids from user action
- * 
+ *
  * @author Hector Plahar
- * 
  */
 public class EntryIdsEvent extends GwtEvent<EntryIdsEventHandler> {
 

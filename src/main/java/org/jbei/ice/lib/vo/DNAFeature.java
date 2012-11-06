@@ -9,9 +9,8 @@ import org.jbei.ice.lib.models.SequenceFeature;
 /**
  * Value object to hold a combination of {@link SequenceFeature} and
  * {@link org.jbei.ice.lib.models.Feature Feature} data.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham
- * 
  */
 public class DNAFeature implements Serializable {
     private static final long serialVersionUID = 1L;

@@ -1,14 +1,5 @@
 package org.jbei.ice.lib.parsers;
 
-import org.jbei.ice.lib.utils.FileUtils;
-import org.jbei.ice.lib.utils.UtilityException;
-import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.DNAFeature;
-import org.jbei.ice.lib.vo.DNAFeatureLocation;
-import org.jbei.ice.lib.vo.DNAFeatureNote;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.lib.vo.IDNASequence;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,6 +15,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jbei.ice.lib.utils.FileUtils;
+import org.jbei.ice.lib.utils.UtilityException;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNAFeatureLocation;
+import org.jbei.ice.lib.vo.DNAFeatureNote;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
 
 /**
  * Genbank parser and generator.

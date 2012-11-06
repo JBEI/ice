@@ -11,9 +11,8 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * Handler for create new entry selections
- * 
+ *
  * @author Hector Plahar
- * 
  */
 public class CreateNewEntrySelectionHandler implements SelectionChangeEvent.Handler {
 
@@ -25,7 +24,7 @@ public class CreateNewEntrySelectionHandler implements SelectionChangeEvent.Hand
             RegistryServiceAsync registryServiceAsync, HandlerManager handlerManager,
             ICollectionView display, SingleSelectionModel<EntryAddType> selectionModel) {
         presenter = new EntryAddPresenter(collectionsPresenter, registryServiceAsync,
-                handlerManager);
+                                          handlerManager);
         this.display = display;
         this.selectionModel = selectionModel;
     }

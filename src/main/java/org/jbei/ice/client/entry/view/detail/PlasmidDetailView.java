@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * Details view for entries of type plasmid
- * 
+ *
  * @author Hector Plahar
  */
 

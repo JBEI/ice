@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
+
 import org.sbolstandard.core.DnaComponent;
 import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
@@ -13,9 +14,8 @@ import org.sbolstandard.core.SBOLValidationException;
 
 /**
  * Parse SBOL (v 1.1) files.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 public class SbolParser extends AbstractParser {
 
@@ -37,7 +37,7 @@ public class SbolParser extends AbstractParser {
         FeaturedDNASequence featuredDnaSequence = null;
         try {
             SBOLDocument document = SBOLFactory.read(new ByteArrayInputStream(textSequence
-                    .getBytes()));
+                                                                                      .getBytes()));
             SBOLRootObject content = document.getContents().get(0);
             if (!(content instanceof DnaComponent)) {
                 throw new InvalidFormatParserException("Could not parse SBOL file!");

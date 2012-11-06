@@ -16,9 +16,8 @@ import com.google.gwt.user.client.ui.TextBox;
 /**
  * Panel for displaying the entry parameters. Also maintains
  * a data structure of the user entered values
- * 
+ *
  * @author Hector Plahar
- * 
  */
 public class ParametersPanel {
 

@@ -68,9 +68,8 @@ public class CreateCollectionPanel extends Composite {
     /**
      * Associates handler passed in the param to the submit button.
      * Also validates the nameInput to ensure that the user has entered a value
-     * 
-     * @param handler
-     *            ClickHandler to associate with the submit button
+     *
+     * @param handler ClickHandler to associate with the submit button
      */
     public void addSubmitHandler(ClickHandler handler) {
         submitCollectionButton.addClickHandler(new ClickHandler() {

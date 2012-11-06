@@ -10,16 +10,15 @@ import com.google.gwt.user.client.ui.Composite;
 /**
  * Base class for sub menus (i.e. menus at the top of views like "Add To")
  * which perform some action on submit (usually a click)
- * 
+ *
  * @author Hector Plahar
  */
 public abstract class SubMenuBase extends Composite implements HasSubmitHandlers {
 
     /**
      * Adds a {@link SubmitEvent} handler.
-     * 
-     * @param handler
-     *            the handler
+     *
+     * @param handler the handler
      * @return the handler registration used to remove the handler
      */
     @Override

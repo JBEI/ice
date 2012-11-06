@@ -1,13 +1,14 @@
 package org.jbei.ice.client.entry.view.detail;
 
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
 
 public class DeleteSequenceData {
 

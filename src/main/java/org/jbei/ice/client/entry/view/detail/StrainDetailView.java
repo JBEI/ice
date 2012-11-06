@@ -4,7 +4,7 @@ import org.jbei.ice.shared.dto.StrainInfo;
 
 /**
  * View for displaying strain specific entries
- * 
+ *
  * @author Hector Plahar
  */
 

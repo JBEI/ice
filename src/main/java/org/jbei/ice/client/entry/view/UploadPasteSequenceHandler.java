@@ -28,23 +28,23 @@ public class UploadPasteSequenceHandler implements ClickHandler {
         EntryInfo info = presenter.getEntry();
         try {
             service.saveSequence(AppController.sessionId, info.getId(), sequence,
-                new AsyncCallback<Boolean>() {
+                                 new AsyncCallback<Boolean>() {
 
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        presenter.setHasSequence(result);
-                        if (result) {
-                            presenter.getEntry().setHasSequence(true);
-                            presenter.updateSequenceView();
-                        } else {
-                            Window.alert("Could not save sequence");
-                        }
-                    }
+                                     @Override
+                                     public void onSuccess(Boolean result) {
+                                         presenter.setHasSequence(result);
+                                         if (result) {
+                                             presenter.getEntry().setHasSequence(true);
+                                             presenter.updateSequenceView();
+                                         } else {
+                                             Window.alert("Could not save sequence");
+                                         }
+                                     }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                    }
-                });
+                                     @Override
+                                     public void onFailure(Throwable caught) {
+                                     }
+                                 });
         } catch (org.jbei.ice.client.exception.AuthenticationException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

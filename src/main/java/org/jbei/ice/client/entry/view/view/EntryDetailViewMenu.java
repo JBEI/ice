@@ -72,35 +72,35 @@ public class EntryDetailViewMenu extends Composite implements HasClickHandlers {
 
         switch (menu) {
 
-        case GENERAL:
-            return;
+            case GENERAL:
+                return;
 
             // these are the only two that can be updated
-        case SEQ_ANALYSIS:
-            Widget widget = table.getWidget(1, 0);
-            if (!(widget instanceof MenuCell))
+            case SEQ_ANALYSIS:
+                Widget widget = table.getWidget(1, 0);
+                if (!(widget instanceof MenuCell))
+                    return;
+
+                MenuCell seqCell = ((MenuCell) widget);
+                if (seqCell.getMenu() != Menu.SEQ_ANALYSIS)
+                    return;
+
+                seqCell.updateCount(count);
+                table.setWidget(1, 0, seqCell);
                 return;
 
-            MenuCell seqCell = ((MenuCell) widget);
-            if (seqCell.getMenu() != Menu.SEQ_ANALYSIS)
+            case SAMPLES:
+                widget = table.getWidget(2, 0);
+                if (!(widget instanceof MenuCell))
+                    return;
+
+                MenuCell sampleCell = ((MenuCell) widget);
+                if (sampleCell.getMenu() != Menu.SAMPLES)
+                    return;
+
+                sampleCell.updateCount(count);
+                table.setWidget(2, 0, sampleCell);
                 return;
-
-            seqCell.updateCount(count);
-            table.setWidget(1, 0, seqCell);
-            return;
-
-        case SAMPLES:
-            widget = table.getWidget(2, 0);
-            if (!(widget instanceof MenuCell))
-                return;
-
-            MenuCell sampleCell = ((MenuCell) widget);
-            if (sampleCell.getMenu() != Menu.SAMPLES)
-                return;
-
-            sampleCell.updateCount(count);
-            table.setWidget(2, 0, sampleCell);
-            return;
 
         }
     }

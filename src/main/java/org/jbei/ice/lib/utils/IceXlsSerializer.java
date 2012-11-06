@@ -136,7 +136,7 @@ public class IceXlsSerializer {
             boolean hasAttachments = false;
             try {
                 hasAttachments = attachmentController.hasAttachment(controller.getSystemAccount(),
-                                                                entry);
+                                                                    entry);
             } catch (PermissionException e) {
                 Logger.warn(e.getMessage());
             }

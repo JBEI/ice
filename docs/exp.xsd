@@ -1,33 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	elementFormDefault="qualified"
-	targetNamespace="http://jbei.org/exp"
-	xmlns:exp="http://jbei.org/exp">
-<xs:element name="exp">
-	<xs:complexType>
-		<xs:sequence>
-			<xs:element ref="exp:sequenceTraces" minOccurs="0" />
-		</xs:sequence>
-		<xs:attribute name="schemaVersion" type="xs:string" /> <!-- "2011.08.0" year.month.revision -->
-	</xs:complexType>
-</xs:element>
-<xs:element name="sequenceTraces">
-	<xs:complexType>
-		<xs:sequence>
-			<xs:element ref="exp:sequenceTraceFile" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-</xs:element>
-<xs:element name="sequenceTraceFile">
-	<xs:complexType>
-		<xs:simpleContent>
-			<xs:extension base="xs:base64Binary">
-				<xs:attribute name="fileName" type="xs:string" />
-				<xs:attribute name="fileId" type="xs:string" />	
-				<xs:attribute name="depositorEmail" type="xs:string" />
-				<xs:attribute name="timeStamp" type="xs:dateTime" />
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-</xs:element>
+           elementFormDefault="qualified"
+           targetNamespace="http://jbei.org/exp"
+           xmlns:exp="http://jbei.org/exp">
+    <xs:element name="exp">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="exp:sequenceTraces" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="schemaVersion" type="xs:string"/>
+            <!-- "2011.08.0" year.month.revision -->
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="sequenceTraces">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="exp:sequenceTraceFile" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="sequenceTraceFile">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:base64Binary">
+                    <xs:attribute name="fileName" type="xs:string"/>
+                    <xs:attribute name="fileId" type="xs:string"/>
+                    <xs:attribute name="depositorEmail" type="xs:string"/>
+                    <xs:attribute name="timeStamp" type="xs:dateTime"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
 </xs:schema>

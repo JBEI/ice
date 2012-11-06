@@ -2,9 +2,8 @@ package org.jbei.ice.lib.composers;
 
 /**
  * Exception for the {@link SequenceComposer}.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class SequenceComposerException extends Exception {
     private static final long serialVersionUID = -5780712618108193606L;
@@ -18,7 +17,7 @@ public class SequenceComposerException extends Exception {
 
     /**
      * Create a new SequenceComposerException using the message.
-     * 
+     *
      * @param message
      */
     public SequenceComposerException(String message) {
@@ -27,7 +26,7 @@ public class SequenceComposerException extends Exception {
 
     /**
      * Create a new SequenceComposerException using the message, and a Throwable.
-     * 
+     *
      * @param message
      * @param cause
      */
@@ -37,7 +36,7 @@ public class SequenceComposerException extends Exception {
 
     /**
      * Create a new SequenceComposerException using a Thorwable.
-     * 
+     *
      * @param cause
      */
     public SequenceComposerException(Throwable cause) {

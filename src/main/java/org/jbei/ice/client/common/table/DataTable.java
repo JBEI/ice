@@ -12,11 +12,9 @@ import com.google.gwt.user.client.ui.Label;
 
 /**
  * Generic data table
- * 
+ *
+ * @param <T> type whose fields are to be displayed
  * @author Hector Plahar
- * 
- * @param <T>
- *            type whose fields are to be displayed
  */
 public abstract class DataTable<T> extends CellTable<T> {
 
@@ -35,7 +33,8 @@ public abstract class DataTable<T> extends CellTable<T> {
     public interface DataTableStyle extends Style {
     }
 
-    private final ArrayList<DataTableColumn<?>> columns; // TODO : this list is also maintained in the parent class. look for a way to merge them
+    private final ArrayList<DataTableColumn<?>> columns; // TODO : this list is also maintained in the parent class.
+    // look for a way to merge them
 
     public DataTable() {
 
@@ -72,9 +71,8 @@ public abstract class DataTable<T> extends CellTable<T> {
 
     /**
      * Columns for use with the data table
-     * 
-     * @param <C>
-     *            column type
+     *
+     * @param <C> column type
      */
     public abstract class DataTableColumn<C> extends Column<T, C> {
 

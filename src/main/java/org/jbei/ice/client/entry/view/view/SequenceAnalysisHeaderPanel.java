@@ -16,7 +16,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 
 /**
  * Header for the Entry Sequence table on the Entry detail view page
- * 
+ *
  * @author Hector Plahar
  */
 

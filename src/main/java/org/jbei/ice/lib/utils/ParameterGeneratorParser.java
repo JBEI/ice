@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.utils;
 
-import org.jbei.ice.lib.entry.model.Parameter;
-import org.jbei.ice.lib.entry.model.Parameter.ParameterType;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jbei.ice.lib.entry.model.Parameter;
+import org.jbei.ice.lib.entry.model.Parameter.ParameterType;
 
 /**
  * Converts {@link Parameter} to and from text.

@@ -7,9 +7,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Interface for view of a list of collections
- * 
+ *
  * @author hplahar
- * 
  */
 public interface ICollectionListView {
 

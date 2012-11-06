@@ -1,12 +1,12 @@
 package org.jbei.ice.lib.folder;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.entry.model.Entry;
-
-import javax.persistence.*;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import javax.persistence.*;
+
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.entry.model.Entry;
 
 /**
  * Encapsulates the notion of a collection of {@link org.jbei.ice.lib.entry.model.Entry}s

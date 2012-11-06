@@ -7,6 +7,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.AnnotationLocation;
+import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.lib.models.SequenceFeatureAttribute;
+
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.symbol.IllegalSymbolException;
@@ -25,17 +31,11 @@ import org.biojavax.bio.seq.SimplePosition;
 import org.biojavax.bio.seq.SimpleRichFeature;
 import org.biojavax.bio.seq.SimpleRichLocation;
 import org.biojavax.bio.seq.SimpleRichSequence;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.AnnotationLocation;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 
 /**
  * Formatter for the Genbank file format.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham
- * 
  */
 public class GenbankFormatter extends AbstractFormatter {
     private final String name;
@@ -49,7 +49,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
     /**
      * Constructor using only the name.
-     * 
+     *
      * @param name
      */
     public GenbankFormatter(String name) {
@@ -58,7 +58,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
     /**
      * Constructor using the complete header fields.
-     * 
+     *
      * @param name
      * @param accessionNumber
      * @param version
@@ -115,8 +115,9 @@ public class GenbankFormatter extends AbstractFormatter {
         SimpleRichSequence simpleRichSequence = null;
         try {
             simpleRichSequence = new SimpleRichSequence(getNamespace(), normalizeLocusName(name),
-                    accessionNumber, version, DNATools.createDNA(sequence.getSequence()),
-                    seqVersion);
+                                                        accessionNumber, version, DNATools.createDNA(
+                    sequence.getSequence()),
+                                                        seqVersion);
 
             simpleRichSequence.setCircular(getCircular());
             if (getDescription() != null && !getDescription().isEmpty()) {
@@ -137,7 +138,7 @@ public class GenbankFormatter extends AbstractFormatter {
                 for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
                     if (sequenceFeature.getFeature() == null) {
                         Logger.warn("In sequence with id: " + sequence.getId()
-                                + "; SequenceFeature object has no feature assigned to it.");
+                                            + "; SequenceFeature object has no feature assigned to it.");
 
                         continue;
                     }
@@ -157,8 +158,9 @@ public class GenbankFormatter extends AbstractFormatter {
 
                         for (AnnotationLocation location : locations) {
                             members.add(new SimpleRichLocation(new SimplePosition(location
-                                    .getGenbankStart()), new SimplePosition(location.getEnd()), 1,
-                                    getStrand(sequenceFeature)));
+                                                                                          .getGenbankStart()),
+                                                               new SimplePosition(location.getEnd()), 1,
+                                                               getStrand(sequenceFeature)));
                         }
                         featureTemplate.location = new CompoundRichLocation(members);
                     }
@@ -168,7 +170,7 @@ public class GenbankFormatter extends AbstractFormatter {
                     featureTemplate.rankedCrossRefs = new TreeSet<Object>();
 
                     SimpleRichFeature simpleRichFeature = new SimpleRichFeature(simpleRichSequence,
-                            featureTemplate);
+                                                                                featureTemplate);
                     featureSet.add(simpleRichFeature);
                 }
 
@@ -187,7 +189,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
     /**
      * Get the strand of the {@link SequenceFeature} feature.
-     * 
+     *
      * @param sequenceFeature
      * @return Strand of the feature.
      */
@@ -207,7 +209,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
     /**
      * Convert {@link SequenceFeature} into a {@link RichAnnotation}.
-     * 
+     *
      * @param sequenceFeature
      * @return RichAnnotation object.
      */
@@ -217,19 +219,21 @@ public class GenbankFormatter extends AbstractFormatter {
         if (sequenceFeature.getName() != null && !sequenceFeature.getName().isEmpty()) {
             richAnnotation
                     .addNote(new SimpleNote(RichObjectFactory.getDefaultOntology().getOrCreateTerm(
-                        "label"), normalizeFeatureValue(sequenceFeature.getName()), 1));
+                            "label"), normalizeFeatureValue(sequenceFeature.getName()), 1));
         }
 
         int i = 0;
         for (SequenceFeatureAttribute attribute : sequenceFeature.getSequenceFeatureAttributes()) {
             String key = attribute.getKey();
             String value = attribute.getValue();
-            if (key == null || key.isEmpty() || key.toLowerCase().equals("label")) { // skip invalid or feature with "label" note
+            if (key == null || key.isEmpty() || key.toLowerCase().equals(
+                    "label")) { // skip invalid or feature with "label" note
                 continue;
             }
 
             richAnnotation.addNote(new SimpleNote(RichObjectFactory.getDefaultOntology()
-                    .getOrCreateTerm(key), normalizeFeatureValue(value), i + 2));
+                                                                   .getOrCreateTerm(key), normalizeFeatureValue(value),
+                                                  i + 2));
             i++;
         }
 
@@ -239,7 +243,7 @@ public class GenbankFormatter extends AbstractFormatter {
     /**
      * Retrieve feature type from given {@link SequenceFeature}. Populate it with "misc_feature" if
      * undefined.
-     * 
+     *
      * @param sequenceFeature
      * @return Genbank Feature type.
      */
@@ -248,7 +252,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
         if (sequenceFeature.getGenbankType() == null || sequenceFeature.getGenbankType().isEmpty()) {
             Logger.warn("SequenceFeature by id: " + sequenceFeature.getId()
-                    + " has invalid genbank type.");
+                                + " has invalid genbank type.");
 
             featureType = "misc_feature";
         } else {
@@ -260,7 +264,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
     /**
      * Return the default feature source for a Genbank file.
-     * 
+     *
      * @return Returns "org.jbei".
      */
     protected String getDefaultFeatureSource() {
@@ -269,7 +273,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
     /**
      * Truncate Locus Name to 10 characters, as per Genbank specification.
-     * 
+     *
      * @param locusName
      * @return
      */
@@ -290,7 +294,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
     /**
      * Clean up feature values by removing double quotes and whitespace.
-     * 
+     *
      * @param value
      * @return
      */

@@ -1,9 +1,9 @@
 package org.jbei.ice.client.entry.view.view;
 
+import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
+
 import gwtupload.client.IUploader;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
-
-import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 
 public class SequenceFileUploadHandler implements OnFinishUploaderHandler {
 

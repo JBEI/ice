@@ -11,16 +11,14 @@ import org.apache.commons.codec.binary.Base64;
 
 /**
  * Utility methods for serialization/deserialization.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham
- * 
  */
 public class SerializationUtils {
     /**
      * Exception class for SerializationUtils.
-     * 
+     *
      * @author Zinovii Dmytriv
-     * 
      */
     public static class SerializationUtilsException extends Exception {
         private static final long serialVersionUID = -6597529889622775652L;
@@ -34,11 +32,9 @@ public class SerializationUtils {
 
         /**
          * Constructor using message and cause.
-         * 
-         * @param message
-         *            Message.
-         * @param cause
-         *            Throwable.
+         *
+         * @param message Message.
+         * @param cause   Throwable.
          */
         public SerializationUtilsException(String message, Throwable cause) {
             super(message, cause);
@@ -47,9 +43,8 @@ public class SerializationUtils {
 
     /**
      * Deserialize Base64 encoded string to a java object.
-     * 
-     * @param serializedObject
-     *            Base64 encoded string of a java object.
+     *
+     * @param serializedObject Base64 encoded string of a java object.
      * @return Deserialized java object.
      * @throws SerializationUtilsException
      */
@@ -68,15 +63,14 @@ public class SerializationUtils {
             throw new SerializationUtilsException("Deserialization failed! IOException", e);
         } catch (ClassNotFoundException e) {
             throw new SerializationUtilsException("Deserialization failed! ClassNotFoundException",
-                    e);
+                                                  e);
         }
     }
 
     /**
      * Serialize java {@link Serializable} object into base64 encoded string.
-     * 
-     * @param object
-     *            Object to serialize.
+     *
+     * @param object Object to serialize.
      * @return Base64 encoded string of object.
      * @throws SerializationUtilsException
      */
@@ -97,9 +91,8 @@ public class SerializationUtils {
 
     /**
      * Convert the given byte array into base64 encoded string.
-     * 
-     * @param bytes
-     *            bytes to encdode.
+     *
+     * @param bytes bytes to encdode.
      * @return Base64 encoded string
      */
     public static String serializeBytesToBase64String(byte[] bytes) {
@@ -108,9 +101,8 @@ public class SerializationUtils {
 
     /**
      * Convert the given base64 encoded string into byte array.
-     * 
-     * @param base64String
-     *            base64 encoded string.
+     *
+     * @param base64String base64 encoded string.
      * @return Byte array
      */
     public static byte[] deserializeBase64StringToBytes(String base64String) {

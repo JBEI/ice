@@ -27,7 +27,7 @@ public class EntryViewEvent extends GwtEvent<EntryViewEventHandler> {
 
     /**
      * Handler hook.
-     * 
+     *
      * @return the handler hook
      */
     public static Type<EntryViewEventHandler> getType() {

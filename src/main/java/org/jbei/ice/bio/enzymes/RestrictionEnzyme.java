@@ -4,9 +4,8 @@ import java.io.Serializable;
 
 /**
  * Store restriction digestion enzyme information.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class RestrictionEnzyme implements Serializable {
     private static final long serialVersionUID = 5641976664745014957L;

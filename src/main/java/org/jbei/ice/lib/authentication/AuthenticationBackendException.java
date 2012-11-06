@@ -2,9 +2,8 @@ package org.jbei.ice.lib.authentication;
 
 /**
  * Exception class for the Authentication Backends
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class AuthenticationBackendException extends Exception {
     private static final long serialVersionUID = 1L;
@@ -17,7 +16,7 @@ public class AuthenticationBackendException extends Exception {
 
     /**
      * Create a new AuthenticationBackendException with a message.
-     * 
+     *
      * @param message
      */
     public AuthenticationBackendException(String message) {
@@ -26,7 +25,7 @@ public class AuthenticationBackendException extends Exception {
 
     /**
      * Create a new AuthenticationBackendException with a Throwable.
-     * 
+     *
      * @param cause
      */
     public AuthenticationBackendException(Throwable cause) {
@@ -35,7 +34,7 @@ public class AuthenticationBackendException extends Exception {
 
     /**
      * Create a new AuthenticationBackendException with a message and a Throwable.
-     * 
+     *
      * @param message
      * @param cause
      */

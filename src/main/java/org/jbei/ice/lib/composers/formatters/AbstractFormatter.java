@@ -3,15 +3,15 @@ package org.jbei.ice.lib.composers.formatters;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.jbei.ice.lib.models.Sequence;
+
 import org.biojavax.Namespace;
 import org.biojavax.SimpleNamespace;
-import org.jbei.ice.lib.models.Sequence;
 
 /**
  * Abstract formatter implementing {@link IFormatter} interface.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class AbstractFormatter implements IFormatter {
     public static final String DEFAULT_NAMESPACE = "org.jbei";

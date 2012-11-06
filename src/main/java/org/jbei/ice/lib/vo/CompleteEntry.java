@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.vo;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.Sequence;
-
-import java.util.ArrayList;
 
 /**
  * Value object to hold complete {@link Entry} data, including {@link Sequence} and

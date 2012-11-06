@@ -1,7 +1,5 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter.ISequenceView;
@@ -17,10 +15,11 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
 /**
  * Widget that displays the sequence file on the general view
- * 
+ *
  * @author Hector Plahar
  */
 public class SequenceViewPanel extends Composite implements ISequenceView {
@@ -101,7 +100,8 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         headerPanel = new HTMLPanel(
                 "<span style=\"color: #233559; "
                         + "font-weight: bold; font-style: italic; font-size: 0.80em;\">"
-                        + "SEQUENCE</span><div style=\"float: right\"><span id=\"delete_sequence_link\"></span><span id=\"sequence_link\"></span>"
+                        + "SEQUENCE</span><div style=\"float: right\"><span id=\"delete_sequence_link\"></span><span " +
+                        "id=\"sequence_link\"></span>"
                         + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
                         + " <span id=\"sequence_options\"></span></div>");
 

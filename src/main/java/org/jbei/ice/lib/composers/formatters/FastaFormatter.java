@@ -3,12 +3,13 @@ package org.jbei.ice.lib.composers.formatters;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.jbei.ice.lib.models.Sequence;
+
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.utils.ChangeVetoException;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.SimpleRichSequence;
-import org.jbei.ice.lib.models.Sequence;
 
 /*
  * >gi|<identifier>|<namespace>|<accession>.<version>|<name> <description>
@@ -17,10 +18,9 @@ import org.jbei.ice.lib.models.Sequence;
 
 /**
  * Formatter for creating a FASTA formatted output.
- * <p>
- * 
+ * <p/>
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class FastaFormatter extends AbstractFormatter {
     private final String name;
@@ -30,7 +30,7 @@ public class FastaFormatter extends AbstractFormatter {
 
     /**
      * Constructor using only the name. Uses the name as the accession number.
-     * 
+     *
      * @param name
      */
     public FastaFormatter(String name) {
@@ -39,7 +39,7 @@ public class FastaFormatter extends AbstractFormatter {
 
     /**
      * Constructor using all required fields for FASTA format.
-     * 
+     *
      * @param name
      * @param accessionNumber
      * @param version
@@ -60,7 +60,8 @@ public class FastaFormatter extends AbstractFormatter {
         SimpleRichSequence simpleRichSequence = null;
         try {
             simpleRichSequence = new SimpleRichSequence(getNamespace(), name, accessionNumber,
-                    version, DNATools.createDNA(sequence.getSequence()), seqVersion);
+                                                        version, DNATools.createDNA(sequence.getSequence()),
+                                                        seqVersion);
         } catch (IllegalSymbolException e) {
             throw new FormatterException("Failed to create generate fasta file", e);
         } catch (ChangeVetoException e) {

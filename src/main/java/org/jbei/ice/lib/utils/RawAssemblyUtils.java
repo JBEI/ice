@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.utils;
 
-import org.apache.commons.lang.NotImplementedException;
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part.AssemblyStandard;
@@ -10,8 +12,7 @@ import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 
-import java.util.List;
-import java.util.Set;
+import org.apache.commons.lang.NotImplementedException;
 
 /**
  * Assembly Utils for sequences without any assembly format.

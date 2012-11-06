@@ -4,9 +4,8 @@ import java.util.Date;
 
 /**
  * Value object for sequence trace data.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 public class SequenceTraceFile {
     private String base64Data;

@@ -1,10 +1,11 @@
 package org.jbei.ice.client.search.advanced;
 
-import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
+
 import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import java.util.ArrayList;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Interface for advanced search view

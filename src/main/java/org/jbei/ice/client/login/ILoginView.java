@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Interface view for decoupling the login view
- * 
+ *
  * @author Hector Plahar
  */
 public interface ILoginView {

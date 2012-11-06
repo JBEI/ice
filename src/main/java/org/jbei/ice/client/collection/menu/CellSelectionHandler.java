@@ -9,9 +9,8 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * Click handler for menu cell selection
- * 
+ *
  * @author hplahar
- * 
  */
 class CellSelectionHandler implements ClickHandler {
 

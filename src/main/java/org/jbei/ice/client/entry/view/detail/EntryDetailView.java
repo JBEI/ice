@@ -1,7 +1,5 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.StatusType;
@@ -16,14 +14,13 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
 /**
  * Base view for the different types of entries
- * 
+ *
+ * @param <T> Specific type of entry info to be shown by the view
  * @author Hector Plahar
- * 
- * @param <T>
- *            Specific type of entry info to be shown by the view
  */
 public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
 
@@ -135,11 +132,11 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
                 }
 
                 parameters.setWidget(row, col, new HTML("<b class=\"font-80em color_444\">"
-                        + paramInfo.getName() + "</b>"));
+                                                                + paramInfo.getName() + "</b>"));
                 parameters.getFlexCellFormatter().setWidth(row, col, "170px");
                 col += 1;
                 parameters.setWidget(row, col,
-                    new HTML("<span class=\"font-80em\">" + paramInfo.getValue() + "</span>"));
+                                     new HTML("<span class=\"font-80em\">" + paramInfo.getValue() + "</span>"));
                 //                parameters.getFlexCellFormatter().setWidth(row, col, "220px");
                 col += 1;
             }
@@ -223,8 +220,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         if (width <= 0)
             width = 200;
         notes.setHTML(row, 0,
-            "<span class=\"font-80em\" style=\"display: block; word-wrap: break-word; width: "
-                    + width + "px\">" + description + "</span>");
+                      "<span class=\"font-80em\" style=\"display: block; word-wrap: break-word; width: "
+                              + width + "px\">" + description + "</span>");
 
         table.setWidget(currentRow, 0, notes);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
@@ -241,7 +238,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table.setHTML(currentRow, currentCol, "<b class=\"font-80em color_444\">" + labelString
                 + "</b>");
         table.getFlexCellFormatter().setVerticalAlignment(currentRow, currentCol,
-            HasAlignment.ALIGN_TOP);
+                                                          HasAlignment.ALIGN_TOP);
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
         currentCol += 1;
         if (value == null)
@@ -249,7 +246,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table.setHTML(currentRow, currentCol, "<span class=\"font-80em\">" + value + "</span>");
         table.getFlexCellFormatter().setStyleName(currentRow, currentCol, "min_width_170");
         table.getFlexCellFormatter().setVerticalAlignment(currentRow, currentCol,
-            HasAlignment.ALIGN_TOP);
+                                                          HasAlignment.ALIGN_TOP);
 
         currentCol += 1;
     }
@@ -264,7 +261,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table.setHTML(currentRow, currentCol, "<b class=\"font-80em color_444\">" + labelString
                 + "</b>");
         table.getFlexCellFormatter().setVerticalAlignment(currentRow, currentCol,
-            HasAlignment.ALIGN_TOP);
+                                                          HasAlignment.ALIGN_TOP);
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
 
         currentCol += 1;
@@ -273,7 +270,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table.setWidget(currentRow, currentCol, value);
         table.getFlexCellFormatter().setStyleName(currentRow, currentCol, "min_width_170");
         table.getFlexCellFormatter().setVerticalAlignment(currentRow, currentCol,
-            HasAlignment.ALIGN_TOP);
+                                                          HasAlignment.ALIGN_TOP);
 
         currentCol += 1;
     }
@@ -293,8 +290,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             width = 200;
 
         table.setHTML(currentRow, 1,
-            "<span class=\"font-80em\" style=\"display: block; word-wrap: break-word; width: "
-                    + width + "px\">" + value + "</span>");
+                      "<span class=\"font-80em\" style=\"display: block; word-wrap: break-word; width: "
+                              + width + "px\">" + value + "</span>");
         table.getFlexCellFormatter().setColSpan(currentRow, 1, 3);
 
         currentCol = 0;

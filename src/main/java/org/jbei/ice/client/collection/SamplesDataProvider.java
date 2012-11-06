@@ -1,7 +1,7 @@
 package org.jbei.ice.client.collection;
 
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.LinkedList;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
@@ -12,7 +12,8 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.HasEntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 
-import java.util.LinkedList;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class SamplesDataProvider extends HasEntryDataViewDataProvider<SampleInfo> implements IHasNavigableData {
 

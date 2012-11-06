@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * DTO for groups
- * 
+ *
  * @author Hector Plahar
  */
 

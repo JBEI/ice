@@ -11,14 +11,13 @@ import org.jbei.ice.lib.models.Sequence;
 /**
  * Wrapper for formatters. To be used to generate sequence files of various formats, as specified by
  * the {@link IFormatter} formatter.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class SequenceComposer {
     /**
      * Create a string representation of {@link Sequence} using the {@link IFormatter} formatter.
-     * 
+     *
      * @param sequence
      * @param formatter
      * @return Text of formatted output.
@@ -40,7 +39,7 @@ public class SequenceComposer {
     /**
      * Output a representation of {@link Sequence} using the {@link IFormatter} formatter, to the
      * {@link OutputStream} stream.
-     * 
+     *
      * @param sequence
      * @param formatter
      * @param stream

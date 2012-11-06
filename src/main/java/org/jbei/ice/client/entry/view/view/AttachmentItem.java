@@ -4,7 +4,7 @@ import org.jbei.ice.client.collection.view.OptionSelect;
 
 /**
  * item representing an entry attachment
- * 
+ *
  * @author Hector Plahar
  */
 public class AttachmentItem extends OptionSelect {

@@ -18,7 +18,7 @@ public abstract class ReadBoxSelectionHandler implements SelectionHandler<Sugges
             return;
 
         PermissionInfo info = new PermissionInfo(suggest.getType(), suggest.getId(),
-                suggest.getReplacementString());
+                                                 suggest.getReplacementString());
         this.updatePermission(info, suggest.getType());
     }
 

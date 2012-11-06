@@ -9,11 +9,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 /**
  * Cell that renders a url and allows sub-classes to implement on-click.
  * This comes in handy when history management is desired
- * 
+ *
+ * @param <T> object type cell will render
  * @author Hector Plahar
- * 
- * @param <T>
- *            object type cell will render
  */
 public abstract class UrlCell<T> extends AbstractCell<T> {
 
@@ -63,7 +61,7 @@ public abstract class UrlCell<T> extends AbstractCell<T> {
     /**
      * Action to be performed in the event of a click. To actual go to the url,
      * example code is
-     * 
+     * <p/>
      * History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + recordId);
      */
     protected abstract void onClick(T object);
