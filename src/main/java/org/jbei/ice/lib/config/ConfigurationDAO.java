@@ -42,7 +42,7 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
 
     public Configuration get(String key) throws DAOException {
         Configuration configuration = null;
-        Session session = newSession();
+        Session session = currentSession();
 
         try {
             Query query = session.createQuery("from " + Configuration.class.getName() + " where key = :key");
@@ -55,7 +55,7 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to get Configuration using key: " + key, e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return configuration;

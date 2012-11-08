@@ -35,7 +35,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      */
     public Storage get(long id, boolean fetchChildren) throws DAOException {
         Storage result = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName() + " where id = :id");
             query.setLong("id", id);
@@ -48,7 +48,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
             Logger.error(msg, e);
             throw new DAOException(msg);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return result;
@@ -98,7 +98,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
     @SuppressWarnings("unchecked")
     public List<Storage> retrieveStorageByIndex(String index, StorageType type) throws DAOException {
         List<Storage> result = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
                                                       + " where index = :index and storage_type = :type");
@@ -172,7 +172,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
     @SuppressWarnings("unchecked")
     public List<Storage> getAllStorageSchemes() throws DAOException {
         ArrayList<Storage> result = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
                                                       + " storage where storage.storageType = :storageType");
@@ -198,7 +198,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
     @SuppressWarnings("unchecked")
     public List<Storage> getStorageSchemesForEntryType(String entryType) throws DAOException {
         ArrayList<Storage> result = new ArrayList<Storage>();
-        Session session = newSession();
+        Session session = currentSession();
         String uuid = null;
         EntryType type = EntryType.nameToType(entryType);
         if (type == null)
@@ -310,7 +310,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      */
     public Storage retrieveStorageBy(String name, String index, StorageType type, long parentId)
             throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
                                                       + " storage where storage.name = :name and storage.index = " +

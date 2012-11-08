@@ -27,19 +27,18 @@ import org.hibernate.criterion.Restrictions;
 public class AttachmentDAO extends HibernateRepository<Attachment> {
 
     public Attachment save(File attDir, Attachment attachment, InputStream inputStream) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             session.saveOrUpdate(attachment);
             if (inputStream != null)
                 writeFile(attDir, attachment.getFileId(), inputStream);
-            session.getTransaction().commit();
         } catch (HibernateException e) {
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return attachment;
@@ -83,7 +82,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
     }
 
     public void delete(File attDir, Attachment attachment) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
 
         try {
             session.delete(attachment);
@@ -94,7 +93,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
             Logger.error(e);
             throw new DAOException("Unknown exception ", e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
     }
@@ -110,7 +109,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
     public ArrayList<Attachment> getByEntry(Entry entry) throws DAOException {
         ArrayList<Attachment> attachments = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from " + Attachment.class.getName()
                     + " as attachment where attachment.entry = :entry order by attachment.id desc";
@@ -125,14 +124,14 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(), e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return attachments;
     }
 
     public boolean hasAttachment(Entry entry) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
 
             Number itemCount = (Number) session.createCriteria(Attachment.class)
@@ -144,7 +143,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(),
                                    e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -159,7 +158,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
     public Attachment getByFileId(String fileId) throws DAOException {
         Attachment attachment = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Attachment.class.getName() + " where fileId = :fileId");
             query.setParameter("fileId", fileId);
@@ -171,7 +170,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve attachment by fileId: " + fileId, e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return attachment;

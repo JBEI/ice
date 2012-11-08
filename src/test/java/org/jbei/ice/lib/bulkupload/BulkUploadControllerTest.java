@@ -27,7 +27,9 @@ import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -39,9 +41,19 @@ public class BulkUploadControllerTest {
 
     private BulkUploadController controller;
 
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+
+    }
+
+    @AfterClass
+    public static void afterClass() throws Exception {
+    }
+
     @Before
     public void setUp() throws Exception {
         HibernateHelper.initializeMock();
+        HibernateHelper.beginTransaction();
         controller = new BulkUploadController();
         AccountController accountController = new AccountController();
         if (accountController.getByEmail("system") == null)
@@ -50,6 +62,7 @@ public class BulkUploadControllerTest {
 
     @After
     public void tearDown() throws Exception {
+        HibernateHelper.rollbackTransaction();
     }
 
     @Test
@@ -79,7 +92,9 @@ public class BulkUploadControllerTest {
             info.setPlantType(ArabidopsisSeedInfo.PlantType.OTHER);
             entryList.add(info);
         }
-        boolean success = controller.submitBulkImport(account, EntryAddType.ARABIDOPSIS, entryList, "");
+        GroupController groupController = new GroupController();
+        String uuid = groupController.createOrRetrievePublicGroup().getUuid();
+        boolean success = controller.submitBulkImport(account, EntryAddType.ARABIDOPSIS, entryList, uuid);
         Assert.assertTrue("Could not submit bulk import", success);
 
         // 1 pending
@@ -217,7 +232,9 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(controller.approveBulkImport(adminAccount, verify.getId(), verify.getEntryList(), ""));
 
         entry = entryController.get(account, partId);
+        Assert.assertNotNull(entry);
         partEntry = entryController.get(account, strainId);
+        Assert.assertNotNull(partEntry);
 
         Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
         Assert.assertEquals(Visibility.OK.getValue(), partEntry.getVisibility().intValue());
@@ -236,12 +253,13 @@ public class BulkUploadControllerTest {
         AccountController accountController = new AccountController();
         Account adminAccount = accountController.createAdminAccount();
         Assert.assertNotNull(adminAccount);
-        accountController.createNewAccount("", "TESTER", "", "regular+retrieveById@test.org", "LBL", "");
-
-        Account account = accountController.getByEmail("tester+retrieveById@test.org");
+        String pass = accountController.createNewAccount("", "TESTER", "", "regular+retrieveById@test.org", "LBL", "");
+        Assert.assertFalse(pass == null || pass.isEmpty());
+        Account account = accountController.getByEmail("regular+retrieveById@test.org");
         try {
             controller.retrieveById(account, 1);
         } catch (ControllerException ce) {
+            System.out.println(ce.getMessage());
         }
 
         ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
@@ -258,8 +276,10 @@ public class BulkUploadControllerTest {
             entryList.add(info);
         }
 
+        GroupController groupController = new GroupController();
+        String uuid = groupController.createOrRetrievePublicGroup().getUuid();
         BulkUploadInfo created = controller.createBulkImportDraft(account, EntryAddType.ARABIDOPSIS, "My Test",
-                                                                  entryList, "");
+                                                                  entryList, uuid);
         Assert.assertNotNull(created);
 
         BulkUploadInfo retrieved = controller.retrieveById(account, created.getId());
@@ -278,7 +298,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(adminAccount);
         accountController.createNewAccount("", "TESTER", "", "regular+retrieveByUser@test.org", "LBL", "");
 
-        Account account = accountController.getByEmail("tester+retrieveByUser@test.org");
+        Account account = accountController.getByEmail("regular+retrieveByUser@test.org");
         try {
             controller.retrieveById(account, 1);
         } catch (ControllerException ce) {

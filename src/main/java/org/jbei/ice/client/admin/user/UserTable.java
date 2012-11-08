@@ -39,7 +39,6 @@ public class UserTable extends CellTable<AccountInfo> {
 
     public UserTable() {
         super(15, UserTableResources.INSTANCE);
-//        setStyleName("data_table");
         Label empty = new Label();
         empty.setText("No data available");
         empty.setStyleName("no_data_style");

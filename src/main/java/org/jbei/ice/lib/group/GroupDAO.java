@@ -46,7 +46,7 @@ class GroupDAO extends HibernateRepository<Group> {
 
     @SuppressWarnings("unchecked")
     public HashSet<Group> getByIdList(Set<Long> idsSet) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
 
         try {
             Criteria criteria = session.createCriteria(Group.class).add(Restrictions.in("id", idsSet));
@@ -68,7 +68,7 @@ class GroupDAO extends HibernateRepository<Group> {
     @SuppressWarnings("unchecked")
     public Set<Group> getAll() throws DAOException {
         LinkedHashSet<Group> groups = new LinkedHashSet<Group>();
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from Group";
             Query query = session.createQuery(queryString);
@@ -78,13 +78,13 @@ class GroupDAO extends HibernateRepository<Group> {
             Logger.warn(msg);
             throw new DAOException(msg);
         } finally {
-            closeSession(session);
+            closeSession();
         }
         return groups;
     }
 
     public Set<Group> getMatchingGroups(String token, int limit) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             token = token.toUpperCase();
             String queryString = "from " + Group.class.getName() + " where (UPPER(label) like '%"
@@ -101,7 +101,7 @@ class GroupDAO extends HibernateRepository<Group> {
             Logger.error(e);
             throw new DAOException("Error retrieving matching groups", e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -138,7 +138,7 @@ class GroupDAO extends HibernateRepository<Group> {
     }
 
 //    public Set<Group> retrieveAll(Set<Group> groups) {
-//        Session session = newSession();
+//        Session session = currentSession();
 //
 //        String queryStr = "from " + Group.class.getName() + " where group in :group";
 //        Query query = session.createQuery(queryStr);

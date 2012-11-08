@@ -719,6 +719,7 @@ a.cell_mouseover:hover {
     border: 1px solid #A5A5A5;
     -webkit-box-shadow: 4px 4px 7px #DDD;
     -moz-box-shadow: 4px 4px 7px #DDD;
+    box-shadow: 4px 4px 7px #DDD;
     z-index: 999;
 }
 

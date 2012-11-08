@@ -27,7 +27,7 @@ public class SessionDAO extends HibernateRepository<SessionData> {
      */
     public SessionData get(String sessionKey) throws DAOException {
         SessionData sessionData = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from " + SessionData.class.getName() + " where sessionKey = :sessionKey";
             Query query = session.createQuery(queryString);
@@ -47,7 +47,7 @@ public class SessionDAO extends HibernateRepository<SessionData> {
             String msg = "Could not get SessionData by sessionKey: " + sessionKey;
             throw new DAOException(msg, e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return sessionData;
@@ -63,7 +63,7 @@ public class SessionDAO extends HibernateRepository<SessionData> {
      */
     public SessionData get(Account account) throws DAOException {
         SessionData sessionData = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from " + SessionData.class.getName() + " where account = :account";
             Query query = session.createQuery(queryString);
@@ -82,7 +82,7 @@ public class SessionDAO extends HibernateRepository<SessionData> {
             String msg = "Could not get SessionData by account: " + account.getEmail();
             throw new DAOException(msg, e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return sessionData;
@@ -125,7 +125,7 @@ public class SessionDAO extends HibernateRepository<SessionData> {
      * Flush the database of expired sessions.
      */
     public void deleteExpiredSessions() {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from SessionData sessionData where sessionData.expireDate < :now";
             Query query = session.createQuery(queryString);
@@ -139,7 +139,7 @@ public class SessionDAO extends HibernateRepository<SessionData> {
             String msg = "Could not delete expired sessions: " + e.toString();
             Logger.error(msg, e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 }

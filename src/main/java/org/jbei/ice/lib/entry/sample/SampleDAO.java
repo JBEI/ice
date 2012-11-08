@@ -40,7 +40,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
     }
 
     public boolean hasSample(Entry entry) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
 
             Number itemCount = (Number) session.createCriteria(Sample.class)
@@ -51,7 +51,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sample by entry: " + entry.getId(), e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -69,7 +69,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
     public ArrayList<Sample> getSamplesByEntry(Entry entry) throws DAOException {
         ArrayList<Sample> samples = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from " + Sample.class.getName()
                     + " as sample where sample.entry = :entry order by sample.id desc";
@@ -87,7 +87,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sample by entry: " + entry.getId(), e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return samples;
@@ -103,7 +103,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
     @SuppressWarnings("unchecked")
     public ArrayList<Sample> getSamplesByStorage(Storage storage) throws DAOException {
         ArrayList<Sample> samples = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from " + Sample.class.getName()
                     + " as sample where sample.storage = :storage";
@@ -121,7 +121,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sample by storage: " + storage.getId(), e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
         return samples;
     }
@@ -134,7 +134,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
      * @throws DAOException
      */
     public ArrayList<Sample> retrieveSamplesByIndex(String code) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         String queryString = "from " + Storage.class.getName()
                 + " as storage where storage.index = :code";
         try {
@@ -163,7 +163,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
             throws DAOException {
         ArrayList<Sample> samples = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from " + Sample.class.getName()
                     + " as sample where sample.depositor = :depositor order by sample.id desc";
@@ -185,7 +185,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sample by depositor: " + depositor, e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return samples;
@@ -199,20 +199,20 @@ public class SampleDAO extends HibernateRepository<Sample> {
      * @throws DAOException
      */
     public int getSampleCountBy(String depositor) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             SQLQuery query = session.createSQLQuery("SELECT COUNT(id) FROM samples WHERE depositor = :depositor ");
             query.setString("depositor", depositor);
             return ((Number) query.uniqueResult()).intValue();
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
     @SuppressWarnings("unchecked")
     public LinkedList<Long> retrieveSamplesByDepositorSortByCreated(String depositor,
             boolean ascending) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         LinkedList<Long> results = null;
 
         try {
@@ -230,7 +230,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
             return results;
 
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -246,7 +246,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
         String filter = Utils.join(", ", ids);
         String suffix = "ORDER BY id " + (asc ? "ASC" : "DESC");
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
 
             Query query = session.createQuery("from " + Sample.class.getName() + " e WHERE id in ("
@@ -261,7 +261,7 @@ public class SampleDAO extends HibernateRepository<Sample> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve samples!", e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return samples;

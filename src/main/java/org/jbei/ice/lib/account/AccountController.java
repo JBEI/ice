@@ -154,8 +154,7 @@ public class AccountController {
         return newPassword;
     }
 
-    public Account createAdminAccount()
-            throws ControllerException {
+    public Account createAdminAccount() throws ControllerException {
 
         Account adminAccount = getByEmail(ADMIN_ACCOUNT_EMAIL);
         if (adminAccount != null)

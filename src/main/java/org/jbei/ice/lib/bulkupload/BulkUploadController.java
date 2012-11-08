@@ -89,7 +89,7 @@ public class BulkUploadController {
 
         try {
             results = dao.retrieveByAccount(accountController.getSystemAccount());
-            if (results == null)
+            if (results == null || results.isEmpty())
                 return infoList;
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -107,12 +107,12 @@ public class BulkUploadController {
 
             info.setId(draft.getId());
             info.setLastUpdate(draft.getLastUpdateTime());
-            int count = -1;
-            try {
-                count = dao.retrieveSavedDraftCount(draft.getId());
-            } catch (DAOException e) {
-                Logger.error(e); // we care about the data more than the count
-            }
+            int count = draft.getContents().size();
+//            try {
+//                count = dao.retrieveSavedDraftCount(draft.getId());
+//            } catch (DAOException e) {
+//                Logger.error(e); // we care about the data more than the count
+//            }
 
             info.setCount(count);
             info.setType(EntryAddType.stringToType(draft.getImportType()));
@@ -135,8 +135,7 @@ public class BulkUploadController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public BulkUploadInfo retrieveById(Account account, long id) throws ControllerException,
-            PermissionException {
+    public BulkUploadInfo retrieveById(Account account, long id) throws ControllerException, PermissionException {
 
         BulkUpload draft;
 
@@ -262,14 +261,15 @@ public class BulkUploadController {
 
             draftInfo.setName(draft.getName());
             draftInfo.setType(EntryAddType.stringToType(draft.getImportType()));
+            draftInfo.setCount(draft.getContents().size());
 
-            try {
-                int count = dao.retrieveSavedDraftCount(draft.getId());
-                draftInfo.setCount(count);
-            } catch (DAOException e) {
-                draftInfo.setCount(-1);
-                Logger.error(e);
-            }
+//            try {
+//                int count = dao.retrieveSavedDraftCount(draft.getId());
+//                draftInfo.setCount(count);
+//            } catch (DAOException e) {
+//                draftInfo.setCount(-1);
+//                Logger.error(e);
+//            }
 
             // set the account info
             AccountInfo accountInfo = new AccountInfo();
@@ -840,8 +840,7 @@ public class BulkUploadController {
         try {
             bulkUpload = dao.retrieveByIdWithContents(id);
             if (bulkUpload == null)
-                throw new ControllerException("Could not retrieve bulk upload with id \"" + id
-                                                      + "\" for approval");
+                throw new ControllerException("Could not retrieve bulk upload with id \"" + id + "\" for approval");
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -860,10 +859,9 @@ public class BulkUploadController {
         }
 
         // TODO : there may be situations where the admin added something
-
         // when done approving, delete the bulk upload record but not the entries associated with it.
         try {
-            bulkUpload.setContents(null);
+            bulkUpload.getContents().clear();
             dao.delete(bulkUpload);
             return true;
         } catch (DAOException e) {
@@ -872,13 +870,13 @@ public class BulkUploadController {
         }
     }
 
-    protected void saveSequence(Account account, ArrayList<SequenceAnalysisInfo> sequenceInfoList,
-            Entry entry) throws ControllerException {
+    protected void saveSequence(Account account, ArrayList<SequenceAnalysisInfo> sequenceInfoList, Entry entry)
+            throws ControllerException {
 
         // check for has entry
         if (sequenceInfoList != null && !sequenceInfoList.isEmpty()) {
-            if ("has sequence".equalsIgnoreCase(sequenceInfoList.get(0).getFileId()) && "has sequence".equalsIgnoreCase(
-                    sequenceInfoList.get(0).getName()))
+            if ("has sequence".equalsIgnoreCase(sequenceInfoList.get(0).getFileId())
+                    && "has sequence".equalsIgnoreCase(sequenceInfoList.get(0).getName()))
                 return;
         }
 

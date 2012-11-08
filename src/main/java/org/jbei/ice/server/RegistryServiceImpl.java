@@ -91,6 +91,20 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public Boolean setConfigurationSetting(ConfigurationKey key, String value) {
+        try {
+            HibernateHelper.beginTransaction();
+            ConfigurationController controller = new ConfigurationController();
+            controller.setPropertyValue(key, value);
+            HibernateHelper.commitTransaction();
+            return true;
+        } catch (Exception e) {
+            HibernateHelper.rollbackTransaction();
+            return false;
+        }
+    }
+
+    @Override
     public AccountInfo login(String name, String pass) {
 
         try {
@@ -125,6 +139,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by " + name);
+            HibernateHelper.rollbackTransaction();
         }
         return null;
     }
@@ -240,8 +255,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
                 stringBuilder
                         .append("Dear " + info.getEmail() + ", ")
-                        .append(
-                                "\n\nThank you for creating a "
+                        .append("\n\nThank you for creating a "
                                         + Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
                         .append(" account. \nBy accessing ")
                         .append("this site with the password provided at the bottom ")

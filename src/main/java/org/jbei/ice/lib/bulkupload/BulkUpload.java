@@ -23,7 +23,7 @@ import org.jbei.ice.lib.group.Group;
 public class BulkUpload implements IModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "name", length = 50)
@@ -48,7 +48,7 @@ public class BulkUpload implements IModel {
     @Column(name = "last_update_time", nullable = false)
     private Date lastUpdateTime;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinTable(name = "bulk_upload_entry",
                joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
                inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
@@ -98,7 +98,9 @@ public class BulkUpload implements IModel {
     }
 
     public void setContents(List<Entry> contents) {
-        this.contents = contents;
+        this.contents.clear();
+        if (contents != null)
+            this.contents.addAll(contents);
     }
 
     public String getImportType() {

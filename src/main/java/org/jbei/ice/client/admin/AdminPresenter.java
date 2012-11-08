@@ -8,7 +8,7 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.group.GroupPresenter;
-import org.jbei.ice.client.admin.setting.SystemSettingsWidget;
+import org.jbei.ice.client.admin.setting.SystemSettingPresenter;
 import org.jbei.ice.client.admin.transfer.TransferEntryPanel;
 import org.jbei.ice.client.admin.user.UserPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -33,6 +33,7 @@ public class AdminPresenter extends AbstractPresenter {
     private AdminOption currentOption;
     private GroupPresenter groupPresenter;
     private UserPresenter userPresenter;
+    private SystemSettingPresenter systemSettingPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view, String optionStr) {
         this.service = service;
@@ -66,6 +67,8 @@ public class AdminPresenter extends AbstractPresenter {
 
         switch (option) {
             case SETTINGS:
+                if (systemSettingPresenter == null)
+                    systemSettingPresenter = new SystemSettingPresenter(service, eventBus);
                 retrieveSystemSettings();
                 break;
 
@@ -82,7 +85,6 @@ public class AdminPresenter extends AbstractPresenter {
                 break;
 
             case TRANSFER:
-                currentOption = AdminOption.TRANSFER;
                 view.show(currentOption, new TransferEntryPanel());
                 break;
         }
@@ -122,9 +124,8 @@ public class AdminPresenter extends AbstractPresenter {
                 if (settings == null || currentOption != AdminOption.SETTINGS)
                     return;
 
-                SystemSettingsWidget widget = new SystemSettingsWidget();
-                widget.setData(settings);
-                view.show(currentOption, widget);
+                systemSettingPresenter.setData(settings);
+                view.show(currentOption, systemSettingPresenter.getView().asWidget());
             }
         }.go(eventBus);
     }

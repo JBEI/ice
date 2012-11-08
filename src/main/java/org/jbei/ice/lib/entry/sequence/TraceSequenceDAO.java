@@ -72,7 +72,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
     public TraceSequence save(TraceSequence traceSequence) throws DAOException {
 
         TraceSequenceAlignment traceSequenceAlignment = traceSequence.getTraceSequenceAlignment();
-        Session session = newSession();
+        Session session = currentSession();
         try {
             session.saveOrUpdate(traceSequenceAlignment);
             traceSequence.setTraceSequenceAlignment(traceSequenceAlignment);
@@ -84,7 +84,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -98,7 +98,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
     public static TraceSequence getByFileId(String fileId) throws DAOException {
         TraceSequence traceSequence = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + TraceSequence.class.getName() + " where fileId = :fileId");
             query.setParameter("fileId", fileId);
@@ -205,7 +205,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
 
         List<TraceSequence> result = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from TraceSequence as traceSequence where traceSequence.entry = :entry order by "
                     + "traceSequence.creationTime asc";
@@ -257,7 +257,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
     public long getNumberOfTraceSequences(Entry entry) throws DAOException {
         int result = 0;
 
-        Session session = newSession();
+        Session session = currentSession();
 
         try {
             String queryString = "from " + TraceSequence.class.getName() + " where entry = :entry";
@@ -268,7 +268,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
         } catch (HibernateException e) {
             throw new DAOException(e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return result;

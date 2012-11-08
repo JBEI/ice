@@ -149,7 +149,10 @@ public class Utils {
     public static String getConfigValue(ConfigurationKey key) {
         ConfigurationController controller = new ConfigurationController();
         try {
-            return controller.getPropertyValue(key);
+            String value = controller.getPropertyValue(key);
+            if (value == null)
+                return key.getDefaultValue();
+            return value;
         } catch (ControllerException e) {
             Logger.error(e);
             return null;

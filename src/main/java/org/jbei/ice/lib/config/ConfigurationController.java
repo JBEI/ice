@@ -76,7 +76,7 @@ public class ConfigurationController {
         try {
             Configuration config = dao.get(key);
             if (config == null)
-                throw new ControllerException("Could not retrieve config with key " + key.name());
+                return null;
             return config.getValue();
         } catch (DAOException de) {
             throw new ControllerException(de);
@@ -104,5 +104,22 @@ public class ConfigurationController {
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
+    }
+
+    public void setPropertyValue(ConfigurationKey key, String value) throws ControllerException {
+        try {
+            Configuration configuration = dao.get(key);
+            if (configuration == null) {
+                configuration = new Configuration();
+                configuration.setKey(key.toString());
+            }
+
+            configuration.setValue(value);
+            dao.save(configuration);
+        } catch (DAOException de) {
+            Logger.error(de);
+            throw new ControllerException();
+        }
+
     }
 }

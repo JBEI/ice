@@ -49,7 +49,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
             Logger.error(he);
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -77,7 +77,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
             Logger.error(e);
             throw new DAOException(e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -99,7 +99,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -119,7 +119,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
         } catch (HibernateException he) {
             Logger.error(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -141,7 +141,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -161,12 +161,12 @@ class PermissionDAO extends HibernateRepository<Permission> {
         } catch (HibernateException he) {
             Logger.error(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
 //    protected boolean createCriteriaQuery(Example example) throws DAOException {
-//        Session session = newSession();
+//        Session session = currentSession();
 //
 //        try {
 //            Criteria criteria = session.createCriteria(Permission.class)
@@ -237,7 +237,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
         } catch (HibernateException he) {
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -257,7 +257,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
             Logger.error(he);
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -276,7 +276,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
             Logger.error(he);
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 }

@@ -28,7 +28,11 @@ public class HibernateHelper {
      * @return New Hibernate {@link Session}.
      */
     public static Session newSession() {
-        return getSessionFactory().openSession();
+        return HibernateHelper.getSessionFactory().openSession();
+    }
+
+    protected static Session currentSession() {
+        return getSessionFactory().getCurrentSession();
     }
 
     public static void beginTransaction() {

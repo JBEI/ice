@@ -78,6 +78,7 @@ public class GroupController {
         publicGroup = new Group();
         publicGroup.setLabel(publicGroupName);
         publicGroup.setDescription(publicGroupDescription);
+        publicGroup.setType(GroupType.PUBLIC);
         publicGroup.setParent(null);
         publicGroup.setUuid(publicGroupUUID);
         return save(publicGroup);

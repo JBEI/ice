@@ -19,10 +19,9 @@ import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-/**/
 
 /**
  * @author Hector Plahar
@@ -33,7 +32,13 @@ public class EntryControllerTest {
     @Before
     public void setUp() {
         HibernateHelper.initializeMock();
+        HibernateHelper.beginTransaction();
         controller = new EntryController();
+    }
+
+    @After
+    public void tearDown() {
+        HibernateHelper.rollbackTransaction();
     }
 
     @Test
@@ -63,7 +68,6 @@ public class EntryControllerTest {
 
     @Test
     public void testGet() throws Exception {
-
         String email = "testGet@TESTER.org";
         AccountController accountController = new AccountController();
         String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");

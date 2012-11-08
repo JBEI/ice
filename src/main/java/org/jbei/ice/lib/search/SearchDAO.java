@@ -17,8 +17,7 @@ class SearchDAO extends HibernateRepository {
 
     @SuppressWarnings("unchecked")
     protected Set<Long> runHibernateQuery(String queryString) throws DAOException {
-        Session session = newSession();
-        session.beginTransaction();
+        Session session = currentSession();
         Query query = session.createQuery(queryString);
 
         try {
@@ -28,10 +27,7 @@ class SearchDAO extends HibernateRepository {
             Logger.error("Could not query ", e);
             throw new DAOException(e);
         } finally {
-            session.getTransaction().rollback();
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession();
         }
     }
 

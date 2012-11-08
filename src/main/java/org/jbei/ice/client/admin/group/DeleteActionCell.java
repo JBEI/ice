@@ -1,6 +1,6 @@
 package org.jbei.ice.client.admin.group;
 
-import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -19,36 +19,21 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
  */
 public class DeleteActionCell<C> extends AbstractCell<C> {
 
-    /**
-     * The delegate that will handle events from the cell.
-     *
-     * @param <T> the type that this delegate acts on
-     */
-    public static interface Delegate<T> {
-        /**
-         * Perform the desired action on the given object.
-         *
-         * @param object the object to be acted upon
-         */
-        void execute(T object, Callback<T> callback);
-    }
-
     private final SafeHtml html;
-    private final Delegate<C> delegate;
+    private final ServiceDelegate<C> delegate;
 
     /**
      * Construct a new {@link DeleteActionCell}.
      *
      * @param delegate the delegate that will handle events
      */
-    public DeleteActionCell(Delegate<C> delegate, Callback<C> callback) {
+    public DeleteActionCell(ServiceDelegate<C> delegate) {
         super(CLICK, KEYDOWN);
         this.delegate = delegate;
         this.html = new SafeHtmlBuilder().appendHtmlConstant(
-                "<button type=\"button\" class=\"remove_user_button\"><i class=\"" + FAIconType.REMOVE
-                                                                                               .getStyleName() + "\">")
-                                         .appendHtmlConstant(
-                                                 "</i></button>").toSafeHtml();
+                "<button type=\"button\" class=\"remove_user_button\">"
+                        + "<i class=\"" + FAIconType.REMOVE.getStyleName()
+                        + "\">").appendHtmlConstant("</i></button>").toSafeHtml();
     }
 
     @Override
@@ -75,6 +60,6 @@ public class DeleteActionCell<C> extends AbstractCell<C> {
     @Override
     protected void onEnterKeyDown(Context context, Element parent, C value,
             NativeEvent event, ValueUpdater<C> valueUpdater) {
-        delegate.execute(value, null);
+        delegate.execute(value);
     }
 }

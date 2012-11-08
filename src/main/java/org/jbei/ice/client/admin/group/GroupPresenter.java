@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.AdminPanel;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -22,8 +22,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class GroupPresenter extends AdminPanelPresenter {
 
     private final GroupsPanel view;
-    private String currentGroupSelection;
-    private CreateGroupWidget widget;
+    private GroupInfo currentGroupSelection;
 
     public GroupPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
         super(service, eventBus);
@@ -31,16 +30,13 @@ public class GroupPresenter extends AdminPanelPresenter {
 
         // handlers
         addGroupSelectionHandler();
-        addCreateGroupHandler();
-
-        widget = new CreateGroupWidget();
+        setRetrieveGroupMemberDelegate();
     }
 
-    private DeleteActionCell.Delegate<AccountInfo> createDelegate() {
-        return new DeleteActionCell.Delegate<AccountInfo>() {
+    private ServiceDelegate<AccountInfo> createDelegate() {
+        return new ServiceDelegate<AccountInfo>() {
             @Override
-            public void execute(AccountInfo object, Callback callback) { // TODO : pass another delete that indicates
-                // success
+            public void execute(AccountInfo object) {
                 // TODO : remove object from group
                 if (object == null)
                     return;
@@ -48,25 +44,47 @@ public class GroupPresenter extends AdminPanelPresenter {
         };
     }
 
+    // sets delegate for retrieving group members for a specific group
+    // for group creation
+    private void setRetrieveGroupMemberDelegate() {
+        view.setRetrieveGroupMemberDelegate(new ServiceDelegate<GroupInfo>() {
+            @Override
+            public void execute(final GroupInfo info) {
+                new IceAsyncCallback<ArrayList<AccountInfo>>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<ArrayList<AccountInfo>> callback)
+                            throws AuthenticationException {
+                        service.retrieveGroupMembers(AppController.sessionId, info, callback);
+                    }
+
+                    @Override
+                    public void onSuccess(ArrayList<AccountInfo> result) {
+                        Collections.sort(result, new Comparator<AccountInfo>() {
+                            @Override
+                            public int compare(AccountInfo o1, AccountInfo o2) {
+                                return o1.getFullName().compareTo(o2.getFullName());
+                            }
+                        });
+
+                        view.setGroupCreationMembers(result);
+                    }
+                }.go(eventBus);
+            }
+        });
+    }
+
     private void addGroupSelectionHandler() {
         this.view.setGroupSelectionHandler(new ClickHandler() {
+
             @Override
             public void onClick(ClickEvent event) {
                 GroupInfo info = view.getGroupSelection(event);
                 if (info == null)
                     return;
 
-                currentGroupSelection = info.getUuid();
+                currentGroupSelection = info;
                 retrieveGroupMembers(info);
-            }
-        });
-    }
-
-    private void addCreateGroupHandler() {
-        this.view.setCreateGroupHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                widget.showPopup(true);
             }
         });
     }
@@ -96,7 +114,8 @@ public class GroupPresenter extends AdminPanelPresenter {
                         return o1.getFullName().compareTo(o2.getFullName());
                     }
                 });
-                if (!currentGroupSelection.equalsIgnoreCase(info.getUuid()))
+
+                if (!currentGroupSelection.getUuid().equalsIgnoreCase(info.getUuid()))
                     return;
 
                 view.setGroupMembers(result);

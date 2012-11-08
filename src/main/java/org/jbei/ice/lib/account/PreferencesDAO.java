@@ -27,7 +27,7 @@ class PreferencesDAO extends HibernateRepository<AccountPreferences> {
     public AccountPreferences getAccountPreferences(Account account) throws DAOException {
 
         AccountPreferences accountPreferences = null;
-        Session session = newSession();
+        Session session = currentSession();
 
         try {
             Query query = session.createQuery("from " + AccountPreferences.class.getName()
@@ -40,7 +40,7 @@ class PreferencesDAO extends HibernateRepository<AccountPreferences> {
             throw new DAOException("Failed to get AccountPreferences by Account: "
                                            + account.getFullName(), e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return accountPreferences;

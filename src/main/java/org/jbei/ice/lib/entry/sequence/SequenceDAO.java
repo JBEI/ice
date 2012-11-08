@@ -91,7 +91,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             throw new DAOException("Failed to save null model!");
         }
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             session.saveOrUpdate(feature);
         } catch (HibernateException e) {
@@ -100,7 +100,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return feature;
@@ -116,7 +116,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     public Sequence getByEntry(Entry entry) throws DAOException {
         Sequence sequence = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from " + Sequence.class.getName() + " as sequence where sequence.entry = :entry";
             Query query = session.createQuery(queryString);
@@ -130,14 +130,14 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             Logger.error(e);
             throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
         normalizeAnnotationLocations(sequence);
         return sequence;
     }
 
     public boolean hasSequence(Entry entry) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
 
             Number itemCount = (Number) session.createCriteria(Sequence.class)
@@ -148,7 +148,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -162,7 +162,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     public ArrayList<Sequence> getAllSequences() throws DAOException {
         ArrayList<Sequence> sequences = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Sequence.class.getName());
             @SuppressWarnings("rawtypes")
@@ -173,7 +173,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entries!", e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return sequences;
@@ -212,7 +212,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     @SuppressWarnings("unchecked")
     public ArrayList<Feature> getAllFeatures() throws DAOException {
         ArrayList<Feature> features = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Feature.class.getName());
             @SuppressWarnings("rawtypes")
@@ -224,7 +224,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         } catch (HibernateException e) {
             throw new DAOException(e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return features;
@@ -240,7 +240,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     private Feature getFeatureBySequence(String featureDnaSequence) throws DAOException {
         featureDnaSequence = featureDnaSequence.toLowerCase();
         Feature result = null;
-        Session session = newSession();
+        Session session = currentSession();
 
         try {
             String queryString = "from " + Feature.class.getName() + " where hash = :hash";
@@ -269,7 +269,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         } catch (UtilityException e) {
             throw new DAOException("Failed to get Feature by sequence!", e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return result;

@@ -36,7 +36,7 @@ import org.hibernate.Session;
 public class UtilsDAO extends HibernateRepository {
 
     public Set<String> getMatchingSelectionMarkers(String token, int limit) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
 
         try {
             token = token.toUpperCase();
@@ -51,7 +51,7 @@ public class UtilsDAO extends HibernateRepository {
             Logger.error(he);
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -65,7 +65,7 @@ public class UtilsDAO extends HibernateRepository {
      */
     public TreeSet<String> getUniqueSelectionMarkers() throws DAOException {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-//        Session session = newSession();
+//        Session session = currentSession();
 //        Query query = session
 //                .createQuery("select distinct selectionMarker.name from SelectionMarker selectionMarker");
 //        HashSet<String> rawMarkers = null;
@@ -104,7 +104,7 @@ public class UtilsDAO extends HibernateRepository {
      */
     public TreeSet<String> getUniquePublicPlasmidNames() {
         TreeSet<String> results = new TreeSet<String>();
-//        Session session = newSession();
+//        Session session = currentSession();
 //        Query query = session
 //                .createQuery(
 //                        "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name" +
@@ -136,7 +136,7 @@ public class UtilsDAO extends HibernateRepository {
      */
     public TreeSet<String> getUniquePromoters() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-//        Session session = newSession();
+//        Session session = currentSession();
 //        Query query = session
 //                .createQuery("select distinct plasmid.promoters from Plasmid plasmid ");
 //        HashSet<String> rawPromoters = new HashSet<String>();
@@ -173,7 +173,7 @@ public class UtilsDAO extends HibernateRepository {
      */
     public TreeSet<String> getUniqueOriginOfReplications() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-//        Session session = newSession();
+//        Session session = currentSession();
 //        Query query = session
 //                .createQuery("select distinct plasmid.originOfReplication from Plasmid plasmid ");
 //

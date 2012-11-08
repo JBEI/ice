@@ -1,5 +1,6 @@
 package org.jbei.ice.client.admin.group;
 
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
@@ -28,19 +29,21 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
     }
 
     private SelectionModel<AccountInfo> selectionModel;
-    private final DeleteActionCell.Delegate<AccountInfo> deleteDelegate;
+    private ServiceDelegate<AccountInfo> deleteDelegate;
 
-    public GroupMemberTable(DeleteActionCell.Delegate<AccountInfo> deleteDelegate) {
+    public GroupMemberTable() {
         super(15, TableResources.INSTANCE);
-        this.deleteDelegate = deleteDelegate;
 
-        setStyleName("data_table");
         Label empty = new Label();
         empty.setText("No members for group");
         empty.setStyleName("no_data_style");
         this.setEmptyTableWidget(empty);
         setSelectionModel();
         createColumns();
+    }
+
+    public void setDeleteDelegate(ServiceDelegate<AccountInfo> deleteDelegate) {
+        this.deleteDelegate = deleteDelegate;
     }
 
     /**
@@ -58,15 +61,14 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
         setSelectionModel(selectionModel, DefaultSelectionEventManager.<AccountInfo>createCheckboxManager());
     }
 
-    private void createColumns() {
-//        createSelectionColumn();
+    protected void createColumns() {
         createIDColumn();
         createNameColumn();
         createEmailColumn();
         createEditRemoveColumn();
     }
 
-    private void createIDColumn() {
+    protected void createIDColumn() {
         Column<AccountInfo, String> column = new Column<AccountInfo, String>(new TextCell()) {
             @Override
             public String getValue(AccountInfo object) {
@@ -77,8 +79,8 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
         addColumn(column, "ID");
     }
 
-    private void createEditRemoveColumn() {
-        DeleteActionCell<AccountInfo> cell = new DeleteActionCell<AccountInfo>(deleteDelegate, null);
+    protected void createEditRemoveColumn() {
+        DeleteActionCell<AccountInfo> cell = new DeleteActionCell<AccountInfo>(deleteDelegate);
         Column<AccountInfo, AccountInfo> column = new Column<AccountInfo, AccountInfo>(cell) {
 
             @Override
@@ -90,7 +92,7 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
 
     }
 
-    private void createSelectionColumn() {
+    protected void createSelectionColumn() {
         Column<AccountInfo, Boolean> checkColumn = new Column<AccountInfo, Boolean>(new CheckboxCell(
                 true, false)) {
             @Override
@@ -102,7 +104,7 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
         setColumnWidth(checkColumn, 20, com.google.gwt.dom.client.Style.Unit.PX);
     }
 
-    private void createNameColumn() {
+    protected void createNameColumn() {
         Column<AccountInfo, String> column = new Column<AccountInfo, String>(new TextCell()) {
             @Override
             public String getValue(AccountInfo object) {
@@ -115,7 +117,7 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
 //        setColumnWidth(column, 30, com.google.gwt.dom.client.Style.Unit.PCT);
     }
 
-    private void createEmailColumn() {
+    protected void createEmailColumn() {
         Column<AccountInfo, String> column = new Column<AccountInfo, String>(new TextCell()) {
             @Override
             public String getValue(AccountInfo object) {

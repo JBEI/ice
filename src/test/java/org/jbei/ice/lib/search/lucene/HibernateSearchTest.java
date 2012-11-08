@@ -52,6 +52,6 @@ public class HibernateSearchTest {
 //        }
 //
 //        ApplicationController.initializeHibernateSearch();
-        HibernateSearch.getInstance().executeSearchOnField("strain", "recordType");
+        HibernateSearch.getInstance().executeSearchOnField("strain", "recordType", 0, 50);
     }
 }

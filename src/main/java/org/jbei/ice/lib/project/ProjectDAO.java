@@ -67,7 +67,7 @@ public class ProjectDAO extends HibernateRepository {
     public Project get(long id) throws DAOException {
         Project project = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session
                     .createQuery("from " + Project.class.getName() + " where id = :id");
@@ -100,7 +100,7 @@ public class ProjectDAO extends HibernateRepository {
     public Project getByUUID(String uuid) throws DAOException {
         Project project = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Project.class.getName()
                                                       + " where uuid = :uuid");
@@ -134,7 +134,7 @@ public class ProjectDAO extends HibernateRepository {
     public ArrayList<Project> getByAccount(Account account) throws DAOException {
         ArrayList<Project> projects = new ArrayList<Project>();
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "select id from " + Project.class.getName()
                     + " where account.id = :account_id ORDER BY modification_time DESC";

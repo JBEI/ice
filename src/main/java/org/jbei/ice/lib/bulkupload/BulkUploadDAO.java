@@ -24,12 +24,11 @@ class BulkUploadDAO extends HibernateRepository<BulkUpload> {
     }
 
     public BulkUpload retrieveByIdWithContents(long id) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
 
         try {
             BulkUpload result = (BulkUpload) session.get(BulkUpload.class, id);
             if (result == null) {
-                session.getTransaction().rollback();
                 throw new DAOException("Could not locate draft with id \"" + id + "\"");
             }
             result.getContents().size();
@@ -38,7 +37,7 @@ class BulkUploadDAO extends HibernateRepository<BulkUpload> {
             Logger.error(e);
             throw new DAOException(e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -60,7 +59,7 @@ class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         ArrayList<BulkUpload> result;
 
         try {
-            session = newSession();
+            session = currentSession();
             Query query = session.createQuery("from " + BulkUpload.class.getName() + " where account = :account");
             query.setParameter("account", account);
             result = new ArrayList<BulkUpload>(query.list());
@@ -69,7 +68,7 @@ class BulkUploadDAO extends HibernateRepository<BulkUpload> {
             Logger.error(he);
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -77,7 +76,7 @@ class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         Session session = null;
 
         try {
-            session = newSession();
+            session = currentSession();
             Query query = session
                     .createSQLQuery("select count(*) from bulk_upload_entry where bulk_upload_id = " + draftId);
             int count = ((Number) query.uniqueResult()).intValue();
@@ -87,7 +86,7 @@ class BulkUploadDAO extends HibernateRepository<BulkUpload> {
             Logger.error(he);
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 }

@@ -37,7 +37,7 @@ class AccountDAO extends HibernateRepository<Account> {
     }
 
     public Set<Account> getMatchingAccounts(String token, int limit) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             token = token.toUpperCase();
             String queryString = "from " + Account.class.getName()
@@ -53,7 +53,7 @@ class AccountDAO extends HibernateRepository<Account> {
         } catch (Exception e) {
             throw new DAOException(e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -67,7 +67,7 @@ class AccountDAO extends HibernateRepository<Account> {
     public Account getByEmail(String email) throws DAOException {
         Account account = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Account.class.getName()
                                                       + " where email = :email");
@@ -80,7 +80,7 @@ class AccountDAO extends HibernateRepository<Account> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve Account by email: " + email);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return account;
@@ -110,7 +110,7 @@ class AccountDAO extends HibernateRepository<Account> {
 
         String queryString = "from " + SessionData.class.getName()
                 + " sessionData where sessionData.sessionKey = :sessionKey";
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery(queryString);
             query.setString("sessionKey", authToken);
@@ -121,7 +121,7 @@ class AccountDAO extends HibernateRepository<Account> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to get Account by token: " + authToken);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return account;

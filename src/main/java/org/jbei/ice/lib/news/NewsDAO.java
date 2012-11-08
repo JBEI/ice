@@ -22,7 +22,7 @@ class NewsDAO extends HibernateRepository<News> {
 
     @SuppressWarnings("unchecked")
     public ArrayList<News> retrieveAll() throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             ArrayList<News> results = new ArrayList<News>();
             Query query = session.createQuery("from " + News.class.getName() + " order by creationTime DESC ");
@@ -32,7 +32,7 @@ class NewsDAO extends HibernateRepository<News> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve news", e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 

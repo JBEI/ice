@@ -8,6 +8,7 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +22,13 @@ public class PermissionsControllerTest {
     @Before
     public void setUp() throws Exception {
         HibernateHelper.initializeMock();
+        HibernateHelper.beginTransaction();
         controller = new PermissionsController();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        HibernateHelper.rollbackTransaction();
     }
 
     @Test

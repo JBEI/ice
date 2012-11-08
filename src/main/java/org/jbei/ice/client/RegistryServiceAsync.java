@@ -212,4 +212,6 @@ public interface RegistryServiceAsync {
             AsyncCallback<SearchResults> async);
 
     void retrieveSystemSettings(String sid, AsyncCallback<HashMap<String, String>> asyncCallback);
+
+    void setConfigurationSetting(ConfigurationKey key, String value, AsyncCallback<Boolean> async);
 }

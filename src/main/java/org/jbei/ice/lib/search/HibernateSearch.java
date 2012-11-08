@@ -37,7 +37,7 @@ public class HibernateSearch {
     }
 
     /**
-     * Retrieve the singleton instance of this classe.
+     * Retrieve the singleton instance of this class.
      *
      * @return HibernateSearch instance.
      */
@@ -45,10 +45,9 @@ public class HibernateSearch {
         return SingletonHolder.INSTANCE;
     }
 
-    public void executeSearchOnField(String queryString, String field) {
+    public void executeSearchOnField(String queryString, String field, int start, int limit) {
         Session session = HibernateHelper.newSession();
         FullTextSession fullTextSession = Search.getFullTextSession(session);
-//        Transaction tx = fullTextSession.beginTransaction();
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
 
         org.apache.lucene.search.Query query = qb
@@ -60,8 +59,8 @@ public class HibernateSearch {
         fullTextQuery.setSort(Sort.RELEVANCE);
         fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
 
-        fullTextQuery.setFirstResult(0); //start from the "startth" element
-        fullTextQuery.setMaxResults(50); //return count elements
+        fullTextQuery.setFirstResult(start); //start from the "startth" element
+        fullTextQuery.setMaxResults(limit); //return count elements
 
         int resultCount = fullTextQuery.getResultSize(); // this is where you are hiding
 //        fquery.setProjection("id");

@@ -47,7 +47,7 @@ class FolderDAO extends HibernateRepository<Folder> {
 
     public Folder removeFolderEntries(Folder folder, ArrayList<Long> entries) throws DAOException {
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
             folder = (Folder) session.get(Folder.class, folder.getId());
             Iterator<Entry> it = folder.getContents().iterator();
@@ -65,7 +65,7 @@ class FolderDAO extends HibernateRepository<Folder> {
             Logger.error(he);
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -78,7 +78,7 @@ class FolderDAO extends HibernateRepository<Folder> {
      * @throws DAOException on any exception retrieving the folder or its contents
      */
     public Long getFolderSize(long id) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             SQLQuery query = session.createSQLQuery("select count(*) from folder_entry where folder_id = :id ");
             query.setLong("id", id);
@@ -87,7 +87,7 @@ class FolderDAO extends HibernateRepository<Folder> {
         } catch (HibernateException he) {
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -100,7 +100,7 @@ class FolderDAO extends HibernateRepository<Folder> {
      */
     @SuppressWarnings("unchecked")
     public ArrayList<Long> getFolderContents(long id) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             SQLQuery query = session.createSQLQuery("SELECT entry_id FROM folder_entry WHERE folder_id = :id");
             query.setLong("id", id);
@@ -115,12 +115,12 @@ class FolderDAO extends HibernateRepository<Folder> {
         } catch (HibernateException he) {
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
     public Folder addFolderContents(Folder folder, ArrayList<Entry> entrys) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             folder = (Folder) session.get(Folder.class, folder.getId());
             folder.getContents().addAll(entrys);
@@ -130,19 +130,19 @@ class FolderDAO extends HibernateRepository<Folder> {
         } catch (HibernateException e) {
             throw new DAOException(e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
     public Folder save(Folder folder) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             session.saveOrUpdate(folder);
             return folder;
         } catch (HibernateException he) {
             throw new DAOException(he);
         } finally {
-            closeSession(session);
+            closeSession();
         }
     }
 
@@ -157,7 +157,7 @@ class FolderDAO extends HibernateRepository<Folder> {
     public List<Folder> getFoldersByOwner(Account account) throws DAOException {
 
         ArrayList<Folder> folders = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             String queryString = "from " + Folder.class.getName()
                     + " WHERE ownerEmail = :ownerEmail order by creationTime desc";
@@ -168,7 +168,7 @@ class FolderDAO extends HibernateRepository<Folder> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve folders!", e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return folders;
@@ -177,7 +177,7 @@ class FolderDAO extends HibernateRepository<Folder> {
     @SuppressWarnings({"unchecked"})
     public List<Folder> getFoldersByEntry(Entry entry) throws DAOException {
         ArrayList<Folder> folders = new ArrayList<Folder>();
-        Session session = newSession();
+        Session session = currentSession();
 
         try {
             String hql = "select distinct folder from " + Folder.class.getName()
@@ -188,7 +188,7 @@ class FolderDAO extends HibernateRepository<Folder> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve folders!", e);
         } finally {
-            closeSession(session);
+            closeSession();
         }
 
         return folders;

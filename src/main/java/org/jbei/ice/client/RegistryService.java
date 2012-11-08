@@ -177,4 +177,6 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<AccountInfo> retrieveGroupMembers(String sessionId, GroupInfo info)
             throws AuthenticationException;
+
+    Boolean setConfigurationSetting(ConfigurationKey key, String value);
 }

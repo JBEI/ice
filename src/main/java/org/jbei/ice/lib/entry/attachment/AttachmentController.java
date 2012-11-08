@@ -22,13 +22,13 @@ public class AttachmentController {
 
     private final AttachmentDAO dao;
     private final PermissionsController permissionsController;
-    private final File attachmentFile;
-
+    private File attachmentFile;
 
     public AttachmentController() {
         permissionsController = new PermissionsController();
         dao = new AttachmentDAO();
-        attachmentFile = new File(Utils.getConfigValue(ConfigurationKey.ATTACHMENTS_DIRECTORY));
+        String attachmentFileLocation = Utils.getConfigValue(ConfigurationKey.ATTACHMENTS_DIRECTORY);
+        attachmentFile = new File(attachmentFileLocation);
     }
 
     /**

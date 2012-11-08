@@ -2,6 +2,7 @@ package org.jbei.ice.client.admin.group;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.entry.view.table.TablePager;
 import org.jbei.ice.shared.dto.AccountInfo;
 
@@ -20,9 +21,10 @@ public class GroupMembersWidget extends Composite {
     private final ArrayList<AccountInfo> infoList;
     private final ListDataProvider<AccountInfo> dataProvider;
 
-    public GroupMembersWidget(DeleteActionCell.Delegate<AccountInfo> deleteDelegate) {
+    public GroupMembersWidget(ServiceDelegate<AccountInfo> deleteDelegate) {
         infoList = new ArrayList<AccountInfo>();
-        GroupMemberTable memberTable = new GroupMemberTable(deleteDelegate);
+        GroupMemberTable memberTable = new GroupMemberTable();
+        memberTable.setDeleteDelegate(deleteDelegate);
         ScrollPanel panel = new ScrollPanel(memberTable);
         dataProvider = new ListDataProvider<AccountInfo>();
         dataProvider.addDataDisplay(memberTable);
@@ -39,10 +41,6 @@ public class GroupMembersWidget extends Composite {
     public void setMemberList(ArrayList<AccountInfo> list) {
         infoList.clear();
         infoList.addAll(list);
-        showMembers();
-    }
-
-    private void showMembers() {
         dataProvider.setList(infoList);
     }
 }
