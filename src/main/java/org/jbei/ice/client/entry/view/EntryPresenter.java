@@ -21,7 +21,6 @@ import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
 import org.jbei.ice.client.entry.view.view.PermissionsPresenter;
-import org.jbei.ice.client.entry.view.view.SampleAddHandler;
 import org.jbei.ice.client.entry.view.view.SequenceFileUploadHandler;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
@@ -97,8 +96,6 @@ public class EntryPresenter extends AbstractPresenter {
                 }
 
                 model.retrieveStorageSchemes(currentInfo);
-                SampleAddHandler handler = new SampleAddHandler(currentInfo, service, display, eventBus);
-                display.addSampleSaveHandler(handler);
             }
         });
 

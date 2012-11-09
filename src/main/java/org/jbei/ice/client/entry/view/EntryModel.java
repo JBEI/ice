@@ -7,6 +7,7 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.view.view.IEntryView;
+import org.jbei.ice.client.entry.view.view.SampleAddHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryType;
@@ -40,6 +41,8 @@ public class EntryModel {
         if (cacheLocation != null) {
             display.setSampleOptions(cacheLocation);
             display.setSampleFormVisibility(!display.getSampleFormVisibility());
+            SampleAddHandler handler = new SampleAddHandler(currentInfo, service, display, eventBus);
+            display.addSampleSaveHandler(handler);
             return;
         }
 
@@ -62,6 +65,9 @@ public class EntryModel {
                                                cache.put(currentInfo.getType(), sampleLocation);
                                                display.setSampleOptions(sampleLocation);
                                                display.setSampleFormVisibility(!display.getSampleFormVisibility());
+                                               SampleAddHandler handler = new SampleAddHandler(currentInfo, service,
+                                                                                               display, eventBus);
+                                               display.addSampleSaveHandler(handler);
                                            }
                                        });
     }
