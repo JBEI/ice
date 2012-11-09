@@ -3,6 +3,7 @@ package org.jbei.ice.lib.entry;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -157,21 +158,33 @@ class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     public Entry getByName(String name) throws DAOException {
-        Entry entry = null;
         Session session = newSession();
 
         try {
             session.getTransaction().begin();
-            Query query = session.createQuery("from " + Name.class.getName()
-                                                      + " where name = :name");
+            Query query = session.createQuery("from " + Name.class.getName() + " where name = :name");
             query.setParameter("name", name);
-            Object queryResult = query.uniqueResult();
-            if (queryResult == null) {
+            List list = query.list();
+            if (list == null)
                 return null;
-            }
 
-            entry = ((Name) queryResult).getEntry();
+            ArrayList<Name> results = new ArrayList<Name>(list);
             session.getTransaction().commit();
+
+            Iterator<Name> iterator = results.iterator();
+            while (iterator.hasNext()) {
+                Entry next = iterator.next().getEntry();
+                if (next.getVisibility() != Visibility.OK.getValue())
+                    iterator.remove();
+            }
+            if (results.size() > 1)
+                throw new DAOException("Entry by name " + name + " yielded " + results.size() + " results");
+
+            if (results.isEmpty())
+                return null;
+
+            return results.get(0).getEntry();
+
         } catch (HibernateException e) {
             Logger.error("Failed to retrieve entry by JBEI name: " + name, e);
             session.getTransaction().rollback();
@@ -179,8 +192,6 @@ class EntryDAO extends HibernateRepository<Entry> {
         } finally {
             closeSession(session);
         }
-
-        return entry;
     }
 
     public int getOwnerEntryCount(String ownerEmail, Integer... visibilities) throws DAOException {
