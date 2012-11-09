@@ -68,8 +68,7 @@ public class SearchController {
 
                 QueryOperator operator = filter.getOperator();
                 try {
-                    Set<Long> intermediateResults = dao.runSearchFilter(type, operator,
-                                                                        operand);
+                    Set<Long> intermediateResults = dao.runSearchFilter(type, operator, operand);
 
                     if (results == null) {
                         results = new HashSet<Long>();

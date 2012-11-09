@@ -126,6 +126,15 @@ public class AggregateSearch {
                 substringMatches.addAll(matchedSubstringEntries);
             }
 
+            queries = new ArrayList<String[]>();
+            queries.add(new String[]{"host", "~" + queryString});
+            queryResultIds = Query.getInstance().query(queries);
+            Collections.reverse(queryResultIds);
+            matchedSubstringEntries = entryController.getEntriesByIdSet(account, queryResultIds);
+            if (matchedSubstringEntries != null) {
+                substringMatches.addAll(matchedSubstringEntries);
+            }
+
             // Remove duplicates
             // If getEntriesByQueris is non-lazy, this may contain duplicates
             ArrayList<Long> seenBefore = new ArrayList<Long>();
@@ -143,11 +152,11 @@ public class AggregateSearch {
                     substringResults.add(new SearchResult(entry, 1.0F));
             }
 
-            return SearchResult.sumSearchResults(substringResults, exactNameResult);
+//            return SearchResult.sumSearchResults(substringResults, exactNameResult);
 
-//            result = LuceneSearch.getInstance().query(queryString);
+            ArrayList<SearchResult> result = LuceneSearch.getInstance().query(queryString);
 
-//            SearchResult.sumSearchResults(result, substringResults);
+            return SearchResult.sumSearchResults(result, substringResults);
         } catch (ControllerException e) {
             throw new SearchException(e);
         } catch (QueryException e) {
