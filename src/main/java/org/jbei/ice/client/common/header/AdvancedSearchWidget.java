@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
+import org.jbei.ice.shared.dto.EntryType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -111,7 +112,7 @@ public class AdvancedSearchWidget extends Composite {
         return options;
     }
 
-    public void setFilterOperands(Widget operand) {
+    public void setFilterOperands(Widget operand, EntryType... restrictions) {
         filterOptionsPanel.setWidget(currentRow, 1, operand);
 
         // add filter icon and handler

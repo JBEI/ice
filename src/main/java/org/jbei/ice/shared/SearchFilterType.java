@@ -1,5 +1,7 @@
 package org.jbei.ice.shared;
 
+import org.jbei.ice.shared.dto.EntryType;
+
 /**
  * Fields represented in the search filter pull down.
  * Users can search by each field type. Each type is
@@ -25,7 +27,7 @@ public enum SearchFilterType {
     BACKBONE("Backbone", "backbone"),
     PROMOTERS("Promoters", "promoters"),
     ORIGIN("Origin of Replication", "origin"),
-    HOST("Host", "host"),
+    HOST("Host", "host", EntryType.STRAIN),
     STRAIN_PLASMIDS("Strain Plasmids", "plasmids"),
     GEN_PHEN("Genotype/Phenotype", "gen_phen"),
     PACKAGE_FORMAT("Package Format", "format"),
@@ -33,10 +35,12 @@ public enum SearchFilterType {
 
     private String displayName;
     private String shortName;
+    private EntryType[] entryType;
 
-    SearchFilterType(String displayName, String shortName) {
+    SearchFilterType(String displayName, String shortName, EntryType... entryType) {
         this.displayName = displayName;
         this.shortName = shortName;
+        this.entryType = entryType;
     }
 
     public String displayName() {
@@ -50,6 +54,10 @@ public enum SearchFilterType {
 
     public String getShortName() {
         return this.shortName;
+    }
+
+    public EntryType[] getEntryRestrictions() {
+        return this.entryType;
     }
 
     public static SearchFilterType filterValueOf(String value) {

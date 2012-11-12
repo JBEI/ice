@@ -14,7 +14,7 @@ import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;

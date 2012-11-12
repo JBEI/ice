@@ -6,6 +6,8 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupType;
 
 /**
  * Aggregate users into groups.
@@ -103,5 +105,20 @@ public class Group implements IModel {
 
     public Set<Account> getMembers() {
         return members;
+    }
+
+    public static GroupInfo toDTO(Group group) {
+
+        GroupInfo info = new GroupInfo();
+        info.setUuid(group.getUuid());
+        info.setId(group.getId());
+        info.setLabel(group.getLabel());
+        info.setDescription(group.getDescription());
+        Group parent = group.getParent();
+        if (parent != null) {
+            info.setParentId(parent.getId());
+        }
+
+        return info;
     }
 }

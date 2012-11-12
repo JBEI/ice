@@ -56,7 +56,7 @@ public class HeaderPresenter {
             }
 
             currentSelected = searchFilter.getFilterWidget(type);
-            view.setFilterOperands(currentSelected);
+            view.setFilterOperands(currentSelected, type.getEntryRestrictions());
         }
     }
 

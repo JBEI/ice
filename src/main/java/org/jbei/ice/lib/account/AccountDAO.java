@@ -69,8 +69,7 @@ class AccountDAO extends HibernateRepository<Account> {
 
         Session session = currentSession();
         try {
-            Query query = session.createQuery("from " + Account.class.getName()
-                                                      + " where email = :email");
+            Query query = session.createQuery("from " + Account.class.getName() + " where email = :email");
             query.setParameter("email", email);
             Object result = query.uniqueResult();
 

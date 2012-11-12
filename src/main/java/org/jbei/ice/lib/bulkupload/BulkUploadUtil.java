@@ -25,7 +25,7 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupInfo;
 
 /**
  * Utility class for Bulk Import

@@ -8,6 +8,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
 public enum AdminOption {
 
     SETTINGS(FAIconType.COGS, "System Settings", "settings"),
+    WEB(FAIconType.GLOBE, "Web of Registries", "Web of registries settings"),
     USERS(FAIconType.USER, "Manage Users", "users"),
     GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members"),
     TRANSFER(FAIconType.INBOX, "Transfer Entries", "transfer entries between ICE instances");

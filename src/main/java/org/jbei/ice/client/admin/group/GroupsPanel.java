@@ -6,7 +6,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.AdminPanel;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -67,8 +67,8 @@ public class GroupsPanel extends Composite implements AdminPanel {
         widget.setGroupMembers(list);
     }
 
-    public void setGroups(ArrayList<GroupInfo> groups) {
-        widget.setGroups(groups);
+    public void setGroups(GroupInfo group) {
+        widget.setGroups(group);
         widget.showDisplay();
         vPanel.add(widget);
     }

@@ -12,7 +12,7 @@ import org.jbei.ice.client.admin.AdminPanel;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -40,6 +40,32 @@ public class GroupPresenter extends AdminPanelPresenter {
                 // TODO : remove object from group
                 if (object == null)
                     return;
+            }
+        };
+    }
+
+    /**
+     * @return service deletegate for creating a new public group
+     */
+    private ServiceDelegate<GroupInfo> createNewGroupDelete() {
+        return new ServiceDelegate<GroupInfo>() {
+
+            @Override
+            public void execute(GroupInfo groupInfo) {
+                new IceAsyncCallback<GroupInfo>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<GroupInfo> callback)
+                            throws AuthenticationException {
+//                        service.retrieveGroupMembers(AppController.sessionId, info, callback);
+                    }
+
+                    @Override
+                    public void onSuccess(GroupInfo result) {
+
+//                        view.setGroupCreationMembers(result);
+                    }
+                }.go(eventBus);
             }
         };
     }
@@ -94,8 +120,8 @@ public class GroupPresenter extends AdminPanelPresenter {
         return this.view;
     }
 
-    public void setGroups(ArrayList<GroupInfo> groups) {
-        this.view.setGroups(groups);
+    public void setGroups(GroupInfo group) {
+        this.view.setGroups(group);
     }
 
     protected void retrieveGroupMembers(final GroupInfo info) {

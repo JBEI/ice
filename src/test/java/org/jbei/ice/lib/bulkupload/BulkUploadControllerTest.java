@@ -23,6 +23,7 @@ import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
@@ -381,7 +382,7 @@ public class BulkUploadControllerTest {
 
         // test delete with valid group id
         GroupController groupController = new GroupController();
-        Group publicGroup = groupController.create("delete_DRAFT", "TEST", null);
+        Group publicGroup = groupController.createGroup("delete_DRAFT", "TEST", -1, GroupType.PUBLIC);
         Assert.assertNotNull(publicGroup);
 
         entryList.clear();
@@ -540,7 +541,7 @@ public class BulkUploadControllerTest {
 
         // update existing and add one more and also set the group to public
         GroupController groupController = new GroupController();
-        Group group = groupController.create("delete_UPDATE", "TEST", null);
+        Group group = groupController.createGroup("delete_UPDATE", "TEST", -1, GroupType.PUBLIC);
         added.setName("Part Test");
         EntryInfo newInfo = new PartInfo();
         newInfo.setLongDescription("This is a long description");

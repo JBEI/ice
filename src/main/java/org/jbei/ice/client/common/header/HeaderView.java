@@ -9,6 +9,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.core.client.GWT;
@@ -223,13 +224,12 @@ public class HeaderView extends Composite {
 
     public void createPullDownHandler() {
         if (this.searchInput != null) {
-            PopupHandler handler = new PopupHandler(widgetAdvanced, this.searchInput.getPullDownAreaElement(),
-                                                    false);
-            this.searchInput.setPullDownClickhandler(handler);
+            PopupHandler handler = new PopupHandler(widgetAdvanced, this.searchInput.getPullDownAreaElement(), false);
+            this.searchInput.setPullDownClickHandler(handler);
         }
     }
 
-    public void setFilterOperands(FilterWidget currentSelected) {
-        widgetAdvanced.setFilterOperands(currentSelected);
+    public void setFilterOperands(FilterWidget currentSelected, EntryType... restrictions) {
+        widgetAdvanced.setFilterOperands(currentSelected, restrictions);
     }
 }

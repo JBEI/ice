@@ -19,18 +19,18 @@ import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 public class QuickSearchParser {
 
-    private static final HashSet<String> operatorSymbol;
-    private static final HashSet<String> types;
+    private static final HashSet<String> OPERATOR_SYMBOL;
+    private static final HashSet<String> TYPES;
 
     static {
-        operatorSymbol = new HashSet<String>();
+        OPERATOR_SYMBOL = new HashSet<String>();
         for (QueryOperator operator : QueryOperator.values()) {
-            operatorSymbol.add(operator.symbol());
+            OPERATOR_SYMBOL.add(operator.symbol());
         }
 
-        types = new HashSet<String>();
+        TYPES = new HashSet<String>();
         for (SearchFilterType type : SearchFilterType.values())
-            types.add(type.getShortName().toLowerCase());
+            TYPES.add(type.getShortName().toLowerCase());
     }
 
     public static ArrayList<SearchFilterInfo> parse(String value) {
@@ -57,7 +57,7 @@ public class QuickSearchParser {
 
                 char c = value.charAt(i);
                 sb.append(c);
-                if (types.contains(sb.toString().trim())) {
+                if (TYPES.contains(sb.toString().trim())) {
                     type = sb.toString().trim();
                     i += 1;
                     break;
@@ -90,7 +90,7 @@ public class QuickSearchParser {
                 char c = value.charAt(i);
                 sb.append(c);
 
-                if (operatorSymbol.contains(sb.toString().trim())) {
+                if (OPERATOR_SYMBOL.contains(sb.toString().trim())) {
                     operator = sb.toString().trim();
                     i += 1;
                     break;

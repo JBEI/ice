@@ -33,8 +33,7 @@ public class EntryModel {
     private final RegistryServiceAsync service;
     private final HashMap<EntryType, SampleLocation> cache;
 
-    public EntryModel(final RegistryServiceAsync service, IEntryView display,
-            HandlerManager eventBus) {
+    public EntryModel(final RegistryServiceAsync service, IEntryView display, HandlerManager eventBus) {
         this.display = display;
         this.eventBus = eventBus;
         this.service = service;
@@ -46,6 +45,8 @@ public class EntryModel {
         if (cacheLocation != null) {
             display.setSampleOptions(cacheLocation);
             display.setSampleFormVisibility(!display.getSampleFormVisibility());
+            SampleAddHandler handler = new SampleAddHandler(currentInfo);
+            display.addSampleSaveHandler(handler);
             return;
         }
 

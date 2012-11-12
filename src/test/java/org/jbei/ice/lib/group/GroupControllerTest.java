@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.group;
 
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.shared.dto.group.GroupType;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -30,7 +32,8 @@ public class GroupControllerTest {
     public void testGetGroupByUUID() throws Exception {
         Group group = controller.createOrRetrievePublicGroup();
         Assert.assertNotNull(group);
-        Group created = controller.create("Test Group", "Description of a test group", group);
+        Group created = controller.createGroup("Test Group", "Description of a test group", group.getId(),
+                                               GroupType.PUBLIC);
         Assert.assertNotNull(created);
         created = controller.getGroupByUUID(created.getUuid());
         Assert.assertNotNull(created);
@@ -44,7 +47,8 @@ public class GroupControllerTest {
     public void testGetGroupById() throws Exception {
         Group group = controller.createOrRetrievePublicGroup();
         Assert.assertNotNull(group);
-        Group created = controller.create("Test Group", "Description of a test group", group);
+        Group created = controller.createGroup("Test Group", "Description of a test group", group.getId(),
+                                               GroupType.PUBLIC);
         Assert.assertNotNull(created);
         created = controller.getGroupById(created.getId());
         Assert.assertNotNull(created);
@@ -56,7 +60,6 @@ public class GroupControllerTest {
 
     @Test
     public void testSave() throws Exception {
-
     }
 
     @Test
@@ -84,5 +87,16 @@ public class GroupControllerTest {
     @Test
     public void testRetrieveGroupMembers() throws Exception {
 
+    }
+
+    @Test
+    public void testAddMemberToGroup() throws Exception {
+        Group group = controller.createOrRetrievePublicGroup();
+        Assert.assertNotNull(group);
+        Assert.assertTrue(group.getMembers().size() == 0);
+        AccountController accountController = new AccountController();
+        accountController.createNewAccount("Test", "Tester", "TT", "test@tester", "LBL", "test account");
+        controller.addMemberToGroup(group.getId(), "test@tester");
+        Assert.assertTrue(group.getMembers().size() == 1);
     }
 }

@@ -63,6 +63,8 @@ import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.*;
 import org.jbei.ice.shared.dto.autocomplete.AutoCompleteSuggestion;
+import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
@@ -101,6 +103,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         } catch (Exception e) {
             HibernateHelper.rollbackTransaction();
             return false;
+        }
+    }
+
+    @Override
+    public GroupInfo createNewGroup(String sessionId, String label, String description, long parentId, GroupType type)
+            throws AuthenticationException {
+
+        try {
+            HibernateHelper.beginTransaction();
+            GroupController controller = new GroupController();
+            Group group = controller.createGroup(label, description, parentId, type);
+            HibernateHelper.rollbackTransaction();
+            return Group.toDTO(group);
+        } catch (Exception e) {
+            HibernateHelper.rollbackTransaction();
+            return null;
         }
     }
 
@@ -313,8 +331,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo updateAccount(String sid, String email, AccountInfo info)
-            throws AuthenticationException {
+    public AccountInfo updateAccount(String sid, String email, AccountInfo info) throws AuthenticationException {
         Account account;
         AccountController controller = new AccountController();
         HibernateHelper.beginTransaction();
@@ -436,8 +453,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<FolderDetails> retrieveCollections(String sessionId)
-            throws AuthenticationException {
+    public ArrayList<FolderDetails> retrieveCollections(String sessionId) throws AuthenticationException {
 
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
         try {
@@ -482,8 +498,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails retrieveEntriesForFolder(String sessionId, long folderId)
-            throws AuthenticationException {
+    public FolderDetails retrieveEntriesForFolder(String sessionId, long folderId) throws AuthenticationException {
 
         try {
             HibernateHelper.beginTransaction();
@@ -988,31 +1003,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
     }
 
-    //
-    // SAMPLES
-    //
-
-    // Uses email identifier from session if parameter instance is null
-    @Override
-    public LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field,
-            boolean asc) throws AuthenticationException {
-
-        Account account = this.retrieveAccountForSid(sid);
-        if (field == null)
-            field = ColumnField.CREATED;
-
-        String depositor = (email == null) ? account.getEmail() : email;
-        SampleController sampleController = new SampleController();
-
-        // sort param
-        try {
-            return sampleController.retrieveSamplesByDepositor(account, depositor, field, asc);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
-    }
-
     @Override
     public LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds,
             ColumnField sortField, boolean asc) throws AuthenticationException {
@@ -1446,7 +1436,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account account = retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + " retrieving group members for group " + info.getLabel());
             GroupController controller = new GroupController();
-            ArrayList<AccountInfo> result = controller.retrieveGroupMembers(info);
+            ArrayList<AccountInfo> result = controller.retrieveGroupMembers(info.getUuid());
             HibernateHelper.commitTransaction();
             return result;
         } catch (Exception e) {
@@ -2001,41 +1991,33 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     // Groups //
     @Override
-    public ArrayList<GroupInfo> retrieveAllGroups(String sessionId) throws AuthenticationException {
+    public GroupInfo retrieveGroup(String sessionId, String uuid) throws AuthenticationException {
 
-        HibernateHelper.beginTransaction();
-        GroupController groupController = new GroupController();
-        Account account = retrieveAccountForSid(sessionId);
-
-        // retrieve all groups
-        Logger.info(account.getEmail() + ": retrieving all groups");
-        Set<Group> groups;
         try {
-            groups = groupController.getAllGroups();
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
+            HibernateHelper.beginTransaction();
+            GroupController groupController = new GroupController();
+            Account account = retrieveAccountForSid(sessionId);
 
-        if (groups == null)
-            return null;
+            // retrieve all groups
+            Logger.info(account.getEmail() + ": retrieving group " + uuid);
+            Group group;
+            if (uuid == null)
+                group = groupController.createOrRetrievePublicGroup();
+            else
+                group = groupController.getGroupByUUID(uuid);
 
-        ArrayList<GroupInfo> infos = new ArrayList<GroupInfo>();
-        for (Group group : groups) {
-            GroupInfo info = new GroupInfo();
-            info.setUuid(group.getUuid());
-            info.setId(group.getId());
-            info.setLabel(group.getLabel());
-            info.setDescription(group.getDescription());
-            Group parent = group.getParent();
-            if (parent != null) {
-                info.setParentId(parent.getId());
+            GroupInfo result = Group.toDTO(group);
+            if (group.getChildren() != null) {
+                for (Group child : group.getChildren()) {
+                    result.getChildren().add(Group.toDTO(child));
+                }
             }
-            infos.add(info);
+            HibernateHelper.commitTransaction();
+            return result;
+        } catch (Exception e) {
+            HibernateHelper.rollbackTransaction();
+            return null;
         }
-
-        HibernateHelper.commitTransaction();
-        return infos;
     }
 
     @Override

@@ -39,19 +39,18 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     public EntryDataTable() {
         super();
         selectionModel = new EntrySelectionModel<T>();
-        this.setSelectionModel(selectionModel,
-                               DefaultSelectionEventManager.<T>createCheckboxManager());
+        this.setSelectionModel(selectionModel, DefaultSelectionEventManager.<T>createCheckboxManager());
     }
 
     protected DataTableColumn<Boolean> addSelectionColumn() {
         final CheckboxCell columnCell = new CheckboxCell(true, false) {
+
             @Override
             public void onBrowserEvent(Context context, Element parent, Boolean value,
                     NativeEvent event, ValueUpdater<Boolean> valueUpdater) {
                 String type = event.getType();
 
-                boolean enterPressed = "keydown".equals(type)
-                        && event.getKeyCode() == KeyCodes.KEY_ENTER;
+                boolean enterPressed = "keydown".equals(type) && event.getKeyCode() == KeyCodes.KEY_ENTER;
                 if ("change".equals(type) || enterPressed) {
                     InputElement input = parent.getFirstChild().cast();
                     Boolean isChecked = input.isChecked();
@@ -63,8 +62,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
             }
         };
 
-        DataTableColumn<Boolean> selectionColumn = new DataTableColumn<Boolean>(columnCell,
-                                                                                ColumnField.SELECTION) {
+        DataTableColumn<Boolean> selectionColumn = new DataTableColumn<Boolean>(columnCell, ColumnField.SELECTION) {
 
             @Override
             public Boolean getValue(T object) {
@@ -89,8 +87,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     protected DataTableColumn<String> addTypeColumn(boolean sortable, double width, Unit unit) {
-        DataTableColumn<String> typeCol = new DataTableColumn<String>(new TextCell(),
-                                                                      ColumnField.TYPE) {
+        DataTableColumn<String> typeCol = new DataTableColumn<String>(new TextCell(), ColumnField.TYPE) {
 
             @Override
             public String getValue(T entry) {
@@ -105,15 +102,13 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected DataTableColumn<SafeHtml> addNameColumn(final double width, Unit unit) {
 
-        DataTableColumn<SafeHtml> nameColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(),
-                                                                             ColumnField.NAME) {
+        DataTableColumn<SafeHtml> nameColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(), ColumnField.NAME) {
 
             @Override
             public SafeHtml getValue(T object) {
                 String name = object.getName();
                 if (name == null)
                     return SafeHtmlUtils.EMPTY_SAFE_HTML;
-
 
                 return SafeHtmlUtils
                         .fromSafeConstant("<div style=\"width: "
@@ -160,8 +155,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     protected DataTableColumn<String> addStatusColumn() {
-        DataTableColumn<String> statusColumn = new DataTableColumn<String>(new TextCell(),
-                                                                           ColumnField.STATUS) {
+        DataTableColumn<String> statusColumn = new DataTableColumn<String>(new TextCell(), ColumnField.STATUS) {
 
             @Override
             public String getValue(T object) {
@@ -212,8 +206,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     protected DataTableColumn<String> addCreatedColumn() {
-        DataTableColumn<String> createdColumn = new DataTableColumn<String>(new TextCell(),
-                                                                            ColumnField.CREATED) {
+        DataTableColumn<String> createdColumn = new DataTableColumn<String>(new TextCell(), ColumnField.CREATED) {
 
             @Override
             public String getValue(EntryInfo object) {

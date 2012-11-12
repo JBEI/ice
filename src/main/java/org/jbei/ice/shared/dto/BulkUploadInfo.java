@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.group.GroupInfo;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 

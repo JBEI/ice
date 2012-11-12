@@ -2,7 +2,7 @@ package org.jbei.ice.client.bulkupload.widget;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupInfo;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;

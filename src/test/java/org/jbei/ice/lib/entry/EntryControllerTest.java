@@ -16,6 +16,7 @@ import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
@@ -213,7 +214,7 @@ public class EntryControllerTest {
         Assert.assertEquals("New account has entry", 0, count);
 
         GroupController groupController = new GroupController();
-        Group publicGroup = groupController.create("delete_NUMBERPUBLIC", "TEST", null);
+        Group publicGroup = groupController.createGroup("delete_NUMBERPUBLIC", "TEST", -1, GroupType.PUBLIC);
         account.getGroups().add(publicGroup);
         accountController.save(account);
 

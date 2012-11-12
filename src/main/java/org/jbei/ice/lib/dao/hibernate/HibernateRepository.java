@@ -35,7 +35,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
      * @param model model to delete
      * @throws DAOException
      */
-    protected void delete(T model) throws DAOException {
+    public void delete(T model) throws DAOException {
         if (model == null) {
             throw new DAOException("Failed to delete null model!");
         }
@@ -84,7 +84,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
      * @return Object saved object
      * @throws DAOException in the event of a problem saving or null model parameter
      */
-    protected T save(T model) throws DAOException {
+    public T save(T model) throws DAOException {
         if (model == null) {
             throw new DAOException("Failed to save null model!");
         }
@@ -113,7 +113,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
     @SuppressWarnings("unchecked")
     protected T get(Class<T> theClass, long id) throws DAOException {
 
-        T result = null;
+        T result;
         Session session = currentSession();
 
         try {

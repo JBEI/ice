@@ -2025,7 +2025,7 @@ td.datePickerMonth {
 }
 
 .profile_menu {
-    width: 160px;
+    width: 180px;
     color: #0082C0;
     font-size: 0.9em;
 }
@@ -2092,7 +2092,7 @@ td.datePickerMonth {
     opacity: 1;
 }
 
-.group_info_td i {
+.group_info_td i.icon-chevron-right {
     float: right;
     position: relative;
     top: 7px;
@@ -2107,6 +2107,7 @@ td.datePickerMonth {
 .group_info_td:hover {
     cursor: pointer;
     opacity: 1;
+    background-color: #fafafa;
 }
 
 .group_info_td:hover i {

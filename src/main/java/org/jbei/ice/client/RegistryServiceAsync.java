@@ -13,6 +13,8 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.*;
+import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -42,21 +44,16 @@ public interface RegistryServiceAsync {
             AsyncCallback<LinkedList<Long>> callback) throws AuthenticationException;
 
     // permissions
-    void getPermissionSuggestions(SuggestOracle.Request req,
-            AsyncCallback<SuggestOracle.Response> callback);
+    void getPermissionSuggestions(SuggestOracle.Request req, AsyncCallback<SuggestOracle.Response> callback);
 
     /**
      * retrieves the list of entries for the folder
      */
-    void retrieveEntriesForFolder(String sessionId, long folderId,
-            AsyncCallback<FolderDetails> callback);
+    void retrieveEntriesForFolder(String sessionId, long folderId, AsyncCallback<FolderDetails> callback);
 
     void retrieveUserEntries(String sid, String userId, AsyncCallback<FolderDetails> asyncCallback);
 
     void retrieveAllVisibleEntryIDs(String sid, AsyncCallback<FolderDetails> asyncCallback);
-
-    void retrieveSamplesByDepositor(String sid, String email, ColumnField field, boolean asc,
-            AsyncCallback<LinkedList<Long>> callback);
 
     void blastSearch(String sid, String searchString, QueryOperator program,
             AsyncCallback<ArrayList<BlastResultInfo>> callback);
@@ -103,8 +100,7 @@ public interface RegistryServiceAsync {
     // end collections
     //
 
-    void updateEntry(String sid, EntryInfo info, AsyncCallback<Boolean> callback)
-            throws AuthenticationException;
+    void updateEntry(String sid, EntryInfo info, AsyncCallback<Boolean> callback) throws AuthenticationException;
 
     void retrieveStorageSchemes(String sessionId, EntryType type,
             AsyncCallback<HashMap<SampleInfo, ArrayList<String>>> callback);
@@ -122,8 +118,7 @@ public interface RegistryServiceAsync {
 
     // bulk import and draft
 
-    void retrieveBulkImport(String sid, long id, AsyncCallback<BulkUploadInfo> callback)
-            throws AuthenticationException;
+    void retrieveBulkImport(String sid, long id, AsyncCallback<BulkUploadInfo> callback) throws AuthenticationException;
 
     void deleteFolder(String sessionId, long folderId, AsyncCallback<FolderDetails> callback);
 
@@ -168,17 +163,18 @@ public interface RegistryServiceAsync {
     void deleteEntryAttachment(String sid, String fileId, AsyncCallback<Boolean> callback)
             throws AuthenticationException;
 
-    void retrieveAllGroups(String sessionId, AsyncCallback<ArrayList<GroupInfo>> callback)
-            throws AuthenticationException;
+    void retrieveGroup(String sessionId, String uuid, AsyncCallback<GroupInfo> callback) throws AuthenticationException;
 
     void retrieveGroupMembers(String sessionId, GroupInfo info, AsyncCallback<ArrayList<AccountInfo>> callback)
             throws AuthenticationException;
 
+    void createNewGroup(String sessionId, String label, String description, long parentId, GroupType type,
+            AsyncCallback<GroupInfo> callback) throws AuthenticationException;
+
     void deleteEntry(String sessionId, EntryInfo info,
             AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
 
-    void createEntry(String sid, EntryInfo info, AsyncCallback<Long> async)
-            throws AuthenticationException;
+    void createEntry(String sid, EntryInfo info, AsyncCallback<Long> async) throws AuthenticationException;
 
     void createStrainWithPlasmid(String sid, HashSet<EntryInfo> infoSet,
             AsyncCallback<ArrayList<Long>> async) throws AuthenticationException;

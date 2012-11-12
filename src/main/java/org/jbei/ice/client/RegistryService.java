@@ -13,6 +13,8 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.*;
+import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -57,9 +59,6 @@ public interface RegistryService extends RemoteService {
     FolderDetails retrieveAllVisibleEntryIDs(String sid) throws AuthenticationException;
 
     EntryInfo retrieveEntryDetails(String sid, long id) throws AuthenticationException;
-
-    LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field, boolean asc)
-            throws AuthenticationException;
 
     LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds,
             ColumnField sortField, boolean asc) throws AuthenticationException;
@@ -145,7 +144,7 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<BulkUploadInfo> retrieveDraftsPendingVerification(String sid) throws AuthenticationException;
 
-    ArrayList<GroupInfo> retrieveAllGroups(String sessionId) throws AuthenticationException;
+    GroupInfo retrieveGroup(String sessionId, String uuid) throws AuthenticationException;
 
     boolean deleteEntryAttachment(String sid, String fileId) throws AuthenticationException;
 
@@ -179,4 +178,7 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     Boolean setConfigurationSetting(ConfigurationKey key, String value);
+
+    GroupInfo createNewGroup(String sessionId, String label, String description, long parentId, GroupType type)
+            throws AuthenticationException;
 }

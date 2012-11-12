@@ -8,6 +8,7 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.server.EntryViewFactory;
@@ -48,13 +49,14 @@ public class HibernateSearch {
     public void executeSearchOnField(String queryString, String field, int start, int limit) {
         Session session = HibernateHelper.newSession();
         FullTextSession fullTextSession = Search.getFullTextSession(session);
-        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
 
+        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Strain.class).get();
         org.apache.lucene.search.Query query = qb
                 .keyword().fuzzy().withThreshold(0.8f)
                 .onField(field)
                 .matching(queryString)
                 .createQuery();
+
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(query, Entry.class);
         fullTextQuery.setSort(Sort.RELEVANCE);
         fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
@@ -96,7 +98,7 @@ public class HibernateSearch {
                 .keyword()
                 .fuzzy().withThreshold(0.8f)
                 .onFields("owner", "creator", "names.name", "alias", "creator", "keywords", "shortDescription",
-                          "references", "longDescription", "intellectualProperty")
+                          "references", "longDescription", "intellectualProperty", "host")
                 .matching(queryString)
                 .createQuery();
 

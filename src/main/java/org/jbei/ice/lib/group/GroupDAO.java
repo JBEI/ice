@@ -117,16 +117,6 @@ class GroupDAO extends HibernateRepository<Group> {
     }
 
     /**
-     * Delete the given {@link Group} object in the database.
-     *
-     * @param group
-     * @throws DAOException
-     */
-    public void delete(Group group) throws DAOException {
-        super.delete(group);
-    }
-
-    /**
      * Save the given {@link Group} object in the database.
      *
      * @param group

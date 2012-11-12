@@ -11,9 +11,10 @@ import org.jbei.ice.client.admin.group.GroupPresenter;
 import org.jbei.ice.client.admin.setting.SystemSettingPresenter;
 import org.jbei.ice.client.admin.transfer.TransferEntryPanel;
 import org.jbei.ice.client.admin.user.UserPresenter;
+import org.jbei.ice.client.admin.web.WebOfRegistriesPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -34,6 +35,7 @@ public class AdminPresenter extends AbstractPresenter {
     private GroupPresenter groupPresenter;
     private UserPresenter userPresenter;
     private SystemSettingPresenter systemSettingPresenter;
+    private WebOfRegistriesPresenter webPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view, String optionStr) {
         this.service = service;
@@ -72,6 +74,12 @@ public class AdminPresenter extends AbstractPresenter {
                 retrieveSystemSettings();
                 break;
 
+            case WEB:
+                if (webPresenter == null)
+                    webPresenter = new WebOfRegistriesPresenter(service, eventBus);
+                retrieveWebOfRegistriesSettings();
+                break;
+
             case GROUPS:
                 if (groupPresenter == null)
                     groupPresenter = new GroupPresenter(service, eventBus);
@@ -92,15 +100,15 @@ public class AdminPresenter extends AbstractPresenter {
 
     // GROUPS
     private void retrieveGroups() {
-        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+        new IceAsyncCallback<GroupInfo>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
-                service.retrieveAllGroups(AppController.sessionId, callback);
+            protected void callService(AsyncCallback<GroupInfo> callback) throws AuthenticationException {
+                service.retrieveGroup(AppController.sessionId, null, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<GroupInfo> result) {
+            public void onSuccess(GroupInfo result) {
                 if (result == null || currentOption != AdminOption.GROUPS)
                     return;
 
@@ -126,6 +134,25 @@ public class AdminPresenter extends AbstractPresenter {
 
                 systemSettingPresenter.setData(settings);
                 view.show(currentOption, systemSettingPresenter.getView().asWidget());
+            }
+        }.go(eventBus);
+    }
+
+    private void retrieveWebOfRegistriesSettings() {
+        new IceAsyncCallback<HashMap<String, String>>() {
+
+            @Override
+            protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
+                service.retrieveSystemSettings(AppController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(HashMap<String, String> settings) {
+                if (settings == null || currentOption != AdminOption.WEB)
+                    return;
+
+                webPresenter.setData(settings);
+                view.show(currentOption, webPresenter.getView().asWidget());
             }
         }.go(eventBus);
     }

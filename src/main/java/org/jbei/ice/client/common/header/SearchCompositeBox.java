@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Hector Plahar
  */
 public class SearchCompositeBox extends Composite {
+
     private final TextBox box;
     private final FlexTable widgetHolder;
     private final HTMLPanel imagePanel;
@@ -86,7 +87,7 @@ public class SearchCompositeBox extends Composite {
         box.addKeyDownHandler(keyDownHandler);
     }
 
-    public void setPullDownClickhandler(ClickHandler handler) {
+    public void setPullDownClickHandler(ClickHandler handler) {
         imagePanel.addDomHandler(handler, ClickEvent.getType());
     }
 }

@@ -50,6 +50,23 @@ public class EntryTypeFilterWidget extends Composite {
         allCheck.setValue(Boolean.TRUE, true);
     }
 
+    public void setSelected(EntryType... select) {
+        if (select == null || select.length == 0 || select.length == typeChecks.length) {
+            allCheck.setValue(true, true);
+            return;
+        }
+
+        for (int i = 0; i < EntryType.values().length; i += 1) {
+            for (int j = 0; j < select.length; j += 1) {
+                EntryType type = EntryType.values()[i];
+                if (type == select[j]) {
+                    typeChecks[i].setValue(true, true);
+                    break;
+                }
+            }
+        }
+    }
+
     protected void addHandlers() {
         allCheck.addValueChangeHandler(new CheckBoxHandlers(true));
         CheckBoxHandlers handlers = new CheckBoxHandlers(false);

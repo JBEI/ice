@@ -5,22 +5,26 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountUtils;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupType;
 
 public class GroupController {
 
+    public static final String PUBLIC_GROUP_NAME = "Global";
+    public static final String PUBLIC_GROUP_DESCRIPTION = "All users are members of this group";
+    public static final String PUBLIC_GROUP_UUID = "8746a64b-abd5-4838-a332-02c356bbeac0";
+
+    private final AccountController accountController;
     private final GroupDAO dao;
-    private final String publicGroupName = "Global";
-    private final String publicGroupDescription = "All users are members of this group";
-    private final String publicGroupUUID = "8746a64b-abd5-4838-a332-02c356bbeac0";
 
     public GroupController() {
         dao = new GroupDAO();
+        accountController = new AccountController();
     }
 
     public Group getGroupByUUID(String uuid) throws ControllerException {
@@ -55,32 +59,40 @@ public class GroupController {
      *
      * @param label       group label
      * @param description group description
-     * @param parent      group parent
+     * @param parentId    group parent
+     * @param groupType   type of group to create
      * @return Saved Group object.
      * @throws ControllerException
      */
-    public Group create(String label, String description, Group parent) throws ControllerException {
+    public Group createGroup(String label, String description, long parentId, GroupType groupType)
+            throws ControllerException {
+
+        Group parent = getGroupById(parentId);
+        if (parent != null && parent.getType() != groupType)
+            throw new ControllerException("Parent child groups must be the same type");
 
         String uuid = java.util.UUID.randomUUID().toString();
         Group newGroup = new Group();
         newGroup.setUuid(uuid);
         newGroup.setLabel(label);
         newGroup.setDescription(description);
-        newGroup.setParent(parent);
+        if (parent != null)
+            newGroup.setParent(parent);
+        newGroup.setType(groupType);
         return save(newGroup);
     }
 
     public Group createOrRetrievePublicGroup() throws ControllerException {
-        Group publicGroup = this.getGroupByUUID(publicGroupUUID);
+        Group publicGroup = this.getGroupByUUID(PUBLIC_GROUP_UUID);
         if (publicGroup != null)
             return publicGroup;
 
         publicGroup = new Group();
-        publicGroup.setLabel(publicGroupName);
-        publicGroup.setDescription(publicGroupDescription);
+        publicGroup.setLabel(PUBLIC_GROUP_NAME);
+        publicGroup.setDescription(PUBLIC_GROUP_DESCRIPTION);
         publicGroup.setType(GroupType.PUBLIC);
         publicGroup.setParent(null);
-        publicGroup.setUuid(publicGroupUUID);
+        publicGroup.setUuid(PUBLIC_GROUP_UUID);
         return save(publicGroup);
     }
 
@@ -163,15 +175,49 @@ public class GroupController {
         return groupIds;
     }
 
-    public ArrayList<AccountInfo> retrieveGroupMembers(GroupInfo info) throws ControllerException {
+    public ArrayList<AccountInfo> retrieveGroupMembers(String uuid) throws ControllerException {
         try {
             ArrayList<AccountInfo> result = new ArrayList<AccountInfo>();
-            Group group = dao.get(info.getUuid());
+            Group group = dao.get(uuid);
             for (Account account : group.getMembers()) {
                 AccountInfo accountInfo = AccountUtils.accountToInfo(account);
                 result.add(accountInfo);
             }
             return result;
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public void addMemberToGroup(long groupId, String email) throws ControllerException {
+        try {
+            Group group = dao.get(groupId);
+            if (group == null)
+                throw new ControllerException("Could not retrieve group with id " + groupId);
+
+            Account account = accountController.getByEmail(email);
+            if (account == null)
+                throw new ControllerException("Could not retrieve account " + email);
+
+            group.getMembers().add(account);
+            dao.update(group);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public void removeMemberFromGroup(long groupId, String email) throws ControllerException {
+        try {
+            Group group = dao.get(groupId);
+            if (group == null)
+                throw new ControllerException("Could not retrieve group with id " + groupId);
+
+            Account account = accountController.getByEmail(email);
+            if (account == null)
+                throw new ControllerException("Could not retrieve account with email " + email);
+
+            group.getMembers().remove(account);
+            dao.update(group);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

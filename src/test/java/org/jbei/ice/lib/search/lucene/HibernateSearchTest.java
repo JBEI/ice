@@ -2,9 +2,11 @@ package org.jbei.ice.lib.search.lucene;
 
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.search.HibernateSearch;
 
 import junit.framework.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,6 +18,12 @@ public class HibernateSearchTest {
     @Before
     public void setUp() {
 //        HibernateHelper.initializeMock();
+        HibernateHelper.beginTransaction();
+    }
+
+    @After
+    public void tearDown() {
+        HibernateHelper.rollbackTransaction();
     }
 
     @Test
@@ -51,7 +59,7 @@ public class HibernateSearchTest {
 //
 //        }
 //
-//        ApplicationController.initializeHibernateSearch();
-        HibernateSearch.getInstance().executeSearchOnField("strain", "recordType", 0, 50);
+//        ApplicationController.upgradeDatabaseIfNecessary();
+        HibernateSearch.getInstance().executeSearchOnField("hector", "backbone", 0, 50);
     }
 }

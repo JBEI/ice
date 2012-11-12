@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
