@@ -53,6 +53,8 @@ public class ImageUtil {
         @Source("org/jbei/ice/client/resource/image/file_upload.png")
         ImageResource fileUpload();
 
+        @Source("org/jbei/ice/client/resource/image/undo.png")
+        ImageResource undoImage();
     }
 
     public static Image getSampleIcon() {
@@ -103,8 +105,8 @@ public class ImageUtil {
         return new Image(Resources.INSTANCE.hideSideImage());
     }
 
-    public static Image getUploadImage() {
-        return new Image(Resources.INSTANCE.uploadImage());
+    public static Image getUndoImage() {
+        return new Image(Resources.INSTANCE.undoImage());
     }
 
     public static Image getFileUpload() {

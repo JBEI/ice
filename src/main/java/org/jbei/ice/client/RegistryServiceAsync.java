@@ -207,4 +207,7 @@ public interface RegistryServiceAsync {
 
     void importXMLEntries(String sessionId, String fileId, String ownerEmail, String ownerName,
             AsyncCallback<Boolean> asyncCallback);
+
+    void revertedSubmittedBulkUpload(String sid, long uploadId, AsyncCallback<Boolean> async)
+            throws AuthenticationException;
 }

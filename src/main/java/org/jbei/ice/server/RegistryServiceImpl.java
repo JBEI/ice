@@ -1223,6 +1223,26 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public boolean revertedSubmittedBulkUpload(String sid, long uploadId) throws AuthenticationException {
+        try {
+            Account account = retrieveAccountForSid(sid);
+            AccountController accountController = new AccountController();
+            if (!accountController.isAdministrator(account)) {
+                Logger.warn(account.getEmail() + ": attempting revert bulk upload. Admin only function.");
+                return false;
+            }
+
+            BulkUploadController controller = new BulkUploadController();
+            Logger.info(account.getEmail() + ": reverting submitted bulk upload " + uploadId);
+            return controller.revertSubmitted(account, uploadId);
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
+        }
+    }
+
+    @Override
     public BulkUploadInfo deleteSavedDraft(String sid, long draftId)
             throws AuthenticationException {
 

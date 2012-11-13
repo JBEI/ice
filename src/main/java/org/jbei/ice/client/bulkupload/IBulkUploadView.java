@@ -20,7 +20,7 @@ public interface IBulkUploadView {
 
     void setSavedDraftsData(ArrayList<BulkUploadMenuItem> data, IDeleteMenuHandler handler);
 
-    void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, IDeleteMenuHandler handler);
+    void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, IRevertBulkUploadHandler handler);
 
     SingleSelectionModel<BulkUploadMenuItem> getDraftMenuModel();
 

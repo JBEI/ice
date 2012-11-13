@@ -151,7 +151,7 @@ public abstract class BulkUploadHeaders {
                 ArrayList<SequenceAnalysisInfo> plasmidSequenceList = info.getInfo().getSequenceAnalysis();
                 if (plasmidSequenceList == null || plasmidSequenceList.isEmpty()) {
                     value = "";
-                    if (info.isHasSequence())
+                    if (info.getInfo().isHasSequence())
                         value = "has sequence";
                     break;
                 }
