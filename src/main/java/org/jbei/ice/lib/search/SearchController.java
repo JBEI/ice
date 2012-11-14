@@ -279,7 +279,7 @@ public class SearchController {
                     try {
                         entry = entryController.getByRecordId(account, blastResult.getSubjectId());
                     } catch (PermissionException e) {
-                        Logger.error(e);
+//                        Logger.error(e);
                         continue;
                     }
 
