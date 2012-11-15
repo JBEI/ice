@@ -210,4 +210,6 @@ public interface RegistryServiceAsync {
     void retrieveSystemSettings(String sid, AsyncCallback<HashMap<String, String>> asyncCallback);
 
     void setConfigurationSetting(ConfigurationKey key, String value, AsyncCallback<Boolean> async);
+
+    void revertedSubmittedBulkUpload(String sid, long uploadId, AsyncCallback<Boolean> async);
 }

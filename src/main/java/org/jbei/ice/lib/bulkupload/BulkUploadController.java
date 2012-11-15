@@ -205,7 +205,7 @@ public class BulkUploadController {
                 Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController, plasmids);
                 if (plasmid != null) {
                     attachments = attachmentController.getByEntry(account, plasmid);
-                    sequence = sequenceController.getByEntry(entry);
+                    sequence = sequenceController.getByEntry(plasmid);
                     EntryInfo plasmidInfo = ModelToInfoFactory.getInfo(account, plasmid,
                                                                        attachments, null, null, sequence != null);
                     info.setInfo(plasmidInfo);
@@ -730,8 +730,7 @@ public class BulkUploadController {
                 draft.setContents(null);
                 dao.delete(draft);
             } catch (DAOException e) {
-                throw new ControllerException("Could not delete draft " + draft.getId()
-                                                      + ". Delete manually.", e);
+                throw new ControllerException("Could not delete draft " + draft.getId() + ". Delete manually.", e);
             }
             return true;
         }
@@ -759,6 +758,37 @@ public class BulkUploadController {
         } catch (DAOException e) {
             throw new ControllerException("Could not assign draft " + draftId + " to system", e);
         }
+    }
+
+    public boolean revertSubmitted(Account account, long uploadId) throws ControllerException {
+        boolean isAdmin = accountController.isAdministrator(account);
+        if (!isAdmin) {
+            Logger.warn(account.getEmail() + " attempting to revert submitted bulk upload "
+                                + uploadId + " without admin privs");
+            return false;
+        }
+
+        try {
+            BulkUpload upload = dao.retrieveById(uploadId);
+            if (upload == null) {
+                Logger.warn("Could not retrieve bulk upload " + uploadId + " for reversal");
+                return false;
+            }
+
+            String previousOwner = upload.getName();
+            Account prevOwnerAccount = accountController.getByEmail(previousOwner);
+            if (prevOwnerAccount == null)
+                return false;
+
+            upload.setAccount(prevOwnerAccount);
+            upload.setName("Returned Upload");
+            upload.setLastUpdateTime(new Date());
+            dao.update(upload);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        return true;
     }
 
     /**
@@ -836,6 +866,7 @@ public class BulkUploadController {
 
         // retrieve bulk upload in question (at this point it is owned by system)
         BulkUpload bulkUpload;
+
 
         try {
             bulkUpload = dao.retrieveByIdWithContents(id);

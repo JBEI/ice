@@ -181,4 +181,6 @@ public interface RegistryService extends RemoteService {
 
     GroupInfo createNewGroup(String sessionId, String label, String description, long parentId, GroupType type)
             throws AuthenticationException;
+
+    boolean revertedSubmittedBulkUpload(String sid, long uploadId) throws AuthenticationException;
 }

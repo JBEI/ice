@@ -209,8 +209,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 }
 
                 if (!data.isEmpty())
-                    view.setPendingDraftsData(data, new DeleteBulkUploadHandler(model.getService(),
-                                                                                model.getEventBus()));
+                    view.setPendingDraftsData(data, new RevertPendingBulkUploadHandler(model.getService(),
+                                                                                       model.getEventBus()));
             }
         });
     }

@@ -124,11 +124,11 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                 break;
 
             case PLASMID_SUMMARY:
-                value = plasmid.getKeywords();
+                value = plasmid.getShortDescription();
                 break;
 
             case PLASMID_NOTES:
-                value = plasmid.getShortDescription();
+                value = plasmid.getLongDescription();
                 break;
 
             case PLASMID_REFERENCES:

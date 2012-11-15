@@ -306,7 +306,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, IDeleteMenuHandler handler) {
+    public void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, IRevertBulkUploadHandler handler) {
         pendingDraftsMenu.setMenuItems(data, handler);
         menuPanel.add(pendingDraftsMenu);
         menuPanel.add(new HTML("&nbsp;"));
