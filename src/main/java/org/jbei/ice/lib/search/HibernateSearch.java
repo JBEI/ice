@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.search;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,6 +10,8 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Part;
+import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionsController;
@@ -16,6 +20,8 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchResultInfo;
 import org.jbei.ice.shared.dto.SearchResults;
 
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Sort;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextQuery;
@@ -86,24 +92,52 @@ public class HibernateSearch {
         // or the Lucene programmatic API. The Hibernate Search DSL is recommended though
 
         // you can create several query builders (for each entity type involved in the root of the query)
-        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
-        boolean wildCard = queryString.endsWith("*");
+//        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Strain.class).get();
+//        boolean wildCard = queryString.endsWith("*");
 
 //        TermContext termContext = qb.keyword();
 //        if( wildCard)
 //            termContext = termContext.wildcard();
 
         // use phrase (instead of keyword) for more than one word
-        org.apache.lucene.search.Query query = qb
-                .keyword()
-                .fuzzy().withThreshold(0.8f)
-                .onFields("owner", "creator", "names.name", "alias", "creator", "keywords", "shortDescription",
-                          "references", "longDescription", "intellectualProperty", "host")
-                .matching(queryString)
-                .createQuery();
+
+        ArrayList<Class> r = new ArrayList<Class>(Arrays.asList(Entry.class, Strain.class, Part.class, Plasmid.class));
+        BooleanQuery b = new BooleanQuery();
+
+        String[] fields;
+
+        for (Class clazz : r) {
+            if (clazz == Strain.class) {
+                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
+                        "shortDescription", "references", "longDescription", "intellectualProperty", "host", "plasmids",
+                        "genotypePhenotype"
+                };
+            } else if (clazz == Part.class) {
+                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
+                        "shortDescription", "references", "longDescription", "intellectualProperty"
+                };
+            } else if (clazz == Plasmid.class) {
+                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
+                        "shortDescription", "references", "longDescription", "intellectualProperty", "backbone"
+                };
+            } else {
+                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
+                        "shortDescription", "references", "longDescription", "intellectualProperty"
+                };
+            }
+
+            QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
+            org.apache.lucene.search.Query query = qb
+                    .keyword().fuzzy().withThreshold(0.8f)        // todo add threshold as params to fields
+                    .onFields(fields)
+                    .matching(queryString)
+                    .createQuery();
+
+            b.add(query, BooleanClause.Occur.SHOULD);
+        }
 
         // wrap Lucene query in a org.hibernate.Query
-        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(query, Entry.class);
+        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(b, Entry.class);
         fullTextQuery.setSort(Sort.RELEVANCE);
 
         // criteria example

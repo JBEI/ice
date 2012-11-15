@@ -60,6 +60,6 @@ public class HibernateSearchTest {
 //        }
 //
 //        ApplicationController.upgradeDatabaseIfNecessary();
-        HibernateSearch.getInstance().executeSearchOnField("hector", "backbone", 0, 50);
+        HibernateSearch.getInstance().executeSearchOnField("hector", "general", 0, 50);
     }
 }

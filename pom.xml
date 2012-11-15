@@ -330,12 +330,6 @@
             <version>1.3.1</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.cxf.dosgi</groupId>
-            <artifactId>cxf-dosgi-ri-dsw-cxf</artifactId>
-            <version>1.3</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.neethi</groupId>
             <artifactId>neethi</artifactId>
             <version>3.0.2</version>
