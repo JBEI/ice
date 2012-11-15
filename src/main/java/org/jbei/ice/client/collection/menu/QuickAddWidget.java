@@ -1,36 +1,38 @@
 package org.jbei.ice.client.collection.menu;
 
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
+ * Widget for adding a new collection
+ *
  * @author Hector Plahar
  */
-public class QuickAddWidget extends Composite implements QuickAddWidgetPresenter.View {
+public class QuickAddWidget extends Composite {
 
     private final TextBox quickAddBox;
-    private final QuickAddWidgetPresenter presenter;
-    private final FlexTable layout;
-    private final Icon iconSave;
-    private final Icon iconCancel;
+    private final Button btnSave;
+    private final Button btnCancel;
 
     public QuickAddWidget() {
         quickAddBox = new TextBox();
         quickAddBox.setStyleName("input_box");
         quickAddBox.addStyleName("pad-4");
         quickAddBox.getElement().setAttribute("placeholder", "Enter collection name");
-        quickAddBox.setWidth("170px");
+        quickAddBox.setWidth("165px");
+        quickAddBox.setMaxLength(35);
         quickAddBox.addFocusHandler(new FocusHandler() {
 
             @Override
@@ -39,33 +41,33 @@ public class QuickAddWidget extends Composite implements QuickAddWidgetPresenter
             }
         });
 
-        layout = new FlexTable();
+        FlexTable layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
         initWidget(layout);
 
-        iconCancel = new Icon(FAIconType.REMOVE_SIGN);
-        iconCancel.addStyleName("remove_filter");
-        iconSave = new Icon(FAIconType.OK_SIGN);
-        iconSave.addStyleName("add_filter_style");
+        btnCancel = new Button("<i class=\"" + FAIconType.REMOVE.getStyleName() + "\"></i>");
+        btnCancel.addStyleName("remove_filter");
+        addCancelHandler();
+
+        btnSave = new Button("<i class=\"" + FAIconType.OK.getStyleName() + "\"></i>");
+        btnSave.addStyleName("add_filter_style");
 
         layout.setWidget(0, 0, quickAddBox);
 
-        layout.setWidget(0, 1, iconSave);
+        layout.setWidget(0, 1, btnSave);
         layout.getFlexCellFormatter().setWidth(0, 1, "20px");
         layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_CENTER);
 
-        layout.setWidget(0, 2, iconCancel);
+        layout.setWidget(0, 2, btnCancel);
         layout.getFlexCellFormatter().setWidth(0, 2, "20px");
         layout.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_CENTER);
-
-        presenter = new QuickAddWidgetPresenter(this);
     }
 
-    // todo : move to model/presenter/handler
     protected boolean validate() {
         if (quickAddBox != null && quickAddBox.getText().trim().isEmpty()) {
             quickAddBox.setStyleName("entry_input_error");
+            quickAddBox.addStyleName("pad-4");
             return false;
         }
         return true;
@@ -95,13 +97,26 @@ public class QuickAddWidget extends Composite implements QuickAddWidgetPresenter
         });
     }
 
-    public void addSubmitHandler(ClickHandler handler) {
-        this.iconSave.addClickHandler(handler);
+    public void addSubmitHandler(final ClickHandler handler) {
+        this.btnSave.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!validate())
+                    return;
+                handler.onClick(event);
+            }
+        });
     }
 
-    @Override
-    public void addCancelHandler(ClickHandler handler) {
-        this.iconCancel.addClickHandler(handler);
+    public void addCancelHandler() {
+        this.btnCancel.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                quickAddBox.setStyleName("input_box");
+                quickAddBox.addStyleName("pad-4");
+                QuickAddWidget.this.setVisible(false);
+            }
+        });
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.jbei.ice.client.common.widget.Icon;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 
@@ -16,7 +17,7 @@ public class MenuHeader extends Composite {
 
     private Icon expandCollapseIcon;    // icon that indicates whether collection has been expanded or collapsed
     private final Label headerLabel;
-    private Icon quickAddIcon;
+    private HTML quickAddIcon;
     private boolean collapsed; // this should be saved
 
     public MenuHeader(String header, boolean addQuickEdit) {
@@ -25,7 +26,9 @@ public class MenuHeader extends Composite {
         headerLabel.setStyleName("display-inline");
         headerLabel.addStyleName("cursor_pointer");
         // quick collection add
-        quickAddIcon = new Icon(FAIconType.PLUS);
+        quickAddIcon = new HTML("<i class=\"" + FAIconType.FOLDER_CLOSE.getStyleName()
+                                        + "\"></i><i style=\"vertical-align: sub; font-size: 7px\" class=\""
+                                        + FAIconType.PLUS.getStyleName() + "\"></i>");
         quickAddIcon.setVisible(addQuickEdit);
         quickAddIcon.addStyleName("quick_add_icon");
 

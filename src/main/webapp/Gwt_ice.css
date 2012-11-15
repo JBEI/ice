@@ -1932,7 +1932,7 @@ td.datePickerMonth {
 
 .add_filter_style {
     cursor: pointer;
-    opacity: 0.3;
+    opacity: 0.5;
 }
 
 .add_filter_style:hover {
@@ -1942,8 +1942,7 @@ td.datePickerMonth {
 
 .remove_filter {
     cursor: pointer;
-    opacity: 0.3;
-
+    opacity: 0.5;
 }
 
 .remove_filter:hover {
@@ -2012,17 +2011,12 @@ td.datePickerMonth {
 
 .quick_add_icon {
     cursor: pointer;
-    border: 1px solid #ccc;
-    opacity: 0.4;
+    opacity: 0.5;
     padding: 0 2px 0 2px;
-    text-shadow: 0.1em 0.1em #c1c1c1
 }
 
 .quick_add_icon:hover {
     opacity: 0.9;
-    color: #3f7f00;
-    border: 1px solid #3f7f00;
-    background-color: #fff;
 }
 
 .profile_menu {

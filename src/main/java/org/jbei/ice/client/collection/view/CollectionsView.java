@@ -91,6 +91,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         systemMenu = new CollectionMenu(false, "Collections");
         systemMenu.setEmptyCollectionMessage("No collections available");
         userMenu = new CollectionMenu(true, "My Collections");
+        userMenu.setEmptyCollectionMessage("No collections available");
         sharedCollections = new CollectionMenu(false, "Shared Collections");
         sharedCollections.setEmptyCollectionMessage("No collections have been shared with you");
 

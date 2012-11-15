@@ -96,8 +96,8 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
 
     public void setEmptyCollectionMessage(String msg) {
         int messageRow = hasQuickEdit ? 2 : 1;
-        HTML html = new HTML("<span style=\"font-size: 0.70em; color: #666; padding: 4px; font-style:italic\">" + msg +
-                                     "</span>");
+        HTML html = new HTML("<span style=\"font-size: 0.70em; color: #666; padding: 4px; font-style:italic\">"
+                                     + msg + "</span>");
         layout.setWidget(messageRow, 0, html);
     }
 
@@ -262,7 +262,6 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
 
     // inner classes
 
-    // TODO : this needs to go into a presenter;
     class DeleteCallBack extends Callback<MenuItem> {
 
         private final IDeleteMenuHandler deleteHandler;
