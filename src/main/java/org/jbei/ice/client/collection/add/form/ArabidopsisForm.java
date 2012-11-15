@@ -222,7 +222,7 @@ public class ArabidopsisForm extends SingleEntryForm<ArabidopsisSeedInfo> {
         super.populateEntries();
 
         ArabidopsisSeedInfo seed = super.getEntryInfo();
-        String selectionMarkers = ((MultipleTextBox) markers.getTextBox()).getWholeText();
+        String selectionMarkers = ((MultipleTextBox) markers.getValueBox()).getWholeText();
         seed.setSelectionMarkers(selectionMarkers);
 
         Generation gen = Generation.valueOf(generation.getValue(generation.getSelectedIndex()));

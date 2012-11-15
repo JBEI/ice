@@ -1783,7 +1783,7 @@ td.datePickerMonth {
 
 .dialog_box_glass {
     background-color: #000;
-    opacity: 0.2;
+    opacity: 0.3;
 }
 
 .saved_draft_input {
@@ -1977,6 +1977,7 @@ td.datePickerMonth {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
+    cursor: pointer;
 }
 
 .collection_options {

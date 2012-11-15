@@ -26,6 +26,7 @@ public class GroupsPanel extends Composite implements AdminPanel {
     private Button createGroup;
     private GroupsWidget widget;
     private CreateGroupWidget createGroupWidget;
+    private GroupInfo rootGroup;
 
     public GroupsPanel(ServiceDelegate<AccountInfo> deleteDelegate) {
         ScrollPanel scrollPanel = new ScrollPanel();
@@ -59,18 +60,27 @@ public class GroupsPanel extends Composite implements AdminPanel {
         });
     }
 
+    public void addCreateGroupHandler(ClickHandler handler) {
+        createGroupWidget.addCreateGroupHandler(handler);
+    }
+
     public void setGroupCreationMembers(ArrayList<AccountInfo> list) {
         createGroupWidget.setGroupCreationMembers(list);
+    }
+
+    public void addNewGroup(GroupInfo info) {
+        widget.addNewGroup(info);
     }
 
     public void setGroupMembers(ArrayList<AccountInfo> list) {
         widget.setGroupMembers(list);
     }
 
-    public void setGroups(GroupInfo group) {
-        widget.setGroups(group);
+    public void setRootGroup(GroupInfo group) {
+        widget.setRootGroup(group);
         widget.showDisplay();
         vPanel.add(widget);
+        rootGroup = group;
     }
 
     public void setGroupSelectionHandler(ClickHandler handler) {
@@ -83,5 +93,14 @@ public class GroupsPanel extends Composite implements AdminPanel {
 
     public void setRetrieveGroupMemberDelegate(ServiceDelegate<GroupInfo> serviceDelegate) {
         createGroupWidget.setGroupMemberDelegate(serviceDelegate);
+    }
+
+    public GroupInfo getNewGroup() {
+        String name = createGroupWidget.getGroupName();
+        String description = createGroupWidget.getGroupDescription();
+        GroupInfo newGroup = new GroupInfo();
+        newGroup.setLabel(name);
+        newGroup.setDescription(description);
+        return newGroup;
     }
 }

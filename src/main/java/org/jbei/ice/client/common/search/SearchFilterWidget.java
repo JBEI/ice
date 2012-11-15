@@ -15,11 +15,9 @@ public class SearchFilterWidget extends FilterWidget {
 
     private final ListBox list;
     private final TextBox box;
-    private final boolean showOperator;
 
-    public SearchFilterWidget(SearchFilterType type, boolean showOperator) {
+    public SearchFilterWidget(SearchFilterType type) {
         super(type);
-        this.showOperator = showOperator;
 
         box = new TextBox();
         box.setStyleName("input_box");
@@ -29,12 +27,12 @@ public class SearchFilterWidget extends FilterWidget {
         String boxId = "_" + type.getShortName();
         HTMLPanel layout = new HTMLPanel("<span id=\"" + listId + "\"></span><span id=\"" + boxId + "\"></span>");
 
-        if (showOperator) {
-            for (QueryOperator operator : getOperatorList()) {
-                list.addItem(operator.operator(), operator.symbol());
-            }
-            layout.add(list, listId);
-        }
+//        if (showOperator) {
+//            for (QueryOperator operator : getOperatorList()) {
+//                list.addItem(operator.operator(), operator.symbol());
+//            }
+//            layout.add(list, listId);
+//        }
 
         layout.add(box, boxId);
         initWidget(layout);
@@ -66,9 +64,5 @@ public class SearchFilterWidget extends FilterWidget {
     @Override
     public String getSelectedOperand() {
         return this.box.getText();
-    }
-
-    public boolean isShowOperator() {
-        return showOperator;
     }
 }

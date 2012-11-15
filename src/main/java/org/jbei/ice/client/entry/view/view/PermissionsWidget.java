@@ -161,7 +161,7 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
         if (visible) {
             writeAddLabel.setText("Close");
             writeSuggestBox.setText("");
-            writeSuggestBox.getTextBox().setFocus(true);
+            writeSuggestBox.getValueBox().setFocus(true);
         } else
             writeAddLabel.setText("Add");
     }
@@ -172,7 +172,7 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
         if (visible) {
             readAddLabel.setText("Close");
             readSuggestBox.setText("");
-            readSuggestBox.getTextBox().setFocus(true);
+            readSuggestBox.getValueBox().setFocus(true);
         } else
             readAddLabel.setText("Add");
     }

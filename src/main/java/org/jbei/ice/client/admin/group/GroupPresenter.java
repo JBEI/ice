@@ -23,18 +23,33 @@ public class GroupPresenter extends AdminPanelPresenter {
 
     private final GroupsPanel view;
     private GroupInfo currentGroupSelection;
+    private GroupInfo rootGroup;
 
     public GroupPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
         super(service, eventBus);
-        this.view = new GroupsPanel(createDelegate());
+        this.view = new GroupsPanel(createRemoveGroupMemberDelegate());
 
         // handlers
         addGroupSelectionHandler();
         setRetrieveGroupMemberDelegate();
+        addCreateGroupHandler();
     }
 
-    private ServiceDelegate<AccountInfo> createDelegate() {
+    private void addCreateGroupHandler() {
+        view.addCreateGroupHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                GroupInfo newGroup = view.getNewGroup();
+                newGroup.setParentId(rootGroup.getId());
+                view.addNewGroup(newGroup);
+            }
+        });
+    }
+
+    private ServiceDelegate<AccountInfo> createRemoveGroupMemberDelegate() {
         return new ServiceDelegate<AccountInfo>() {
+
             @Override
             public void execute(AccountInfo object) {
                 // TODO : remove object from group
@@ -120,8 +135,9 @@ public class GroupPresenter extends AdminPanelPresenter {
         return this.view;
     }
 
-    public void setGroups(GroupInfo group) {
-        this.view.setGroups(group);
+    public void setRootGroup(GroupInfo group) {
+        this.view.setRootGroup(group);
+        rootGroup = group;
     }
 
     protected void retrieveGroupMembers(final GroupInfo info) {

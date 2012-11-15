@@ -63,7 +63,7 @@ public class GroupsWidget extends Composite {
         groupList.addClickHandler(handler);
     }
 
-    public void setGroups(GroupInfo list) {
+    public void setRootGroup(GroupInfo list) {
         this.root = list;
         mapping.clear();
         groupMembers.setMemberList(new ArrayList<AccountInfo>());  // reset

@@ -17,8 +17,8 @@ public class BooleanFilterWidget extends FilterWidget {
     public BooleanFilterWidget(SearchFilterType type) {
         super(type);
 
-        yesRadio = new RadioButton("Boolean_Filter", QueryOperator.BOOLEAN_YES.symbol());
-        RadioButton noRadio = new RadioButton("Boolean_Filter", QueryOperator.BOOLEAN_NO.symbol());
+        yesRadio = new RadioButton("Boolean_Filter", "Yes");
+        RadioButton noRadio = new RadioButton("Boolean_Filter", "No");
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(yesRadio);
         panel.add(noRadio);

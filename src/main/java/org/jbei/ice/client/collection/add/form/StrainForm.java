@@ -149,18 +149,18 @@ public class StrainForm extends SingleEntryForm<StrainInfo> {
         StrainInfo strain = super.getEntryInfo();
         strain.setHost(host.getText());
         strain.setGenotypePhenotype(genPhen.getText());
-        strain.setPlasmids(((MultipleTextBox) plasmids.getTextBox()).getWholeText());
-        String selectionMarkers = ((MultipleTextBox) markers.getTextBox()).getWholeText();
+        strain.setPlasmids(((MultipleTextBox) plasmids.getValueBox()).getWholeText());
+        String selectionMarkers = ((MultipleTextBox) markers.getValueBox()).getWholeText();
         strain.setSelectionMarkers(selectionMarkers);
     }
 
     @Override
     public FocusWidget validateForm() {
         FocusWidget widget = super.validateForm();
-        if (markers.getTextBox().getText().isEmpty()) {
+        if (markers.getValueBox().getText().isEmpty()) {
             markers.setStyleName("entry_input_error");
             if (widget == null)
-                widget = markers.getTextBox();
+                widget = markers.getValueBox();
         } else {
             markers.setStyleName("input_box");
         }

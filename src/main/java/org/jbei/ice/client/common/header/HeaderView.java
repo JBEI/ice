@@ -1,19 +1,14 @@
 package org.jbei.ice.client.common.header;
 
-import java.util.LinkedHashMap;
-
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.common.FilterWidget;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -75,12 +70,7 @@ public class HeaderView extends Composite {
         widgetAdvanced = new AdvancedSearchWidget();
         widgetAdvanced.setWidth("401px");
         widgetAdvanced.setHeight("150px");
-
         presenter = new HeaderPresenter(this);
-    }
-
-    public String getSelectedFilterValue() {
-        return widgetAdvanced.getSelectedFilter();
     }
 
     public String[] getSelectedSearchType() {
@@ -94,19 +84,6 @@ public class HeaderView extends Composite {
 
     public void setSearchButtonEnable(boolean enable) {
         searchBtn.setEnabled(enable);
-    }
-
-    public void setEntryTypeChangeHandler(ChangeHandler handler) {
-//        final ListBox entryTypeOptions = widgetAdvanced.getEntryTypeOptions();
-//        entryTypeOptions.addChangeHandler(handler);
-    }
-
-    public void setAddFilterHandler(ClickHandler handler) {
-        widgetAdvanced.getAddFilter().addClickHandler(handler);
-    }
-
-    public void setSearchOptions(LinkedHashMap<String, String> options) {
-        widgetAdvanced.initializeWidget(options);
     }
 
     private Widget getImageHeader() {
@@ -180,46 +157,50 @@ public class HeaderView extends Composite {
         });
         loggedInContentsPanel.setWidget(0, 0, label);
 
-        // pipe
-        HTML pipe = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
-        pipe.addStyleName("color_eee");
-        loggedInContentsPanel.setWidget(0, 1, pipe);
-
         // messages
-        loggedInContentsPanel.setWidget(0, 2, new HTML("<span class=\"badge\">2</span>"));
+        loggedInContentsPanel.setHTML(0, 1, "");
 
         // pipe
         HTML pipe3 = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
         pipe3.addStyleName("color_eee");
-        loggedInContentsPanel.setWidget(0, 3, pipe3);
+        loggedInContentsPanel.setWidget(0, 2, pipe3);
 
         // logout link
-        loggedInContentsPanel.setWidget(0, 4, new Icon(FAIconType.SIGNOUT));
-        loggedInContentsPanel.setWidget(0, 5, new HTML("&nbsp;"));
+        loggedInContentsPanel.setWidget(0, 3, new Icon(FAIconType.SIGNOUT));
+        loggedInContentsPanel.setWidget(0, 4, new HTML("&nbsp;"));
         Hyperlink logout = new Hyperlink("Log Out", Page.LOGOUT.getLink());
-        loggedInContentsPanel.setWidget(0, 6, logout);
+        loggedInContentsPanel.setWidget(0, 5, logout);
 
         return loggedInContentsPanel;
     }
 
     public void setNewMessages(int newMessageCount) {
+        if (newMessageCount <= 0)
+            return;
 
+        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #EEE\">|</span>&nbsp;&nbsp;"
+                                                 + "<span class=\"badge\">"
+                                                 + newMessageCount
+                                                 + "</span>");
+        emailBadge.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                emailBadge.setVisible(false);
+                emailBadge.setHTML("");
+                loggedInContentsPanel.setHTML(0, 1, "");
+                History.newItem(Page.PROFILE.getLink() + ";id=" + AppController.accountInfo.getId() + ";s=messages");
+            }
+        });
+
+        loggedInContentsPanel.setWidget(0, 1, emailBadge);
     }
 
     public String getSearchInput() {
         return this.searchInput.getTextBox().getText();
     }
 
-    public SearchCompositeBox getSearchComposite() {
-        return this.searchInput;
-    }
-
     public SearchFilterInfo getBlastInfo() {
         return presenter.getBlastInfo();
-    }
-
-    public void setFilterChangeHandler(ChangeHandler handler) {
-        widgetAdvanced.setOptionChangeHandler(handler);
     }
 
     public void createPullDownHandler() {
@@ -227,9 +208,5 @@ public class HeaderView extends Composite {
             PopupHandler handler = new PopupHandler(widgetAdvanced, this.searchInput.getPullDownAreaElement(), false);
             this.searchInput.setPullDownClickHandler(handler);
         }
-    }
-
-    public void setFilterOperands(FilterWidget currentSelected, EntryType... restrictions) {
-        widgetAdvanced.setFilterOperands(currentSelected, restrictions);
     }
 }

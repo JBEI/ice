@@ -12,26 +12,27 @@ import org.jbei.ice.shared.dto.EntryType;
  */
 public enum SearchFilterType {
 
-    IDENTIFIER("Identifier", "identifier"),     // name, alias, part_number, rid, part_id
-    HAS_ATTACHMENT("Has Attachment", "has_attach"),
-    HAS_SEQUENCE("Has Sequence", "has_seq"),
-    HAS_SAMPLE("Has Sample", "has_sample"),
-    DESCRIPTION("Description", "description"),  // keywords, intellectual property, summary, notes, references
-    STATUS("Status", "status"),
-    OWNER("Owner", "owner"),
-    CREATOR("Creator", "creator"),
-    BIO_SAFETY_LEVEL("Bio Safety Level", "safety_level"),
-    PRINCIPAL_INVESTIGATOR("Principal Investigator", "pi"),
-    FUNDING_SOURCE("Funding Source", "funding"),
-    SELECTION_MARKER("Selection Marker", "marker"),
-    BACKBONE("Backbone", "backbone"),
-    PROMOTERS("Promoters", "promoters"),
-    ORIGIN("Origin of Replication", "origin"),
+    IDENTIFIER("Identifier", "identifier", EntryType.values()),
+    HAS_ATTACHMENT("Has Attachment", "has_attach", EntryType.values()),
+    HAS_SEQUENCE("Has Sequence", "has_seq", EntryType.values()),
+    HAS_SAMPLE("Has Sample", "has_sample", EntryType.values()),
+    DESCRIPTION("Description", "description", EntryType.values()),
+    STATUS("Status", "status", EntryType.values()),
+    OWNER("Owner", "owner", EntryType.values()),
+    CREATOR("Creator", "creator", EntryType.values()),
+    BIO_SAFETY_LEVEL("Bio Safety Level", "safety_level", EntryType.values()),
+    PRINCIPAL_INVESTIGATOR("Principal Investigator", "pi", EntryType.values()),
+    FUNDING_SOURCE("Funding Source", "funding", EntryType.values()),
+
+    SELECTION_MARKER("Selection Marker", "marker", EntryType.STRAIN, EntryType.PLASMID),
+    BACKBONE("Backbone", "backbone", EntryType.PLASMID),
+    PROMOTERS("Promoters", "promoters", EntryType.PLASMID),
+    ORIGIN("Origin of Replication", "origin", EntryType.PLASMID),
     HOST("Host", "host", EntryType.STRAIN),
-    STRAIN_PLASMIDS("Strain Plasmids", "plasmids"),
-    GEN_PHEN("Genotype/Phenotype", "gen_phen"),
-    PACKAGE_FORMAT("Package Format", "format"),
-    BLAST("Blast", "blast");
+    STRAIN_PLASMIDS("Strain Plasmids", "plasmids", EntryType.STRAIN),
+    GEN_PHEN("Genotype/Phenotype", "gen_phen", EntryType.STRAIN),
+    //    PACKAGE_FORMAT("Package Format", "format", EntryType.PART),
+    BLAST("Blast", "blast", EntryType.values());
 
     private String displayName;
     private String shortName;

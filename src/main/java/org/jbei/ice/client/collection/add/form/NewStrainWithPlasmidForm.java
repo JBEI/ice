@@ -533,7 +533,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         if (plasmidName.getText().isEmpty()) {
             plasmidName.setStyleName("entry_input_error");
             if (invalid == null)
-                invalid = plasmidName.getTextBox();
+                invalid = plasmidName.getValueBox();
         } else {
             plasmidName.setStyleName("input_box");
         }
@@ -560,7 +560,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         if (strainMarkers.getText().isEmpty()) {
             strainMarkers.setStyleName("entry_input_error");
             if (invalid == null)
-                invalid = strainMarkers.getTextBox();
+                invalid = strainMarkers.getValueBox();
         } else {
             strainMarkers.setStyleName("input_box");
         }
@@ -569,7 +569,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         if (plasmidMarkers.getText().isEmpty()) {
             plasmidMarkers.setStyleName("entry_input_error");
             if (invalid == null)
-                invalid = plasmidMarkers.getTextBox();
+                invalid = plasmidMarkers.getValueBox();
         } else {
             plasmidMarkers.setStyleName("input_box");
         }
@@ -621,7 +621,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         strain.setAlias(strainAlias.getText());
         strain.setLinks(strainLinks.getText());
         strain.setHost(host.getText());
-        String strainSelectionMarkers = ((MultipleTextBox) strainMarkers.getTextBox()).getWholeText();
+        String strainSelectionMarkers = ((MultipleTextBox) strainMarkers.getValueBox()).getWholeText();
         strain.setSelectionMarkers(strainSelectionMarkers);
         strain.setGenotypePhenotype(genPhen.getText());
         strain.setKeywords(strainKeywords.getText());
@@ -638,7 +638,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         plasmid.setCircular(circular.isEnabled());
         plasmid.setBackbone(backbone.getText());
         plasmid.setLinks(plasmidLinks.getText());
-        String plasmidSelectionMarkers = ((MultipleTextBox) plasmidMarkers.getTextBox()).getWholeText();
+        String plasmidSelectionMarkers = ((MultipleTextBox) plasmidMarkers.getValueBox()).getWholeText();
         plasmid.setSelectionMarkers(plasmidSelectionMarkers);
         plasmid.setOriginOfReplication(origin.getText());
         plasmid.setPromoters(promoters.getText());

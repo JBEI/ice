@@ -3,8 +3,11 @@ package org.jbei.ice.shared.dto;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum EntryType implements IsSerializable {
-    STRAIN("Strain", "strain"), PLASMID("Plasmid", "plasmid"), PART("Part", "part"), ARABIDOPSIS(
-            "Arabidopsis", "arabidopsis");
+
+    STRAIN("Strain", "strain"),
+    PLASMID("Plasmid", "plasmid"),
+    PART("Part", "part"),
+    ARABIDOPSIS("Arabidopsis", "arabidopsis");
 
     private String name;
     private String display;

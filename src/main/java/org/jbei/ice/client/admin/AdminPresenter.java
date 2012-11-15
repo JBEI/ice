@@ -112,7 +112,7 @@ public class AdminPresenter extends AbstractPresenter {
                 if (result == null || currentOption != AdminOption.GROUPS)
                     return;
 
-                groupPresenter.setGroups(result);
+                groupPresenter.setRootGroup(result);
                 view.show(currentOption, groupPresenter.getView().asWidget());
             }
         }.go(eventBus);

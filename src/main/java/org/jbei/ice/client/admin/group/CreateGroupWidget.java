@@ -60,11 +60,13 @@ public class CreateGroupWidget {
 
         popup.setWidget(createTable);
         popup.setGlassEnabled(true);
+        popup.setGlassStyleName("dialog_box_glass");
         closeLink.addClickHandler(new CloseWidgetHandler());
         cancelButton.addClickHandler(new CloseWidgetHandler());
     }
 
-    public void addShowPopHandler() {
+    public void addCreateGroupHandler(ClickHandler handler) {
+        this.createButton.addClickHandler(handler);
     }
 
     public void setAvailableMemberList(ArrayList<AccountInfo> memberList) {

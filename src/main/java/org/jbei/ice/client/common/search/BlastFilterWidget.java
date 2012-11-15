@@ -28,10 +28,11 @@ public class BlastFilterWidget extends FilterWidget {
         // widgets
         area = new TextArea();
         area.setStyleName("input_box");
-        area.setSize("350px", "200px");
+        area.setSize("200px", "98px");
         layout.setWidget(0, 0, area);
 
         list = new ListBox();
+        list.setStyleName("input_box");
         this.operators = new ArrayList<QueryOperator>();
         this.operators.add(QueryOperator.BLAST_N);
         list.addItem(QueryOperator.BLAST_N.operator(), QueryOperator.BLAST_N.symbol());

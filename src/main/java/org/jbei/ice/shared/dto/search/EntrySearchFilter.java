@@ -1,8 +1,6 @@
 package org.jbei.ice.shared.dto.search;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.jbei.ice.client.common.BooleanFilterWidget;
 import org.jbei.ice.client.common.EnumFilterWidget;
@@ -19,22 +17,12 @@ import org.jbei.ice.shared.StatusType;
  */
 public class EntrySearchFilter {
 
-    public List<SearchFilterType> getSearchFilters() {
-        // for each filter type here, there needs to be a corresponding "case" in the getFilterWidget() method
-        // that creates and returns the associated widget
-        return Arrays.asList(SearchFilterType.IDENTIFIER, SearchFilterType.FUNDING_SOURCE,
-                             SearchFilterType.HAS_ATTACHMENT, SearchFilterType.BIO_SAFETY_LEVEL,
-                             SearchFilterType.HAS_SAMPLE, SearchFilterType.HAS_SEQUENCE, SearchFilterType.STATUS,
-                             SearchFilterType.DESCRIPTION, SearchFilterType.PRINCIPAL_INVESTIGATOR);
-    }
-
     public FilterWidget getFilterWidget(SearchFilterType filterType) {
         FilterWidget filterWidget;
 
         switch (filterType) {
             case IDENTIFIER:
-            default:
-                filterWidget = new SearchFilterWidget(filterType, false);
+                filterWidget = new SearchFilterWidget(filterType);
                 filterWidget.setInputPlaceholder("Name, Alias, RID, PartID");
                 break;
 
@@ -44,10 +32,15 @@ public class EntrySearchFilter {
                 filterWidget = new BooleanFilterWidget(filterType);
                 break;
 
-            case DESCRIPTION:
-            case PRINCIPAL_INVESTIGATOR:
-            case FUNDING_SOURCE:
-                filterWidget = new SearchFilterWidget(filterType, false);
+//            case OWNER:
+//            case CREATOR:
+//            case DESCRIPTION:
+//            case PRINCIPAL_INVESTIGATOR:
+//            case FUNDING_SOURCE:
+//            case SELECTION_MARKER:
+//            case BACKBONE:
+            default:
+                filterWidget = new SearchFilterWidget(filterType);
                 break;
 
             case STATUS:
