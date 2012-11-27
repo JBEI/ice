@@ -11,6 +11,7 @@ import org.jbei.ice.client.collection.event.FolderEventHandler;
 import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
 import org.jbei.ice.client.collection.event.FolderRetrieveEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -92,31 +93,31 @@ public class CollectionsModel {
         }.go(eventBus);
     }
 
-    public void retrieveEntriesForFolder(long id, final FolderRetrieveEventHandler handler) {
-
+    public void retrieveEntriesForFolder(long id, final FolderRetrieveEventHandler handler, int start, int limit) {
         if (id == 0)
-            retrieveEntriesForCurrentUser(handler);
+            retrieveEntriesForCurrentUser(handler, start, limit);
         else if (id == -1)
-            retrieveAllVisibleEntries(handler);
+            retrieveAllVisibleEntries(handler, start, limit);
         else {
-            service.retrieveEntriesForFolder(AppController.sessionId, id,
-                                             new AsyncCallback<FolderDetails>() {
-
-                                                 @Override
-                                                 public void onSuccess(FolderDetails result) {
-                                                     handler.onFolderRetrieve(new FolderRetrieveEvent(result));
-                                                 }
-
-                                                 @Override
-                                                 public void onFailure(Throwable caught) {
-                                                     handler.onFolderRetrieve(null);
-                                                 }
-                                             });
+//            service.retrieveEntriesForFolder(AppController.sessionId, id,
+//                                             new AsyncCallback<FolderDetails>() {
+//
+//                                                 @Override
+//                                                 public void onSuccess(FolderDetails result) {
+//                                                     handler.onFolderRetrieve(new FolderRetrieveEvent(result));
+//                                                 }
+//
+//                                                 @Override
+//                                                 public void onFailure(Throwable caught) {
+//                                                     handler.onFolderRetrieve(null);
+//                                                 }
+//                                             });
         }
     }
 
-    public void retrieveAllVisibleEntries(final FolderRetrieveEventHandler handler) {
-        service.retrieveAllVisibleEntryIDs(AppController.sessionId,
+    public void retrieveAllVisibleEntries(final FolderRetrieveEventHandler handler, int start, int limit) {
+        FolderDetails details = new FolderDetails(-1, "Available Entries", true);
+        service.retrieveAllVisibleEntryIDs(AppController.sessionId, details, ColumnField.CREATED, false, start, limit,
                                            new AsyncCallback<FolderDetails>() {
 
                                                @Override
@@ -131,8 +132,9 @@ public class CollectionsModel {
                                            });
     }
 
-    public void retrieveEntriesForCurrentUser(final FolderRetrieveEventHandler handler) {
+    public void retrieveEntriesForCurrentUser(final FolderRetrieveEventHandler handler, int start, int limit) {
         service.retrieveUserEntries(AppController.sessionId, AppController.accountInfo.getId() + "",
+                                    ColumnField.CREATED, false, start, limit,
                                     new AsyncCallback<FolderDetails>() {
 
                                         @Override

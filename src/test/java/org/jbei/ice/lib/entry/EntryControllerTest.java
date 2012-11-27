@@ -237,8 +237,6 @@ public class EntryControllerTest {
         // same entry so it should be one
         count = controller.getNumberOfVisibleEntries(account);
         Assert.assertEquals(1, count);
-
-        Assert.assertEquals(count, controller.getAllVisibleEntryIDs(account).size());
     }
 
     @Test

@@ -1,5 +1,8 @@
 package org.jbei.ice.lib.folder;
 
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.shared.ColumnField;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,6 +20,9 @@ public class FolderDAOTest {
 
     @Test
     public void testGet() throws Exception {
+        HibernateHelper.beginTransaction();
+        dao.retrieveFolderContents(1, ColumnField.CREATED, false, 0, 12);
+        HibernateHelper.rollbackTransaction();
     }
 
     @Test

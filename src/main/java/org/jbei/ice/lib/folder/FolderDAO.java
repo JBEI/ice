@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.folder;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -11,6 +10,7 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.shared.ColumnField;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -86,36 +86,35 @@ class FolderDAO extends HibernateRepository<Folder> {
             return result.longValue();
         } catch (HibernateException he) {
             throw new DAOException(he);
-        } finally {
-            closeSession();
         }
     }
 
-    /**
-     * Retrieves the entry contents of a folder contents.
-     *
-     * @param id folder id.
-     * @return List of Entry ids.
-     * @throws DAOException
-     */
     @SuppressWarnings("unchecked")
-    public ArrayList<Long> getFolderContents(long id) throws DAOException {
+    public ArrayList<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit)
+            throws DAOException {
         Session session = currentSession();
+
         try {
-            SQLQuery query = session.createSQLQuery("SELECT entry_id FROM folder_entry WHERE folder_id = :id");
-            query.setLong("id", id);
-            @SuppressWarnings("rawtypes")
-            List list = query.list();
-            ArrayList<Long> results = new ArrayList<Long>();
-            for (Object object : list) {
-                BigInteger bi = (BigInteger) object;
-                results.add(bi.longValue());
+            Folder folder = get(folderId);
+            if (folder == null)
+                throw new DAOException();
+
+            String queryString = "order by";
+
+            switch (sort) {
+                default:
+                case CREATED:
+                    queryString += " creation_time";
             }
+
+            queryString += (asc ? " asc" : " desc");
+            List list = session.createFilter(folder.getContents(), queryString).setFirstResult(start)
+                               .setMaxResults(limit).list();
+            ArrayList<Entry> results = new ArrayList<Entry>(list);
             return results;
         } catch (HibernateException he) {
+            Logger.error(he);
             throw new DAOException(he);
-        } finally {
-            closeSession();
         }
     }
 

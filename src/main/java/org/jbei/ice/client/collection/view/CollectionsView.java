@@ -173,15 +173,15 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     public void showFeedbackMessage(String msg, boolean errMsg) {
         if (errMsg)
             feedback.setFailureMessage(msg);
-        else
+        else {
             feedback.setSuccessMessage(msg);
-
-        new Timer() {
-            @Override
-            public void run() {
-                feedback.setVisible(false);
-            }
-        }.schedule(20000);
+            new Timer() {
+                @Override
+                public void run() {
+                    feedback.setVisible(false);
+                }
+            }.schedule(20000);
+        }
     }
 
     @Override

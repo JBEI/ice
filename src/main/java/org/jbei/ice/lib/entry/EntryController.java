@@ -30,6 +30,7 @@ import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.EntryViewFactory;
 import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.Visibility;
@@ -298,28 +299,34 @@ public class EntryController {
         return entry;
     }
 
-    public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
-
-        Set<Group> accountGroups = new HashSet<Group>(account.getGroups());
-
-        // TODO : retrieve all parent groups
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
-        accountGroups.add(everybodyGroup);
-
+    // TODO : add sort
+    public FolderDetails retrieveVisibleEntries(Account account, ColumnField field, boolean asc, int start, int limit)
+            throws ControllerException {
+        LinkedList<Entry> results;
+        FolderDetails details = new FolderDetails();
         try {
-            return dao.getAllVisibleEntries(accountGroups, account);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+//            if (accountController.isAdministrator(account)) {
+//                // no filters
+//                results = null;
+//            } else {
+            // retrieve groups for account and filter by permission
+            long startTime = System.currentTimeMillis();
+            Set<Group> accountGroups = new HashSet<Group>(account.getGroups());
+            GroupController controller = new GroupController();
+            Group everybodyGroup = controller.createOrRetrievePublicGroup();
+            accountGroups.add(everybodyGroup);
+            results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit);
+            for (Entry entry : results) {
+                EntryInfo info = EntryViewFactory.createTableViewData(account, entry);
+                details.getEntries().add(info);
+            }
+            System.out.println("Visible entry retrieve took " + (System.currentTimeMillis() - startTime) + "ms");
+//            }
+        } catch (DAOException de) {
+            throw new ControllerException(de);
         }
-    }
 
-    public ArrayList<Long> getAllEntryIDs() throws ControllerException {
-        try {
-            return dao.getEntries("creationTime", true);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return details;
     }
 
     /**
@@ -340,7 +347,7 @@ public class EntryController {
         accountGroups.add(everybodyGroup);
 
         try {
-            numberOfVisibleEntries = dao.getNumberOfVisibleEntries(accountGroups, account);
+            numberOfVisibleEntries = dao.visibleEntryCount(account, accountGroups);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -356,6 +363,30 @@ public class EntryController {
 
         try {
             return dao.getNumberOfVisibleEntries(accountGroups, null);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public ArrayList<Entry> retrieveOwnerEntries(Account account, String ownerEmail,
+            ColumnField sort, boolean asc, int start, int limit) throws ControllerException {
+        try {
+//            if( !accountController.isAdministrator(account) && !account.getEmail().equals(ownerEmail)){
+//                Logger.error(account.getEmail());
+//                throw new
+//            }
+
+            // TODO : should only be able to see entries that user has permission to see
+
+            return dao.retrieveOwnerEntries(ownerEmail, sort, asc, start, limit);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public long getNumberOfOwnerEntries(Account account, String ownerEmail) throws ControllerException {
+        try {
+            return dao.ownerEntryCount(ownerEmail);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -470,7 +501,6 @@ public class EntryController {
         }
 
         return savedEntry;
-
     }
 
     /**
@@ -480,8 +510,7 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public void delete(Account account, Entry entry) throws ControllerException,
-            PermissionException {
+    public void delete(Account account, Entry entry) throws ControllerException, PermissionException {
         delete(account, entry, true);
     }
 
@@ -534,8 +563,7 @@ public class EntryController {
      * @return List of Entry ids.
      * @throws ControllerException
      */
-    List<Long> filterEntriesByPermission(Account account, List<Long> ids)
-            throws ControllerException {
+    List<Long> filterEntriesByPermission(Account account, List<Long> ids) throws ControllerException {
         ArrayList<Long> result = new ArrayList<Long>();
         for (Long id : ids) {
             Entry entry;
@@ -562,8 +590,7 @@ public class EntryController {
         }
     }
 
-    public long getOwnerEntryCount(Account account, Visibility... exclude)
-            throws ControllerException {
+    public long getOwnerEntryCount(Account account, Visibility... exclude) throws ControllerException {
         try {
             if (exclude.length == 0)
                 return dao.getOwnerEntryCount(account.getEmail());
@@ -573,15 +600,6 @@ public class EntryController {
                 excludeInt[i] = exclude[i].getValue();
             return dao.getOwnerEntryCount(account.getEmail(), excludeInt);
 
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
-    }
-
-    public ArrayList<Entry> getAllEntries() throws ControllerException {
-        try {
-            return dao.getAllEntries();
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);
@@ -635,16 +653,6 @@ public class EntryController {
         try {
             ArrayList<Entry> results = new ArrayList<Entry>(dao.getEntriesByIdSet(filtered));
             return results;
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public LinkedList<Long> sortList(LinkedList<Long> ids, ColumnField field, boolean asc)
-            throws ControllerException {
-        try {
-
-            return dao.sortList(ids, field, asc);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

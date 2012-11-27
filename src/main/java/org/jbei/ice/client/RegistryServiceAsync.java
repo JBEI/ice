@@ -40,20 +40,17 @@ public interface RegistryServiceAsync {
     void retrieveEntryTipDetails(String sessionId, long id, AsyncCallback<EntryInfo> callback)
             throws AuthenticationException;
 
-    void sortEntryList(String sessionId, LinkedList<Long> ids, ColumnField field, boolean asc,
-            AsyncCallback<LinkedList<Long>> callback) throws AuthenticationException;
-
     // permissions
     void getPermissionSuggestions(SuggestOracle.Request req, AsyncCallback<SuggestOracle.Response> callback);
 
     /**
      * retrieves the list of entries for the folder
      */
-    void retrieveEntriesForFolder(String sessionId, long folderId, AsyncCallback<FolderDetails> callback);
+    void retrieveEntriesForFolder(String sessionId, long folderId, ColumnField sort, boolean asc,
+            int start, int limit, AsyncCallback<FolderDetails> callback);
 
-    void retrieveUserEntries(String sid, String userId, AsyncCallback<FolderDetails> asyncCallback);
-
-    void retrieveAllVisibleEntryIDs(String sid, AsyncCallback<FolderDetails> asyncCallback);
+    void retrieveUserEntries(String sid, String userId, ColumnField sort, boolean asc,
+            int start, int limit, AsyncCallback<FolderDetails> asyncCallback);
 
     void blastSearch(String sid, String searchString, QueryOperator program,
             AsyncCallback<ArrayList<BlastResultInfo>> callback);
@@ -185,9 +182,8 @@ public interface RegistryServiceAsync {
     void updateBulkImportDraft(String sessionId, long draftId,
             ArrayList<EntryInfo> list, String groupUUID, AsyncCallback<BulkUploadInfo> async);
 
-    void saveBulkImportDraft(String sid, String name,
-            EntryAddType importType, ArrayList<EntryInfo> entryList, String groupUUID,
-            AsyncCallback<BulkUploadInfo> async);
+    void saveBulkImportDraft(String sid, String name, EntryAddType importType, ArrayList<EntryInfo> entryList,
+            String groupUUID, AsyncCallback<BulkUploadInfo> async);
 
     void submitBulkImport(String sid, EntryAddType importType,
             ArrayList<EntryInfo> entryList, String groupUUID, AsyncCallback<Boolean> async);
@@ -212,4 +208,7 @@ public interface RegistryServiceAsync {
     void setConfigurationSetting(ConfigurationKey key, String value, AsyncCallback<Boolean> async);
 
     void revertedSubmittedBulkUpload(String sid, long uploadId, AsyncCallback<Boolean> async);
+
+    void retrieveAllVisibleEntryIDs(String sid, FolderDetails details, ColumnField field, boolean asc, int start,
+            int limit, AsyncCallback<FolderDetails> async);
 }

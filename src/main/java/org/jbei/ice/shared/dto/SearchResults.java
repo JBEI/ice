@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author Hector Plahar
  */
 public class SearchResults implements IsSerializable {
+
     private long resultCount;
     private LinkedList<SearchResultInfo> resultInfos;
     private ArrayList<SearchFilterInfo> searchFilters;

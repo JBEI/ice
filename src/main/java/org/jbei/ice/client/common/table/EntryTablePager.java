@@ -67,7 +67,7 @@ public class EntryTablePager extends AbstractPager {
     private final NavLink btn50Count;
     private final NavLink btn100Count;
 
-    public final static int JUMP_PAGE_COUNT = 5;
+    public final static int JUMP_PAGE_COUNT = 3;
     private int start;
 
     public EntryTablePager() {

@@ -18,8 +18,9 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.IceXlsSerializer;
-import org.jbei.ice.lib.utils.IceXmlSerializer;
-import org.jbei.ice.lib.utils.UtilityException;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 public class EntryExportServlet extends HttpServlet {
 
@@ -95,33 +96,35 @@ public class EntryExportServlet extends HttpServlet {
 
     private void exportXML(Account account, ArrayList<Entry> entries, HttpServletResponse response) {
         try {
-            String xmlDocument = IceXmlSerializer.serializeToJbeiXml(account, entries);
+            XStream xstream = new XStream(new StaxDriver());
+//            String xmlDocument = IceXmlSerializer.serializeToJbeiXml(account, entries);
+//            String xmlDocument =
 
             // write to file
             String saveName = "data.xml";
 
-            byte[] bytes = xmlDocument.getBytes();
-            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
+//            byte[] bytes = xmlDocument.getBytes();
+//            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
 
             response.setContentType("text/xml");
-            response.setContentLength(bytes.length);
+//            response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=" + saveName);
 
-            OutputStream os = response.getOutputStream();
-            DataInputStream is = new DataInputStream(byteInputStream);
-
-            int read;
-
-            while ((read = is.read(bytes)) != -1) {
-                os.write(bytes, 0, read);
-            }
-            os.flush();
-            os.close();
+            xstream.toXML(entries.get(0), response.getOutputStream());
+//            DataInputStream is = new DataInputStream(byteInputStream);
+//
+//            int read;
+//
+//            while ((read = is.read(bytes)) != -1) {
+//                os.write(bytes, 0, read);
+//            }
+//            os.flush();
+//            os.close();
 
         } catch (IOException e) {
             Logger.error(e);
-        } catch (UtilityException e) {
-            Logger.error(e);
+//        } catch (UtilityException e) {
+//            Logger.error(e);
         }
     }
 

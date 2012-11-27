@@ -44,8 +44,10 @@ public class HibernateHelper {
     }
 
     public static void rollbackTransaction() {
-        if (getSessionFactory().getCurrentSession().getTransaction().isActive())
+        if (getSessionFactory().getCurrentSession().getTransaction().isActive()) {
+            Logger.info("Rolling back transaction");
             getSessionFactory().getCurrentSession().getTransaction().rollback();
+        }
     }
 
     /**

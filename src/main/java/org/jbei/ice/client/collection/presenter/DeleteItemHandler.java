@@ -48,7 +48,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                     return;
                 }
 
-                folder.put(result.getId(), result.getContents());
+//                folder.put(result.getId(), result.getContents());
                 MenuItem item = new MenuItem(result.getId(), result.getName(), result.getCount(),
                                              result.isSystemFolder());
                 deleteCallback.onSuccess(item);

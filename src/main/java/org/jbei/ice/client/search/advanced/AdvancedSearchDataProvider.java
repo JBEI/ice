@@ -75,11 +75,6 @@ public class AdvancedSearchDataProvider extends HasEntryDataViewDataProvider<Sea
         return results.get(idx - 1).getEntryInfo();
     }
 
-//    protected void fetchHasEntryData(ColumnField sortField, boolean asc, final int rangeStart, final int rangeEnd) {
-//
-//    }
-
-
     @Override
     protected void onRangeChanged(final HasData<SearchResultInfo> display) {
 
@@ -163,9 +158,9 @@ public class AdvancedSearchDataProvider extends HasEntryDataViewDataProvider<Sea
 
         this.searchResults = searchResults;
         if (searchResults != null) {
-            for (SearchResultInfo info : searchResults.getResults()) {
-                results.add(info);
-            }
+//            for (SearchResultInfo info : searchResults.getResults()) {
+            results.addAll(searchResults.getResults());
+//            }
 
             // number of search results available
             resultSize = (int) searchResults.getResultCount();

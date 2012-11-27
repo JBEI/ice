@@ -1,7 +1,5 @@
 package org.jbei.ice.client.profile;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
@@ -14,7 +12,6 @@ import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.client.profile.widget.UserOption;
-import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.core.client.GWT;
@@ -119,26 +116,26 @@ public class ProfilePresenter extends AbstractPresenter {
     }
 
     private void retrieveUserEntries() {
-        service.retrieveUserEntries(AppController.sessionId, this.userId,
-                                    new AsyncCallback<FolderDetails>() {
-
-                                        @Override
-                                        public void onSuccess(FolderDetails folder) {
-                                            if (folder == null) {
-                                                entryDataProvider.setValues(null);
-                                                return;
-                                            }
-
-                                            collectionsDataTable.clearSelection();
-                                            ArrayList<Long> entries = folder.getContents();
-                                            entryDataProvider.setValues(entries);
-                                            display.setEntryContent(collectionsDataTable);
-                                        }
-
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                        }
-                                    });
+//        service.retrieveUserEntries(AppController.sessionId, this.userId,
+//                                    new AsyncCallback<FolderDetails>() {
+//
+//                                        @Override
+//                                        public void onSuccess(FolderDetails folder) {
+//                                            if (folder == null) {
+//                                                entryDataProvider.setValues(null);
+//                                                return;
+//                                            }
+//
+//                                            collectionsDataTable.clearSelection();
+////                                            ArrayList<Long> entries = folder.getContents();
+////                                            entryDataProvider.setValues(entries);
+//                                            display.setEntryContent(collectionsDataTable);
+//                                        }
+//
+//                                        @Override
+//                                        public void onFailure(Throwable caught) {
+//                                        }
+//                                    });
     }
 
     private void checkCanEditProfile() {

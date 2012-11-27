@@ -52,11 +52,11 @@ public interface RegistryService extends RemoteService {
      */
     ArrayList<FolderDetails> retrieveCollections(String sessionId) throws AuthenticationException;
 
-    FolderDetails retrieveEntriesForFolder(String sessionId, long folderId) throws AuthenticationException;
+    FolderDetails retrieveEntriesForFolder(String sessionId, long folderId, ColumnField sort, boolean asc,
+            int start, int limit) throws AuthenticationException;
 
-    FolderDetails retrieveUserEntries(String sid, String userId) throws AuthenticationException;
-
-    FolderDetails retrieveAllVisibleEntryIDs(String sid) throws AuthenticationException;
+    FolderDetails retrieveUserEntries(String sid, String userId, ColumnField sort, boolean asc,
+            int start, int limit) throws AuthenticationException;
 
     EntryInfo retrieveEntryDetails(String sid, long id) throws AuthenticationException;
 
@@ -114,9 +114,6 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     boolean saveSequence(String sessionId, long entry, String sequenceUser) throws AuthenticationException;
-
-    LinkedList<Long> sortEntryList(String sessionId, LinkedList<Long> ids, ColumnField field,
-            boolean asc) throws AuthenticationException;
 
     boolean sendFeedback(String email, String msg);
 
@@ -183,4 +180,7 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     boolean revertedSubmittedBulkUpload(String sid, long uploadId) throws AuthenticationException;
+
+    FolderDetails retrieveAllVisibleEntryIDs(String sid, FolderDetails details, ColumnField field, boolean asc,
+            int start, int limit) throws AuthenticationException;
 }

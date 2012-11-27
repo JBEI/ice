@@ -9,6 +9,8 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.FolderDetails;
 
 /**
  * @author Hector Plahar
@@ -74,11 +76,25 @@ public class FolderController {
         }
     }
 
-    public ArrayList<Long> getFolderContents(long folderId) throws ControllerException {
+    public FolderDetails retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit)
+            throws ControllerException {
         try {
-            return dao.getFolderContents(folderId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+            Folder folder = getFolderById(folderId);
+            if (folder == null)
+                return null;
+
+            AccountController controller = new AccountController();
+            Account system = controller.getSystemAccount();
+            boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
+            long folderSize = getFolderSize(folderId);
+            details.setCount(folderSize);
+            details.setDescription(folder.getDescription());
+
+            dao.retrieveFolderContents(folderId, sort, asc, start, limit);
+            return null;
+        } catch (DAOException de) {
+            throw new ControllerException(de);
         }
     }
 

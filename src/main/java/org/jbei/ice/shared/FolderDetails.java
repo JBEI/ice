@@ -2,6 +2,8 @@ package org.jbei.ice.shared;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.shared.dto.EntryInfo;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
@@ -14,10 +16,10 @@ public class FolderDetails implements IsSerializable {
 
     private long id;
     private String folderName;
-    private long count;
+    private long count = -1;
     private boolean systemFolder;
     private String description;
-    private ArrayList<Long> contents;
+    private ArrayList<EntryInfo> entries = new ArrayList<EntryInfo>();
 
     public FolderDetails() {
     }
@@ -64,11 +66,11 @@ public class FolderDetails implements IsSerializable {
         this.description = description;
     }
 
-    public ArrayList<Long> getContents() {
-        return contents;
+    public ArrayList<EntryInfo> getEntries() {
+        return entries;
     }
 
-    public void setContents(ArrayList<Long> contents) {
-        this.contents = contents;
+    public void setEntries(ArrayList<EntryInfo> entries) {
+        this.entries = entries;
     }
 }

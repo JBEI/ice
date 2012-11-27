@@ -16,16 +16,6 @@
         <name>Joint BioEnergy Institute</name>
         <url>http://code.google.com/p/gd-ice/</url>
     </organization>
-    <!--<repositories>-->
-    <!--<repository>-->
-    <!--<id>mule-deps</id>-->
-    <!--<name>Mule Dependencies</name>-->
-    <!--<url>http://dist.codehaus.org/mule/dependencies/maven2</url>-->
-    <!--<snapshots>-->
-    <!--<enabled>false</enabled>-->
-    <!--</snapshots>-->
-    <!--</repository>-->
-    <!--</repositories>-->
     <developers>
         <developer>
             <id>tsham</id>
@@ -93,50 +83,6 @@
         </license>
     </licenses>
     <dependencies>
-        <!-- MULE -->
-        <!--<dependency>-->
-        <!--<groupId>org.mule</groupId>-->
-        <!--<artifactId>mule-core</artifactId>-->
-        <!--<version>${mule.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.mule</groupId>-->
-        <!--<artifactId>mule-core</artifactId>-->
-        <!--<version>${mule.version}</version>-->
-        <!--<scope>test</scope>-->
-        <!--<type>test-jar</type>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>org.mule.modules</groupId>-->
-        <!--<artifactId>mule-module-builders</artifactId>-->
-        <!--<version>${mule.version}</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>org.mule.modules</groupId>-->
-        <!--<artifactId>mule-module-scripting</artifactId>-->
-        <!--<version>${mule.version}</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>org.mule.transports</groupId>-->
-        <!--<artifactId>mule-transport-vm</artifactId>-->
-        <!--<version>${mule.version}</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>org.mule.transports</groupId>-->
-        <!--<artifactId>mule-transport-servlet</artifactId>-->
-        <!--<version>${mule.version}</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>org.mule.transports</groupId>-->
-        <!--<artifactId>mule-transport-stdio</artifactId>-->
-        <!--<version>${mule.version}</version>-->
-        <!--</dependency>-->
-
         <!-- LOGGING DEPENDENCIES - LOG4J -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -386,6 +332,11 @@
             <artifactId>guava</artifactId>
             <version>13.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.3</version>
+        </dependency>
     </dependencies>
     <build>
         <outputDirectory>target</outputDirectory>
@@ -550,6 +501,5 @@
     <properties>
         <jetty.version>6.1.26</jetty.version>
         <gwt.version>2.5.0-rc2</gwt.version>
-        <!--<mule.version>3.3.0</mule.version>-->
     </properties>
 </project>
