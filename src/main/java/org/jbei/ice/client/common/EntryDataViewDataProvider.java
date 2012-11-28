@@ -1,52 +1,42 @@
 package org.jbei.ice.client.common;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.table.DataTable;
-import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
 // Takes care of retrieving all data page, by page
-public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> implements IHasNavigableData {
+public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> implements IHasNavigableData {
 
-    protected final LinkedList<Long> valuesIds;
-    protected LinkedList<EntryInfo> results;
+    protected int resultSize;
+    protected LinkedList<EntryInfo> cachedEntries;
     protected final RegistryServiceAsync service;
     protected final DataTable<EntryInfo> table;
     protected ColumnField lastSortField;
     protected boolean lastSortAsc = false;
 
     public EntryDataViewDataProvider(DataTable<EntryInfo> view, RegistryServiceAsync service) {
-
         this.table = view;
         this.service = service;
-        this.valuesIds = new LinkedList<Long>();
-        results = new LinkedList<EntryInfo>();
+        cachedEntries = new LinkedList<EntryInfo>();
 
         this.table.addColumnSortHandler(new AsyncHandler(this.table) {
             @Override
             public void onColumnSort(ColumnSortEvent event) {
                 super.onColumnSort(event);
 
-                results.clear();
+                cachedEntries.clear();
                 int pageSize = table.getVisibleRange().getLength();
                 table.setVisibleRange(0, pageSize);
             }
@@ -69,7 +59,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
 
     @Override
     public EntryInfo getCachedData(long entryId) {
-        for (EntryInfo result : results) {
+        for (EntryInfo result : cachedEntries) {
 
             if (result.getId() == entryId)
                 return result;
@@ -79,66 +69,59 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
 
     @Override
     public int indexOfCached(EntryInfo info) {
-        return results.indexOf(info);
-    }
-
-    public Set<Long> getData() {
-        if (this.valuesIds == null)
-            return null;
-        return new HashSet<Long>(this.valuesIds);
+        return cachedEntries.indexOf(info);
     }
 
     @Override
     public EntryInfo getNext(EntryInfo info) {
-        int idx = results.indexOf(info);
-        int size = results.size();
+        int idx = cachedEntries.indexOf(info);
+        int size = cachedEntries.size();
 
-        // we just may have reached the end of the cache and need to retrieve more
-        if (idx == -1 || results.size() <= idx + 1)
-            return null;
-
-        if (idx + 1 == size) {
-            GWT.log("Retrieving extra info");
-            final Range range = this.getRanges()[0];
-            final int rangeStart = range.getStart();
-            final int rangeEnd;
-
-            if ((rangeStart + range.getLength()) > valuesIds.size())
-                rangeEnd = valuesIds.size();
-            else
-                rangeEnd = (rangeStart + range.getLength());
-
-            retrieveEntryData(lastSortField, lastSortAsc, rangeStart, rangeEnd);
-        }
-        return results.get(idx + 1);
+        // todo : we just may have reached the end of the cache and need to retrieve more
+//        if (idx == -1 || cachedEntries.size() <= idx + 1)
+//            return null;
+//
+//        if (idx + 1 == size) {
+//            GWT.log("Retrieving extra info");
+//            final Range range = this.getRanges()[0];
+//            final int rangeStart = range.getStart();
+//            final int rangeEnd;
+//
+//            if ((rangeStart + range.getLength()) > valuesIds.size())
+//                rangeEnd = valuesIds.size();
+//            else
+//                rangeEnd = (rangeStart + range.getLength());
+//
+//            retrieveEntryData(lastSortField, lastSortAsc, rangeStart, rangeEnd);
+//        }
+        return cachedEntries.get(idx + 1);
     }
 
     @Override
     public EntryInfo getPrev(EntryInfo info) {
-        int idx = results.indexOf(info);
+        int idx = cachedEntries.indexOf(info);
         if (idx == -1)
             return null;
 
-        return results.get(idx - 1);
+        return cachedEntries.get(idx - 1);
     }
 
     @Override
     public int getSize() {
-        return valuesIds.size();
+        return resultSize;
     }
 
     public void reset() {
-        this.results.clear();
-        this.valuesIds.clear();
+        this.cachedEntries.clear();
+        resultSize = 0;
         this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
 
         // reset sort 
         lastSortAsc = false;
-        lastSortField = null;
+        lastSortField = ColumnField.CREATED;
 
         this.table.getColumnSortList().clear();
-        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table
-                .getColumn(ColumnField.CREATED);
+        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
 
         if (defaultSortField != null) {
             ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
@@ -146,40 +129,15 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         }
     }
 
-    public void setValues(List<Long> data) {
-        reset();
-        if (data != null)
-            this.valuesIds.addAll(data);
-
-        updateRowCount(this.valuesIds.size(), true);
-
-        // retrieve the first page of results and updateRowData
-        final Range range = this.getRanges()[0];
-        final int rangeStart = range.getStart();
-        final int rangeEnd;
-
-        if ((rangeStart + range.getLength()) > valuesIds.size())
-            rangeEnd = valuesIds.size();
-        else
-            rangeEnd = (rangeStart + range.getLength());
-
-        // this will always cause a sort since reset() is call.
-        sort(rangeStart, rangeEnd);
-    }
-
-    public void refresh() {
-        table.setVisibleRangeAndClearData(table.getVisibleRange(), true); // triggers onRangeChange() call
-        updateRowCount(this.valuesIds.size(),
-                       true); // tODO : this may need to go after the call to updateRowData() in onRangeChanged
-    }
-
     @Override
-    protected void onRangeChanged(final HasData<EntryInfo> display) {
+    protected void onRangeChanged(HasData<EntryInfo> display) {
+        if (resultSize == 0)   // display changed its range of interest but no data
+            return;
 
         // values of range to display from view
         final Range range = display.getVisibleRange();
         final int rangeStart = range.getStart();
-        final int rangeEnd = (rangeStart + range.getLength()) > valuesIds.size() ? valuesIds.size()
+        final int rangeEnd = (rangeStart + range.getLength()) > resultSize ? resultSize
                 : (rangeStart + range.getLength());
 
         if (sort(rangeStart, rangeEnd))
@@ -187,8 +145,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
 
         // did not need to sort so use the cache
         ArrayList<EntryInfo> show = new ArrayList<EntryInfo>();
-        show.addAll(results.subList(rangeStart, rangeEnd));
-
+        show.addAll(cachedEntries.subList(rangeStart, rangeEnd));
         updateRowData(rangeStart, show);
     }
 
@@ -198,21 +155,17 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
      * still made if the cache does not contain enough data;
      *
      * @param rangeStart data range start (based on page user is on)
-     * @param rangeEnd
+     * @param rangeEnd   data range end
      * @return true if the data is sorted/rpc is made
      */
     protected boolean sort(int rangeStart, int rangeEnd) {
-
+        boolean sortAsc;
+        ColumnField sortField = lastSortField;
         ColumnSortList sortList = this.table.getColumnSortList();
-        final boolean sortAsc;
-        final ColumnField sortField;
-
         sortAsc = sortList.get(0).isAscending();
 
         int colIndex = this.table.getColumns().indexOf(sortList.get(0).getColumn());
-        if (colIndex < 0)
-            sortField = lastSortField;
-        else
+        if (colIndex >= 0)
             sortField = this.table.getColumns().get(colIndex).getField();
 
         // check whether we need to sort in order to determine whether we can use the cache or not
@@ -220,7 +173,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         if (lastSortAsc == sortAsc && lastSortField == sortField) {
             // make sure there is enough data in the cache for the callee to obtain what they need
             // based on range
-            if (results.size() >= rangeEnd)
+            if (cachedEntries.size() >= rangeEnd)
                 return false;
         }
 
@@ -232,78 +185,5 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         return true;
     }
 
-    /**
-     * Fetches the data user is interested in viewing (usually a page)
-     *
-     * @param field
-     * @param ascending
-     * @param rangeStart
-     * @param rangeEnd
-     */
-    protected void fetchEntryData(final ColumnField field, final boolean ascending,
-            final int rangeStart, final int rangeEnd) {
-
-        if (valuesIds == null || valuesIds.isEmpty())
-            return;
-
-        // TODO : sort the list on the server
-//        try {
-//            service.sortEntryList(AppController.sessionId, valuesIds, field, ascending,
-//                                  new AsyncCallback<LinkedList<Long>>() {
-//
-//                                      @Override
-//                                      public void onFailure(Throwable caught) {
-//                                          // TODO : notify of failure
-//                                          retrieveEntryData(field, ascending, rangeStart, rangeEnd);
-//                                      }
-//
-//                                      @Override
-//                                      public void onSuccess(LinkedList<Long> result) {
-//                                          valuesIds.clear();
-//                                          valuesIds.addAll(result);
-//                                          retrieveEntryData(field, ascending, rangeStart, rangeEnd);
-//                                      }
-//                                  });
-//        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
-//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//        }
-    }
-
-    // this method should be called after sorting, if sorting is desired
-    protected void retrieveEntryData(final ColumnField field, final boolean ascending,
-            final int rangeStart, final int rangeEnd) {
-        // TODO : index out of bounds exception here when we page to the last page and sort
-        // TODO : this is because we clear results and when we do not retrieve enough (factor below) 
-        // TODO : solution is to go to page one when user sorts
-
-        int factor = (rangeEnd - rangeStart) * EntryTablePager.JUMP_PAGE_COUNT; // get 4 pages in advance
-        factor = (factor + rangeEnd) > valuesIds.size() ? valuesIds.size() : (factor + rangeEnd);
-        List<Long> subList = valuesIds.subList(rangeStart, factor);
-        final LinkedList<Long> realValues = new LinkedList<Long>(subList);
-
-        final long start = System.currentTimeMillis();
-
-        service.retrieveEntryData(AppController.sessionId, field, ascending, realValues,
-                                  new AsyncCallback<LinkedList<EntryInfo>>() {
-
-                                      @Override
-                                      public void onFailure(Throwable caught) {
-                                          Window.alert(caught.getMessage());
-                                      }
-
-                                      @Override
-                                      public void onSuccess(LinkedList<EntryInfo> result) {
-
-                                          long time = System.currentTimeMillis() - start;
-                                          GWT.log("Retrieve took " + time + "ms");
-
-                                          results.addAll(result);
-                                          int end = rangeEnd;
-                                          if (rangeEnd > results.size())
-                                              end = results.size();
-                                          updateRowData(rangeStart, results.subList(rangeStart, end));
-                                      }
-                                  });
-    }
-
+    protected abstract void fetchEntryData(ColumnField field, boolean asc, int rangeStart, int rangeEnd);
 }

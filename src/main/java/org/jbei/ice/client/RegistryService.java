@@ -43,9 +43,6 @@ public interface RegistryService extends RemoteService {
     ArrayList<BlastResultInfo> blastSearch(String sid, String searchString, QueryOperator program)
             throws AuthenticationException;
 
-    LinkedList<EntryInfo> retrieveEntryData(String sid, ColumnField field, boolean ascending,
-            LinkedList<Long> entries) throws AuthenticationException;
-
     /**
      * Returns list of folders as seen on the collections page
      * collections menu

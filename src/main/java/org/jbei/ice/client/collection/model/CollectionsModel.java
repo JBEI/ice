@@ -99,6 +99,7 @@ public class CollectionsModel {
         else if (id == -1)
             retrieveAllVisibleEntries(handler, start, limit);
         else {
+            handler.onFolderRetrieve(null);
 //            service.retrieveEntriesForFolder(AppController.sessionId, id,
 //                                             new AsyncCallback<FolderDetails>() {
 //
@@ -117,7 +118,7 @@ public class CollectionsModel {
 
     public void retrieveAllVisibleEntries(final FolderRetrieveEventHandler handler, int start, int limit) {
         FolderDetails details = new FolderDetails(-1, "Available Entries", true);
-        service.retrieveAllVisibleEntryIDs(AppController.sessionId, details, ColumnField.CREATED, false, start, limit,
+        service.retrieveAllVisibleEntryIDs(AppController.sessionId, details, ColumnField.CREATED, false, start, 30,
                                            new AsyncCallback<FolderDetails>() {
 
                                                @Override

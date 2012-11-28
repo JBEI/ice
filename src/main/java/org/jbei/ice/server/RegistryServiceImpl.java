@@ -378,22 +378,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public LinkedList<EntryInfo> retrieveEntryData(String sid, ColumnField field, boolean asc,
-            LinkedList<Long> entryIds) throws AuthenticationException {
-
-        try {
-            Account account = this.retrieveAccountForSid(sid);
-            Logger.info(account.getEmail() + ": retrieving entry data for " + entryIds.size() + " entries");
-            EntryController entryController = new EntryController();
-            LinkedList<EntryInfo> results = entryController.retrieveEntriesByIdSetSort(account, entryIds, field, asc);
-            return results;
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
-    }
-
-    @Override
     public ArrayList<FolderDetails> retrieveCollections(String sessionId) throws AuthenticationException {
 
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
@@ -522,7 +506,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             int start, int limit) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            Logger.info(account.getEmail() + ": retrieving all visible entry ids");
+            Logger.info(account.getEmail() + ": retrieving all visible entries from " + start + " with size " + limit);
             EntryController entryController = new EntryController();
             FolderDetails retrieved = entryController.retrieveVisibleEntries(account, field, asc, start, limit);
             details.setEntries(retrieved.getEntries());

@@ -55,7 +55,7 @@ public class EntryTablePager extends AbstractPager {
     }
 
     private final NavLink first;
-    //    private final NavLink last;
+    private final NavLink last;
     private final NavLink next;
     private final NavLink prev;
 
@@ -81,13 +81,13 @@ public class EntryTablePager extends AbstractPager {
             }
         });
 
-        //        last = new NavLink("&gt;&gt;", new ClickHandler() {
-        //
-        //            @Override
-        //            public void onClick(ClickEvent event) {
-        //                EntryTablePager.super.lastPage();
-        //            }
-        //        });
+        last = new NavLink("&gt;&gt;", new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                EntryTablePager.super.lastPage();
+            }
+        });
 
         next = new NavLink("&gt;", new ClickHandler() {
 
@@ -199,7 +199,7 @@ public class EntryTablePager extends AbstractPager {
         } else
             this.nav.setWidget(0, 2, next);
 
-        //        this.nav.setWidget(0, 4, last);
+        this.nav.setWidget(0, 4, last);
     }
 
     protected Widget createRangeOptions() {
@@ -293,7 +293,7 @@ public class EntryTablePager extends AbstractPager {
      */
     private void setNextPageButtonsDisabled(boolean disabled) {
         next.setDisabled(disabled);
-        //        last.setDisabled(disabled);
+        last.setDisabled(disabled);
     }
 
     protected class VisibleRangeChanger implements ClickHandler {
@@ -314,7 +314,6 @@ public class EntryTablePager extends AbstractPager {
 
             int start = rows.getVisibleRange().getStart();
             rows.setVisibleRange(start, range);
-
             updateNavigation();
         }
     }

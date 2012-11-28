@@ -10,7 +10,6 @@ import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.collection.FolderEntryDataProvider;
 import org.jbei.ice.client.collection.ICollectionView;
-import org.jbei.ice.client.collection.MyEntriesDataProvider;
 import org.jbei.ice.client.collection.event.FolderEvent;
 import org.jbei.ice.client.collection.event.FolderEventHandler;
 import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
@@ -64,7 +63,6 @@ public class CollectionsPresenter extends AbstractPresenter {
     private final ICollectionView display;
 
     private FolderEntryDataProvider folderDataProvider;
-    private MyEntriesDataProvider myEntriesDataProvider;
     private final CollectionDataTable collectionsDataTable;
 
     //  data providers for the sub menu
@@ -118,8 +116,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         this.systemListProvider = new ListDataProvider<FolderDetails>(new FolderDetailsKeyProvider());
 
         folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, model.getService());
-//        myEntriesDataProvider = new MyEntriesDataProvider(collectionsDataTable, model.getService(),
-//                                                          AppController.accountInfo.getId()+"");
 
         // selection models used for menus
         initMenus();
@@ -510,21 +506,21 @@ public class CollectionsPresenter extends AbstractPresenter {
             public void onFolderRetrieve(FolderRetrieveEvent event) {
                 if (event == null || event.getItems() == null) {
                     display.showFeedbackMessage("Error connecting to server. Please try again", true);
-                    folderDataProvider.setValues(null);
+                    folderDataProvider.setFolderData(null);
                     return;
                 }
 
                 FolderDetails folder = event.getItems().get(0);
                 if (folder == null) {
                     display.showFeedbackMessage("Could not retrieve collection with id " + id, true);
-                    folderDataProvider.setValues(null);
+                    folderDataProvider.setFolderData(null);
                     return;
                 }
 
                 collectionsDataTable.clearSelection();
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folder.getId(), false);
                 display.setCurrentMenuSelection(folder.getId());
-                folderDataProvider.setData(folder);
+                folderDataProvider.setFolderData(folder);
 
                 currentFolder = folder;
                 mode = Mode.COLLECTION;
@@ -590,7 +586,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                 case COLLECTION:
                 default:
                     if (collectionsDataTable.getSelectionModel().isAllSelected()) {
-                        return folderDataProvider.getData();
+                        return null;
+//                        return folderDataProvider.getData();
                     } else {
                         return collectionsDataTable.getSelectedEntrySet();
                     }

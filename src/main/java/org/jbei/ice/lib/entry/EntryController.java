@@ -299,9 +299,9 @@ public class EntryController {
         return entry;
     }
 
-    // TODO : add sort
     public FolderDetails retrieveVisibleEntries(Account account, ColumnField field, boolean asc, int start, int limit)
             throws ControllerException {
+        long startTime = System.currentTimeMillis();
         LinkedList<Entry> results;
         FolderDetails details = new FolderDetails();
         try {
@@ -310,7 +310,6 @@ public class EntryController {
 //                results = null;
 //            } else {
             // retrieve groups for account and filter by permission
-            long startTime = System.currentTimeMillis();
             Set<Group> accountGroups = new HashSet<Group>(account.getGroups());
             GroupController controller = new GroupController();
             Group everybodyGroup = controller.createOrRetrievePublicGroup();
@@ -320,12 +319,12 @@ public class EntryController {
                 EntryInfo info = EntryViewFactory.createTableViewData(account, entry);
                 details.getEntries().add(info);
             }
-            System.out.println("Visible entry retrieve took " + (System.currentTimeMillis() - startTime) + "ms");
 //            }
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
 
+        Logger.info("Retrieve took " + (System.currentTimeMillis() - startTime) + "ms");
         return details;
     }
 

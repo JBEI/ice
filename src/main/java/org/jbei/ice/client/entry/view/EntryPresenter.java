@@ -254,8 +254,8 @@ public class EntryPresenter extends AbstractPresenter {
             public void onClick(ClickEvent event) {
 
                 IHasNavigableData nav = currentContext.getNav();
-                EntryInfo currentInfo = nav.getCachedData(currentContext
-                                                                  .getCurrent()); // TODO : how is this current info
+                EntryInfo currentInfo = nav.getCachedData(
+                        currentContext.getCurrent()); // TODO : how is this current info
                 // different from EntryPresenter.this.currentInfo
                 int idx = nav.indexOfCached(currentInfo);
 
@@ -270,8 +270,8 @@ public class EntryPresenter extends AbstractPresenter {
                 if (next + 1 == size)
                     display.enableNext(false);
 
-                EntryInfo nextInfo = nav.getNext(
-                        currentInfo); // TODO : nextInfo can be null. look at the implementation of getNext for more
+                // TODO : nextInfo can be null. look at the implementation of getNext for more
+                EntryInfo nextInfo = nav.getNext(currentInfo);
                 // info
 
                 // TODO :this needs to be folded into a single "Retrieve"

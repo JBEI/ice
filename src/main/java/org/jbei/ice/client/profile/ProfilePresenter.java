@@ -61,7 +61,7 @@ public class ProfilePresenter extends AbstractPresenter {
             }
         };
 
-        this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable, service);
+//        this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable, service);
 
         // check
         checkCanEditProfile();
