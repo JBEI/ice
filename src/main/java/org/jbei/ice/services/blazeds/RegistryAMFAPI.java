@@ -14,7 +14,6 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
@@ -124,7 +123,6 @@ public class RegistryAMFAPI extends BaseService {
      * @return FeaturedDNASequence object.
      */
     public FeaturedDNASequence getSequence(String sessionId, String entryId) {
-        HibernateHelper.beginTransaction();
         Account account = getAccountBySessionId(sessionId);
 
         if (account == null) {
@@ -159,7 +157,6 @@ public class RegistryAMFAPI extends BaseService {
             return null;
         }
 
-        HibernateHelper.commitTransaction();
         return featuredDNASequence;
     }
 
