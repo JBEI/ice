@@ -499,6 +499,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.setDataView(collectionsDataTable);
         display.enableExportAs(false);
         display.setSubMenuEnable(false, false, false);
+        int limit = collectionsDataTable.getVisibleRange().getLength() * 2;
 
         model.retrieveEntriesForFolder(id, new FolderRetrieveEventHandler() {
 
@@ -512,7 +513,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                 FolderDetails folder = event.getItems().get(0);
                 if (folder == null) {
-                    display.showFeedbackMessage("Could not retrieve collection with id " + id, true);
+                    display.showFeedbackMessage("Could not retrieve collection entries", true);
                     folderDataProvider.setFolderData(null);
                     return;
                 }
@@ -527,7 +528,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 if (msg != null && !msg.isEmpty())
                     display.showFeedbackMessage(msg, false);
             }
-        }, 0, 45);
+        }, 0, limit);
     }
 
     @Override

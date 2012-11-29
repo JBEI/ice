@@ -428,7 +428,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": retrieving entries for folder " + folderId);
             FolderController folderController = new FolderController();
 
-            return folderController.retrieveFolderContents(folderId, sort, asc, start, limit);
+            return folderController.retrieveFolderContents(account, folderId, sort, asc, start, limit);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;

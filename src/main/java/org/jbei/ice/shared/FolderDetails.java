@@ -1,6 +1,6 @@
 package org.jbei.ice.shared;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.jbei.ice.shared.dto.EntryInfo;
 
@@ -19,7 +19,7 @@ public class FolderDetails implements IsSerializable {
     private long count = -1;
     private boolean systemFolder;
     private String description;
-    private ArrayList<EntryInfo> entries = new ArrayList<EntryInfo>();
+    private LinkedList<EntryInfo> entries = new LinkedList<EntryInfo>();
 
     public FolderDetails() {
     }
@@ -66,11 +66,11 @@ public class FolderDetails implements IsSerializable {
         this.description = description;
     }
 
-    public ArrayList<EntryInfo> getEntries() {
+    public LinkedList<EntryInfo> getEntries() {
         return entries;
     }
 
-    public void setEntries(ArrayList<EntryInfo> entries) {
+    public void setEntries(LinkedList<EntryInfo> entries) {
         this.entries = entries;
     }
 }

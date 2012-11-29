@@ -99,26 +99,25 @@ public class CollectionsModel {
         else if (id == -1)
             retrieveAllVisibleEntries(handler, start, limit);
         else {
-            handler.onFolderRetrieve(null);
-//            service.retrieveEntriesForFolder(AppController.sessionId, id,
-//                                             new AsyncCallback<FolderDetails>() {
-//
-//                                                 @Override
-//                                                 public void onSuccess(FolderDetails result) {
-//                                                     handler.onFolderRetrieve(new FolderRetrieveEvent(result));
-//                                                 }
-//
-//                                                 @Override
-//                                                 public void onFailure(Throwable caught) {
-//                                                     handler.onFolderRetrieve(null);
-//                                                 }
-//                                             });
+            service.retrieveEntriesForFolder(AppController.sessionId, id, ColumnField.CREATED, false, start, limit,
+                                             new AsyncCallback<FolderDetails>() {
+
+                                                 @Override
+                                                 public void onSuccess(FolderDetails result) {
+                                                     handler.onFolderRetrieve(new FolderRetrieveEvent(result));
+                                                 }
+
+                                                 @Override
+                                                 public void onFailure(Throwable caught) {
+                                                     handler.onFolderRetrieve(null);
+                                                 }
+                                             });
         }
     }
 
     public void retrieveAllVisibleEntries(final FolderRetrieveEventHandler handler, int start, int limit) {
         FolderDetails details = new FolderDetails(-1, "Available Entries", true);
-        service.retrieveAllVisibleEntryIDs(AppController.sessionId, details, ColumnField.CREATED, false, start, 30,
+        service.retrieveAllVisibleEntryIDs(AppController.sessionId, details, ColumnField.CREATED, false, start, limit,
                                            new AsyncCallback<FolderDetails>() {
 
                                                @Override

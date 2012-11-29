@@ -1,6 +1,5 @@
 package org.jbei.ice.client.common;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -8,7 +7,7 @@ import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
@@ -31,19 +30,11 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
         this.service = service;
         cachedEntries = new LinkedList<EntryInfo>();
 
-        this.table.addColumnSortHandler(new AsyncHandler(this.table) {
-            @Override
-            public void onColumnSort(ColumnSortEvent event) {
-                super.onColumnSort(event);
+        // connect sorting to async handler
+        AsyncHandler columnSortHandler = new AsyncHandler(table);
+        table.addColumnSortHandler(columnSortHandler);
 
-                cachedEntries.clear();
-                int pageSize = table.getVisibleRange().getLength();
-                table.setVisibleRange(0, pageSize);
-            }
-        });
-
-        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table
-                .getColumn(ColumnField.CREATED);
+        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
 
         if (defaultSortField != null) {
             ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
@@ -60,7 +51,6 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
     @Override
     public EntryInfo getCachedData(long entryId) {
         for (EntryInfo result : cachedEntries) {
-
             if (result.getId() == entryId)
                 return result;
         }
@@ -140,29 +130,33 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
         final int rangeEnd = (rangeStart + range.getLength()) > resultSize ? resultSize
                 : (rangeStart + range.getLength());
 
-        if (sort(rangeStart, rangeEnd))
+        if (sortChanged(rangeStart, rangeEnd)) {
+            fetchEntryData(lastSortField, lastSortAsc, 0, (range.getLength() * 2), true);
             return;
+        }
 
-        // did not need to sort so use the cache
-        ArrayList<EntryInfo> show = new ArrayList<EntryInfo>();
-        show.addAll(cachedEntries.subList(rangeStart, rangeEnd));
-        updateRowData(rangeStart, show);
+        // sort did not change
+        // todo : move the check of the cache here
+        updateRowData(rangeStart, cachedEntries.subList(rangeStart, rangeEnd));
+
+        if (rangeEnd == cachedEntries.size()) { // or close enough within some delta, retrieve more
+            cacheMore(lastSortField, lastSortAsc, rangeEnd, rangeEnd + range.getLength());
+            GWT.log("Retrieving more; range (" + rangeEnd + ", " + (rangeEnd + range.getLength()) + ")");
+        }
     }
 
     /**
      * Determines if the sort params have changed and therefore warrants a
-     * call to retrieve new data based on those params. Note that the rpc is
-     * still made if the cache does not contain enough data;
+     * call to retrieve new data based on those params.
      *
      * @param rangeStart data range start (based on page user is on)
      * @param rangeEnd   data range end
-     * @return true if the data is sorted/rpc is made
+     * @return true if the data needs to be sorted
      */
-    protected boolean sort(int rangeStart, int rangeEnd) {
-        boolean sortAsc;
+    protected boolean sortChanged(int rangeStart, int rangeEnd) {
         ColumnField sortField = lastSortField;
         ColumnSortList sortList = this.table.getColumnSortList();
-        sortAsc = sortList.get(0).isAscending();
+        boolean sortAsc = sortList.get(0).isAscending();
 
         int colIndex = this.table.getColumns().indexOf(sortList.get(0).getColumn());
         if (colIndex >= 0)
@@ -177,13 +171,12 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
                 return false;
         }
 
-        //        results.clear();
         lastSortAsc = sortAsc;
         lastSortField = sortField;
-
-        fetchEntryData(sortField, sortAsc, rangeStart, rangeEnd);
         return true;
     }
 
-    protected abstract void fetchEntryData(ColumnField field, boolean asc, int rangeStart, int rangeEnd);
+    protected abstract void cacheMore(ColumnField field, boolean asc, int rangeStart, int rangeEnd);
+
+    protected abstract void fetchEntryData(ColumnField field, boolean ascending, int start, int factor, boolean reset);
 }

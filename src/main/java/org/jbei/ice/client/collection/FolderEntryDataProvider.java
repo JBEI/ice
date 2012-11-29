@@ -9,6 +9,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.EntryInfo;
 
+import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.Range;
@@ -24,41 +25,108 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider implement
         super(view, service);
     }
 
-    /**
-     * Fetches the data user is interested in viewing
-     */
-    protected void fetchEntryData(final ColumnField field, final boolean ascending, int rangeStart, int rangeEnd) {
-        if (resultSize == 0)
-            return;
-
-        int factor = (rangeEnd - rangeStart) * 3;  //  pages in advance
-//        factor = (factor + rangeEnd) > resultSize ? resultSize : (factor + rangeEnd);
-        makeServiceCall(field, ascending, rangeStart, factor);
+    @Override
+    protected void cacheMore(final ColumnField field, final boolean ascending, int rangeStart, int rangeEnd) {
+        int factor = (rangeEnd - rangeStart) * 2;  //  pages in advance
+        fetchEntryData(field, ascending, rangeStart, factor, false);
     }
 
-    protected void makeServiceCall(ColumnField field, boolean ascending, int rangeStart, int factor) {
-        service.retrieveAllVisibleEntryIDs(AppController.sessionId, details, field, ascending, rangeStart, factor,
-                                           new AsyncCallback<FolderDetails>() {
+    @Override
+    protected void fetchEntryData(ColumnField field, boolean asc, int start, int factor, final boolean reset) {
+        switch ((int) details.getId()) {
+            case -1:
+                service.retrieveAllVisibleEntryIDs(AppController.sessionId, details, field, asc, start, factor,
+                                                   new AsyncCallback<FolderDetails>() {
 
-                                               @Override
-                                               public void onFailure(Throwable caught) {
-                                                   Window.alert(caught.getMessage());
-                                               }
+                                                       @Override
+                                                       public void onFailure(Throwable caught) {
+                                                           Window.alert(caught.getMessage());
+                                                       }
 
-                                               @Override
-                                               public void onSuccess(FolderDetails result) {
-                                                   details = result;
-                                                   cachedEntries.addAll(result.getEntries());
-                                                   // retrieve the first page of results and updateRowData
-                                                   final Range range = table.getVisibleRange();
-                                                   final int rangeStart = range.getStart();
-                                                   int rangeEnd = rangeStart + range.getLength();
-                                                   if (rangeEnd > resultSize)
-                                                       rangeEnd = resultSize;
-                                                   updateRowData(rangeStart,
-                                                                 cachedEntries.subList(rangeStart, rangeEnd));
-                                               }
-                                           });
+                                                       @Override
+                                                       public void onSuccess(FolderDetails result) {
+                                                           details = result;
+                                                           if (result == null) {
+                                                               return;
+                                                           }
+
+                                                           if (reset)
+                                                               setFolderData(details);
+                                                           else
+                                                               cachedEntries.addAll(result.getEntries());
+                                                       }
+                                                   });
+                break;
+
+            case 0:
+                service.retrieveUserEntries(AppController.sessionId, AppController.accountInfo.getId() + "",
+                                            field, asc, start, factor,
+                                            new AsyncCallback<FolderDetails>() {
+
+                                                @Override
+                                                public void onSuccess(FolderDetails result) {
+                                                    details = result;
+                                                    if (result == null) {
+                                                        return;
+                                                    }
+
+                                                    if (reset)
+                                                        setFolderData(details);
+                                                    else
+                                                        cachedEntries.addAll(result.getEntries());
+                                                }
+
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    Window.alert(caught.getMessage());
+                                                }
+                                            });
+                break;
+
+            default:
+                service.retrieveEntriesForFolder(AppController.sessionId, details.getId(), field, asc, start, factor,
+                                                 new AsyncCallback<FolderDetails>() {
+
+                                                     @Override
+                                                     public void onSuccess(FolderDetails result) {
+                                                         details = result;
+                                                         if (result == null) {
+                                                             return;
+                                                         }
+
+                                                         if (reset)
+                                                             setFolderData(details);
+                                                         else
+                                                             cachedEntries.addAll(result.getEntries());
+                                                     }
+
+                                                     @Override
+                                                     public void onFailure(Throwable caught) {
+                                                         Window.alert(caught.getMessage());
+                                                     }
+                                                 });
+        }
+    }
+
+    @Override
+    public void reset() {
+        this.cachedEntries.clear();
+        details = null;
+        this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
+
+        // reset sort
+        if (lastSortField == null) {
+            lastSortAsc = false;
+            lastSortField = ColumnField.CREATED;
+
+            this.table.getColumnSortList().clear();
+            DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(lastSortField);
+
+            if (defaultSortField != null) {
+                ColumnSortList.ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
+                this.table.getColumnSortList().push(info);
+            }
+        }
     }
 
     public void setFolderData(FolderDetails details) {
@@ -75,12 +143,13 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider implement
 
         // retrieve the first page of results and updateRowData
         final Range range = this.table.getVisibleRange();
-        final int rangeStart = range.getStart();
+        final int rangeStart = 0;
         int rangeEnd = rangeStart + range.getLength();
         if (rangeEnd > resultSize)
             rangeEnd = resultSize;
 
         updateRowData(rangeStart, cachedEntries.subList(rangeStart, rangeEnd));
+        table.setPageStart(0);
     }
 }
 
