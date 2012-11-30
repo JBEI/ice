@@ -3,7 +3,6 @@ package org.jbei.ice.client.collection;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
-import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
@@ -17,18 +16,12 @@ import com.google.gwt.view.client.Range;
 /**
  * @author Hector Plahar
  */
-public class FolderEntryDataProvider extends EntryDataViewDataProvider implements IHasNavigableData {
+public class FolderEntryDataProvider extends EntryDataViewDataProvider {
 
     private FolderDetails details;
 
     public FolderEntryDataProvider(DataTable<EntryInfo> view, RegistryServiceAsync service) {
         super(view, service);
-    }
-
-    @Override
-    protected void cacheMore(final ColumnField field, final boolean ascending, int rangeStart, int rangeEnd) {
-        int factor = (rangeEnd - rangeStart) * 2;  //  pages in advance
-        fetchEntryData(field, ascending, rangeStart, factor, false);
     }
 
     @Override

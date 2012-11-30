@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
+import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.AutoCompleteField;
@@ -376,7 +377,8 @@ public abstract class SingleEntryForm<T extends EntryInfo> extends Composite imp
      * @return text input for auto complete data
      */
     private SuggestBox createSuggestBox(AutoCompleteField field, String width) {
-        SuggestBox box = new SuggestBox(new AutoCompleteSuggestOracle(field));
+        AutoCompleteSuggestOracle oracle = new AutoCompleteSuggestOracle(field);
+        SuggestBox box = new SuggestBox(oracle, new MultipleTextBox());
         box.setStyleName("input_box");
         box.setWidth(width);
         return box;

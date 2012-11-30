@@ -38,13 +38,13 @@ public abstract class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
         columns.add(this.addLabelColumn());
         columns.add(this.addNotesColumn());
         columns.add(this.addLocationColumn());
-        columns.add(this.addCreatedColumn());
+        columns.add(this.addCreatedColumn(true));
 
         return columns;
     }
 
     @Override
-    protected DataTableColumn<String> addCreatedColumn() {
+    protected DataTableColumn<String> addCreatedColumn(boolean sortable) {
         DataTableColumn<String> createdColumn = new DataTableColumn<String>(new TextCell(),
                                                                             ColumnField.CREATED) {
 

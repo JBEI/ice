@@ -16,6 +16,7 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.server.EntryViewFactory;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchResultInfo;
 import org.jbei.ice.shared.dto.SearchResults;
@@ -78,12 +79,12 @@ public class HibernateSearch {
         Logger.info("Found " + result.size() + " for " + fullTextQuery.getQueryString());
     }
 
-    public SearchResults executeSearch(Account account, String queryString, int start, int count,
-            PermissionsController permissionsController) {
+    public SearchResults executeSearch(Account account, String queryString, ColumnField sortField, boolean asc,
+            int start, int count, PermissionsController permissionsController) {
 
         LinkedList<SearchResultInfo> searchResultInfos = new LinkedList<SearchResultInfo>();
         Session session = HibernateHelper.newSession();
-        int resultCount = 0;
+        int resultCount;
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         List result;
 
@@ -138,13 +139,24 @@ public class HibernateSearch {
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(b, Entry.class);
-        fullTextQuery.setSort(Sort.RELEVANCE);
+
+//        Sort sort;
+//        switch(sortField) {
+//            default:
+//                sort = Sort.RELEVANCE;
+//                break;
+//
+//            case CREATED:
+//                sort = new Sort(new SortField("creationTime", SortField.STRING, asc));
+//                break;
+//        }
+//        fullTextQuery.setSort(sort);
 
         // criteria example
-//        fullTextQuery.setCriteriaQuery(session.createCriteria(Entry.class.getName()).add(
-//                Restrictions.eq("ownerEmail", account.getEmail())));
+//        fullTextQuery.setCriteriaQuery(session.createCriteria(Entry.class.getName()).addOrder(Order.asc
+// ("creationTime")));
 
-        // projection (specified properties must be stored in the index)
+        // projection (specified properties must be stored in the index @Field(store=Store.YES))
         fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
 
         // for paging

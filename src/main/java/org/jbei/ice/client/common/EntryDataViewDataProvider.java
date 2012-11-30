@@ -44,10 +44,6 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
         this.addDataDisplay(this.table);
     }
 
-    // experimental. assumes that we have the entryId cached if 
-    // user can click on it. performance is terrible. need a better data structure
-    // expect this to be called only once and getNext()/getPrev() used instead
-
     @Override
     public EntryInfo getCachedData(long entryId) {
         for (EntryInfo result : cachedEntries) {
@@ -66,24 +62,8 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
     public EntryInfo getNext(EntryInfo info) {
         int idx = cachedEntries.indexOf(info);
         int size = cachedEntries.size();
-
-        // todo : we just may have reached the end of the cache and need to retrieve more
-//        if (idx == -1 || cachedEntries.size() <= idx + 1)
-//            return null;
-//
-//        if (idx + 1 == size) {
-//            GWT.log("Retrieving extra info");
-//            final Range range = this.getRanges()[0];
-//            final int rangeStart = range.getStart();
-//            final int rangeEnd;
-//
-//            if ((rangeStart + range.getLength()) > valuesIds.size())
-//                rangeEnd = valuesIds.size();
-//            else
-//                rangeEnd = (rangeStart + range.getLength());
-//
-//            retrieveEntryData(lastSortField, lastSortAsc, rangeStart, rangeEnd);
-//        }
+        if (size == idx + 1)
+            return null;
         return cachedEntries.get(idx + 1);
     }
 
@@ -130,13 +110,12 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
         final int rangeEnd = (rangeStart + range.getLength()) > resultSize ? resultSize
                 : (rangeStart + range.getLength());
 
-        if (sortChanged(rangeStart, rangeEnd)) {
+        if (sortChanged(rangeEnd)) {
             fetchEntryData(lastSortField, lastSortAsc, 0, (range.getLength() * 2), true);
             return;
         }
 
         // sort did not change
-        // todo : move the check of the cache here
         updateRowData(rangeStart, cachedEntries.subList(rangeStart, rangeEnd));
 
         if (rangeEnd == cachedEntries.size()) { // or close enough within some delta, retrieve more
@@ -149,11 +128,10 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
      * Determines if the sort params have changed and therefore warrants a
      * call to retrieve new data based on those params.
      *
-     * @param rangeStart data range start (based on page user is on)
-     * @param rangeEnd   data range end
+     * @param rangeEnd data range end
      * @return true if the data needs to be sorted
      */
-    protected boolean sortChanged(int rangeStart, int rangeEnd) {
+    protected boolean sortChanged(int rangeEnd) {
         ColumnField sortField = lastSortField;
         ColumnSortList sortList = this.table.getColumnSortList();
         boolean sortAsc = sortList.get(0).isAscending();
@@ -176,7 +154,10 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
         return true;
     }
 
-    protected abstract void cacheMore(ColumnField field, boolean asc, int rangeStart, int rangeEnd);
+    protected void cacheMore(final ColumnField field, final boolean ascending, int rangeStart, int rangeEnd) {
+        int factor = (rangeEnd - rangeStart) * 2;  //  pages in advance
+        fetchEntryData(field, ascending, rangeStart, factor, false);
+    }
 
     protected abstract void fetchEntryData(ColumnField field, boolean ascending, int start, int factor, boolean reset);
 }

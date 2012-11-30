@@ -335,19 +335,6 @@ class EntryDAO extends HibernateRepository<Entry> {
         return results;
     }
 
-    /**
-     * Retrieve all entries in the database.
-     *
-     * @return ArrayList of Entries.
-     * @throws DAOException
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public ArrayList<Entry> getAllEntries() throws DAOException {
-        List results = super.retrieveAll(Entry.class);
-        ArrayList<Entry> entries = new ArrayList<Entry>(results);
-        return entries;
-    }
-
     public long getAllEntryCount() throws DAOException {
         Session session = currentSession();
         try {
@@ -432,72 +419,6 @@ class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public List<Entry> getEntriesByIdSetSortByType(List<Long> ids, boolean ascending)
-            throws DAOException {
-
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        if (ids.size() == 0) {
-            return entries;
-        }
-
-        String filter = Utils.join(", ", ids);
-        String orderSuffix = (" ORDER BY record_type " + (ascending ? "ASC" : "DESC"));
-        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
-                + orderSuffix;
-        return retrieveEntriesByQuery(queryString);
-    }
-
-    public List<Entry> getEntriesByIdSetSortByCreated(List<Long> ids, boolean ascending)
-            throws DAOException {
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        if (ids.size() == 0)
-            return entries;
-
-        String filter = Utils.join(", ", ids);
-        String orderSuffix = (" ORDER BY creation_time " + (ascending ? "ASC" : "DESC"));
-        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
-                + orderSuffix;
-        return retrieveEntriesByQuery(queryString);
-    }
-
-    public List<Entry> getEntriesByIdSetSortByStatus(List<Long> ids, boolean ascending)
-            throws DAOException {
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        if (ids.size() == 0) {
-            return entries;
-        }
-
-        String filter = Utils.join(", ", ids);
-        String orderSuffix = (" ORDER BY status " + (ascending ? "ASC" : "DESC"));
-        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
-                + orderSuffix;
-        return retrieveEntriesByQuery(queryString);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<Entry> retrieveEntriesByQuery(String queryString) throws DAOException {
-        Session session = currentSession();
-        try {
-            Query query = session.createQuery(queryString);
-            ArrayList<Entry> entries = new ArrayList<Entry>();
-
-            @SuppressWarnings("rawtypes")
-            ArrayList list = (ArrayList) query.list();
-
-            if (list != null) {
-                entries.addAll(list);
-            }
-            return entries;
-        } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve entries!", e);
-        } finally {
-            closeSession();
-        }
-    }
-
     /**
      * Delete an {@link Entry} object in the database.
      *
@@ -544,8 +465,6 @@ class EntryDAO extends HibernateRepository<Entry> {
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
-        } finally {
-            closeSession();
         }
     }
 
@@ -576,8 +495,6 @@ class EntryDAO extends HibernateRepository<Entry> {
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
-        } finally {
-            closeSession();
         }
     }
 
@@ -682,8 +599,6 @@ class EntryDAO extends HibernateRepository<Entry> {
         try {
             Criteria criteria = session.createCriteria(Entry.class).add(Restrictions.eq("ownerEmail", ownerEmail))
                                        .add(Restrictions.ne("visibility", new Integer(Visibility.DRAFT.getValue())));
-            criteria.setFirstResult(start);
-            criteria.setMaxResults(limit);
 
             // sort
             if (sort == null)
@@ -708,6 +623,8 @@ class EntryDAO extends HibernateRepository<Entry> {
 
             Order sortOrder = asc ? Order.asc(fieldName) : Order.desc(fieldName);
             criteria.addOrder(sortOrder);
+            criteria.setFirstResult(start);
+            criteria.setMaxResults(limit);
             List list = criteria.list();
 
             return new ArrayList<Entry>(list);

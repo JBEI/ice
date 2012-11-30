@@ -60,7 +60,7 @@ public class AdvancedSearchModel {
             final int limit,
             final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
 
-        service.retrieveSearchResults(AppController.sessionId, searchFilters, start, limit,
+        service.retrieveSearchResults(AppController.sessionId, searchFilters, null, false, start, limit,
                                       new AsyncCallback<SearchResults>() {
 
                                           @Override
@@ -102,7 +102,7 @@ public class AdvancedSearchModel {
     public void retrieveSearchResults(final ArrayList<SearchFilterInfo> searchFilters, int start, int limit,
             final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
 
-        service.retrieveSearchResults(AppController.sessionId, searchFilters, start, limit,
+        service.retrieveSearchResults(AppController.sessionId, searchFilters, null, false, start, limit,
                                       new AsyncCallback<SearchResults>() {
 
                                           @Override

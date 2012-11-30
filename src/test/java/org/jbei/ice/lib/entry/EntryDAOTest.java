@@ -1,7 +1,12 @@
 package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.EntryType;
 
+import junit.framework.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,7 +21,32 @@ public class EntryDAOTest {
     @Before
     public void setUp() {
         HibernateHelper.initializeMock();
+        HibernateHelper.beginTransaction();
         dao = new EntryDAO();
+    }
+
+    @After
+    public void tearDown() {
+        HibernateHelper.rollbackTransaction();
+    }
+
+    @Test
+    public void testSave() throws Exception {
+        Entry entry = new Entry();
+        entry.setRecordId(Utils.generateUUID());
+        entry.setRecordType(EntryType.PLASMID.getName());
+        entry.setVersionId(entry.getRecordId());
+        entry = dao.save(entry);
+        System.out.println(entry.getId());
+        Entry retrieved = dao.get(entry.getId());
+        Assert.assertNotNull(retrieved);
+
+        Entry entry2 = new Entry();
+        entry2.setRecordId(Utils.generateUUID());
+        entry2.setRecordType(EntryType.STRAIN.getName());
+        entry2.setVersionId(entry.getRecordId());
+        entry2 = dao.save(entry2);
+        System.out.println(entry2.getId());
     }
 
     @Test
@@ -125,7 +155,5 @@ public class EntryDAOTest {
     public void testDelete() throws Exception {
     }
 
-    @Test
-    public void testSave() throws Exception {
-    }
+
 }

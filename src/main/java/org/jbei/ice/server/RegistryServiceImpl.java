@@ -825,8 +825,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     // 
 
     @Override
-    public SearchResults retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, int start, int limit)
-            throws AuthenticationException {
+    public SearchResults retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, ColumnField sort,
+            boolean asc, int start, int limit) throws AuthenticationException {
 
         if (filters == null || filters.isEmpty())
             return null;
@@ -841,7 +841,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Account account = this.retrieveAccountForSid(sid);
             SearchController search = new SearchController();
-            SearchResults searchResults = search.runSearch(account, queryFilters, start, limit);
+            SearchResults searchResults = search.runSearch(account, queryFilters, sort, asc, start, limit);
             searchResults.setSearchFilters(filters);
             return searchResults;
         } catch (Throwable e) {

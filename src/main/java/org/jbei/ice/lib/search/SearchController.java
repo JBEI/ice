@@ -15,6 +15,7 @@ import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.server.QueryFilter;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -34,8 +35,10 @@ public class SearchController {
         permissionsController = new PermissionsController();
     }
 
-    public SearchResults runSearch(Account account, ArrayList<QueryFilter> filters, int start, int count)
-            throws ControllerException {
+    public SearchResults runSearch(Account account, ArrayList<QueryFilter> filters, ColumnField sort, boolean asc,
+            int start, int count) throws ControllerException {
+        if (sort == null)
+            sort = ColumnField.RELEVANCE;
 
         SearchResults searchResults = null;
         for (QueryFilter filter : filters) {
@@ -48,7 +51,7 @@ public class SearchController {
             // no filter type indicates a term or phrase query
             if (type == null) {
                 if (isTerm(operand)) {
-                    searchResults = runTermQuery(account, operand, start, count);
+                    searchResults = runTermQuery(account, sort, asc, operand, start, count);
                 } else {
                     runPhraseQuery(account, operand, start, count);
                 }
@@ -92,14 +95,16 @@ public class SearchController {
      * @return
      * @throws ControllerException
      */
-    public SearchResults runTermQuery(Account account, String query, int start, int count) throws ControllerException {
+    public SearchResults runTermQuery(Account account, ColumnField sort, boolean asc,
+            String query, int start, int count) throws ControllerException {
         if (query == null) {
             throw new ControllerException("Cannot execute null query");
         }
 
         String cleanedQuery = cleanQuery(query);
         Logger.info(account.getEmail() + ": searching for \"" + cleanedQuery + "\"");
-        return HibernateSearch.getInstance().executeSearch(account, cleanedQuery, start, count, permissionsController);
+        return HibernateSearch.getInstance().executeSearch(account, cleanedQuery, sort, asc,
+                                                           start, count, permissionsController);
     }
 
     public SearchResults runPhraseQuery(Account account, String phrase, int start, int count)

@@ -197,7 +197,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
         return nameColumn;
     }
 
-    protected DataTableColumn<String> addCreatedColumn() {
+    protected DataTableColumn<String> addCreatedColumn(boolean sortable) {
         DataTableColumn<String> createdColumn = new DataTableColumn<String>(new TextCell(), ColumnField.CREATED) {
 
             @Override
@@ -211,7 +211,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
             }
         };
 
-        createdColumn.setSortable(true);
+        createdColumn.setSortable(sortable);
         this.addColumn(createdColumn, "Created");
         this.setColumnWidth(createdColumn, 100, Unit.PX);
         return createdColumn;

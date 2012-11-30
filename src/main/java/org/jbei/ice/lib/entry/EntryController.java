@@ -605,47 +605,6 @@ public class EntryController {
         }
     }
 
-    public LinkedList<EntryInfo> retrieveEntriesByIdSetSort(Account account,
-            LinkedList<Long> entryIds, ColumnField field, boolean asc) throws ControllerException {
-
-        List<Entry> entries;
-
-        try {
-            switch (field) {
-                case TYPE:
-                    entries = dao.getEntriesByIdSetSortByType(entryIds, asc);
-                    break;
-
-                case STATUS:
-                    entries = dao.getEntriesByIdSetSortByStatus(entryIds, asc);
-                    break;
-
-                case CREATED:
-                    entries = dao.getEntriesByIdSetSortByCreated(entryIds, asc);
-                    break;
-
-                default:
-                    entries = dao.getEntriesByIdSet(entryIds);
-            }
-        } catch (DAOException ce) {
-            throw new ControllerException("Could not retrieve entries by sort ", ce);
-        }
-
-        if (entries == null)
-            return null;
-        LinkedList<EntryInfo> results = new LinkedList<EntryInfo>();
-
-        for (Entry entry : entries) {
-            EntryInfo view = EntryViewFactory.createTableViewData(account, entry);
-            if (view == null)
-                continue;
-
-            results.add(view);
-        }
-
-        return results;
-    }
-
     public ArrayList<Entry> getEntriesByIdSet(Account account, ArrayList<Long> queryResultIds)
             throws ControllerException {
         List<Long> filtered = this.filterEntriesByPermission(account, queryResultIds);

@@ -400,7 +400,6 @@ public class BulkUploadController {
         }
     }
 
-    // TODO : really need transaction rollback here
     public void processEntryInfo(Account draftOwner, EntryAddType type, EntryInfo info, ArrayList<Entry> contents,
             ArrayList<EntryInfo> contentInfoList, Group group) throws ControllerException {
 

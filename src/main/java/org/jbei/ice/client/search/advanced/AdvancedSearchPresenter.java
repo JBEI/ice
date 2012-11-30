@@ -156,7 +156,7 @@ public class AdvancedSearchPresenter {
         public void onSearchCompletion(AdvancedSearchEvent event) {
             if (event == null)
                 return;
-            dataProvider.setData(event.getSearchResults(), true);
+            dataProvider.setSearchData(event.getSearchResults());
             mode = Mode.SEARCH;
         }
 
@@ -164,7 +164,7 @@ public class AdvancedSearchPresenter {
         public void onBlastCompletion(AdvancedSearchEvent event) {
             if (event == null)
                 return;
-            blastProvider.setData(event.getResults());
+            blastProvider.setBlastData(event.getResults());
             mode = Mode.BLAST;
         }
     }

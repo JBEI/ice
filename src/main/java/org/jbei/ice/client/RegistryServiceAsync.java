@@ -197,8 +197,8 @@ public interface RegistryServiceAsync {
     //
     // Search
     //
-    void retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, int start, int limit,
-            AsyncCallback<SearchResults> async);
+    void retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, ColumnField sort, boolean asc,
+            int start, int limit, AsyncCallback<SearchResults> async);
 
     void retrieveSystemSettings(String sid, AsyncCallback<HashMap<String, String>> asyncCallback);
 

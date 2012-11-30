@@ -37,8 +37,8 @@ public interface RegistryService extends RemoteService {
     //
     // Search
     //
-    SearchResults retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, int start, int limit)
-            throws AuthenticationException;
+    SearchResults retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, ColumnField sort, boolean asc,
+            int start, int limit) throws AuthenticationException;
 
     ArrayList<BlastResultInfo> blastSearch(String sid, String searchString, QueryOperator program)
             throws AuthenticationException;

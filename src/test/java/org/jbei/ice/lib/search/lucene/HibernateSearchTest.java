@@ -3,7 +3,11 @@ package org.jbei.ice.lib.search.lucene;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.HibernateSearch;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.SearchResultInfo;
+import org.jbei.ice.shared.dto.SearchResults;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -60,6 +64,10 @@ public class HibernateSearchTest {
 //        }
 //
 //        ApplicationController.upgradeDatabaseIfNecessary();
-        HibernateSearch.getInstance().executeSearchOnField("hector", "general", 0, 50);
+        SearchResults results = HibernateSearch.getInstance().executeSearch(account, "test", ColumnField.CREATED, true,
+                                                                            0, 5, new PermissionsController());
+        for (SearchResultInfo info : results.getResults()) {
+            System.out.println(info.getEntryInfo().getCreationTime().toString());
+        }
     }
 }
