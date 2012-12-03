@@ -220,10 +220,7 @@ public class EntryAddPresenter {
 
         String creatorName = AppController.accountInfo.getFullName();
         String creatorEmail = AppController.accountInfo.getEmail();
-
-        final IEntryFormSubmit form = EntryFormFactory.entryForm(type,
-                                                                 AppController.autoCompleteData, creatorName,
-                                                                 creatorEmail);
+        final IEntryFormSubmit form = EntryFormFactory.entryForm(type, creatorName, creatorEmail);
 
         if (form == null)
             return null;

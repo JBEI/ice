@@ -169,7 +169,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public IEntryFormSubmit showUpdateForm(EntryInfo info) {
-        IEntryFormSubmit form = EntryFormFactory.updateForm(info, AppController.autoCompleteData);
+        IEntryFormSubmit form = EntryFormFactory.updateForm(info);
         if (form == null)
             return form;
 

@@ -1,11 +1,9 @@
 package org.jbei.ice.client.bulkupload.sheet.header;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
-import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
@@ -18,15 +16,13 @@ public class StrainHeaders extends PartHeader {
         super();
 
         // strain specific headers
-        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
+        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(true), null));
         headers.add(new CellColumnHeader(Header.PARENTAL_STRAIN));
         headers.add(new CellColumnHeader(Header.GEN_PHEN));
         headers.add(new CellColumnHeader(
                 Header.PLASMIDS,
                 false,
-                new MultiSuggestSheetCell(AppController.autoCompleteData.get(AutoCompleteField.PLASMID_NAME), true),
-                null));
+                new MultiSuggestSheetCell(true), null));
     }
 
     @Override

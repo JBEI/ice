@@ -2,7 +2,6 @@ package org.jbei.ice.client.bulkupload.sheet.header;
 
 import java.util.Date;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
@@ -11,7 +10,6 @@ import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.GenerationSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
-import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
@@ -33,8 +31,7 @@ public class ArabidopsisSeedHeaders extends PartHeader {
         headers.add(new CellColumnHeader(Header.PARENTS));
         headers.add(new CellColumnHeader(Header.GENERATION, true, new GenerationSheetCell(), null));
         headers.add(new CellColumnHeader(Header.PLANT_TYPE, true, new PlantTypeSheetCell(), null));
-        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
+        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(true), null));
         headers.add(new CellColumnHeader(Header.SENT_TO_ABRC, false, new BooleanSheetCell(), null));
     }
 

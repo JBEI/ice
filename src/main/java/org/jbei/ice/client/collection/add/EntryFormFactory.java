@@ -1,15 +1,11 @@
 package org.jbei.ice.client.collection.add;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.jbei.ice.client.collection.add.form.ArabidopsisForm;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.NewStrainWithPlasmidForm;
 import org.jbei.ice.client.collection.add.form.PartForm;
 import org.jbei.ice.client.collection.add.form.PlasmidForm;
 import org.jbei.ice.client.collection.add.form.StrainForm;
-import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -26,12 +22,8 @@ public class EntryFormFactory {
      * @param type EntryType
      * @return form specific to type
      */
-    public static IEntryFormSubmit entryForm(EntryAddType type,
-            HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData, String creatorName,
-            String creatorEmail) {
-
+    public static IEntryFormSubmit entryForm(EntryAddType type, String creatorName, String creatorEmail) {
         switch (type) {
-
             case PLASMID:
                 PlasmidInfo plasmidInfo = new PlasmidInfo();
                 plasmidInfo.setCreator(creatorName);
@@ -68,10 +60,8 @@ public class EntryFormFactory {
         }
     }
 
-    public static IEntryFormSubmit updateForm(EntryInfo info,
-            HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData) {
+    public static IEntryFormSubmit updateForm(EntryInfo info) {
         switch (info.getType()) {
-
             case PLASMID:
                 PlasmidInfo plasmidInfo = (PlasmidInfo) info;
                 return new PlasmidForm(plasmidInfo);

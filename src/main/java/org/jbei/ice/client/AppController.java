@@ -31,7 +31,6 @@ import org.jbei.ice.client.news.NewsPresenter;
 import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
-import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
@@ -58,9 +57,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     public static String sessionId;
-
-    // TODO : see permissions auto complete for how to run this on the server and avoid sending data back and forth
-    public static HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData;
     public static AccountInfo accountInfo;
 
     public AppController(RegistryServiceAsync service, HandlerManager eB) {
@@ -283,8 +279,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             @Override
             public void onClick(ClickEvent event) {
                 view.getHeader().setSearchButtonEnable(false);
-                ArrayList<SearchFilterInfo> parse = QuickSearchParser.parse(view.getHeader()
-                                                                                .getSearchInput());
+                ArrayList<SearchFilterInfo> parse = QuickSearchParser.parse(view.getHeader().getSearchInput());
                 SearchFilterInfo blastInfo = view.getHeader().getBlastInfo();
                 if (blastInfo != null)
                     parse.add(blastInfo);
