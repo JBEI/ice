@@ -1,19 +1,14 @@
 package org.jbei.ice.lib.entry;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.attachment.Attachment;
+import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
@@ -21,14 +16,21 @@ import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.StorageDAO;
+import org.jbei.ice.lib.entry.sample.model.Sample;
+import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.server.EntryViewFactory;
+import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.ConfigurationKey;
@@ -46,11 +48,19 @@ public class EntryController {
     private EntryDAO dao;
     private PermissionsController permissionsController;
     private AccountController accountController;
+    private AttachmentController attachmentController;
+    private SampleController sampleController;
+    private SequenceAnalysisController sequenceAnalysisController;
+    private SequenceController sequenceController;
 
     public EntryController() {
         dao = new EntryDAO();
         permissionsController = new PermissionsController();
         accountController = new AccountController();
+        attachmentController = new AttachmentController();
+        sampleController = new SampleController();
+        sequenceAnalysisController = new SequenceAnalysisController();
+        sequenceController = new SequenceController();
     }
 
     /**
@@ -207,7 +217,7 @@ public class EntryController {
         }
 
         if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
-            throw new PermissionException("No read permission for entry!");
+            throw new PermissionException(account.getEmail() + ": No read permission for entry " + id);
         }
 
         return entry;
@@ -315,7 +325,7 @@ public class EntryController {
             accountGroups.add(everybodyGroup);
             results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit);
             for (Entry entry : results) {
-                EntryInfo info = EntryViewFactory.createTableViewData(account, entry);
+                EntryInfo info = ModelToInfoFactory.createTableViewData(account, entry);
                 details.getEntries().add(info);
             }
 //            }
@@ -604,5 +614,43 @@ public class EntryController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public EntryInfo retrieveEntryDetails(Account account, long id) throws ControllerException {
+        Entry entry;
+        try {
+            entry = get(account, id);
+        } catch (PermissionException e) {
+            Logger.warn(e.getMessage());
+            return null;
+        }
+
+        ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
+        ArrayList<Sample> samples = sampleController.getSamplesByEntry(entry);
+        List<TraceSequence> sequences = sequenceAnalysisController.getTraceSequences(entry);
+
+        // samples
+        Map<Sample, LinkedList<Storage>> sampleMap = new HashMap<Sample, LinkedList<Storage>>();
+        for (Sample sample : samples) {
+            Storage storage = sample.getStorage();
+
+            LinkedList<Storage> storageList = new LinkedList<Storage>();
+            List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
+            if (storages != null)
+                storageList.addAll(storages);
+            Storage scheme = StorageDAO.getSchemeContainingParentStorage(storage);
+            if (scheme != null)
+                storageList.add(scheme);
+
+            sampleMap.put(sample, storageList);
+        }
+
+        boolean hasSequence = (sequenceController.getByEntry(entry) != null);
+        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence);
+
+        // group with write permissions
+        PermissionsController permissionsController = new PermissionsController();
+        info.setCanEdit(permissionsController.hasWritePermission(account, entry));
+        return info;
     }
 }

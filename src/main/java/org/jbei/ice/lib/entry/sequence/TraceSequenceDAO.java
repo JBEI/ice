@@ -83,8 +83,6 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
         } catch (Exception e1) {
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
-        } finally {
-            closeSession();
         }
     }
 
@@ -95,7 +93,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      * @return TraceSequence object.
      * @throws DAOException
      */
-    public static TraceSequence getByFileId(String fileId) throws DAOException {
+    public TraceSequence getByFileId(String fileId) throws DAOException {
         TraceSequence traceSequence = null;
 
         Session session = currentSession();
@@ -109,8 +107,6 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
             }
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entry by fileId: " + fileId, e);
-        } finally {
-
         }
 
         return traceSequence;
@@ -220,9 +216,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
             }
         } catch (HibernateException e) {
             throw new DAOException("Failed to get trace sequence by entry!", e);
-        } finally {
         }
-
         return result;
     }
 
@@ -241,36 +235,6 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
         if (!file.canRead()) {
             throw new DAOException("Failed to open file for read!");
         }
-
         return file;
-    }
-
-    /**
-     * Retrieve the number of {@link TraceSequence} object associated with the given {@link Entry}
-     * object.
-     *
-     * @param entry
-     * @return Number of TraceSequence objects.
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    public long getNumberOfTraceSequences(Entry entry) throws DAOException {
-        int result = 0;
-
-        Session session = currentSession();
-
-        try {
-            String queryString = "from " + TraceSequence.class.getName() + " where entry = :entry";
-            Query query = session.createQuery(queryString);
-            query.setParameter("entry", entry);
-            List<TraceSequence> traceSequences = query.list();
-            result = traceSequences.size();
-        } catch (HibernateException e) {
-            throw new DAOException(e);
-        } finally {
-            closeSession();
-        }
-
-        return result;
     }
 }

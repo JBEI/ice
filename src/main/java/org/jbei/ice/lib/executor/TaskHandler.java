@@ -14,6 +14,10 @@ class TaskHandler implements Runnable {
 
     @Override
     public void run() {
-        task.execute();
+        try {
+            task.execute();
+        } catch (Throwable caught) {
+            // TODO
+        }
     }
 }

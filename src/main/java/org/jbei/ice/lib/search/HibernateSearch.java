@@ -15,7 +15,7 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.server.EntryViewFactory;
+import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchResultInfo;
@@ -193,7 +193,7 @@ public class HibernateSearch {
                 continue;
             }
 
-            EntryInfo info = EntryViewFactory.createTipView(account, entry);
+            EntryInfo info = ModelToInfoFactory.createTipView(account, entry);
             SearchResultInfo searchResult = new SearchResultInfo();
             searchResult.setScore(score);
             searchResult.setEntryInfo(info);

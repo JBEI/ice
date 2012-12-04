@@ -165,7 +165,6 @@ public class EntryUtil {
     public static String linkifyText(Account account, String text) {
         String newText = wikiLinkifyText(account, text);
         newText = urlLinkifyText(newText);
-
         return newText;
     }
 
@@ -240,6 +239,49 @@ public class EntryUtil {
 
         return newText;
     }
+
+    public static String getParsedNotes(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        final StringBuilder buffer = new StringBuilder();
+        int newlineCount = 0;
+
+        buffer.append("<p>");
+        for (int i = 0; i < s.length(); i++) {
+            final char c = s.charAt(i);
+
+            switch (c) {
+                case '\n':
+                    newlineCount++;
+                    break;
+
+                case '\r':
+                    break;
+
+                default:
+                    if (newlineCount == 1) {
+                        buffer.append("<br/>");
+                    } else if (newlineCount > 1) {
+                        buffer.append("</p><p>");
+                    }
+
+                    buffer.append(c);
+                    newlineCount = 0;
+                    break;
+            }
+        }
+        if (newlineCount == 1) {
+            buffer.append("<br/>");
+        } else if (newlineCount > 1) {
+            buffer.append("</p><p>");
+        }
+        buffer.append("</p>");
+        return buffer.toString();
+
+    }
+
 
     /**
      * Hold information about the ICE link.

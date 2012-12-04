@@ -177,13 +177,10 @@ public class Blast {
      * @throws BlastException
      * @throws ProgramTookTooLongException
      */
-    public String runBl2Seq(String query, String subject) throws BlastException,
-            ProgramTookTooLongException {
+    public String runBl2Seq(String query, String subject) throws BlastException, ProgramTookTooLongException {
         String result = "";
-
         ArrayList<String> subjects = new ArrayList<String>();
         subjects.add(subject);
-
         List<String> bl2seqResults = runBl2Seq(query, subjects);
 
         if (bl2seqResults.size() > 0) {
@@ -223,7 +220,6 @@ public class Blast {
                                                  getProgram(blastProgram), BLAST_DATASE_NAME);
 
             Logger.info("Blast query: " + commandString);
-
             result = processBlastOutput(runExternalProgram(queryString, commandString));
         }
 
@@ -252,7 +248,6 @@ public class Blast {
      */
     private boolean isBlastDatabaseExists() {
         File blastDatabaseFile = new File(BLAST_DATASE_NAME + ".nsq");
-
         return blastDatabaseFile.exists();
     }
 
@@ -332,7 +327,6 @@ public class Blast {
             if (errorString.length() > 0) {
                 throw new IOException("Could not format blast db");
             }
-
         } catch (InterruptedException e) {
             throw new BlastException("Could not run formatdb", e);
         } catch (IOException e) {
@@ -353,7 +347,6 @@ public class Blast {
 
         try {
             Process p = Runtime.getRuntime().exec(commandString);
-
             BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line;
 
@@ -401,13 +394,11 @@ public class Blast {
             long maxWait = 5000L;
             long startTime = System.currentTimeMillis();
 
-            BufferedReader programOutputReader = new BufferedReader(new InputStreamReader(
-                    process.getInputStream()));
-            BufferedReader programErrorReader = new BufferedReader(new InputStreamReader(
-                    process.getErrorStream()));
+            BufferedReader programOutputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader programErrorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
-            String tempError = null;
-            String tempOutput = null;
+            String tempError;
+            String tempOutput;
 
             /*
              * How to Deal with External Blast
@@ -479,7 +470,6 @@ public class Blast {
      */
     private ArrayList<BlastResult> processBlastOutput(String blastOutput) {
         ArrayList<String> lines = new ArrayList<String>(Arrays.asList(blastOutput.split("\n")));
-
         ArrayList<BlastResult> blastResults = new ArrayList<BlastResult>();
 
         for (String line : lines) {
@@ -587,8 +577,7 @@ public class Blast {
                 if (!newbigFastaFileDir.mkdir()) {
                     throw new BlastException("Could not create " + BLAST_DIRECTORY + ".new");
                 }
-                File bigFastaFile = new File(newbigFastaFileDir.getPath() + File.separator
-                                                     + BIG_FASTA_FILE);
+                File bigFastaFile = new File(newbigFastaFileDir.getPath() + File.separator + BIG_FASTA_FILE);
                 FileWriter bigFastaWriter = new FileWriter(bigFastaFile);
                 writeBigFastaFile(bigFastaWriter);
                 formatBlastDb(newbigFastaFileDir, BIG_FASTA_FILE, FORMAT_LOG_FILE,
@@ -621,12 +610,10 @@ public class Blast {
             if (!newFeatureFastaDir.mkdir()) {
                 throw new BlastException("Could not create " + newFeatureFastaDirName);
             }
-            File fastaFile = new File(newFeatureFastaDir.getPath() + File.separator
-                                              + FEATURE_BLAST_FILE);
+            File fastaFile = new File(newFeatureFastaDir.getPath() + File.separator + FEATURE_BLAST_FILE);
             FileWriter fastaFileWriter = new FileWriter(fastaFile);
             writeFeatureFastaFile(fastaFileWriter);
-            Blast.formatBlastDb(newFeatureFastaDir, fastaFile.getName(), FEATURE_BLAST_FILE
-                    + ".log", "features");
+            Blast.formatBlastDb(newFeatureFastaDir, fastaFile.getName(), FEATURE_BLAST_FILE + ".log", "features");
 
             setRebuilding(true);
             renameBlastDb(newFeatureFastaDir, FEATURE_BLAST_DIRECTORY);
@@ -669,15 +656,13 @@ public class Blast {
                         symL = RNATools.createRNA(sequence.getSequence().trim());
                     } catch (IllegalSymbolException e2) {
                         // skip this sequence
-                        Logger.debug("invalid characters in sequence for "
-                                             + sequence.getEntry().getRecordId());
+                        Logger.debug("invalid characters in sequence for " + sequence.getEntry().getRecordId());
                         Logger.debug(e2.toString());
                     }
                 }
                 if (symL != null) {
                     sequenceLength = symL.seqString().length();
-                    sequenceString = SequenceUtils
-                            .breakUpLines(symL.seqString() + symL.seqString());
+                    sequenceString = SequenceUtils.breakUpLines(symL.seqString() + symL.seqString());
                 }
             }
             if (sequenceString.length() > 0) {
@@ -707,7 +692,7 @@ public class Blast {
      * @throws BlastException
      */
     private void writeFeatureFastaFile(FileWriter fastaFileWriter) throws BlastException {
-        ArrayList<Feature> featureList = null;
+        ArrayList<Feature> featureList;
         SequenceController sequenceController = new SequenceController();
 
         try {

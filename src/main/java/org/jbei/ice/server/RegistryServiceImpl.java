@@ -20,7 +20,6 @@ import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -49,7 +48,6 @@ import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.Emailer;
-import org.jbei.ice.lib.utils.RichTextRenderer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.utils.UtilsController;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -489,7 +487,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             long count = entryController.getNumberOfOwnerEntries(account, user.getEmail());
             details.setCount(count);
             for (Entry entry : entries) {
-                EntryInfo info = EntryViewFactory.createTableViewData(account, entry);
+                EntryInfo info = ModelToInfoFactory.createTableViewData(account, entry);
                 details.getEntries().add(info);
             }
             return details;
@@ -616,65 +614,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Account account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": retrieving details for entry with id \"" + id + "\"");
-            Entry entry;
-            try {
-                entry = new EntryController().get(account, id);
-            } catch (PermissionException e) {
-                Logger.warn(e.getMessage());
-                return null;
-            }
-
-            AttachmentController attachmentController = new AttachmentController();
-            SampleController sampleController = new SampleController();
-
-            ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
-            ArrayList<Sample> samples = sampleController.getSamplesByEntry(entry);
-            List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
-
-            Map<Sample, LinkedList<Storage>> sampleMap = new HashMap<Sample, LinkedList<Storage>>();
-            for (Sample sample : samples) {
-                Storage storage = sample.getStorage();
-
-                LinkedList<Storage> storageList = new LinkedList<Storage>();
-                List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
-                if (storages != null)
-                    storageList.addAll(storages);
-                Storage scheme = StorageDAO.getSchemeContainingParentStorage(storage);
-                if (scheme != null)
-                    storageList.add(scheme);
-
-                sampleMap.put(sample, storageList);
-            }
-
-            SequenceController sequenceController = new SequenceController();
-            boolean hasSequence = (sequenceController.getByEntry(entry) != null);
-
-            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence);
-
-            //
-            //  the parsed versions are separated out into complementary fields
-            //
-            // todo
-            String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(), info.getLongDescription());
-            String parsed = getParsedNotes(html);
-            info.setLongDescription(info.getLongDescription());
-            info.setParsedDescription(parsed);
-            String parsedShortDesc = EntryUtil.linkifyText(account, info.getShortDescription());
-            info.setLinkifiedShortDescription(parsedShortDesc);
-            String parsedLinks = EntryUtil.linkifyText(account, info.getLinks());
-            info.setLinkifiedLinks(parsedLinks);
-
-            // group with write permissions
-            PermissionsController permissionsController = new PermissionsController();
-            info.setCanEdit(permissionsController.hasWritePermission(account, entry));
-
-            return info;
-
-        } catch (DAOException e) {
-            Logger.error(e);
-            return null;
-        } catch (ControllerException e) {
-            Logger.error(e);
+            return new EntryController().retrieveEntryDetails(account, id);
+        } catch (ControllerException ce) {
             return null;
         }
     }
@@ -718,28 +659,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             SequenceController sequenceController = new SequenceController();
             boolean hasSequence = (sequenceController.getByEntry(entry) != null);
-
-            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap,
-                                                        sequences, hasSequence);
-
-            //
-            //  the parsed versions are separated out into complementary fields
-            //
-            // todo
-            String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(),
-                                                          info.getLongDescription());
-            String parsed = getParsedNotes(html);
-            info.setLongDescription(info.getLongDescription());
-            info.setParsedDescription(parsed);
-            String parsedShortDesc = EntryUtil.linkifyText(account, info.getShortDescription());
-            info.setLinkifiedShortDescription(parsedShortDesc);
-            String parsedLinks = EntryUtil.linkifyText(account, info.getLinks());
-            info.setLinkifiedLinks(parsedLinks);
+            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence);
 
             // group with write permissions
             PermissionsController permissionsController = new PermissionsController();
             info.setCanEdit(permissionsController.hasWritePermission(account, entry));
-
             return info;
 
         } catch (DAOException e) {
@@ -754,47 +678,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
     }
 
-    private String getParsedNotes(String s) {
-        if (s == null) {
-            return null;
-        }
-
-        final StringBuilder buffer = new StringBuilder();
-        int newlineCount = 0;
-
-        buffer.append("<p>");
-        for (int i = 0; i < s.length(); i++) {
-            final char c = s.charAt(i);
-
-            switch (c) {
-                case '\n':
-                    newlineCount++;
-                    break;
-
-                case '\r':
-                    break;
-
-                default:
-                    if (newlineCount == 1) {
-                        buffer.append("<br/>");
-                    } else if (newlineCount > 1) {
-                        buffer.append("</p><p>");
-                    }
-
-                    buffer.append(c);
-                    newlineCount = 0;
-                    break;
-            }
-        }
-        if (newlineCount == 1) {
-            buffer.append("<br/>");
-        } else if (newlineCount > 1) {
-            buffer.append("</p><p>");
-        }
-        buffer.append("</p>");
-        return buffer.toString();
-
-    }
 
     private AccountInfo accountToInfo(Account account) {
         if (account == null)
@@ -896,7 +779,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                     SampleInfo info = new SampleInfo();
                     info.setSampleId(String.valueOf(sample.getId()));
                     info.setCreationTime(sample.getCreationTime());
-                    EntryInfo view = EntryViewFactory.createTipView(account, sample.getEntry());
+                    EntryInfo view = ModelToInfoFactory.createTipView(account, sample.getEntry());
                     info.setEntryInfo(view);
                     info.setLabel(sample.getLabel());
                     info.setNotes(sample.getNotes());
