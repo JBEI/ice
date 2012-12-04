@@ -1,9 +1,7 @@
 package org.jbei.ice.server;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -136,7 +134,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             info.setVisibleEntryCount(visibleEntryCount);
 
             // get the count of the user's entries
-            long ownerEntryCount = entryController.getOwnerEntryCount(account, Visibility.DRAFT);
+            long ownerEntryCount = entryController.getNumberOfOwnerEntries(account, account.getEmail());
             info.setUserEntryCount(ownerEntryCount);
             return info;
         } catch (ControllerException e) {
@@ -175,7 +173,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 AccountInfo info = new AccountInfo();
                 long count;
                 try {
-                    count = entryController.getOwnerEntryCount(userAccount, Visibility.DRAFT);
+                    count = entryController.getNumberOfOwnerEntries(account, userAccount.getEmail());
                     info.setUserEntryCount(count);
                 } catch (ControllerException e) {
                     Logger.error("Error retrieving entry count for user " + userAccount.getEmail());
@@ -344,7 +342,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (AccountController.isAuthenticated(sid)) {
                 Account account = controller.getAccountBySessionKey(sid);
                 AccountInfo info = this.accountToInfo(account);
-                long entryCount = entryController.getOwnerEntryCount(account, Visibility.DRAFT);
+                long entryCount = entryController.getNumberOfOwnerEntries(account, account.getEmail());
                 info.setUserEntryCount(entryCount);
 
                 boolean isModerator = controller.isAdministrator(account);
@@ -486,8 +484,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             AccountController controller = new AccountController();
             Account user = controller.get(Long.decode(userId));
             Logger.info(account.getEmail() + ": retrieving user entries for " + user.getEmail());
-            ArrayList<Entry> entries = entryController.retrieveOwnerEntries(account, user.getEmail(), sort,
-                                                                            asc, start, limit);
+            List<Entry> entries = entryController.retrieveOwnerEntries(account, user.getEmail(), sort,
+                                                                       asc, start, limit);
             long count = entryController.getNumberOfOwnerEntries(account, user.getEmail());
             details.setCount(count);
             for (Entry entry : entries) {
@@ -811,12 +809,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         info.setInitials(account.getInitials());
         info.setLastLogin(account.getLastLoginTime());
         info.setId(account.getId());
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d yyyy");
-        Date memberSinceDate = account.getCreationTime();
-        if (memberSinceDate != null)
-            info.setSince(dateFormat.format(memberSinceDate));
-
         return info;
     }
 
@@ -1063,9 +1055,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             AccountInfo accountInfo = accountToInfo(account);
 
             // get the count for samples
-            SampleController sampleController = new SampleController();
-            int sampleCount = sampleController.getSampleCountBy(accountInfo.getEmail());
-            accountInfo.setUserSampleCount(sampleCount);
             boolean isModerator = controller.isAdministrator(account);
             long visibleEntryCount;
             if (isModerator)
@@ -1073,7 +1062,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             else
                 visibleEntryCount = entryController.getNumberOfVisibleEntries(account);
             accountInfo.setVisibleEntryCount(visibleEntryCount);
-            long entryCount = entryController.getOwnerEntryCount(account, Visibility.DRAFT);
+            long entryCount = entryController.getNumberOfOwnerEntries(account, account.getEmail());
             accountInfo.setUserEntryCount(entryCount);
             return accountInfo;
         } catch (ControllerException e) {

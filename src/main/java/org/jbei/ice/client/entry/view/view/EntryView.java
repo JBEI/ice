@@ -131,11 +131,13 @@ public class EntryView extends Composite implements IEntryView {
         generalHeaderPanel.setVerticalAlignment(HasAlignment.ALIGN_MIDDLE);
 
         editGeneralButton = new HTML("<i class=\"" + FAIconType.EDIT.getStyleName()
-                                             + "\" style=\"margin-right: 2px\"></i>Edit");
+                                             + "\" style=\"font-size: 16px;\"></i>");
         editGeneralButton.setStyleName("entry_edit_link");
-        deleteLabel = new HTML("<i class=\"" + FAIconType.REMOVE_SIGN.getStyleName()
-                                       + "\" style=\"margin-right: 2px\"></i>Delete");
+        editGeneralButton.setTitle("Edit");
+        deleteLabel = new HTML("<i class=\"" + FAIconType.TRASH.getStyleName()
+                                       + "\" style=\"font-size: 16px\"></i>");
         deleteLabel.setStyleName("entry_delete_link");
+        deleteLabel.setTitle("Delete");
         addSampleLabel = new HTML("<i class=\"" + FAIconType.EDIT.getStyleName()
                                           + "\" style=\"margin-right: 2px\"></i>Add Sample");
         addSampleLabel.setStyleName("entry_edit_link");
@@ -143,7 +145,7 @@ public class EntryView extends Composite implements IEntryView {
                                        + "\" style=\"margin-right: 2px\"></i>Add Sequence");
         addSeqLabel.setStyleName("entry_edit_link");
         headerLabel.setStyleName("entry_general_info_header");
-        pipe = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
+        pipe = new HTML("&nbsp;|&nbsp;");
         pipe.addStyleName("color_eee");
 
         generalHeaderPanel.add(contextPager.getGoBack());

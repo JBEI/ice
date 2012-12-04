@@ -32,7 +32,7 @@ public class EntryControllerTest {
 
     @Before
     public void setUp() {
-        HibernateHelper.initializeMock();
+//        HibernateHelper.initializeMock();
         HibernateHelper.beginTransaction();
         controller = new EntryController();
     }
@@ -84,7 +84,6 @@ public class EntryControllerTest {
 
     @Test
     public void testGetByRecordId() throws Exception {
-
         String email = "testGetByRecordId@TESTER.org";
         AccountController accountController = new AccountController();
         String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
@@ -129,7 +128,6 @@ public class EntryControllerTest {
 
     @Test
     public void testUpdate() throws Exception {
-
         // create account
         String email = "testUpdate@TESTER.org";
 

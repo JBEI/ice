@@ -22,7 +22,7 @@ public class PagerWidget extends Composite {
     private final Icon rightBtn;
 
     public PagerWidget() {
-        goBack = new Icon(FAIconType.SHARE_ALT); //ImageUtil.getPrevIcon();
+        goBack = new Icon(FAIconType.CIRCLE_ARROW_LEFT);
         goBack.setTitle("Back");
         goBack.addStyleName("cursor_pointer");
 

@@ -19,6 +19,7 @@ import com.google.gwt.view.client.HasRows;
  */
 public class EntryTablePager extends AbstractPager {
 
+
     private static class NavLink extends Button {
 
         private int page;
@@ -135,6 +136,10 @@ public class EntryTablePager extends AbstractPager {
         layout.setStyleName("pager");
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
+    }
+
+    public void setNextEnabled(boolean b) { // TODO : use a loading icon since disabled means there is nothing
+        next.setDisabled(!b);
     }
 
     public void goToFirstPage() {

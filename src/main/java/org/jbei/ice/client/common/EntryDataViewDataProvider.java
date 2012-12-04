@@ -120,7 +120,6 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
 
         if (rangeEnd == cachedEntries.size()) { // or close enough within some delta, retrieve more
             cacheMore(lastSortField, lastSortAsc, rangeEnd, rangeEnd + range.getLength());
-            GWT.log("Retrieving more; range (" + rangeEnd + ", " + (rangeEnd + range.getLength()) + ")");
         }
     }
 
@@ -128,7 +127,6 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
      * Determines if the sort params have changed and therefore warrants a
      * call to retrieve new data based on those params.
      *
-     * @param rangeEnd data range end
      * @return true if the data needs to be sorted
      */
     protected boolean sortChanged(int rangeEnd) {
@@ -141,12 +139,11 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
             sortField = this.table.getColumns().get(colIndex).getField();
 
         // check whether we need to sort in order to determine whether we can use the cache or not
-        // this is done because sort() is also called when we are paging (from onRangeChanged)
         if (lastSortAsc == sortAsc && lastSortField == sortField) {
-            // make sure there is enough data in the cache for the callee to obtain what they need
-            // based on range
+            // make sure there is enough data in the cache for the callee to obtain what they need based on range
             if (cachedEntries.size() >= rangeEnd)
                 return false;
+            GWT.log("Not enough cached");
         }
 
         lastSortAsc = sortAsc;
@@ -155,6 +152,7 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
     }
 
     protected void cacheMore(final ColumnField field, final boolean ascending, int rangeStart, int rangeEnd) {
+        GWT.log("Retrieving [" + rangeStart + " - " + rangeEnd + "]");
         int factor = (rangeEnd - rangeStart) * 2;  //  pages in advance
         fetchEntryData(field, ascending, rangeStart, factor, false);
     }

@@ -301,7 +301,6 @@ public class EntryController {
 
     public FolderDetails retrieveVisibleEntries(Account account, ColumnField field, boolean asc, int start, int limit)
             throws ControllerException {
-        long startTime = System.currentTimeMillis();
         LinkedList<Entry> results;
         FolderDetails details = new FolderDetails();
         try {
@@ -324,7 +323,6 @@ public class EntryController {
             throw new ControllerException(de);
         }
 
-        Logger.info("Retrieve took " + (System.currentTimeMillis() - startTime) + "ms");
         return details;
     }
 
@@ -367,7 +365,7 @@ public class EntryController {
         }
     }
 
-    public ArrayList<Entry> retrieveOwnerEntries(Account account, String ownerEmail,
+    public List<Entry> retrieveOwnerEntries(Account account, String ownerEmail,
             ColumnField sort, boolean asc, int start, int limit) throws ControllerException {
         try {
 //            if( !accountController.isAdministrator(account) && !account.getEmail().equals(ownerEmail)){
@@ -583,22 +581,6 @@ public class EntryController {
     public long getAllEntryCount() throws ControllerException {
         try {
             return dao.getAllEntryCount();
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
-    }
-
-    public long getOwnerEntryCount(Account account, Visibility... exclude) throws ControllerException {
-        try {
-            if (exclude.length == 0)
-                return dao.getOwnerEntryCount(account.getEmail());
-
-            Integer[] excludeInt = new Integer[exclude.length];
-            for (int i = 0; i < exclude.length; i += 1)
-                excludeInt[i] = exclude[i].getValue();
-            return dao.getOwnerEntryCount(account.getEmail(), excludeInt);
-
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);

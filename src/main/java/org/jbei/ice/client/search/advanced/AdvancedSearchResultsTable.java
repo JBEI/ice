@@ -9,6 +9,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.SearchResultInfo;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -32,7 +33,7 @@ public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<Searc
         // selection column
         columns.add(super.addSelectionColumn());
 
-//        columns.add(addScoreColumn());
+        columns.add(addScoreColumn());
 
         // type column
         columns.add(super.addTypeColumn(false));
@@ -109,19 +110,19 @@ public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<Searc
         return ownerColumn;
     }
 
-//    protected DataTableColumn<String> addScoreColumn() {
-//        DataTableColumn<String> scoreColumn = new DataTableColumn<String>(new TextCell(), ColumnField.RELEVANCE) {
-//            @Override
-//            public String getValue(SearchResultInfo object) {
-//                return (object.getScore() + "").substring(0, 6);
-//            }
-//        };
-//
-//        scoreColumn.setSortable(false);
-//        this.addColumn(scoreColumn, "Relevance");
-//        this.setColumnWidth(scoreColumn, 90, Unit.PX);
-//        return scoreColumn;
-//    }
+    protected DataTableColumn<String> addScoreColumn() {
+        DataTableColumn<String> scoreColumn = new DataTableColumn<String>(new TextCell(), ColumnField.RELEVANCE) {
+            @Override
+            public String getValue(SearchResultInfo object) {
+                return (object.getScore() + "").substring(0, 6);
+            }
+        };
+
+        scoreColumn.setSortable(false);
+        this.addColumn(scoreColumn, "Relevance");
+        this.setColumnWidth(scoreColumn, 90, Unit.PX);
+        return scoreColumn;
+    }
 
     protected abstract EntryViewEventHandler getHandler();
 }

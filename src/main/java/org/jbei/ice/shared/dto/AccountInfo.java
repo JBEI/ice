@@ -14,10 +14,8 @@ public class AccountInfo implements IsSerializable {
     private String lastName;
     private String institution;
     private String description;
-    private String since;
     private Date lastLogin;
     private long userEntryCount;
-    private int userSampleCount;
     private long visibleEntryCount;
     private boolean isAdmin;
 
@@ -52,10 +50,6 @@ public class AccountInfo implements IsSerializable {
         this.description = description;
     }
 
-    public void setSince(String since) {
-        this.since = since;
-    }
-
     public String getLastName() {
         return lastName;
     }
@@ -72,10 +66,6 @@ public class AccountInfo implements IsSerializable {
         return description;
     }
 
-    public String getSince() {
-        return since;
-    }
-
     public String getSessionId() {
         return sessionId;
     }
@@ -90,14 +80,6 @@ public class AccountInfo implements IsSerializable {
 
     public void setUserEntryCount(long ownerEntryCount) {
         this.userEntryCount = ownerEntryCount;
-    }
-
-    public int getUserSampleCount() {
-        return userSampleCount;
-    }
-
-    public void setUserSampleCount(int userSampleCount) {
-        this.userSampleCount = userSampleCount;
     }
 
     public long getVisibleEntryCount() {

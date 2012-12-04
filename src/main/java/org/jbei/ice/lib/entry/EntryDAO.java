@@ -593,14 +593,10 @@ class EntryDAO extends HibernateRepository<Entry> {
     }
 
     @SuppressWarnings("unchecked")
-    public ArrayList<Entry> retrieveOwnerEntries(String ownerEmail, ColumnField sort, boolean asc, int start, int limit)
+    public List<Entry> retrieveOwnerEntries(String ownerEmail, ColumnField sort, boolean asc, int start, int limit)
             throws DAOException {
-        Session session = currentSession();
         try {
-            Criteria criteria = session.createCriteria(Entry.class).add(Restrictions.eq("ownerEmail", ownerEmail))
-                                       .add(Restrictions.ne("visibility", new Integer(Visibility.DRAFT.getValue())));
 
-            // sort
             if (sort == null)
                 sort = ColumnField.CREATED;
 
@@ -621,13 +617,18 @@ class EntryDAO extends HibernateRepository<Entry> {
                     break;
             }
 
-            Order sortOrder = asc ? Order.asc(fieldName) : Order.desc(fieldName);
-            criteria.addOrder(sortOrder);
-            criteria.setFirstResult(start);
-            criteria.setMaxResults(limit);
-            List list = criteria.list();
+            String suffix = "order by " + fieldName;
+            suffix += asc ? " asc " : " desc";
 
-            return new ArrayList<Entry>(list);
+            Query query = currentSession().createQuery(
+                    "from " + Entry.class.getName() + " where ownerEmail = :ownerEmail AND visibility != :v " + suffix);
+            query.setFirstResult(start);
+            query.setMaxResults(limit);
+            query.setString("ownerEmail", ownerEmail);
+            query.setInteger("v", Visibility.DRAFT.getValue());
+
+            List list = query.list();
+            return new LinkedList<Entry>(list);
 
         } catch (HibernateException he) {
             Logger.error(he);
@@ -639,7 +640,8 @@ class EntryDAO extends HibernateRepository<Entry> {
         Session session = currentSession();
         try {
             Criteria criteria = session.createCriteria(Entry.class).add(Restrictions.eq("ownerEmail", ownerEmail))
-                                       .add(Restrictions.eq("visibility", new Integer(Visibility.OK.getValue())));
+                                       .add(Restrictions.or(Restrictions.eq("visibility", new Integer(
+                                               Visibility.OK.getValue())), Restrictions.eq("visibility", null)));
             criteria.setProjection(Projections.rowCount());
             Long rowCount = (Long) criteria.uniqueResult();  // long
             return rowCount;

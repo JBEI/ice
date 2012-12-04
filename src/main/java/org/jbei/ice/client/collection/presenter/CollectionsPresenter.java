@@ -303,10 +303,10 @@ public class CollectionsPresenter extends AbstractPresenter {
             entryViewPresenter = new EntryPresenter(model.getService(), model.getEventBus(), event);
             entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
         }
+
         mode = Mode.ENTRY;
         currentContext = event;
         History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getCurrent(), false);
-        entryViewPresenter.setCurrentContext(event);
         display.enableExportAs(true);
         display.setMainContent(entryViewPresenter.getView());
         boolean enable;
@@ -416,8 +416,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             public void onFolderEvent(FolderEvent event) {
                 FolderDetails folder = event.getFolder();
                 if (folder == null) {
-                    display.showFeedbackMessage("Error updating collection. Please try again",
-                                                false);
+                    display.showFeedbackMessage("Error updating collection. Please try again", false);
                     return;
                 }
 

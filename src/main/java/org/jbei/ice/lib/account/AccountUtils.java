@@ -1,8 +1,5 @@
 package org.jbei.ice.lib.account;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.AccountInfo;
@@ -39,12 +36,6 @@ public class AccountUtils {
         info.setDescription(account.getDescription());
         info.setInitials(account.getInitials());
         info.setId(account.getId());
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d yyyy");
-        Date memberSinceDate = account.getCreationTime();
-        if (memberSinceDate != null)
-            info.setSince(dateFormat.format(memberSinceDate));
-
         return info;
     }
 }

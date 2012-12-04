@@ -37,7 +37,6 @@ public abstract class DataTable<T> extends CellTable<T> {
     // look for a way to merge them
 
     public DataTable() {
-
         super(15, EntryResources.INSTANCE);
         setStyleName("data_table");
         Label empty = new Label();

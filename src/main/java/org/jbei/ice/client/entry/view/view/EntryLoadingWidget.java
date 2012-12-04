@@ -32,8 +32,7 @@ public class EntryLoadingWidget extends Composite {
             panel.setHeight("450px");
 
         panel.setHTML(0, 0, "<span>LOADING...</span>");
-        panel.getFlexCellFormatter().setAlignment(0, 0, HasAlignment.ALIGN_CENTER,
-                                                  HasAlignment.ALIGN_MIDDLE);
+        panel.getFlexCellFormatter().setAlignment(0, 0, HasAlignment.ALIGN_CENTER, HasAlignment.ALIGN_MIDDLE);
         //        panel.setHeight("100%");
         initWidget(panel);
     }

@@ -219,9 +219,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 long id = Long.decode(param);
                 EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
                 context.setCurrent(id);
-
-                presenter = new CollectionsPresenter(new CollectionsModel(this.service, this.eventBus),
-                                                     cView, context);
+                presenter = new CollectionsPresenter(new CollectionsModel(this.service, this.eventBus), cView, context);
                 break;
 
             case PROFILE:

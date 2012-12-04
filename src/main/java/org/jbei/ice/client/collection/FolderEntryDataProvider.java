@@ -2,8 +2,10 @@ package org.jbei.ice.client.collection;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.DataTable;
+import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -19,13 +21,20 @@ import com.google.gwt.view.client.Range;
 public class FolderEntryDataProvider extends EntryDataViewDataProvider {
 
     private FolderDetails details;
+    private boolean nextDisabled = false;
+    private final EntryTablePager pager;
 
-    public FolderEntryDataProvider(DataTable<EntryInfo> view, RegistryServiceAsync service) {
+    public FolderEntryDataProvider(CollectionDataTable view, RegistryServiceAsync service) {
         super(view, service);
+        pager = view.getPager();
     }
 
     @Override
     protected void fetchEntryData(ColumnField field, boolean asc, int start, int factor, final boolean reset) {
+
+        if (!reset)
+            pager.setNextEnabled(false);
+
         switch ((int) details.getId()) {
             case -1:
                 service.retrieveAllVisibleEntryIDs(AppController.sessionId, details, field, asc, start, factor,
@@ -45,8 +54,10 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
 
                                                            if (reset)
                                                                setFolderData(details);
-                                                           else
+                                                           else {
                                                                cachedEntries.addAll(result.getEntries());
+                                                               pager.setNextEnabled(true);
+                                                           }
                                                        }
                                                    });
                 break;
