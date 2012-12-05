@@ -12,27 +12,27 @@ import org.jbei.ice.shared.dto.EntryType;
  */
 public enum SearchFilterType {
 
-    IDENTIFIER("Identifier", "identifier", EntryType.values()),
-    HAS_ATTACHMENT("Has Attachment", "has_attach", EntryType.values()),
-    HAS_SEQUENCE("Has Sequence", "has_seq", EntryType.values()),
-    HAS_SAMPLE("Has Sample", "has_sample", EntryType.values()),
-    DESCRIPTION("Description", "description", EntryType.values()),
-    STATUS("Status", "status", EntryType.values()),
-    OWNER("Owner", "owner", EntryType.values()),
-    CREATOR("Creator", "creator", EntryType.values()),
-    BIO_SAFETY_LEVEL("Bio Safety Level", "safety_level", EntryType.values()),
+    IDENTIFIER("Identifier", "id", EntryType.values()),
+    HAS_ATTACHMENT("Has Attachment", "ha", EntryType.values()),
+    HAS_SEQUENCE("Has Sequence", "hse", EntryType.values()),
+    HAS_SAMPLE("Has Sample", "hsa", EntryType.values()),
+    DESCRIPTION("Description", "des", EntryType.values()),
+    STATUS("Status", "st", EntryType.values()),
+    OWNER("Owner", "o", EntryType.values()),
+    CREATOR("Creator", "c", EntryType.values()),
+    BIO_SAFETY_LEVEL("Bio Safety Level", "sl", EntryType.values()),
     PRINCIPAL_INVESTIGATOR("Principal Investigator", "pi", EntryType.values()),
-    FUNDING_SOURCE("Funding Source", "funding", EntryType.values()),
+    FUNDING_SOURCE("Funding Source", "f", EntryType.values()),
 
-    SELECTION_MARKER("Selection Marker", "marker", EntryType.STRAIN, EntryType.PLASMID),
-    BACKBONE("Backbone", "backbone", EntryType.PLASMID),
-    PROMOTERS("Promoters", "promoters", EntryType.PLASMID),
-    ORIGIN("Origin of Replication", "origin", EntryType.PLASMID),
-    HOST("Host", "host", EntryType.STRAIN),
-    STRAIN_PLASMIDS("Strain Plasmids", "plasmids", EntryType.STRAIN),
-    GEN_PHEN("Genotype/Phenotype", "gen_phen", EntryType.STRAIN),
+    SELECTION_MARKER("Selection Marker", "sm", EntryType.STRAIN, EntryType.PLASMID),
+    BACKBONE("Backbone", "b", EntryType.PLASMID),
+    PROMOTERS("Promoters", "p", EntryType.PLASMID),
+    ORIGIN("Origin of Replication", "or", EntryType.PLASMID),
+    HOST("Host", "h", EntryType.STRAIN),
+    STRAIN_PLASMIDS("Strain Plasmids", "spl", EntryType.STRAIN),
+    GEN_PHEN("Genotype/Phenotype", "gp", EntryType.STRAIN),
     //    PACKAGE_FORMAT("Package Format", "format", EntryType.PART),
-    BLAST("Blast", "blast", EntryType.values());
+    BLAST("Blast", "bl", EntryType.values());
 
     private String displayName;
     private String shortName;
@@ -75,5 +75,14 @@ public enum SearchFilterType {
 
             return null;
         }
+    }
+
+    public static SearchFilterType stringToSearchType(String value) {
+        for (SearchFilterType type : SearchFilterType.values()) {
+            if (type.getShortName().equals(type))
+                return type;
+        }
+
+        return null;
     }
 }

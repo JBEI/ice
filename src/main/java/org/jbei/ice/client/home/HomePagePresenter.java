@@ -8,15 +8,10 @@ import com.google.gwt.user.client.ui.HasWidgets;
 
 public class HomePagePresenter extends AbstractPresenter {
 
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     private final IHomePageView display;
 
-    public HomePagePresenter(RegistryServiceAsync service, HandlerManager eventBus,
-            IHomePageView display) {
-
-        this.service = service;
-        this.eventBus = eventBus;
+    public HomePagePresenter(RegistryServiceAsync service, HandlerManager eventBus, IHomePageView display) {
+        super(service, eventBus);
         this.display = display;
     }
 

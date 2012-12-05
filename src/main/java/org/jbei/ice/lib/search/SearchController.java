@@ -27,6 +27,7 @@ import org.jbei.ice.shared.dto.SearchResults;
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
 public class SearchController {
+
     private final SearchDAO dao;
     private final PermissionsController permissionsController;
 
@@ -42,7 +43,6 @@ public class SearchController {
 
         SearchResults searchResults = null;
         for (QueryFilter filter : filters) {
-
             SearchFilterType type = filter.getSearchType();
             String operand = filter.getOperand();
             if (operand == null || operand.trim().isEmpty())     // operand is actual query and it cannot be empty

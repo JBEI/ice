@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Hector Plahar
  */
-public interface IAdvancedSearchView {
+public interface ISearchView {
 
     void setSearchFilters(ArrayList<SearchFilterInfo> filters);
 
@@ -21,4 +21,6 @@ public interface IAdvancedSearchView {
     void setSearchVisibility(AdvancedSearchResultsTable table, boolean visible);
 
     void setBlastVisibility(BlastResultsTable table, boolean visible);
+
+    ArrayList<SearchFilterInfo> parseUrlForFilters();
 }

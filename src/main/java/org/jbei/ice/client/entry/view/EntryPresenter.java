@@ -56,8 +56,6 @@ import gwtupload.client.IUploader.UploadedInfo;
  */
 public class EntryPresenter extends AbstractPresenter {
 
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     private final IEntryView display;
     private final EntryModel model;
     private EntryInfo currentInfo;
@@ -65,8 +63,7 @@ public class EntryPresenter extends AbstractPresenter {
     private SequenceViewPanelPresenter sequencePresenter;
 
     public EntryPresenter(final RegistryServiceAsync service, final HandlerManager eventBus, EntryContext context) {
-        this.service = service;
-        this.eventBus = eventBus;
+        super(service, eventBus);
         this.display = new EntryView();
         this.currentContext = context;
 

@@ -29,8 +29,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 public class AdminPresenter extends AbstractPresenter {
 
     private final AdminView view;
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     private AdminOption currentOption;
     private GroupPresenter groupPresenter;
     private UserPresenter userPresenter;
@@ -38,10 +36,8 @@ public class AdminPresenter extends AbstractPresenter {
     private WebOfRegistriesPresenter webPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view, String optionStr) {
-        this.service = service;
+        super(service, eventBus);
         this.view = view;
-        this.eventBus = eventBus;
-
         AdminOption option = AdminOption.urlToOption(optionStr);
         if (option == null)
             option = AdminOption.SETTINGS;

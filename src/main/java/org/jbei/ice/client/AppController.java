@@ -1,6 +1,5 @@
 package org.jbei.ice.client;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -8,21 +7,15 @@ import org.jbei.ice.client.admin.AdminPresenter;
 import org.jbei.ice.client.admin.AdminView;
 import org.jbei.ice.client.bulkupload.BulkUploadPresenter;
 import org.jbei.ice.client.bulkupload.BulkUploadView;
-import org.jbei.ice.client.bulkupload.model.BulkUploadModel;
-import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.collection.view.CollectionsView;
-import org.jbei.ice.client.common.AbstractLayout;
-import org.jbei.ice.client.common.header.QuickSearchParser;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.ILoginEventHandler;
 import org.jbei.ice.client.event.ILogoutEventHandler;
 import org.jbei.ice.client.event.LoginEvent;
 import org.jbei.ice.client.event.LogoutEvent;
-import org.jbei.ice.client.event.SearchEvent;
-import org.jbei.ice.client.event.SearchEventHandler;
 import org.jbei.ice.client.home.HomePagePresenter;
 import org.jbei.ice.client.home.HomePageView;
 import org.jbei.ice.client.login.LoginPresenter;
@@ -31,11 +24,9 @@ import org.jbei.ice.client.news.NewsPresenter;
 import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
+import org.jbei.ice.client.search.advanced.SearchView;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -44,24 +35,20 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
-// TODO : this class is due for a makeover
 public class AppController extends AbstractPresenter implements ValueChangeHandler<String> {
 
     // cookie times out in three days (current value set in Ice)
     private static final int COOKIE_TIMEOUT = (1000 * 60 * 60 * 24) * 3;
     private static final int DAY_TIMEOUT = (1000 * 60 * 60 * 24);
-    private static final String COOKIE_NAME = "gd-ice";
+    private static final String COOKIE_NAME = "gd-ice"; //TODO: this is set in the backend. does anyone even change it?
     private static final String COOKIE_PATH = "/";
 
     private HasWidgets container; // root panel
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     public static String sessionId;
     public static AccountInfo accountInfo;
 
-    public AppController(RegistryServiceAsync service, HandlerManager eB) {
-        this.service = service;
-        eventBus = eB;
+    public AppController(RegistryServiceAsync service, HandlerManager eventBus) {
+        super(service, eventBus);
         bind();
     }
 
@@ -106,15 +93,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         // add log out handler
         this.eventBus.addHandler(LogoutEvent.TYPE, new AppLogoutHandler());
 
-        // search handler
-        this.eventBus.addHandler(SearchEvent.TYPE, new SearchEventHandler() {
-
-            @Override
-            public void onSearch(SearchEvent event) {
-                showSearchResults(event.getFilters());
-            }
-        });
-
         // entry view event
         this.eventBus.addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
 
@@ -125,32 +103,13 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         });
     }
 
-    private void showSearchResults(ArrayList<SearchFilterInfo> operands) {
-        if (operands == null)
-            return;
-
-        Page currentPage = getPage(History.getToken());
-        if (currentPage == Page.COLLECTIONS)
-            return; // collections is also listening on the eventBus for search events so do not respond. 
-
-        History.newItem(Page.COLLECTIONS.getLink(), false);
-        final CollectionsView cView = new CollectionsView();
-        addHeaderSearchHandler(cView);
-        CollectionsPresenter presenter = new CollectionsPresenter(new CollectionsModel(
-                this.service, this.eventBus), cView, operands);
-        presenter.go(container);
-    }
-
     private void showEntryView(EntryViewEvent event) {
         Page currentPage = getPage(History.getToken());
         if (currentPage == Page.COLLECTIONS || currentPage == Page.ENTRY_VIEW)
             return;
 
         CollectionsView cView = new CollectionsView();
-        addHeaderSearchHandler(cView); // TODO : not sure if this is needed
-
-        CollectionsPresenter presenter = new CollectionsPresenter(new CollectionsModel(
-                this.service, this.eventBus), cView, event.getContext());
+        CollectionsPresenter presenter = new CollectionsPresenter(service, eventBus, cView, event.getContext());
         presenter.go(container);
     }
 
@@ -203,48 +162,36 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         AbstractPresenter presenter;
 
         switch (page) {
-
-            // TODO : cache the views and call reset() in the presenter when displaying them. they are apparently
-            // expensive to create or sum such
-            // TODO : presenters are cheap however
             case MAIN:
                 HomePageView homePageView = new HomePageView();
-                addHeaderSearchHandler(homePageView);
                 presenter = new HomePagePresenter(this.service, this.eventBus, homePageView);
                 break;
 
             case ENTRY_VIEW:
                 CollectionsView cView = new CollectionsView();
-                addHeaderSearchHandler(cView); // TODO : not sure if this is needed
                 long id = Long.decode(param);
                 EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
                 context.setCurrent(id);
-                presenter = new CollectionsPresenter(new CollectionsModel(this.service, this.eventBus), cView, context);
+                presenter = new CollectionsPresenter(this.service, this.eventBus, cView, context);
                 break;
 
             case PROFILE:
                 ProfileView pView = new ProfileView();
                 presenter = new ProfilePresenter(this.service, this.eventBus, pView, param); //, selection);
-                addHeaderSearchHandler(pView);
                 break;
 
             case COLLECTIONS:
                 CollectionsView collectionsView = new CollectionsView();
-                addHeaderSearchHandler(collectionsView);
-                CollectionsModel collectionsModel = new CollectionsModel(this.service, this.eventBus);
-                presenter = new CollectionsPresenter(collectionsModel, collectionsView, param);
+                presenter = new CollectionsPresenter(this.service, this.eventBus, collectionsView, param);
                 break;
 
             case BULK_IMPORT:
-                BulkUploadModel model = new BulkUploadModel(this.service, this.eventBus);
                 BulkUploadView uploadView = new BulkUploadView();
-                addHeaderSearchHandler(uploadView);
-                presenter = new BulkUploadPresenter(model, uploadView);
+                presenter = new BulkUploadPresenter(service, eventBus, uploadView);
                 break;
 
             case NEWS:
                 NewsView nView = new NewsView();
-                addHeaderSearchHandler(nView);
                 presenter = new NewsPresenter(this.service, this.eventBus, nView);
                 break;
 
@@ -254,8 +201,13 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                     return;
                 }
                 AdminView aView = new AdminView();
-                addHeaderSearchHandler(aView);
                 presenter = new AdminPresenter(this.service, this.eventBus, aView, param);
+                break;
+
+            case QUERY:
+                SearchView searchView = new SearchView();
+                collectionsView = new CollectionsView();
+                presenter = new CollectionsPresenter(this.service, this.eventBus, collectionsView, searchView);
                 break;
 
             case LOGIN:
@@ -265,28 +217,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         }
 
         presenter.go(this.container);
-    }
-
-    // TODO : this can go into the abstract presenter at some point
-    private void addHeaderSearchHandler(final AbstractLayout view) {
-        if (view == null)
-            return;
-
-        view.getHeader().addSearchClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                view.getHeader().setSearchButtonEnable(false);
-                ArrayList<SearchFilterInfo> parse = QuickSearchParser.parse(view.getHeader().getSearchInput());
-                SearchFilterInfo blastInfo = view.getHeader().getBlastInfo();
-                if (blastInfo != null)
-                    parse.add(blastInfo);
-                SearchEvent searchInProgressEvent = new SearchEvent();
-                searchInProgressEvent.setFilters(parse);
-                eventBus.fireEvent(searchInProgressEvent);
-                view.getHeader().setSearchButtonEnable(true);
-            }
-        });
     }
 
     protected Page getPage(String token) {
@@ -320,7 +250,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
     // newItem and fireCurrentHistoryState causes onValueChange call
     @Override
     public void go(final HasWidgets container) {
-
         this.container = container;
 
         // check if there is a stored session that is valid
@@ -357,7 +286,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 }
             });
         } else {
-
             if (Page.LOGIN.getLink().equals(History.getToken()))
                 History.fireCurrentHistoryState();
             else

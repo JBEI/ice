@@ -1,10 +1,10 @@
 package org.jbei.ice.client.common.header;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.FilterWidget;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
@@ -18,10 +18,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.ListBox;
@@ -34,12 +36,13 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class AdvancedSearchWidget extends Composite {
 
-    private final EntryTypeFilterWidget entryTypes;  // entry type filter
+    private final EntryTypeFilterWidget entryTypes;     // entry type filter
     private final Button runSearch;
+    private final HTML reset;
     private final FlexTable panel;
     private final FlexTable filterOptionsPanel;
     private int currentRow;
-    private ChangeHandler optionChangeHandler;
+    private ChangeHandler filterSelectionHandler;
     private final HashMap<Integer, FilterRow> rowBox;   // mapping of row->list box
     private final EntrySearchFilter searchFilter;
 
@@ -51,7 +54,7 @@ public class AdvancedSearchWidget extends Composite {
         panel.setStyleName("bg_white");
         searchFilter = new EntrySearchFilter();
 
-        optionChangeHandler = new FilterOptionChangeHandler();
+        filterSelectionHandler = new FilterOptionChangeHandler();
 
         // init components
         filterOptionsPanel = new FlexTable();
@@ -61,6 +64,8 @@ public class AdvancedSearchWidget extends Composite {
         rowBox = new HashMap<Integer, FilterRow>();
 
         runSearch = new Button("Search");
+        reset = new HTML("<b>Reset</b>");
+        reset.setStyleName("edit_permissions_label");
         entryTypes = new EntryTypeFilterWidget();
 
         panel.setWidget(0, 0, entryTypes);
@@ -69,6 +74,26 @@ public class AdvancedSearchWidget extends Composite {
         panel.getFlexCellFormatter().setHeight(0, 0, "23px");
 
         initializeWidget();
+        addResetHandler();
+        addSearchHandler();
+    }
+
+    private void addSearchHandler() {
+        runSearch.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                History.newItem(Page.QUERY.getLink() + ";test");
+            }
+        });
+    }
+
+    private void addResetHandler() {
+        reset.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                initializeWidget();
+            }
+        });
     }
 
     // meant to be called only once to set the options available for searching
@@ -76,9 +101,13 @@ public class AdvancedSearchWidget extends Composite {
         // search filter options
         panel.setWidget(1, 0, filterOptionsPanel);
         panel.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
+        panel.getFlexCellFormatter().setColSpan(1, 0, 2);
 
         panel.setWidget(2, 0, runSearch);
         panel.getFlexCellFormatter().setHorizontalAlignment(2, 0, HasAlignment.ALIGN_RIGHT);
+        panel.setWidget(2, 1, reset);
+        panel.getFlexCellFormatter().setHorizontalAlignment(2, 1, HasAlignment.ALIGN_CENTER);
+        panel.getFlexCellFormatter().setWidth(2, 1, "50px");
 
         filterOptionsPanel.removeAllRows();
 
@@ -93,7 +122,7 @@ public class AdvancedSearchWidget extends Composite {
     protected void populateListBox(ListBox options) {
         options.setWidth("140px");
         options.setStyleName("pull_down");
-        options.addChangeHandler(this.optionChangeHandler);
+        options.addChangeHandler(this.filterSelectionHandler);
 
         options.addItem("Select Filter", "");
         for (SearchFilterType type : SearchFilterType.values()) {
@@ -198,10 +227,10 @@ public class AdvancedSearchWidget extends Composite {
         }
 
         protected void addHandlers() {
-            allCheck.addValueChangeHandler(new CheckBoxHandlers(true));
-            CheckBoxHandlers handlers = new CheckBoxHandlers(false);
+            allCheck.addValueChangeHandler(new CheckBoxHandler(true));
+            CheckBoxHandler handler = new CheckBoxHandler(false);
             for (CheckBox box : typeChecks) {
-                box.addValueChangeHandler(handlers);
+                box.addValueChangeHandler(handler);
             }
         }
 
@@ -225,11 +254,11 @@ public class AdvancedSearchWidget extends Composite {
             return selected;
         }
 
-        private class CheckBoxHandlers implements ValueChangeHandler<Boolean> {
+        private class CheckBoxHandler implements ValueChangeHandler<Boolean> {
 
             private final boolean isAll;
 
-            public CheckBoxHandlers(boolean isAll) {
+            public CheckBoxHandler(boolean isAll) {
                 this.isAll = isAll;
             }
 
@@ -289,29 +318,44 @@ public class AdvancedSearchWidget extends Composite {
                 option.setWidth("140px");
                 option.setStyleName("pull_down");
                 option.addItem("Select Filter", "");
-                option.addChangeHandler(optionChangeHandler);
+                option.addChangeHandler(filterSelectionHandler);
 
                 int i = 0;
-                boolean hasSelection = false;
+//                boolean hasSelection = false;
 
+                // for each of the search filters
                 for (SearchFilterType type : SearchFilterType.values()) {
-                    ArrayList<EntryType> restrictions = new ArrayList<EntryType>();
-                    restrictions.addAll(Arrays.asList(type.getEntryRestrictions()));
-                    ArrayList<EntryType> selectedCopy = new ArrayList<EntryType>(selected);
+                    // any restrictions
+                    boolean add = (type.getEntryRestrictions().length == 0);
 
-                    // restrictions must be empty or contain at least one of selected
-                    if (restrictions.isEmpty() || (selectedCopy.retainAll(restrictions) && !selectedCopy.isEmpty())) {
+                    // check to see if at least one of the remaining selected entry types is found in the
+                    // restrictions list for the search filter, then add the filter to that option
+                    if (!add) {
+                        for (EntryType selectedType : selected) {
+                            for (EntryType restrictedType : type.getEntryRestrictions()) {
+                                if (selectedType == restrictedType) {
+                                    add = true;
+                                    break;
+                                }
+                            }
+                            if (add)
+                                break;
+                        }
+                    }
+
+                    // can we add now?
+                    if (add) {
                         option.addItem(type.displayName(), type.name());
                         i += 1;
                         if (type.name().equals(selectedValue)) {
                             option.setSelectedIndex(i);
-                            hasSelection = true;
+//                            hasSelection = true;
                         }
                     }
                 }
 
-                if (!hasSelection)
-                    return null;
+//                if (!hasSelection)
+//                    return null;
                 return option;
             }
         }
@@ -353,5 +397,4 @@ public class AdvancedSearchWidget extends Composite {
             this.value = value;
         }
     }
-
 }

@@ -29,14 +29,10 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class NewsPresenter extends AbstractPresenter {
 
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     private final INewsView display;
 
     public NewsPresenter(RegistryServiceAsync service, HandlerManager eventBus, INewsView news) {
-
-        this.service = service;
-        this.eventBus = eventBus;
+        super(service, eventBus);
         this.display = news;
         bind();
 

@@ -3,6 +3,7 @@ package org.jbei.ice.client.search.advanced;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
@@ -14,6 +15,7 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 
 /**
@@ -21,13 +23,13 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
  *
  * @author Hector Plahar
  */
-public class AdvancedSearchPresenter {
+public class SearchPresenter extends AbstractPresenter {
 
     private enum Mode {
         BLAST, SEARCH;
     }
 
-    private final AdvancedSearchView display;
+    private final ISearchView display;
     private final AdvancedSearchDataProvider dataProvider;
     private final BlastSearchDataProvider blastProvider;
     private final AdvancedSearchModel model;
@@ -35,9 +37,9 @@ public class AdvancedSearchPresenter {
     private BlastResultsTable blastTable;
     private Mode mode;
 
-    public AdvancedSearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus) {
-        this.display = new AdvancedSearchView();
-
+    public SearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus, ISearchView view) {
+        super(rpcService, eventBus);
+        this.display = view;
         table = new AdvancedSearchResultsTable() {
 
             @Override
@@ -72,8 +74,14 @@ public class AdvancedSearchPresenter {
         this.model = new AdvancedSearchModel(rpcService, eventBus);
     }
 
+    @Override
+    public void go(HasWidgets container) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public void addTableSelectionModelChangeHandler(Handler handler) {
-//        final EntrySelectionModel<EntryInfo> selectionModel = this.table.getSelectionModel();
+        // TODO :
+//        final HasEntrySelectionModel<SearchResultInfo> selectionModel = this.table.getSelectionModel();
 //        selectionModel.addSelectionChangeHandler(handler);
     }
 
@@ -82,21 +90,20 @@ public class AdvancedSearchPresenter {
         return null;
     }
 
-    public void search(final ArrayList<SearchFilterInfo> searchFilters) {
-        if (searchFilters == null)
-            return;
-
+    public void search() {
         // currently support only a single blast search with filters
         // search for blast operator
-        ArrayList<SearchFilterInfo> filterCopy = new ArrayList<SearchFilterInfo>(searchFilters);
+
+        ArrayList<SearchFilterInfo> searchFilters = display.parseUrlForFilters();
+        ArrayList<SearchFilterInfo> searchFilterCopy = new ArrayList<SearchFilterInfo>(searchFilters);
         SearchFilterInfo blastInfo = null;
-        for (SearchFilterInfo filter : filterCopy) {
+        for (SearchFilterInfo filter : searchFilterCopy) {
             QueryOperator operator = QueryOperator.operatorValueOf(filter.getOperator());
             if (operator == null)
                 continue;
 
             if (operator == QueryOperator.TBLAST_X || operator == QueryOperator.BLAST_N) {
-                if (filterCopy.remove(filter)) {
+                if (searchFilterCopy.remove(filter)) {
                     blastInfo = filter;
                 }
                 break;
@@ -112,7 +119,7 @@ public class AdvancedSearchPresenter {
 
             // get blast results and filter 
             QueryOperator program = QueryOperator.operatorValueOf(blastInfo.getOperator());
-            this.model.performBlast(filterCopy, blastInfo.getOperand(), program, 0, 15, new EventHandler(
+            this.model.performBlast(searchFilterCopy, blastInfo.getOperand(), program, 0, 15, new EventHandler(
                     searchFilters));
         } else {
 
@@ -120,7 +127,7 @@ public class AdvancedSearchPresenter {
             dataProvider.updateRowCount(0, false);
             display.setSearchVisibility(table, true);
             table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
-            this.model.retrieveSearchResults(filterCopy, 0, 30, new EventHandler(searchFilters));
+            this.model.retrieveSearchResults(searchFilterCopy, 0, 30, new EventHandler(searchFilters));
         }
     }
 
@@ -138,7 +145,7 @@ public class AdvancedSearchPresenter {
         }
     }
 
-    public AdvancedSearchView getView() {
+    public ISearchView getView() {
         return this.display;
     }
 

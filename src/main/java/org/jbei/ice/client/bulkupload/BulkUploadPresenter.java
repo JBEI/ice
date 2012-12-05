@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.bulkupload.events.BulkUploadDraftSubmitEvent;
 import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEvent;
 import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEventHandler;
@@ -23,6 +24,7 @@ import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -42,9 +44,10 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>(); // list of saved
     // drafts
 
-    public BulkUploadPresenter(BulkUploadModel model, final IBulkUploadView display) {
+    public BulkUploadPresenter(RegistryServiceAsync service, HandlerManager eventBus, final IBulkUploadView display) {
+        super(service, eventBus);
         this.view = display;
-        this.model = model;
+        this.model = new BulkUploadModel(service, eventBus);
         sheetCache = new HashMap<EntryAddType, NewBulkInput>();
 
         setClickHandlers();

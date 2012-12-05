@@ -2,6 +2,7 @@ package org.jbei.ice.client.common.header;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
@@ -28,7 +29,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class HeaderView extends Composite {
+public class HeaderView extends Composite implements HeaderPresenter.View {
 
     interface Resources extends ClientBundle {
 
@@ -43,15 +44,21 @@ public class HeaderView extends Composite {
     private final AdvancedSearchWidget widgetAdvanced;
     private final HeaderPresenter presenter;
     private FlexTable loggedInContentsPanel;
+    private final static HeaderView INSTANCE = new HeaderView();
 
-    public HeaderView() {
+    public static HeaderView getInstance() {
+        return INSTANCE;
+    }
+
+    private HeaderView() {
         Widget searchPanel = createSearchPanel();
         FlexTable table = new FlexTable();
         table.setCellPadding(0);
         table.setCellSpacing(0);
-        table.setStyleName("pad-right-10");
         table.setWidth("100%");
         initWidget(table);
+
+        HeaderMenu headerMenu = new HeaderMenu();
 
         VerticalPanel vertical = new VerticalPanel();
         vertical.add(createLoggedInContents());
@@ -65,6 +72,9 @@ public class HeaderView extends Composite {
         horizontal.add(vertical);
 
         table.setWidget(0, 0, horizontal);
+        if (userIsLoggedIn()) {
+            table.setWidget(1, 0, headerMenu);
+        }
 
         // search Option
         widgetAdvanced = new AdvancedSearchWidget();
@@ -82,10 +92,6 @@ public class HeaderView extends Composite {
         searchBtn.addClickHandler(handler);
     }
 
-    public void setSearchButtonEnable(boolean enable) {
-        searchBtn.setEnabled(enable);
-    }
-
     private Widget getImageHeader() {
         Image img = new Image(Resources.INSTANCE.logo());
         return img;
@@ -96,7 +102,7 @@ public class HeaderView extends Composite {
         layout.setCellPadding(4);
         layout.setCellSpacing(1);
 
-        if (!isUserLoggedIn()) {
+        if (!userIsLoggedIn()) {
             return layout;
         }
 
@@ -122,7 +128,7 @@ public class HeaderView extends Composite {
         return layout;
     }
 
-    protected boolean isUserLoggedIn() {
+    protected boolean userIsLoggedIn() {
         return AppController.sessionId != null;
     }
 
@@ -170,7 +176,6 @@ public class HeaderView extends Composite {
         loggedInContentsPanel.setWidget(0, 4, new HTML("&nbsp;"));
         Hyperlink logout = new Hyperlink("Log Out", Page.LOGOUT.getLink());
         loggedInContentsPanel.setWidget(0, 5, logout);
-
         return loggedInContentsPanel;
     }
 
@@ -179,9 +184,7 @@ public class HeaderView extends Composite {
             return;
 
         final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #EEE\">|</span>&nbsp;&nbsp;"
-                                                 + "<span class=\"badge\">"
-                                                 + newMessageCount
-                                                 + "</span>");
+                                                 + "<span class=\"badge\">" + newMessageCount + "</span>");
         emailBadge.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

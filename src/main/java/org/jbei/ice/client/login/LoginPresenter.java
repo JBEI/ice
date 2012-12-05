@@ -29,13 +29,10 @@ import com.google.gwt.user.client.ui.HasWidgets;
 
 public class LoginPresenter extends AbstractPresenter {
 
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     private final ILoginView display;
 
     public LoginPresenter(RegistryServiceAsync service, HandlerManager eventBus, ILoginView display) {
-        this.service = service;
-        this.eventBus = eventBus;
+        super(service, eventBus);
         this.display = display;
 
         determineCanChangePassword();

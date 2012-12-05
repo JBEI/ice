@@ -29,10 +29,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
  */
 public class ProfilePresenter extends AbstractPresenter {
 
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     private final IProfileView display;
-
     private AccountInfo currentInfo;
     private EntryDataViewDataProvider entryDataProvider;
     private final CollectionDataTable collectionsDataTable;
@@ -40,10 +37,8 @@ public class ProfilePresenter extends AbstractPresenter {
 
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
             final IProfileView display, final String userId) {
-
+        super(service, eventBus);
         this.userId = userId;
-        this.service = service;
-        this.eventBus = eventBus;
         this.display = display;
 
 

@@ -9,6 +9,8 @@ import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -18,14 +20,13 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-public class AdvancedSearchView extends Composite implements IAdvancedSearchView {
+public class SearchView extends Composite implements ISearchView {
 
     private FlowPanel filterPanel;
     private EntryTablePager pager;
     private final FlexTable layout;
-    private final HorizontalPanel tableHeader;
 
-    public AdvancedSearchView() {
+    public SearchView() {
         layout = new FlexTable();
         layout.setWidth("100%");
         layout.setHeight("100%");
@@ -43,7 +44,7 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
         captionPanel.add(filterPanel);
 
         // table header
-        tableHeader = new HorizontalPanel();
+        HorizontalPanel tableHeader = new HorizontalPanel();
         tableHeader.add(new HTML(
                 "<span style=\"padding: 4px; font-size: 12px; border-top: 1px solid #ccc; border-left: 1px solid #ccc; "
                         + "border-right: 1px solid #ccc\">Local Results</span>"));
@@ -129,5 +130,34 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
             layout.setWidget(2, 0, blastTable);
             layout.setWidget(3, 0, blastTable.getPager());
         }
+    }
+
+    @Override
+    public ArrayList<SearchFilterInfo> parseUrlForFilters() {
+        String token = History.getToken();
+        ArrayList<SearchFilterInfo> filterList = new ArrayList<SearchFilterInfo>();
+        String[] split = token.split(";");
+        if (split.length < 2)
+            return filterList;
+
+        String[] filters = split[1].split("&");
+        for (int i = 0; i < filters.length; i += 1) {  // restrict to 2000 xter limit due to GET constraints
+            // each filter is of the form "type operator operand"
+            String decoded = URL.decode(filters[i]);
+            if (i == 0) {
+                // free form text;
+                filterList.add(new SearchFilterInfo(null, null, decoded));
+            } else {
+//                String[] values = filter.split("=");
+//                if (values != null && values.length >= 2)  {
+//                    SearchFilterType type = SearchFilterType.stringToSearchType(values[0]);
+//                    if( type != null ) {
+//                        filterList.add(new SearchFilterInfo());
+//                    }
+//                }
+            }
+        }
+
+        return filterList;
     }
 }

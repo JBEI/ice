@@ -8,6 +8,7 @@ import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.FolderEntryDataProvider;
 import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.event.FolderEvent;
@@ -26,16 +27,14 @@ import org.jbei.ice.client.entry.view.EntryPresenter;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
-import org.jbei.ice.client.event.SearchEvent;
-import org.jbei.ice.client.event.SearchEventHandler;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.event.ShowEntryListEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.client.search.advanced.AdvancedSearchPresenter;
+import org.jbei.ice.client.search.advanced.ISearchView;
+import org.jbei.ice.client.search.advanced.SearchPresenter;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -44,7 +43,7 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -71,31 +70,45 @@ public class CollectionsPresenter extends AbstractPresenter {
 
     // selection menu
     private final CollectionsModel model;
-    private AdvancedSearchPresenter searchPresenter;
+    private SearchPresenter searchPresenter;
     private EntryPresenter entryViewPresenter;
     private FolderDetails currentFolder;
     private Mode mode = Mode.COLLECTION;
     private EntryContext currentContext; // this can sometimes be null
     private final DeleteItemHandler deleteHandler;
 
-    // handlers 
-    private HandlerRegistration searchHandler;
-
-    public CollectionsPresenter(CollectionsModel model, final ICollectionView display,
-            ArrayList<SearchFilterInfo> operands) {
-        this(model, display);
-        search(operands);
+    public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, final ICollectionView display,
+            ISearchView searchView) {
+        this(service, eventBus, display);
+        search(searchView);
     }
 
     // collections for entry view
-    public CollectionsPresenter(CollectionsModel model, final ICollectionView view, EntryContext event) {
-        this(model, view);
+    public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, final ICollectionView view,
+            EntryContext event) {
+        this(service, eventBus, view);
         this.showEntryView(event);
     }
 
-    public CollectionsPresenter(final CollectionsModel model, final ICollectionView display) {
+    public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, ICollectionView display,
+            String param) {
+        // collection sub menu
+        this(service, eventBus, display);
+        long id = 0;
+        try {
+            if (param != null)
+                id = Long.decode(param);
+        } catch (NumberFormatException nfe) {
+            id = 0;
+        }
+
+        retrieveEntriesForFolder(id, null);
+    }
+
+    public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, final ICollectionView display) {
+        super(service, eventBus);
         this.display = display;
-        this.model = model;
+        this.model = new CollectionsModel(service, eventBus);
         this.deleteHandler = new DeleteItemHandler(model.getService(), model.getEventBus(), display);
 
         // initialize all parameters
@@ -112,10 +125,10 @@ public class CollectionsPresenter extends AbstractPresenter {
                 };
             }
         };
+
         this.userListProvider = new ListDataProvider<FolderDetails>(new FolderDetailsKeyProvider());
         this.systemListProvider = new ListDataProvider<FolderDetails>(new FolderDetailsKeyProvider());
-
-        folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, model.getService());
+        this.folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, model.getService());
 
         // selection models used for menus
         initMenus();
@@ -130,22 +143,9 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         // create entry handler
         final SingleSelectionModel<EntryAddType> selectionModel = display.getAddEntrySelectionHandler();
-        CreateNewEntrySelectionHandler handler = new CreateNewEntrySelectionHandler(this,
-                                                                                    model.getService(),
-                                                                                    model.getEventBus(), display,
+        CreateNewEntrySelectionHandler handler = new CreateNewEntrySelectionHandler(this, service, eventBus, display,
                                                                                     selectionModel);
         selectionModel.addSelectionChangeHandler(handler);
-
-        if (searchHandler != null)
-            searchHandler.removeHandler();
-
-        searchHandler = model.getEventBus().addHandler(SearchEvent.TYPE, new SearchEventHandler() {
-
-            @Override
-            public void onSearch(SearchEvent event) {
-                search(event.getFilters());
-            }
-        });
 
         // show entry context
         model.getEventBus().addHandler(ShowEntryListEvent.TYPE, new ShowEntryListEventHandler() {
@@ -230,21 +230,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         });
     }
 
-    public CollectionsPresenter(CollectionsModel model, final ICollectionView display, String param) {
-
-        // collection sub menu
-        this(model, display);
-        long id = 0;
-        try {
-            if (param != null)
-                id = Long.decode(param);
-        } catch (NumberFormatException nfe) {
-            id = 0;
-        }
-
-        retrieveEntriesForFolder(id, null);
-    }
-
     private void initExportAsHandler() {
         display.getExportAsModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
@@ -318,12 +303,9 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.setSubMenuEnable(true, enable, enable);
     }
 
-    private void search(ArrayList<SearchFilterInfo> operands) {
-        if (operands == null)
-            return;
-
+    protected void search(ISearchView searchView) {
         if (searchPresenter == null) {
-            searchPresenter = new AdvancedSearchPresenter(model.getService(), model.getEventBus());
+            searchPresenter = new SearchPresenter(model.getService(), model.getEventBus(), searchView);
             searchPresenter.addTableSelectionModelChangeHandler(new Handler() {
 
                 @Override
@@ -335,8 +317,8 @@ public class CollectionsPresenter extends AbstractPresenter {
             });
         }
 
-        display.setMainContent(searchPresenter.getView());
-        searchPresenter.search(operands);
+        display.setMainContent(searchPresenter.getView().asWidget());
+        searchPresenter.search();
         mode = Mode.SEARCH;
     }
 
@@ -354,7 +336,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             case SEARCH:
                 mode = Mode.SEARCH;
                 if (searchPresenter != null)
-                    display.setMainContent(searchPresenter.getView());
+                    display.setMainContent(searchPresenter.getView().asWidget());
                 break;
         }
     }
