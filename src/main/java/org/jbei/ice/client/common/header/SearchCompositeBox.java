@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Composite box for quick search.
@@ -23,7 +22,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class SearchCompositeBox extends Composite {
 
     private final TextBox box;
-    private final FlexTable widgetHolder;
     private final HTMLPanel imagePanel;
 
     public SearchCompositeBox() {
@@ -33,7 +31,7 @@ public class SearchCompositeBox extends Composite {
         grid.setStyleName("quick_search");
         initWidget(grid);
 
-        widgetHolder = new FlexTable();
+        FlexTable widgetHolder = new FlexTable();
         widgetHolder.setCellPadding(4);
         widgetHolder.setCellSpacing(0);
 
@@ -56,10 +54,6 @@ public class SearchCompositeBox extends Composite {
         grid.getCellFormatter().setStyleName(0, 2, "search_arrow_td");
     }
 
-    public void setSearchWidget(Widget widget) {
-        widgetHolder.setWidget(0, 0, widget);
-    }
-
     public TextBox getTextBox() {
         return this.box;
     }
@@ -68,26 +62,19 @@ public class SearchCompositeBox extends Composite {
         return imagePanel.getElement();
     }
 
-    public void appendFilter(String filter) {
-        if (box.getText().isEmpty())
-            box.setText(filter);
-        else
-            box.setText(box.getText() + " " + filter);
-    }
-
-    public void setTextFilter(String filter) {
-        box.setText(filter);
-    }
-
-    public void removeSearchWidget(Widget filter) {
-        widgetHolder.remove(filter);
-    }
-
     public void addTextBoxKeyDownHandler(KeyDownHandler keyDownHandler) {
         box.addKeyDownHandler(keyDownHandler);
     }
 
     public void setPullDownClickHandler(ClickHandler handler) {
         imagePanel.addDomHandler(handler, ClickEvent.getType());
+    }
+
+    public void reset() {
+        box.setText("");
+    }
+
+    public String getQueryString() {
+        return box.getText();
     }
 }

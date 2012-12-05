@@ -717,6 +717,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account account = this.retrieveAccountForSid(sid);
             SearchController search = new SearchController();
             SearchResults searchResults = search.runSearch(account, queryFilters, sort, asc, start, limit);
+            if (searchResults == null)
+                return null;
             searchResults.setSearchFilters(filters);
             return searchResults;
         } catch (Throwable e) {

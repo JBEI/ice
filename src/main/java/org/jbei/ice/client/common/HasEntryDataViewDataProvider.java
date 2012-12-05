@@ -77,6 +77,26 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
         }
     }
 
+    public void reset() {
+        this.results.clear();
+        resultSize = 0;
+        this.dataTable.setVisibleRangeAndClearData(dataTable.getVisibleRange(), false);
+
+        if (lastSortField == null) {
+            // reset sort
+            lastSortAsc = false;
+            lastSortField = defaultSort;
+
+            this.dataTable.getColumnSortList().clear();
+            DataTable<T>.DataTableColumn<?> defaultSortField = this.dataTable.getColumn(lastSortField);
+
+            if (defaultSortField != null) {
+                ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
+                this.dataTable.getColumnSortList().push(info);
+            }
+        }
+    }
+
     /**
      * Determines if the sort params have changed and therefore warrants a
      * call to retrieve new data based on those params.
@@ -107,26 +127,6 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
         lastSortAsc = sortAsc;
         lastSortField = sortField;
         return true;
-    }
-
-    public void reset() {
-        this.results.clear();
-        resultSize = 0;
-        this.dataTable.setVisibleRangeAndClearData(dataTable.getVisibleRange(), false);
-
-        if (lastSortField == null) {
-            // reset sort
-            lastSortAsc = false;
-            lastSortField = defaultSort;
-
-            this.dataTable.getColumnSortList().clear();
-            DataTable<T>.DataTableColumn<?> defaultSortField = this.dataTable.getColumn(lastSortField);
-
-            if (defaultSortField != null) {
-                ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
-                this.dataTable.getColumnSortList().push(info);
-            }
-        }
     }
 
     protected void cacheMore(final ColumnField field, final boolean ascending, int rangeStart, int rangeEnd) {

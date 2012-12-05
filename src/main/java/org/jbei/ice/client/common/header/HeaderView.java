@@ -7,7 +7,6 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -77,7 +76,7 @@ public class HeaderView extends Composite implements HeaderPresenter.View {
         }
 
         // search Option
-        widgetAdvanced = new AdvancedSearchWidget();
+        widgetAdvanced = new AdvancedSearchWidget(searchInput);
         widgetAdvanced.setWidth("401px");
         widgetAdvanced.setHeight("150px");
         presenter = new HeaderPresenter(this);
@@ -199,11 +198,7 @@ public class HeaderView extends Composite implements HeaderPresenter.View {
     }
 
     public String getSearchInput() {
-        return this.searchInput.getTextBox().getText();
-    }
-
-    public SearchFilterInfo getBlastInfo() {
-        return presenter.getBlastInfo();
+        return this.searchInput.getQueryString();
     }
 
     public void createPullDownHandler() {

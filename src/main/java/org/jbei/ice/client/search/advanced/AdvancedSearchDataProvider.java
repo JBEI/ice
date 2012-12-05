@@ -3,6 +3,7 @@ package org.jbei.ice.client.search.advanced;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
+import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -19,9 +20,11 @@ import com.google.gwt.view.client.Range;
 public class AdvancedSearchDataProvider extends HasEntryDataViewDataProvider<SearchResultInfo> {
 
     private SearchResults searchResults;
+    private final EntryTablePager pager;
 
     public AdvancedSearchDataProvider(AdvancedSearchResultsTable table, RegistryServiceAsync rpcService) {
         super(table, rpcService, ColumnField.RELEVANCE);
+        pager = table.getPager();
     }
 
     @Override
@@ -66,6 +69,8 @@ public class AdvancedSearchDataProvider extends HasEntryDataViewDataProvider<Sea
 
     @Override
     protected void fetchEntryData(ColumnField field, boolean ascending, int start, int factor, final boolean reset) {
+        if (!reset)
+            pager.setNextEnabled(false);
         service.retrieveSearchResults(AppController.sessionId, searchResults.getSearchFilters(), field, ascending,
                                       start, factor,
                                       new AsyncCallback<SearchResults>() {
@@ -79,8 +84,10 @@ public class AdvancedSearchDataProvider extends HasEntryDataViewDataProvider<Sea
 
                                               if (reset)
                                                   setSearchData(success);
-                                              else
+                                              else {
                                                   results.addAll(success.getResults());
+                                                  pager.setNextEnabled(true);
+                                              }
                                           }
 
                                           @Override

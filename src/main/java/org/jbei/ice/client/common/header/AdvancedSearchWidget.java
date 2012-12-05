@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -45,14 +46,16 @@ public class AdvancedSearchWidget extends Composite {
     private ChangeHandler filterSelectionHandler;
     private final HashMap<Integer, FilterRow> rowBox;   // mapping of row->list box
     private final EntrySearchFilter searchFilter;
+    private final SearchCompositeBox searchInput;
 
-    public AdvancedSearchWidget() {
+    public AdvancedSearchWidget(SearchCompositeBox searchInput) {
         panel = new FlexTable();
         panel.setCellPadding(0);
         panel.setCellSpacing(0);
         initWidget(panel);
         panel.setStyleName("bg_white");
         searchFilter = new EntrySearchFilter();
+        this.searchInput = searchInput;
 
         filterSelectionHandler = new FilterOptionChangeHandler();
 
@@ -82,7 +85,9 @@ public class AdvancedSearchWidget extends Composite {
         runSearch.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                History.newItem(Page.QUERY.getLink() + ";test");
+                String url = Page.QUERY.getLink() + ";";
+                url += URL.encode(searchInput.getQueryString());
+                History.newItem(url);
             }
         });
     }
@@ -92,6 +97,7 @@ public class AdvancedSearchWidget extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 initializeWidget();
+                searchInput.reset();
             }
         });
     }

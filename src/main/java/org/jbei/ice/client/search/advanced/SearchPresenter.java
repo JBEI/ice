@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
@@ -40,7 +41,7 @@ public class SearchPresenter extends AbstractPresenter {
     public SearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus, ISearchView view) {
         super(rpcService, eventBus);
         this.display = view;
-        table = new AdvancedSearchResultsTable() {
+        table = new AdvancedSearchResultsTable(new EntryTablePager()) {
 
             @Override
             protected EntryViewEventHandler getHandler() {

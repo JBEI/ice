@@ -3,7 +3,6 @@ package org.jbei.ice.client.search.advanced;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.common.header.BlastSearchFilter;
-import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.shared.QueryOperator;
@@ -23,7 +22,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class SearchView extends Composite implements ISearchView {
 
     private FlowPanel filterPanel;
-    private EntryTablePager pager;
     private final FlexTable layout;
 
     public SearchView() {
@@ -106,18 +104,14 @@ public class SearchView extends Composite implements ISearchView {
 
     @Override
     public void setSearchVisibility(AdvancedSearchResultsTable table, boolean visible) {
-        if (pager == null) {
-            pager = new EntryTablePager();
-            pager.setDisplay(table);
-        }
 
-        pager.setVisible(visible);
+        table.getPager().setVisible(visible);
         table.setVisible(visible);
 
         if (visible) {
 //            table.clearSelection();
             layout.setWidget(2, 0, table);
-            layout.setWidget(3, 0, pager);
+            layout.setWidget(3, 0, table.getPager());
         }
     }
 

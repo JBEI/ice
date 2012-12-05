@@ -31,7 +31,6 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
 
     @Override
     protected void fetchEntryData(ColumnField field, boolean asc, int start, int factor, final boolean reset) {
-
         if (!reset)
             pager.setNextEnabled(false);
 

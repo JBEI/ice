@@ -2,6 +2,7 @@ package org.jbei.ice.client.search.advanced;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.cell.EntryOwnerCell;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
@@ -22,7 +23,12 @@ import com.google.gwt.user.client.Window;
  */
 public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<SearchResultInfo> {
 
-    public AdvancedSearchResultsTable() {
+    private final EntryTablePager pager;
+
+    public AdvancedSearchResultsTable(EntryTablePager pager) {
+        this.pager = pager;
+        if (pager != null)
+            pager.setDisplay(this);
     }
 
     @Override
@@ -122,6 +128,10 @@ public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<Searc
         this.addColumn(scoreColumn, "Relevance");
         this.setColumnWidth(scoreColumn, 90, Unit.PX);
         return scoreColumn;
+    }
+
+    public EntryTablePager getPager() {
+        return this.pager;
     }
 
     protected abstract EntryViewEventHandler getHandler();
