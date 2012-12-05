@@ -15,6 +15,7 @@ public class SearchResults implements IsSerializable {
 
     private long resultCount;
     private LinkedList<SearchResultInfo> resultInfos;
+    private EntryType[] searchTypes;
     private ArrayList<SearchFilterInfo> searchFilters;
 
     public SearchResults() {
@@ -27,11 +28,10 @@ public class SearchResults implements IsSerializable {
     }
 
     public void setResults(LinkedList<SearchResultInfo> results) {
-
+        this.resultInfos.clear();
         if (results == null)
             return;
 
-        this.resultInfos.clear();
         this.resultInfos.addAll(results);
     }
 
@@ -53,5 +53,13 @@ public class SearchResults implements IsSerializable {
 
     public ArrayList<SearchFilterInfo> getSearchFilters() {
         return this.searchFilters;
+    }
+
+    public EntryType[] getSearchTypes() {
+        return searchTypes;
+    }
+
+    public void setSearchTypes(EntryType[] types) {
+        searchTypes = types;
     }
 }

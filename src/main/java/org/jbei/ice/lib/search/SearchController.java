@@ -19,6 +19,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SearchResults;
 
 /**
@@ -36,8 +37,8 @@ public class SearchController {
         permissionsController = new PermissionsController();
     }
 
-    public SearchResults runSearch(Account account, ArrayList<QueryFilter> filters, ColumnField sort, boolean asc,
-            int start, int count) throws ControllerException {
+    public SearchResults runSearch(Account account, ArrayList<QueryFilter> filters, EntryType[] types, ColumnField sort,
+            boolean asc, int start, int count) throws ControllerException {
         if (sort == null)
             sort = ColumnField.RELEVANCE;
 
@@ -49,11 +50,12 @@ public class SearchController {
                 continue;
 
             // no filter type indicates a term or phrase query
+            String[] terms = operand.split("\\s");
             if (type == null) {
-                if (isTerm(operand)) {
-                    searchResults = runTermQuery(account, sort, asc, operand, start, count);
+                if (terms.length > 1) {
+                    searchResults = runMultiTermQuery(account, terms, types, start, count);
                 } else {
-                    runPhraseQuery(account, operand, start, count);
+                    searchResults = runTermQuery(account, sort, asc, operand, start, count);
                 }
             } else {
 //                QueryOperator operator = filter.getOperator();
@@ -76,16 +78,6 @@ public class SearchController {
         return searchResults;
     }
 
-    /**
-     * determines if a query is a term or phrase. A term is strictly defined as a single word whereas
-     * a phrase
-     *
-     * @param query query string being checked
-     * @return true is term, false is phrase
-     */
-    private boolean isTerm(String query) {
-        return query.split("\\s").length == 1;
-    }
 
     /**
      * Perform full text search on the query.
@@ -107,10 +99,19 @@ public class SearchController {
                                                            start, count, permissionsController);
     }
 
+    public SearchResults runMultiTermQuery(Account account, String[] terms, EntryType[] types, int start, int count)
+            throws ControllerException {
+        return HibernateSearch.getInstance()
+                              .executeMultiTermQuery(account, terms, types, start, count, permissionsController);
+    }
+
     public SearchResults runPhraseQuery(Account account, String phrase, int start, int count)
             throws ControllerException {
-
-        String cleanedQuery = cleanQuery(phrase);
+//
+//        String cleanedQuery = cleanQuery(phrase);
+//        Logger.info(account.getEmail() + ": searching for \"" + cleanedQuery + "\"");
+//        return HibernateSearch.getInstance()
+//                              .executeMultiTermQuery(account, cleanedQuery, start, count, permissionsController);
         return null;
     }
 

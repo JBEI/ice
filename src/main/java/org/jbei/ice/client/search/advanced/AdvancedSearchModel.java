@@ -8,6 +8,7 @@ import org.jbei.ice.client.search.event.AdvancedSearchEvent;
 import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.BlastResultInfo;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.SearchResults;
 
@@ -60,49 +61,50 @@ public class AdvancedSearchModel {
             final int limit,
             final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
 
-        service.retrieveSearchResults(AppController.sessionId, searchFilters, null, false, start, limit,
-                                      new AsyncCallback<SearchResults>() {
-
-                                          @Override
-                                          public void onSuccess(SearchResults result) {
-//                                              if (result == null) {
-//                                                  reset();
-//                                                  return;
-//                                              }
+//        service.retrieveSearchResults(AppController.sessionId, searchFilters, null, false, start, limit,
+//                                      new AsyncCallback<SearchResults>() {
 //
-//                                              // TODO : performance
-//                                              // TODO : push to server for filtering. this search can return a very
-//                                              // long list
-//                                              ArrayList<BlastResultInfo> toRemove = new ArrayList<BlastResultInfo>();
+//                                          @Override
+//                                          public void onSuccess(SearchResults result) {
+////                                              if (result == null) {
+////                                                  reset();
+////                                                  return;
+////                                              }
+////
+////                                              // TODO : performance
+////                                              // TODO : push to server for filtering. this search can return a very
+////                                              // long list
+////                                              ArrayList<BlastResultInfo> toRemove = new
+// ArrayList<BlastResultInfo>();
+////
+////                                              for (BlastResultInfo info : blastResult) {
+////                                                  long entryId = info.getEntryInfo().getId();
+////                                                  if (!result.contains(entryId)) {
+////                                                      toRemove.add(info);
+////                                                  }
+////                                              }
+////
+////                                              blastResult.removeAll(toRemove);
+////                                              handler.onBlastCompletion(new AdvancedSearchEvent(blastResult));
+////                                              reset();
+//                                          }
 //
-//                                              for (BlastResultInfo info : blastResult) {
-//                                                  long entryId = info.getEntryInfo().getId();
-//                                                  if (!result.contains(entryId)) {
-//                                                      toRemove.add(info);
-//                                                  }
-//                                              }
-//
-//                                              blastResult.removeAll(toRemove);
-//                                              handler.onBlastCompletion(new AdvancedSearchEvent(blastResult));
+//                                          @Override
+//                                          public void onFailure(Throwable caught) {
+//                                              handler.onBlastCompletion(null);
 //                                              reset();
-                                          }
-
-                                          @Override
-                                          public void onFailure(Throwable caught) {
-                                              handler.onBlastCompletion(null);
-                                              reset();
-                                          }
-
-                                          public void reset() {
-                                              Utils.showDefaultCursor(null);
-                                          }
-                                      });
+//                                          }
+//
+//                                          public void reset() {
+//                                              Utils.showDefaultCursor(null);
+//                                          }
+//                                      });
     }
 
-    public void retrieveSearchResults(final ArrayList<SearchFilterInfo> searchFilters, int start, int limit,
-            final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
+    public void retrieveSearchResults(final ArrayList<SearchFilterInfo> searchFilters, EntryType[] types,
+            int start, int limit, final AdvancedSearchEvent.AdvancedSearchEventHandler handler) {
 
-        service.retrieveSearchResults(AppController.sessionId, searchFilters, null, false, start, limit,
+        service.retrieveSearchResults(AppController.sessionId, searchFilters, types, null, false, start, limit,
                                       new AsyncCallback<SearchResults>() {
 
                                           @Override

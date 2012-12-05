@@ -71,8 +71,8 @@ public class AdvancedSearchDataProvider extends HasEntryDataViewDataProvider<Sea
     protected void fetchEntryData(ColumnField field, boolean ascending, int start, int factor, final boolean reset) {
         if (!reset)
             pager.setNextEnabled(false);
-        service.retrieveSearchResults(AppController.sessionId, searchResults.getSearchFilters(), field, ascending,
-                                      start, factor,
+        service.retrieveSearchResults(AppController.sessionId, searchResults.getSearchFilters(),
+                                      searchResults.getSearchTypes(), field, ascending, start, factor,
                                       new AsyncCallback<SearchResults>() {
 
                                           @Override

@@ -15,9 +15,11 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionsController;
+import org.jbei.ice.lib.search.filter.SearchFieldFactory;
 import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SearchResultInfo;
 import org.jbei.ice.shared.dto.SearchResults;
 
@@ -79,6 +81,88 @@ public class HibernateSearch {
         Logger.info("Found " + result.size() + " for " + fullTextQuery.getQueryString());
     }
 
+    public SearchResults executeMultiTermQuery(Account account, String[] terms, EntryType[] types, int start, int count,
+            PermissionsController permissionsController) {
+
+        Session session = HibernateHelper.newSession();
+        int resultCount;
+        FullTextSession fullTextSession = Search.getFullTextSession(session);
+        List result;
+
+        // you can create several query builders (for each entity type involved in the root of the query)
+//        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Strain.class).get();
+//        boolean wildCard = queryString.endsWith("*");
+
+//        TermContext termContext = qb.keyword();
+//        if( wildCard)
+//            termContext = termContext.wildcard();
+
+        BooleanQuery boolQuery = new BooleanQuery();
+        Class<?>[] classes = new Class<?>[types.length];
+
+        // for each query type
+        for (int i = 0; i < types.length; i += 1) {
+            EntryType type = types[i];
+            String[] fields = SearchFieldFactory.entryFields(type);
+            Class<?> clazz = SearchFieldFactory.entryClass(type);
+            classes[i] = clazz;
+
+            // for each term
+            for (String term : terms) {
+                QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
+                org.apache.lucene.search.Query query = qb
+                        .keyword().fuzzy().withThreshold(0.8f)
+                        .onFields(fields)
+                        .matching(term)
+                        .createQuery();
+                boolQuery.add(query, BooleanClause.Occur.MUST);
+            }
+        }
+
+        // wrap Lucene query in a org.hibernate.Query
+        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(boolQuery, classes);
+
+        // projection (specified properties must be stored in the index @Field(store=Store.YES))
+        fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
+
+        // for paging
+        fullTextQuery.setFirstResult(start); //start from the startth element
+        fullTextQuery.setMaxResults(count); //return count elements
+
+        resultCount = fullTextQuery.getResultSize(); // this is where you are hiding
+
+        // execute search
+        result = fullTextQuery.list();
+        Logger.info("Found " + resultCount + " for " + fullTextQuery.getQueryString());
+
+        // sort
+        LinkedList<SearchResultInfo> searchResultInfos = new LinkedList<SearchResultInfo>();
+        Iterator<Object[]> iterator = result.iterator();
+        while (iterator.hasNext()) {
+            Object[] objects = iterator.next();
+            float score = ((Float) objects[0]).floatValue();
+            Entry entry = (Entry) objects[1];
+            try {
+                if (!permissionsController.hasReadPermission(account, entry))
+                    continue;
+            } catch (ControllerException e) {
+                Logger.error(e);
+                continue;
+            }
+
+            EntryInfo info = ModelToInfoFactory.createTipView(account, entry);
+            SearchResultInfo searchResult = new SearchResultInfo();
+            searchResult.setScore(score);
+            searchResult.setEntryInfo(info);
+            searchResultInfos.add(searchResult);
+        }
+
+        SearchResults results = new SearchResults();
+        results.setResultCount(resultCount);
+        results.setResults(searchResultInfos);
+        return results;
+    }
+
     public SearchResults executeSearch(Account account, String queryString, ColumnField sortField, boolean asc,
             int start, int count, PermissionsController permissionsController) {
 
@@ -87,10 +171,6 @@ public class HibernateSearch {
         int resultCount;
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         List result;
-
-        // create native Lucene query using the query DSL
-        // alternatively you can write the Lucene query using the Lucene query parser
-        // or the Lucene programmatic API. The Hibernate Search DSL is recommended though
 
         // you can create several query builders (for each entity type involved in the root of the query)
 //        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Strain.class).get();
@@ -176,7 +256,7 @@ public class HibernateSearch {
 
         // execute search
         result = fullTextQuery.list();
-        Logger.info("Found " + result.size() + " for " + fullTextQuery.getQueryString());
+        Logger.info("Found " + resultCount + " for " + fullTextQuery.getQueryString());
 
         // sort
 

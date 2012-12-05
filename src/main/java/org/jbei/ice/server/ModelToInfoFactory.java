@@ -269,7 +269,6 @@ public class ModelToInfoFactory {
     }
 
     private static EntryInfo getCommon(Account account, EntryInfo info, Entry entry) {
-        AccountController accountController = new AccountController();
         info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
         info.setPartId(EntryUtil.getPartNumbersAsString(entry));
@@ -278,6 +277,7 @@ public class ModelToInfoFactory {
         info.setOwner(entry.getOwner());
         info.setCreator(entry.getCreator());
 
+        AccountController accountController = new AccountController();
         try {
             Account account1;
             if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
@@ -367,7 +367,6 @@ public class ModelToInfoFactory {
     }
 
     private static void getTipViewCommon(Account account, EntryInfo view, Entry entry) {
-
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
         view.setPartId(EntryUtil.getPartNumbersAsString(entry));
@@ -376,7 +375,18 @@ public class ModelToInfoFactory {
         view.setCreator(entry.getCreator());
         view.setStatus(entry.getStatus());
         view.setOwner(entry.getOwner());
-        view.setOwnerEmail(entry.getOwnerEmail());
+
+        AccountController accountController = new AccountController();
+        try {
+            Account account1;
+            if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
+                view.setOwnerEmail(account1.getId() + "");
+
+            if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
+                view.setCreatorEmail(account1.getId() + "");
+        } catch (ControllerException ce) {
+        }
+
         view.setKeywords(entry.getKeywords());
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime());
@@ -492,7 +502,6 @@ public class ModelToInfoFactory {
             }
 
             case ARABIDOPSIS: {
-
                 ArabidopsisSeedInfo view = new ArabidopsisSeedInfo();
                 getTipViewCommon(account, view, entry);
 

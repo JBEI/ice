@@ -112,7 +112,6 @@ public class SearchPresenter extends AbstractPresenter {
         }
 
         if (blastInfo != null) {
-
             // show blast table loading
             blastProvider.updateRowCount(0, false);
             display.setBlastVisibility(blastTable, true);
@@ -120,15 +119,15 @@ public class SearchPresenter extends AbstractPresenter {
 
             // get blast results and filter 
             QueryOperator program = QueryOperator.operatorValueOf(blastInfo.getOperator());
-            this.model.performBlast(searchFilterCopy, blastInfo.getOperand(), program, 0, 15, new EventHandler(
-                    searchFilters));
+            this.model.performBlast(searchFilterCopy, blastInfo.getOperand(), program, 0, 30,
+                                    new EventHandler(searchFilters));
         } else {
-
             // regular search
             dataProvider.updateRowCount(0, false);
             display.setSearchVisibility(table, true);
             table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
-            this.model.retrieveSearchResults(searchFilterCopy, 0, 30, new EventHandler(searchFilters));
+            this.model.retrieveSearchResults(searchFilterCopy, display.getSearchTypes(),
+                                             0, 30, new EventHandler(searchFilters));
         }
     }
 

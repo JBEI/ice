@@ -577,9 +577,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId,
-            ArrayList<String> fileId) throws AuthenticationException {
-
+    public ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId, ArrayList<String> fileId)
+            throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             Entry entry = new EntryController().get(account, entryId);
@@ -700,9 +699,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     // 
 
     @Override
-    public SearchResults retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, ColumnField sort,
-            boolean asc, int start, int limit) throws AuthenticationException {
-
+    public SearchResults retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters, EntryType[] types,
+            ColumnField sort, boolean asc, int start, int limit) throws AuthenticationException {
         if (filters == null || filters.isEmpty())
             return null;
 
@@ -716,10 +714,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Account account = this.retrieveAccountForSid(sid);
             SearchController search = new SearchController();
-            SearchResults searchResults = search.runSearch(account, queryFilters, sort, asc, start, limit);
+            SearchResults searchResults = search.runSearch(account, queryFilters, types, sort, asc, start, limit);
             if (searchResults == null)
                 return null;
             searchResults.setSearchFilters(filters);
+            searchResults.setSearchTypes(types);
             return searchResults;
         } catch (Throwable e) {
             Logger.error(e);

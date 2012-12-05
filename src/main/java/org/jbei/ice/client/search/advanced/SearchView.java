@@ -6,6 +6,7 @@ import org.jbei.ice.client.common.header.BlastSearchFilter;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.shared.QueryOperator;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.http.client.URL;
@@ -153,5 +154,15 @@ public class SearchView extends Composite implements ISearchView {
         }
 
         return filterList;
+    }
+
+    @Override
+    public EntryType[] getSearchTypes() {
+        String token = History.getToken();
+
+        // TODO : parse url for types
+
+        return EntryType.values();
+
     }
 }

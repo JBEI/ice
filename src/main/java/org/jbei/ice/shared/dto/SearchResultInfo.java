@@ -6,6 +6,7 @@ package org.jbei.ice.shared.dto;
  * @author Hector Plahar
  */
 public class SearchResultInfo extends HasEntryInfo implements Comparable<SearchResultInfo> {
+
     private float score;
 
     public SearchResultInfo() {
