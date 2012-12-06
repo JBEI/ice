@@ -113,9 +113,8 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
                 return SafeHtmlUtils
                         .fromSafeConstant("<div style=\"width: "
                                                   + width + "px; "
-                                                  + "white-space: nowrap; overflow: hidden; text-overflow: " +
-                                                  "ellipsis;\" title=\""
-                                                  + name.replaceAll("\"", "'") + "\">"
+                                                  + "white-space: nowrap; overflow: hidden; text-overflow: "
+                                                  + "ellipsis;\" title=\"" + name.replaceAll("\"", "'") + "\">"
                                                   + name + "</div>");
             }
         };
@@ -127,8 +126,8 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     protected DataTableColumn<SafeHtml> addSummaryColumn() {
-        DataTableColumn<SafeHtml> summaryColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(),
-                                                                                ColumnField.SUMMARY) {
+        DataTableColumn<SafeHtml> summaryColumn = new DataTableColumn<SafeHtml>(
+                new SafeHtmlCell(), ColumnField.SUMMARY) {
 
             @Override
             public SafeHtml getValue(T object) {
@@ -243,8 +242,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
                     NativeEvent event, ValueUpdater<Boolean> valueUpdater) {
                 String type = event.getType();
 
-                boolean enterPressed = "keydown".equals(type)
-                        && event.getKeyCode() == KeyCodes.KEY_ENTER;
+                boolean enterPressed = "keydown".equals(type) && event.getKeyCode() == KeyCodes.KEY_ENTER;
                 if ("change".equals(type) || enterPressed) {
                     InputElement input = parent.getFirstChild().cast();
                     Boolean isChecked = input.isChecked();

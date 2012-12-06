@@ -21,7 +21,6 @@ import com.google.gwt.view.client.Range;
 public class FolderEntryDataProvider extends EntryDataViewDataProvider {
 
     private FolderDetails details;
-    private boolean nextDisabled = false;
     private final EntryTablePager pager;
 
     public FolderEntryDataProvider(CollectionDataTable view, RegistryServiceAsync service) {
@@ -52,7 +51,7 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                                                            }
 
                                                            if (reset)
-                                                               setFolderData(details);
+                                                               setFolderData(details, false);
                                                            else {
                                                                cachedEntries.addAll(result.getEntries());
                                                                pager.setNextEnabled(true);
@@ -74,7 +73,7 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                                                     }
 
                                                     if (reset)
-                                                        setFolderData(details);
+                                                        setFolderData(details, false);
                                                     else
                                                         cachedEntries.addAll(result.getEntries());
                                                 }
@@ -98,7 +97,7 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                                                          }
 
                                                          if (reset)
-                                                             setFolderData(details);
+                                                             setFolderData(details, false);
                                                          else
                                                              cachedEntries.addAll(result.getEntries());
                                                      }
@@ -111,7 +110,6 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
         }
     }
 
-    @Override
     public void reset() {
         this.cachedEntries.clear();
         details = null;
@@ -132,7 +130,10 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
         }
     }
 
-    public void setFolderData(FolderDetails details) {
+    public void setFolderData(FolderDetails details, boolean resetSort) {
+        if (resetSort)
+            lastSortField = null;
+
         reset();
         this.details = details;
         if (details == null) {

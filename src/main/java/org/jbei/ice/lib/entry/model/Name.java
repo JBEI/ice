@@ -25,7 +25,7 @@ public class Name implements IModel {
     private long id;
 
     @Column(name = "name", length = 127, nullable = false)
-    @Field(store = Store.YES, boost = @Boost(2f))
+    @Field(store = Store.YES, boost = @Boost(1.2f))
     private String name;
 
     @ManyToOne(fetch = FetchType.EAGER)

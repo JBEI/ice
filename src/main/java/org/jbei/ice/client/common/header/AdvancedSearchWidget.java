@@ -164,6 +164,22 @@ public class AdvancedSearchWidget extends Composite {
         filterOptionsPanel.setWidget(currentRow, 3, removeIcon);
     }
 
+    public EntryType[] getSearchEntryType() {
+        ArrayList<String> selected = entryTypes.getSelected();
+        EntryType[] types = new EntryType[selected.size()];
+        int i = 0;
+        for (String select : selected) {
+            EntryType type = EntryType.nameToType(select);
+            if (type == null)
+                continue;
+
+            types[i] = type;
+            i += 1;
+        }
+
+        return types;
+    }
+
     protected void addNewFilter(int afterRow) {
         ListBox filterBox = new ListBox();
         filterBox.setWidth("140px");
@@ -182,10 +198,6 @@ public class AdvancedSearchWidget extends Composite {
     public String getSelectedFilter() {
         final ListBox filterOptions = rowBox.get(currentRow).getBox();
         return filterOptions.getValue(filterOptions.getSelectedIndex());
-    }
-
-    public String[] getSelectedEntrySearch() {
-        return entryTypes.getSelected();
     }
 
     //
@@ -240,19 +252,17 @@ public class AdvancedSearchWidget extends Composite {
             }
         }
 
-        public String[] getSelected() {
-            String[] selected = new String[]{};
+        public ArrayList<String> getSelected() {
+            ArrayList<String> selected = new ArrayList<String>();
 
             if (allCheck.getValue().booleanValue()) {
-                int i = 0;
                 for (EntryType type : EntryType.values()) {
-                    selected[i] = type.getName();
-                    i += 1;
+                    selected.add(type.getName());
                 }
             } else {
                 for (int i = 0; i < EntryType.values().length; i += 1) {
                     if (typeChecks[i].getValue().booleanValue()) {
-                        selected[i] = EntryType.values()[i].getName();
+                        selected.add(EntryType.values()[i].getName());
                     }
                 }
             }

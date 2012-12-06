@@ -17,15 +17,9 @@ import org.jbei.ice.shared.dto.Visibility;
 
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.Analyze;
-import org.hibernate.search.annotations.Boost;
-import org.hibernate.search.annotations.DateBridge;
-import org.hibernate.search.annotations.DocumentId;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.IndexedEmbedded;
-import org.hibernate.search.annotations.Resolution;
-import org.hibernate.search.annotations.Store;
+import org.hibernate.search.annotations.*;
+
+import org.jbei.ice.lib.entry.model.Parameter;
 
 /**
  * Entry class is the most important class in gd-ice. Other record types extend this class.
@@ -160,12 +154,14 @@ public class Entry implements IModel {
 
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
-    @DateBridge(resolution = Resolution.SECOND)
+    @Field(index = Index.YES, analyze = Analyze.NO, store = Store.YES)
+    @DateBridge(resolution = Resolution.DAY)
     private Date creationTime;
 
     @Column(name = "modification_time")
     @Temporal(TemporalType.TIMESTAMP)
-    @DateBridge(resolution = Resolution.SECOND)
+    @Field(index = Index.YES, analyze = Analyze.NO, store = Store.YES)
+    @DateBridge(resolution = Resolution.DAY)
     private Date modificationTime;
 
     @Column(name = "bio_safety_level")

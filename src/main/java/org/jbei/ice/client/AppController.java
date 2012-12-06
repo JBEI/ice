@@ -46,6 +46,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
     private HasWidgets container; // root panel
     public static String sessionId;
     public static AccountInfo accountInfo;
+    public static final String URL_SEPARATOR = ";";
 
     public AppController(RegistryServiceAsync service, HandlerManager eventBus) {
         super(service, eventBus);

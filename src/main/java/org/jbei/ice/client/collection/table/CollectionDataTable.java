@@ -55,7 +55,6 @@ public abstract class CollectionDataTable extends EntryDataTable<EntryInfo> {
     }
 
     protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable, double width, Unit unit) {
-
         PartIDCell<EntryInfo> cell = new PartIDCell<EntryInfo>(EntryContext.Type.COLLECTION);
         cell.addEntryHandler(getHandler());
         DataTableColumn<EntryInfo> partIdColumn = new PartIdColumn(cell);

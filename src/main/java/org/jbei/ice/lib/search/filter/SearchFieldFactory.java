@@ -18,26 +18,37 @@ public class SearchFieldFactory {
         switch (type) {
             case STRAIN:
                 fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty", "host", "plasmids",
-                        "genotypePhenotype"
+                        "shortDescription", "references", "longDescription", "intellectualProperty", "host",
+                        "plasmids", "genotypePhenotype", "partNumbers.partNumber", "links.link", "links.url",
+                        "entryFundingSources.fundingSource.fundingSource", "selectionMarkers.name",
+                        "entryFundingSources.fundingSource.principalInvestigator"
                 };
                 break;
 
             case PLASMID:
                 fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty", "backbone"
+                        "shortDescription", "references", "longDescription", "intellectualProperty", "backbone",
+                        "originOfReplication", "promoters", "partNumbers.partNumber", "links.link", "links.url",
+                        "entryFundingSources.fundingSource.fundingSource", "selectionMarkers.name",
+                        "entryFundingSources.fundingSource.principalInvestigator"
                 };
                 break;
 
             case ARABIDOPSIS:
                 fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty"
+                        "shortDescription", "references", "longDescription", "intellectualProperty",
+                        "partNumbers.partNumber", "links.link", "links.url", "selectionMarkers.name",
+                        "entryFundingSources.fundingSource.fundingSource",
+                        "entryFundingSources.fundingSource.principalInvestigator"
                 };
                 break;
 
             case PART:
                 fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty"
+                        "shortDescription", "references", "longDescription", "intellectualProperty",
+                        "partNumbers.partNumber", "links.link", "links.url", "selectionMarkers.name",
+                        "entryFundingSources.fundingSource.fundingSource",
+                        "entryFundingSources.fundingSource.principalInvestigator"
                 };
                 break;
 
@@ -47,7 +58,6 @@ public class SearchFieldFactory {
 
         return fields;
     }
-
 
     public static Class<?> entryClass(EntryType type) {
         switch (type) {

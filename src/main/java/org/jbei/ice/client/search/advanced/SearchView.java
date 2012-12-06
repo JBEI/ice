@@ -2,6 +2,7 @@ package org.jbei.ice.client.search.advanced;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.header.BlastSearchFilter;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
@@ -24,6 +25,7 @@ public class SearchView extends Composite implements ISearchView {
 
     private FlowPanel filterPanel;
     private final FlexTable layout;
+    private HorizontalPanel tableHeader;
 
     public SearchView() {
         layout = new FlexTable();
@@ -36,17 +38,16 @@ public class SearchView extends Composite implements ISearchView {
         initComponents();
 
         // add filters
-        CaptionPanel captionPanel = new CaptionPanel("<span class=\"search_caption_caption\">Search Filters</span>",
-                                                     true);
+        CaptionPanel captionPanel = new CaptionPanel("<span class=\"search_caption\">Search Filters</span>", true);
         captionPanel.setWidth("98%");
         captionPanel.setStyleName("search_caption_display");
         captionPanel.add(filterPanel);
 
         // table header
-        HorizontalPanel tableHeader = new HorizontalPanel();
+        tableHeader = new HorizontalPanel();
         tableHeader.add(new HTML(
-                "<span style=\"padding: 4px; font-size: 12px; border-top: 1px solid #ccc; border-left: 1px solid #ccc; "
-                        + "border-right: 1px solid #ccc\">Local Results</span>"));
+                "<span style=\"font-size: 12px; border-top: 1px solid #ccc; border-left: 1px solid #ccc;"
+                        + " border-right: 1px solid #ccc\">&nbsp;Local Results&nbsp;</span>"));
         tableHeader.add(new HTML("<span><i class=\"" + FAIconType.GLOBE.getStyleName() + "\"></i> Web Results</span>"));
 
         // add a break between filters and results
@@ -110,7 +111,6 @@ public class SearchView extends Composite implements ISearchView {
         table.setVisible(visible);
 
         if (visible) {
-//            table.clearSelection();
             layout.setWidget(2, 0, table);
             layout.setWidget(3, 0, table.getPager());
         }
@@ -159,10 +159,41 @@ public class SearchView extends Composite implements ISearchView {
     @Override
     public EntryType[] getSearchTypes() {
         String token = History.getToken();
+        String[] split = token.split(AppController.URL_SEPARATOR);
+        if (split.length < 2)
+            return EntryType.values();
 
-        // TODO : parse url for types
+        String[] filters = split[1].split("&");
+        String typesFilter = null;
+        for (String filter : filters) {
+            if (filter.startsWith("types")) {
+                typesFilter = filter;
+                break;
+            }
+        }
+        if (typesFilter == null)
+            return EntryType.values();
 
-        return EntryType.values();
+        String[] typeSplit = typesFilter.split("=");
+        if (typeSplit.length < 2)
+            return EntryType.values();
 
+        String types = typeSplit[1];
+        if ("all".equals(types))
+            return EntryType.values();
+
+        EntryType[] entryTypes = new EntryType[]{};
+        int i = 0;
+        for (String type : types.split(",")) {
+            EntryType entryType = EntryType.nameToType(type);
+            if (entryType == null)
+                continue;
+            entryTypes[i] = entryType;
+            i += 1;
+        }
+
+        if (entryTypes.length == 0)
+            return EntryType.values();
+        return entryTypes;
     }
 }

@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.search;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,8 +8,6 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionsController;
@@ -23,6 +19,7 @@ import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SearchResultInfo;
 import org.jbei.ice.shared.dto.SearchResults;
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Sort;
@@ -31,6 +28,7 @@ import org.hibernate.search.FullTextQuery;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hibernate.search.query.dsl.TermContext;
 
 /**
  * Apache Lucene full text library functionality in Hibernate
@@ -109,12 +107,23 @@ public class HibernateSearch {
 
             // for each term
             for (String term : terms) {
+                // a search exception is thrown when a stop word is queried
+                if (StandardAnalyzer.STOP_WORDS_SET.contains(term))
+                    continue;
+
                 QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
-                org.apache.lucene.search.Query query = qb
-                        .keyword().fuzzy().withThreshold(0.8f)
-                        .onFields(fields)
-                        .matching(term)
-                        .createQuery();
+                TermContext termContext = qb.keyword();
+                org.apache.lucene.search.Query query;
+//                if( term.endsWith("?") || term.endsWith("*"))
+//                    query = termContext.wildcard()
+//                                       .onFields(fields)
+//                                       .matching(term)
+//                                       .createQuery();
+//                else
+                query = termContext.fuzzy().withThreshold(0.8f)
+                                   .onFields(fields)
+                                   .matching(term)
+                                   .createQuery();
                 boolQuery.add(query, BooleanClause.Occur.MUST);
             }
         }
@@ -182,30 +191,13 @@ public class HibernateSearch {
 
         // use phrase (instead of keyword) for more than one word
 
-        ArrayList<Class> r = new ArrayList<Class>(Arrays.asList(Entry.class, Strain.class, Part.class, Plasmid.class));
         BooleanQuery b = new BooleanQuery();
 
         String[] fields;
 
-        for (Class clazz : r) {
-            if (clazz == Strain.class) {
-                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty", "host", "plasmids",
-                        "genotypePhenotype"
-                };
-            } else if (clazz == Part.class) {
-                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty"
-                };
-            } else if (clazz == Plasmid.class) {
-                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty", "backbone"
-                };
-            } else {
-                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty"
-                };
-            }
+        for (EntryType type : EntryType.values()) {
+            fields = SearchFieldFactory.entryFields(type);
+            Class<?> clazz = SearchFieldFactory.entryClass(type);
 
             QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
             org.apache.lucene.search.Query query = qb
@@ -233,8 +225,14 @@ public class HibernateSearch {
 //        fullTextQuery.setSort(sort);
 
         // criteria example
-//        fullTextQuery.setCriteriaQuery(session.createCriteria(Entry.class.getName()).addOrder(Order.asc
-// ("creationTime")));
+//        Criteria criteria = session.createCriteria(Permission.class)
+////                                   .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
+//                                   .add(Restrictions.eq("canRead", Boolean.TRUE))
+//                                   .add(Restrictions.eq("account", account))
+//                                   .add(Restrictions.isNull("folder"))
+//                                   .add(Restrictions.isNull("group"));
+////                                   .add(Restrictions.eq("entry", entry))
+//        fullTextQuery.setCriteriaQuery(criteria);
 
         // projection (specified properties must be stored in the index @Field(store=Store.YES))
         fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);

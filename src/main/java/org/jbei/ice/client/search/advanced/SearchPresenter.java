@@ -12,8 +12,8 @@ import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
 import org.jbei.ice.client.search.event.AdvancedSearchEvent;
 import org.jbei.ice.shared.QueryOperator;
-import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
+import org.jbei.ice.shared.dto.SearchResultInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -71,24 +71,21 @@ public class SearchPresenter extends AbstractPresenter {
         // hide the results table
         dataProvider = new AdvancedSearchDataProvider(table, rpcService);
         blastProvider = new BlastSearchDataProvider(blastTable, rpcService);
-
-        this.model = new AdvancedSearchModel(rpcService, eventBus);
+        model = new AdvancedSearchModel(rpcService, eventBus);
     }
 
     @Override
     public void go(HasWidgets container) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        container.clear();
+        container.add(this.display.asWidget());
     }
 
     public void addTableSelectionModelChangeHandler(Handler handler) {
-        // TODO :
-//        final HasEntrySelectionModel<SearchResultInfo> selectionModel = this.table.getSelectionModel();
-//        selectionModel.addSelectionChangeHandler(handler);
+        this.table.getSelectionModel().addSelectionChangeHandler(handler);
     }
 
-    public Set<EntryInfo> getResultSelectedSet() {
-//        return this.table.getSelectionModel().getSelectedSet();
-        return null;
+    public Set<SearchResultInfo> getResultSelectedSet() {
+        return this.table.getSelectionModel().getSelectedSet();
     }
 
     public void search() {

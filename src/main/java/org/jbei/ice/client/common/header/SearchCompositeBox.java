@@ -54,10 +54,6 @@ public class SearchCompositeBox extends Composite {
         grid.getCellFormatter().setStyleName(0, 2, "search_arrow_td");
     }
 
-    public TextBox getTextBox() {
-        return this.box;
-    }
-
     public Element getPullDownAreaElement() {
         return imagePanel.getElement();
     }
@@ -75,6 +71,6 @@ public class SearchCompositeBox extends Composite {
     }
 
     public String getQueryString() {
-        return box.getText();
+        return box.getText().trim();
     }
 }

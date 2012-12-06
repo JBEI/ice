@@ -81,23 +81,23 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
         return resultSize;
     }
 
-    public void reset() {
-        this.cachedEntries.clear();
-        resultSize = 0;
-        this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
-
-        // reset sort 
-        lastSortAsc = false;
-        lastSortField = ColumnField.CREATED;
-
-        this.table.getColumnSortList().clear();
-        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
-
-        if (defaultSortField != null) {
-            ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
-            this.table.getColumnSortList().push(info);
-        }
-    }
+//    public void reset() {
+//        this.cachedEntries.clear();
+//        resultSize = 0;
+//        this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
+//
+//        // reset sort
+//        lastSortAsc = false;
+//        lastSortField = ColumnField.CREATED;
+//
+//        this.table.getColumnSortList().clear();
+//        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
+//
+//        if (defaultSortField != null) {
+//            ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
+//            this.table.getColumnSortList().push(info);
+//        }
+//    }
 
     @Override
     protected void onRangeChanged(HasData<EntryInfo> display) {

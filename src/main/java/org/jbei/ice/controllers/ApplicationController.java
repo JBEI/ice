@@ -38,11 +38,8 @@ public class ApplicationController {
     public static void initializeHibernateSearch() {
         Session session = HibernateHelper.newSession();
         FullTextSession fullTextSession = Search.getFullTextSession(session);
-        try {
-            fullTextSession.createIndexer().startAndWait();
-        } catch (InterruptedException e) {
-            Logger.error("Indexer interrupted", e);
-        }
+//            fullTextSession.createIndexer().startAndWait();
+        fullTextSession.createIndexer().start();
     }
 
     public static void upgradeDatabaseIfNecessary() {
@@ -57,7 +54,7 @@ public class ApplicationController {
 
             // check if previous supported versions
             boolean previousVersionSupported = isPreviousVersionSupported(dbVersion);
-            if (!previousVersionSupported) // TODO : fatal db cannot be upgraded
+            if (!previousVersionSupported) //TODO : fatal db cannot be upgraded
                 return;
 
             // upgrade the db and save new version
@@ -84,7 +81,6 @@ public class ApplicationController {
             if (prevVersion.equalsIgnoreCase(version))
                 return true;
         }
-
         return false;
     }
 

@@ -99,7 +99,10 @@ public abstract class AdvancedSearchResultsTable extends HasEntryDataTable<Searc
 
             @Override
             public String getOwnerId(SearchResultInfo value) {
-                return value.getEntryInfo().getOwnerEmail() + "";
+                String ownerId = value.getEntryInfo().getOwnerEmail();
+                if (ownerId == null)
+                    return "";
+                return ownerId;
             }
         };
 

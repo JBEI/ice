@@ -45,8 +45,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
     public HasEntryDataTable() {
 
         selectionModel = new HasEntrySelectionModel<T>();
-        this.setSelectionModel(selectionModel,
-                               DefaultSelectionEventManager.<T>createCheckboxManager());
+        this.setSelectionModel(selectionModel, DefaultSelectionEventManager.<T>createCheckboxManager());
     }
 
     @Override
@@ -58,6 +57,10 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
         }
 
         return infoSet;
+    }
+
+    public HasEntrySelectionModel<T> getSelectionModel() {
+        return this.selectionModel;
     }
 
     protected DataTableColumn<Boolean> addSelectionColumn() {

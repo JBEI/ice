@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
+import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Boost;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Store;
@@ -28,7 +29,7 @@ public class PartNumber implements IModel {
     private long id;
 
     @Column(name = "part_number", length = 127, nullable = false)
-    @Field(boost = @Boost(1.2f), store = Store.YES)
+    @Field(boost = @Boost(2f), store = Store.YES, analyze = Analyze.NO)
     private String partNumber;
 
     @ManyToOne(fetch = FetchType.EAGER)

@@ -12,6 +12,8 @@ import javax.persistence.TemporalType;
 
 import org.jbei.ice.shared.dto.EntryType;
 
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 
 /**
@@ -56,9 +58,11 @@ public class ArabidopsisSeed extends Entry {
     }
 
     @Column(name = "homozygosity", nullable = false)
+    @Field
     private String homozygosity;
 
     @Column(name = "ecotype", nullable = false)
+    @Field
     private String ecotype;
 
     @Column(name = "harvest_date")
@@ -66,14 +70,17 @@ public class ArabidopsisSeed extends Entry {
     private Date harvestDate;
 
     @Column(name = "parents", nullable = false)
+    @Field
     private String parents;
 
     @Column(name = "generation", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Field(analyze = Analyze.NO)
     private Generation generation;
 
     @Column(name = "plant_type", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Field(analyze = Analyze.NO)
     private PlantType plantType;
 
     @Column(name = "sentToABRC")

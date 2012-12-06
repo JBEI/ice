@@ -209,15 +209,12 @@ public class CollectionsPresenter extends AbstractPresenter {
     }
 
     private void initCollectionTableSelectionHandler() {
-        final EntrySelectionModel<EntryInfo> selectionModel = this.collectionsDataTable
-                .getSelectionModel();
+        final EntrySelectionModel<EntryInfo> selectionModel = this.collectionsDataTable.getSelectionModel();
         this.collectionsDataTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-
                 boolean enable = (selectionModel.getSelectedSet().size() > 0);
-
                 display.enableExportAs(enable);
 
                 // can user edit current folder?
@@ -488,21 +485,21 @@ public class CollectionsPresenter extends AbstractPresenter {
             public void onFolderRetrieve(FolderRetrieveEvent event) {
                 if (event == null || event.getItems() == null) {
                     display.showFeedbackMessage("Error connecting to server. Please try again", true);
-                    folderDataProvider.setFolderData(null);
+                    folderDataProvider.setFolderData(null, true);
                     return;
                 }
 
                 FolderDetails folder = event.getItems().get(0);
                 if (folder == null) {
                     display.showFeedbackMessage("Could not retrieve collection entries", true);
-                    folderDataProvider.setFolderData(null);
+                    folderDataProvider.setFolderData(null, true);
                     return;
                 }
 
                 collectionsDataTable.clearSelection();
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folder.getId(), false);
                 display.setCurrentMenuSelection(folder.getId());
-                folderDataProvider.setFolderData(folder);
+                folderDataProvider.setFolderData(folder, true);
 
                 currentFolder = folder;
                 mode = Mode.COLLECTION;
