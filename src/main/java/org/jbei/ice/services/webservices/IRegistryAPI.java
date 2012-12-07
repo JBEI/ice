@@ -1,6 +1,7 @@
 package org.jbei.ice.services.webservices;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -13,11 +14,10 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
-import org.jbei.ice.shared.dto.SearchFilterInfo;
-import org.jbei.ice.shared.dto.SearchResults;
+import org.jbei.ice.shared.dto.search.SearchQuery;
+import org.jbei.ice.shared.dto.search.SearchResults;
 
 /**
  * @author Hector Plahar
@@ -29,8 +29,7 @@ public interface IRegistryAPI {
 
     void logout(@WebParam(name = "sessionId") String sessionId) throws ServiceException;
 
-    boolean isAuthenticated(@WebParam(name = "sessionId") String sessionId)
-            throws ServiceException;
+    boolean isAuthenticated(@WebParam(name = "sessionId") String sessionId) throws ServiceException;
 
     boolean isModerator(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "login") String login)
             throws SessionException, ServiceException;
@@ -38,22 +37,13 @@ public interface IRegistryAPI {
     Entry getEntryByName(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "name") String name)
             throws ServiceException;
 
-    long getNumberOfPublicEntries() throws ServiceException;
-
-    SearchResults search(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "query") String query)
-            throws ServiceException, SessionException;
-
-    ArrayList<BlastResult> blastn(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "querySequence") String querySequence) throws SessionException,
-            ServiceException;
-
-    ArrayList<BlastResult> tblastx(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "querySequence") String querySequence) throws SessionException,
-            ServiceException;
+    boolean hasSequence(@WebParam(name = "recordId") String recordId) throws ServiceException;
 
     Entry getByRecordId(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException;
+
+    Entry getPublicEntryByRecordId(@WebParam(name = "recordId") String recordId) throws ServiceException;
 
     Entry getByPartNumber(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "partNumber") String partNumber) throws SessionException,
@@ -93,6 +83,8 @@ public interface IRegistryAPI {
     FeaturedDNASequence getSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId)
             throws SessionException, ServiceException, ServicePermissionException;
+
+    FeaturedDNASequence getPublicSequence(@WebParam(name = "entryId") String entryId) throws ServiceException;
 
     String getOriginalGenBankSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId)
@@ -138,8 +130,7 @@ public interface IRegistryAPI {
             @WebParam(name = "samples") Sample[] samples, @WebParam(name = "plateId") String plateId)
             throws SessionException, ServiceException;
 
-    List<TraceSequence> listTraceSequenceFiles(
-            @WebParam(name = "sessionId") String sessionId,
+    List<TraceSequence> listTraceSequenceFiles(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "recordId") String recordId) throws ServiceException, SessionException;
 
     String uploadTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
@@ -153,7 +144,12 @@ public interface IRegistryAPI {
     void deleteTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException;
 
-    // web of registries
-    SearchResults runSearch(@WebParam(name = "searchFilters") ArrayList<SearchFilterInfo> searchFilters)
+    SearchResults runSearch(@WebParam(name = "searchQuery") SearchQuery query) throws ServiceException;
+
+    /**
+     * WARNING
+     * This is experimental and should not be used under any circumstances by third party applications
+     */
+    boolean transmitEntries(@WebParam(name = "entrySequenceMap") HashMap<Entry, String> entrySequenceMap)
             throws ServiceException;
 }

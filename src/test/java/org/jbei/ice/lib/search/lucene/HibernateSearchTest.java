@@ -2,14 +2,10 @@ package org.jbei.ice.lib.search.lucene;
 
 import java.util.List;
 
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.search.HibernateSearch;
-import org.jbei.ice.shared.dto.EntryType;
 
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -41,9 +37,6 @@ public class HibernateSearchTest {
 
     @Test
     public void testExecuteSearch() throws Exception {
-        Account account = new AccountController().getByEmail("afschlatter@lbl.gov");
-//        HibernateSearch.getInstance().executeSearchOnField(account, "pamela", "creator",EntryType.values(), 0, 30);
-        HibernateSearch.getInstance().executeSearchOnField(account, "a*", "canRead", EntryType.values(), 0, 30);
     }
 
     @Test
@@ -52,8 +45,7 @@ public class HibernateSearchTest {
 
     @Test
     public void test() throws Exception {
-
-        String queryString = "sfhansen@lbl.gov";
+        String queryString = "test";
         String field = "creatorEmail";
         int start = 0;
         int limit = 20;
@@ -71,26 +63,14 @@ public class HibernateSearchTest {
         } else {
             query = qb
                     .keyword().fuzzy().withThreshold(0.8f)        // todo add threshold as params to fields
-                    .onField(
-                            field)//.ignoreFieldBridge() is used when searching on the fields created by the class
-                            // bridge
+                    .onField(field)
+                    .ignoreFieldBridge()    // search for objects of type string only
                     .matching(queryString)
                     .createQuery();
         }
         boolQuery.add(query, BooleanClause.Occur.MUST);
 
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(boolQuery, Entry.class);
-
-//        Criteria criteria = session.createCriteria(Permission.class)
-////                                   .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
-//                                   .add(Restrictions.eq("canRead", Boolean.TRUE))
-//                                   .add(Restrictions.eq("account", account))
-//                                   .add(Restrictions.isNull("folder"))
-//                                   .add(Restrictions.isNull("group"));
-//                                   .add(Restrictions.eq("entry", entry))
-
-//        fullTextQuery.setCriteriaQuery(criteria);
-
         fullTextQuery.setSort(Sort.RELEVANCE);
         fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
         fullTextQuery.enableFullTextFilter("security").setParameter("account",

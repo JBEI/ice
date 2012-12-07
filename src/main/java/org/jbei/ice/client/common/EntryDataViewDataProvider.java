@@ -4,8 +4,9 @@ import java.util.LinkedList;
 
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.table.DataTable;
+import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
@@ -34,7 +35,7 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
         AsyncHandler columnSortHandler = new AsyncHandler(table);
         table.addColumnSortHandler(columnSortHandler);
 
-        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
+        DataTableColumn<EntryInfo, ?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
 
         if (defaultSortField != null) {
             ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
@@ -45,10 +46,13 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
     }
 
     @Override
-    public EntryInfo getCachedData(long entryId) {
-        for (EntryInfo result : cachedEntries) {
-            if (result.getId() == entryId)
-                return result;
+    public EntryInfo getCachedData(long entryId, String recordId) {
+        for (EntryInfo info : cachedEntries) {
+            if (recordId != null && info.getRecordId().equalsIgnoreCase(recordId))
+                return info;
+
+            if (info.getId() == entryId)
+                return info;
         }
         return null;
     }
@@ -81,24 +85,6 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
         return resultSize;
     }
 
-//    public void reset() {
-//        this.cachedEntries.clear();
-//        resultSize = 0;
-//        this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
-//
-//        // reset sort
-//        lastSortAsc = false;
-//        lastSortField = ColumnField.CREATED;
-//
-//        this.table.getColumnSortList().clear();
-//        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
-//
-//        if (defaultSortField != null) {
-//            ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
-//            this.table.getColumnSortList().push(info);
-//        }
-//    }
-
     @Override
     protected void onRangeChanged(HasData<EntryInfo> display) {
         if (resultSize == 0)   // display changed its range of interest but no data
@@ -110,12 +96,19 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
         final int rangeEnd = (rangeStart + range.getLength()) > resultSize ? resultSize
                 : (rangeStart + range.getLength());
 
-        if (sortChanged(rangeEnd)) {
-            fetchEntryData(lastSortField, lastSortAsc, 0, (range.getLength() * 2), true);
+        // last page
+        if (rangeEnd == resultSize && resultSize > range.getLength()) {
+            fetchEntryData(lastSortField, lastSortAsc, rangeStart, (resultSize - rangeStart), false);
             return;
         }
 
-        // sort did not change
+        // user is sorting
+        if (sortChanged(rangeEnd)) {
+            fetchEntryData(lastSortField, lastSortAsc, 0, range.getLength(), true);
+            return;
+        }
+
+        // sort did not change, use data in cache
         updateRowData(rangeStart, cachedEntries.subList(rangeStart, rangeEnd));
 
         if (rangeEnd == cachedEntries.size()) { // or close enough within some delta, retrieve more
@@ -152,8 +145,8 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
     }
 
     protected void cacheMore(final ColumnField field, final boolean ascending, int rangeStart, int rangeEnd) {
-        GWT.log("Retrieving [" + rangeStart + " - " + rangeEnd + "]");
-        int factor = (rangeEnd - rangeStart) * 2;  //  pages in advance
+        GWT.log("Caching [" + rangeStart + " - " + rangeEnd + "]");
+        int factor = (rangeEnd - rangeStart);  //  pages in advance
         fetchEntryData(field, ascending, rangeStart, factor, false);
     }
 

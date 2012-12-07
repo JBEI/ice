@@ -15,6 +15,7 @@ public enum ColumnField implements IsSerializable {
     CREATED("Created"),
     NAME("Name"),
     SUMMARY("Summary"),
+    ICE_PROJECT("Project ID"),
     OWNER("Owner"),
     STATUS("Status"),
     BIT_SCORE("Bit Score"),

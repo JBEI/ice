@@ -14,7 +14,7 @@ public class SelectGroupMemberTable extends GroupMemberTable {
     private final ListDataProvider<AccountInfo> dataProvider;
 
     public SelectGroupMemberTable() {
-        super();
+        super(null);
         this.dataProvider = new ListDataProvider<AccountInfo>();
         this.dataProvider.addDataDisplay(this);
     }
@@ -23,11 +23,11 @@ public class SelectGroupMemberTable extends GroupMemberTable {
         dataProvider.setList(data);
     }
 
-    @Override
-    protected void createColumns() {
-        createSelectionColumn();
-        createIDColumn();
-        createNameColumn();
-        createEmailColumn();
-    }
+//    @Override
+//    protected void createColumns() {
+//        createSelectionColumn();
+////        createIDColumn();
+//        createNameColumn();
+//        createEmailColumn();
+//    }
 }

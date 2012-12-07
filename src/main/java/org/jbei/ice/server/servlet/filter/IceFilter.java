@@ -33,7 +33,11 @@ public class IceFilter implements Filter {
             chain.doFilter(request, response);
             HibernateHelper.commitTransaction();
         } catch (Throwable t) {
-            Logger.error(t);
+            try {
+                Logger.error(t);    // todo : need to rollback current transaction and start new one for logging
+            } catch (Throwable e) {
+                Logger.warn("Could not log error " + e.getMessage());
+            }
             HibernateHelper.rollbackTransaction();
 
             /*

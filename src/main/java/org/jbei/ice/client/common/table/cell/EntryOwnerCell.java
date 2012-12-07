@@ -14,7 +14,8 @@ public abstract class EntryOwnerCell<T> extends AbstractCell<T> {
         if (ownerId == null || ownerId.isEmpty())
             sb.appendHtmlConstant("<i>" + owner + "</i>");
         else
-            sb.appendHtmlConstant("<a href=\"#" + Page.PROFILE.getLink() + ";id=" + ownerId + "\">" + owner + "</a>");
+            sb.appendHtmlConstant("<a href=\"#" + Page.PROFILE.getLink() + ";id="
+                                          + ownerId + ";s=profile\">" + owner + "</a>");
     }
 
     public abstract String getOwnerName(T value);

@@ -22,8 +22,9 @@ public abstract class ImageColumn<T> extends Column<T, ImageResource> {
      * Supported image types for the column
      */
     public enum Type {
-        SAMPLE(resources.sample()), ATTACHMENT(resources.attachment()), SEQUENCE(resources
-                                                                                         .sequence());
+        SAMPLE(resources.sample()),
+        ATTACHMENT(resources.attachment()),
+        SEQUENCE(resources.sequence());
 
         private transient ImageResource image;
 

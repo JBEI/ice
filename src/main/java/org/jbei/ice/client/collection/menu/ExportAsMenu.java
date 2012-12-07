@@ -53,8 +53,7 @@ public class ExportAsMenu implements IsWidget {
 
         options.setRowData(Arrays.asList(ExportAsOption.values()));
 
-        final PopupHandler exportAsClickHandler = new PopupHandler(options, exportAs.getElement(),
-                                                                   false);
+        final PopupHandler exportAsClickHandler = new PopupHandler(options, exportAs.getElement(), false);
 
         exportAs.addClickHandler(exportAsClickHandler);
         optionSelection = new SingleSelectionModel<ExportAsOption>();
@@ -68,6 +67,10 @@ public class ExportAsMenu implements IsWidget {
 
         options.setSelectionModel(optionSelection);
         exportAs.setEnabled(false);
+    }
+
+    public int getWidth() {
+        return 95;
     }
 
     public SingleSelectionModel<ExportAsOption> getSelectionModel() {

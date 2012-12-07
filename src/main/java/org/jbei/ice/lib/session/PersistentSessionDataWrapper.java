@@ -149,8 +149,7 @@ public class PersistentSessionDataWrapper {
                 getSessionDataCache().remove(sessionKey);
             }
         }
-        Logger.debug("SessionData cache went from " + before + " to "
-                             + getSessionDataCache().size() + " elements");
+        Logger.debug("SessionData cache went from " + before + " to " + getSessionDataCache().size() + " elements");
     }
 
     /**

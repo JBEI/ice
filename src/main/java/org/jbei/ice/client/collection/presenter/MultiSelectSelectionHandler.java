@@ -1,6 +1,6 @@
 package org.jbei.ice.client.collection.presenter;
 
-import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.shared.dto.folder.FolderDetails;
 
 public interface MultiSelectSelectionHandler {
 

@@ -7,6 +7,7 @@ import org.jbei.ice.lib.dao.IModel;
 
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Boost;
+import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Store;
 
@@ -25,13 +26,14 @@ public class PartNumber implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "part_number", length = 127, nullable = false)
     @Field(boost = @Boost(2f), store = Store.YES, analyze = Analyze.NO)
     private String partNumber;
 
+    @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;

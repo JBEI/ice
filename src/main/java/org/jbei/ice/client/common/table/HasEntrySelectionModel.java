@@ -1,6 +1,6 @@
 package org.jbei.ice.client.common.table;
 
-import org.jbei.ice.shared.dto.HasEntryInfo;
+import org.jbei.ice.shared.dto.entry.HasEntryInfo;
 
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;

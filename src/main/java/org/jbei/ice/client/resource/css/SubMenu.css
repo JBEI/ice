@@ -1,9 +1,5 @@
 .buttonAddTo {
     border-right: 0px;
-    -webkit-border-top-left-radius: 2px;
-    -webkit-border-bottom-left-radius: 2px;
-    -moz-border-radius-topleft: 2px;
-    -moz-border-radius-bottomleft: 2px;
     border-top-left-radius: 2px;
     border-bottom-left-radius: 2px;
     width: 90px;
@@ -19,10 +15,6 @@
 
 .buttonMoveTo {
     border-left: 0px;
-    -webkit-border-top-right-radius: 2px;
-    -webkit-border-bottom-right-radius: 2px;
-    -moz-border-radius-topright: 2px;
-    -moz-border-radius-bottomright: 2px;
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
     width: 93px;
@@ -38,7 +30,7 @@
     border-top: 2px solid #f1f1f1;
     font-family: Arial, serif;
     border: 1px solid #c2c2c2;
-    height: 26px;
+    height: 28px;
     background-image: -webkit-linear-gradient(top, #fefefe, #F2F2F2);
     background-image: -o-linear-gradient(top, #fefefe, #F2F2F2);
     background-image: linear-gradient(to bottom, #fefefe, #F2F2F2);

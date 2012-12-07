@@ -9,6 +9,3 @@ mvn install:install-file -Dfile=flex-messaging-opt.jar -DgroupId=org.jbei.ice -D
 mvn install:install-file -Dfile=flex-messaging-proxy.jar -DgroupId=org.jbei.ice -DartifactId=flex-messaging-proxy -Dversion=SNAPSHOT -Dpackaging=jar
 mvn install:install-file -Dfile=flex-messaging-remoting.jar -DgroupId=org.jbei.ice -DartifactId=flex-messaging-remoting -Dversion=SNAPSHOT -Dpackaging=jar
 mvn install:install-file -Dfile=libSBOLj.jar -DgroupId=org.jbei.ice -DartifactId=libSBOLj -Dversion=SNAPSHOT -Dpackaging=jar
-mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.core_1.8.0.I20120924-2338.jar -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.core -Dversion=SNAPSHOT -Dpackaging=jar
-mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.mediawiki.core_1.8.0.I20120924-2338.jar -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.mediawiki.core -Dversion=SNAPSHOT -Dpackaging=jar
-mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.8.0.I20120924-2338.jar -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.confluence.core -Dversion=SNAPSHOT -Dpackaging=jar

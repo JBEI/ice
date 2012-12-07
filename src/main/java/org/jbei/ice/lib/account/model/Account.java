@@ -7,6 +7,7 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.shared.dto.AccountInfo;
 
 import org.hibernate.annotations.Type;
 
@@ -29,7 +30,7 @@ public class Account implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "firstname", length = 50, nullable = false)
@@ -79,7 +80,7 @@ public class Account implements IModel {
     @Column(name = "salt")
     private String salt;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"),
                inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups = new LinkedHashSet<Group>();
@@ -89,41 +90,6 @@ public class Account implements IModel {
      */
     public Account() {
         super();
-    }
-
-    /**
-     * Constructor with parameters.
-     *
-     * @param firstName
-     * @param lastName
-     * @param initials
-     * @param email
-     * @param password
-     * @param institution
-     * @param isSubscribed
-     * @param description
-     * @param ip
-     * @param creationTime
-     * @param modificationTime
-     * @param lastLoginTime
-     */
-    public Account(String firstName, String lastName, String initials, String email,
-            String password, String institution, int isSubscribed, String description, String ip,
-            Date creationTime, Date modificationTime, Date lastLoginTime) {
-        super();
-
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.initials = initials;
-        this.email = email;
-        this.password = password;
-        this.institution = institution;
-        this.isSubscribed = isSubscribed;
-        this.description = description;
-        this.ip = ip;
-        this.creationTime = creationTime;
-        this.modificationTime = modificationTime;
-        this.lastLoginTime = lastLoginTime;
     }
 
     /**
@@ -293,5 +259,21 @@ public class Account implements IModel {
 
     public void setSalt(String salt) {
         this.salt = salt;
+    }
+
+    public static AccountInfo toDTO(Account account) {
+        if (account == null)
+            return null;
+
+        AccountInfo info = new AccountInfo();
+        info.setEmail(account.getEmail());
+        info.setFirstName(account.getFirstName());
+        info.setLastName(account.getLastName());
+        info.setInstitution(account.getInstitution());
+        info.setDescription(account.getDescription());
+        info.setInitials(account.getInitials());
+        info.setLastLogin(account.getLastLoginTime());
+        info.setId(account.getId());
+        return info;
     }
 }

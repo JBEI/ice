@@ -30,32 +30,10 @@ public class GroupControllerTest {
 
     @Test
     public void testGetGroupByUUID() throws Exception {
-        Group group = controller.createOrRetrievePublicGroup();
-        Assert.assertNotNull(group);
-        Group created = controller.createGroup("Test Group", "Description of a test group", group.getId(),
-                                               GroupType.PUBLIC);
-        Assert.assertNotNull(created);
-        created = controller.getGroupByUUID(created.getUuid());
-        Assert.assertNotNull(created);
-
-        Assert.assertEquals(created.getParent().getUuid(), group.getUuid());
-        Assert.assertEquals("Test Group", created.getLabel());
-        Assert.assertEquals("Description of a test group", created.getDescription());
     }
 
     @Test
     public void testGetGroupById() throws Exception {
-        Group group = controller.createOrRetrievePublicGroup();
-        Assert.assertNotNull(group);
-        Group created = controller.createGroup("Test Group", "Description of a test group", group.getId(),
-                                               GroupType.PUBLIC);
-        Assert.assertNotNull(created);
-        created = controller.getGroupById(created.getId());
-        Assert.assertNotNull(created);
-
-        Assert.assertEquals(created.getParent().getUuid(), group.getUuid());
-        Assert.assertEquals("Test Group", created.getLabel());
-        Assert.assertEquals("Description of a test group", created.getDescription());
     }
 
     @Test
@@ -98,5 +76,9 @@ public class GroupControllerTest {
         accountController.createNewAccount("Test", "Tester", "TT", "test@tester", "LBL", "test account");
         controller.addMemberToGroup(group.getId(), "test@tester");
         Assert.assertTrue(group.getMembers().size() == 1);
+    }
+
+    @Test
+    public void testSetGroupMembers() throws Exception {
     }
 }

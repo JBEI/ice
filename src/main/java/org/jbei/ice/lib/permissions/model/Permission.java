@@ -2,11 +2,12 @@ package org.jbei.ice.lib.permissions.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.account.model.Account;
@@ -15,9 +16,9 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.ClassBridge;
+import org.hibernate.search.annotations.ContainedIn;
 
 /**
  * Permission object for storing permissions related to either folders or entries
@@ -28,13 +29,13 @@ import org.hibernate.search.annotations.ClassBridge;
 @Entity
 @Table(name = "PERMISSION")
 @ClassBridge(name = "permission", analyze = Analyze.NO, impl = PermissionEntryBridge.class)
+@SequenceGenerator(name = "sequence", sequenceName = "permission_id_seq", allocationSize = 1)
 public class Permission implements IModel {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(generator = "increment")
-    @GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private int id;
 
     @ManyToOne
@@ -51,14 +52,18 @@ public class Permission implements IModel {
     @Column(name = "can_write")
     private boolean canWrite;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "entry_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "entry_id")
+    @ContainedIn
     private Entry entry;
 
     @ManyToOne
     @JoinColumn(name = "folder_id")
     private Folder folder;
 
+    public int getId() {
+        return id;
+    }
 
     public Account getAccount() {
         return account;

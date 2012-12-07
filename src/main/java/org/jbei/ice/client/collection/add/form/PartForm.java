@@ -1,11 +1,12 @@
 package org.jbei.ice.client.collection.add.form;
 
-import org.jbei.ice.shared.dto.PartInfo;
+import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.entry.PartInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Widget;
 
-public class PartForm extends SingleEntryForm<PartInfo> {
+public class PartForm extends EntryForm<PartInfo> {
 
     public PartForm(PartInfo partInfo) {
         super(partInfo);
@@ -89,5 +90,10 @@ public class PartForm extends SingleEntryForm<PartInfo> {
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
         return general;
+    }
+
+    @Override
+    public String getHeaderDisplay() {
+        return EntryAddType.PART.getDisplay();
     }
 }

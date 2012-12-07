@@ -1,7 +1,7 @@
 package org.jbei.ice.client.entry.view.detail;
 
 import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;

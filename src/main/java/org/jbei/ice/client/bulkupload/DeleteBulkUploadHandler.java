@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -31,7 +31,7 @@ public class DeleteBulkUploadHandler implements IDeleteMenuHandler {
             @Override
             protected void callService(AsyncCallback<BulkUploadInfo> callback) throws AuthenticationException {
                 try {
-                    service.deleteSavedDraft(AppController.sessionId, draftId, callback);
+                    service.deleteSavedDraft(ClientController.sessionId, draftId, callback);
                 } catch (AuthenticationException e) {
                     History.newItem(Page.LOGIN.getLink());
                 }

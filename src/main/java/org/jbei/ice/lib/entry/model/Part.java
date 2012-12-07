@@ -11,7 +11,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import org.hibernate.search.annotations.Indexed;
 
@@ -51,7 +51,9 @@ public class Part extends Entry {
     private String pkgdDnaRevHash;
 
     public Part() {
+        super();
         setRecordType(EntryType.PART.getName());
+        setPackageFormat(Part.AssemblyStandard.RAW);
     }
 
     public AssemblyStandard getPackageFormat() {

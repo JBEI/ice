@@ -1,21 +1,36 @@
 package org.jbei.ice.client.search.advanced;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.common.table.EntryTablePager;
+import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.common.table.cell.HasEntryPartIDCell;
+import org.jbei.ice.client.common.table.column.DataTableColumn;
+import org.jbei.ice.client.common.table.column.HasEntryPartIdColumn;
+import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
-import org.jbei.ice.client.search.event.AdvancedSearchEvent;
-import org.jbei.ice.shared.QueryOperator;
-import org.jbei.ice.shared.dto.SearchFilterInfo;
-import org.jbei.ice.shared.dto.SearchResultInfo;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.shared.dto.search.SearchQuery;
+import org.jbei.ice.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.shared.dto.search.SearchResults;
 
+import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 
@@ -31,17 +46,19 @@ public class SearchPresenter extends AbstractPresenter {
     }
 
     private final ISearchView display;
-    private final AdvancedSearchDataProvider dataProvider;
+    private final SearchDataProvider dataProvider;
+    private final SearchDataProvider webDataProvider;
     private final BlastSearchDataProvider blastProvider;
-    private final AdvancedSearchModel model;
-    private AdvancedSearchResultsTable table;
-    private BlastResultsTable blastTable;
+    private final SearchModel model;
+    private final SearchResultsTable table;
+    private final SearchResultsTable webResults;
+    private final BlastResultsTable blastTable;
     private Mode mode;
 
     public SearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus, ISearchView view) {
         super(rpcService, eventBus);
         this.display = view;
-        table = new AdvancedSearchResultsTable(new EntryTablePager()) {
+        table = new SearchResultsTable() {
 
             @Override
             protected EntryViewEventHandler getHandler() {
@@ -54,6 +71,8 @@ public class SearchPresenter extends AbstractPresenter {
                 };
             }
         };
+
+        webResults = new WebResultsTable();
 
         blastTable = new BlastResultsTable() {
             @Override
@@ -69,9 +88,43 @@ public class SearchPresenter extends AbstractPresenter {
         };
 
         // hide the results table
-        dataProvider = new AdvancedSearchDataProvider(table, rpcService);
+        dataProvider = new SearchDataProvider(table, rpcService, false);
+        webDataProvider = new SearchDataProvider(webResults, rpcService, true);
         blastProvider = new BlastSearchDataProvider(blastTable, rpcService);
-        model = new AdvancedSearchModel(rpcService, eventBus);
+        model = new SearchModel(rpcService, eventBus);
+        getWebOfRegistrySettings();
+        addSearchHandlers();
+    }
+
+    public void addSearchHandlers() {
+        display.setLocalSearchHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                search();
+            }
+        });
+
+        display.setWebSearchHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                webSearch();
+            }
+        });
+    }
+
+    public void getWebOfRegistrySettings() {
+        new IceAsyncCallback<Boolean>() {
+
+            @Override
+            protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                service.isWebOfRegistriesEnabled(callback);
+            }
+
+            @Override
+            public void onSuccess(Boolean show) {
+                display.showWebOfRegistryOptions(show);
+            }
+        }.go(eventBus);
     }
 
     @Override
@@ -89,42 +142,41 @@ public class SearchPresenter extends AbstractPresenter {
     }
 
     public void search() {
-        // currently support only a single blast search with filters
-        // search for blast operator
-
-        ArrayList<SearchFilterInfo> searchFilters = display.parseUrlForFilters();
-        ArrayList<SearchFilterInfo> searchFilterCopy = new ArrayList<SearchFilterInfo>(searchFilters);
-        SearchFilterInfo blastInfo = null;
-        for (SearchFilterInfo filter : searchFilterCopy) {
-            QueryOperator operator = QueryOperator.operatorValueOf(filter.getOperator());
-            if (operator == null)
-                continue;
-
-            if (operator == QueryOperator.TBLAST_X || operator == QueryOperator.BLAST_N) {
-                if (searchFilterCopy.remove(filter)) {
-                    blastInfo = filter;
-                }
-                break;
-            }
+        SearchQuery searchQuery = display.parseUrlForQuery();
+        searchQuery.getParameters().setRetrieveCount(30);
+        searchQuery.getParameters().setStart(0);
+        model.performSearch(searchQuery, false, new SearchCallback(false));
+        if (searchQuery.hasBlastQuery()) {
+            // show blast table loading
+            searchQuery.getParameters().setSortField(ColumnField.BIT_SCORE);
+            blastProvider.updateRowCount(0, false);
+            display.setBlastVisibility(blastTable, true);
+            blastTable.setVisibleRangeAndClearData(blastTable.getVisibleRange(), false);
+        } else {
+            // regular search
+            searchQuery.getParameters().setSortField(ColumnField.RELEVANCE);
+            dataProvider.updateRowCount(0, false);
+            display.setSearchVisibility(table, true);
+            table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
         }
+    }
 
-        if (blastInfo != null) {
+    public void webSearch() {
+        SearchQuery searchQuery = display.parseUrlForQuery();
+        searchQuery.getParameters().setSortField(ColumnField.RELEVANCE);
+        searchQuery.getParameters().setRetrieveCount(30);
+        searchQuery.getParameters().setStart(0);
+        model.performSearch(searchQuery, true, new SearchCallback(true));
+        if (searchQuery.hasBlastQuery()) {
             // show blast table loading
             blastProvider.updateRowCount(0, false);
             display.setBlastVisibility(blastTable, true);
             blastTable.setVisibleRangeAndClearData(blastTable.getVisibleRange(), false);
-
-            // get blast results and filter 
-            QueryOperator program = QueryOperator.operatorValueOf(blastInfo.getOperator());
-            this.model.performBlast(searchFilterCopy, blastInfo.getOperand(), program, 0, 30,
-                                    new EventHandler(searchFilters));
         } else {
             // regular search
-            dataProvider.updateRowCount(0, false);
-            display.setSearchVisibility(table, true);
-            table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
-            this.model.retrieveSearchResults(searchFilterCopy, display.getSearchTypes(),
-                                             0, 30, new EventHandler(searchFilters));
+            webDataProvider.updateRowCount(0, false);
+            display.setSearchVisibility(webResults, true);
+            webResults.setVisibleRangeAndClearData(webResults.getVisibleRange(), false);
         }
     }
 
@@ -146,30 +198,145 @@ public class SearchPresenter extends AbstractPresenter {
         return this.display;
     }
 
-    // 
+    //
     // inner class
     //
+    private class SearchCallback extends Callback<SearchResults> {
 
-    private class EventHandler implements AdvancedSearchEvent.AdvancedSearchEventHandler {
+        private final boolean webSearch;
 
-        public EventHandler(ArrayList<SearchFilterInfo> filters) {
-            display.setSearchFilters(filters);
+        public SearchCallback(boolean webSearch) {
+            this.webSearch = webSearch;
         }
 
         @Override
-        public void onSearchCompletion(AdvancedSearchEvent event) {
-            if (event == null)
+        public void onSuccess(SearchResults searchResults) {
+            if (searchResults.getQuery().hasBlastQuery()) {
+                blastProvider.setBlastData(searchResults.getResults());
+                mode = Mode.BLAST;
                 return;
-            dataProvider.setSearchData(event.getSearchResults());
+            }
+
+            if (webSearch) {
+                webDataProvider.setSearchData(searchResults);
+            } else
+                dataProvider.setSearchData(searchResults);
             mode = Mode.SEARCH;
         }
 
+        public void onFailure() {
+            if (mode == Mode.BLAST)
+                blastProvider.setBlastData(new LinkedList<SearchResultInfo>());
+            else {
+                if (webSearch)
+                    webDataProvider.setSearchData(null);
+                else
+                    dataProvider.setSearchData(null);
+            }
+        }
+    }
+
+    private class WebResultsTable extends SearchResultsTable {
+
         @Override
-        public void onBlastCompletion(AdvancedSearchEvent event) {
-            if (event == null)
-                return;
-            blastProvider.setBlastData(event.getResults());
-            mode = Mode.BLAST;
+        protected ArrayList<DataTableColumn<SearchResultInfo, ?>> createColumns() {
+            ArrayList<DataTableColumn<SearchResultInfo, ?>> columns =
+                    new ArrayList<DataTableColumn<SearchResultInfo, ?>>();
+            columns.add(addScoreColumn());
+            columns.add(super.addTypeColumn(true));
+            columns.add(addPartIdColumn(false, 120, com.google.gwt.dom.client.Style.Unit.PX));
+            columns.add(super.addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
+            columns.add(addSummaryColumn());
+            columns.add(addWebPartnerName());
+            columns.add(addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
+            super.addHasSequenceColumn();
+            columns.add(super.addCreatedColumn(true));
+            return columns;
+        }
+
+        protected DataTableColumn<SearchResultInfo, SafeHtml> addWebPartnerName() {
+            SafeHtmlCell htmlCell = new SafeHtmlCell();
+            DataTableColumn<SearchResultInfo, SafeHtml> partner =
+                    new DataTableColumn<SearchResultInfo, SafeHtml>(htmlCell, ColumnField.ICE_PROJECT) {
+
+                        @Override
+                        public SafeHtml getValue(SearchResultInfo object) {
+                            String projectName = object.getWebPartnerName();
+                            String projectURI = object.getWebPartnerURL();
+                            if (projectName == null && projectURI == null)
+                                return SafeHtmlUtils.EMPTY_SAFE_HTML;
+
+                            if (projectURI == null)
+                                return SafeHtmlUtils.fromSafeConstant("<i>" + projectName + "</i>");
+
+                            String name = (projectName == null || projectName.isEmpty()) ? projectURI : projectName;
+                            return SafeHtmlUtils.fromSafeConstant(
+                                    "<a target=\"_blank\" href=\"" + projectURI + "\">" + name
+                                            + "</a>&nbsp;<i class=\""
+                                            + FAIconType.EXTERNAL_LINK.getStyleName() + " opacity_hover\"></i>");
+                        }
+                    };
+
+            this.addColumn(partner, "Project");
+            return partner;
+        }
+
+        @Override
+        protected DataTableColumn<SearchResultInfo, HasEntryInfo> addPartIdColumn(boolean sortable, double width,
+                com.google.gwt.dom.client.Style.Unit unit) {
+            HasEntryPartIDCell<HasEntryInfo> cell = new HasEntryPartIDCell<HasEntryInfo>(EntryContext.Type.SEARCH) {
+                @Override
+                protected String getURI(HasEntryInfo value) {
+                    return ((SearchResultInfo) value).getWebPartnerURL();
+                }
+            };
+            cell.addEntryHandler(getHandler());
+            DataTableColumn<SearchResultInfo, HasEntryInfo> partIdColumn =
+                    new HasEntryPartIdColumn<SearchResultInfo>(cell);
+            this.setColumnWidth(partIdColumn, width, unit);
+            partIdColumn.setSortable(sortable);
+            this.addColumn(partIdColumn, "Part ID");
+            return partIdColumn;
+        }
+
+        @Override
+        protected DataTableColumn<SearchResultInfo, SafeHtml> addNameColumn(final double width,
+                com.google.gwt.dom.client.Style.Unit unit) {
+
+            DataTableColumn<SearchResultInfo, SafeHtml> nameColumn =
+                    new DataTableColumn<SearchResultInfo, SafeHtml>(new SafeHtmlCell(), ColumnField.NAME) {
+
+                        @Override
+                        public SafeHtml getValue(SearchResultInfo object) {
+                            String name = object.getEntryInfo().getOwner();
+                            if (name == null)
+                                return SafeHtmlUtils.EMPTY_SAFE_HTML;
+
+                            return SafeHtmlUtils
+                                    .fromSafeConstant("<i style=\"width: "
+                                                              + width + "px; "
+                                                              + "white-space: nowrap; overflow: hidden; text-overflow: "
+                                                              + "ellipsis;\" title=\""
+                                                              + name.replaceAll("\"", "'") + "\">"
+                                                              + name + "</i>");
+                        }
+                    };
+
+            this.addColumn(nameColumn, "Owner");
+            nameColumn.setSortable(false);
+            this.setColumnWidth(nameColumn, width, unit);
+            return nameColumn;
+        }
+
+        @Override
+        protected EntryViewEventHandler getHandler() {
+            return new EntryViewEventHandler() {
+                @Override
+                public void onEntryView(EntryViewEvent event) {
+                    event.setNavigable(webDataProvider);
+                    model.getEventBus().fireEvent(event);
+                }
+            };
         }
     }
 }

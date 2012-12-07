@@ -13,6 +13,11 @@ import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
+import org.hibernate.SessionFactory;
+import org.hibernate.internal.SessionFactoryImpl;
+import org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider;
+import org.hibernate.service.jdbc.connections.spi.ConnectionProvider;
+
 /**
  * Ice servlet context listener for running initializing
  * and pre-shutdown instructions
@@ -31,6 +36,8 @@ public class IceServletContextListener implements ServletContextListener {
         // shutdown executor service
         IceExecutorService.getInstance().stopService();
 
+        closeSessionFactory(HibernateHelper.getSessionFactory());
+
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
             Driver driver = drivers.nextElement();
@@ -41,13 +48,18 @@ public class IceServletContextListener implements ServletContextListener {
                 Logger.error("Error de-registering driver: " + driver, e);
             }
         }
+    }
 
-//        if( muleContext != null && muleContext.isStarted())
-//            try {
-//                muleContext.stop();
-//            } catch (MuleException e) {
-//                Logger.error(e);
-//            }
+    // work
+    private void closeSessionFactory(SessionFactory factory) {
+        if (factory instanceof SessionFactoryImpl) {
+            SessionFactoryImpl sf = (SessionFactoryImpl) factory;
+            ConnectionProvider conn = sf.getConnectionProvider();
+            if (conn instanceof C3P0ConnectionProvider) {
+                ((C3P0ConnectionProvider) conn).close();
+            }
+        }
+        factory.close();
     }
 
     protected void init() {
@@ -55,26 +67,18 @@ public class IceServletContextListener implements ServletContextListener {
             HibernateHelper.beginTransaction();
             PopulateInitialDatabase.initializeDatabase();
             ApplicationController.upgradeDatabaseIfNecessary();
-            startMuleESB();
             HibernateHelper.commitTransaction();
+
+            checkBlast();
         } catch (Throwable e) {
             HibernateHelper.rollbackTransaction();
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
 
-    private void startMuleESB() {
-//        try {
-//        DefaultMuleContextFactory muleContextFactory = new DefaultMuleContextFactory();
-//        SpringXmlConfigurationBuilder configBuilder = new SpringXmlConfigurationBuilder("mule-config.xml");
-//        muleContext = muleContextFactory.createMuleContext(configBuilder);
-//            muleContext.start();
-//        } catch (ConfigurationException e ) {
-//            Logger.error(e);
-//        } catch (InitialisationException e) {
-//            Logger.error(e);
-//        } catch (MuleException e) {
-//            Logger.error(e);
-//        }
+    protected void checkBlast() {
+        Logger.info("Checking blast database");
+        ApplicationController.scheduleBlastIndexRebuildTask(false);
     }
 }

@@ -1,10 +1,10 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter.ISequenceView;
 import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -85,13 +85,13 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         if (info.isHasSequence()) {
             Flash.Parameters param = new Flash.Parameters();
             param.setEntryId(info.getRecordId());
-            param.setSessiondId(AppController.sessionId);
+            param.setSessiondId(ClientController.sessionId);
             param.setSwfPath("vv/VectorViewer.swf");
             param.setMovieName("VectorViewer.swf");
             layout.setWidget(2, 0, new Flash(param));
             layout.getFlexCellFormatter().setHeight(2, 0, "600px");
         } else {
-            layout.setHTML(2, 0, "<span class=\"font-80em\">No sequence provided.</span>");
+            layout.setHTML(2, 0, "<span class=\"font-80em\"><i>No sequence provided</i></span>");
             layout.getFlexCellFormatter().setHeight(2, 0, "20px");
         }
     }
@@ -162,7 +162,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         public void onClick(ClickEvent event) {
             String url = GWT.getHostPageBaseURL();
             url += "static/swf/ve/VectorEditor.swf?entryId=" + info.getRecordId() + "&sessionId="
-                    + AppController.sessionId;
+                    + ClientController.sessionId;
             Window.open(url, info.getName(), "");
         }
     }

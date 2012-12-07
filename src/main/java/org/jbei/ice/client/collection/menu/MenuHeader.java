@@ -21,19 +21,19 @@ public class MenuHeader extends Composite {
     private boolean collapsed; // this should be saved
 
     public MenuHeader(String header, boolean addQuickEdit) {
-        expandCollapseIcon = new Icon(FAIconType.CARET_DOWN);
+        expandCollapseIcon = new Icon(FAIconType.FOLDER_OPEN);
         headerLabel = new Label(header);
         headerLabel.setStyleName("display-inline");
         headerLabel.addStyleName("cursor_pointer");
         // quick collection add
-        quickAddIcon = new HTML("<i class=\"" + FAIconType.FOLDER_CLOSE.getStyleName()
-                                        + "\"></i><i style=\"vertical-align: sub; font-size: 7px\" class=\""
+        quickAddIcon = new HTML("<i class=\"" + FAIconType.FOLDER_CLOSE_ALT.getStyleName()
+                                        + "\"></i><i style=\"vertical-align: text-bottom; font-size: 7px\" class=\""
                                         + FAIconType.PLUS.getStyleName() + "\"></i>");
         quickAddIcon.setVisible(addQuickEdit);
         quickAddIcon.addStyleName("quick_add_icon");
 
         HTMLPanel menuHeaderPanel = new HTMLPanel(
-                "<span style=\"float: left; opacity: 0.65; margin-top: -1px\" "
+                "<span style=\"float: left; opacity: 0.65;\" "
                         + " id=\"expand_collapse\"></span>&nbsp;&nbsp;"
                         + "<span id=\"collection_menu_header\"></span>"
                         + "<span style=\"float: right\" id=\"quick_add\"></span>");
@@ -54,9 +54,9 @@ public class MenuHeader extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 if (collapsed) {
-                    expandCollapseIcon.setType(FAIconType.CARET_DOWN);
+                    expandCollapseIcon.setType(FAIconType.FOLDER_OPEN);
                 } else {
-                    expandCollapseIcon.setType(FAIconType.CARET_RIGHT);
+                    expandCollapseIcon.setType(FAIconType.FOLDER_CLOSE);
                 }
                 collapsed = !collapsed;
                 handler.onClick(event);

@@ -1,5 +1,6 @@
 package org.jbei.ice.client.event;
 
+import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.event.FeedbackEvent.IFeedbackEventHandler;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -25,7 +26,9 @@ public class FeedbackEvent extends GwtEvent<IFeedbackEventHandler> {
     }
 
     public String getMessage() {
-        return this.msg;
+        if (error)
+            return "<i class=\"" + FAIconType.WARNING_SIGN.getStyleName() + "\"></i> " + msg;
+        return "<i class=\"" + FAIconType.OK_SIGN.getStyleName() + "\"></i> " + this.msg;
     }
 
     @Override

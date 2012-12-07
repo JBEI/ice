@@ -1,6 +1,6 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -118,7 +118,7 @@ public class UploadSequenceFileWidget extends Composite {
             @Override
             public void onStart(IUploader uploader) {
                 uploader.setServletPath("/sequence_upload?eid=" + entryId + "&type=file&sid="
-                                                + AppController.sessionId);
+                                                + ClientController.sessionId);
             }
         });
 

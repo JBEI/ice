@@ -41,14 +41,14 @@ public class LoginPresenter extends AbstractPresenter {
     }
 
     protected void determineCanChangePassword() {
-        service.getSetting("PASSWORD_CHANGE_ALLOWED", new AsyncCallback<String>() {
+        service.getConfigurationSetting("PASSWORD_CHANGE_ALLOWED", new AsyncCallback<String>() {
 
             @Override
             public void onSuccess(String result) {
                 if (!"yes".equalsIgnoreCase(result) && !"true".equalsIgnoreCase(result))
                     return;
 
-                display.addForgotPasswordHandler(new ForgotPasswordHandler());
+                display.addForgotPasswordLinkHandler(new ForgotPasswordHandler());
             }
 
             @Override
@@ -58,7 +58,7 @@ public class LoginPresenter extends AbstractPresenter {
     }
 
     protected void determineCanRegister() {
-        service.getSetting("NEW_REGISTRATION_ALLOWED", new AsyncCallback<String>() {
+        service.getConfigurationSetting("NEW_REGISTRATION_ALLOWED", new AsyncCallback<String>() {
 
             @Override
             public void onSuccess(String result) {
@@ -72,7 +72,6 @@ public class LoginPresenter extends AbstractPresenter {
             public void onFailure(Throwable caught) {
             }
         });
-
     }
 
     protected void login() {
@@ -84,14 +83,12 @@ public class LoginPresenter extends AbstractPresenter {
         boolean error = false;
 
         if (loginName == null || loginName.isEmpty()) {
-            this.display
-                    .setLoginNameError("The username field is required and cannot be left empty!");
+            this.display.setLoginNameError("Username is required");
             error = true;
         }
 
         if (loginPass == null || loginPass.isEmpty()) {
-            this.display
-                    .setLoginPassError("The password field is required and cannot be left empty!");
+            this.display.setLoginPassError("Password is required");
             error = true;
         }
 
@@ -108,7 +105,7 @@ public class LoginPresenter extends AbstractPresenter {
             public void onSuccess(AccountInfo result) {
 
                 if (result == null) {
-                    display.setLoginPassError("The username and/or password you entered is incorrect!");
+                    display.setLoginPassError("Invalid username and/or password!");
                     enableInputFields();
                     return;
                 }
@@ -138,7 +135,7 @@ public class LoginPresenter extends AbstractPresenter {
         SubmitHandler handler = new SubmitHandler();
 
         this.display.setSubmitKeyPressHandler(handler);
-        this.display.setSubmitClickHandler(new ClickHandler() {
+        this.display.setLoginHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -164,7 +161,7 @@ public class LoginPresenter extends AbstractPresenter {
             @Override
             public void onSuccess(AccountInfo result) {
                 if (result != null) {
-                    display.informOfDuplidateRegistrationEmail();
+                    display.informOfDuplicateRegistrationEmail();
                 } else {
                     saveNewAccount(details);
                 }
@@ -199,7 +196,7 @@ public class LoginPresenter extends AbstractPresenter {
 
             @Override
             public void onSuccess(AccountInfo result) {
-                Window.alert("Registration successful. \n\nPlease check your email for\n you login credentials");
+                Window.alert("Registration successful. \n\nPlease check your email for\n your login credentials");
                 display.switchToLoginMode();
             }
         });
@@ -212,7 +209,7 @@ public class LoginPresenter extends AbstractPresenter {
         @Override
         public void onClick(ClickEvent event) {
             display.switchToForgotPasswordMode();
-            display.setSubmitClickHandler(new ClickHandler() {
+            display.setResetPasswordHandler(new ClickHandler() {
 
                 @Override
                 public void onClick(ClickEvent event) {
@@ -223,7 +220,10 @@ public class LoginPresenter extends AbstractPresenter {
     }
 
     private void attemptToSendUserPassword() {
-        final String login = display.getLoginName();
+        final String login = display.getForgotPasswordLogin();
+        if (login.isEmpty())
+            return;
+
         service.retrieveAccount(login, new AsyncCallback<AccountInfo>() {
 
             @Override
@@ -234,7 +234,7 @@ public class LoginPresenter extends AbstractPresenter {
             @Override
             public void onSuccess(AccountInfo result) {
                 if (result == null) {
-                    Window.alert("Account with id \"" + login + "\"");
+                    Window.alert("Could not retrieve user account");
                     return;
                 }
 

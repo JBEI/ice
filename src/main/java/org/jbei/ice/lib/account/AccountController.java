@@ -1,25 +1,30 @@
 package org.jbei.ice.lib.account;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.account.model.AccountType;
-import org.jbei.ice.lib.authentication.AuthenticationBackendException;
-import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
-import org.jbei.ice.lib.authentication.AuthenticationBackendManager.AuthenticationBackendManagerException;
-import org.jbei.ice.lib.authentication.IAuthenticationBackend;
+import org.jbei.ice.lib.authentication.IAuthentication;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
+import org.jbei.ice.lib.authentication.LocalBackend;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.session.PersistentSessionDataWrapper;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.AccountResults;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
@@ -36,13 +41,12 @@ public class AccountController {
 
     private static final String ADMIN_ACCOUNT_EMAIL = "Administrator";
     private static final String ADMIN_ACCOUNT_PASSWORD = "Administrator";
-
-    private final AccountDAO dao; // TODO : setter injection
-    private final PreferencesDAO preferencesDAO;
+    private final AccountDAO dao;
+    private final AccountPreferencesDAO accountPreferencesDAO;
 
     public AccountController() {
         dao = new AccountDAO();
-        preferencesDAO = new PreferencesDAO();
+        accountPreferencesDAO = new AccountPreferencesDAO();
     }
 
     /**
@@ -119,8 +123,7 @@ public class AccountController {
      * @param institution account institution affiliation
      * @param description account description
      * @return generated password
-     * @throws ControllerException in the event email is already assigned to another user or is
-     *                             empty
+     * @throws ControllerException in the event email is already assigned to another user or is empty
      */
     public String createNewAccount(String firstName, String lastName, String initials,
             String email, String institution, String description) throws ControllerException {
@@ -148,14 +151,15 @@ public class AccountController {
                                       institution, description);
         account.setIp("");
         account.setIsSubscribed(1);
+        account.setSalt(Utils.generateUUID());
+        Group publicGroup = ApplicationController.getGroupController().createOrRetrievePublicGroup();
+        account.getGroups().add(publicGroup);
         account.setCreationTime(Calendar.getInstance().getTime());
-        if (save(account) == null)
-            throw new ControllerException("Could not save new account");
+        save(account);
         return newPassword;
     }
 
     public Account createAdminAccount() throws ControllerException {
-
         Account adminAccount = getByEmail(ADMIN_ACCOUNT_EMAIL);
         if (adminAccount != null)
             return adminAccount;
@@ -192,6 +196,18 @@ public class AccountController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public long getAccountId(String email) throws ControllerException {
+        Account account;
+        try {
+            account = dao.getByEmail(email);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+        if (account == null)
+            throw new ControllerException("Could not retrieve account for " + email);
+        return account.getId();
     }
 
     /**
@@ -279,7 +295,7 @@ public class AccountController {
         AccountPreferences accountPreferences;
 
         try {
-            accountPreferences = preferencesDAO.getAccountPreferences(account);
+            accountPreferences = accountPreferencesDAO.getAccountPreferences(account);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -290,7 +306,8 @@ public class AccountController {
     /**
      * Authenticate a user in the database.
      * <p/>
-     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the
+     * Using the {@link org.jbei.ice.lib.authentication.IAuthentication} specified in the settings file, authenticate
+     * the
      * user, and return the sessionData
      *
      * @param login
@@ -303,24 +320,19 @@ public class AccountController {
     public SessionData authenticate(String login, String password, String ip)
             throws InvalidCredentialsException, ControllerException {
         SessionData result = null;
-        IAuthenticationBackend authenticationBackend;
-
-        try {
-            authenticationBackend = AuthenticationBackendManager.loadAuthenticationBackend();
-        } catch (AuthenticationBackendManagerException e) {
-            throw new ControllerException(e);
-        }
-
         Account account;
         try {
-            account = authenticationBackend.authenticate(login, password);
-        } catch (AuthenticationBackendException e2) {
+            IAuthentication authentication = new LocalBackend();
+            account = authentication.authenticate(login, password);
+        } catch (AuthenticationException e2) {
+            throw new ControllerException(e2);
+        } catch (InvalidCredentialsException e) {
             try {
                 Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password bruteforce hacking
-            } catch (InterruptedException e) {
-                throw new ControllerException(e);
+            } catch (InterruptedException ie) {
+                throw new ControllerException(ie);
             }
-            throw new InvalidCredentialsException(e2);
+            throw new InvalidCredentialsException(e);
         }
 
         if (account != null) {
@@ -348,7 +360,8 @@ public class AccountController {
     /**
      * Authenticate a user in the database.
      * <p/>
-     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the
+     * Using the {@link org.jbei.ice.lib.authentication.IAuthentication} specified in the settings file, authenticate
+     * the
      * user, and return the sessionData
      *
      * @param login
@@ -417,7 +430,7 @@ public class AccountController {
     public void saveAccountPreferences(AccountPreferences accountPreferences)
             throws ControllerException {
         try {
-            preferencesDAO.save(accountPreferences);
+            accountPreferencesDAO.save(accountPreferences);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -477,10 +490,37 @@ public class AccountController {
         }
     }
 
-    public Set<Account> retrieveAllAccounts() throws ControllerException {
+    public AccountResults retrieveAccounts(Account account, int start, int limit) throws ControllerException {
         try {
-            Set<Account> results = new HashSet<Account>(dao.getAllAccounts());
+            AccountResults results = new AccountResults();
+            EntryController entryController = new EntryController();
+            LinkedList<Account> accounts = dao.retrieveAccounts(start, limit);
+
+            ArrayList<AccountInfo> infos = new ArrayList<AccountInfo>();
+            for (Account userAccount : accounts) {
+                AccountInfo info = new AccountInfo();
+                long count;
+                try {
+                    count = entryController.getNumberOfOwnerEntries(userAccount, userAccount.getEmail());
+                    info.setUserEntryCount(count);
+                } catch (ControllerException e) {
+                    Logger.error("Error retrieving entry count for user " + userAccount.getEmail());
+                    info.setUserEntryCount(-1);
+                }
+
+                info.setEmail(userAccount.getEmail());
+                info.setAdmin(isAdministrator(userAccount));
+                info.setFirstName(userAccount.getFirstName());
+                info.setLastName(userAccount.getLastName());
+                info.setLastLogin(userAccount.getLastLoginTime());
+                info.setId(account.getId());
+                infos.add(info);
+            }
+            results.getResults().addAll(infos);
+            int count = dao.retrieveAllAccountCount();
+            results.setResultCount(count);
             return results;
+
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -505,5 +545,21 @@ public class AccountController {
         systemAccount.setModificationTime(currentTime);
         systemAccount.setLastLoginTime(currentTime);
         save(systemAccount);
+    }
+
+    public void removeMemberFromGroup(long id, String email) throws ControllerException {
+        Account account = getByEmail(email);
+        if (account == null)
+            throw new ControllerException("Could not find account " + email);
+
+        Group group = ApplicationController.getGroupController().getGroupById(id);
+        if (group == null)
+            throw new ControllerException("Could not find group " + id);
+        account.getGroups().remove(group);
+        try {
+            dao.update(account);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
     }
 }

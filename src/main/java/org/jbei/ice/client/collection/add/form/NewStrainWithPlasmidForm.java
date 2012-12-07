@@ -1,15 +1,21 @@
 package org.jbei.ice.client.collection.add.form;
 
-import org.jbei.ice.client.AppController;
+import java.util.HashMap;
+
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOption;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.StatusType;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.PlasmidInfo;
-import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.shared.dto.user.PreferenceKey;
 
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.*;
 
 public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSubmit {
@@ -59,6 +65,9 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private final PlasmidInfo plasmid;
 
     private final FlexTable layout;
+
+    private HandlerRegistration cancelRegistration;
+    private HandlerRegistration submitRegistration;
 
     public NewStrainWithPlasmidForm(StrainInfo strain) {
         this.layout = new FlexTable();
@@ -264,7 +273,8 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     private SuggestBox createSuggestBox(AutoCompleteField field, String width) {
-        SuggestBox box = new SuggestBox(new AutoCompleteSuggestOracle(field));
+        AutoCompleteSuggestOracle oracle = new AutoCompleteSuggestOracle(field);
+        SuggestBox box = new SuggestBox(oracle, new MultipleTextBox());
         box.setStyleName("input_box");
         box.setWidth(width);
         return box;
@@ -307,7 +317,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         notes.getFlexCellFormatter().setHeight(1, 0, "10px");
         notes.getFlexCellFormatter().setColSpan(1, 0, 2);
 
-        notes.setWidget(2, 0, new HTML("<span class=\"font-80em\">Markup Type</span>"));
+        notes.setWidget(2, 0, new HTML("<span class=\"font-85em\">Markup Type</span>"));
         notes.getFlexCellFormatter().setStyleName(2, 0, "entry_add_sub_label");
         plasmidNotesMarkupOptions = new ListBox();
         plasmidNotesMarkupOptions.setVisibleItemCount(1);
@@ -330,10 +340,10 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     protected void setLabel(boolean required, String label, FlexTable layout, int row, int col) {
         String html;
         if (required)
-            html = "<span class=\"font-80em\" style=\"white-space:nowrap\">" + label
+            html = "<span class=\"font-85em\" style=\"white-space:nowrap\">" + label
                     + "  <span class=\"required\">*</span></span>";
         else
-            html = "<span class=\"font-80em\" style=\"white-space:nowrap\">" + label + "</span>";
+            html = "<span class=\"font-85em\" style=\"white-space:nowrap\">" + label + "</span>";
 
         layout.setHTML(row, col, html);
         layout.getFlexCellFormatter().setVerticalAlignment(row, col, HasAlignment.ALIGN_TOP);
@@ -437,7 +447,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         notes.getFlexCellFormatter().setHeight(1, 0, "10px");
         notes.getFlexCellFormatter().setColSpan(1, 0, 2);
 
-        notes.setWidget(2, 0, new HTML("<span class=\"font-80em\">Markup Type</span>"));
+        notes.setWidget(2, 0, new HTML("<span class=\"font-85em\">Markup Type</span>"));
         notes.getFlexCellFormatter().setStyleName(2, 0, "entry_add_sub_label");
         strainNotesMarkupOptions = new ListBox();
         strainNotesMarkupOptions.setVisibleItemCount(1);
@@ -489,13 +499,18 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     @Override
-    public Button getSubmit() {
-        return submit;
+    public void addSubmitHandler(ClickHandler handler) {
+        if (submitRegistration != null)
+            submitRegistration.removeHandler();
+
+        submitRegistration = submit.addClickHandler(handler);
     }
 
     @Override
-    public Button getCancel() {
-        return this.cancel;
+    public void addCancelHandler(ClickHandler handler) {
+        if (cancelRegistration != null)
+            cancelRegistration.removeHandler();
+        cancelRegistration = this.cancel.addClickHandler(handler);
     }
 
     @Override
@@ -505,7 +520,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
         // strain number
         if (strainNumber.getText().isEmpty()) {
-            strainNumber.setStyleName("entry_input_error");
+            strainNumber.setStyleName("input_box_error");
             invalid = strainNumber;
         } else {
             strainNumber.setStyleName("input_box");
@@ -513,7 +528,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
         // principal Investigator
         if (pI.getText().isEmpty()) {
-            pI.setStyleName("entry_input_error");
+            pI.setStyleName("input_box_error");
             if (invalid == null)
                 invalid = pI;
         } else {
@@ -522,7 +537,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
         // creator
         if (creator.getText().isEmpty()) {
-            creator.setStyleName("entry_input_error");
+            creator.setStyleName("input_box_error");
             if (invalid == null)
                 invalid = creator;
         } else {
@@ -531,7 +546,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
         // plasmid name
         if (plasmidName.getText().isEmpty()) {
-            plasmidName.setStyleName("entry_input_error");
+            plasmidName.setStyleName("input_box_error");
             if (invalid == null)
                 invalid = plasmidName.getValueBox();
         } else {
@@ -540,7 +555,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
         // plasmid summary
         if (plasmidSummary.getText().isEmpty()) {
-            plasmidSummary.setStyleName("entry_input_error");
+            plasmidSummary.setStyleName("input_box_error");
             if (invalid == null)
                 invalid = plasmidSummary;
         } else {
@@ -549,7 +564,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
         // strain summary
         if (strainSummary.getText().isEmpty()) {
-            strainSummary.setStyleName("entry_input_error");
+            strainSummary.setStyleName("input_box_error");
             if (invalid == null)
                 invalid = strainSummary;
         } else {
@@ -558,7 +573,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
         // strain markers
         if (strainMarkers.getText().isEmpty()) {
-            strainMarkers.setStyleName("entry_input_error");
+            strainMarkers.setStyleName("input_box_error");
             if (invalid == null)
                 invalid = strainMarkers.getValueBox();
         } else {
@@ -567,7 +582,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
         // plasmid markers
         if (plasmidMarkers.getText().isEmpty()) {
-            plasmidMarkers.setStyleName("entry_input_error");
+            plasmidMarkers.setStyleName("input_box_error");
             if (invalid == null)
                 invalid = plasmidMarkers.getValueBox();
         } else {
@@ -578,17 +593,12 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     @Override
-    public void setSampleLocation(SampleLocation sampleLocation) {
-        // no samples for strain with one plasmid
-    }
-
-    @Override
     public void populateEntries() {
 
-        strain.setOwner(AppController.accountInfo.getFullName());
-        strain.setOwnerEmail(AppController.accountInfo.getEmail());
-        plasmid.setOwner(AppController.accountInfo.getFullName());
-        plasmid.setOwnerEmail(AppController.accountInfo.getEmail());
+        strain.setOwner(ClientController.account.getFullName());
+        strain.setOwnerEmail(ClientController.account.getEmail());
+        plasmid.setOwner(ClientController.account.getFullName());
+        plasmid.setOwnerEmail(ClientController.account.getEmail());
 
         strain.setCreator(creator.getText());
         plasmid.setCreator(creator.getText());
@@ -653,7 +663,22 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     @Override
+    public void setPreferences(HashMap<PreferenceKey, String> preferences) {
+        if (preferences.containsKey(PreferenceKey.FUNDING_SOURCE)) {
+            fundingSource.setText(preferences.get(PreferenceKey.FUNDING_SOURCE));
+        }
+
+        if (preferences.containsKey(PreferenceKey.PRINCIPAL_INVESTIGATOR))
+            pI.setText(preferences.get(PreferenceKey.PRINCIPAL_INVESTIGATOR));
+    }
+
+    @Override
     public EntryInfo getEntry() {
         return strain;
+    }
+
+    @Override
+    public String getHeaderDisplay() {
+        return EntryAddType.STRAIN_WITH_PLASMID.getDisplay();
     }
 }

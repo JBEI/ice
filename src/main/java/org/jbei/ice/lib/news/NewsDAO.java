@@ -31,16 +31,6 @@ class NewsDAO extends HibernateRepository<News> {
 
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve news", e);
-        } finally {
-            closeSession();
         }
-    }
-
-    public News save(News news) throws DAOException {
-        return super.saveOrUpdate(news);
-    }
-
-    public void update(News news) throws DAOException {
-        super.saveOrUpdate(news);
     }
 }

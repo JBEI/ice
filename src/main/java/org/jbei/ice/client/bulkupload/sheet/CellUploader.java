@@ -1,13 +1,15 @@
 package org.jbei.ice.client.bulkupload.sheet;
 
-import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,14 +24,15 @@ import gwtupload.client.SingleUploader;
 public class CellUploader implements IsWidget {
 
     private final SingleUploader uploader;
-    private Image fileUploadImg;
+    private HTML fileUploadImg;
     private HorizontalPanel panel;
     private HandlerRegistration finishUploadRegistration;
 
-    public CellUploader(final boolean sequenceUpload) {
-        fileUploadImg = ImageUtil.getFileUpload();
-        fileUploadImg.setHeight((fileUploadImg.getHeight() - 2) + "px");
-        fileUploadImg.setStyleName("cursor_pointer");
+    public CellUploader(final boolean sequenceUpload, final int row, final EntryInfoDelegate delegate,
+            final Boolean isStrainWithPlasmidPlasmid) {
+        fileUploadImg = new HTML("<i class=\"" + FAIconType.UPLOAD.getStyleName() + "\"></i>");
+        fileUploadImg.addStyleName("cursor_pointer");
+        fileUploadImg.addStyleName("opacity_hover");
 
         panel = new HorizontalPanel();
         panel.setWidth("100%");
@@ -47,8 +50,11 @@ public class CellUploader implements IsWidget {
 
             @Override
             public void onStart(IUploader uploader) {
-                uploader.setServletPath("servlet.gupld?type=bulk_file_upload&is_sequence=" +
-                                                Boolean.toString(sequenceUpload) + "&sid=" + AppController.sessionId);
+                EntryInfo info = delegate.getInfoForRow(row, isStrainWithPlasmidPlasmid);
+                long id = info == null ? 0 : info.getId();
+                uploader.setServletPath("servlet.gupld?type=bulk_file_upload&is_sequence="
+                                                + Boolean.toString(sequenceUpload)
+                                                + "&sid=" + ClientController.sessionId + "&eid=" + id);
             }
         });
 

@@ -7,45 +7,55 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.entry.sample.StorageDAO;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.lib.utils.RichTextRenderer;
-import org.jbei.ice.lib.utils.UtilsDAO;
-import org.jbei.ice.shared.dto.*;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
+import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.ParameterInfo;
+import org.jbei.ice.shared.dto.ParameterType;
+import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.StorageInfo;
+import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.Generation;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
+import org.jbei.ice.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.shared.dto.entry.PartInfo;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 /**
- * Factory for converting {@link Entry}s to their corresponding {@link EntryInfo} data transfer objects
+ * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.shared.dto.entry.EntryInfo} data
+ * transfer objects
  *
  * @author Hector Plahar
  */
 public class ModelToInfoFactory {
 
     public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
-            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences,
-            boolean hasSequence) {
+            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences, boolean hasSequence) {
         EntryInfo info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
@@ -174,13 +184,23 @@ public class ModelToInfoFactory {
         if (sequences == null)
             return infos;
 
+        AccountController accountController = ApplicationController.getAccountController();
         for (TraceSequence sequence : sequences) {
             SequenceAnalysisInfo info = new SequenceAnalysisInfo();
             info.setCreated(sequence.getCreationTime());
             info.setName(sequence.getFilename());
-            AccountInfo account = new AccountInfo();
-            account.setEmail(sequence.getDepositor());
-            info.setDepositor(account);
+            AccountInfo accountInfo = new AccountInfo();
+            try {
+                Account account = accountController.getByEmail(sequence.getDepositor());
+                if (account != null) {
+                    accountInfo.setFirstName(account.getFirstName());
+                    accountInfo.setLastName(account.getLastName());
+                    accountInfo.setId(account.getId());
+                }
+            } catch (ControllerException e) {
+                Logger.warn(e.getMessage());
+            }
+            info.setDepositor(accountInfo);
             infos.add(info);
             info.setFileId(sequence.getFileId());
         }
@@ -237,7 +257,7 @@ public class ModelToInfoFactory {
         info.setPlasmids(strain.getPlasmids());
         info.setLinkifiedPlasmids(EntryUtil.linkifyText(account, info.getPlasmids()));
         info.setHost(strain.getHost());
-
+        info.setLinkifiedHost(EntryUtil.linkifyText(account, info.getHost()));
         return info;
     }
 
@@ -252,17 +272,13 @@ public class ModelToInfoFactory {
         info.setOriginOfReplication(plasmid.getOriginOfReplication());
         info.setPromoters(plasmid.getPromoters());
 
-        /// get strains for plasmid
-        try {
-            Set<Strain> strains = UtilsDAO.getStrainsForPlasmid(plasmid);
-            if (strains != null) {
-                for (Strain strain : strains) {
-                    info.getStrains()
-                        .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
-                }
+        // get strains for plasmid
+        Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
+        if (strains != null) {
+            for (Strain strain : strains) {
+                info.getStrains()
+                    .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
             }
-        } catch (DAOException e) {
-            Logger.error(e);
         }
 
         return info;
@@ -275,16 +291,18 @@ public class ModelToInfoFactory {
         info.setVersionId(entry.getVersionId());
         info.setName(entry.getNamesAsString());
         info.setOwner(entry.getOwner());
+        info.setOwnerEmail(entry.getOwnerEmail());
         info.setCreator(entry.getCreator());
+        info.setCreatorEmail(entry.getCreatorEmail());
 
-        AccountController accountController = new AccountController();
+        AccountController accountController = ApplicationController.getAccountController();
         try {
-            Account account1;
-            if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
-                info.setOwnerEmail(account1.getId() + "");
-
-            if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
-                info.setCreatorEmail(account1.getId() + "");
+            long ownerId = accountController.getAccountId(entry.getOwnerEmail());
+            info.setOwnerId(ownerId);
+            if (entry.getCreatorEmail() != null) {
+                long creatorId = accountController.getAccountId(entry.getCreatorEmail());
+                info.setCreatorId(creatorId);
+            }
         } catch (ControllerException ce) {
         }
 
@@ -306,6 +324,7 @@ public class ModelToInfoFactory {
             info.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
             info.setFundingSource(source.getFundingSource().getFundingSource());
         }
+
         info.setLinks(entry.getLinksAsString());
         ArrayList<ParameterInfo> params = new ArrayList<ParameterInfo>();
 
@@ -314,7 +333,7 @@ public class ModelToInfoFactory {
                 ParameterInfo paramInfo = new ParameterInfo();
                 paramInfo.setName(parameter.getKey());
                 paramInfo.setValue(parameter.getValue());
-                paramInfo.setType(ParameterInfo.Type.valueOf(parameter.getParameterType().name()));
+                paramInfo.setType(ParameterType.valueOf(parameter.getParameterType().name()));
                 params.add(paramInfo);
             }
         }
@@ -323,22 +342,33 @@ public class ModelToInfoFactory {
         // get visibility
         info.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 
-        String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(), info.getLongDescription());
-        String parsed = EntryUtil.getParsedNotes(html);
-        info.setLongDescription(info.getLongDescription());
+        String parsed = EntryUtil.getParsedNotes(entry.getLongDescriptionType());
+        info.setLongDescription(entry.getLongDescription());
         info.setParsedDescription(parsed);
-        String parsedShortDesc = EntryUtil.linkifyText(account, info.getShortDescription());
-        info.setLinkifiedShortDescription(parsedShortDesc);
-        String parsedLinks = EntryUtil.linkifyText(account, info.getLinks());
-        info.setLinkifiedLinks(parsedLinks);
-        String parsedReferences = EntryUtil.linkifyText(account, info.getReferences());
-        info.setReferences(parsedReferences);
+        if (account != null) {
+            String parsedShortDesc = EntryUtil.linkifyText(account, entry.getShortDescription());
+            info.setLinkifiedShortDescription(parsedShortDesc);
 
+            String linkStr = "";
+            if (entry.getLinks() != null) {
+                for (Link link : entry.getLinks()) {
+                    if (link.getLink() != null && !link.getLink().isEmpty())
+                        linkStr += (link.getLink() + ", ");
+                    else if (link.getUrl() != null && !link.getUrl().isEmpty())
+                        linkStr += (link.getUrl() + ", ");
+                }
+                if (!linkStr.isEmpty())
+                    linkStr = linkStr.substring(0, linkStr.length() - 1);
+            }
+            String parsedLinks = EntryUtil.linkifyText(account, linkStr);
+            info.setLinkifiedLinks(parsedLinks);
+            String parsedReferences = EntryUtil.linkifyText(account, entry.getReferences());
+            info.setReferences(parsedReferences);
+        }
         return info;
     }
 
     public static EntryInfo getSummaryInfo(Entry entry) {
-
         EntryInfo info = null;
         EntryType type = EntryType.nameToType(entry.getRecordType());
 
@@ -361,29 +391,32 @@ public class ModelToInfoFactory {
         }
 
         info.setId(entry.getId());
+        info.setRecordId(entry.getRecordId());
         info.setPartId(EntryUtil.getPartNumbersAsString(entry));
         info.setName(entry.getNamesAsString());
         return info;
     }
 
-    private static void getTipViewCommon(Account account, EntryInfo view, Entry entry) {
+    private static void getTipViewCommon(EntryInfo view, Entry entry) {
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
         view.setPartId(EntryUtil.getPartNumbersAsString(entry));
         view.setName(entry.getNamesAsString());
         view.setAlias(entry.getAlias());
         view.setCreator(entry.getCreator());
+        view.setCreatorEmail(entry.getCreatorEmail());
         view.setStatus(entry.getStatus());
         view.setOwner(entry.getOwner());
+        view.setOwnerEmail(entry.getOwnerEmail());
 
-        AccountController accountController = new AccountController();
+        AccountController accountController = ApplicationController.getAccountController();
         try {
             Account account1;
             if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
-                view.setOwnerEmail(account1.getId() + "");
+                view.setOwnerId(account1.getId());
 
             if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
-                view.setCreatorEmail(account1.getId() + "");
+                view.setCreatorId(account1.getId());
         } catch (ControllerException ce) {
         }
 
@@ -392,52 +425,19 @@ public class ModelToInfoFactory {
         view.setCreationTime(entry.getCreationTime());
         view.setModificationTime(entry.getModificationTime());
         view.setBioSafetyLevel(entry.getBioSafetyLevel());
-
-        try {
-            AttachmentController attachmentController = new AttachmentController();
-            boolean hasAttachment = attachmentController.hasAttachment(account, entry);
-            view.setHasAttachment(hasAttachment);
-
-            SampleController sampleController = new SampleController();
-            ArrayList<Sample> samples = sampleController.getSamplesByEntry(entry);
-            ArrayList<SampleStorage> sampleMap = new ArrayList<SampleStorage>();
-
-            if (samples != null) {
-                for (Sample sample : samples) {
-                    Storage storage = sample.getStorage();
-
-                    LinkedList<Storage> storageList = new LinkedList<Storage>();
-
-                    List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
-                    if (storages != null)
-                        storageList.addAll(storages);
-                    Storage scheme = StorageDAO.getSchemeContainingParentStorage(storage);
-                    if (scheme != null)
-                        storageList.add(scheme);
-
-                    SampleInfo sampleInfo = getSampleInfo(sample);
-                    SampleStorage sampleStorage = new SampleStorage(sampleInfo,
-                                                                    getStorageListInfo(storageList));
-                    sampleMap.add(sampleStorage);
-                }
-            }
-
-            boolean hasSample = (samples != null && samples.size() > 0);
-            view.setHasSample(hasSample);
-            view.setSampleMap(sampleMap);
-            SequenceController sequenceController = new SequenceController();
-            boolean hasSequence = sequenceController.hasSequence(entry);
-            view.setHasSequence(hasSequence);
-        } catch (ControllerException e) {
-            Logger.error(e);
-        } catch (PermissionException e) {
-            Logger.warn(account.getEmail() + " does not have read permission for " + entry.getRecordId());
+        if (!entry.getEntryFundingSources().isEmpty()) {
+            EntryFundingSource source = entry.getEntryFundingSources().iterator().next();
+            view.setFundingSource(source.getFundingSource().getFundingSource());
+            view.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
         }
     }
 
-    public static EntryInfo createTableViewData(Account account, Entry entry) {
+    public static EntryInfo createTableViewData(Entry entry, boolean includeOwnerInfo) {
+        if (entry == null)
+            return null;
         EntryType type = EntryType.nameToType(entry.getRecordType());
-        EntryInfo view = new EntryInfo(type);
+        EntryInfo view = new EntryInfo();
+        view.setType(type);
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
         view.setPartId(EntryUtil.getPartNumbersAsString(entry));
@@ -445,24 +445,35 @@ public class ModelToInfoFactory {
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime());
         view.setStatus(entry.getStatus());
-        view.setOwner(entry.getOwner());
-        view.setOwnerEmail(entry.getOwnerEmail());
+        if (includeOwnerInfo) {
+            view.setOwner(entry.getOwner());
+            view.setOwnerEmail(entry.getOwnerEmail());
+
+            AccountController accountController = ApplicationController.getAccountController();
+            try {
+                Account account1;
+                if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
+                    view.setOwnerId(account1.getId());
+
+                if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
+                    view.setCreatorId(account1.getId());
+            } catch (ControllerException ce) {
+            }
+        }
 
         // attachments
         boolean hasAttachment = false;
         try {
-            AttachmentController attachmentController = new AttachmentController();
-            hasAttachment = attachmentController.hasAttachment(account, entry);
+            AttachmentController attachmentController = ApplicationController.getAttachmentController();
+            hasAttachment = attachmentController.hasAttachment(entry);
         } catch (ControllerException e) {
             Logger.error(e);
-        } catch (PermissionException pe) {
-            Logger.warn(pe.getMessage());
         }
         view.setHasAttachment(hasAttachment);
 
         // has sample
         try {
-            SampleController sampleController = new SampleController();
+            SampleController sampleController = ApplicationController.getSampleController();
             view.setHasSample(sampleController.hasSample(entry));
         } catch (ControllerException e) {
             Logger.error(e);
@@ -470,7 +481,7 @@ public class ModelToInfoFactory {
 
         // has sequence
         try {
-            SequenceController sequenceController = new SequenceController();
+            SequenceController sequenceController = ApplicationController.getSequenceController();
             view.setHasSequence(sequenceController.hasSequence(entry));
         } catch (ControllerException e) {
             Logger.error(e);
@@ -479,8 +490,7 @@ public class ModelToInfoFactory {
         return view;
     }
 
-    public static EntryInfo createTipView(Account account, Entry entry) {
-
+    public static EntryInfo createTipView(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         switch (type) {
 
@@ -488,14 +498,13 @@ public class ModelToInfoFactory {
                 StrainInfo view = new StrainInfo();
 
                 // common
-                getTipViewCommon(account, view, entry);
+                getTipViewCommon(view, entry);
 
                 // strain specific
                 Strain strain = (Strain) entry;
                 view.setHost(strain.getHost());
                 view.setGenotypePhenotype(strain.getGenotypePhenotype());
-                String link = EntryUtil.linkifyText(account, strain.getPlasmids());
-                view.setPlasmids(link);
+                view.setPlasmids(strain.getPlasmids());
                 view.setSelectionMarkers(strain.getSelectionMarkersAsString());
 
                 return view;
@@ -503,7 +512,7 @@ public class ModelToInfoFactory {
 
             case ARABIDOPSIS: {
                 ArabidopsisSeedInfo view = new ArabidopsisSeedInfo();
-                getTipViewCommon(account, view, entry);
+                getTipViewCommon(view, entry);
 
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
                 PlantType plantType = PlantType.valueOf(seed.getPlantType().toString());
@@ -522,7 +531,7 @@ public class ModelToInfoFactory {
             case PART: {
                 PartInfo view = new PartInfo();
 
-                getTipViewCommon(account, view, entry);
+                getTipViewCommon(view, entry);
 
                 Part part = (Part) entry;
                 view.setPackageFormat(part.getPackageFormat().toString());
@@ -531,7 +540,7 @@ public class ModelToInfoFactory {
 
             case PLASMID: {
                 PlasmidInfo view = new PlasmidInfo();
-                getTipViewCommon(account, view, entry);
+                getTipViewCommon(view, entry);
 
                 Plasmid plasmid = (Plasmid) entry;
                 view.setBackbone(plasmid.getBackbone());
@@ -539,16 +548,11 @@ public class ModelToInfoFactory {
                 view.setPromoters(plasmid.getPromoters());
 
                 // get strains for plasmid
-                try {
-                    Set<Strain> strains = UtilsDAO.getStrainsForPlasmid(plasmid);
-                    if (strains != null) {
-                        for (Strain strain : strains) {
-                            view.getStrains().put(strain.getId(),
-                                                  strain.getOnePartNumber().getPartNumber());
-                        }
+                Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
+                if (strains != null) {
+                    for (Strain strain : strains) {
+                        view.getStrains().put(strain.getId(), strain.getOnePartNumber().getPartNumber());
                     }
-                } catch (DAOException e) {
-                    Logger.error(e);
                 }
 
                 return view;

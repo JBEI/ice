@@ -1,20 +1,20 @@
 package org.jbei.ice.client.collection.presenter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.FolderEntryDataProvider;
 import org.jbei.ice.client.collection.ICollectionView;
-import org.jbei.ice.client.collection.event.FolderEvent;
-import org.jbei.ice.client.collection.event.FolderEventHandler;
-import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
-import org.jbei.ice.client.collection.event.FolderRetrieveEventHandler;
+import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.model.CollectionsModel;
@@ -33,17 +33,18 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.search.advanced.ISearchView;
 import org.jbei.ice.client.search.advanced.SearchPresenter;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.FolderDetails;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.folder.FolderDetails;
+import org.jbei.ice.shared.dto.folder.FolderShareType;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -59,7 +60,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         SEARCH, COLLECTION, ENTRY;
     }
 
-    private final ICollectionView display;
+    private ICollectionView display;
 
     private FolderEntryDataProvider folderDataProvider;
     private final CollectionDataTable collectionsDataTable;
@@ -76,6 +77,9 @@ public class CollectionsPresenter extends AbstractPresenter {
     private Mode mode = Mode.COLLECTION;
     private EntryContext currentContext; // this can sometimes be null
     private final DeleteItemHandler deleteHandler;
+    private static HandlerRegistration selectionRegistration;
+    private static HandlerRegistration showListRegistration;
+    private static HandlerRegistration showEntryRegistration;
 
     public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, final ICollectionView display,
             ISearchView searchView) {
@@ -141,14 +145,39 @@ public class CollectionsPresenter extends AbstractPresenter {
         // init text box
         initCreateCollectionHandlers();
 
+        // init entry handler
+        initEntryViewHandler();
+
         // create entry handler
         final SingleSelectionModel<EntryAddType> selectionModel = display.getAddEntrySelectionHandler();
-        CreateNewEntrySelectionHandler handler = new CreateNewEntrySelectionHandler(this, service, eventBus, display,
-                                                                                    selectionModel);
-        selectionModel.addSelectionChangeHandler(handler);
+        if (selectionRegistration != null)
+            selectionRegistration.removeHandler();
+
+        selectionRegistration = selectionModel.addSelectionChangeHandler(new Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (entryViewPresenter == null) {// TODO : when user navigates to another page and returns this is null
+                    entryViewPresenter = new EntryPresenter(model.getService(), CollectionsPresenter.this,
+                                                            model.getEventBus(), null);
+                    entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
+                }
+
+                EntryAddType type = selectionModel.getSelectedObject();
+                if (type == null)
+                    return;
+                selectionModel.setSelected(type, false);
+                mode = Mode.ENTRY;
+                display.setMainContent(entryViewPresenter.getView().asWidget());
+                entryViewPresenter.showCreateEntry(type);
+                display.setCurrentMenuSelection(0);
+            }
+        });
 
         // show entry context
-        model.getEventBus().addHandler(ShowEntryListEvent.TYPE, new ShowEntryListEventHandler() {
+        if (showListRegistration != null)
+            showListRegistration.removeHandler();
+        showListRegistration = model.getEventBus().addHandler(ShowEntryListEvent.TYPE, new ShowEntryListEventHandler() {
 
             @Override
             public void onEntryListContextAvailable(ShowEntryListEvent event) {
@@ -157,15 +186,6 @@ public class CollectionsPresenter extends AbstractPresenter {
                     return;
 
                 handleContext(context);
-            }
-        });
-
-        // register for entry view events
-        model.getEventBus().addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
-
-            @Override
-            public void onEntryView(EntryViewEvent event) {
-                showEntryView(event.getContext());
             }
         });
 
@@ -206,6 +226,39 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         // remove handler
         display.addRemoveHandler(new RemoveHandler());
+
+        display.addTransferHandler(new TransferHandler());
+
+        // permission delegate for the menu (user)
+        display.setPermissionDelegate(new PermissionDelegate());
+
+        // retrieve web of registries settings
+        if (ClientController.account.isAdmin()) {
+            model.retrieveWebOfRegistrySettings(new Callback<HashMap<String, String>>() {
+
+                @Override
+                public void onSuccess(HashMap<String, String> result) {
+                    String value = result.get(ConfigurationKey.WEB_PARTNERS.name());
+                    if (value == null)
+                        return;
+
+                    ArrayList<OptionSelect> values = new ArrayList<OptionSelect>();
+                    for (String split : value.split(";")) {
+                        if (split.isEmpty())
+                            continue;
+
+                        OptionSelect select = new OptionSelect(0, split);
+                        values.add(select);
+                    }
+                    display.setTransferOptions(values);
+
+                    // check if it is web enabled and set transfer widget to visible
+                }
+
+                @Override
+                public void onFailure() {}
+            });
+        }
     }
 
     private void initCollectionTableSelectionHandler() {
@@ -244,7 +297,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                         break;
 
                     case ENTRY:
-                        selected.add(currentContext.getCurrent());
+                        selected.add(currentContext.getId());
                         break;
 
                     case SEARCH:
@@ -261,18 +314,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     builder.append(id + ", ");
                 }
 
-                switch (option) {
-                    case XML:
-                        Window.Location.replace("/export?type=xml&entries=" + builder.toString());
-                        break;
-
-                    case EXCEL:
-                        Window.Location.replace("/export?type=excel&entries=" + builder.toString());
-                        break;
-
-                    default:
-                        Window.alert("Not supported yet");
-                }
+                Window.Location.replace("/export?type=" + option.name() + "&entries=" + builder.toString());
 
                 // clear selected
                 display.getExportAsModel().setSelected(option, false);
@@ -282,15 +324,20 @@ public class CollectionsPresenter extends AbstractPresenter {
 
     public void showEntryView(EntryContext event) {
         if (entryViewPresenter == null) {
-            entryViewPresenter = new EntryPresenter(model.getService(), model.getEventBus(), event);
+            entryViewPresenter = new EntryPresenter(model.getService(), CollectionsPresenter.this,
+                                                    model.getEventBus(), event);
             entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
+        } else {
+            entryViewPresenter.setCurrentContext(event);
+            entryViewPresenter.showCurrentEntryView();
         }
 
         mode = Mode.ENTRY;
         currentContext = event;
-        History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getCurrent(), false);
+        if (event.getPartnerUrl() == null)
+            History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getId(), false);
         display.enableExportAs(true);
-        display.setMainContent(entryViewPresenter.getView());
+        display.setMainContent(entryViewPresenter.getView().asWidget());
         boolean enable;
         if (currentFolder != null)
             enable = !currentFolder.isSystemFolder();
@@ -314,6 +361,10 @@ public class CollectionsPresenter extends AbstractPresenter {
             });
         }
 
+        search();
+    }
+
+    public void search() {
         display.setMainContent(searchPresenter.getView().asWidget());
         searchPresenter.search();
         mode = Mode.SEARCH;
@@ -339,37 +390,38 @@ public class CollectionsPresenter extends AbstractPresenter {
     }
 
     private void initCreateCollectionHandlers() {
-        this.display.setQuickAddVisibility(false);
-
         this.display.addQuickAddKeyHandler(new KeyPressHandler() {
 
             @Override
             public void onKeyPress(KeyPressEvent event) {
-                if (event.getNativeEvent().getKeyCode() != KeyCodes.KEY_ENTER)
-                    return;
-
-                display.setQuickAddVisibility(false);
                 saveCollection(display.getCollectionInputValue());
                 display.hideQuickAddInput();
             }
         });
 
-        this.display.addSubmitNewCollectionHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                display.setQuickAddVisibility(false);
-                saveCollection(display.getCollectionInputValue());
-                display.hideQuickAddInput();
-            }
-        });
-
-        display.addQuickEditKeyDownHandler(new KeyDownHandler() {
+        display.addQuickEditKeyPressHandler(new KeyPressHandler() {
 
             @Override
-            public void onKeyDown(KeyDownEvent event) {
+            public void onKeyPress(KeyPressEvent event) {
                 handle();
             }
         });
+    }
+
+    private void initEntryViewHandler() {
+        if (showEntryRegistration != null)
+            showEntryRegistration.removeHandler();
+        showEntryRegistration = this.eventBus.addHandler(
+                EntryViewEvent.TYPE,
+                new EntryViewEvent.EntryViewEventHandler() {
+                    @Override
+                    public void onEntryView(EntryViewEvent event) {
+                        if (event == null || event.getContext() == null)
+                            return;
+
+                        showEntryView(event.getContext());
+                    }
+                });
     }
 
     private void handle() {
@@ -389,20 +441,24 @@ public class CollectionsPresenter extends AbstractPresenter {
         editFolder.setName(newName);
         editFolder.setId(item.getId());
 
-        model.updateFolder(item.getId(), editFolder, new FolderEventHandler() {
+        model.updateFolder(item.getId(), editFolder, new Callback<FolderDetails>() {
 
             @Override
-            public void onFolderEvent(FolderEvent event) {
-                FolderDetails folder = event.getFolder();
+            public void onSuccess(FolderDetails folder) {
                 if (folder == null) {
-                    display.showFeedbackMessage("Error updating collection. Please try again", false);
+                    display.showFeedbackMessage("Error updating collection. Please try again", true);
                     return;
                 }
 
                 display.updateSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                 MenuItem resultItem = new MenuItem(folder.getId(), folder.getName(), folder
-                        .getCount(), folder.isSystemFolder());
+                        .getCount(), folder.isSystemFolder(), false);
                 display.setMenuItem(resultItem, deleteHandler);
+            }
+
+            @Override
+            public void onFailure() {
+                display.showFeedbackMessage("Error updating collection. Please try again", true);
             }
         });
     }
@@ -411,26 +467,24 @@ public class CollectionsPresenter extends AbstractPresenter {
         if (value == null || value.isEmpty())
             return;
 
-        model.createFolder(value, new FolderEventHandler() {
+        model.createFolder(value, new Callback<FolderDetails>() {
 
             @Override
-            public void onFolderEvent(FolderEvent event) {
-                if (event == null || event.getFolder() == null) {
-                    display.showFeedbackMessage("Error creating new folder. Please try again", true);
-                    return;
-                }
-
-                FolderDetails folder = event.getFolder();
-
+            public void onSuccess(FolderDetails folder) {
                 userListProvider.getList().add(folder);
                 display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                 MenuItem newItem = new MenuItem(folder.getId(), folder.getName(), folder.getCount(),
-                                                folder.isSystemFolder());
+                                                folder.isSystemFolder(), false);
 
                 if (!folder.isSystemFolder())
                     display.addMenuItem(newItem, deleteHandler);
                 else
                     display.addMenuItem(newItem, null);
+            }
+
+            @Override
+            public void onFailure() {
+                display.showFeedbackMessage("Error creating new folder.", true);
             }
         });
     }
@@ -440,8 +494,9 @@ public class CollectionsPresenter extends AbstractPresenter {
      * by adding the selection change handlers
      */
     private void initMenus() {
-        final SingleSelectionModel<MenuItem> userModel = display.getUserMenuModel();
-        final SingleSelectionModel<MenuItem> systemModel = display.getSystemMenuModel();
+        final SingleSelectionModel<MenuItem> userModel = display.getMenuModel(FolderShareType.PRIVATE);
+        final SingleSelectionModel<MenuItem> systemModel = display.getMenuModel(FolderShareType.PUBLIC);
+        final SingleSelectionModel<MenuItem> sharedModel = display.getMenuModel(FolderShareType.SHARED);
 
         userModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
@@ -467,35 +522,34 @@ public class CollectionsPresenter extends AbstractPresenter {
             }
         });
 
+        sharedModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                MenuItem selection = sharedModel.getSelectedObject();
+                if (selection == null)
+                    return;
+
+                retrieveEntriesForFolder(selection.getId(), null);
+            }
+        });
+
         // retrieve folders to use as menu
         model.retrieveFolders(new CollectionRetrieveHandler());
     }
 
-    private void retrieveEntriesForFolder(final long id, final String msg) {
+    public void retrieveEntriesForFolder(final long id, final String msg) {
         display.setCurrentMenuSelection(id);
         folderDataProvider.updateRowCount(0, false);
         display.setDataView(collectionsDataTable);
         display.enableExportAs(false);
         display.setSubMenuEnable(false, false, false);
-        int limit = collectionsDataTable.getVisibleRange().getLength() * 2;
+        int limit = collectionsDataTable.getVisibleRange().getLength();
 
-        model.retrieveEntriesForFolder(id, new FolderRetrieveEventHandler() {
+        model.retrieveEntriesForFolder(id, new Callback<FolderDetails>() {
 
             @Override
-            public void onFolderRetrieve(FolderRetrieveEvent event) {
-                if (event == null || event.getItems() == null) {
-                    display.showFeedbackMessage("Error connecting to server. Please try again", true);
-                    folderDataProvider.setFolderData(null, true);
-                    return;
-                }
-
-                FolderDetails folder = event.getItems().get(0);
-                if (folder == null) {
-                    display.showFeedbackMessage("Could not retrieve collection entries", true);
-                    folderDataProvider.setFolderData(null, true);
-                    return;
-                }
-
+            public void onSuccess(FolderDetails folder) {
                 collectionsDataTable.clearSelection();
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folder.getId(), false);
                 display.setCurrentMenuSelection(folder.getId());
@@ -506,6 +560,11 @@ public class CollectionsPresenter extends AbstractPresenter {
                 if (msg != null && !msg.isEmpty())
                     display.showFeedbackMessage(msg, false);
             }
+
+            @Override
+            public void onFailure() {
+                display.showFeedbackMessage("Error retrieving folder entries", true);
+            }
         }, 0, limit);
     }
 
@@ -515,44 +574,79 @@ public class CollectionsPresenter extends AbstractPresenter {
         container.add(this.display.asWidget());
     }
 
-    private class CollectionRetrieveHandler implements FolderRetrieveEventHandler {
+    private class CollectionRetrieveHandler extends Callback<ArrayList<FolderDetails>> {
 
         @Override
-        public void onFolderRetrieve(FolderRetrieveEvent event) {
-            ArrayList<FolderDetails> folders = event.getItems();
-
+        public void onSuccess(ArrayList<FolderDetails> folders) {
             ArrayList<MenuItem> userMenuItems = new ArrayList<MenuItem>();
             ArrayList<FolderDetails> userFolders = new ArrayList<FolderDetails>();
 
             ArrayList<MenuItem> systemMenuItems = new ArrayList<MenuItem>();
             ArrayList<FolderDetails> systemFolder = new ArrayList<FolderDetails>();
 
+            ArrayList<MenuItem> sharedMenuItems = new ArrayList<MenuItem>();
+            ArrayList<FolderDetails> sharedFolders = new ArrayList<FolderDetails>();
+
+            ArrayList<Long> userFolderIds = new ArrayList<Long>();
+
             for (FolderDetails folder : folders) {
                 MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder.getCount(),
-                                             folder.isSystemFolder());
+                                             folder.isSystemFolder(), false);
 
-                if (folder.isSystemFolder()) {
-                    systemMenuItems.add(item);
-                    systemFolder.add(folder);
-                } else {
-                    userMenuItems.add(item);
-                    userFolders.add(folder);
-                    display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
+                switch (folder.getShareType()) {
+                    case PUBLIC:
+                        systemMenuItems.add(item);
+                        systemFolder.add(folder);
+                        break;
+
+                    case PRIVATE:
+                        userMenuItems.add(item);
+                        userFolders.add(folder);
+                        userFolderIds.add(folder.getId());
+                        display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
+                        break;
+
+                    case SHARED:
+                        sharedMenuItems.add(item);
+                        sharedFolders.add(folder);
+                        break;
                 }
             }
 
             // my entries
-            MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo.getUserEntryCount(), true);
+            MenuItem item = new MenuItem(0, "My Entries", ClientController.account.getUserEntryCount(), true, false);
             userMenuItems.add(0, item);
             MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
-                                                   AppController.accountInfo.getVisibleEntryCount(), true);
+                                                   ClientController.account.getVisibleEntryCount(), true, false);
             systemMenuItems.add(0, allEntriesItem);
             display.setSystemCollectionMenuItems(systemMenuItems);
             DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService(), model.getEventBus(), display);
             display.setUserCollectionMenuItems(userMenuItems, deleteHandler);
+            display.setSharedCollectionsMenuItems(sharedMenuItems);
 
             userListProvider.getList().addAll(userFolders);
             systemListProvider.getList().addAll(systemFolder);
+            if (currentFolder != null)
+                display.setCurrentMenuSelection(currentFolder.getId());
+
+            // retrieve user folder permissions
+            model.retrieveFolderPermissions(userFolderIds, new FolderPermissionRetrieveHandler());
+        }
+
+        @Override
+        public void onFailure() {
+        }
+    }
+
+    private class FolderPermissionRetrieveHandler extends Callback<ArrayList<PermissionInfo>> {
+
+        @Override
+        public void onSuccess(ArrayList<PermissionInfo> permissionInfos) {
+            display.setUserFolderPermissions(permissionInfos);
+        }
+
+        @Override
+        public void onFailure() {
         }
     }
 
@@ -577,9 +671,23 @@ public class CollectionsPresenter extends AbstractPresenter {
                 case ENTRY:
                     HashSet<Long> set = new HashSet<Long>();
                     if (currentContext != null)
-                        set.add(currentContext.getCurrent());
+                        set.add(currentContext.getId());
                     return set;
             }
+        }
+    }
+
+    private class TransferHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            final ArrayList<Long> ids = new ArrayList<Long>(new HasEntry().getSelectedEntrySet());
+            if (ids.isEmpty())
+                return;
+
+            ArrayList<OptionSelect> selectedTransfer = display.getSelectedTransfers();
+            model.requestTransfer(ids, selectedTransfer);
+            retrieveEntriesForFolder(currentFolder.getId(), "Transfer requested for " + ids.size() + " entries");
         }
     }
 
@@ -587,47 +695,36 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-
             final ArrayList<Long> ids = new ArrayList<Long>(new HasEntry().getSelectedEntrySet());
             if (ids.isEmpty())
                 return;
 
-            model.removeEntriesFromFolder(currentFolder.getId(), ids,
-                                          new FolderRetrieveEventHandler() {
+            model.removeEntriesFromFolder(
+                    currentFolder.getId(), ids,
+                    new Callback<FolderDetails>() {
+                        @Override
+                        public void onSuccess(FolderDetails result) {
+                            ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                            MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result.getCount(),
+                                                               result.isSystemFolder(), false);
+                            items.add(updateItem);
+                            display.updateMenuItemCounts(items);
 
-                                              @Override
-                                              public void onFolderRetrieve(FolderRetrieveEvent event) {
-                                                  if (event == null || event.getItems() == null) {
-                                                      display.showFeedbackMessage(
-                                                              "An error occurred while removing entries.", true);
-                                                      return;
-                                                  }
+                            String entryDisp = (ids.size() == 1) ? "entry" : "entries";
+                            String msg = "<b>" + ids.size() + "</b> " + entryDisp + " successfully removed from";
+                            String name = result.getName();
+                            if (name.length() > 20)
+                                msg += " collection.";
+                            else
+                                msg += ("\"<b>" + name + "</b>\" collection.");
 
-                                                  FolderDetails result = event.getItems().get(0);
-                                                  if (result == null)
-                                                      return;
+                            retrieveEntriesForFolder(currentFolder.getId(), msg);
+                            collectionsDataTable.clearSelection();
+                        }
 
-                                                  ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                                                  MenuItem updateItem = new MenuItem(result.getId(), result.getName(),
-                                                                                     result.getCount(),
-                                                                                     result.isSystemFolder());
-                                                  items.add(updateItem);
-                                                  display.updateMenuItemCounts(items);
-
-                                                  String entryDisp = (ids.size() == 1) ? "entry" : "entries";
-                                                  String msg = "<b>" + ids.size() + "</b> " + entryDisp
-                                                          + " successfully removed from";
-
-                                                  String name = result.getName();
-                                                  if (name.length() > 20)
-                                                      msg += " collection.";
-                                                  else
-                                                      msg += ("\"<b>" + name + "</b>\" collection.");
-
-                                                  retrieveEntriesForFolder(currentFolder.getId(), msg);
-                                                  collectionsDataTable.clearSelection();
-                                              }
-                                          });
+                        @Override
+                        public void onFailure() {}
+                    });
         }
     }
 
@@ -644,7 +741,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 @Override
                 protected void callService(AsyncCallback<ArrayList<FolderDetails>> callback)
                         throws AuthenticationException {
-                    model.getService().deleteEntry(AppController.sessionId, toDelete, callback);
+                    model.getService().deleteEntry(ClientController.sessionId, toDelete, callback);
                 }
 
                 @Override
@@ -656,26 +753,69 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                     for (FolderDetails detail : result) {
                         MenuItem item = new MenuItem(detail.getId(), detail.getName(), detail.getCount(),
-                                                     detail.isSystemFolder());
+                                                     detail.isSystemFolder(), false);
                         menuItems.add(item);
                     }
 
                     if (currentFolder.getId() == 0) {
-                        AppController.accountInfo.setUserEntryCount(AppController.accountInfo.getUserEntryCount() - 1);
+                        ClientController.account.setUserEntryCount(ClientController.account.getUserEntryCount() - 1);
                         MenuItem myItems = new MenuItem(0, "My Entries",
-                                                        AppController.accountInfo.getUserEntryCount(), true);
+                                                        ClientController.account.getUserEntryCount(), true, false);
                         menuItems.add(myItems);
                     }
 
-                    AppController.accountInfo.setVisibleEntryCount(AppController.accountInfo
-                                                                                .getVisibleEntryCount() - 1);
+                    ClientController.account.setVisibleEntryCount(ClientController.account.getVisibleEntryCount() - 1);
                     MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
-                                                           AppController.accountInfo.getVisibleEntryCount(), true);
+                                                           ClientController.account.getVisibleEntryCount(), true,
+                                                           false);
                     menuItems.add(allEntriesItem);
 
                     display.updateMenuItemCounts(menuItems);
                 }
             }.go(model.getEventBus());
+        }
+    }
+
+    private class PermissionDelegate implements Delegate<ShareCollectionData> {
+
+        @Override
+        public void execute(final ShareCollectionData data) {
+            IceAsyncCallback<Boolean> asyncCallback;
+
+            if (data.isDelete()) {
+                asyncCallback = new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        model.getService().removePermission(ClientController.sessionId, data.getInfo(), callback);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        data.getInfoCallback().onSuccess(data.getInfo());
+                    }
+                };
+            } else {
+                if (data.getInfo().isCanWrite()) {
+                    data.getInfo().setType(PermissionInfo.Type.WRITE_FOLDER);
+                } else if (data.getInfo().isCanWrite()) {
+                    data.getInfo().setType(PermissionInfo.Type.READ_FOLDER);
+                }
+
+                asyncCallback = new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        model.getService().addPermission(ClientController.sessionId, data.getInfo(), callback);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        data.getInfoCallback().onSuccess(data.getInfo());
+                    }
+                };
+            }
+            asyncCallback.go(model.getEventBus());
         }
     }
 

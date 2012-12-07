@@ -14,5 +14,5 @@ public abstract class AdminPanelPresenter {
         this.eventBus = eventBus;
     }
 
-    public abstract AdminPanel getView();
+    public abstract IAdminPanel getView();
 }

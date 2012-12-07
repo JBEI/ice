@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -51,7 +52,7 @@ public class FileDownloadServlet extends HttpServlet {
                 if (!AccountController.isAuthenticated(sid))
                     return;
 
-                AccountController controller = new AccountController();
+                AccountController controller = ApplicationController.getAccountController();
                 account = controller.getAccountBySessionKey(sid);
                 if (account == null)
                     return;
@@ -104,7 +105,7 @@ public class FileDownloadServlet extends HttpServlet {
     }
 
     private File getTraceSequenceFile(Account account, String fileId) {
-        SequenceAnalysisController controller = new SequenceAnalysisController();
+        SequenceAnalysisController controller = ApplicationController.getSequenceAnalysisController();
 
         try {
             TraceSequence sequence = controller.getTraceSequenceByFileId(fileId);
@@ -121,7 +122,7 @@ public class FileDownloadServlet extends HttpServlet {
     }
 
     private File getAttachmentFile(Account account, String fileId) {
-        AttachmentController controller = new AttachmentController();
+        AttachmentController controller = ApplicationController.getAttachmentController();
         try {
             Attachment attachment = controller.getAttachmentByFileId(fileId);
             if (attachment == null)
@@ -150,7 +151,7 @@ public class FileDownloadServlet extends HttpServlet {
                 if (!AccountController.isAuthenticated(sid))
                     return null;
 
-                AccountController controller = new AccountController();
+                AccountController controller = ApplicationController.getAccountController();
                 return controller.getAccountBySessionKey(sid);
             }
         }

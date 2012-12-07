@@ -32,7 +32,6 @@ public class GeneralParser {
         for (AbstractParser parser : parsers) {
             try {
                 parsedSequence = parser.parse(sequence);
-
                 break;
             } catch (InvalidFormatParserException e) {
                 // it's ok
@@ -48,7 +47,6 @@ public class GeneralParser {
         for (AbstractParser parser : parsers) {
             try {
                 parsedSequence = parser.parse(bytes);
-
                 break;
             } catch (InvalidFormatParserException e) {
                 // it's ok

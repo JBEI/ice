@@ -2,6 +2,8 @@ package org.jbei.ice.shared.dto.group;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.shared.dto.AccountInfo;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
@@ -18,9 +20,13 @@ public class GroupInfo implements IsSerializable {
     private long parentId;
     private String description;
     private ArrayList<GroupInfo> children;
+    private ArrayList<AccountInfo> members;
+    private long memberCount;
+    private GroupType type;
 
     public GroupInfo() {
         children = new ArrayList<GroupInfo>();
+        members = new ArrayList<AccountInfo>();
     }
 
     public String getUuid() {
@@ -65,5 +71,33 @@ public class GroupInfo implements IsSerializable {
 
     public ArrayList<GroupInfo> getChildren() {
         return this.children;
+    }
+
+    public ArrayList<AccountInfo> getMembers() {
+        return members;
+    }
+
+    public void setMembers(ArrayList<AccountInfo> members) {
+        this.members = members;
+        if (members == null)
+            setMemberCount(0);
+        else
+            setMemberCount(members.size());
+    }
+
+    public long getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(long memberCount) {
+        this.memberCount = memberCount;
+    }
+
+    public GroupType getType() {
+        return type;
+    }
+
+    public void setType(GroupType type) {
+        this.type = type;
     }
 }

@@ -1,37 +1,37 @@
 package org.jbei.ice.client.entry.view;
 
-import org.jbei.ice.client.entry.view.detail.ArabidopsisDetailView;
-import org.jbei.ice.client.entry.view.detail.EntryDetailView;
-import org.jbei.ice.client.entry.view.detail.PartDetailView;
-import org.jbei.ice.client.entry.view.detail.PlasmidDetailView;
-import org.jbei.ice.client.entry.view.detail.StrainDetailView;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.PartInfo;
-import org.jbei.ice.shared.dto.PlasmidInfo;
-import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.client.entry.view.detail.ArabidopsisInfoView;
+import org.jbei.ice.client.entry.view.detail.EntryInfoView;
+import org.jbei.ice.client.entry.view.detail.PartInfoView;
+import org.jbei.ice.client.entry.view.detail.PlasmidInfoView;
+import org.jbei.ice.client.entry.view.detail.StrainInfoView;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.PartInfo;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 public class ViewFactory {
 
-    public static EntryDetailView<? extends EntryInfo> createDetailView(EntryInfo info) {
+    public static EntryInfoView createDetailView(EntryInfo info) {
 
         switch (info.getType()) {
 
             case PLASMID:
                 PlasmidInfo plasmidInfo = (PlasmidInfo) info;
-                return new PlasmidDetailView(plasmidInfo);
+                return new PlasmidInfoView(plasmidInfo);
 
             case PART:
                 PartInfo partInfo = (PartInfo) info;
-                return new PartDetailView(partInfo);
+                return new PartInfoView(partInfo);
 
             case ARABIDOPSIS:
                 ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
-                return new ArabidopsisDetailView(seedInfo);
+                return new ArabidopsisInfoView(seedInfo);
 
             case STRAIN:
                 StrainInfo strainInfo = (StrainInfo) info;
-                return new StrainDetailView(strainInfo);
+                return new StrainInfoView(strainInfo);
 
             default:
                 return null;

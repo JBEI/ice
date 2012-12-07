@@ -1,0 +1,114 @@
+.cellTableWidget {
+}
+
+.cellTableFirstColumn {
+}
+
+.cellTableLastColumn {
+}
+
+@sprite .cellTableFooter {
+    gwt-image: 'cellTableFooterBackground';
+}
+
+    /**
+    * Applied to headers cells.
+    */
+.cellTableHeader {
+    border-bottom: 1px solid #6f7277;
+    text-align: left;
+    color: #4b4a4a;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 2px;
+    font-size: 0.80em;
+    text-shadow: #ddf 1px 1px 0;
+    text-transform: uppercase;
+}
+
+    /* Applied to every cell */
+.cellTableCell {
+    padding: 3px;
+    font-size: 0.80em;
+    color: #333;
+    font-family: arial;
+    overflow: hidden;
+    border-top: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.cellTableFirstColumnFooter {
+    border-left: 0px;
+}
+
+.cellTableFirstColumnHeader {
+    border-left: 0px;
+}
+
+.cellTableLastColumnFooter {
+}
+
+.cellTableLastColumnHeader {
+}
+
+.cellTableSortableHeader {
+    color: #003f7f;
+    cursor: pointer;
+}
+
+.cellTableSortableHeader:hover {
+    color: #222;
+}
+
+.cellTableSortedHeaderAscending {
+}
+
+.cellTableSortedHeaderDescending {
+}
+
+.cellTableEvenRow {
+    background-color: #FFFFFF;
+}
+
+.cellTableOddRow {
+    background-color: #FAFAFA;
+    border: selectionBorderWidth solid #f3f7fb;
+}
+
+.cellTableEvenRowCell {
+}
+
+.cellTableOddRowCell {
+}
+
+.cellTableHoveredRow {
+    background-color: #F6F6F6;
+}
+
+.cellTableHoveredRowCell {
+}
+
+.cellTableKeyboardSelectedRow {
+}
+
+.cellTableKeyboardSelectedRowCell {
+}
+
+@sprite .cellTableSelectedRow {
+    gwt-image: 'cellTableSelectedBackground';
+    background-color: #f3f1d9;
+    color: white;
+    height: auto;
+    overflow: auto;
+}
+
+.cellTableSelectedRowCell {
+    background: #ffc;
+}
+
+.cellTableKeyboardSelectedCell {
+}
+
+.cellTableLoading {
+    margin: 30px;
+}

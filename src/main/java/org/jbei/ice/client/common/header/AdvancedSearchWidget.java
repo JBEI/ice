@@ -1,23 +1,18 @@
 package org.jbei.ice.client.common.header;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.common.FilterWidget;
-import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
-import org.jbei.ice.shared.SearchFilterType;
-import org.jbei.ice.shared.dto.EntryType;
-import org.jbei.ice.shared.dto.search.EntrySearchFilter;
+import org.jbei.ice.shared.BioSafetyOption;
+import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.shared.dto.search.BlastProgram;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Button;
@@ -28,7 +23,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.TextArea;
 
 /**
  * Options widget for search
@@ -38,134 +33,183 @@ import com.google.gwt.user.client.ui.Widget;
 public class AdvancedSearchWidget extends Composite {
 
     private final EntryTypeFilterWidget entryTypes;     // entry type filter
+    private final BooleanAssociationEntryWidget entryWidget;
     private final Button runSearch;
     private final HTML reset;
     private final FlexTable panel;
-    private final FlexTable filterOptionsPanel;
-    private int currentRow;
-    private ChangeHandler filterSelectionHandler;
-    private final HashMap<Integer, FilterRow> rowBox;   // mapping of row->list box
-    private final EntrySearchFilter searchFilter;
     private final SearchCompositeBox searchInput;
+    private final ListBox bioSafetyOptions;
+    private final TextArea blastSequence;
+    private final ListBox blastProgram;
+    private final Button mainSearchBtn;
+    private HandlerRegistration mainBtnRegistration;
 
-    public AdvancedSearchWidget(SearchCompositeBox searchInput) {
+    public AdvancedSearchWidget(SearchCompositeBox searchInput, Button mainSearchBtn) {
         panel = new FlexTable();
         panel.setCellPadding(0);
         panel.setCellSpacing(0);
         initWidget(panel);
         panel.setStyleName("bg_white");
-        searchFilter = new EntrySearchFilter();
         this.searchInput = searchInput;
-
-        filterSelectionHandler = new FilterOptionChangeHandler();
+        this.mainSearchBtn = mainSearchBtn;
 
         // init components
-        filterOptionsPanel = new FlexTable();
-        filterOptionsPanel.setWidth("100%");
-        filterOptionsPanel.setHeight("100%");
-
-        rowBox = new HashMap<Integer, FilterRow>();
-
         runSearch = new Button("Search");
-        reset = new HTML("<b>Reset</b>");
-        reset.setStyleName("edit_permissions_label");
+        reset = new HTML("Reset");
+        reset.setStyleName("footer_feedback_widget");
+        reset.addStyleName("font-80em");
         entryTypes = new EntryTypeFilterWidget();
+        entryWidget = new BooleanAssociationEntryWidget();
 
-        panel.setWidget(0, 0, entryTypes);
-        panel.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
-        panel.getFlexCellFormatter().setColSpan(0, 0, 2);
-        panel.getFlexCellFormatter().setHeight(0, 0, "23px");
+        int row = 0;
+        panel.setWidget(row, 0, entryTypes);
+        panel.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
+        panel.getFlexCellFormatter().setColSpan(row, 0, 2);
+        panel.getFlexCellFormatter().setHeight(row, 0, "23px");
+
+        // blast
+        blastSequence = new TextArea();
+        blastSequence.setWidth("370px");
+        blastSequence.setVisibleLines(9);
+        blastSequence.setStyleName("input_box");
+        blastSequence.getElement().setAttribute("placeHolder", "Enter Sequence");
+        blastProgram = new ListBox();
+        blastProgram.setStyleName("pull_down");
+        for (BlastProgram program : BlastProgram.values()) {
+            blastProgram.addItem(program.getDetails(), program.name());
+        }
+        HTMLPanel folderOptionsPanel = new HTMLPanel("<div style=\"padding: 8px 8px 8px 5px; "
+                                                             + "border-bottom: 0.10em solid #f3f3f3;"
+                                                             + " padding-bottom: 15px\"><span class=\"font-80em\""
+                                                             + "style=\"letter-spacing:-1px; color:#555;\">"
+                                                             + "<b>BLAST</b></span> &nbsp; <span "
+                                                             + "id=\"advanced_folders\"></span><br>"
+                                                             + "<span id=\"blast_input\"></span>"
+                                                             + "</div>");
+        folderOptionsPanel.add(blastProgram, "advanced_folders");
+        folderOptionsPanel.add(blastSequence, "blast_input");
+
+        row += 1;
+        panel.setWidget(row, 0, folderOptionsPanel);
+        panel.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
+        panel.getFlexCellFormatter().setColSpan(row, 0, 2);
+
+        row += 1;
+        panel.setWidget(row, 0, entryWidget);
+        panel.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
+        panel.getFlexCellFormatter().setColSpan(row, 0, 2);
+
+        // biosafety
+        bioSafetyOptions = new ListBox();
+        bioSafetyOptions.setStyleName("pull_down");
+        bioSafetyOptions.addItem("Select");
+        for (BioSafetyOption option : BioSafetyOption.values())
+            bioSafetyOptions.addItem(option.getDisplayName(), option.getValue());
+        HTMLPanel htmlPanel = new HTMLPanel("<div style=\"padding: 10px; border-bottom: 0.10em solid #f3f3f3;"
+                                                    + " padding-bottom: 15px\"><span class=\"font-80em\"" +
+                                                    "style=\"letter-spacing: -1px; margin-right: 20px; color:#555;" +
+                                                    "\"><b>"
+                                                    + "BIOSAFETY OPTION</b></span><span " +
+                                                    "id=\"advanced_biosafety\"></span>"
+                                                    + "</div>");
+        htmlPanel.add(bioSafetyOptions, "advanced_biosafety");
+
+        row += 1;
+        panel.setWidget(row, 0, htmlPanel);
+        panel.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
+        panel.getFlexCellFormatter().setColSpan(row, 0, 2);
 
         initializeWidget();
         addResetHandler();
-        addSearchHandler();
     }
 
-    private void addSearchHandler() {
+    public void parseSearchOptions() {
+        String url = Page.QUERY.getLink() + ";";
+        url += URL.encodeQueryString(searchInput.getQueryString());
+
+        //blast
+        ClientController.blast = blastSequence.getText().trim();
+        if (!ClientController.blast.isEmpty()) {
+            url += ("&" + BlastProgram.values()[blastProgram.getSelectedIndex()].getName());
+        }
+
+        // search entry types
+        EntryType[] types = getSearchEntryType();
+        if (types != null && types.length != EntryType.values().length) {
+            url += "&type=";
+            for (EntryType type : types) {
+                url += (type.getName() + ",");
+            }
+            url = url.substring(0, url.length() - 1);
+        }
+
+        // check has attachment ext
+        String has = "";
+        if (entryWidget.isHasAttachmentChecked())
+            has += "&attachment";
+
+        if (entryWidget.isHasSampleChecked()) {
+            has += "&sample";
+        }
+
+        if (entryWidget.isHasSequenceChecked()) {
+            has += "&sequence";
+        }
+        url += has;
+
+        // biosafety level
+        if (bioSafetyOptions.getSelectedIndex() != 0) {
+            url += ("&biosafety=" + bioSafetyOptions.getSelectedIndex());
+        }
+
+        History.newItem(url);
+    }
+
+    public void addSearchHandler(final ClickHandler handler) {
         runSearch.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                String url = Page.QUERY.getLink() + ";";
-                url += URL.encode(searchInput.getQueryString());
-                History.newItem(url);
+                handler.onClick(event);
+                parseSearchOptions();
             }
         });
+        if (mainBtnRegistration != null)
+            mainBtnRegistration = mainSearchBtn.addClickHandler(handler);
     }
 
     private void addResetHandler() {
         reset.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                initializeWidget();
-                searchInput.reset();
+                reset();
             }
         });
     }
 
+    public void reset() {
+        initializeWidget();
+        searchInput.reset();
+    }
+
     // meant to be called only once to set the options available for searching
     private void initializeWidget() {
-        // search filter options
-        panel.setWidget(1, 0, filterOptionsPanel);
-        panel.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
-        panel.getFlexCellFormatter().setColSpan(1, 0, 2);
-
-        panel.setWidget(2, 0, runSearch);
-        panel.getFlexCellFormatter().setHorizontalAlignment(2, 0, HasAlignment.ALIGN_RIGHT);
-        panel.setWidget(2, 1, reset);
-        panel.getFlexCellFormatter().setHorizontalAlignment(2, 1, HasAlignment.ALIGN_CENTER);
-        panel.getFlexCellFormatter().setWidth(2, 1, "50px");
-
-        filterOptionsPanel.removeAllRows();
-
-        ListBox filterBox = new ListBox();
-        populateListBox(filterBox);
-        filterOptionsPanel.setWidget(currentRow, 0, filterBox);
-        FilterRow filterRow = new FilterRow();
-        filterRow.setBox(filterBox);
-        rowBox.put(currentRow, filterRow);
-    }
-
-    protected void populateListBox(ListBox options) {
-        options.setWidth("140px");
-        options.setStyleName("pull_down");
-        options.addChangeHandler(this.filterSelectionHandler);
-
-        options.addItem("Select Filter", "");
-        for (SearchFilterType type : SearchFilterType.values()) {
-            options.addItem(type.displayName(), type.name());
-        }
-    }
-
-    public void setFilterOperands(Widget operand) {
-        filterOptionsPanel.setWidget(currentRow, 1, operand);
-
-        // add filter icon and handler
-        Icon icon = new Icon(FAIconType.PLUS_SIGN);
-        icon.addStyleName("add_filter_style");
-        icon.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                currentRow += 1;
-                addNewFilter(currentRow);
-            }
-        }, ClickEvent.getType());
-        filterOptionsPanel.setWidget(currentRow, 2, icon);
-
-        // remove filter icon and handler
-        Icon removeIcon = new Icon(FAIconType.MINUS_SIGN);
-        removeIcon.addStyleName("remove_filter");
-        removeIcon.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                currentRow -= 1;
-                removeFilter(currentRow);
-            }
-        }, ClickEvent.getType());
-        filterOptionsPanel.setWidget(currentRow, 3, removeIcon);
+        String html = "<span id=\"run_advanced_search\"></span>&nbsp;<span id=\"reset_advanced_search\"></span>";
+        HTMLPanel buttonPanel = new HTMLPanel(html);
+        buttonPanel.setStyleName("pad-8");
+        runSearch.addStyleName("display-inline");
+        reset.addStyleName("display-inline");
+        buttonPanel.add(runSearch, "run_advanced_search");
+        buttonPanel.add(reset, "reset_advanced_search");
+        panel.setWidget(4, 0, buttonPanel);
+        panel.getFlexCellFormatter().setColSpan(4, 0, 2);
+        panel.getFlexCellFormatter().setHorizontalAlignment(4, 0, HasAlignment.ALIGN_RIGHT);
     }
 
     public EntryType[] getSearchEntryType() {
         ArrayList<String> selected = entryTypes.getSelected();
+        if (selected.size() == EntryType.values().length)
+            return null;
+
         EntryType[] types = new EntryType[selected.size()];
         int i = 0;
         for (String select : selected) {
@@ -180,26 +224,6 @@ public class AdvancedSearchWidget extends Composite {
         return types;
     }
 
-    protected void addNewFilter(int afterRow) {
-        ListBox filterBox = new ListBox();
-        filterBox.setWidth("140px");
-        filterBox.setStyleName("pull_down");
-        populateListBox(filterBox);
-        filterOptionsPanel.setWidget(afterRow, 0, filterBox);
-        FilterRow filterRow = new FilterRow();
-        filterRow.setBox(filterBox);
-        rowBox.put(afterRow, filterRow);
-    }
-
-    protected void removeFilter(int atRow) {
-        rowBox.remove(atRow);
-    }
-
-    public String getSelectedFilter() {
-        final ListBox filterOptions = rowBox.get(currentRow).getBox();
-        return filterOptions.getValue(filterOptions.getSelectedIndex());
-    }
-
     //
     // inner classes
     //
@@ -209,24 +233,24 @@ public class AdvancedSearchWidget extends Composite {
         private final CheckBox[] typeChecks;
 
         public EntryTypeFilterWidget() {
-
             allCheck = new CheckBox();
             typeChecks = new CheckBox[EntryType.values().length];
 
             String html =
-                    "<span class=\"font-80em;\" style=\"letter-spacing:-1.8px; color:#777\"><b>SEARCH:</b></span> " +
-                            "<label "
-                            + "style=\"padding-left:10px;\"><span style=\"position:relative; top: 2px; *overflow: " +
-                            "hidden\" "
-                            + "id=\"all_check\"></span>All</label>";
+                    "<div style=\"border-bottom: 0.10em solid #f3f3f3; padding-bottom: 15px\">"
+                            + "<span class=\"font-80em;\" style=\"letter-spacing:-1px; color:#555;\">"
+                            + "<b>TYPE</b></span> <label "
+                            + "style=\"padding-left:10px;\"><span style=\"position:relative; top: 2px; *overflow: "
+                            + "hidden\" id=\"all_check\"></span>All</label>";
 
             for (int i = 0; i < EntryType.values().length; i += 1) {
                 typeChecks[i] = new CheckBox();
-                html += "<label style=\" padding-left:10px;\"><span style=\"position:relative; top: " +
-                        "2px; *overflow: hidden\" id=\"" + EntryType.values()[i]
-                        .getName() + "_check\"></span>" + EntryType.values()[i].getDisplay() + "</label>";
+                html += "<label style=\"padding-left:10px;\"><span style=\"position:relative; top: "
+                        + "2px; *overflow: hidden\" id=\"" + EntryType.values()[i].getName()
+                        + "_check\"></span>" + EntryType.values()[i].getDisplay() + "</label>";
             }
 
+            html += "</div>";
             HTMLPanel htmlPanel = new HTMLPanel(html);
             htmlPanel.setStyleName("font-80em");
             htmlPanel.addStyleName("pad-3");
@@ -284,20 +308,6 @@ public class AdvancedSearchWidget extends Composite {
                     for (CheckBox box : typeChecks) {
                         box.setValue(allCheck.getValue(), false);
                     }
-
-                    if (!allCheck.getValue()) {
-                        // clear filters
-                        for (Map.Entry<Integer, FilterRow> value : rowBox.entrySet()) {
-                            value.getValue().getBox().clear();
-                            value.getValue().getBox().addItem("No Filters Available");
-                        }
-                    } else {
-                        // set filters to all
-                        for (Map.Entry<Integer, FilterRow> value : rowBox.entrySet()) {
-                            value.getValue().getBox().clear();
-                            populateListBox(value.getValue().getBox());
-                        }
-                    }
                 } else {
                     ArrayList<EntryType> selected = new ArrayList<EntryType>();
                     for (int i = 0; i < typeChecks.length; i += 1) {
@@ -307,110 +317,51 @@ public class AdvancedSearchWidget extends Composite {
                     }
 
                     allCheck.setValue((selected.size() == EntryType.values().length), false);
-                    filterOptionsPanel.clear();
-
-                    for (int i = 0; i < rowBox.size(); i += 1) {
-                        FilterRow removedRow = rowBox.remove(i);
-                        String removedSelected = removedRow.getBox().getValue(removedRow.getBox().getSelectedIndex());
-                        ListBox createdBox = createListBoxForEntryType(selected, removedSelected);
-                        if (createdBox == null)
-                            continue;
-
-                        removedRow.setBox(createdBox);
-                        rowBox.put(i, removedRow);
-                        filterOptionsPanel.setWidget(i, 0, createdBox);
-                        currentRow = i;
-                        setFilterOperands(removedRow.getValue());
-                    }
-
-                    if (rowBox.isEmpty()) {
-                        // initialize
-                    }
                 }
-            }
-
-            private ListBox createListBoxForEntryType(ArrayList<EntryType> selected, String selectedValue) {
-                ListBox option = new ListBox();
-                option.setWidth("140px");
-                option.setStyleName("pull_down");
-                option.addItem("Select Filter", "");
-                option.addChangeHandler(filterSelectionHandler);
-
-                int i = 0;
-//                boolean hasSelection = false;
-
-                // for each of the search filters
-                for (SearchFilterType type : SearchFilterType.values()) {
-                    // any restrictions
-                    boolean add = (type.getEntryRestrictions().length == 0);
-
-                    // check to see if at least one of the remaining selected entry types is found in the
-                    // restrictions list for the search filter, then add the filter to that option
-                    if (!add) {
-                        for (EntryType selectedType : selected) {
-                            for (EntryType restrictedType : type.getEntryRestrictions()) {
-                                if (selectedType == restrictedType) {
-                                    add = true;
-                                    break;
-                                }
-                            }
-                            if (add)
-                                break;
-                        }
-                    }
-
-                    // can we add now?
-                    if (add) {
-                        option.addItem(type.displayName(), type.name());
-                        i += 1;
-                        if (type.name().equals(selectedValue)) {
-                            option.setSelectedIndex(i);
-//                            hasSelection = true;
-                        }
-                    }
-                }
-
-//                if (!hasSelection)
-//                    return null;
-                return option;
             }
         }
     }
 
-    private class FilterOptionChangeHandler implements ChangeHandler {
+    // association with entries such as [has sample, has sequence, has attachment]
+    private class BooleanAssociationEntryWidget extends Composite {
 
-        @Override
-        public void onChange(ChangeEvent event) {
-            String value = getSelectedFilter();
-            SearchFilterType type = SearchFilterType.filterValueOf(value);
-            if (type == null) {
-                return;
-            }
+        private CheckBox hasAttachmentCheck;
+        private CheckBox hasSampleCheck;
+        private CheckBox hasSequenceCheck;
 
-            FilterWidget currentSelected = searchFilter.getFilterWidget(type);
-            setFilterOperands(currentSelected);
-        }
-    }
+        public BooleanAssociationEntryWidget() {
+            hasAttachmentCheck = new CheckBox();
+            hasSampleCheck = new CheckBox();
+            hasSequenceCheck = new CheckBox();
 
-    private class FilterRow {
+            String html = "<div style=\"border-bottom: 0.10em solid #f3f3f3; padding-bottom: 15px\">"
+                    + "<label style=\"margin-left:5px;\"><span style=\"position:relative; top: " +
+                    "2px; *overflow: hidden\" id=\"attachment_check\"></span> Has Attachment</label>";
+            html += "<label style=\" margin-left:30px;\"><span style=\"position:relative; top: " +
+                    "2px; *overflow: hidden\" id=\"sample_check\"></span> Has Sample</label>";
+            html += "<label style=\" margin-left:30px;\"><span style=\"position:relative; top: " +
+                    "2px; *overflow: hidden\" id=\"sequence_check\"></span> Has Sequence</label>";
+            html += "</div>";
+            HTMLPanel panel = new HTMLPanel(html);
+            initWidget(panel);
 
-        private ListBox box;
-        private FilterWidget value;
-
-        public ListBox getBox() {
-            return box;
-        }
-
-        public void setBox(ListBox box) {
-            this.box = box;
-        }
-
-        public FilterWidget getValue() {
-            return value;
+            panel.add(hasAttachmentCheck, "attachment_check");
+            panel.add(hasSampleCheck, "sample_check");
+            panel.add(hasSequenceCheck, "sequence_check");
+            setStyleName("font-80em");
+            addStyleName("margin-top-10");
         }
 
-        public void setValue(FilterWidget value) {
-            this.value = value;
+        public boolean isHasAttachmentChecked() {
+            return hasAttachmentCheck.getValue().booleanValue();
+        }
+
+        public boolean isHasSampleChecked() {
+            return hasSampleCheck.getValue().booleanValue();
+        }
+
+        public boolean isHasSequenceChecked() {
+            return hasSequenceCheck.getValue().booleanValue();
         }
     }
 }

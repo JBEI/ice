@@ -1,7 +1,8 @@
 package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -9,7 +10,7 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class StrainForm extends SingleEntryForm<StrainInfo> {
+public class StrainForm extends EntryForm<StrainInfo> {
 
     private TextBox host;
     private TextBox genPhen;
@@ -158,12 +159,17 @@ public class StrainForm extends SingleEntryForm<StrainInfo> {
     public FocusWidget validateForm() {
         FocusWidget widget = super.validateForm();
         if (markers.getValueBox().getText().isEmpty()) {
-            markers.setStyleName("entry_input_error");
+            markers.setStyleName("input_box_error");
             if (widget == null)
                 widget = markers.getValueBox();
         } else {
             markers.setStyleName("input_box");
         }
         return widget;
+    }
+
+    @Override
+    public String getHeaderDisplay() {
+        return EntryAddType.STRAIN.getDisplay();
     }
 }

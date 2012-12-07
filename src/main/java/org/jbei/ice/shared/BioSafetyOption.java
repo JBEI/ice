@@ -16,8 +16,7 @@ public enum BioSafetyOption implements IsSerializable {
         this.value = value;
     }
 
-    BioSafetyOption() {
-    }
+    BioSafetyOption() {}
 
     public String getDisplayName() {
         return this.displayName;
@@ -44,7 +43,6 @@ public enum BioSafetyOption implements IsSerializable {
         for (BioSafetyOption option : BioSafetyOption.values()) {
             if (option.displayName.equalsIgnoreCase(value) || option.getValue().equals(value)) {
                 return Integer.valueOf(option.getValue());
-
             }
         }
         return null;
@@ -58,8 +56,7 @@ public enum BioSafetyOption implements IsSerializable {
         return list;
     }
 
-    public static Object displayToEnum(String value) {
-
+    public static BioSafetyOption displayToEnum(String value) {
         for (BioSafetyOption option : BioSafetyOption.values()) {
             if (value.equalsIgnoreCase(option.getDisplayName()))
                 return option;

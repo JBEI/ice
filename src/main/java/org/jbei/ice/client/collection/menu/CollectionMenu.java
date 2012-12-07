@@ -4,22 +4,25 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.widget.ShareCollectionWidget;
 import org.jbei.ice.client.common.util.ImageUtil;
-import org.jbei.ice.client.common.widget.Icon;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.entry.view.ReadBoxSelectionHandler;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -36,15 +39,16 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
     private MenuItem currentEditSelection;
 
     private int row;
-    private final TextBox editCollectionNameBox;
     private int editRow = -1;
     private int editIndex = -1;
     private final SingleSelectionModel<MenuItem> selectionModel;
     private final CollectionMenuPresenter presenter;
     private final boolean hasQuickEdit;
+    private final QuickAddWidget editName;
 
     // quick add
     private QuickAddWidget quickAddWidget;
+    private Delegate<ShareCollectionData> permissionInfoDelegate;
 
     public CollectionMenu(boolean addQuickEdit, String header) {
         layout = new FlexTable();
@@ -54,14 +58,12 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
         initWidget(layout);
 
         // quick add
-        quickAddWidget = new QuickAddWidget();
+        quickAddWidget = new QuickAddWidget(true);
         quickAddWidget.setVisible(false);
 
         // quick edit
-        editCollectionNameBox = new TextBox();
-        editCollectionNameBox.setStyleName("input_box");
-        editCollectionNameBox.setWidth("99%");
-        editCollectionNameBox.setVisible(false);
+        editName = new QuickAddWidget(false);
+        editName.setVisible(false);
 
         hasQuickEdit = addQuickEdit;
 
@@ -94,6 +96,10 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
         presenter = new CollectionMenuPresenter(this);
     }
 
+    public void setPermissionInfoDelegate(Delegate<ShareCollectionData> infoDelegate) {
+        this.permissionInfoDelegate = infoDelegate;
+    }
+
     public void setEmptyCollectionMessage(String msg) {
         int messageRow = hasQuickEdit ? 2 : 1;
         HTML html = new HTML("<span style=\"font-size: 0.70em; color: #666; padding: 4px; font-style:italic\">"
@@ -110,21 +116,21 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
     }
 
     public String getQuickEditText() {
-        return this.editCollectionNameBox.getText();
+        return editName.getInputName();
     }
 
     public boolean isQuickEditVisible() {
-        return this.editCollectionNameBox.isVisible();
+        return editName.isVisible();
     }
 
-    public void addQuickEditKeyDownHandler(final KeyDownHandler handler) {
-        this.editCollectionNameBox.addKeyDownHandler(new KeyDownHandler() {
+    public void addQuickEditKeyPressHandler(final KeyPressHandler handler) {
+        editName.addQuickAddKeyPressHandler(new KeyPressHandler() {
 
             @Override
-            public void onKeyDown(KeyDownEvent event) {
-                if (event.getNativeKeyCode() != KeyCodes.KEY_ENTER)
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getNativeEvent().getKeyCode() != KeyCodes.KEY_ENTER)
                     return;
-                handler.onKeyDown(event);
+                handler.onKeyPress(event);
             }
         });
     }
@@ -152,6 +158,20 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
         }
     }
 
+    public void setPermissions(ArrayList<PermissionInfo> list) {
+        presenter.setPermissions(list);
+
+        for (int i = 0; i < layout.getRowCount(); i += 1) {
+            Widget w = layout.getWidget(i, 0);
+            if (!(w instanceof MenuCell))
+                continue;
+
+            MenuCell cell = (MenuCell) w;
+            cell.setShared(presenter.getPermissionCount(cell.getMenuItem().getId()));
+            // TODO : include the shared info in a tooltip. All the information is contained in here
+        }
+    }
+
     /**
      * replaces current edit cell (in menu)
      * with new cell with folder
@@ -163,7 +183,7 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
         final MenuCell cell = new MenuCell(item, deleteHandler);
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         layout.setWidget(editRow, editIndex, cell);
-        this.editCollectionNameBox.setVisible(false);
+        this.editName.setVisible(true);
     }
 
     public void addMenuItem(MenuItem item, IDeleteMenuHandler deleteHandler) {
@@ -171,6 +191,7 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
             return;
 
         final MenuCell cell = new MenuCell(item, deleteHandler);
+        cell.setShared(0);
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         row += 1;
         layout.setWidget(row, 0, cell);
@@ -201,7 +222,7 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
      * sets the busy indicator where the folder counts are displayed
      * to indicate that some form of update is taking place
      */
-    public void setBusyIndicator(Set<Long> ids) {
+    public void setBusyIndicator(Set<Long> ids, boolean visible) {
         for (int i = 0; i < layout.getRowCount(); i += 1) {
             Widget w = layout.getWidget(i, 0);
             if (!(w instanceof MenuCell))
@@ -209,7 +230,7 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
 
             MenuCell cell = (MenuCell) w;
             if (ids.contains(cell.getMenuItem().getId()))
-                cell.showBusyIndicator();
+                cell.setBusyIndicatorVisibility(visible);
         }
     }
 
@@ -248,35 +269,26 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
         quickAddWidget.setVisible(false);
     }
 
-    public boolean getQuickAddVisibility() {
-        return quickAddWidget.isVisible();
-    }
-
-    public void addQuickAddKeyPressHandler(KeyPressHandler handler) {
-        this.quickAddWidget.addQuickAddKeyPressHandler(handler);
-    }
-
-    public void addSaveCollectionNameHandler(ClickHandler handler) {
-        this.quickAddWidget.addSubmitHandler(handler);
+    public void addQuickAddKeyPressHandler(final KeyPressHandler handler) {
+        this.quickAddWidget.addQuickAddKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getNativeEvent().getKeyCode() != KeyCodes.KEY_ENTER)
+                    return;
+                handler.onKeyPress(event);
+            }
+        });
     }
 
     // inner classes
-
     class DeleteCallBack extends Callback<MenuItem> {
-
-        private final IDeleteMenuHandler deleteHandler;
-
-        public DeleteCallBack(IDeleteMenuHandler deleteHandler) {
-            this.deleteHandler = deleteHandler;
-        }
 
         @Override
         public void onSuccess(MenuItem item) {
-            MenuHiderTimer timer = new MenuHiderTimer(layout, editRow);
-            DeletedCell deletedCell = new DeletedCell(currentEditSelection,
-                                                      deleteHandler.getUndoHandler(item, CollectionMenu.this, timer));
-            layout.setWidget(editRow, editIndex, deletedCell);
-            timer.schedule(6000);
+            if (layout == null || layout.getRowCount() <= editRow)
+                return;
+
+            layout.removeRow(editRow);
         }
 
         @Override
@@ -291,16 +303,61 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
         private final MenuItem item;
 
         private Label count;
-        private Icon collectionIcon; // icon displayed before the collection name
         private final HoverCell action;
         private final String folderId;
+        private final Widget busyIndicator;
+        private ShareCollectionWidget shareCollectionWidget;
+        private final HTML shared;
 
-        public MenuCell(final MenuItem item, final IDeleteMenuHandler deleteHandler) {
-
+        public MenuCell(final MenuItem item, final IDeleteMenuHandler handler) {
             this.item = item;
             folderId = "right" + item.getId();
             action = new HoverCell();
+            shareCollectionWidget = new ShareCollectionWidget(item.getName(), new Delegate<PermissionInfo>() {
+                @Override
+                public void execute(PermissionInfo info) {
+                    if (permissionInfoDelegate == null)
+                        return;
+
+                    presenter.removePermission(info);
+                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getRemoveCallback());
+                    data.setDelete(true);
+                    permissionInfoDelegate.execute(data);
+                }
+            });
+
+            shareCollectionWidget.getPermissionsPresenter().setWriteAddSelectionHandler(new ReadBoxSelectionHandler() {
+
+                @Override
+                public void updatePermission(PermissionInfo info) {
+                    if (permissionInfoDelegate == null)
+                        return;
+
+                    presenter.addPermission(info);
+                    info.setType(PermissionInfo.Type.WRITE_FOLDER);
+                    info.setTypeId(item.getId());
+                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
+                    permissionInfoDelegate.execute(data);
+                }
+            });
+
+            shareCollectionWidget.getPermissionsPresenter().setReadAddSelectionHandler(new ReadBoxSelectionHandler() {
+
+                @Override
+                public void updatePermission(PermissionInfo info) {
+                    if (permissionInfoDelegate == null)
+                        return;
+
+                    presenter.addPermission(info);
+                    info.setType(PermissionInfo.Type.READ_FOLDER);
+                    info.setTypeId(item.getId());
+                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
+                    permissionInfoDelegate.execute(data);
+                }
+            });
+
             action.getOptionSelection().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
                 @Override
                 public void onSelectionChange(SelectionChangeEvent event) {
                     HoverCell.HoverOptions selected = action.getOptionSelection().getSelectedObject();
@@ -312,7 +369,6 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
 
                     switch (selected) {
                         case EDIT:
-
                             for (int i = 0; i < layout.getRowCount(); i += 1) {
                                 Widget widget = layout.getWidget(i, 0);
                                 if (widget == null || !(widget instanceof MenuCell))
@@ -329,17 +385,16 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
                                 currentEditSelection = getMenuItem();
                                 editRow = i;
                                 editIndex = 0;
-                                layout.setWidget(editRow, editIndex, editCollectionNameBox);
-                                editCollectionNameBox.setVisible(true);
-                                editCollectionNameBox.setFocus(true);
-                                editCollectionNameBox.setText(name);
-                                editCollectionNameBox.selectAll();
+                                layout.setWidget(editRow, editIndex, editName);
+                                editName.setVisible(true);
+                                editName.setInputName(name);
+                                editName.setFocus(true);
                                 break;
                             }
                             break;
 
                         case DELETE:
-                            if (deleteHandler == null)
+                            if (handler == null)
                                 break;
 
                             for (int i = 0; i < layout.getRowCount(); i += 1) {
@@ -358,7 +413,10 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
                                 currentEditSelection = getMenuItem();
                                 editRow = i;
                                 editIndex = 0;
-                                deleteHandler.delete(item.getId(), new DeleteCallBack(deleteHandler));
+                                if (Window.confirm("Delete \"" + currentEditSelection.getName()
+                                                           + "\"? This action cannot be undone")) {
+                                    handler.delete(item.getId(), new DeleteCallBack());
+                                }
                                 break;
                             }
                             break;
@@ -380,8 +438,7 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
                                 currentEditSelection = getMenuItem();
                                 editRow = i;
                                 editIndex = 0;
-                                ShareCollectionWidget shareCollectionWidget = new ShareCollectionWidget(id, name);
-                                shareCollectionWidget.showDialog();
+                                shareCollectionWidget.showDialog(presenter.getFolderPermissions(cellId));
                             }
                             break;
                     }
@@ -397,25 +454,37 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
                 public void onClose(CloseEvent<PopupPanel> event) {
                     if (item.isSystem())
                         return;
-
-                    setRightPanel(count);
+                    busyIndicator.setVisible(false);
+                    action.setVisible(false);
+                    count.setVisible(true);
                 }
             });
+            action.setVisible(false);
 
             String name = item.getName();
             if (name.length() > 25)
                 name = (name.substring(0, 22) + "...");
 
-            String html = "<span id=\"collection_icon\"></span><span class=\"collection_user_menu\">" + name
-                    + "</span><span class=\"menu_count\" id=\"" + folderId + "\"></span>";
+            shared = new HTML("<span style=\"color: #999; font-size: 9px\">Private</span>");
+            shared.setVisible(false);
 
-            if (!item.isSystem())
-                html += "<br><span style=\"color: #ccc; font-size: 9px\">Private</span>";
+            busyIndicator = ImageUtil.getBusyIcon();
+            busyIndicator.setVisible(false);
+
+            String html = "<span class=\"collection_user_menu\">" + name
+                    + "</span><span class=\"menu_count\" id=\"count_" + folderId + "\"></span>"
+                    + "<span class=\"menu_count\" " + "id=\"submenu_" + folderId + "\"></span>"
+                    + "<span class=\"menu_count\" " + "id=\"busy_indicator_" + folderId + "\"></span>"
+                    + "<span id=\"shared_row_info\">";
 
             panel = new HTMLPanel(html);
+            panel.add(shared, "shared_row_info");
             panel.setTitle(item.getName());
-            count = new Label(formatNumber(item.getCount()));
-            panel.add(count, folderId);
+            count = new Label(presenter.formatNumber(item.getCount()));
+            panel.add(count, "count_" + folderId);
+            panel.add(action, "submenu_" + folderId);
+            panel.add(busyIndicator, "busy_indicator_" + folderId);
+
             if (item.isSystem())
                 panel.setStyleName("system_collection_user_menu_row");
             else
@@ -432,8 +501,9 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
 
                     if (action.optionsAreVisible())
                         return;
-
-                    setRightPanel(count);
+                    busyIndicator.setVisible(false);
+                    action.setVisible(false);
+                    count.setVisible(true);
                 }
             });
 
@@ -442,10 +512,26 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
                 public void onMouseOver(MouseOverEvent event) {
                     if (item.isSystem())
                         return;
-
-                    setRightPanel(action);
+                    busyIndicator.setVisible(false);
+                    action.setVisible(true);
+                    count.setVisible(false);
                 }
             });
+        }
+
+        public void setShared(int count) {
+            if (item.getId() <= 0 || item.isSystem())
+                return;
+
+            item.setShared(count > 0);
+            if (item.isShared()) {
+                String html = "<span style=\"color: #999; font-size: 9px\">Shared&nbsp;";
+                html += "<i class=\"" + FAIconType.EYE_OPEN.getStyleName() + "\"></i></span>";
+                shared.setHTML(html);
+            }
+            shared.setVisible(true);
+            action.setVisible(false);
+            this.count.setVisible(true);
         }
 
         public void setSelected(boolean selected) {
@@ -455,40 +541,28 @@ public class CollectionMenu extends Composite implements CollectionMenuPresenter
                 this.removeStyleName("collection_user_menu_row_selected");
         }
 
-        public void showBusyIndicator() {
-            setRightPanel(ImageUtil.getBusyIcon());
+        public void setBusyIndicatorVisibility(boolean visible) {
+            busyIndicator.setVisible(visible);
         }
 
         public void showFolderCount() {
-            setRightPanel(count);
+            busyIndicator.setVisible(false);
+            action.setVisible(false);
+            count.setVisible(true);
         }
 
         public void updateCount(long newCount) {
             item.setCount(newCount);
-            count = new Label(formatNumber(item.getCount()));
+            count.setText(presenter.formatNumber(item.getCount()));
         }
 
         public MenuItem getMenuItem() {
             return this.item;
         }
 
-        private void setRightPanel(Widget widget) {
-            Widget toReplace = panel.getWidget(0);
-            if (toReplace == null)
-                return;
-
-            panel.remove(0);
-            panel.add(widget, folderId);
-        }
-
         @Override
         public HandlerRegistration addClickHandler(ClickHandler handler) {
             return addDomHandler(handler, ClickEvent.getType());
-        }
-
-        private String formatNumber(long l) {
-            NumberFormat format = NumberFormat.getFormat("##,###");
-            return format.format(l);
         }
 
         public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {

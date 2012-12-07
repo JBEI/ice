@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -15,6 +14,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -37,7 +37,14 @@ import gwtupload.shared.UConsts;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.IOUtils;
 
-// TODO : Robust exception handling
+/**
+ * GWTUpload servlet that handles file uploads. If an upload type (e.g. sequence or attachment)
+ * is associated with an entry if the entry id (EID) passed is valid. If no valid EID is provided
+ * then the file is simply uploaded and the file id (essentially a unique identifier based on type)
+ * is returned
+ *
+ * @author Hector Plahar
+ */
 public class FileUploadServlet extends UploadAction {
 
     private static final long serialVersionUID = 1L;
@@ -47,8 +54,8 @@ public class FileUploadServlet extends UploadAction {
     private static final String BULK_UPLOAD_FILE_TYPE = "bulk_file_upload";
     private static final String BULK_CSV_UPLOAD = "bulk_csv";
 
-    Hashtable<String, String> receivedContentTypes = new Hashtable<String, String>();
-    Hashtable<String, File> receivedFiles = new Hashtable<String, File>(); // received files list and content types
+    Hashtable<String, String> receivedContentTypes = new Hashtable<>();
+    Hashtable<String, File> receivedFiles = new Hashtable<>(); // received files list and content types
 
     private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
         for (Cookie cookie : cookies) {
@@ -59,7 +66,7 @@ public class FileUploadServlet extends UploadAction {
 
                 if (!AccountController.isAuthenticated(sid))
                     return null;
-                AccountController controller = new AccountController();
+                AccountController controller = ApplicationController.getAccountController();
                 return controller.getAccountBySessionKey(sid);
             }
         }
@@ -70,9 +77,7 @@ public class FileUploadServlet extends UploadAction {
      * Override executeAction to save the received files in a custom place and delete this items from session.
      */
     @Override
-    public String executeAction(HttpServletRequest request, List<FileItem> sessionFiles)
-            throws UploadActionException {
-
+    public String executeAction(HttpServletRequest request, List<FileItem> sessionFiles) throws UploadActionException {
         String desc = request.getParameter("desc");
         String type = request.getParameter("type");
         String entryId = request.getParameter("eid");
@@ -86,19 +91,17 @@ public class FileUploadServlet extends UploadAction {
             if (account == null) {
                 if (!AccountController.isAuthenticated(sid))
                     return "";
-                AccountController controller = new AccountController();
+                AccountController controller = ApplicationController.getAccountController();
                 account = controller.getAccountBySessionKey(sid);
                 if (account == null)
                     return "";
             }
-
         } catch (ControllerException ce) {
             Logger.error(ce);
             String url = request.getRequestURL().toString();
             String path = request.getServletPath();
             url = url.substring(0, url.indexOf(path));
-            Logger.info(FileUploadServlet.class.getSimpleName()
-                                + ": authentication failed. Redirecting user to " + url);
+            Logger.info(FileUploadServlet.class.getSimpleName() + ": Redirecting user to login at \"" + url + "\"");
             return "";
         }
 
@@ -123,28 +126,87 @@ public class FileUploadServlet extends UploadAction {
                 continue;
             }
 
-            if (ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
-                if (entryId == null || entryId.isEmpty())
-                    return "No entry id specified for file upload";
-                result = uploadAttachment(account, file, entryId, desc, saveName);
-            } else if (SEQUENCE_TYPE.equalsIgnoreCase(type)) {
-                if (entryId == null || entryId.isEmpty())
-                    result = "No entry id specified for file upload";
-                try {
-                    result = uploadSequenceTraceFile(file, entryId, account, saveName);
-                } catch (IOException e) {
-                    Logger.error(e);
-                }
-            } else if (BULK_UPLOAD_FILE_TYPE.equalsIgnoreCase(type)) {
-                Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
-                result = uploadFileToTemp(file, saveName, isSequence.booleanValue());
-            }
+            switch (type) {
+                case ATTACHMENT_TYPE:
+                    result = uploadAttachment(account, file, entryId, desc, saveName);
+                    break;
 
+                case SEQUENCE_TYPE:
+                    try {
+                        result = uploadSequenceTraceFile(file, entryId, account, saveName);
+                    } catch (IOException e) {
+                        Logger.error(e);
+                    }
+                    break;
+
+                case BULK_UPLOAD_FILE_TYPE:
+                case BULK_CSV_UPLOAD:
+                    Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
+                    result = uploadBulkCSVFile(account, file, entryId, saveName, isSequence);
+                    break;
+            }
             break;
         }
 
         removeSessionFileItems(request);
         return result;
+    }
+
+    public String uploadBulkCSVFile(Account account, File file, String entryId, String saveName, boolean isSequence) {
+        try {
+            if (entryId == null || "0".equals(entryId.trim())) // TODO : create new file Id and return it
+                return uploadFileToTemp(file, saveName, isSequence);
+
+            // associate with entry
+            EntryController entryController = ApplicationController.getEntryController();
+            AttachmentController attachmentController = ApplicationController.getAttachmentController();
+
+            Entry entry = null;
+            try {
+                entry = entryController.get(account, Long.decode(entryId));
+            } catch (NumberFormatException | ControllerException | PermissionException e) {
+                Logger.error(e);
+            }
+            if (entry == null)
+                return uploadFileToTemp(file, saveName, isSequence);
+
+            if (isSequence) {
+                String sequenceString = FileUtils.readFileToString(file);
+                ApplicationController.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
+                return saveName;
+            } else {
+                FileInputStream inputStream = new FileInputStream(file);
+                if (entry != null) {
+                    try {
+                        ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
+                        if (attachments != null && !attachments.isEmpty()) {
+                            for (Attachment attachment : attachments) {
+                                try {
+                                    attachmentController.delete(account, attachment);
+                                } catch (PermissionException e) {
+                                    continue;
+                                }
+                            }
+                        }
+
+                        Attachment attachment = new Attachment();
+                        attachment.setEntry(entry);
+                        attachment.setDescription("");
+                        attachment.setFileName(saveName);
+                        Attachment saved = attachmentController.save(account, attachment, inputStream);
+                        if (saved != null)
+                            return saved.getFileId();
+                        return "";
+                    } catch (ControllerException e) {
+                        Logger.error(e);
+                    }
+                }
+                return "";
+            }
+        } catch (IOException | ControllerException e) {
+            Logger.error(e);
+            return "";
+        }
     }
 
     public String uploadFileToTemp(File file, String saveName, boolean isSequence) {
@@ -159,7 +221,6 @@ public class FileUploadServlet extends UploadAction {
             }
         }
 
-        // if succeeds return "T\tfileId";
         String fileId = Utils.generateUUID();
         if (file.renameTo(new File(file.getParentFile() + File.separator + fileId)))
             return fileId;
@@ -167,44 +228,34 @@ public class FileUploadServlet extends UploadAction {
     }
 
     // TODO : this needs to go to manager/controller
-    private String uploadSequenceTraceFile(File file, String entryId, Account account,
-            String uploadFileName) throws IOException {
-
-        EntryController controller = new EntryController();
+    private String uploadSequenceTraceFile(File file, String entryId, Account account, String uploadFileName)
+            throws IOException {
+        EntryController controller = ApplicationController.getEntryController();
         Entry entry = null;
         try {
             entry = controller.get(account, Long.decode(entryId));
-        } catch (NumberFormatException e) {
-            Logger.error(e);
-        } catch (ControllerException e) {
-            Logger.error(e);
-        } catch (PermissionException e) {
+        } catch (NumberFormatException | ControllerException | PermissionException e) {
             Logger.error(e);
         }
 
         if (entry == null)
-            return "Could not retrieve entry with id : " + entryId;
+            return "Unknown entry (" + entryId + "). Upload aborted";
 
-        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
-
+        SequenceAnalysisController sequenceAnalysisController = ApplicationController.getSequenceAnalysisController();
         IDNASequence dnaSequence;
 
-        ArrayList<ByteHolder> byteHolders = new ArrayList<ByteHolder>();
+        ArrayList<ByteHolder> byteHolders = new ArrayList<>();
         FileInputStream inputStream = new FileInputStream(file);
 
-        if ((uploadFileName.endsWith(".zip")) || uploadFileName.endsWith(".ZIP")) {
+        if (uploadFileName.toLowerCase().endsWith(".zip")) {
             try {
-
                 ZipInputStream zis = new ZipInputStream(inputStream);
                 ZipEntry zipEntry;
-
                 while (true) {
                     zipEntry = zis.getNextEntry();
 
                     if (zipEntry != null) {
-
                         if (!zipEntry.isDirectory() && !zipEntry.getName().startsWith("__MACOSX")) {
-
                             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                             int c;
                             while ((c = zis.read()) != -1) {
@@ -237,8 +288,8 @@ public class FileUploadServlet extends UploadAction {
                 currentFileName = byteHolder.getName();
                 dnaSequence = sequenceAnalysisController.parse(byteHolder.getBytes());
                 if (dnaSequence == null || dnaSequence.getSequence() == null) {
-                    String errMsg = ("Could not parse file: " + currentFileName + ". Only Fasta, GenBank, " +
-                            "or ABI files are supported.");
+                    String errMsg = ("Could not parse \"" + currentFileName
+                            + "\". Only Fasta, GenBank & ABI files are supported.");
                     Logger.error(errMsg);
                     return errMsg;
                 }
@@ -249,53 +300,50 @@ public class FileUploadServlet extends UploadAction {
                                                                new ByteArrayInputStream(byteHolder.getBytes()));
             }
             sequenceAnalysisController.rebuildAllAlignments(entry);
-            return "ok";
-
-        } catch (ControllerException e) { // 
-            String errMsg = ("Could not parse file: " + currentFileName + ". Only Fasta, GenBank, " +
-                    "or ABI files are supported.");
+            return "";
+        } catch (ControllerException e) {
+            String errMsg = ("Could not parse \"" + currentFileName
+                    + "\". Only Fasta, GenBank & ABI files are supported.");
             Logger.error(errMsg);
             return errMsg;
         }
     }
 
     // TODO : check for path information in filename. safari includes it
-    private String uploadAttachment(Account account, File file, String entryId, String desc,
-            String filename) {
-
-        EntryController controller = new EntryController();
+    private String uploadAttachment(Account account, File file, String entryId, String desc, String filename) {
+        EntryController controller = ApplicationController.getEntryController();
         Entry entry = null;
         try {
             entry = controller.get(account, Long.decode(entryId));
-        } catch (NumberFormatException e) {
-            Logger.error(e);
-        } catch (ControllerException e) {
-            Logger.error(e);
-        } catch (PermissionException e) {
+        } catch (NumberFormatException | ControllerException | PermissionException e) {
             Logger.error(e);
         }
 
-        if (entry == null)
-            return "Could not retrieve entry with id : " + entryId;
-
         try {
-            Attachment attachment = new Attachment();
-            attachment.setEntry(entry);
-            attachment.setDescription(desc);
-            attachment.setFileName(filename);
-
             FileInputStream inputStream = new FileInputStream(file);
-            // TODO : this save method also writes the attachment to file
-            AttachmentController attachmentController = new AttachmentController();
-            Attachment saved = attachmentController.save(account, attachment, inputStream);
-            if (saved != null)
-                return saved.getFileId();
-        } catch (ControllerException e) {
+            if (entry != null) {
+                try {
+                    Attachment attachment = new Attachment();
+                    attachment.setEntry(entry);
+                    attachment.setDescription(desc);
+                    attachment.setFileName(filename);
+                    AttachmentController attachmentController = ApplicationController.getAttachmentController();
+                    Attachment saved = attachmentController.save(account, attachment, inputStream);
+                    if (saved != null)
+                        return saved.getFileId();
+                } catch (ControllerException e) {
+                    Logger.error(e);
+                }
+            } else {
+                // upload file. return file id
+                String fileId = Utils.generateUUID();
+                File attDir = new File(Utils.getConfigValue(ConfigurationKey.ATTACHMENTS_DIRECTORY));
+                FileUtils.writeFile(attDir, fileId, inputStream);
+                return fileId;
+            }
+        } catch (IOException e) {
             Logger.error(e);
-        } catch (FileNotFoundException e) {
-            Logger.error(e);
-        } catch (PermissionException e) {
-            Logger.error(e);
+            return null;
         }
 
         return null;
@@ -305,8 +353,7 @@ public class FileUploadServlet extends UploadAction {
      * Get the content of an uploaded file.
      */
     @Override
-    public void getUploadedFile(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    public void getUploadedFile(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String fieldName = request.getParameter(UConsts.PARAM_SHOW);
         File f = receivedFiles.get(fieldName);
         if (f != null) {
@@ -322,8 +369,7 @@ public class FileUploadServlet extends UploadAction {
      * Remove a file when the user sends a delete request.
      */
     @Override
-    public void removeItem(HttpServletRequest request, String fieldName)
-            throws UploadActionException {
+    public void removeItem(HttpServletRequest request, String fieldName) throws UploadActionException {
         File file = receivedFiles.get(fieldName);
         receivedFiles.remove(fieldName);
         receivedContentTypes.remove(fieldName);

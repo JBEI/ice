@@ -10,8 +10,8 @@ public enum AdminOption {
     SETTINGS(FAIconType.COGS, "System Settings", "settings"),
     WEB(FAIconType.GLOBE, "Web of Registries", "Web of registries settings"),
     USERS(FAIconType.USER, "Manage Users", "users"),
-    GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members"),
-    TRANSFER(FAIconType.INBOX, "Transfer Entries", "transfer entries between ICE instances");
+    GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members");
+//    TRANSFER(FAIconType.INBOX, "Transfer Entries", "transfer entries between ICE instances");
 
     private final String display;
     private final FAIconType iconType;
@@ -36,17 +36,18 @@ public enum AdminOption {
     }
 
     public static AdminOption urlToOption(String url) {
-        if (url == null)
-            return null;
+        if (url == null || url.isEmpty())
+            return AdminOption.SETTINGS;
 
-        for (AdminOption option : AdminOption.values()) {
-            if (url.trim().equalsIgnoreCase(option.getUrl()))
-                return option;
+        try {
+            return AdminOption.valueOf(url.toUpperCase());
+        } catch (Exception e) {
+            return AdminOption.SETTINGS;
         }
-        return null;
     }
 
     public String getDescription() {
         return description;
     }
 }
+

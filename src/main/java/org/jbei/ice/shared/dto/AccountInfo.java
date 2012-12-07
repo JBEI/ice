@@ -18,6 +18,7 @@ public class AccountInfo implements IsSerializable {
     private long userEntryCount;
     private long visibleEntryCount;
     private boolean isAdmin;
+    private int newMessageCount;
 
     public AccountInfo() {
     }
@@ -120,5 +121,13 @@ public class AccountInfo implements IsSerializable {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public int getNewMessageCount() {
+        return newMessageCount;
+    }
+
+    public void setNewMessageCount(int newMessageCount) {
+        this.newMessageCount = newMessageCount;
     }
 }

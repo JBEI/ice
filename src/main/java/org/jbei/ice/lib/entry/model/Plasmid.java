@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
@@ -46,7 +46,9 @@ public class Plasmid extends Entry {
     private Boolean circular;
 
     public Plasmid() {
+        super();
         setRecordType(EntryType.PLASMID.getName());
+        setCircular(Boolean.TRUE);
     }
 
     public String getBackbone() {

@@ -6,7 +6,7 @@ import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.TipViewContentFactory;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -30,7 +30,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements IHasEntryHandlers {
 
     private static PopupPanel popup = new PopupPanel(true);
-    ;
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
     private static final String MOUSEOUT_EVENT_NAME = "mouseout";
     private static final String MOUSE_CLICK = "click";
@@ -46,7 +45,6 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
 
     @Override
     public void render(Context context, T view, SafeHtmlBuilder sb) {
-
         if (view == null || view.getPartId() == null)
             return;
 
@@ -56,9 +54,7 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
     @Override
     public void onBrowserEvent(Context context, Element parent, T value, NativeEvent event,
             ValueUpdater<T> valueUpdater) {
-
         super.onBrowserEvent(context, parent, value, event, valueUpdater);
-
         final String eventType = event.getType();
 
         if (MOUSEOVER_EVENT_NAME.equalsIgnoreCase(eventType)) {
@@ -71,17 +67,17 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
             onMouseOut();
         } else if (MOUSE_CLICK.equalsIgnoreCase(eventType)) {
             if (withinBounds(event))
-                onMouseClick(value.getId());
+                onMouseClick(value.getId(), value.getRecordId());
         }
     }
 
-    protected void onMouseClick(long recordId) {
+    protected void onMouseClick(long id, String recordId) {
         hidden = true;
         popup.hide();
-        dispatchEntryViewEvent(recordId);
+        dispatchEntryViewEvent(id, recordId);
     }
 
-    protected void dispatchEntryViewEvent(final long recordId) {
+    protected void dispatchEntryViewEvent(final long id, final String recordId) {
         fireEvent(new GwtEvent<EntryViewEventHandler>() {
 
             @Override
@@ -91,7 +87,7 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
 
             @Override
             protected void dispatch(EntryViewEventHandler handler) {
-                handler.onEntryView(new EntryViewEvent(recordId, mode));
+                handler.onEntryView(new EntryViewEvent(id, recordId, mode));
             }
         });
     }
@@ -109,14 +105,13 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
         return false;
     }
 
-    protected void onMouseOver(NativeEvent event, EntryInfo value) {
-
+    protected void onMouseOver(final NativeEvent event, EntryInfo value) {
         hidden = false;
         final int x = event.getClientX() + 30 + Window.getScrollLeft();
         final int y = event.getClientY() + Window.getScrollTop();
         // TODO : set popup loading widget
 
-        TipViewContentFactory.getContents(value, new Callback<Widget>() {
+        TipViewContentFactory.getContents(value, null, new Callback<Widget>() {
 
             @Override
             public void onSuccess(Widget contents) {

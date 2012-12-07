@@ -18,6 +18,12 @@
         <property name="hibernate.c3p0.max_size">20</property>
         <property name="hibernate.c3p0.timeout">300</property>
         <property name="hibernate.c3p0.max_statements">50</property>
+        <property name="hibernate.c3p0.idle_test_period">100</property>
+        <property name="hibernate.c3p0.unreturnedConnectionTimeout">300</property>
+        <property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">true</property>
+        <property name="hibernate.c3p0.acquireRetryAttempts">0</property>
+        <!-- wait 30secs before attempting to acquire db connection after a failed attempt -->
+        <property name="hibernate.c3p0.acquireRetryDelay">30000</property>
 
         <!-- SQL dialect: use the correct one for your database -->
         <property name="dialect">org.hibernate.dialect.PostgreSQL82Dialect</property>
@@ -31,6 +37,8 @@
 
         <!-- Echo all executed SQL to stdout -->
         <property name="show_sql">false</property>
+
+        <property name="hibernate.jdbc.batch_size">20</property>
 
         <!-- format -->
         <property name="format_sql">true</property>
@@ -89,5 +97,7 @@
         <mapping class="org.jbei.ice.lib.models.AnnotationLocation"/>
         <mapping class="org.jbei.ice.lib.bulkupload.BulkUpload"/>
         <mapping class="org.jbei.ice.lib.permissions.model.Permission"/>
+        <mapping class="org.jbei.ice.lib.message.Message"/>
+        <mapping class="org.jbei.ice.lib.account.model.Preference"/>
     </session-factory>
 </hibernate-configuration>

@@ -1,6 +1,9 @@
 package org.jbei.ice.server;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,13 +20,15 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.ParameterInfo;
-import org.jbei.ice.shared.dto.PlasmidInfo;
-import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.shared.dto.ParameterType;
 import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 /**
  * Factory object for converting data transfer objects to model
@@ -42,7 +47,6 @@ public class InfoToModelFactory {
      * @return converted EntryInfo object
      */
     public static Entry infoToEntry(EntryInfo info, Entry entry) {
-
         EntryType type = info.getType();
 
         switch (type) {
@@ -54,14 +58,11 @@ public class InfoToModelFactory {
                 } else
                     plasmid = (Plasmid) entry;
 
-                plasmid.setRecordType(EntryType.PLASMID.getName());
                 PlasmidInfo plasmidInfo = (PlasmidInfo) info;
-
                 plasmid.setBackbone(plasmidInfo.getBackbone());
                 plasmid.setOriginOfReplication(plasmidInfo.getOriginOfReplication());
                 plasmid.setPromoters(plasmidInfo.getPromoters());
                 plasmid.setCircular(plasmidInfo.getCircular());
-
                 break;
 
             case STRAIN:
@@ -72,9 +73,7 @@ public class InfoToModelFactory {
                 } else
                     strain = (Strain) entry;
 
-                strain.setRecordType(EntryType.STRAIN.getName());
                 StrainInfo strainInfo = (StrainInfo) info;
-
                 strain.setHost(strainInfo.getHost());
                 strain.setGenotypePhenotype(strainInfo.getGenotypePhenotype());
                 strain.setPlasmids(strainInfo.getPlasmids());
@@ -87,7 +86,6 @@ public class InfoToModelFactory {
                     entry = part;
                 } else
                     part = (Part) entry;
-                part.setRecordType(EntryType.PART.getName());
 
                 // default is RAW until sequence is supplied.
                 part.setPackageFormat(AssemblyStandard.RAW);
@@ -101,9 +99,7 @@ public class InfoToModelFactory {
                 } else
                     seed = (ArabidopsisSeed) entry;
 
-                seed.setRecordType(EntryType.ARABIDOPSIS.getName());
                 ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
-
                 String homozygosity = seedInfo.getHomozygosity() == null ? "" : seedInfo.getHomozygosity();
                 seed.setHomozygosity(homozygosity);
                 seed.setHarvestDate(seedInfo.getHarvestDate());
@@ -161,12 +157,10 @@ public class InfoToModelFactory {
 
         entry.setStatus(info.getStatus() == null ? "" : info.getStatus());
         entry.setAlias(info.getAlias());
-        entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? new Integer(0) : info
-                .getBioSafetyLevel());
+        entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? new Integer(0) : info.getBioSafetyLevel());
         entry.setShortDescription(info.getShortDescription());
         entry.setLongDescription(info.getLongDescription());
-        entry.setLongDescriptionType(info.getLongDescriptionType() != null ? info
-                .getLongDescriptionType() : "text");
+        entry.setLongDescriptionType(info.getLongDescriptionType() != null ? info.getLongDescriptionType() : "text");
         entry.setIntellectualProperty(info.getIntellectualProperty());
         entry.setVersionId(info.getVersionId());
         Set<Link> links = getLinks(info.getLinks(), entry);
@@ -182,19 +176,18 @@ public class InfoToModelFactory {
         // parameters 
         List<Parameter> parameters = getParameters(info.getParameters(), entry);
         entry.setParameters(parameters);
-
         return entry;
     }
 
     private static List<Parameter> getParameters(ArrayList<ParameterInfo> infos, Entry entry) {
-        List<Parameter> parameters = new ArrayList<Parameter>();
+        List<Parameter> parameters = new ArrayList<>();
 
         if (infos == null)
             return parameters;
 
         for (ParameterInfo info : infos) {
             Parameter param = new Parameter();
-            Parameter.ParameterType type = Parameter.ParameterType.valueOf(info.getType().name());
+            ParameterType type = ParameterType.valueOf(info.getType().name());
             param.setParameterType(type);
             param.setEntry(entry);
             param.setKey(info.getName());
@@ -204,12 +197,10 @@ public class InfoToModelFactory {
         return parameters;
     }
 
-    private static Set<EntryFundingSource> getFundingSources(String fundingSourcesStr, String pI,
-            Entry entry) {
-
+    private static Set<EntryFundingSource> getFundingSources(String fundingSourcesStr, String pI, Entry entry) {
         Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
         if (fundingSources == null) {
-            fundingSources = new HashSet<EntryFundingSource>();
+            fundingSources = new HashSet<>();
             entry.setEntryFundingSources(fundingSources);
         }
 
@@ -238,7 +229,6 @@ public class InfoToModelFactory {
                 entryFundingSource.setEntry(entry);
             }
         } else if (pI != null) {
-
             EntryFundingSource entryFundingSource;
             FundingSource fundingSource;
 
@@ -262,12 +252,11 @@ public class InfoToModelFactory {
     }
 
     private static Set<SelectionMarker> getSelectionMarkers(String markerStr, Entry entry) {
-
         Set<SelectionMarker> existingMarkers = entry.getSelectionMarkers();
-        Set<SelectionMarker> markers = new HashSet<SelectionMarker>();
+        Set<SelectionMarker> markers = new HashSet<>();
 
         if (existingMarkers == null)
-            existingMarkers = new HashSet<SelectionMarker>();
+            existingMarkers = new HashSet<>();
 
         if (markerStr != null) {
             String[] itemsAsString = markerStr.split("\\s*,+\\s*");
@@ -295,10 +284,10 @@ public class InfoToModelFactory {
 
     private static Set<Link> getLinks(String linkString, Entry entry) {
         Set<Link> existingLinks = entry.getLinks();
-        Set<Link> links = new HashSet<Link>();
+        Set<Link> links = new HashSet<>();
 
         if (existingLinks == null)
-            existingLinks = new HashSet<Link>();
+            existingLinks = new HashSet<>();
 
         if (linkString != null) {
             String[] itemsAsString = linkString.split("\\s*,+\\s*");
@@ -324,10 +313,10 @@ public class InfoToModelFactory {
 
     private static Set<Name> getNames(String nameStr, Entry entry) {
         Set<Name> existingNames = entry.getNames();
-        Set<Name> names = new HashSet<Name>();
+        Set<Name> names = new HashSet<>();
 
         if (existingNames == null)
-            existingNames = new HashSet<Name>();
+            existingNames = new HashSet<>();
 
         if (nameStr == null)
             return existingNames;
@@ -349,5 +338,274 @@ public class InfoToModelFactory {
         }
 
         return names;
+    }
+
+    /**
+     * Updates the entry based on the field that is specified. Mainly created for use by the bulk import auto update
+     *
+     * @param entry entry to be updated
+     * @param value value to be set
+     * @param field to set
+     * @return updated entry
+     */
+    public static Entry infoToEntryForField(Entry entry, String value, String field) {
+        switch (field) {
+            case "Principal Investigator": {
+                Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
+                EntryFundingSource entryFundingSource;
+                FundingSource fundingSource;
+
+                if (fundingSources == null)
+                    fundingSources = new HashSet<>();
+
+                if (fundingSources.isEmpty()) {
+                    fundingSource = new FundingSource();
+                    fundingSource.setFundingSource("");
+                    fundingSource.setPrincipalInvestigator(value);
+                    entryFundingSource = new EntryFundingSource();
+                    fundingSources.add(entryFundingSource);
+                    entryFundingSource.setFundingSource(fundingSource);
+                } else {
+                    entryFundingSource = (EntryFundingSource) fundingSources.toArray()[0];
+                    fundingSource = entryFundingSource.getFundingSource();
+                    fundingSource.setPrincipalInvestigator(value);
+                }
+
+                entry.setEntryFundingSources(fundingSources);
+                entryFundingSource.setEntry(entry);
+                break;
+            }
+
+            case "Funding Source": {
+                Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
+                EntryFundingSource entryFundingSource;
+                FundingSource fundingSource;
+
+                if (fundingSources == null)
+                    fundingSources = new HashSet<>();
+
+                if (fundingSources.isEmpty()) {
+                    fundingSource = new FundingSource();
+                    fundingSource.setFundingSource(value);
+                    fundingSource.setPrincipalInvestigator("");
+                    entryFundingSource = new EntryFundingSource();
+                    fundingSources.add(entryFundingSource);
+                    entryFundingSource.setFundingSource(fundingSource);
+                } else {
+                    entryFundingSource = (EntryFundingSource) fundingSources.toArray()[0];
+                    fundingSource = entryFundingSource.getFundingSource();
+                    fundingSource.setFundingSource(value);
+                }
+
+                entry.setEntryFundingSources(fundingSources);
+                entryFundingSource.setEntry(entry);
+                break;
+            }
+
+            case "Intellectual Property":
+                entry.setIntellectualProperty(value);
+                break;
+
+            case "BioSafety Level":
+                Integer level = BioSafetyOption.intValue(value);
+                entry.setBioSafetyLevel(level);
+                break;
+
+            case "Name":
+            case "Plasmid Name":
+            case "Strain Number":
+                HashSet<Name> names = new HashSet<>();
+                Name name = new Name(value, entry);
+                names.add(name);
+                entry.setNames(names);
+                break;
+
+            case "Alias":
+            case "Strain Alias":
+            case "Plasmid Alias":
+                entry.setAlias(value);
+                break;
+
+            case "Keywords":
+            case "Strain Keywords":
+            case "Plasmid Keywords":
+                entry.setKeywords(value);
+                break;
+
+            case "Summary":
+            case "Strain Summary":
+            case "Plasmid Summary":
+                entry.setShortDescription(value);
+                break;
+
+            case "Notes":
+            case "Strain Notes":
+            case "Plasmid Notes":
+                entry.setLongDescription(value);
+                entry.setLongDescriptionType("text");
+                break;
+
+            case "References":
+            case "Plasmid References":
+            case "Strain References":
+                entry.setReferences(value);
+                break;
+
+            case "Links":
+            case "Plasmid Links":
+            case "Strain Links":
+                HashSet<Link> links = new HashSet<>();
+                Link link = new Link();
+                link.setUrl(value);
+                link.setEntry(entry);
+                links.add(link);
+                entry.setLinks(links);
+                break;
+
+            case "Status":
+            case "Plasmid Status":
+                entry.setStatus(value);
+                break;
+
+            case "Selection Markers":
+            case "Plasmid Selection Markers":
+            case "Strain Selection Markers":
+                HashSet<SelectionMarker> markers = new HashSet<>();
+                SelectionMarker marker = new SelectionMarker(value, entry);
+                markers.add(marker);
+                entry.setSelectionMarkers(markers);
+                break;
+
+            case "Parental Strain":
+            case "Genotype or Phenotype":
+            case "Plasmids":
+                entry = infoToStrainForField(entry, value, field);
+                break;
+
+            case "Backbone":
+            case "Plasmid Backbone":
+            case "Promoters":
+            case "Plasmid Promoters":
+            case "Circular":
+            case "Origin of Replication":
+            case "Plasmid Origin of Replication":
+                entry = infoToPlasmidForField(entry, value, field);
+                break;
+
+            case "Homozygosity":
+            case "Ecotype":
+            case "Harvest Date":
+            case "Generation":
+            case "Sent to ABRC?":
+            case "Plant Type":
+            case "Parents":
+                entry = infoToSeedForField(entry, value, field);
+                break;
+        }
+        return entry;
+    }
+
+    public static boolean isSharedField(String field) {
+        return ("Principal Investigator".equals(field) || "Funding Source".equals(field) ||
+                "Intellectual Property".equals(field) || "BioSafety Level".equals(field) || "Status".equals(field));
+    }
+
+    private static Entry infoToStrainForField(Entry entry, String value, String field) {
+        if (!entry.getRecordType().equals(EntryType.STRAIN.toString()))
+            return entry;
+
+        Strain strain = (Strain) entry;
+
+        switch (field) {
+            case "Parental Strain":
+                strain.setHost(value);
+                return strain;
+
+            case "Genotype or Phenotype":
+                strain.setGenotypePhenotype(value);
+                return strain;
+
+            case "Plasmids":
+                strain.setPlasmids(value);
+                return strain;
+
+            default:
+                return strain;
+        }
+    }
+
+    private static Entry infoToPlasmidForField(Entry entry, String value, String field) {
+        if (!entry.getRecordType().equals(EntryType.PLASMID.toString()))
+            return entry;
+
+        Plasmid plasmid = (Plasmid) entry;
+
+        switch (field) {
+            case "Backbone":
+            case "Plasmid Backbone":
+                plasmid.setBackbone(value);
+                return plasmid;
+
+            case "Promoters":
+            case "Plasmid Promoters":
+                plasmid.setPromoters(value);
+                return plasmid;
+
+            case "Circular":
+                plasmid.setCircular("yes".equalsIgnoreCase(value));
+                return plasmid;
+
+            case "Origin of Replication":
+            case "Plasmid Origin of Replication":
+                plasmid.setOriginOfReplication(value);
+                return plasmid;
+
+            default:
+                return plasmid;
+        }
+    }
+
+    private static Entry infoToSeedForField(Entry entry, String value, String field) {
+        if (!entry.getRecordType().equals(EntryType.ARABIDOPSIS.toString()))
+            return entry;
+
+        ArabidopsisSeed seed = new ArabidopsisSeed();
+
+        switch (field) {
+            case "Homozygosity":
+                seed.setHomozygosity(value);
+                return seed;
+
+            case "Ecotype":
+                seed.setEcotype(value);
+                return seed;
+
+            case "Harvest Date":
+                try {
+                    Date date = SimpleDateFormat.getDateInstance().parse(value);
+                    seed.setHarvestDate(date);
+                } catch (ParseException ia) {
+                }
+                return seed;
+
+            case "Generation":
+                seed.setGeneration(ArabidopsisSeed.Generation.valueOf(value));
+                return seed;
+
+            case "Sent to ABRC?":
+                seed.setSentToABRC("yes".equalsIgnoreCase(value));
+                return seed;
+
+            case "Plant Type":
+                seed.setPlantType(ArabidopsisSeed.PlantType.valueOf(value));
+                return seed;
+
+            case "Parents":
+                seed.setParents(value);
+                return seed;
+
+            default:
+                return seed;
+        }
     }
 }

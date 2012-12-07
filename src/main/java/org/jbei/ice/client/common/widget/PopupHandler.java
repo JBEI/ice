@@ -12,7 +12,6 @@ public class PopupHandler implements ClickHandler {
 
     private final PopupPanel popup;
     private HandlerRegistration closeHandlerRegistration;
-    private final Widget widget;
 
     public PopupHandler(Widget widget, Element autoHide, boolean enableGlass) {
         this.popup = new PopupPanel();
@@ -22,13 +21,20 @@ public class PopupHandler implements ClickHandler {
             this.popup.addAutoHidePartner(autoHide);
         this.popup.setWidget(widget);
         this.popup.setGlassEnabled(enableGlass);
-        this.widget = widget;
     }
 
     public void setCloseHandler(CloseHandler<PopupPanel> handler) {
         if (closeHandlerRegistration != null)
             closeHandlerRegistration.removeHandler();
         closeHandlerRegistration = this.popup.addCloseHandler(handler);
+    }
+
+    public void addAutoHidePartner(Element autoHidePartner) {
+        this.popup.addAutoHidePartner(autoHidePartner);
+    }
+
+    public void show() {
+        popup.show();
     }
 
     @Override
@@ -49,13 +55,5 @@ public class PopupHandler implements ClickHandler {
             return;
 
         this.popup.hide();
-    }
-
-    @Deprecated
-    public void showPopup() {
-        if (this.popup == null || this.popup.isShowing())
-            return;
-
-        this.popup.showRelativeTo(widget);
     }
 }

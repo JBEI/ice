@@ -15,41 +15,52 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
+ * Widget for setting/displaying the entry creator information
+ *
  * @author Hector Plahar
  */
 public class CreatorWidget implements IsWidget {
 
     private final FocusPanel parent;
-    private final HTMLPanel panel;
+    private final HTMLPanel popUp;
     private TextBox creatorBox;
     private TextBox creatorEmailBox;
 
     public CreatorWidget(String creator, String creatorEmail) {
         Icon creatorIcon = new Icon(FAIconType.USER);
         creatorIcon.setTitle("Click to set creator information");
-        parent = new FocusPanel(creatorIcon);
-        parent.setStyleName("bulk_upload_creator");
+        creatorIcon.addStyleName("display-inline");
+        creatorIcon.removeStyleName("font-awesome");
 
-        panel = new HTMLPanel("<span id=\"creator_label\"></span><br><span id=\"creator_input\"></span><br><br>" +
+        HTMLPanel creatorPanel = new HTMLPanel("<span id=\"creator_icon\"></span> Creator");
+        creatorPanel.add(creatorIcon, "creator_icon");
+        creatorPanel.setStyleName("display-inline");
+
+        parent = new FocusPanel(creatorPanel);
+        parent.setStyleName("bulk_upload_creator");
+        parent.addStyleName("opacity_hover");
+
+        popUp = new HTMLPanel("<span id=\"creator_label\"></span><br><span id=\"creator_input\"></span><br><br>" +
                                       "<span id=\"creator_email_label\"></span><br><span " +
                                       "id=\"creator_email_input\"></span>");
-        panel.setStyleName("bg_fc");
-        panel.addStyleName("pad-6");
+        popUp.setStyleName("bg_fc");
+        popUp.addStyleName("pad-6");
         createTableContents(creator, creatorEmail);
 
-        final PopupHandler clickHandler = new PopupHandler(panel, creatorIcon.getElement(), false);
-        clickHandler.setCloseHandler(new CloseHandler<PopupPanel>() {
+        final PopupHandler popUp = new PopupHandler(this.popUp, creatorIcon.getElement(), false);
+        popUp.setCloseHandler(new CloseHandler<PopupPanel>() {
+
             @Override
             public void onClose(CloseEvent<PopupPanel> event) {
                 if (creatorBox.getText().isEmpty()) {
-                    creatorBox.setStyleName("entry_input_error");
-                    clickHandler.showPopup();
+                    creatorBox.setStyleName("input_box_error");
+                    popUp.show();
                 } else {
                     creatorBox.setStyleName("input_box");
                 }
             }
         });
-        parent.addClickHandler(clickHandler);
+        parent.addClickHandler(popUp);
     }
 
     private void createTableContents(String creator, String creatorEmail) {
@@ -61,7 +72,7 @@ public class CreatorWidget implements IsWidget {
         creatorBox.setStyleName("input_box");
         creatorBox.setMaxLength(65);
 
-        panel.add(creatorBox, "creator_input");
+        popUp.add(creatorBox, "creator_input");
 
         addLabel(false, "Creator's Email", "creator_email_label");
         creatorEmailBox = new TextBox();
@@ -69,7 +80,7 @@ public class CreatorWidget implements IsWidget {
         creatorEmailBox.setStyleName("input_box");
         creatorEmailBox.setWidth("150px");
         creatorEmailBox.setMaxLength(75);
-        panel.add(creatorEmailBox, "creator_email_input");
+        popUp.add(creatorEmailBox, "creator_email_input");
     }
 
     protected void addLabel(boolean required, String label, String elementId) {
@@ -81,7 +92,7 @@ public class CreatorWidget implements IsWidget {
 
         HTML widget = new HTML(html);
         widget.setStyleName("display-inline");
-        panel.add(widget, elementId);
+        popUp.add(widget, elementId);
     }
 
     public String getCreator() {

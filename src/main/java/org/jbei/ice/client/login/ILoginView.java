@@ -37,11 +37,11 @@ public interface ILoginView {
 
     void setSubmitKeyPressHandler(KeyPressHandler handler);
 
-    void setSubmitClickHandler(ClickHandler handler);
+    void setLoginHandler(ClickHandler handler);
 
     Widget asWidget();
 
-    void addForgotPasswordHandler(ClickHandler forgotPasswordHandler);
+    void addForgotPasswordLinkHandler(ClickHandler forgotPasswordHandler);
 
     void addRegisterHandler(ClickHandler handler);
 
@@ -53,5 +53,9 @@ public interface ILoginView {
 
     void switchToLoginMode();
 
-    void informOfDuplidateRegistrationEmail();
+    void informOfDuplicateRegistrationEmail();
+
+    void setResetPasswordHandler(ClickHandler handler);
+
+    String getForgotPasswordLogin();
 }

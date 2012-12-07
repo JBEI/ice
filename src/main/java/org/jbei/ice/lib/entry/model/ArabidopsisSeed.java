@@ -10,7 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Field;
@@ -45,7 +45,12 @@ public class ArabidopsisSeed extends Entry {
      * @author Timothy Ham
      */
     public enum Generation {
-        NULL, M0, M1, M2, T0, T1, T2, T3, T4, T5
+        NULL, M0, M1, M2, T0, T1, T2, T3, T4, T5;
+
+        @Override
+        public String toString() {
+            return name();
+        }
     }
 
     /**
@@ -87,7 +92,10 @@ public class ArabidopsisSeed extends Entry {
     private Boolean sentToABRC = Boolean.FALSE;
 
     public ArabidopsisSeed() {
+        super();
         setRecordType(EntryType.ARABIDOPSIS.getName());
+        setGeneration(ArabidopsisSeed.Generation.NULL);
+        setPlantType(ArabidopsisSeed.PlantType.NULL);
     }
 
     // getters and setters

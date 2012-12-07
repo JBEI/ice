@@ -1,10 +1,12 @@
 package org.jbei.ice.client.bulkupload;
 
 import java.util.ArrayList;
+import java.util.Date;
 
+import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.shared.dto.BulkUploadInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
@@ -12,13 +14,11 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public interface IBulkUploadView {
 
-    void setHeader(String header);
-
     Widget asWidget();
 
     void showFeedback(String msg, boolean isError);
 
-    void setSavedDraftsData(ArrayList<BulkUploadMenuItem> data, IDeleteMenuHandler handler);
+    void setSavedDraftsData(ArrayList<BulkUploadMenuItem> data, String lastSaved, IDeleteMenuHandler handler);
 
     void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, IRevertBulkUploadHandler handler);
 
@@ -36,33 +36,29 @@ public interface IBulkUploadView {
 
     void setSheet(NewBulkInput input, boolean isNew, boolean isValidation);
 
-    void setDraftUpdateHandler(ClickHandler handler);
-
-    String getDraftName();
+    void setUpdatingVisibility(boolean visible);
 
     void setSubmitHandler(ClickHandler submitHandler);
 
     void setResetHandler(ClickHandler resetHandler);
 
-    void setDraftSaveHandler(ClickHandler draftSaveHandler);
-
-    void updateSavedDraftsMenu(BulkUploadMenuItem item);
-
     SingleSelectionModel<BulkUploadMenuItem> getPendingMenuModel();
 
     void setApproveHandler(ClickHandler handler);
-
-    void setGroupPermissions(ArrayList<GroupInfo> result);
-
-    void setSelectedGroupPermission(GroupInfo groupInfo);
-
-    String getPermissionSelection();
-
-    void setDraftSubmitHandler(ClickHandler handler);
 
     String getCreator();
 
     String getCreatorEmail();
 
     void setCreatorInformation(String name, String email);
+
+    void updateBulkUploadDraftInfo(BulkUploadInfo result);
+
+    void setDraftName(String name);
+
+    void setDraftNameSetHandler(Delegate<String> handler);
+
+    void setLastUpdated(Date date);
+
+    void setLoading(boolean set);
 }

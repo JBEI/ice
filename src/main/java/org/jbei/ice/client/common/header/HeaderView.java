@@ -1,50 +1,37 @@
 package org.jbei.ice.client.common.header;
 
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.EntryType;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class HeaderView extends Composite implements HeaderPresenter.View {
-
-    interface Resources extends ClientBundle {
-
-        static Resources INSTANCE = GWT.create(Resources.class);
-
-        @Source("org/jbei/ice/client/resource/image/logo.gif")
-        ImageResource logo();
-    }
+public class HeaderView extends Composite {
 
     private SearchCompositeBox searchInput;
     private Button searchBtn;
     private final AdvancedSearchWidget widgetAdvanced;
-    private final HeaderPresenter presenter;
-    private FlexTable loggedInContentsPanel;
+    private final FlexTable loggedInContentsPanel;
     private final static HeaderView INSTANCE = new HeaderView();
+    private final HeaderMenu headerMenu;
 
     public static HeaderView getInstance() {
         return INSTANCE;
@@ -52,45 +39,46 @@ public class HeaderView extends Composite implements HeaderPresenter.View {
 
     private HeaderView() {
         Widget searchPanel = createSearchPanel();
+
         FlexTable table = new FlexTable();
+        table.setStyleName("margin-bottom-20");
         table.setCellPadding(0);
         table.setCellSpacing(0);
         table.setWidth("100%");
         initWidget(table);
 
-        HeaderMenu headerMenu = new HeaderMenu();
+        loggedInContentsPanel = new FlexTable();
+        loggedInContentsPanel.setCellPadding(0);
+        loggedInContentsPanel.setCellSpacing(0);
+        loggedInContentsPanel.setStyleName("float_right");
+        loggedInContentsPanel.addStyleName("font-80em");
+        loggedInContentsPanel.addStyleName("pad-right-10");
 
-        VerticalPanel vertical = new VerticalPanel();
-        vertical.add(createLoggedInContents());
-        vertical.add(searchPanel);
-        vertical.addStyleName("float_right");
-        vertical.setSpacing(4);
+        headerMenu = new HeaderMenu();
+        table.setHTML(0, 0, "<img src=\"static/images/logo.png\" height=\"80px\"/>");
+        table.setWidget(0, 1, headerMenu);
+        table.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_BOTTOM);
 
-        HorizontalPanel horizontal = new HorizontalPanel();
-        horizontal.setWidth("100%");
-        horizontal.add(getImageHeader());
-        horizontal.add(vertical);
-
-        table.setWidget(0, 0, horizontal);
-        if (userIsLoggedIn()) {
-            table.setWidget(1, 0, headerMenu);
-        }
+        String html = "<span id=\"logged_in_info\"></span><br><span id=\"search_panel\"></span>";
+        HTMLPanel panel = new HTMLPanel(html);
+        panel.add(searchPanel, "search_panel");
+        panel.add(loggedInContentsPanel, "logged_in_info");
+        table.setWidget(0, 2, panel);
 
         // search Option
-        widgetAdvanced = new AdvancedSearchWidget(searchInput);
-        widgetAdvanced.setWidth("401px");
+        widgetAdvanced = new AdvancedSearchWidget(searchInput, searchBtn);
+        widgetAdvanced.setWidth("394px");
         widgetAdvanced.setHeight("150px");
-        presenter = new HeaderPresenter(this);
+
+        createHandlers();
     }
 
-    // handler for clicking search
-    public void addSearchClickHandler(ClickHandler handler) {
-        searchBtn.addClickHandler(handler);
+    public void resetSearchBox() {
+        widgetAdvanced.reset();
     }
 
-    private Widget getImageHeader() {
-        Image img = new Image(Resources.INSTANCE.logo());
-        return img;
+    public void setSearchBox(String box) {
+        searchInput.setSearch(box);
     }
 
     protected Widget createSearchPanel() {
@@ -125,39 +113,22 @@ public class HeaderView extends Composite implements HeaderPresenter.View {
     }
 
     protected boolean userIsLoggedIn() {
-        return AppController.sessionId != null;
+        return ClientController.sessionId != null;
     }
 
     /**
      * @return top right hand corner widget. Empty when the user is not logged in
-     *         TODO the logic pertaining to setting the names should be moved to a
      *         controller/presenter
      */
-    private Widget createLoggedInContents() {
-        loggedInContentsPanel = new FlexTable();
-        loggedInContentsPanel.setCellPadding(0);
-        loggedInContentsPanel.setCellSpacing(0);
-        loggedInContentsPanel.setStyleName("float_right");
-        loggedInContentsPanel.addStyleName("font-80em");
-        loggedInContentsPanel.addStyleName("pad-right-10");
-
-        if (AppController.accountInfo == null) {
-            loggedInContentsPanel.add(new HTML(SafeHtmlUtils.EMPTY_SAFE_HTML));
+    private Widget createLoggedInContents(final AccountInfo info) {
+        if (info == null) {
+            loggedInContentsPanel.setHTML(0, 0, SafeHtmlUtils.EMPTY_SAFE_HTML);
             return loggedInContentsPanel;
         }
 
-        final AccountInfo info = AppController.accountInfo;
-
         // user
-        HTML label = new HTML(info.getEmail());
-        label.setStyleName("pull_down_as_link");
-        label.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                History.newItem(Page.PROFILE.getLink() + ";id=" + info.getId());
-            }
-        });
-        loggedInContentsPanel.setWidget(0, 0, label);
+        loggedInContentsPanel.setHTML(0, 0, "<a href=\"#" + Page.PROFILE.getLink() + ";id=" + info.getId()
+                + "\">" + info.getEmail() + "</a>");
 
         // messages
         loggedInContentsPanel.setHTML(0, 1, "");
@@ -175,37 +146,54 @@ public class HeaderView extends Composite implements HeaderPresenter.View {
         return loggedInContentsPanel;
     }
 
-    public void setNewMessages(int newMessageCount) {
+    private void setNewMessages(int newMessageCount) {
         if (newMessageCount <= 0)
             return;
 
         final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #EEE\">|</span>&nbsp;&nbsp;"
                                                  + "<span class=\"badge\">" + newMessageCount + "</span>");
+        String title = "You have " + newMessageCount + " new message";
+        title += newMessageCount != 1 ? "s" : "";
+        emailBadge.setTitle(title);
         emailBadge.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                emailBadge.setVisible(false);
-                emailBadge.setHTML("");
-                loggedInContentsPanel.setHTML(0, 1, "");
-                History.newItem(Page.PROFILE.getLink() + ";id=" + AppController.accountInfo.getId() + ";s=messages");
+//                emailBadge.setVisible(false);
+//                emailBadge.setHTML("");
+//                loggedInContentsPanel.setHTML(0, 1, "");
+                History.newItem(Page.PROFILE.getLink() + ";id=" + ClientController.account.getId() + ";s=messages");
             }
         });
 
         loggedInContentsPanel.setWidget(0, 1, emailBadge);
     }
 
-    public String getSearchInput() {
-        return this.searchInput.getQueryString();
-    }
-
-    public EntryType[] getSearchEntryTypes() {
-        return this.widgetAdvanced.getSearchEntryType();
-    }
-
-    public void createPullDownHandler() {
+    public void createHandlers() {
         if (this.searchInput != null) {
             PopupHandler handler = new PopupHandler(widgetAdvanced, this.searchInput.getPullDownAreaElement(), false);
+            handler.addAutoHidePartner(searchInput.getTextBoxElement());
+            handler.setCloseHandler(searchInput.getCloseHandler());
             this.searchInput.setPullDownClickHandler(handler);
         }
+
+        ClickHandler searchHandler = new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                searchInput.advancedWidgetClosed();
+                widgetAdvanced.parseSearchOptions();
+            }
+        };
+
+        searchBtn.addClickHandler(searchHandler);
+        widgetAdvanced.addSearchHandler(searchHandler);
+    }
+
+    public void setHeader(Page page) {
+        headerMenu.setSelected(page);
+    }
+
+    public void setHeaderData(AccountInfo account) {
+        createLoggedInContents(account);
+        setNewMessages(account.getNewMessageCount());
     }
 }

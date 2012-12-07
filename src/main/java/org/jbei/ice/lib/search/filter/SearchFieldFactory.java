@@ -5,7 +5,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 /**
  * @author Hector Plahar
@@ -39,7 +39,8 @@ public class SearchFieldFactory {
                         "shortDescription", "references", "longDescription", "intellectualProperty",
                         "partNumbers.partNumber", "links.link", "links.url", "selectionMarkers.name",
                         "entryFundingSources.fundingSource.fundingSource",
-                        "entryFundingSources.fundingSource.principalInvestigator"
+                        "entryFundingSources.fundingSource.principalInvestigator", "generation", "ecotype", "plantType",
+                        "parents"
                 };
                 break;
 

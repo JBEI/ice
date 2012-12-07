@@ -20,7 +20,7 @@ public class Link implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "link", length = 1023)
@@ -36,8 +36,7 @@ public class Link implements IModel {
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 
-    public Link() {
-    }
+    public Link() {}
 
     @XmlTransient
     public long getId() {

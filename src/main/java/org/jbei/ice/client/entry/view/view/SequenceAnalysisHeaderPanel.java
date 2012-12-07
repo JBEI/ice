@@ -1,6 +1,7 @@
 package org.jbei.ice.client.entry.view.view;
 
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -9,7 +10,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
@@ -22,30 +22,30 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 
 public class SequenceAnalysisHeaderPanel extends Composite {
 
-    private final HTMLPanel panel;
-    private final Label traceCount;
     private final MultiSelectionModel<SequenceAnalysisInfo> selection;
     private final Button delete;
+    private final Button upload;
     private HandlerRegistration registration;
+    private HandlerRegistration uploadRegistration;
 
     public SequenceAnalysisHeaderPanel(MultiSelectionModel<SequenceAnalysisInfo> selection) {
-
-        panel = new HTMLPanel(
-                "<span id=\"selection_trace_file_count\"></span><span id=\"trace_file_delete\"></span>");
+        HTMLPanel panel = new HTMLPanel("<span id=\"trace_file_delete\"></span> "
+                                                + "&nbsp; <span id=\"trace_file_upload\"></span>");
         initWidget(panel);
 
-        traceCount = new Label("0 selected");
-        traceCount.setStyleName("open_sequence_sub_link");
-        traceCount.addStyleName("display-inline");
-        panel.add(traceCount, "selection_trace_file_count");
         this.selection = selection;
         addSelectionHandler();
 
         // delete button
-        delete = new Button("Delete");
+        delete = new Button("<i class=\"" + FAIconType.TRASH.getStyleName() + "\"></i> Delete Selected");
         delete.setEnabled(false);
         delete.setVisible(false);
         panel.add(delete, "trace_file_delete");
+
+        // upload button
+        upload = new Button("<i class=\"" + FAIconType.UPLOAD_ALT.getStyleName() + "\"></i> Upload File(s)");
+        panel.add(upload, "trace_file_upload");
+        this.setStyleName("pad-8");
     }
 
     private void addSelectionHandler() {
@@ -56,9 +56,14 @@ public class SequenceAnalysisHeaderPanel extends Composite {
                 int count = selection.getSelectedSet().size();
                 delete.setEnabled(count > 0);
                 delete.setVisible(registration != null);
-                traceCount.setText(count + " selected");
             }
         });
+    }
+
+    public void setTraceUploadHandler(final ClickHandler handler) {
+        if (uploadRegistration != null)
+            uploadRegistration.removeHandler();
+        uploadRegistration = upload.addClickHandler(handler);
     }
 
     public void setDeleteHandler(final ClickHandler handler) {
@@ -72,6 +77,7 @@ public class SequenceAnalysisHeaderPanel extends Composite {
                 if (Window.confirm("Delete selected trace files? This action cannot be undone")) {
                     handler.onClick(event);
                     selection.clear();
+                    delete.setEnabled(false);
                 }
             }
         });

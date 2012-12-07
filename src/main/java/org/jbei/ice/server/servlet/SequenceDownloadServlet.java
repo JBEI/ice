@@ -1,15 +1,13 @@
 package org.jbei.ice.server.servlet;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.UUID;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -27,6 +25,8 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 
+import org.apache.commons.io.IOUtils;
+
 // will eventually attempt to consolidate the servlets
 public class SequenceDownloadServlet extends HttpServlet {
 
@@ -35,13 +35,12 @@ public class SequenceDownloadServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        Logger.info(SequenceDownloadServlet.class.getSimpleName()
-                            + ": attempt to download sequence");
+        Logger.info(SequenceDownloadServlet.class.getSimpleName() + ": attempt to download sequence");
         Account account;
         String entryId = request.getParameter("entry");
         String type = request.getParameter(TYPE);
         String sid = request.getParameter("sid");
-        AccountController controller = new AccountController();
+        AccountController controller = ApplicationController.getAccountController();
 
         try {
             account = isLoggedIn(request.getCookies());
@@ -52,30 +51,25 @@ public class SequenceDownloadServlet extends HttpServlet {
                 if (account == null)
                     return;
             }
-
         } catch (ControllerException ce) {
             Logger.error(ce);
             String url = request.getRequestURL().toString();
             String path = request.getServletPath();
             url = url.substring(0, url.indexOf(path));
             response.sendRedirect(url);
-            Logger.info(FileDownloadServlet.class.getSimpleName()
-                                + ": authentication failed. Redirecting user to " + url);
+            Logger.info("Authentication failed. Redirecting user to " + url);
             return;
         }
 
-        EntryController entryController = new EntryController();
+        EntryController entryController = ApplicationController.getEntryController();
         Entry entry;
         try {
             entry = entryController.get(account, Long.parseLong(entryId));
-        } catch (NumberFormatException e) {
-            Logger.error(e);
-            return;
-        } catch (ControllerException e) {
+        } catch (NumberFormatException | ControllerException e) {
             Logger.error(e);
             return;
         } catch (PermissionException e) {
-            Logger.error(e);
+            Logger.warn(e.getMessage());
             return;
         }
 
@@ -100,7 +94,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
-        AccountController controller = new AccountController();
+        AccountController controller = ApplicationController.getAccountController();
 
         for (Cookie cookie : cookies) {
             if ("gd-ice".equals(cookie.getName())) {
@@ -117,8 +111,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getOriginal(HttpServletResponse response, Entry entry, Account account) {
-
-        SequenceController sequenceController = new SequenceController();
+        SequenceController sequenceController = ApplicationController.getSequenceController();
         Sequence sequence;
 
         try {
@@ -142,37 +135,22 @@ public class SequenceDownloadServlet extends HttpServlet {
         String filename = getFileName(entry) + ".seq";
         try {
             byte[] bytes = sequenceString.getBytes();
-            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
-
             response.setContentType("text/plain");
             response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
-
-            OutputStream os = response.getOutputStream();
-            DataInputStream is = new DataInputStream(byteInputStream);
-
-            int read = 0;
-
-            while ((read = is.read(bytes)) != -1) {
-                os.write(bytes, 0, read);
-            }
-            os.flush();
-            os.close();
-
+            IOUtils.write(bytes, response.getOutputStream());
         } catch (IOException e) {
             Logger.error(e);
         }
     }
 
     private void getGenbank(HttpServletResponse response, Entry entry, Account account) {
-
-        SequenceController sequenceController = new SequenceController();
+        SequenceController sequenceController = ApplicationController.getSequenceController();
         GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getNamesAsString());
         genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular()
                                              : false); // TODO
 
-        Sequence sequence = null;
-
+        Sequence sequence;
         try {
             sequence = sequenceController.getByEntry(entry);
             if (sequence == null) {
@@ -184,7 +162,7 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        String sequenceString = null;
+        String sequenceString;
         try {
             sequenceString = SequenceController.compose(sequence, genbankFormatter);
         } catch (SequenceComposerException e) {
@@ -193,8 +171,7 @@ public class SequenceDownloadServlet extends HttpServlet {
         }
 
         if (sequenceString == null || sequenceString.isEmpty()) {
-            Logger.info("Sequence string is empty for entry " + entry.getId() + " and sequence "
-                                + sequence.getId());
+            Logger.info("Sequence string is empty for entry " + entry.getId() + " and sequence " + sequence.getId());
             return;
         }
 
@@ -202,23 +179,10 @@ public class SequenceDownloadServlet extends HttpServlet {
 
         try {
             byte[] bytes = sequenceString.getBytes();
-            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
-
             response.setContentType("text/plain");
             response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
-
-            OutputStream os = response.getOutputStream();
-            DataInputStream is = new DataInputStream(byteInputStream);
-
-            int read = 0;
-
-            while ((read = is.read(bytes)) != -1) {
-                os.write(bytes, 0, read);
-            }
-            os.flush();
-            os.close();
-
+            IOUtils.write(bytes, response.getOutputStream());
         } catch (IOException e) {
             Logger.error(e);
         }
@@ -240,11 +204,10 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        String sequenceString = null;
+        String sequenceString;
         try {
-            sequenceString = SequenceController.compose(sequence, new FastaFormatter(sequence
-                                                                                             .getEntry()
-                                                                                             .getNamesAsString()));
+            FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getNamesAsString());
+            sequenceString = SequenceController.compose(sequence, formatter);
         } catch (SequenceComposerException e) {
             Logger.error("Failed to generate fasta file for download!", e);
             return;
@@ -254,23 +217,10 @@ public class SequenceDownloadServlet extends HttpServlet {
 
         try {
             byte[] bytes = sequenceString.getBytes();
-            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
-
             response.setContentType("text/plain");
             response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
-
-            OutputStream os = response.getOutputStream();
-            DataInputStream is = new DataInputStream(byteInputStream);
-
-            int read = 0;
-
-            while ((read = is.read(bytes)) != -1) {
-                os.write(bytes, 0, read);
-            }
-            os.flush();
-            os.close();
-
+            IOUtils.write(bytes, response.getOutputStream());
         } catch (IOException e) {
             Logger.error(e);
         }
@@ -278,12 +228,12 @@ public class SequenceDownloadServlet extends HttpServlet {
 
     private void getSBOL(HttpServletResponse response, Entry entry, Account account) {
         SequenceController sequenceController = new SequenceController();
-        Sequence sequence = null;
+        Sequence sequence;
 
         try {
             sequence = sequenceController.getByEntry(entry);
             if (sequence == null) {
-                Logger.info("No sequence associated with entry " + entry.getId());
+                Logger.warn("No sequence associated with entry " + entry.getId());
                 return;
             }
         } catch (ControllerException e) {
@@ -291,7 +241,7 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        String sequenceString = null;
+        String sequenceString;
         try {
             sequenceString = SequenceController.compose(sequence, new SbolFormatter());
         } catch (SequenceComposerException e) {
@@ -303,23 +253,10 @@ public class SequenceDownloadServlet extends HttpServlet {
 
         try {
             byte[] bytes = sequenceString.getBytes();
-            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
-
             response.setContentType("text/xml");
             response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
-
-            OutputStream os = response.getOutputStream();
-            DataInputStream is = new DataInputStream(byteInputStream);
-
-            int read = 0;
-
-            while ((read = is.read(bytes)) != -1) {
-                os.write(bytes, 0, read);
-            }
-            os.flush();
-            os.close();
-
+            IOUtils.write(bytes, response.getOutputStream());
         } catch (IOException e) {
             Logger.error(e);
         }
@@ -333,13 +270,13 @@ public class SequenceDownloadServlet extends HttpServlet {
      * @return string to be used as a filename
      */
     private String getFileName(Entry entry) {
-        PartNumber partNumber = entry.getOnePartNumber();
-        if (partNumber != null)
-            return partNumber.getPartNumber();
-
         Name name = entry.getOneName();
         if (name != null)
             return name.getName();
+
+        PartNumber partNumber = entry.getOnePartNumber();
+        if (partNumber != null)
+            return partNumber.getPartNumber();
 
         return UUID.randomUUID().toString().split("-")[0];
     }

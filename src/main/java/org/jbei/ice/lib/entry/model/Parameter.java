@@ -1,10 +1,11 @@
 package org.jbei.ice.lib.entry.model;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.shared.dto.ParameterType;
+
+import org.hibernate.search.annotations.ContainedIn;
 
 // TODO Make advanced search filter for parameters
 
@@ -27,14 +28,11 @@ public class Parameter implements IModel {
 
     private static final long serialVersionUID = 1L;
 
-    public enum ParameterType {
-        NUMBER, BOOLEAN, TEXT;
-    }
-
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
+    @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false, unique = false)
     private Entry entry;
@@ -87,15 +85,5 @@ public class Parameter implements IModel {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public static Map<String, String> getParameterTypeFormatOptionsMap() {
-        Map<String, String> result = new LinkedHashMap<String, String>();
-
-        result.put(ParameterType.NUMBER.toString(), "Number");
-        result.put(ParameterType.BOOLEAN.toString(), "Boolean");
-        result.put(ParameterType.TEXT.toString(), "Text");
-
-        return result;
     }
 }

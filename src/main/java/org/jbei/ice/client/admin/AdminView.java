@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class AdminView extends AbstractLayout {
+
     private FlexTable mainContent;
     private AdminViewMenu menu;
     private HTML contentHeader;

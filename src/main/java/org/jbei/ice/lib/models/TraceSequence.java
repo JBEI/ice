@@ -22,7 +22,7 @@ public class TraceSequence implements IModel {
 
     @XmlTransient
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @OneToOne(fetch = FetchType.EAGER)

@@ -5,10 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.Store;
 
 /**
  * Store Strain specific fields.
@@ -30,7 +31,7 @@ public class Strain extends Entry {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "host", length = 255)
-    @Field
+    @Field(store = Store.YES)
     private String host;
 
     @Column(name = "genotype_phenotype", length = 255)
@@ -42,6 +43,7 @@ public class Strain extends Entry {
     private String plasmids;
 
     public Strain() {
+        super();
         setRecordType(EntryType.STRAIN.getName());
     }
 

@@ -1,32 +1,34 @@
 package org.jbei.ice.client.bulkupload.sheet.header;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.PlasmidInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 
 /**
  * @author Hector Plahar
  */
 public class PlasmidHeader extends PartHeader {
 
-    public PlasmidHeader() {
-        super();
+    public PlasmidHeader(EntryInfoDelegate delegate, HashMap<String, String> preferences) {
+        super(delegate, preferences);
 
         // plasmid specific headers
-        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(true), null));
         ArrayList<String> data = new ArrayList<String>();
         data.add("Yes");
         data.add("No");
-        headers.add(new CellColumnHeader(Header.CIRCULAR, false, new BooleanSheetCell(), null));
-        headers.add(new CellColumnHeader(Header.BACKBONE));
-        headers.add(new CellColumnHeader(Header.PROMOTERS, false, new MultiSuggestSheetCell(true), null));
-        headers.add(new CellColumnHeader(Header.ORIGIN_OF_REPLICATION, false, new MultiSuggestSheetCell(true), null));
+        headers.add(new CellColumnHeader(Header.CIRCULAR, preferences, false, new BooleanSheetCell()));
+        headers.add(new CellColumnHeader(Header.BACKBONE, preferences));
+        headers.add(new CellColumnHeader(Header.PROMOTERS, preferences, false, new MultiSuggestSheetCell(true)));
+        headers.add(new CellColumnHeader(Header.ORIGIN_OF_REPLICATION, preferences, false,
+                                         new MultiSuggestSheetCell(true)));
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.jbei.ice.client.bulkupload.sheet.Header;
 public class SheetCellData {
 
     private Header type;
-    private String id;
+    private String id;     // used for file id
     private String value;
 
     public SheetCellData(Header type, String id, String value) {
@@ -43,5 +43,10 @@ public class SheetCellData {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "(type=" + type + ", id=" + id + ", value=" + value + ")";
     }
 }

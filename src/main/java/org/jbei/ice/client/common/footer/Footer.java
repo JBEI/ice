@@ -36,9 +36,11 @@ public class Footer extends Composite {
 
         @Source("org/jbei/ice/client/resource/image/llnl-logo.gif")
         ImageResource lnlLogo();
+
+        @Source("org/jbei/ice/client/resource/image/pnw.png")
+        ImageResource pnnlLogo();
     }
 
-    private final Resources resources = GWT.create(Resources.class);
     private final RegistryServiceAsync service = GWT.create(RegistryService.class);
 
     private static Footer INSTANCE;
@@ -52,7 +54,6 @@ public class Footer extends Composite {
     }
 
     private Footer() {
-
         FlexTable layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
@@ -67,6 +68,7 @@ public class Footer extends Composite {
 
         // create images
         HorizontalPanel panel = new HorizontalPanel();
+        Resources resources = GWT.create(Resources.class);
         panel.add(new Image(resources.doeLogo()));
         panel.add(new Image(resources.lblLogo()));
         panel.add(new Image(resources.sandiaLogo()));
@@ -74,6 +76,7 @@ public class Footer extends Composite {
         panel.add(new Image(resources.davisLogo()));
         panel.add(new Image(resources.carnegieLogo()));
         panel.add(new Image(resources.lnlLogo()));
+        panel.add(new Image(resources.pnnlLogo()));
 
         // add images to a table
         FlexTable contents = new FlexTable();
@@ -82,8 +85,7 @@ public class Footer extends Composite {
         contents.setCellSpacing(0);
         contents.setWidget(0, 0, panel);
         contents.setWidget(0, 1, getFooterText());
-        contents.getCellFormatter()
-                .setHorizontalAlignment(0, 1, HasHorizontalAlignment.ALIGN_RIGHT);
+        contents.getCellFormatter().setHorizontalAlignment(0, 1, HasHorizontalAlignment.ALIGN_RIGHT);
 
         layout.setWidget(1, 0, contents);
     }
@@ -123,8 +125,7 @@ public class Footer extends Composite {
         Label feedback = new Label("Feedback");
         feedback.setStyleName("footer_feedback_widget");
 
-        final PopupHandler handler = new PopupHandler(feedbackWidget, feedback.getElement(),
-                                                      true);
+        final PopupHandler handler = new PopupHandler(feedbackWidget, feedback.getElement(), true);
         feedbackWidget.addCloseHandler(new ClickHandler() {
 
             @Override
@@ -163,8 +164,7 @@ public class Footer extends Composite {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert(
-                                "There was an error submitting your feedback. We apologize for the inconvenience\n\n"
-                                        + caught.getMessage());
+                                "There was an error submitting your feedback. We apologize for the inconvenience\n\n");
                     }
                 });
                 handler.hidePopup();

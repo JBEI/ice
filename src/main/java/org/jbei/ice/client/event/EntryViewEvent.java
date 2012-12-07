@@ -7,6 +7,11 @@ import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
+/**
+ * Event used to signal entry detail view of a specific entry id is desired
+ *
+ * @author Hector Plahar
+ */
 public class EntryViewEvent extends GwtEvent<EntryViewEventHandler> {
 
     public interface EntryViewEventHandler extends EventHandler {
@@ -16,9 +21,10 @@ public class EntryViewEvent extends GwtEvent<EntryViewEventHandler> {
     public static Type<EntryViewEventHandler> TYPE = new Type<EntryViewEventHandler>();
     private EntryContext context;
 
-    public EntryViewEvent(long id, EntryContext.Type mode) {
+    public EntryViewEvent(long id, String recordId, EntryContext.Type mode) {
         this.context = new EntryContext(mode);
-        this.context.setCurrent(id);
+        this.context.setRecordId(recordId);
+        this.context.setId(id);
     }
 
     public EntryContext getContext() {

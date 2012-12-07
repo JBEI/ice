@@ -1,6 +1,6 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.shared.dto.PartInfo;
+import org.jbei.ice.shared.dto.entry.PartInfo;
 
 public class PartSheetModel extends SingleInfoSheetModel<PartInfo> {
 

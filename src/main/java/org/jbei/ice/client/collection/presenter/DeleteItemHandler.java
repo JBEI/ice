@@ -3,8 +3,8 @@ package org.jbei.ice.client.collection.presenter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -14,7 +14,7 @@ import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuHiderTimer;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.shared.dto.folder.FolderDetails;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -38,7 +38,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
 
     @Override
     public void delete(long id, final Callback<MenuItem> deleteCallback) {
-        service.deleteFolder(AppController.sessionId, id, new AsyncCallback<FolderDetails>() {
+        service.deleteFolder(ClientController.sessionId, id, new AsyncCallback<FolderDetails>() {
 
             @Override
             public void onSuccess(FolderDetails result) {
@@ -50,7 +50,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
 
 //                folder.put(result.getId(), result.getContents());
                 MenuItem item = new MenuItem(result.getId(), result.getName(), result.getCount(),
-                                             result.isSystemFolder());
+                                             result.isSystemFolder(), false);
                 deleteCallback.onSuccess(item);
                 view.removeSubMenuFolder(item);
             }
@@ -82,7 +82,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                     @Override
                     protected void callService(AsyncCallback<FolderDetails> callback) throws AuthenticationException {
                         try {
-                            service.createUserCollection(AppController.sessionId, item.getName(), "",
+                            service.createUserCollection(ClientController.sessionId, item.getName(), "",
                                                          folder.get(item.getId()), callback);
                         } catch (AuthenticationException e) {
                             History.newItem(Page.LOGIN.getLink());
@@ -93,7 +93,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                     public void onSuccess(FolderDetails result) {
                         timer.cancel();
                         MenuItem newItem = new MenuItem(result.getId(), result.getName(),
-                                                        result.getCount(), result.isSystemFolder());
+                                                        result.getCount(), result.isSystemFolder(), false);
                         menu.updateMenuItem(item.getId(), newItem, DeleteItemHandler.this);
                         view.addSubMenuFolder(newItem);
                     }

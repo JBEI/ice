@@ -10,6 +10,16 @@ public class AuthenticationException extends Exception implements IsSerializable
         super();
     }
 
+    /**
+     * @inheritDoc
+     */
+    public AuthenticationException(String s, Exception e) {
+        super(s, e);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public AuthenticationException(String s) {
         super(s);
     }

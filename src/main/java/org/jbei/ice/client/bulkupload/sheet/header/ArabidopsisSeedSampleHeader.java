@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 /**
  * @author Hector Plahar
@@ -14,7 +14,7 @@ import org.jbei.ice.shared.dto.StorageInfo;
 public class ArabidopsisSeedSampleHeader extends SampleHeaders {
 
     public ArabidopsisSeedSampleHeader(ArrayList<String> locationList) {
-        super(locationList);
+        super(locationList, null);
     }
 
     public SheetCellData extractValue(Header headerType, EntryInfo info) {

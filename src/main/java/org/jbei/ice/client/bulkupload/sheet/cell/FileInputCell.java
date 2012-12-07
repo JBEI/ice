@@ -2,6 +2,7 @@ package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import java.util.HashMap;
 
+import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellUploader;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
@@ -26,12 +27,16 @@ public class FileInputCell extends SheetCell {
     private final HashMap<Integer, CellUploader> rowUploaderMap; // each cell has its own uploader
     private final HashMap<Integer, CellWidget> widgetHashMap;
     private final boolean sequenceUpload;
+    private final EntryInfoDelegate delegate;
+    private final boolean isStrainWithPlasmidPlasmid;
 
-    public FileInputCell(boolean sequenceUpload) {
+    public FileInputCell(boolean sequenceUpload, EntryInfoDelegate delegate, boolean isStrainWithPlasmidPlasmid) {
         super();
         rowUploaderMap = new HashMap<Integer, CellUploader>();
         widgetHashMap = new HashMap<Integer, CellWidget>();
         this.sequenceUpload = sequenceUpload;
+        this.delegate = delegate;
+        this.isStrainWithPlasmidPlasmid = isStrainWithPlasmidPlasmid;
     }
 
     @Override
@@ -41,8 +46,7 @@ public class FileInputCell extends SheetCell {
     }
 
     @Override
-    public void setText(String text) {
-    }
+    public void setText(String text) {}
 
     /**
      * Sets data for row specified in the param, using the user entered value in the input widget
@@ -60,7 +64,7 @@ public class FileInputCell extends SheetCell {
         // typically called when user wants to edit cell (e.g. by starting to type)
         CellUploader cellUploader = rowUploaderMap.get(row);
         if (cellUploader == null) {
-            cellUploader = new CellUploader(sequenceUpload);
+            cellUploader = new CellUploader(sequenceUpload, row, delegate, isStrainWithPlasmidPlasmid);
             FileFinishHandler handler = new FileFinishHandler(cellUploader, row);
             cellUploader.addOnFinishUploadHandler(handler);
             rowUploaderMap.put(row, cellUploader);
@@ -80,7 +84,7 @@ public class FileInputCell extends SheetCell {
         CellUploader cellUploader = rowUploaderMap.get(row);
 
         if (cellUploader == null) {
-            cellUploader = new CellUploader(sequenceUpload);
+            cellUploader = new CellUploader(sequenceUpload, row, delegate, isStrainWithPlasmidPlasmid);
 
             final SheetCellData datum = getDataForRow(row);
             if (datum != null) {

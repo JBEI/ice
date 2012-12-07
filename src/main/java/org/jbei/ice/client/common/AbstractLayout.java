@@ -35,8 +35,8 @@ public abstract class AbstractLayout extends Composite {
      * super.initComponents();
      */
     protected void initComponents() {
+        HeaderView.getInstance().resetSearchBox();
     }
 
-    protected void reset() { // TODO : should eventually be abstract
-    }
+    public void reset() {}
 }

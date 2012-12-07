@@ -157,7 +157,7 @@ public class UserTable extends CellTable<AccountInfo> {
                 return object.getUserEntryCount() + "";
             }
         };
-        addColumn(entryCount, "Entries");
+        addColumn(entryCount, "# Entries");
         setColumnWidth(entryCount, 50, Unit.PX);
     }
 

@@ -21,7 +21,7 @@
     </filter>
     <filter-mapping>
         <filter-name>UrlRewriteFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/entry/view/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
@@ -32,7 +32,40 @@
     </filter>
     <filter-mapping>
         <filter-name>IceFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/gwt_ice/ice</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>IceFilter</filter-name>
+        <url-pattern>/messagebroker/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>IceFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>IceFilter</filter-name>
+        <url-pattern>*.gupld</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>IceFilter</filter-name>
+        <url-pattern>/download</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>IceFilter</filter-name>
+        <url-pattern>/export</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>IceFilter</filter-name>
+        <url-pattern>/sequence</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>IceFilter</filter-name>
+        <url-pattern>/sequence_upload</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>IceFilter</filter-name>
+        <url-pattern>/csv_upload</url-pattern>
     </filter-mapping>
 
     <!-- BlazeDS -->
@@ -155,7 +188,23 @@ false or 0, means don't use slow uploads  -->
         <url-pattern>/sequence_upload</url-pattern>
     </servlet-mapping>
 
+    <!-- csv upload -->
+    <servlet>
+        <servlet-name>CSVUploadServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.CSVUploadServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CSVUploadServlet</servlet-name>
+        <url-pattern>/csv_upload</url-pattern>
+    </servlet-mapping>
+
+
     <welcome-file-list>
         <welcome-file>Gwt_ice.html</welcome-file>
     </welcome-file-list>
+
+    <session-config>
+        <session-timeout>10</session-timeout>
+    </session-config>
 </web-app>

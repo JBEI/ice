@@ -24,7 +24,7 @@ public class PagerWidget extends Composite {
     public PagerWidget() {
         goBack = new Icon(FAIconType.CIRCLE_ARROW_LEFT);
         goBack.setTitle("Back");
-        goBack.addStyleName("cursor_pointer");
+        goBack.addStyleName("entry_go_back");
 
         leftBtn = new Icon(FAIconType.CHEVRON_LEFT);
         leftBtn.removeStyleName("font-awesome");
@@ -69,9 +69,9 @@ public class PagerWidget extends Composite {
     public void enablePrev(boolean enabled) {
         if (enabled) {
             leftBtn.removeStyleName("nav_disabled");
-            leftBtn.addStyleName("nav");
+            leftBtn.addStyleName("context-nav");
         } else {
-            leftBtn.removeStyleName("nav");
+            leftBtn.removeStyleName("context-nav");
             leftBtn.addStyleName("nav_disabled");
         }
     }
@@ -79,9 +79,9 @@ public class PagerWidget extends Composite {
     public void enableNext(boolean enabled) {
         if (enabled) {
             rightBtn.removeStyleName("nav_disabled");
-            rightBtn.addStyleName("nav");
+            rightBtn.addStyleName("context-nav");
         } else {
-            rightBtn.removeStyleName("nav");
+            rightBtn.removeStyleName("context-nav");
             rightBtn.addStyleName("nav_disabled");
         }
     }

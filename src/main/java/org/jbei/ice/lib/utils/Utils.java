@@ -122,11 +122,8 @@ public class Utils {
 
         try {
             MessageDigest digest = MessageDigest.getInstance(algorithm);
-
             digest.update(string.getBytes("UTF-8"));
-
             byte[] hashed = digest.digest();
-
             result = Utils.getHexString(hashed);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -150,9 +147,9 @@ public class Utils {
         ConfigurationController controller = new ConfigurationController();
         try {
             String value = controller.getPropertyValue(key);
-            if (value == null)
-                return key.getDefaultValue();
-            return value;
+            if (value != null)
+                return value;
+            return key.getDefaultValue();
         } catch (ControllerException e) {
             Logger.error(e);
             return null;

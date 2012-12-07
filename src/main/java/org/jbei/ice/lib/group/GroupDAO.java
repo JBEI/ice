@@ -1,13 +1,15 @@
 package org.jbei.ice.lib.group;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.shared.dto.group.GroupType;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -20,12 +22,12 @@ import org.hibernate.criterion.Restrictions;
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
+@SuppressWarnings("unchecked")
 class GroupDAO extends HibernateRepository<Group> {
-
     /**
      * Retrieve {@link Group} object from the database by its uuid.
      *
-     * @param uuid
+     * @param uuid universally unique identifier for group
      * @return Group object.
      * @throws DAOException
      */
@@ -33,10 +35,14 @@ class GroupDAO extends HibernateRepository<Group> {
         return super.getByUUID(Group.class, uuid);
     }
 
+    public long getMemberCount(String uuid) throws DAOException {
+        return get(uuid).getMembers().size();
+    }
+
     /**
      * Retrieve {@link Group} object from the database by its id.
      *
-     * @param id
+     * @param id group unique identifier
      * @return Group object.
      * @throws DAOException
      */
@@ -44,7 +50,6 @@ class GroupDAO extends HibernateRepository<Group> {
         return super.get(Group.class, id);
     }
 
-    @SuppressWarnings("unchecked")
     public HashSet<Group> getByIdList(Set<Long> idsSet) throws DAOException {
         Session session = currentSession();
 
@@ -57,30 +62,6 @@ class GroupDAO extends HibernateRepository<Group> {
             Logger.error(he);
             throw new DAOException(he);
         }
-    }
-
-    /**
-     * Retrieve all the {@link Group} objects in the database.
-     *
-     * @return SEt of Groups.
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    public Set<Group> getAll() throws DAOException {
-        LinkedHashSet<Group> groups = new LinkedHashSet<Group>();
-        Session session = currentSession();
-        try {
-            String queryString = "from Group";
-            Query query = session.createQuery(queryString);
-            groups.addAll(query.list());
-        } catch (HibernateException e) {
-            String msg = "Could not retrieve all groups: " + e.toString();
-            Logger.warn(msg);
-            throw new DAOException(msg);
-        } finally {
-            closeSession();
-        }
-        return groups;
     }
 
     public Set<Group> getMatchingGroups(String token, int limit) throws DAOException {
@@ -100,38 +81,26 @@ class GroupDAO extends HibernateRepository<Group> {
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Error retrieving matching groups", e);
-        } finally {
-            closeSession();
         }
     }
 
-    /**
-     * Update the given {@link Group} object in the database.
-     *
-     * @param group
-     * @return Saved Group object.
-     * @throws DAOException
-     */
-    public Group update(Group group) throws DAOException {
-        return super.saveOrUpdate(group);
+    public ArrayList<Group> retrieveGroups(Account account, GroupType type) throws DAOException {
+        Session session = currentSession();
+        Criteria criteria = session.createCriteria(Group.class);
+        if (type != null) {
+            criteria = criteria.add(Restrictions.eq("type", type));
+        }
+
+        criteria.add(Restrictions.eq("owner", account));
+        List result = criteria.list();
+        return new ArrayList<Group>(result);
     }
 
-    /**
-     * Save the given {@link Group} object in the database.
-     *
-     * @param group
-     * @return Saved Group object.
-     * @throws DAOException
-     */
-    public Group save(Group group) throws DAOException {
-        return super.saveOrUpdate(group);
+    public ArrayList<Group> retrievePublicGroups() throws DAOException {
+        Session session = currentSession();
+        Criteria criteria = session.createCriteria(Group.class);
+        criteria = criteria.add(Restrictions.eq("type", GroupType.PUBLIC));
+        List result = criteria.list();
+        return new ArrayList<Group>(result);
     }
-
-//    public Set<Group> retrieveAll(Set<Group> groups) {
-//        Session session = currentSession();
-//
-//        String queryStr = "from " + Group.class.getName() + " where group in :group";
-//        Query query = session.createQuery(queryStr);
-//        query.setParameterList("group", groups);
-//    }
 }

@@ -1,11 +1,10 @@
 .subMenuExport {
-    height: 26px;
+    height: 28px;
     cursor: pointer;
     color: #393939;
     font-weight: bold;
     font-size: 0.75em;
     text-align: center;
-    -webkit-border-radius: 2px;
     border-radius: 2px;
     font-family: Arial;
     border-top: 2px solid #f1f1f1;
@@ -24,7 +23,7 @@
 }
 
 .subMenuExport[disabled] {
-    height: 26px;
+    height: 28px;
     color: #393939;
     font-weight: bold;
     font-size: 0.75em;
@@ -32,7 +31,6 @@
     background-color: #c2c2c2;
     border-top: 2px solid #f1f1f1;
     border: 1px solid #c2c2c2;
-    -webkit-border-radius: 2px;
     border-radius: 2px;
     font-family: Arial;
     opacity: 0.4;

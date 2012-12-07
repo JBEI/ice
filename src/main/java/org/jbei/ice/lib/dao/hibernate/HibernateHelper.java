@@ -19,18 +19,21 @@ public class HibernateHelper {
     private static SessionFactory sessionFactory;
 
     // singleton
-    private HibernateHelper() {
-    }
+    private HibernateHelper() {}
 
     /**
      * Open a new {@link Session} from the sessionFactory.
+     * This needs to be closed when done with
      *
      * @return New Hibernate {@link Session}.
      */
     public static Session newSession() {
-        return HibernateHelper.getSessionFactory().openSession();
+        return getSessionFactory().openSession();
     }
 
+    /**
+     * @return session bound to context.
+     */
     protected static Session currentSession() {
         return getSessionFactory().getCurrentSession();
     }
@@ -45,7 +48,6 @@ public class HibernateHelper {
 
     public static void rollbackTransaction() {
         if (getSessionFactory().getCurrentSession().getTransaction().isActive()) {
-            Logger.info("Rolling back transaction");
             getSessionFactory().getCurrentSession().getTransaction().rollback();
         }
     }
@@ -59,6 +61,7 @@ public class HibernateHelper {
 
     private static synchronized void initialize(Type type) {
         if (sessionFactory == null) { // initialize only when there is no previous sessionFactory
+            Logger.info("Initializing session factory for type " + type.name());
             Configuration configuration;
             try {
                 if (type == Type.MOCK) {
@@ -73,7 +76,8 @@ public class HibernateHelper {
                 sessionFactory = configuration.buildSessionFactory(serviceRegistry);
             } catch (Throwable e) {
                 String msg = "Could not initialize hibernate!!!";
-                Logger.error(msg, e);
+//                Logger.error(msg, e);
+                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }
@@ -89,6 +93,14 @@ public class HibernateHelper {
             initialize(Type.NORMAL);
         }
         return sessionFactory;
+    }
+
+    public static void close() {
+        currentSession().disconnect();
+        if (sessionFactory != null && !sessionFactory.isClosed()) {
+            Logger.info("Closing session factory");
+            sessionFactory.close();
+        }
     }
 
     /**

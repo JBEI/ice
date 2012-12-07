@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.collection.ICollectionView;
+import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.CollectionEntryActionMenu;
@@ -13,16 +16,17 @@ import org.jbei.ice.client.collection.menu.ExportAsMenu;
 import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
+import org.jbei.ice.client.collection.menu.TransferMenu;
 import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.folder.FolderShareType;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
@@ -40,12 +44,12 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     private CollectionMenu userMenu;
     private CollectionMenu sharedCollections;
 
-    private FlexTable contents;
     private FlexTable rightContents;
 
     private CreateEntryMenu createNew;
     private CollectionEntryActionMenu subMenu;
     private ExportAsMenu exportAs;
+    private TransferMenu transferMenu;
     private FeedbackPanel feedback;
 
     @Override
@@ -56,34 +60,48 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         rightContents.setCellSpacing(0);
         rightContents.setWidth("100%");
 
-        createNew = new CreateEntryMenu();
+        createNew = new CreateEntryMenu("Create Entry");
         feedback = new FeedbackPanel("400px");
 
+        int cell = 0;
+
         // create new pull down
-        rightContents.setWidget(0, 0, createNew);
-        rightContents.getFlexCellFormatter().setWidth(0, 0, "120px");
+        rightContents.setWidget(0, cell, createNew);
+        rightContents.getFlexCellFormatter().setWidth(0, cell, "120px");
 
         // sub menu (add to, remove, move to)
+        cell += 1;
         subMenu = new CollectionEntryActionMenu();
-        rightContents.setWidget(0, 1, subMenu);
-        String width = (subMenu.getWidth() + 12) + "px";
-        rightContents.getFlexCellFormatter().setWidth(0, 1, width);
+        rightContents.setWidget(0, cell, subMenu);
 
         // export as
+        String width = (subMenu.getWidth() + 12) + "px";
+        rightContents.getFlexCellFormatter().setWidth(0, cell, width);
         exportAs = new ExportAsMenu();
-        rightContents.setWidget(0, 2, exportAs);
+        cell += 1;
+        rightContents.setWidget(0, cell, exportAs);
+
+        // transfer
+        if (ClientController.account.isAdmin()) {
+            width = (exportAs.getWidth() + 12) + "px";
+            rightContents.getFlexCellFormatter().setWidth(0, cell, width);
+            cell += 1;
+            transferMenu = new TransferMenu();
+            rightContents.setWidget(0, cell, transferMenu);
+        }
 
         // feedback
-        rightContents.setWidget(0, 3, feedback);
-        rightContents.getFlexCellFormatter().setHorizontalAlignment(0, 3, HasAlignment.ALIGN_RIGHT);
+        cell += 1;
+        rightContents.setWidget(0, cell, feedback);
+        rightContents.getFlexCellFormatter().setHorizontalAlignment(0, cell, HasAlignment.ALIGN_RIGHT);
 
         rightContents.setHTML(1, 0, "&nbsp;");
-        rightContents.getFlexCellFormatter().setColSpan(1, 0, 3);
+        rightContents.getFlexCellFormatter().setColSpan(1, 0, cell);
     }
 
     @Override
     protected Widget createContents() {
-        contents = new FlexTable();
+        FlexTable contents = new FlexTable();
         contents.setWidth("100%");
         contents.setCellSpacing(0);
         contents.setCellPadding(0);
@@ -96,7 +114,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         sharedCollections.setEmptyCollectionMessage("No collections have been shared with you");
 
         HTMLPanel menuPanel = new HTMLPanel(
-                "<span id=\"system_menu\"></span><br><span id=\"user_menu\"></span><br><span " +
+                "<br><span id=\"system_menu\"></span><br><span id=\"user_menu\"></span><br><span " +
                         "id=\"shared_collections\"></span><br>");
         menuPanel.add(systemMenu, "system_menu");
         menuPanel.add(userMenu, "user_menu");
@@ -122,6 +140,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
+    public void setPermissionDelegate(Delegate<ShareCollectionData> delegate) {
+        userMenu.setPermissionInfoDelegate(delegate);
+    }
+
+    @Override
     public void hideQuickAddInput() {
         this.userMenu.hideQuickText();
     }
@@ -137,19 +160,20 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         String width = (subMenu.getWidth() + 12) + "px";
         rightContents.getFlexCellFormatter().setWidth(0, 1, width);
 
+        int colspan = rightContents.getCellCount(0);
         rightContents.setWidget(2, 0, table);
-        rightContents.getFlexCellFormatter().setColSpan(2, 0, 4);
+        rightContents.getFlexCellFormatter().setColSpan(2, 0, colspan);
 
-        // table pager TODO : this should be merged with the table
         rightContents.setWidget(3, 0, table.getPager());
-        rightContents.getFlexCellFormatter().setColSpan(3, 0, 4);
+        rightContents.getFlexCellFormatter().setColSpan(3, 0, colspan);
     }
 
     @Override
     public void setMainContent(Widget mainContent) {
         rightContents.setWidget(0, 1, subMenu);
         rightContents.setWidget(2, 0, mainContent);
-        rightContents.getFlexCellFormatter().setColSpan(2, 0, 4);
+        int colspan = rightContents.getCellCount(0);
+        rightContents.getFlexCellFormatter().setColSpan(2, 0, colspan);
         if (rightContents.getRowCount() > 3)
             rightContents.removeRow(3);
     }
@@ -170,33 +194,27 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
+    public void setUserFolderPermissions(ArrayList<PermissionInfo> list) {
+        this.userMenu.setPermissions(list);
+    }
+
+    @Override
+    public void setSharedCollectionsMenuItems(ArrayList<MenuItem> items) {
+        this.sharedCollections.setMenuItems(items, null);
+    }
+
+    @Override
     public void showFeedbackMessage(String msg, boolean errMsg) {
         if (errMsg)
             feedback.setFailureMessage(msg);
         else {
             feedback.setSuccessMessage(msg);
-            new Timer() {
-                @Override
-                public void run() {
-                    feedback.setVisible(false);
-                }
-            }.schedule(20000);
         }
     }
 
     @Override
     public SingleSelectionModel<EntryAddType> getAddEntrySelectionHandler() {
         return this.createNew.getSelectionModel();
-    }
-
-    @Override
-    public void setQuickAddVisibility(boolean visible) {
-//        this.userMenu.getQuickAddBox().setVisible(visible);
-    }
-
-    @Override
-    public boolean getQuickAddVisibility() {
-        return this.userMenu.getQuickAddVisibility();
     }
 
     @Override
@@ -210,18 +228,13 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void addSubmitNewCollectionHandler(ClickHandler handler) {
-        this.userMenu.addSaveCollectionNameHandler(handler);
-    }
-
-    @Override
     public void updateMenuItemCounts(ArrayList<MenuItem> item) {
         this.userMenu.updateCounts(item);
     }
 
     @Override
-    public void setBusyIndicator(Set<Long> ids) {
-        this.userMenu.setBusyIndicator(ids);
+    public void setBusyIndicator(Set<Long> ids, boolean visible) {
+        this.userMenu.setBusyIndicator(ids, visible);
     }
 
     @Override
@@ -230,8 +243,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void addQuickEditKeyDownHandler(KeyDownHandler handler) {
-        this.userMenu.addQuickEditKeyDownHandler(handler);
+    public void addQuickEditKeyPressHandler(KeyPressHandler handler) {
+        this.userMenu.addQuickEditKeyPressHandler(handler);
     }
 
     @Override
@@ -243,6 +256,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     public void setCurrentMenuSelection(long id) {
         this.userMenu.setSelection(id);
         this.systemMenu.setSelection(id);
+        this.sharedCollections.setSelection(id);
     }
 
     @Override
@@ -256,13 +270,16 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public SingleSelectionModel<MenuItem> getUserMenuModel() {
-        return userMenu.getSelectionModel();
-    }
-
-    @Override
-    public SingleSelectionModel<MenuItem> getSystemMenuModel() {
-        return systemMenu.getSelectionModel();
+    public SingleSelectionModel<MenuItem> getMenuModel(FolderShareType type) {
+        switch (type) {
+            case PUBLIC:
+                return systemMenu.getSelectionModel();
+            case PRIVATE:
+                return userMenu.getSelectionModel();
+            case SHARED:
+                return sharedCollections.getSelectionModel();
+        }
+        return null;
     }
 
     @Override
@@ -273,6 +290,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public void enableExportAs(boolean enable) {
         this.exportAs.enable(enable);
+        if (transferMenu != null)
+            this.transferMenu.setEnabled(enable);
     }
 
     @Override
@@ -283,6 +302,25 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public void addAddToSubmitHandler(SubmitHandler handler) {
         subMenu.addAddToSubmitHandler(handler);
+    }
+
+    @Override
+    public void addTransferHandler(ClickHandler handler) {
+        if (transferMenu != null)
+            this.transferMenu.setHandler(handler);
+    }
+
+    @Override
+    public void setTransferOptions(ArrayList<OptionSelect> options) {
+        if (transferMenu != null)
+            transferMenu.setOptions(options);
+    }
+
+    @Override
+    public ArrayList<OptionSelect> getSelectedTransfers() {
+        if (transferMenu != null)
+            return transferMenu.getSelectedItems();
+        return null;
     }
 
     @Override

@@ -1,26 +1,25 @@
 package org.jbei.ice.client.collection.presenter;
 
 import org.jbei.ice.client.common.IHasNavigableData;
-import org.jbei.ice.shared.ColumnField;
 
 public class EntryContext {
 
-    private long current;
+    private long id;
+    private String recordId;
     private Type type;
-    private ColumnField sortColumn;
-    private boolean asc;
     private IHasNavigableData nav;
+    private String partnerUrl;
 
     public EntryContext(Type type) {
         this.setType(type);
     }
 
-    public long getCurrent() {
-        return current;
+    public long getId() {
+        return id;
     }
 
-    public void setCurrent(long current) {
-        this.current = current;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Type getType() {
@@ -31,28 +30,28 @@ public class EntryContext {
         this.type = type;
     }
 
-    public ColumnField getSortColumn() {
-        return sortColumn;
-    }
-
-    public void setSortColumn(ColumnField sortColumn) {
-        this.sortColumn = sortColumn;
-    }
-
-    public boolean isAsc() {
-        return asc;
-    }
-
-    public void setAsc(boolean asc) {
-        this.asc = asc;
-    }
-
     public IHasNavigableData getNav() {
         return nav;
     }
 
     public void setNav(IHasNavigableData nav) {
         this.nav = nav;
+    }
+
+    public String getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(String recordId) {
+        this.recordId = recordId;
+    }
+
+    public String getPartnerUrl() {
+        return partnerUrl;
+    }
+
+    public void setPartnerUrl(String partnerUrl) {
+        this.partnerUrl = partnerUrl;
     }
 
     public enum Type {

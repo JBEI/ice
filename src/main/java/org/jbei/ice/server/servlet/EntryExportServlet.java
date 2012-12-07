@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -18,15 +19,12 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.IceXlsSerializer;
-
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.StaxDriver;
+import org.jbei.ice.lib.utils.IceXmlSerializer;
+import org.jbei.ice.lib.utils.UtilityException;
 
 public class EntryExportServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private static final String XML_EXPORT = "xml";
-    private static final String EXCEL_EXPORT = "excel";
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -60,10 +58,14 @@ public class EntryExportServlet extends HttpServlet {
         if (entries == null || entries.isEmpty())
             return;
 
-        if (XML_EXPORT.equalsIgnoreCase(type)) {
-            exportXML(account, entries, response);
-        } else if (EXCEL_EXPORT.equalsIgnoreCase(type)) {
-            exportExcel(entries, response);
+        switch (type.toLowerCase()) {
+            case "xml":
+                exportXML(account, entries, response);
+                break;
+
+            case "excel":
+                exportExcel(entries, response);
+                break;
         }
     }
 
@@ -80,10 +82,7 @@ public class EntryExportServlet extends HttpServlet {
             } catch (NumberFormatException nfe) {
                 Logger.error("Could not convert string id to long : " + idStr);
                 continue;
-            } catch (ControllerException e) {
-                Logger.error(e);
-                continue;
-            } catch (PermissionException e) {
+            } catch (ControllerException | PermissionException e) {
                 Logger.error(e);
                 continue;
             }
@@ -96,35 +95,26 @@ public class EntryExportServlet extends HttpServlet {
 
     private void exportXML(Account account, ArrayList<Entry> entries, HttpServletResponse response) {
         try {
-            XStream xstream = new XStream(new StaxDriver());
-//            String xmlDocument = IceXmlSerializer.serializeToJbeiXml(account, entries);
-//            String xmlDocument =
+            String xmlDocument = IceXmlSerializer.serializeToJbeiXml(account, entries);
 
             // write to file
             String saveName = "data.xml";
-
-//            byte[] bytes = xmlDocument.getBytes();
-//            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
-
+            byte[] bytes = xmlDocument.getBytes();
+            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
             response.setContentType("text/xml");
-//            response.setContentLength(bytes.length);
+            response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=" + saveName);
 
-            xstream.toXML(entries.get(0), response.getOutputStream());
-//            DataInputStream is = new DataInputStream(byteInputStream);
-//
-//            int read;
-//
-//            while ((read = is.read(bytes)) != -1) {
-//                os.write(bytes, 0, read);
-//            }
-//            os.flush();
-//            os.close();
-
-        } catch (IOException e) {
+            try (OutputStream os = response.getOutputStream()) {
+                DataInputStream is = new DataInputStream(byteInputStream);
+                int read;
+                while ((read = is.read(bytes)) != -1) {
+                    os.write(bytes, 0, read);
+                }
+                os.flush();
+            }
+        } catch (IOException | UtilityException e) {
             Logger.error(e);
-//        } catch (UtilityException e) {
-//            Logger.error(e);
         }
     }
 
@@ -172,7 +162,7 @@ public class EntryExportServlet extends HttpServlet {
                 if (!AccountController.isAuthenticated(sid))
                     return null;
 
-                AccountController controller = new AccountController();
+                AccountController controller = ApplicationController.getAccountController();
                 return controller.getAccountBySessionKey(sid);
             }
         }

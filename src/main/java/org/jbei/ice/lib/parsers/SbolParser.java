@@ -34,10 +34,9 @@ public class SbolParser extends AbstractParser {
 
     @Override
     public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
-        FeaturedDNASequence featuredDnaSequence = null;
+        FeaturedDNASequence featuredDnaSequence;
         try {
-            SBOLDocument document = SBOLFactory.read(new ByteArrayInputStream(textSequence
-                                                                                      .getBytes()));
+            SBOLDocument document = SBOLFactory.read(new ByteArrayInputStream(textSequence.getBytes()));
             SBOLRootObject content = document.getContents().get(0);
             if (!(content instanceof DnaComponent)) {
                 throw new InvalidFormatParserException("Could not parse SBOL file!");

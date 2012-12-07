@@ -26,7 +26,7 @@ public class TraceSequenceAlignment implements IModel {
 
     @XmlTransient
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "score", nullable = false)

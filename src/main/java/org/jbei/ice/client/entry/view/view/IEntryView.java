@@ -1,30 +1,27 @@
 package org.jbei.ice.client.entry.view.view;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
-import gwtupload.client.IUploader;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
 public interface IEntryView {
 
     Widget asWidget();
 
-    void setEntryName(String name);
+    void setEntryHeader(String typeDisplay, String name, String owner, String ownerId, Date creationDate);
 
-    void setMenuItems(ArrayList<MenuItem> items);
-
-    void showSequenceView(EntryInfo info, boolean showFlash);
+    void showSequenceView(EntryInfo info);
 
     IEntryFormSubmit showUpdateForm(EntryInfo info);
 
@@ -34,13 +31,11 @@ public interface IEntryView {
 
     void addGeneralEditButtonHandler(ClickHandler clickHandler);
 
-    void addSequenceAddButtonHandler(ClickHandler clickHandler);
-
     void showSampleView();
 
     SampleStorage getSampleAddFormValues();
 
-    EntryDetailViewMenu getDetailMenu();
+    EntryViewMenu getMenu();
 
     void showContextNav(boolean show);
 
@@ -56,10 +51,6 @@ public interface IEntryView {
 
     void setNavText(String text);
 
-    boolean getSequenceFormVisibility();
-
-    void setSequenceFormVisibility(boolean visible);
-
     boolean getSampleFormVisibility();
 
     void setSampleFormVisibility(boolean visible);
@@ -70,9 +61,7 @@ public interface IEntryView {
 
     void addSampleSaveHandler(ClickHandler handler);
 
-    void showLoadingIndicator();
-
-    void setSequenceFinishUploadHandler(OnFinishUploaderHandler handler);
+    void showLoadingIndicator(boolean showErrorLoad);
 
     void setSequenceData(ArrayList<SequenceAnalysisInfo> data, EntryInfo info);
 
@@ -80,18 +69,21 @@ public interface IEntryView {
 
     void setSequenceDeleteHandler(ClickHandler handler);
 
-    SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit,
-            DeleteSequenceHandler deleteHandler);
+    SequenceViewPanelPresenter setEntryInfoForView(EntryInfo info);
 
     void setAttachmentDeleteHandler(HasAttachmentDeleteHandler handler);
 
     void removeAttachment(AttachmentItem item);
 
-    void setAttachments(ArrayList<AttachmentItem> items, long entryId);
-
     void addDeleteEntryHandler(ClickHandler handler);
 
     VisibilityWidgetPresenter getVisibilityWidget();
 
-    void setTraceSequenceStartUploader(IUploader.OnStartUploaderHandler handler);
+    void showNewForm(IEntryFormSubmit form);
+
+    void setDeleteSequenceHandler(DeleteSequenceHandler handler);
+
+    void showEntryDetailView();
+
+    ArrayList<AttachmentItem> getAttachmentItems();
 }

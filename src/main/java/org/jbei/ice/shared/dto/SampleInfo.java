@@ -2,6 +2,8 @@ package org.jbei.ice.shared.dto;
 
 import java.util.Date;
 
+import org.jbei.ice.shared.dto.entry.HasEntryInfo;
+
 public class SampleInfo extends HasEntryInfo implements Comparable<SampleInfo> {
 
     private String sampleId;

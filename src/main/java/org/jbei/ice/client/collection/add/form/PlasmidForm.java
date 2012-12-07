@@ -1,7 +1,8 @@
 package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.shared.dto.PlasmidInfo;
+import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -16,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Hector Plahar
  */
 
-public class PlasmidForm extends SingleEntryForm<PlasmidInfo> {
+public class PlasmidForm extends EntryForm<PlasmidInfo> {
 
     private CheckBox circular;
     private TextBox backbone;
@@ -185,12 +186,17 @@ public class PlasmidForm extends SingleEntryForm<PlasmidInfo> {
     public FocusWidget validateForm() {
         FocusWidget widget = super.validateForm();
         if (markers.getValueBox().getText().isEmpty()) {
-            markers.setStyleName("entry_input_error");
+            markers.setStyleName("input_box_error");
             if (widget == null)
                 widget = markers.getValueBox();
         } else {
             markers.setStyleName("input_box");
         }
         return widget;
+    }
+
+    @Override
+    public String getHeaderDisplay() {
+        return EntryAddType.PLASMID.getDisplay();
     }
 }

@@ -23,23 +23,24 @@ import com.google.gwt.user.client.ui.TextBox;
 public class QuickAddWidget extends Composite {
 
     private final TextBox quickAddBox;
-    private final Button btnSave;
     private final Button btnCancel;
 
-    public QuickAddWidget() {
+    public QuickAddWidget(boolean resetOnFocus) {
         quickAddBox = new TextBox();
         quickAddBox.setStyleName("input_box");
-        quickAddBox.addStyleName("pad-4");
         quickAddBox.getElement().setAttribute("placeholder", "Enter collection name");
-        quickAddBox.setWidth("165px");
+        quickAddBox.setWidth("185px");
         quickAddBox.setMaxLength(35);
-        quickAddBox.addFocusHandler(new FocusHandler() {
 
-            @Override
-            public void onFocus(FocusEvent event) {
-                quickAddBox.setText("");
-            }
-        });
+        if (resetOnFocus) {
+            quickAddBox.addFocusHandler(new FocusHandler() {
+
+                @Override
+                public void onFocus(FocusEvent event) {
+                    quickAddBox.setText("");
+                }
+            });
+        }
 
         FlexTable layout = new FlexTable();
         layout.setCellPadding(0);
@@ -47,34 +48,34 @@ public class QuickAddWidget extends Composite {
         initWidget(layout);
 
         btnCancel = new Button("<i class=\"" + FAIconType.REMOVE.getStyleName() + "\"></i>");
-        btnCancel.addStyleName("remove_filter");
+        btnCancel.setStyleName("remove_filter");
         addCancelHandler();
-
-        btnSave = new Button("<i class=\"" + FAIconType.OK.getStyleName() + "\"></i>");
-        btnSave.addStyleName("add_filter_style");
 
         layout.setWidget(0, 0, quickAddBox);
 
-        layout.setWidget(0, 1, btnSave);
-        layout.getFlexCellFormatter().setWidth(0, 1, "20px");
-        layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_CENTER);
-
-        layout.setWidget(0, 2, btnCancel);
-        layout.getFlexCellFormatter().setWidth(0, 2, "20px");
-        layout.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_CENTER);
+        layout.setWidget(0, 1, btnCancel);
+        layout.getFlexCellFormatter().setWidth(0, 1, "30px");
+        layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_RIGHT);
     }
 
     protected boolean validate() {
         if (quickAddBox != null && quickAddBox.getText().trim().isEmpty()) {
-            quickAddBox.setStyleName("entry_input_error");
-            quickAddBox.addStyleName("pad-4");
+            quickAddBox.setStyleName("input_box_error");
             return false;
         }
         return true;
     }
 
+    public void setFocus(boolean focus) {
+        quickAddBox.setFocus(focus);
+    }
+
     public String getInputName() {
         return this.quickAddBox.getText();
+    }
+
+    public void setInputName(String text) {
+        this.quickAddBox.setText(text);
     }
 
     public void addQuickAddKeyPressHandler(final KeyPressHandler handler) {
@@ -97,23 +98,11 @@ public class QuickAddWidget extends Composite {
         });
     }
 
-    public void addSubmitHandler(final ClickHandler handler) {
-        this.btnSave.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (!validate())
-                    return;
-                handler.onClick(event);
-            }
-        });
-    }
-
     public void addCancelHandler() {
         this.btnCancel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 quickAddBox.setStyleName("input_box");
-                quickAddBox.addStyleName("pad-4");
                 QuickAddWidget.this.setVisible(false);
             }
         });

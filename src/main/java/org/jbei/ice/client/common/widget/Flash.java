@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class Flash implements IsWidget {
 
-    public static String SWF_LOCATION = "static/swf/";
     private final HTML widget;
 
     public Flash(Parameters params) {
@@ -37,8 +36,8 @@ public class Flash implements IsWidget {
                 + params.getSessiondId()
                 + "\" quality=\"high\" bgcolor=\"#869ca7\" width=\"100%\" wmode=\"opaque\" height=\"100%\" " +
                 "name=\"VectorEditor\" align=\"middle\" play=\"true\" loop=\"false\" " +
-                "type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe" +
-                ".com/go/getflashplayer\"></object>";
+                "type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\">"
+                + "</object>";
         widget = new HTML(html);
         widget.setStyleName("z-index-low");
         widget.setHeight("100%");
@@ -88,5 +87,4 @@ public class Flash implements IsWidget {
             this.movieName = movieName;
         }
     }
-
 }

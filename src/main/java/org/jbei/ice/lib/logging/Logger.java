@@ -21,8 +21,7 @@ import org.jbei.ice.shared.dto.ConfigurationKey;
  * @author Timothy Ham
  */
 public class Logger {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
-                                                                          .getLogger("org.jbei.ice.system");
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger("org.jbei.ice.system");
 
     /**
      * Log a message at the DEBUG level.
@@ -119,16 +118,17 @@ public class Logger {
     private static void sendEmail(String message, Throwable e) {
         if (e instanceof MessagingException || e instanceof ControllerException || e instanceof DAOException) {
             // if error is "Can't send email", there is no need to try to send email
-        } else {
-            if (Utils.getConfigValue(ConfigurationKey.SEND_EMAIL_ON_ERRORS).equals("YES")) {
+            return;
+        }
 
-                SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
-                body = body + message;
-                String subject = "Error";
-                Emailer.error(Utils.getConfigValue(ConfigurationKey.ERROR_EMAIL_EXCEPTION_PREFIX) + " "
-                                      + subject, body);
-            }
+        String value = Utils.getConfigValue(ConfigurationKey.SEND_EMAIL_ON_ERRORS);
+
+        if (value != null && value.equalsIgnoreCase("YES")) {
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
+            body = body + message;
+            String subject = "Error";
+            Emailer.error(Utils.getConfigValue(ConfigurationKey.ERROR_EMAIL_EXCEPTION_PREFIX) + " " + subject, body);
         }
     }
 

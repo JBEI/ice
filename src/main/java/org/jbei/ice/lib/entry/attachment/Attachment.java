@@ -4,8 +4,12 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
 
 import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.FieldBridge;
+import org.hibernate.search.annotations.Indexed;
 
 /**
  * Store information about attachments.
@@ -16,13 +20,14 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name = "attachments")
+@Indexed(index = "Attachment")
 @SequenceGenerator(name = "sequence", sequenceName = "attachments_id_seq", allocationSize = 1)
 public class Attachment implements IModel {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "description", nullable = false)
@@ -44,10 +49,12 @@ public class Attachment implements IModel {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
+    @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
+            @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasAttachment")
+    }))
     private Entry entry;
 
-    public Attachment() {
-    }
+    public Attachment() {}
 
     /**
      * Attachment constructor.

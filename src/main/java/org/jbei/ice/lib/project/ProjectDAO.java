@@ -81,10 +81,6 @@ public class ProjectDAO extends HibernateRepository {
             }
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve project by id: " + id, e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
         }
 
         return project;
@@ -114,10 +110,6 @@ public class ProjectDAO extends HibernateRepository {
             }
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve project by uuid: " + uuid, e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
         }
 
         return project;
@@ -140,7 +132,6 @@ public class ProjectDAO extends HibernateRepository {
                     + " where account.id = :account_id ORDER BY modification_time DESC";
 
             Query query = session.createQuery(queryString);
-
             query.setParameter("account_id", account.getId());
 
             List list = query.list();
@@ -151,12 +142,7 @@ public class ProjectDAO extends HibernateRepository {
                 }
             }
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve projects by account: "
-                                           + account.getFullName(), e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            throw new DAOException("Failed to retrieve projects by account: " + account.getFullName(), e);
         }
 
         return projects;

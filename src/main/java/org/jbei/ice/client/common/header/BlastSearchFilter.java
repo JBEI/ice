@@ -7,12 +7,10 @@ import com.google.gwt.user.client.ui.HTML;
 
 public class BlastSearchFilter extends Composite {
 
-    private final FlexTable table;
     private final HTML label;
 
     public BlastSearchFilter(String msg, String type) {
-
-        table = new FlexTable();
+        FlexTable table = new FlexTable();
         table.setCellPadding(2);
         table.setCellSpacing(0);
         table.setStyleName("search_filter_widget");

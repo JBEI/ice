@@ -25,7 +25,7 @@ public class Folder implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -53,7 +53,7 @@ public class Folder implements IModel {
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
                inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
     @LazyCollection(LazyCollectionOption.EXTRA)
-    private Set<Entry> contents = new LinkedHashSet<Entry>();
+    private Set<Entry> contents = new LinkedHashSet<>();
 
     public Folder() {
     }
@@ -64,10 +64,6 @@ public class Folder implements IModel {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public void setParent(Folder parent) {
-        this.parent = parent;
     }
 
     public void setName(String name) {
@@ -82,16 +78,8 @@ public class Folder implements IModel {
         this.ownerEmail = ownerEmail;
     }
 
-    public void setContents(Set<Entry> contents) {
-        this.contents = contents;
-    }
-
     public long getId() {
         return id;
-    }
-
-    public Folder getParent() {
-        return parent;
     }
 
     public String getName() {

@@ -38,14 +38,13 @@ public class CreateEntryMenu implements IsWidget {
         Style cellListStyle();
     }
 
-    private static final String LABEL = "Create Entry <i class=\"" + FAIconType.CARET_DOWN.getStyleName()
-            + " font-80em\"></i>";
     private final Button createEntry;
     private final SingleSelectionModel<EntryAddType> optionSelection;
 
-    public CreateEntryMenu() {
+    public CreateEntryMenu(String label) {
         ExportAsResource.INSTANCE.cellListStyle().ensureInjected();
-        createEntry = new Button(LABEL);
+        label += " <i class=\"" + FAIconType.CARET_DOWN.getStyleName() + "\"></i>";
+        createEntry = new Button(label);
         createEntry.setStyleName(ExportAsResource.INSTANCE.cellListStyle().subMenuCreateNew());
 
         // renderer for options list

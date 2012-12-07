@@ -18,7 +18,7 @@ public class AnnotationLocation implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "genbank_start", nullable = false)
@@ -38,7 +38,7 @@ public class AnnotationLocation implements IModel {
     // genbank "site between two residues" notation (e.g. 4^5)
     private boolean inbetween;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sequence_feature_id")
     private SequenceFeature sequenceFeature;
 

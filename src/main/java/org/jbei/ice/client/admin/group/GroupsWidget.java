@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 
@@ -35,7 +33,7 @@ public class GroupsWidget extends Composite {
         groupList.setCellSpacing(0);
         groupList.getFlexCellFormatter().setWidth(0, 0, "250px");
         mapping = new HashMap<Integer, GroupInfo>();
-        groupMembers = new GroupMembersWidget(delegate);
+        groupMembers = new GroupMembersWidget();
         groupMembers.setVisible(false);
         HorizontalPanel layout = new HorizontalPanel();
         initWidget(layout);
@@ -72,39 +70,18 @@ public class GroupsWidget extends Composite {
     }
 
     public void showDisplay() {
-        displayGroup(root, 0);
-
-//        // test
-//        GroupInfo newGroup = new GroupInfo();
-//        newGroup.setLabel("Test");
-//        newGroup.setDescription("This is a test of the widget add child blab");
-//        newGroup.setParentId(root.getId());
-//        addNewGroup(newGroup);
-//
-//        GroupInfo newGroup2 = new GroupInfo();
-//        newGroup2.setLabel("Test2");
-//        newGroup2.setDescription("This is a test of the widget add child blab2");
-//        newGroup2.setParentId(newGroup.getId());
-//        addNewGroup(newGroup2);
-//
-//        GroupInfo newGroup1 = new GroupInfo();
-//        newGroup1.setLabel("Test1");
-//        newGroup1.setDescription("This is a test of the widget add child blab1");
-//        newGroup1.setParentId(root.getId());
-//        addNewGroup(newGroup1);
+        displayGroup(root);
     }
 
-    private void displayGroup(GroupInfo info, int level) {
+    private void displayGroup(GroupInfo info) {
         if (info == null)
             return;
 
-        boolean expandParent = true && info.getChildren().isEmpty();
-        draw(row, info, level, expandParent);
-        level += 5;
+        draw(row, info);
 
         for (GroupInfo child : info.getChildren()) {
             row += 1;
-            draw(row, child, level, false);
+            draw(row, child);
         }
     }
 
@@ -135,11 +112,11 @@ public class GroupsWidget extends Composite {
         // insert
         Cell cell = (Cell) groupList.getWidget(parentRow, 0);
         int row = groupList.insertRow(parentRow + 1);
-        draw(row, newGroup, cell.getLevel() + 1, true);
+        draw(row, newGroup);
     }
 
-    private void draw(int row, GroupInfo info, int level, boolean expand) {
-        Cell cell = new Cell(level, info, expand);
+    private void draw(int row, GroupInfo info) {
+        Cell cell = new Cell(info);
         groupList.setWidget(row, 0, cell);
         groupList.getFlexCellFormatter().setStyleName(row, 0, "group_info_td");
         mapping.put(row, info);
@@ -147,44 +124,19 @@ public class GroupsWidget extends Composite {
 
     private class Cell extends Composite {
 
-        private final int level;
         private final GroupInfo info;
-        private boolean expand;
 
-        public Cell(int level, GroupInfo info, boolean expand) {
-
-            this.level = level;
+        public Cell(GroupInfo info) {
             this.info = info;
-            this.expand = expand;
 
-            HTMLPanel panel = new HTMLPanel("<div style=\"margin-left: " + (level * 15)
-                                                    + "px\"><span style=\"float: left; margin-right: 5px;\" id=\""
-                                                    + info.getUuid() + "\"></span> <b>"
-                                                    + info.getLabel()
-                                                    + "</b><i class=\""
-                                                    + FAIconType.CHEVRON_RIGHT.getStyleName() + "\"></i>"
-                                                    + "<br><span style=\"color: #888; font-size: 0.62em; top: "
-                                                    + "-5px; position: relative; left: 16px\">"
+            HTMLPanel panel = new HTMLPanel("<div><b>" + info.getLabel() + "</b><br><span style=\"color: #888; "
+                                                    + "font-size: 0.62em; top: -5px; position: relative\">"
                                                     + info.getDescription() + "</span></div>");
             initWidget(panel);
-
-            Icon icon;
-            if (expand)
-                icon = new Icon(FAIconType.CARET_DOWN);
-            else
-                icon = new Icon(FAIconType.CARET_RIGHT);
-            panel.add(icon, info.getUuid());
-
-            icon.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    event.stopPropagation();
-                }
-            });
         }
 
-        public int getLevel() {
-            return level;
+        public GroupInfo getGroup() {
+            return this.info;
         }
     }
 }

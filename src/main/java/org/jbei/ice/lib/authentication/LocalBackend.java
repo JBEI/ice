@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.authentication;
 
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -9,36 +11,27 @@ import org.jbei.ice.lib.account.model.Account;
  *
  * @author Zinovii Dmytriv, Timothy Ham, Hector Plahar
  */
-public class LocalBackend implements IAuthenticationBackend {
+public class LocalBackend implements IAuthentication {
 
-    private final AccountController controller;
-
-    public LocalBackend() {
-        controller = new AccountController();
-    }
-
-    @Override
-    public String getBackendName() {
-        return "LocalBackend";
-    }
+    public LocalBackend() {}
 
     @Override
     public Account authenticate(String userId, String password)
-            throws AuthenticationBackendException, InvalidCredentialsException {
+            throws AuthenticationException, InvalidCredentialsException {
         if (userId == null || password == null) {
             throw new InvalidCredentialsException("Username and Password are mandatory!");
         }
 
         Account account;
+        AccountController controller = ApplicationController.getAccountController();
 
         try {
             account = controller.getByEmail(userId);
-
             if ((account == null) || (!controller.isValidPassword(account, password))) {
                 throw new InvalidCredentialsException("Invalid Username or Password!");
             }
         } catch (ControllerException e) {
-            throw new AuthenticationBackendException(e);
+            throw new AuthenticationException("Exception validating credentials", e);
         }
 
         return account;

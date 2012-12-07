@@ -10,12 +10,18 @@ import org.jbei.ice.lib.logging.Logger;
  */
 public class RebuildBlastIndexTask extends Task {
 
+    private final boolean force;
+
+    public RebuildBlastIndexTask(boolean force) {
+        this.force = force;
+    }
+
     @Override
     public void execute() {
         Logger.info("Running blast rebuild task");
         Blast blast = new Blast();
         try {
-            blast.rebuildDatabase();
+            blast.rebuildDatabase(force);
         } catch (BlastException e) {
             Logger.error(e);
         }

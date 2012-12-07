@@ -3,6 +3,7 @@
  */
 package org.jbei.ice.lib.account;
 
+import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 
@@ -54,7 +55,7 @@ public class AccountControllerTest {
      */
     @Test
     public void testGet() throws Exception {
-        AccountController controller = new AccountController();
+        AccountController controller = ApplicationController.getAccountController();
         Account account = controller.get(0);
         Assert.assertNull(account);
 

@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload.model;
 
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 public class ModelFactory {
 

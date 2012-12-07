@@ -5,9 +5,13 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
 import org.jbei.ice.lib.models.Storage;
 
 import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.FieldBridge;
+import org.hibernate.search.annotations.Indexed;
 
 /**
  * Store Sample information.
@@ -19,13 +23,14 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name = "samples")
+@Indexed(index = "Sample")
 @SequenceGenerator(name = "sequence", sequenceName = "samples_id_seq", allocationSize = 1)
 public class Sample implements IModel {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "uuid", length = 36)
@@ -44,6 +49,9 @@ public class Sample implements IModel {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false, unique = false)
+    @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
+            @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasSample")
+    }))
     private Entry entry;
 
     @Column(name = "creation_time")
@@ -58,8 +66,7 @@ public class Sample implements IModel {
     @JoinColumn(name = "location_id")
     private Storage storage;
 
-    public Sample() {
-    }
+    public Sample() {}
 
     public long getId() {
         return id;

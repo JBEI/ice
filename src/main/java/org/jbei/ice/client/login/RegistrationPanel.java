@@ -4,31 +4,40 @@ import org.jbei.ice.client.login.RegistrationPanelPresenter.IRegistrationPanelVi
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Panel for new user account registration
+ *
+ * @author Hector Plahar
+ */
 public class RegistrationPanel extends Composite implements IRegistrationPanelView {
 
-    private FlowPanel panel = new FlowPanel();
     private Button submit;
     private Label cancel;
     private TextBox givenName;
     private TextBox familyName;
-    private TextBox initials;
     private TextBox email;
     private TextArea aboutYourself;
     private TextBox institution;
     private Label alreadyRegistered;
     private HTMLPanel emailPanel;
+    private FlexTable inputTable;
 
     private final RegistrationPanelPresenter presenter;
 
     public RegistrationPanel() {
-
         initComponents();
 
-        panel.setStyleName("login_panel");
         submit.setStyleName("login_btn");
-
         cancel.setStyleName("footer_feedback_widget");
         cancel.addStyleName("font-80em");
         cancel.addStyleName("display-inline");
@@ -36,21 +45,10 @@ public class RegistrationPanel extends Composite implements IRegistrationPanelVi
         alreadyRegistered.setStyleName("required");
         alreadyRegistered.addStyleName("font-70em");
 
-        FlexTable registrationTable = new FlexTable();
-        registrationTable.setStyleName("login_table");
-        registrationTable.setCellPadding(0);
-        registrationTable.setCellSpacing(0);
-        registrationTable.setHTML(1, 0, "<b>REGISTRATION</b>");
-        registrationTable.getCellFormatter().setStyleName(1, 0, "pad-15");
+        inputTable = new FlexTable();
+        createInputTable();
 
-        registrationTable.setHTML(2, 0, "<div style=\"height: 2px; background-color: #0082C0;"
-                + "-webkit-box-shadow: 0px 1px 1px #999\"></div>");
-
-        registrationTable.setWidget(3, 0, createInputTable());
-        registrationTable.getFlexCellFormatter().setStyleName(3, 0, "pad-15");
-
-        panel.add(registrationTable);
-        initWidget(panel);
+        initWidget(inputTable);
         presenter = new RegistrationPanelPresenter(this);
     }
 
@@ -100,89 +98,76 @@ public class RegistrationPanel extends Composite implements IRegistrationPanelVi
         cancel = new Label("Cancel");
         givenName = createStandardTextBox("205px");
         familyName = createStandardTextBox("205px");
-        initials = createStandardTextBox("50px");
         email = createStandardTextBox("205px");
         institution = createStandardTextBox("205px");
-        aboutYourself = createTextArea("250px", "100px");
+        aboutYourself = createTextArea("205px", "60px");
         alreadyRegistered = new Label("Aready registered");
-        emailPanel = new HTMLPanel(
-                "<span id=\"email_input_box\"></span> <span id=\"email_error_msg\"></span>");
+        emailPanel = new HTMLPanel("<span id=\"email_input_box\"></span> <span id=\"email_error_msg\"></span>");
     }
 
     private Widget createInputTable() {
-        FlexTable inputTable = new FlexTable();
+        int row = 0;
+
+        inputTable.setHTML(row, 0, "<img style=\"margin-bottom: 30px;\" src=\"static/images/logo.png\" />");
+        inputTable.getFlexCellFormatter().setColSpan(row, 0, 3);
 
         // given name
-        inputTable
-                .setHTML(
-                        0,
-                        0,
-                        "<span class=\"font-80em\" style=\"white-space:nowrap\">Given name <span " +
-                                "class=\"required\">*</span></span>");
-        inputTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
-        inputTable.getFlexCellFormatter().setWidth(0, 0, "150px");
-        inputTable.setWidget(0, 1, givenName);
+        row += 1;
+        createLabel("Given Name", row, true);
+        inputTable.setWidget(row, 1, givenName);
 
         // family name
-        inputTable
-                .setHTML(
-                        1,
-                        0,
-                        "<span class=\"font-80em\" style=\"white-space:nowrap\">Family name <span " +
-                                "class=\"required\">*</span></span>");
-        inputTable.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
-        inputTable.getFlexCellFormatter().setWidth(1, 0, "150px");
-        inputTable.setWidget(1, 1, familyName);
-
-        // initials
-        inputTable.setHTML(2, 0,
-                           "<span class=\"font-80em\" style=\"white-space:nowrap\">Initials</span>");
-        inputTable.getFlexCellFormatter().setVerticalAlignment(2, 0, HasAlignment.ALIGN_TOP);
-        inputTable.getFlexCellFormatter().setWidth(2, 0, "150px");
-        inputTable.setWidget(2, 1, initials);
+        row += 1;
+        createLabel("Family Name", row, true);
+        inputTable.setWidget(row, 1, familyName);
 
         // email
-        inputTable
-                .setHTML(
-                        3,
-                        0,
-                        "<span class=\"font-80em\" style=\"white-space:nowrap\">Email <span " +
-                                "class=\"required\">*</span></span>");
-        inputTable.getFlexCellFormatter().setVerticalAlignment(3, 0, HasAlignment.ALIGN_TOP);
-        inputTable.getFlexCellFormatter().setWidth(3, 0, "150px");
-
+        row += 1;
+        createLabel("Email", row, true);
         emailPanel.add(email, "email_input_box");
-        inputTable.setWidget(3, 1, emailPanel);
+        inputTable.setWidget(row, 1, emailPanel);
 
         // institution
-        inputTable.setHTML(4, 0,
-                           "<span class=\"font-80em\" style=\"white-space:nowrap\">Institution</span>");
-        inputTable.getFlexCellFormatter().setVerticalAlignment(4, 0, HasAlignment.ALIGN_TOP);
-        inputTable.getFlexCellFormatter().setWidth(4, 0, "150px");
-        inputTable.setWidget(4, 1, institution);
+        row += 1;
+        createLabel("Institution", row, true);
+        inputTable.setWidget(row, 1, institution);
 
         // about yourself
-        inputTable.setHTML(5, 0,
-                           "<span class=\"font-80em\" style=\"white-space:nowrap\">About yourself</span>");
-        inputTable.getFlexCellFormatter().setVerticalAlignment(5, 0, HasAlignment.ALIGN_TOP);
-        inputTable.getFlexCellFormatter().setWidth(5, 0, "150px");
-        inputTable.setWidget(5, 1, aboutYourself);
+        row += 1;
+        inputTable.setHTML(row, 0, "<span class=\"font-80em\" style=\"white-space:nowrap\">About yourself</span>");
+        inputTable.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
+        inputTable.getFlexCellFormatter().setWidth(row, 0, "100px");
+        inputTable.setWidget(row, 1, aboutYourself);
 
         HTMLPanel buttonPanel = new HTMLPanel(
                 "<span id=\"submit_button\"></span> <span id=\"registration_cancel_link\"></span>");
         buttonPanel.add(submit, "submit_button");
         buttonPanel.add(cancel, "registration_cancel_link");
 
-        inputTable.getFlexCellFormatter().setColSpan(6, 0, 2);
-        inputTable.setWidget(6, 0, buttonPanel);
-        inputTable.getCellFormatter().setHorizontalAlignment(6, 0, HasAlignment.ALIGN_CENTER);
-
+        row += 1;
+        inputTable.getFlexCellFormatter().setColSpan(row, 0, 2);
+        inputTable.setWidget(row, 0, buttonPanel);
+        inputTable.getCellFormatter().setHorizontalAlignment(row, 0, HasAlignment.ALIGN_CENTER);
         return inputTable;
     }
+
+    private void createLabel(String label, int row, boolean required) {
+        String html = "<span class=\"font-80em\" style=\"white-space:nowrap\">" + label;
+        if (required)
+            html += " <span class=\"required\">*</span></span>";
+        else
+            html += "</span>";
+
+        inputTable.setHTML(row, 0, html);
+        inputTable.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
+        inputTable.getFlexCellFormatter().setWidth(row, 0, "100px");
+    }
+
 
     protected TextBox createStandardTextBox(String width) {
         final TextBox box = new TextBox();
         box.setStyleName("input_box");
+        box.addStyleName("pad-2");
         box.setWidth(width);
         return box;
     }
@@ -203,7 +188,7 @@ public class RegistrationPanel extends Composite implements IRegistrationPanelVi
         details.setFirstName(this.givenName.getText());
         details.setLastName(this.familyName.getText());
         details.setInstitution(this.institution.getText());
-        details.setInitials(this.initials.getText());
+        details.setInitials("");
         return details;
     }
 

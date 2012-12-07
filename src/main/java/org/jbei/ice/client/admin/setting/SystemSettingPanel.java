@@ -1,23 +1,24 @@
 package org.jbei.ice.client.admin.setting;
 
 import java.util.HashMap;
-import java.util.Map;
 
-import org.jbei.ice.client.admin.AdminPanel;
-import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
+ * Panel for displaying system settings on the administrative page
+ *
  * @author Hector Plahar
  */
-public class SystemSettingPanel extends Composite implements AdminPanel {
+public class SystemSettingPanel extends Composite implements IAdminPanel {
 
     private final FlexTable layout;
+    private ServiceDelegate<RowData> serviceDelegate;
 
     public SystemSettingPanel() {
         layout = new FlexTable();
@@ -28,155 +29,105 @@ public class SystemSettingPanel extends Composite implements AdminPanel {
         layout.clear();
         int row = 0;
 
-        layout.setWidget(row, 0, createGeneralSettingsPanel(settings));
+        // general settings
+        layout.setWidget(row, 0, createGeneralSettingPanel(settings));
         layout.getFlexCellFormatter().setColSpan(row, 0, 3);
         layout.getFlexCellFormatter().setStyleName(row, 0, "pad_top");
         row += 1;
 
+        // email settings
         layout.setWidget(row, 0, createEmailSettingsPanel(settings));
         layout.getFlexCellFormatter().setStyleName(row, 0, "pad_top");
         layout.getFlexCellFormatter().setColSpan(row, 0, 3);
         row += 1;
 
-        // display whatever settings remain.
-        for (Map.Entry<String, String> entry : settings.entrySet()) {
+//        // sample settings
+//        layout.setWidget(row, 0, createSampleSettingsPanel(settings));
+//        layout.getFlexCellFormatter().setStyleName(row, 0, "pad_top");
+//        layout.getFlexCellFormatter().setColSpan(row, 0, 3);
+//        row += 1;
 
-            String key;
-            ConfigurationKey configurationKey = ConfigurationKey.stringToEnum(entry.getKey());
-            if (configurationKey == null || configurationKey.toString().isEmpty())
-                key = entry.getKey();
-            else
-                key = configurationKey.toString();
+        // search settings
+        layout.setWidget(row, 0, createSearchSettingsPanel(settings));
+        layout.getFlexCellFormatter().setStyleName(row, 0, "pad_top");
+        layout.getFlexCellFormatter().setColSpan(row, 0, 3);
+        row += 1;
 
-            layout.setHTML(row, 0, "<b class=\"font-75em\" style=\"text-transform: uppercase\">" + key + "</b>");
-            layout.setHTML(row, 1, "<span class=\"font-75em\" style=\"margin-left: 30px; margin-right: 30px\">"
-                    + entry.getValue() + "</span>");
-            layout.setHTML(row, 2, "<span class=\"font-70em\"><i class=\"" + FAIconType.EDIT.getStyleName()
-                    + "\"> Edit</span>");
-            row += 1;
-        }
+//        layout.setWidget(row, 0, createLDAPSettingsPanel(settings));
+//        layout.getFlexCellFormatter().setStyleName(row, 0, "pad_top");
+//        layout.getFlexCellFormatter().setColSpan(row, 0, 3);
+//        row += 1;
     }
 
-    private Widget createGeneralSettingsPanel(HashMap<String, String> settings) {
-        HTMLPanel headerPanel = new HTMLPanel(
-                "<span style=\"color: #233559; "
-                        + "font-weight: bold; font-style: italic; font-size: 0.80em; text-transform: uppercase\">"
-                        + "General Settings"
-                        + "</span><div style=\"float: right\"><span id=\"add_partner\"></span></div>");
-
-        headerPanel.setStyleName("entry_sequence_sub_header");
-
-        FlexTable table = new FlexTable();
-        table.setWidth("100%");
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-        table.setWidget(0, 0, headerPanel);
-        table.getFlexCellFormatter().setColSpan(0, 0, 2);
-
-        int row = 1;
-        String key = ConfigurationKey.COOKIE_NAME.name();
-        String value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.COOKIE_NAME.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-
-        key = ConfigurationKey.PROFILE_EDIT_ALLOWED.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.PROFILE_EDIT_ALLOWED.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-
-        key = ConfigurationKey.WIKILINK_PREFIX.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.WIKILINK_PREFIX.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-
-        key = ConfigurationKey.PART_NUMBER_DELIMITER.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.PART_NUMBER_DELIMITER.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-
-        key = ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-
-        key = ConfigurationKey.PART_NUMBER_PREFIX.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.PART_NUMBER_PREFIX.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-
-        key = ConfigurationKey.URI_PREFIX.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.URI_PREFIX.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-
-        key = ConfigurationKey.PROJECT_NAME.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.PROJECT_NAME.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-
-        key = ConfigurationKey.NEW_REGISTRATION_ALLOWED.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.NEW_REGISTRATION_ALLOWED.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-
-        return table;
+    private Widget createGeneralSettingPanel(HashMap<String, String> settings) {
+        return new SettingPanel(settings, "General Settings", serviceDelegate,
+                                ConfigurationKey.SITE_SECRET,
+                                ConfigurationKey.PROFILE_EDIT_ALLOWED,
+                                ConfigurationKey.WIKILINK_PREFIX,
+                                ConfigurationKey.PART_NUMBER_DELIMITER,
+                                ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX,
+                                ConfigurationKey.PART_NUMBER_PREFIX,
+                                ConfigurationKey.PASSWORD_CHANGE_ALLOWED,
+                                ConfigurationKey.PROJECT_NAME,
+                                ConfigurationKey.NEW_REGISTRATION_ALLOWED,
+                                ConfigurationKey.ATTACHMENTS_DIRECTORY,
+                                ConfigurationKey.TRACE_FILES_DIRECTORY,
+                                ConfigurationKey.DATA_DIRECTORY,
+                                ConfigurationKey.SECRET_KEY,
+                                ConfigurationKey.TEMPORARY_DIRECTORY,
+                                ConfigurationKey.DATABASE_SCHEMA_VERSION);
     }
 
     private Widget createEmailSettingsPanel(HashMap<String, String> settings) {
-        HTMLPanel headerPanel = new HTMLPanel(
-                "<span style=\"color: #233559; "
-                        + "font-weight: bold; font-style: italic; font-size: 0.80em; text-transform: uppercase\">"
-                        + "Email Settings"
-                        + "</span><div style=\"float: right\"><span id=\"add_partner\"></span></div>");
+        return new SettingPanel(settings, "Email Settings", serviceDelegate,
+                                ConfigurationKey.SMTP_HOST,
+                                ConfigurationKey.ERROR_EMAIL_EXCEPTION_PREFIX,
+                                ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL,
+                                ConfigurationKey.SEND_EMAIL_ON_ERRORS,
+                                ConfigurationKey.ADMIN_EMAIL);
+    }
 
-        headerPanel.setStyleName("entry_sequence_sub_header");
+//    private Widget createSampleSettingsPanel(HashMap<String, String> settings) {
+//        return new SettingPanel(settings, "Sample Settings", serviceDelegate,
+//                                ConfigurationKey.PART_STORAGE_DEFAULT,
+//                                ConfigurationKey.PART_STORAGE_ROOT,
+//                                ConfigurationKey.STRAIN_STORAGE_DEFAULT,
+//                                ConfigurationKey.STRAIN_STORAGE_ROOT,
+//                                ConfigurationKey.ARABIDOPSIS_STORAGE_DEFAULT,
+//                                ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT,
+//                                ConfigurationKey.PLASMID_STORAGE_DEFAULT,
+//                                ConfigurationKey.PLASMID_STORAGE_ROOT);
+//    }
 
-        FlexTable table = new FlexTable();
-        table.setWidth("100%");
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-        table.setWidget(0, 0, headerPanel);
-        table.getFlexCellFormatter().setColSpan(0, 0, 2);
+//    private Widget createLDAPSettingsPanel(HashMap<String, String> settings) {
+//        return new SettingPanel(settings, "Authentication Settings", serviceDelegate,
+//                                ConfigurationKey.LDAP_AUTHENTICATION_URL,
+//                                ConfigurationKey.LDAP_QUERY,
+//                                ConfigurationKey.AUTHENTICATION_BACKEND,
+//                                ConfigurationKey.LDAP_SEARCH_URL);
+//    }
 
-        int row = 1;
-        String key = ConfigurationKey.SMTP_HOST.name();
-        String value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.SMTP_HOST.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
+    private Widget createSearchSettingsPanel(HashMap<String, String> settings) {
+        return new SettingPanel(settings, "Search Settings", serviceDelegate,
+                                ConfigurationKey.BLAST_BL2SEQ,
+                                ConfigurationKey.BLAST_BLASTALL,
+                                ConfigurationKey.BLAST_DIRECTORY,
+                                ConfigurationKey.BLAST_DATABASE_NAME,
+                                ConfigurationKey.BLAST_FORMATDB);
+    }
 
-        key = ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
+    public void setServiceDelegate(ServiceDelegate<RowData> serviceDelegate) {
+        this.serviceDelegate = serviceDelegate;
+    }
 
-        key = ConfigurationKey.SEND_EMAIL_ON_ERRORS.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.SEND_EMAIL_ON_ERRORS.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
+    public void setConfigValue(ConfigurationKey key, int row, String value) {
+        for (int i = 0; i < layout.getRowCount(); i += 1) {
+            Widget widget = layout.getWidget(i, 0);
+            if (!(widget instanceof SettingPanel))
+                continue;
 
-        key = ConfigurationKey.ERROR_EMAIL_EXCEPTION_PREFIX.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.ERROR_EMAIL_EXCEPTION_PREFIX.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-
-        key = ConfigurationKey.ADMIN_EMAIL.name();
-        value = settings.remove(key);
-        table.setHTML(row, 0, ConfigurationKey.ADMIN_EMAIL.toString());
-        table.setHTML(row, 1, value);
-        row += 1;
-        return table;
+            SettingPanel panel = (SettingPanel) widget;
+            panel.updateConfigSetting(key, row, value);
+        }
     }
 }

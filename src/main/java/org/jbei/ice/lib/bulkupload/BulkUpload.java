@@ -1,14 +1,18 @@
 package org.jbei.ice.lib.bulkupload;
 
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.BulkUploadInfo;
 
 /**
  * Saved draft of bulk imports. Encapsulates a list of {@link Entry}s that are created and updated
@@ -23,7 +27,7 @@ import org.jbei.ice.lib.group.Group;
 public class BulkUpload implements IModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private Long id;
 
     @Column(name = "name", length = 50)
@@ -48,14 +52,19 @@ public class BulkUpload implements IModel {
     @Column(name = "last_update_time", nullable = false)
     private Date lastUpdateTime;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "bulk_upload_entry",
                joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
                inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
-    private List<Entry> contents = new LinkedList<Entry>();
+    private Set<Entry> contents = new HashSet<>();
 
-    public BulkUpload() {
-    }
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE, CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinTable(name = "bulk_upload_preferences",
+               joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
+               inverseJoinColumns = {@JoinColumn(name = "preference_id", nullable = false)})
+    private Set<Preference> preferences = new HashSet<>();
+
+    public BulkUpload() {}
 
     public Long getId() {
         return this.id;
@@ -93,7 +102,7 @@ public class BulkUpload implements IModel {
         this.name = name;
     }
 
-    public List<Entry> getContents() {
+    public Set<Entry> getContents() {
         return contents;
     }
 
@@ -117,5 +126,22 @@ public class BulkUpload implements IModel {
 
     public void setReadGroup(Group readGroup) {
         this.readGroup = readGroup;
+    }
+
+    public Set<Preference> getPreferences() {
+        return preferences;
+    }
+
+    public static BulkUploadInfo toDTO(BulkUpload draft) {
+        if (draft == null)
+            return null;
+
+        BulkUploadInfo bulkUploadInfo = new BulkUploadInfo();
+        bulkUploadInfo.setCreated(draft.getCreationTime());
+        bulkUploadInfo.setId(draft.getId());
+        Account draftAccount = draft.getAccount();
+        bulkUploadInfo.setName(draftAccount.getFullName());
+        bulkUploadInfo.setType(EntryAddType.stringToType(draft.getImportType()));
+        return bulkUploadInfo;
     }
 }

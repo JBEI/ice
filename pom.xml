@@ -22,7 +22,6 @@
             <name>Timothy Ham</name>
             <email>tsham@lbl.gov</email>
             <roles>
-                <role>Project Manager</role>
                 <role>Architect</role>
                 <role>Developer</role>
             </roles>
@@ -130,19 +129,14 @@
             <version>4.9</version>
         </dependency>
         <dependency>
-            <groupId>javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.8.0.GA</version>
-        </dependency>
-        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>4.1.4.Final</version>
+            <version>4.1.9.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-search</artifactId>
-            <version>4.1.1.Final</version>
+            <version>4.2.0.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -152,7 +146,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-c3p0</artifactId>
-            <version>4.1.4.Final</version>
+            <version>4.1.7.Final</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
@@ -281,21 +275,6 @@
             <version>3.0.2</version>
         </dependency>
         <dependency>
-            <groupId>org.jbei.ice</groupId>
-            <artifactId>org.eclipse.mylyn.wikitext.core</artifactId>
-            <version>SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jbei.ice</groupId>
-            <artifactId>org.eclipse.mylyn.wikitext.mediawiki.core</artifactId>
-            <version>SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jbei.ice</groupId>
-            <artifactId>org.eclipse.mylyn.wikitext.confluence.core</artifactId>
-            <version>SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <version>${gwt.version}</version>
@@ -322,20 +301,9 @@
             <version>1.2.2</version>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.9.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
-            <version>1.4.3</version>
         </dependency>
     </dependencies>
     <build>
@@ -406,8 +374,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <optimize>true</optimize>
                     <debug>true</debug>
                 </configuration>
@@ -500,6 +468,6 @@
     </reporting>
     <properties>
         <jetty.version>6.1.26</jetty.version>
-        <gwt.version>2.5.0-rc2</gwt.version>
+        <gwt.version>2.5.1</gwt.version>
     </properties>
 </project>

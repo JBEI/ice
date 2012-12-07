@@ -3,10 +3,9 @@ package org.jbei.ice.client.bulkupload.model;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.bulkupload.events.BulkUploadDraftSubmitEvent;
 import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEvent;
 import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEventHandler;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
@@ -17,9 +16,8 @@ import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -42,7 +40,7 @@ public class BulkUploadModel {
             @Override
             protected void callService(AsyncCallback<ArrayList<BulkUploadInfo>> callback)
                     throws AuthenticationException {
-                service.retrieveUserSavedDrafts(AppController.sessionId, callback);
+                service.retrieveUserSavedDrafts(ClientController.sessionId, callback);
             }
 
             @Override
@@ -52,32 +50,30 @@ public class BulkUploadModel {
         }.go(eventBus);
     }
 
-    public void saveBulkImportDraftData(final EntryAddType type, final String name,
-            final ArrayList<EntryInfo> entryList, final String groupUUID,
-            final BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler handler) {
+//    public void saveBulkImportDraftData(final EntryAddType type, final String name,
+//            final String groupUUID,
+//            final BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler handler) {
+//
+//        new IceAsyncCallback<BulkUploadInfo>() {
+//
+//            @Override
+//            protected void callService(AsyncCallback<BulkUploadInfo> callback) throws AuthenticationException {
+//                service.saveBulkImportDraft(ClientController.sessionId, name, type, groupUUID, callback);
+//            }
+//
+//            @Override
+//            public void onSuccess(BulkUploadInfo result) {
+//                handler.onSubmit(new BulkUploadDraftSubmitEvent(result));
+//            }
+//        }.go(eventBus);
+//    }
 
-        new IceAsyncCallback<BulkUploadInfo>() {
-
-            @Override
-            protected void callService(AsyncCallback<BulkUploadInfo> callback) throws AuthenticationException {
-                service.saveBulkImportDraft(AppController.sessionId, name, type, entryList, groupUUID, callback);
-            }
-
-            @Override
-            public void onSuccess(BulkUploadInfo result) {
-                handler.onSubmit(new BulkUploadDraftSubmitEvent(result));
-            }
-        }.go(eventBus);
-    }
-
-    public void approvePendingBulkImport(final long draftId, final ArrayList<EntryInfo> entryList,
-            final String groupUUID, final BulkUploadSubmitEventHandler handler) {
-
+    public void approvePendingBulkImport(final long draftId, final BulkUploadSubmitEventHandler handler) {
         new IceAsyncCallback<Boolean>() {
 
             @Override
             protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                service.approvePendingBulkImport(AppController.sessionId, draftId, entryList, groupUUID, callback);
+                service.approvePendingBulkImport(ClientController.sessionId, draftId, callback);
             }
 
             @Override
@@ -87,31 +83,12 @@ public class BulkUploadModel {
         }.go(eventBus);
     }
 
-    public void updateBulkImportDraft(final long id, final ArrayList<EntryInfo> entryList, final String groupUUID,
-            final BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler handler) {
-
-        new IceAsyncCallback<BulkUploadInfo>() {
-
-            @Override
-            protected void callService(AsyncCallback<BulkUploadInfo> callback) throws AuthenticationException {
-                service.updateBulkImportDraft(AppController.sessionId, id, entryList, groupUUID, callback);
-            }
-
-            @Override
-            public void onSuccess(BulkUploadInfo result) {
-                handler.onSubmit(new BulkUploadDraftSubmitEvent(result));
-            }
-        }.go(eventBus);
-    }
-
-    public void submitBulkImport(final EntryAddType type, final ArrayList<EntryInfo> data, final String groupUUID,
-            final BulkUploadSubmitEventHandler handler) {
-
+    public void submitBulkImportDraft(final long bulkImport, final BulkUploadSubmitEventHandler handler) {
         new IceAsyncCallback<Boolean>() {
 
             @Override
             protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                service.submitBulkImport(AppController.sessionId, type, data, groupUUID, callback);
+                service.submitBulkUploadDraft(ClientController.sessionId, bulkImport, callback);
             }
 
             @Override
@@ -121,29 +98,13 @@ public class BulkUploadModel {
         }.go(eventBus);
     }
 
-    public void submitBulkImportDraft(final long bulkImport, final ArrayList<EntryInfo> data,
-            final String groupUUID, final BulkUploadSubmitEventHandler handler) {
-
-        new IceAsyncCallback<Boolean>() {
-
-            @Override
-            protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                service.submitBulkImportDraft(AppController.sessionId, bulkImport, data, groupUUID, callback);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                handler.onSubmit(new BulkUploadSubmitEvent(result));
-            }
-        }.go(eventBus);
-    }
-
-    public void retrieveBulkImport(final long id, final SavedDraftsEventHandler handler) {
+    public void retrieveBulkImport(final long id, final int start, final int limit,
+            final SavedDraftsEventHandler handler) {
         new IceAsyncCallback<BulkUploadInfo>() {
 
             @Override
             protected void callService(AsyncCallback<BulkUploadInfo> callback) throws AuthenticationException {
-                service.retrieveBulkImport(AppController.sessionId, id, callback);
+                service.retrieveBulkImport(ClientController.sessionId, id, start, limit, callback);
             }
 
             @Override
@@ -168,7 +129,7 @@ public class BulkUploadModel {
             @Override
             protected void callService(AsyncCallback<ArrayList<BulkUploadInfo>> callback)
                     throws AuthenticationException {
-                service.retrieveDraftsPendingVerification(AppController.sessionId, callback);
+                service.retrieveDraftsPendingVerification(ClientController.sessionId, callback);
             }
 
             @Override
@@ -198,7 +159,7 @@ public class BulkUploadModel {
         }
 
         service.retrieveStorageSchemes(
-                AppController.sessionId,
+                ClientController.sessionId,
                 entryType,
                 new AsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
 

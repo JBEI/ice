@@ -4,22 +4,25 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.dto.AttachmentInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.PlasmidInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
     @Override
     public StrainInfo setInfoField(SheetCellData datum, EntryInfo strain) {
-
         if (strain == null) {
-            strain = createInfo();
+            strain = new StrainInfo();
         }
 
         PlasmidInfo plasmid = (PlasmidInfo) strain.getInfo();
+        if (plasmid == null) {
+            plasmid = new PlasmidInfo();
+            strain.setInfo(plasmid);
+        }
 
         setPlasmidInfo(plasmid, datum);
         setStrainInfo((StrainInfo) strain, datum);

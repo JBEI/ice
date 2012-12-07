@@ -103,7 +103,7 @@ public class ParametersPanel {
         public Parameter(FlexTable table, int row, boolean firstRow) {
 
             // name label
-            table.setWidget(row, 0, new HTML("<span class=\"font-80em\">Name</span>"));
+            table.setWidget(row, 0, new HTML("<span class=\"font-85em\">Name</span>"));
             table.getFlexCellFormatter().setStyleName(row, 0, "entry_add_parameter");
 
             // input box for name
@@ -112,7 +112,7 @@ public class ParametersPanel {
             table.getFlexCellFormatter().setWidth(row, 1, "220px");
 
             // value label
-            table.setWidget(row, 2, new HTML("<span class=\"font-80em\">Value</span>"));
+            table.setWidget(row, 2, new HTML("<span class=\"font-85em\">Value</span>"));
             table.getFlexCellFormatter().setWidth(row, 2, "50px");
 
             // input box for value

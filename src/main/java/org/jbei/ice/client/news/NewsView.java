@@ -3,7 +3,6 @@ package org.jbei.ice.client.news;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.common.AbstractLayout;
-import org.jbei.ice.client.home.ArchiveMenu;
 import org.jbei.ice.shared.dto.NewsItem;
 
 import com.google.gwt.event.dom.client.ClickEvent;

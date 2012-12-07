@@ -47,7 +47,10 @@ public class SequenceAnalysisController {
     public SequenceAnalysisController() {
         traceDao = new TraceSequenceDAO();
         permissionsController = new PermissionsController();
-        traceSequenceFileDir = new File(Utils.getConfigValue(ConfigurationKey.TRACE_FILES_DIRECTORY));
+        String tracesDir = Utils.getConfigValue(ConfigurationKey.TRACE_FILES_DIRECTORY);
+        if (tracesDir == null)
+            tracesDir = "/tmp/traces";
+        traceSequenceFileDir = new File(tracesDir);
     }
 
     /**

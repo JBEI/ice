@@ -1,6 +1,6 @@
 package org.jbei.ice.shared;
 
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 

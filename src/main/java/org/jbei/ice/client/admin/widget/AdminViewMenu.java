@@ -77,8 +77,8 @@ public class AdminViewMenu extends Composite {
         int row = 1;
         currentRowSelection = row;
         for (AdminOption option : AdminOption.values()) {
-            String html = "<i style=\"width: 24px; float: left; color: #777\" class=\""
-                    + option.getIcon().getStyleName() + " font-awesome font-90em\"></i>" + option.toString();
+            String html = "<i style=\"display:inline; margin-right: 10px; color: #777\" class=\""
+                    + option.getIcon().getStyleName() + " font-awesome\"></i>" + option.toString();
             layout.setHTML(row, 0, html);
             rowOption.put(row, option);
             row += 1;

@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -28,7 +28,7 @@ public class RevertPendingBulkUploadHandler implements IRevertBulkUploadHandler 
 
             @Override
             protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                service.revertedSubmittedBulkUpload(AppController.sessionId, draftId, callback);
+                service.revertedSubmittedBulkUpload(ClientController.sessionId, draftId, callback);
             }
 
             @Override

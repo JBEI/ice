@@ -40,16 +40,27 @@ public class HibernateRepository<T extends IModel> implements IRepository {
             throw new DAOException("Failed to delete null model!");
         }
 
-        Session session = currentSession();
-
         try {
-            session.delete(model);
+            currentSession().delete(model);
         } catch (HibernateException e) {
             throw new DAOException("dbDelete failed!", e);
         } catch (Exception e) {
             Logger.error(e);
             throw new DAOException("Unknown database exception ", e);
         }
+    }
+
+    public T update(T model) throws DAOException {
+        try {
+            currentSession().update(model);
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException("dbDelete failed!", e);
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new DAOException("Unknown database exception ", e);
+        }
+        return model;
     }
 
     /**
@@ -64,9 +75,8 @@ public class HibernateRepository<T extends IModel> implements IRepository {
             throw new DAOException("Failed to save null model!");
         }
 
-        Session session = currentSession();
         try {
-            session.saveOrUpdate(model);
+            currentSession().saveOrUpdate(model);
         } catch (HibernateException e) {
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
@@ -89,9 +99,8 @@ public class HibernateRepository<T extends IModel> implements IRepository {
             throw new DAOException("Failed to save null model!");
         }
 
-        Session session = currentSession();
         try {
-            session.save(model);
+            currentSession().save(model);
         } catch (HibernateException e) {
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
@@ -112,26 +121,19 @@ public class HibernateRepository<T extends IModel> implements IRepository {
      */
     @SuppressWarnings("unchecked")
     protected T get(Class<T> theClass, long id) throws DAOException {
-
-        T result;
-        Session session = currentSession();
-
         try {
-            result = (T) session.get(theClass, id);
+            return (T) currentSession().get(theClass, id);
         } catch (HibernateException e) {
             throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and id=" + id, e);
         } catch (Exception e1) {
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         }
-
-        return result;
     }
 
     @SuppressWarnings("unchecked")
     protected T getByUUID(Class<T> theClass, String uuid) throws DAOException {
         T result;
-
         Session session = currentSession();
 
         try {
@@ -161,8 +163,5 @@ public class HibernateRepository<T extends IModel> implements IRepository {
         } catch (HibernateException he) {
             throw new DAOException("retrieve all failed for " + theClass.getCanonicalName(), he);
         }
-    }
-
-    protected void closeSession() {
     }
 }

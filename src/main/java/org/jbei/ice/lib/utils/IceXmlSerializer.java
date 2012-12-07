@@ -24,7 +24,6 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed.Generation;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.Part;
@@ -35,7 +34,6 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
@@ -236,8 +234,7 @@ public class IceXmlSerializer {
         }
         DefaultElement partNumbers = new DefaultElement(PART_NUMBERS, iceNamespace);
         for (PartNumber partNumber : entry.getPartNumbers()) {
-            partNumbers.add(new DefaultElement(PART_NUMBER, iceNamespace).addText(partNumber
-                                                                                          .getPartNumber()));
+            partNumbers.add(new DefaultElement(PART_NUMBER, iceNamespace).addText(partNumber.getPartNumber()));
         }
         entryRoot.add(partNumbers);
 
@@ -248,17 +245,13 @@ public class IceXmlSerializer {
         entryRoot.add(partNames);
 
         DefaultElement owner = new DefaultElement(OWNER, iceNamespace);
-        owner.add(new DefaultElement(PERSON_NAME, iceNamespace).addText(emptyStringify(entry
-                                                                                               .getOwner())));
-        owner.add(new DefaultElement(EMAIL, iceNamespace).addText(emptyStringify(entry
-                                                                                         .getOwnerEmail())));
+        owner.add(new DefaultElement(PERSON_NAME, iceNamespace).addText(emptyStringify(entry.getOwner())));
+        owner.add(new DefaultElement(EMAIL, iceNamespace).addText(emptyStringify(entry.getOwnerEmail())));
         entryRoot.add(owner);
 
         DefaultElement creator = new DefaultElement(CREATOR, iceNamespace);
-        creator.add(new DefaultElement(PERSON_NAME, iceNamespace).addText(emptyStringify(entry
-                                                                                                 .getCreator())));
-        creator.add(new DefaultElement(EMAIL, iceNamespace).addText(emptyStringify(entry
-                                                                                           .getCreatorEmail())));
+        creator.add(new DefaultElement(PERSON_NAME, iceNamespace).addText(emptyStringify(entry.getCreator())));
+        creator.add(new DefaultElement(EMAIL, iceNamespace).addText(emptyStringify(entry.getCreatorEmail())));
         entryRoot.add(creator);
 
         if (entry.getLinks().size() > 0) {
@@ -273,14 +266,11 @@ public class IceXmlSerializer {
 
         entryRoot.add(new DefaultElement(STATUS, iceNamespace).addText(emptyStringify(entry.getStatus())));
 
-        entryRoot.add(new DefaultElement(SHORT_DESCRIPTION, iceNamespace)
-                              .addText(emptyStringify(entry.getShortDescription())));
         entryRoot.add(new DefaultElement(LONG_DESCRIPTION, iceNamespace)
                               .addText(emptyStringify(entry.getLongDescription())));
         entryRoot.add(new DefaultElement(LONG_DESCRIPTION_MARKUP_TYPE, iceNamespace).addText(
                 entry.getLongDescriptionType()));
-        entryRoot.add(new DefaultElement(REFERENCES, iceNamespace).addText(emptyStringify(entry
-                                                                                                  .getReferences())));
+        entryRoot.add(new DefaultElement(REFERENCES, iceNamespace).addText(emptyStringify(entry.getReferences())));
         entryRoot.add(getEntryTypeSpecificFields(entry));
 
         entryRoot.add(new DefaultElement(BIO_SAFETY_LEVEL, iceNamespace)
@@ -288,18 +278,23 @@ public class IceXmlSerializer {
         entryRoot.add(new DefaultElement(INTELLECTUAL_PROPERTY, iceNamespace)
                               .addText(emptyStringify(entry.getIntellectualProperty())));
 
-        if (entry.getEntryFundingSources().size() > 0) {
-            DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
-            for (EntryFundingSource fundingSource : entry.getEntryFundingSources()) {
-                fundingSources.add(
-                        new DefaultElement(FUNDING_SOURCE, iceNamespace)
-                                .addText(emptyStringify(fundingSource.getFundingSource().getFundingSource()))
-                                .addAttribute(
-                                        PRINCIPAL_INVESTIGATOR,
-                                        emptyStringify(fundingSource.getFundingSource().getPrincipalInvestigator())));
-            }
-            entryRoot.add(fundingSources);
-        }
+//        if (entry.getFundingSources().size() > 0) {
+//            DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
+//            for (Funding funding : entry.getFundingSources()) {
+//                fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace)
+//                                .addText(emptyStringify(funding.getFundingSource())));
+//            }
+//            entryRoot.add(fundingSources);
+//        }
+//
+//        if (entry.getPrincipalInvestigators().size() > 0) {
+//            DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
+//            for (Funding funding : entry.getFundingSources()) {
+//                fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace)
+//                                           .addText(emptyStringify(funding.getFundingSource())));
+//            }
+//            entryRoot.add(fundingSources);
+//        }                     todo
 
         if (sequence != null) {
             entryRoot.add(SeqXmlSerializer.serializeToSeqXmlAsElement(sequence));
@@ -396,8 +391,6 @@ public class IceXmlSerializer {
         } else if (entry.getRecordType().equals(PART)) {
             Part part = (Part) entry;
             fields.add(new DefaultElement(PACKAGE_FORMAT, iceNamespace).addText(emptyStringify(part
-
-
 
 
 
@@ -893,20 +886,16 @@ public class IceXmlSerializer {
         entry.setBioSafetyLevel(Integer.parseInt(entryDocument.elementText(BIO_SAFETY_LEVEL)));
         entry.setIntellectualProperty(entryDocument.elementText(INTELLECTUAL_PROPERTY));
 
-        if (entryDocument.element(FUNDING_SOURCES) != null) {
-            HashSet<EntryFundingSource> entryFundingSources = new HashSet<EntryFundingSource>();
-            for (Object element : entryDocument.element(FUNDING_SOURCES).elements(FUNDING_SOURCE)) {
-                FundingSource fundingSource = new FundingSource();
-                fundingSource.setFundingSource(((Element) element).getText());
-                fundingSource.setPrincipalInvestigator(((Element) element)
-                                                               .attributeValue(PRINCIPAL_INVESTIGATOR));
-                EntryFundingSource entryFundingSource = new EntryFundingSource();
-                entryFundingSource.setEntry(entry);
-                entryFundingSource.setFundingSource(fundingSource);
-                entryFundingSources.add(entryFundingSource);
-            }
-            entry.getEntryFundingSources().addAll(entryFundingSources);
-        }
+//        if (entryDocument.element(FUNDING_SOURCES) != null) {
+//            HashSet<FundingSource> entryFundingSources = new HashSet<FundingSource>();
+//            for (Object element : entryDocument.element(FUNDING_SOURCES).elements(FUNDING_SOURCE)) {
+//                FundingSource fundingSource = new FundingSource();
+//                fundingSource.setFundingSource(((Element) element).getText());
+//                fundingSource.setPrincipalInvestigator(((Element) element).attributeValue(PRINCIPAL_INVESTIGATOR));
+//                entryFundingSources.add(fundingSource);
+//            }
+//            entry.setFundingSources(entryFundingSources);
+//        }
 
         if (entryDocument.element(ATTACHMENTS) != null) {
             completeEntry.getAttachments().addAll(

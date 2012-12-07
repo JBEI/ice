@@ -3,7 +3,7 @@ package org.jbei.ice.client.news;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -55,14 +55,14 @@ public class NewsPresenter extends AbstractPresenter {
     private void bind() {
         display.setAddNewsVisibility(false);
 
-        if (!AppController.accountInfo.isAdmin()) {
+        if (!ClientController.account.isAdmin()) {
             display.setAddNewsButtonVisibilty(false);
         }
 
         new IceAsyncCallback<ArrayList<NewsItem>>() {
             @Override
             protected void callService(AsyncCallback<ArrayList<NewsItem>> callback) throws AuthenticationException {
-                service.retrieveNewsItems(AppController.sessionId, callback);
+                service.retrieveNewsItems(ClientController.sessionId, callback);
             }
 
             @Override
@@ -103,14 +103,14 @@ public class NewsPresenter extends AbstractPresenter {
 
     private void save(final NewsItem item) {
 
-        if (!AppController.accountInfo.isAdmin())
+        if (!ClientController.account.isAdmin())
             return;
 
         new IceAsyncCallback<NewsItem>() {
 
             @Override
             protected void callService(AsyncCallback<NewsItem> callback) throws AuthenticationException {
-                service.createNewsItem(AppController.sessionId, item, callback);
+                service.createNewsItem(ClientController.sessionId, item, callback);
             }
 
             @Override

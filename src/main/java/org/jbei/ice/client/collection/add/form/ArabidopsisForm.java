@@ -1,9 +1,10 @@
 package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
+import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.Generation;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -15,7 +16,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class ArabidopsisForm extends SingleEntryForm<ArabidopsisSeedInfo> {
+public class ArabidopsisForm extends EntryForm<ArabidopsisSeedInfo> {
 
     private ListBox generation;
     private ListBox plantType;
@@ -29,26 +30,21 @@ public class ArabidopsisForm extends SingleEntryForm<ArabidopsisSeedInfo> {
     public ArabidopsisForm(ArabidopsisSeedInfo seedInfo) {
         super(seedInfo);
 
-        // fill out values if any exist
-        for (PlantType type : PlantType.values()) {
-            plantType.addItem(type.toString(), type.name());
-        }
-
-        for (Generation gen : Generation.values()) {
-            generation.addItem(gen.toString(), gen.name());
-        }
-
-        for (int i = 0; i < this.generation.getItemCount(); i += 1) {
-            if (this.generation.getValue(i).equalsIgnoreCase(seedInfo.getGeneration().name())) {
-                this.generation.setSelectedIndex(i);
-                break;
+        if (seedInfo.getGeneration() != null) {
+            for (int i = 0; i < this.generation.getItemCount(); i += 1) {
+                if (this.generation.getValue(i).equalsIgnoreCase(seedInfo.getGeneration().name())) {
+                    this.generation.setSelectedIndex(i);
+                    break;
+                }
             }
         }
 
-        for (int i = 0; i < this.plantType.getItemCount(); i += 1) {
-            if (this.plantType.getValue(i).equalsIgnoreCase(seedInfo.getPlantType().name())) {
-                this.plantType.setSelectedIndex(i);
-                break;
+        if (seedInfo.getPlantType() != null) {
+            for (int i = 0; i < this.plantType.getItemCount(); i += 1) {
+                if (this.plantType.getValue(i).equalsIgnoreCase(seedInfo.getPlantType().name())) {
+                    this.plantType.setSelectedIndex(i);
+                    break;
+                }
             }
         }
 
@@ -56,7 +52,8 @@ public class ArabidopsisForm extends SingleEntryForm<ArabidopsisSeedInfo> {
         markers.setText(seedInfo.getSelectionMarkers());
         ecoType.setText(seedInfo.getEcotype());
         parents.setText(seedInfo.getParents());
-        harvestDate.setValue(seedInfo.getHarvestDate());
+        if (seedInfo.getHarvestDate() != null)
+            harvestDate.setValue(seedInfo.getHarvestDate());
         sentToAbrc.setValue(seedInfo.isSentToAbrc());
     }
 
@@ -234,5 +231,10 @@ public class ArabidopsisForm extends SingleEntryForm<ArabidopsisSeedInfo> {
         seed.setHarvestDate(this.harvestDate.getDatePicker().getValue());
         seed.setParents(parents.getText());
         seed.setSentToAbrc(sentToAbrc.getValue());
+    }
+
+    @Override
+    public String getHeaderDisplay() {
+        return EntryAddType.ARABIDOPSIS.getDisplay();
     }
 }

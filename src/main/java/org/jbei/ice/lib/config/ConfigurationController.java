@@ -20,7 +20,6 @@ public class ConfigurationController {
     }
 
     public String retrieveDatabaseVersion() throws ControllerException {
-
         try {
             Configuration configuration = dao.get(ConfigurationKey.DATABASE_SCHEMA_VERSION);
             if (configuration == null)
@@ -72,11 +71,10 @@ public class ConfigurationController {
     }
 
     public String getPropertyValue(ConfigurationKey key) throws ControllerException {
-
         try {
             Configuration config = dao.get(key);
             if (config == null)
-                return null;
+                return key.getDefaultValue();
             return config.getValue();
         } catch (DAOException de) {
             throw new ControllerException(de);
@@ -111,7 +109,7 @@ public class ConfigurationController {
             Configuration configuration = dao.get(key);
             if (configuration == null) {
                 configuration = new Configuration();
-                configuration.setKey(key.toString());
+                configuration.setKey(key.name());
             }
 
             configuration.setValue(value);
@@ -120,6 +118,5 @@ public class ConfigurationController {
             Logger.error(de);
             throw new ControllerException();
         }
-
     }
 }

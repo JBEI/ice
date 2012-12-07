@@ -1,28 +1,27 @@
 package org.jbei.ice.client.bulkupload.sheet.header;
 
+import java.util.HashMap;
+
+import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 /**
  * @author Hector Plahar
  */
 public class StrainHeaders extends PartHeader {
 
-    public StrainHeaders() {
-        super();
+    public StrainHeaders(EntryInfoDelegate delegate, HashMap<String, String> preferences) {
+        super(delegate, preferences);
 
         // strain specific headers
-        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(true), null));
-        headers.add(new CellColumnHeader(Header.PARENTAL_STRAIN));
-        headers.add(new CellColumnHeader(Header.GEN_PHEN));
-        headers.add(new CellColumnHeader(
-                Header.PLASMIDS,
-                false,
-                new MultiSuggestSheetCell(true), null));
+        headers.add(new CellColumnHeader(Header.PARENTAL_STRAIN, preferences));
+        headers.add(new CellColumnHeader(Header.GEN_PHEN, preferences));
+        headers.add(new CellColumnHeader(Header.PLASMIDS, preferences, false, new MultiSuggestSheetCell(true)));
     }
 
     @Override

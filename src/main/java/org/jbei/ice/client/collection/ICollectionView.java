@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
@@ -12,9 +13,10 @@ import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.folder.FolderShareType;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -31,26 +33,22 @@ public interface ICollectionView {
 
     void setUserCollectionMenuItems(ArrayList<MenuItem> items, IDeleteMenuHandler handler);
 
-    void setQuickAddVisibility(boolean visible);
-
-    boolean getQuickAddVisibility();
+    void setUserFolderPermissions(ArrayList<PermissionInfo> list);
 
     boolean getQuickEditVisibility();
 
     // key handler for the quick add text box
     void addQuickAddKeyHandler(KeyPressHandler handler);
 
-    void addSubmitNewCollectionHandler(ClickHandler handler);
-
     // handler for what happens when the user pressed "enter" in the quick edit input
-    void addQuickEditKeyDownHandler(KeyDownHandler handler);
+    void addQuickEditKeyPressHandler(KeyPressHandler handler);
 
     // user entered collection name
     String getCollectionInputValue();
 
     // set menu items indicated by the ids with the busy indicator
     // currently supported by the user menu only
-    void setBusyIndicator(Set<Long> ids);
+    void setBusyIndicator(Set<Long> ids, boolean visible);
 
     void updateMenuItemCounts(ArrayList<MenuItem> item);
 
@@ -84,9 +82,7 @@ public interface ICollectionView {
 
     void showFeedbackMessage(String msg, boolean errMsg);
 
-    SingleSelectionModel<MenuItem> getUserMenuModel();
-
-    SingleSelectionModel<MenuItem> getSystemMenuModel();
+    SingleSelectionModel<MenuItem> getMenuModel(FolderShareType type);
 
     void addSubMenuFolder(OptionSelect option);
 
@@ -109,4 +105,14 @@ public interface ICollectionView {
     SingleSelectionModel<ExportAsOption> getExportAsModel();
 
     void enableExportAs(boolean enable);
+
+    void setSharedCollectionsMenuItems(ArrayList<MenuItem> items);
+
+    void setPermissionDelegate(Delegate<ShareCollectionData> delegate);
+
+    void addTransferHandler(ClickHandler handler);
+
+    void setTransferOptions(ArrayList<OptionSelect> options);
+
+    ArrayList<OptionSelect> getSelectedTransfers();
 }

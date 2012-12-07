@@ -50,8 +50,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         addWidget = createAddWidget(label);
         initWidget(addWidget);
 
-        table = new CellTable<T>(30, SelectionResource.INSTANCE); // TODO : a pager is needed for when the list size
-        // exceeds 30
+        table = new CellTable<T>(30, SelectionResource.INSTANCE); //TODO : a pager is needed for when the size > 30
         addSelectionColumn();
         addNameColumn();
 
@@ -72,11 +71,9 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         });
 
         // message to display when no collections are created
-        table.setEmptyTableWidget(new HTML(
-                "<i class=\"font-75em\">No user collections available.</i>"));
+        table.setEmptyTableWidget(new HTML("<i class=\"font-75em\">No user collections available.</i>"));
 
         submitButton = new Button("Submit");
-        submitButton.setStyleName("saved_draft_button");
         submitButton.addKeyPressHandler(new EnterClickHandler(submitButton));
         submitButton.addClickHandler(new ClickHandler() {
 
@@ -88,8 +85,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         });
 
         clearButton = new Button("Clear");
-        clearButton.setStyleName("saved_draft_button");
-        clearButton.addKeyPressHandler(new EnterClickHandler(submitButton));
+        clearButton.addKeyPressHandler(new EnterClickHandler(clearButton));
 
         final Widget popup = createPopupWidget();
         addToHandler = new PopupHandler(popup, addWidget.getElement(), false);

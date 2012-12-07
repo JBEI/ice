@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -14,8 +13,6 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.permissions.PermissionException;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -92,8 +89,7 @@ public class IceXlsSerializer {
             if (entry instanceof Plasmid) {
                 Plasmid plasmid = (Plasmid) entry;
 
-                stringBuilder.append(escapeCSVValue(plasmid.getSelectionMarkersAsString())).append(
-                        "\t");
+                stringBuilder.append(escapeCSVValue(plasmid.getSelectionMarkersAsString())).append("\t");
                 stringBuilder.append(escapeCSVValue(plasmid.getBackbone())).append("\t");
                 stringBuilder.append(escapeCSVValue(plasmid.getOriginOfReplication())).append("\t");
                 stringBuilder.append(escapeCSVValue(plasmid.getPromoters())).append("\t");
@@ -105,8 +101,7 @@ public class IceXlsSerializer {
             } else if (entry instanceof Strain) {
                 Strain strain = (Strain) entry;
 
-                stringBuilder.append(escapeCSVValue(strain.getSelectionMarkersAsString())).append(
-                        "\t");
+                stringBuilder.append(escapeCSVValue(strain.getSelectionMarkersAsString())).append("\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
@@ -129,47 +124,33 @@ public class IceXlsSerializer {
                 stringBuilder.append(escapeCSVValue(part.getPackageFormat())).append("\t");
             }
 
-            AccountController controller = new AccountController();
             SampleController sampleController = new SampleController();
             SequenceController sequenceController = new SequenceController();
             AttachmentController attachmentController = new AttachmentController();
-            boolean hasAttachments = false;
-            try {
-                hasAttachments = attachmentController.hasAttachment(controller.getSystemAccount(),
-                                                                    entry);
-            } catch (PermissionException e) {
-                Logger.warn(e.getMessage());
-            }
-            stringBuilder.append(hasAttachments ? "Yes" : "No")
-                         .append("\t");
-            stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append(
-                    "\t");
-            stringBuilder.append((sequenceController.hasSequence(entry)) ? "Yes" : "No").append(
-                    "\t");
+            boolean hasAttachments = attachmentController.hasAttachment(entry);
+            stringBuilder.append(hasAttachments ? "Yes" : "No").append("\t");
+            stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append("\t");
+            stringBuilder.append((sequenceController.hasSequence(entry)) ? "Yes" : "No").append("\t");
 
             stringBuilder.append(escapeCSVValue(entry.getBioSafetyLevel())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getIntellectualProperty())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.principalInvestigatorToString()))
-                         .append("\t");
-            stringBuilder.append(escapeCSVValue(entry.fundingSourceToString())).append("\t");
+            String pis = EntryUtil.principalInvestigatorToString(entry.getEntryFundingSources());
+            stringBuilder.append(escapeCSVValue(pis)).append("\t");
+            String fundingSources = EntryUtil.fundingSourceToString(entry.getEntryFundingSources());
+            stringBuilder.append(escapeCSVValue(fundingSources)).append("\t");
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
 
             stringBuilder
-                    .append(
-                            (entry.getCreationTime() == null) ? "" : dateFormat.format(entry
-                                                                                               .getCreationTime()))
+                    .append((entry.getCreationTime() == null) ? "" : dateFormat.format(entry.getCreationTime()))
                     .append("\t");
             stringBuilder.append(
-                    (entry.getModificationTime() == null) ? "" : dateFormat.format(entry
-                                                                                           .getModificationTime()))
+                    (entry.getModificationTime() == null) ? "" : dateFormat.format(entry.getModificationTime()))
                          .append("\t");
             stringBuilder.append("\n");
-
             index++;
         }
 
         return stringBuilder.toString();
     }
-
 }

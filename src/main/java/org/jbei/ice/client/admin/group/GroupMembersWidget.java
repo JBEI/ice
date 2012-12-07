@@ -3,7 +3,6 @@ package org.jbei.ice.client.admin.group;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.client.entry.view.table.TablePager;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.user.client.ui.Composite;
@@ -20,20 +19,23 @@ public class GroupMembersWidget extends Composite {
 
     private final ArrayList<AccountInfo> infoList;
     private final ListDataProvider<AccountInfo> dataProvider;
+    private final VerticalPanel vPanel;
+    private GroupMemberTable memberTable;
 
-    public GroupMembersWidget(ServiceDelegate<AccountInfo> deleteDelegate) {
+    public GroupMembersWidget() {
         infoList = new ArrayList<AccountInfo>();
-        GroupMemberTable memberTable = new GroupMemberTable();
-        memberTable.setDeleteDelegate(deleteDelegate);
-        ScrollPanel panel = new ScrollPanel(memberTable);
         dataProvider = new ListDataProvider<AccountInfo>();
-        dataProvider.addDataDisplay(memberTable);
+        vPanel = new VerticalPanel();
+        initWidget(vPanel);
+    }
 
-        VerticalPanel vPanel = new VerticalPanel();
+    public void setDeleteMemberDelegate(ServiceDelegate<AccountInfo> deleteDelegate) {
+        memberTable = new GroupMemberTable(deleteDelegate);
+        memberTable.setWidth("100%");
+        ScrollPanel panel = new ScrollPanel(memberTable);
+        dataProvider.addDataDisplay(memberTable);
         TablePager pager = new TablePager();
         pager.setDisplay(memberTable);
-        initWidget(vPanel);
-
         vPanel.add(panel);
         vPanel.add(pager);
     }
@@ -42,5 +44,21 @@ public class GroupMembersWidget extends Composite {
         infoList.clear();
         infoList.addAll(list);
         dataProvider.setList(infoList);
+    }
+
+    public ArrayList<AccountInfo> getMemberList() {
+        return infoList;
+    }
+
+    public void addMember(AccountInfo info) {
+        infoList.add(info);
+        dataProvider.getList().add(info);
+        memberTable.setRowCount(infoList.size());
+    }
+
+    public void removeMember(AccountInfo info) {
+        infoList.remove(info);
+        dataProvider.getList().remove(info);
+        memberTable.setRowCount(infoList.size());
     }
 }

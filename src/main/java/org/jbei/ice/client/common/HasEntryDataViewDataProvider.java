@@ -3,10 +3,10 @@ package org.jbei.ice.client.common;
 import java.util.LinkedList;
 
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
+import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.HasEntryInfo;
+import org.jbei.ice.shared.dto.entry.HasEntryInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
@@ -37,7 +37,7 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
         AsyncHandler columnSortHandler = new AsyncHandler(dataTable);
         dataTable.addColumnSortHandler(columnSortHandler);
 
-        DataTable<T>.DataTableColumn<?> defaultSortField = this.dataTable.getColumn(defaultSort);
+        DataTableColumn<T, ?> defaultSortField = this.dataTable.getColumn(defaultSort);
         lastSortField = defaultSort;
         this.defaultSort = defaultSort;
 
@@ -88,7 +88,7 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
             lastSortField = defaultSort;
 
             this.dataTable.getColumnSortList().clear();
-            DataTable<T>.DataTableColumn<?> defaultSortField = this.dataTable.getColumn(lastSortField);
+            DataTableColumn<T, ?> defaultSortField = this.dataTable.getColumn(lastSortField);
 
             if (defaultSortField != null) {
                 ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);

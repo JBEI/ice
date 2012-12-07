@@ -1,12 +1,14 @@
 package org.jbei.ice.client.bulkupload.sheet.header;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 /**
  * @author Hector Plahar
@@ -15,11 +17,11 @@ public abstract class SampleHeaders {
 
     protected ArrayList<CellColumnHeader> headers = new ArrayList<CellColumnHeader>();
 
-    public SampleHeaders(ArrayList<String> locationList) {
+    public SampleHeaders(ArrayList<String> locationList, HashMap<String, String> preferences) {
         for (String location : locationList) {
             try {
                 Header header = Header.valueOf("SAMPLE_" + location.replaceAll(" ", "_").toUpperCase());
-                headers.add(new CellColumnHeader(header));
+                headers.add(new CellColumnHeader(header, preferences));
             } catch (IllegalArgumentException ila) {
                 headers.clear();
                 return;
@@ -54,6 +56,16 @@ public abstract class SampleHeaders {
 
             default:
                 return null;
+        }
+    }
+
+    public void reset() {
+
+        for (CellColumnHeader header : headers) {
+            SheetCell cell = header.getCell();
+            if (cell == null)
+                continue;
+            cell.reset();
         }
     }
 }

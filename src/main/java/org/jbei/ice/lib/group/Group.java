@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.group;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -25,7 +26,7 @@ public class Group implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     protected long id;
 
     @Column(name = "uuid", length = 36, nullable = false)
@@ -37,9 +38,20 @@ public class Group implements IModel {
     @Column(name = "description", length = 255, nullable = false)
     protected String description;
 
+    @ManyToOne
+    private Account owner;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent")
     protected Group parent;
+
+    @Column(name = "creation_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date creationTime;
+
+    @Column(name = "modification_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date modificationTime;
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private Set<Group> children = new HashSet<Group>();
@@ -47,7 +59,10 @@ public class Group implements IModel {
     @Enumerated(EnumType.STRING)
     private GroupType type;
 
-    @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY, targetEntity = Account.class)
+    @Column(name = "autoJoin")
+    private Boolean autoJoin;
+
+    @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Account> members = new HashSet<Account>();
 
     // Getters and setters
@@ -107,8 +122,40 @@ public class Group implements IModel {
         return members;
     }
 
-    public static GroupInfo toDTO(Group group) {
+    public Account getOwner() {
+        return owner;
+    }
 
+    public void setOwner(Account owner) {
+        this.owner = owner;
+    }
+
+    public Date getModificationTime() {
+        return modificationTime;
+    }
+
+    public void setModificationTime(Date modificationTime) {
+        this.modificationTime = modificationTime;
+    }
+
+    public Date getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public boolean isAutoJoin() {
+        return autoJoin;
+    }
+
+    public void setAutoJoin(Boolean autoJoin) {
+        if (autoJoin != null)
+            this.autoJoin = autoJoin;
+    }
+
+    public static GroupInfo toDTO(Group group) {
         GroupInfo info = new GroupInfo();
         info.setUuid(group.getUuid());
         info.setId(group.getId());

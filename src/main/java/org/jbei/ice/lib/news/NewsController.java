@@ -19,7 +19,7 @@ public class NewsController {
     public News update(News news) throws ControllerException {
         news.setModificationTime(new Date(System.currentTimeMillis()));
         try {
-            return dao.save(news);
+            return dao.update(news);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.group.GroupPresenter;
 import org.jbei.ice.client.admin.setting.SystemSettingPresenter;
-import org.jbei.ice.client.admin.transfer.TransferEntryPanel;
 import org.jbei.ice.client.admin.user.UserPresenter;
 import org.jbei.ice.client.admin.web.WebOfRegistriesPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.AccountResults;
 import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupType;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -39,9 +39,6 @@ public class AdminPresenter extends AbstractPresenter {
         super(service, eventBus);
         this.view = view;
         AdminOption option = AdminOption.urlToOption(optionStr);
-        if (option == null)
-            option = AdminOption.SETTINGS;
-
         view.showMenuSelection(option);
         setViewForOption(option);
         setSelectionHandler();
@@ -88,27 +85,27 @@ public class AdminPresenter extends AbstractPresenter {
                 retrieveUsers();
                 break;
 
-            case TRANSFER:
-                view.show(currentOption, new TransferEntryPanel());
-                break;
+//            case TRANSFER:
+//                view.show(currentOption, new TransferEntryPanel());
+//                break;
         }
     }
 
     // GROUPS
     private void retrieveGroups() {
-        new IceAsyncCallback<GroupInfo>() {
+        new IceAsyncCallback<ArrayList<GroupInfo>>() {
 
             @Override
-            protected void callService(AsyncCallback<GroupInfo> callback) throws AuthenticationException {
-                service.retrieveGroup(AppController.sessionId, null, callback);
+            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+                service.retrieveGroups(ClientController.sessionId, GroupType.PUBLIC, callback);
             }
 
             @Override
-            public void onSuccess(GroupInfo result) {
+            public void onSuccess(ArrayList<GroupInfo> result) {
                 if (result == null || currentOption != AdminOption.GROUPS)
                     return;
 
-                groupPresenter.setRootGroup(result);
+                groupPresenter.setGroups(result);
                 view.show(currentOption, groupPresenter.getView().asWidget());
             }
         }.go(eventBus);
@@ -120,7 +117,7 @@ public class AdminPresenter extends AbstractPresenter {
 
             @Override
             protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
-                service.retrieveSystemSettings(AppController.sessionId, callback);
+                service.retrieveSystemSettings(ClientController.sessionId, callback);
             }
 
             @Override
@@ -139,7 +136,7 @@ public class AdminPresenter extends AbstractPresenter {
 
             @Override
             protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
-                service.retrieveSystemSettings(AppController.sessionId, callback);
+                service.retrieveWebOfRegistrySettings(ClientController.sessionId, callback);
             }
 
             @Override
@@ -154,15 +151,15 @@ public class AdminPresenter extends AbstractPresenter {
     }
 
     private void retrieveUsers() {
-        new IceAsyncCallback<ArrayList<AccountInfo>>() {
+        new IceAsyncCallback<AccountResults>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<AccountInfo>> callback) throws AuthenticationException {
-                service.retrieveAllUserAccounts(AppController.sessionId, callback);
+            protected void callService(AsyncCallback<AccountResults> callback) throws AuthenticationException {
+                service.retrieveAllUserAccounts(ClientController.sessionId, 0, 30, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<AccountInfo> result) {
+            public void onSuccess(AccountResults result) {
                 if (result == null || currentOption != AdminOption.USERS)
                     return;
 

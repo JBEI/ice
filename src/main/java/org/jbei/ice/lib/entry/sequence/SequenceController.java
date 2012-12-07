@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.entry.sequence;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -67,7 +68,7 @@ public class SequenceController {
     }
 
     public void parseAndSaveSequence(Account account, Entry entry, String sequenceString) throws ControllerException {
-        IDNASequence dnaSequence = SequenceController.parse(sequenceString);
+        IDNASequence dnaSequence = parse(sequenceString);
 
         if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
             String errorMsg = "Couldn't parse sequence file! Supported formats: "
@@ -92,31 +93,16 @@ public class SequenceController {
     }
 
     /**
-     * Save the given {@link Sequence} into the database, then rebuild the search index.
+     * Save the given {@link Sequence} into the database, with the option to rebuild the search
+     * index.
      *
-     * @param sequence
+     * @param account  account of user saving sequence
+     * @param sequence sequence to save
      * @return Saved Sequence
      * @throws ControllerException
      * @throws PermissionException
      */
     public Sequence save(Account account, Sequence sequence) throws ControllerException, PermissionException {
-        return save(account, sequence, true);
-    }
-
-    /**
-     * Save the given {@link Sequence} into the database, with the option to rebuild the search
-     * index.
-     *
-     * @param sequence
-     * @param scheduleIndexRebuild
-     * @return Saved Sequence
-     * @throws ControllerException
-     * @throws PermissionException
-     */
-    protected Sequence save(Account account, Sequence sequence, boolean scheduleIndexRebuild)
-            throws ControllerException, PermissionException {
-        Sequence result;
-
         if (sequence == null) {
             throw new ControllerException("Failed to save null sequence!");
         }
@@ -125,11 +111,10 @@ public class SequenceController {
             throw new PermissionException("No write permission for sequence!");
         }
 
+        Sequence result;
         try {
             result = dao.saveSequence(sequence);
-            if (scheduleIndexRebuild) {
-                ApplicationController.scheduleBlastIndexRebuildTask();
-            }
+            ApplicationController.scheduleBlastIndexRebuildTask(true);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -138,9 +123,7 @@ public class SequenceController {
     }
 
     /**
-     * Update the {@link Sequence} in the database, then rebuild the search index.
-     * <p/>
-     * Replace the existing sequence with a new one.
+     * Update the {@link Sequence} in the database, with the option to rebuild the search index.
      *
      * @param sequence
      * @return Saved Sequence.
@@ -148,23 +131,7 @@ public class SequenceController {
      * @throws PermissionException
      */
     public Sequence update(Account account, Sequence sequence) throws ControllerException, PermissionException {
-        return update(account, sequence, true);
-    }
-
-    /**
-     * Update the {@link Sequence} in the database, with the option to rebuild the search index.
-     *
-     * @param sequence
-     * @param scheduleIndexRebuild
-     * @return Saved Sequence.
-     * @throws ControllerException
-     * @throws PermissionException
-     */
-    public Sequence update(Account account, Sequence sequence, boolean scheduleIndexRebuild)
-            throws ControllerException, PermissionException {
-        Sequence result = null;
-
-        if (sequence == null) {
+        if (sequence == null || sequence.getEntry() == null) {
             throw new ControllerException("Failed to save null sequence!");
         }
 
@@ -172,31 +139,25 @@ public class SequenceController {
             throw new PermissionException("No write permission for sequence!");
         }
 
+        Sequence result;
         try {
             Entry entry = sequence.getEntry();
+            entry.setModificationTime(Calendar.getInstance().getTime());
+            Sequence oldSequence = getByEntry(entry);
 
-            if (entry != null) {
-                Sequence oldSequence = getByEntry(entry);
-
-                if (oldSequence != null) {
-                    if ((sequence.getSequenceUser() == null || sequence.getSequenceUser().isEmpty())
-                            && oldSequence.getSequenceUser() != null) {
-                        sequence.setSequenceUser(oldSequence.getSequenceUser());
-                    }
-
-                    dao.deleteSequence(oldSequence);
-                }
-            }
-
-            result = dao.saveSequence(sequence);
+            if (oldSequence != null) {
+                oldSequence.setSequenceUser(sequence.getSequenceUser());
+                oldSequence.setSequence(sequence.getSequence());
+                oldSequence.setFwdHash(sequence.getFwdHash());
+                oldSequence.setRevHash(sequence.getRevHash());
+                result = dao.updateSequence(oldSequence, sequence.getSequenceFeatures());
+            } else
+                result = dao.saveSequence(sequence);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
-        if (scheduleIndexRebuild) {
-            ApplicationController.scheduleBlastIndexRebuildTask();
-        }
-
+        ApplicationController.scheduleBlastIndexRebuildTask(true);
         return result;
     }
 
@@ -233,7 +194,7 @@ public class SequenceController {
             dao.deleteSequence(sequence);
 
             if (scheduleIndexRebuild) {
-                ApplicationController.scheduleBlastIndexRebuildTask();
+                ApplicationController.scheduleBlastIndexRebuildTask(true);
             }
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -280,8 +241,7 @@ public class SequenceController {
             for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
                 DNAFeature dnaFeature = new DNAFeature();
 
-                for (SequenceFeatureAttribute attribute : sequenceFeature
-                        .getSequenceFeatureAttributes()) {
+                for (SequenceFeatureAttribute attribute : sequenceFeature.getSequenceFeatureAttributes()) {
                     String key = attribute.getKey();
                     String value = attribute.getValue();
                     DNAFeatureNote dnaFeatureNote = new DNAFeatureNote(key, value);
@@ -332,8 +292,7 @@ public class SequenceController {
         String fwdHash = SequenceUtils.calculateSequenceHash(sequenceString);
         String revHash;
         try {
-            revHash = SequenceUtils.calculateSequenceHash(SequenceUtils
-                                                                  .reverseComplement(sequenceString));
+            revHash = SequenceUtils.calculateSequenceHash(SequenceUtils.reverseComplement(sequenceString));
         } catch (UtilityException e) {
             revHash = "";
         }
@@ -369,8 +328,7 @@ public class SequenceController {
                                     genbankStart - 1, featuredDNASequence.getSequence().length());
                             featureSequence += featuredDNASequence.getSequence().substring(0, end);
                         } else { // normal
-                            featureSequence += featuredDNASequence.getSequence().substring(
-                                    genbankStart - 1, end);
+                            featureSequence += featuredDNASequence.getSequence().substring(genbankStart - 1, end);
                         }
 
                         if (genbankStart > end) { // over zero case
@@ -378,8 +336,7 @@ public class SequenceController {
                                     genbankStart - 1, featuredDNASequence.getSequence().length());
                             featureSequence += featuredDNASequence.getSequence().substring(0, end);
                         } else { // normal
-                            featureSequence = featuredDNASequence.getSequence().substring(
-                                    genbankStart - 1, end);
+                            featureSequence = featuredDNASequence.getSequence().substring(genbankStart - 1, end);
                         }
 
                         if (dnaFeature.getStrand() == -1) {

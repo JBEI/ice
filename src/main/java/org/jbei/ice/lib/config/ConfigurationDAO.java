@@ -54,8 +54,6 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
             }
         } catch (HibernateException e) {
             throw new DAOException("Failed to get Configuration using key: " + key, e);
-        } finally {
-            closeSession();
         }
 
         return configuration;

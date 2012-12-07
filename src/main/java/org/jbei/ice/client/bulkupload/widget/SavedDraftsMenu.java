@@ -6,7 +6,8 @@ import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.bulkupload.BulkUploadMenuItem;
 import org.jbei.ice.client.bulkupload.IDeleteMenuHandler;
 import org.jbei.ice.client.bulkupload.IRevertBulkUploadHandler;
-import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.Icon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -25,7 +26,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -63,7 +63,6 @@ public class SavedDraftsMenu extends Composite {
             return;
 
         row = 0;
-
         for (BulkUploadMenuItem item : items) {
             addMenuItem(item, handler);
         }
@@ -74,7 +73,6 @@ public class SavedDraftsMenu extends Composite {
             return;
 
         row = 0;
-
         for (BulkUploadMenuItem item : items) {
             addMenuItem(item, handler);
         }
@@ -112,7 +110,14 @@ public class SavedDraftsMenu extends Composite {
 
             cell.updateCount(item.getCount());
             cell.updateDate(item.getDateTime());
+            return;
         }
+
+        // not found so add
+        final MenuCell cell = new MenuCell(item);
+        cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
+        row += 1;
+        table.setWidget(row, 0, cell);
     }
 
     public boolean removeMenuItem(long itemId) {
@@ -131,6 +136,10 @@ public class SavedDraftsMenu extends Composite {
         }
 
         return false;
+    }
+
+    public int getCount() {
+        return row;
     }
 
     // inner class
@@ -163,25 +172,25 @@ public class SavedDraftsMenu extends Composite {
         }
     }
 
-    class MenuCell extends Composite implements HasMouseOverHandlers, HasMouseOutHandlers,
-                                                HasClickHandlers {
+    class MenuCell extends Composite implements HasMouseOverHandlers, HasMouseOutHandlers, HasClickHandlers {
 
         private final HTMLPanel panel;
         private final BulkUploadMenuItem item;
         private final String html;
 
         private Label count;
-        private Label nameLabel;
         private Label dateLabel;
         private final String folderId;
-        private Image delete;
+        private Icon icon;
 
         public MenuCell(final BulkUploadMenuItem item, final IDeleteMenuHandler deleteHandler) {
             this(item);
 
-            delete = ImageUtil.getDeleteIcon();
+            icon = new Icon(FAIconType.TRASH);
+            icon.setTitle("Delete upload");
+            icon.addStyleName("delete_icon");
             if (deleteHandler != null) {
-                delete.addClickHandler(new ClickHandler() {
+                icon.addClickHandler(new ClickHandler() {
 
                     @Override
                     public void onClick(ClickEvent event) {
@@ -202,9 +211,10 @@ public class SavedDraftsMenu extends Composite {
         public MenuCell(final BulkUploadMenuItem item, final IRevertBulkUploadHandler handler) {
             this(item);
 
-            delete = ImageUtil.getUndoImage();
+            icon = new Icon(FAIconType.UNDO);
+            icon.setTitle("Send back to user");
             if (handler != null) {
-                delete.addClickHandler(new ClickHandler() {
+                icon.addClickHandler(new ClickHandler() {
 
                     @Override
                     public void onClick(ClickEvent event) {
@@ -225,24 +235,24 @@ public class SavedDraftsMenu extends Composite {
         private MenuCell(final BulkUploadMenuItem item) {
             this.item = item;
             folderId = "menu_right_holder_" + item.getId();
-            html = "<span class=\"collection_user_menu\" id=\"" + folderId + "_name\"></span>"
-                    + "<span class=\"menu_count\" id=\"" + folderId + "\"></span> "
-                    + "<div style=\"font-size: 10px; color: #999\"><span id=\"" + folderId + "_date\"></span>" +
-                    "<span> | </span><span>" + item.getType() + "</span></div>";
-
-            panel = new HTMLPanel(html);
-            panel.setTitle(item.getName());
-
-            count = new Label(formatNumber(item.getCount()));
-            nameLabel = new Label(generateName());
             dateLabel = new Label(item.getDateTime());
             dateLabel.setStyleName("display-inline");
 
-            panel.add(count, folderId);
-            panel.add(nameLabel, folderId + "_name");
-            panel.add(dateLabel, folderId + "_date");
+            String name = item.getName();
+            if (name.length() > 25)
+                name = (name.substring(0, 22) + "...");
 
-            panel.setStyleName("collection_user_menu_row");
+            html = "<span class=\"collection_user_menu\" style=\"line-height: 15px\">" + name
+                    + "</span><span class=\"menu_count\" id=\"" + folderId + "\"></span>"
+                    + "<br><span style=\"color: #999; font-size: 9px\">" + dateLabel.getText()
+                    + " - " + item.getType() + " </span>";
+
+            panel = new HTMLPanel(html);
+            panel.setTitle(item.getName());
+            count = new Label(formatNumber(item.getCount()));
+            panel.add(count, folderId);
+
+            panel.setStyleName("user_collection_user_menu_row");
             initWidget(panel);
 
             this.addMouseOverHandler(new MouseOverHandler() {
@@ -250,7 +260,7 @@ public class SavedDraftsMenu extends Composite {
                 @Override
                 public void onMouseOver(MouseOverEvent event) {
                     panel.remove(count);
-                    panel.add(delete, folderId);
+                    panel.add(icon, folderId);
 
                 }
             });
@@ -259,17 +269,10 @@ public class SavedDraftsMenu extends Composite {
 
                 @Override
                 public void onMouseOut(MouseOutEvent event) {
-                    panel.remove(delete);
+                    panel.remove(icon);
                     panel.add(count, folderId);
                 }
             });
-        }
-
-        private String generateName() {
-            String name = item.getName();
-            if (name.length() > 22)
-                name = (name.substring(0, 22) + "...");
-            return name;
         }
 
         public void setSelected(boolean selected) {
@@ -285,7 +288,7 @@ public class SavedDraftsMenu extends Composite {
         }
 
         public void updateDate(String dateTime) {
-
+            dateLabel.setText(dateTime);
         }
 
         public BulkUploadMenuItem getMenuItem() {

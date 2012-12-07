@@ -1,24 +1,24 @@
 package org.jbei.ice.client.search.blast;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.BlastResultInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.HasEntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.shared.dto.search.SearchResultInfo;
 
 import com.google.gwt.view.client.Range;
 
-public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastResultInfo> {
+public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<SearchResultInfo> {
 
-    public BlastSearchDataProvider(HasEntryDataTable<BlastResultInfo> view, RegistryServiceAsync service) {
+    public BlastSearchDataProvider(HasEntryDataTable<SearchResultInfo> view, RegistryServiceAsync service) {
         super(view, service, ColumnField.BIT_SCORE);
     }
 
-    public void setBlastData(ArrayList<BlastResultInfo> data) {
+    public void setBlastData(LinkedList<SearchResultInfo> data) {
         reset();
         if (data == null) {
             updateRowCount(0, true);
@@ -41,11 +41,14 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
     }
 
     @Override
-    public EntryInfo getCachedData(long entryId) {
+    public EntryInfo getCachedData(long entryId, String recordId) {
         for (HasEntryInfo result : results) {
+            EntryInfo info = result.getEntryInfo();
+            if (recordId != null && info.getRecordId().equalsIgnoreCase(recordId))
+                return info;
 
-            if (result.getEntryInfo().getId() == entryId)
-                return result.getEntryInfo();
+            if (info.getId() == entryId)
+                return info;
         }
         return null;
     }

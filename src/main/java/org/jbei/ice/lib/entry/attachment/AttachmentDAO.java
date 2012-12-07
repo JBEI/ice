@@ -1,8 +1,6 @@
 package org.jbei.ice.lib.entry.attachment;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +9,8 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.utils.FileUtils;
 
-import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -27,81 +25,36 @@ import org.hibernate.criterion.Restrictions;
 public class AttachmentDAO extends HibernateRepository<Attachment> {
 
     public Attachment save(File attDir, Attachment attachment, InputStream inputStream) throws DAOException {
-        Session session = currentSession();
         try {
-            session.saveOrUpdate(attachment);
+            save(attachment);
             if (inputStream != null)
-                writeFile(attDir, attachment.getFileId(), inputStream);
+                FileUtils.writeFile(attDir, attachment.getFileId(), inputStream);
         } catch (HibernateException e) {
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
-        } finally {
-            closeSession();
         }
 
         return attachment;
     }
 
-    /**
-     * Write the given {@link InputStream} to the file with the given fileName.
-     *
-     * @param fileName
-     * @param inputStream
-     * @throws java.io.IOException
-     * @throws DAOException
-     */
-    private void writeFile(File attDir, String fileName, InputStream inputStream)
-            throws IOException, DAOException {
-        try {
-            File file = new File(attDir + File.separator + fileName);
-
-            if (!attDir.exists()) {
-                if (!attDir.mkdirs()) {
-                    throw new DAOException("Could not create attachment directory");
-                }
-            }
-
-            if (!file.exists()) {
-                if (!file.createNewFile()) {
-                    throw new DAOException("Could not create attachment file " + file.getName());
-                }
-            }
-
-            FileOutputStream outputStream = new FileOutputStream(file);
-
-            try {
-                IOUtils.copy(inputStream, outputStream);
-            } finally {
-                outputStream.close();
-            }
-        } catch (SecurityException e) {
-            throw new DAOException(e);
-        }
-    }
-
     public void delete(File attDir, Attachment attachment) throws DAOException {
-        Session session = currentSession();
-
         try {
-            session.delete(attachment);
+            delete(attachment);
             deleteFile(attDir, attachment);
         } catch (HibernateException e) {
             throw new DAOException("dbDelete failed!", e);
         } catch (Exception e) {
             Logger.error(e);
             throw new DAOException("Unknown exception ", e);
-        } finally {
-            closeSession();
         }
-
     }
 
     /**
      * Retrieve all {@link Attachment}s associated with the given {@link Entry}.
      *
-     * @param entry
+     * @param entry Entry whose attachments are desired
      * @return ArrayList of Attachments.
      * @throws DAOException
      */
@@ -123,8 +76,6 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
             }
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(), e);
-        } finally {
-            closeSession();
         }
 
         return attachments;
@@ -133,17 +84,12 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
     public boolean hasAttachment(Entry entry) throws DAOException {
         Session session = currentSession();
         try {
-
             Number itemCount = (Number) session.createCriteria(Attachment.class)
                                                .setProjection(Projections.countDistinct("id"))
                                                .add(Restrictions.eq("entry", entry)).uniqueResult();
-
             return itemCount.longValue() > 0;
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(),
-                                   e);
-        } finally {
-            closeSession();
+            throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(), e);
         }
     }
 
@@ -157,7 +103,6 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      */
     public Attachment getByFileId(String fileId) throws DAOException {
         Attachment attachment = null;
-
         Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Attachment.class.getName() + " where fileId = :fileId");
@@ -169,8 +114,6 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
             }
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve attachment by fileId: " + fileId, e);
-        } finally {
-            closeSession();
         }
 
         return attachment;
@@ -184,12 +127,10 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      * @throws DAOException
      */
     public File getFile(File attDir, Attachment attachment) throws DAOException {
-
         File file = new File(attDir + File.separator + attachment.getFileId());
         if (!file.canRead()) {
             throw new DAOException("Failed to open file for read!");
         }
-
         return file;
     }
 

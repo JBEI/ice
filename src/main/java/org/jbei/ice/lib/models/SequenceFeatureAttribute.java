@@ -16,7 +16,7 @@ public class SequenceFeatureAttribute implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "key", length = 511)
@@ -34,15 +34,6 @@ public class SequenceFeatureAttribute implements IModel {
 
     public SequenceFeatureAttribute() {
         super();
-    }
-
-    public SequenceFeatureAttribute(String key, String value, Boolean quoted,
-            SequenceFeature sequenceFeature) {
-        super();
-        setKey(key);
-        setValue(value);
-        setQuoted(quoted);
-        setSequenceFeature(sequenceFeature);
     }
 
     public long getId() {
