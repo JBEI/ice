@@ -8,7 +8,6 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.filter.SearchFieldFactory;
@@ -29,6 +28,7 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hibernate.search.query.dsl.TermContext;
+import org.hibernate.search.query.dsl.TermMatchingContext;
 
 /**
  * Apache Lucene full text library functionality in Hibernate
@@ -53,20 +53,48 @@ public class HibernateSearch {
         return SingletonHolder.INSTANCE;
     }
 
-    public void executeSearchOnField(String queryString, String field, int start, int limit) {
+    public void executeSearchOnField(Account account, String queryString, String field, EntryType[] types, int start,
+            int limit) {
         Session session = HibernateHelper.newSession();
         FullTextSession fullTextSession = Search.getFullTextSession(session);
+        boolean wildCard = queryString.endsWith("*") || queryString.endsWith("?");
+        BooleanQuery boolQuery = new BooleanQuery();
+        Class<?>[] classes = new Class<?>[types.length];
 
-        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Strain.class).get();
-        org.apache.lucene.search.Query query = qb
-                .keyword().fuzzy().withThreshold(0.8f)
-                .onField(field)
-                .matching(queryString)
-                .createQuery();
+        for (int i = 0; i < types.length; i += 1) {
+            EntryType type = types[i];
+            Class<?> clazz = SearchFieldFactory.entryClass(type);
+            classes[i] = clazz;
 
-        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(query, Entry.class);
+            QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
+            org.apache.lucene.search.Query query;
+            if (wildCard) {
+                query = qb.keyword().wildcard().onField(field).matching(queryString).createQuery();
+            } else {
+                query = qb
+                        .keyword().fuzzy().withThreshold(0.8f)        // todo add threshold as params to fields
+                        .onField(field).ignoreFieldBridge()
+                        .matching(queryString)
+                        .createQuery();
+            }
+            boolQuery.add(query, BooleanClause.Occur.MUST);
+        }
+
+        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(boolQuery, Entry.class);
+
+//        Criteria criteria = session.createCriteria(Permission.class)
+////                                   .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
+//                                   .add(Restrictions.eq("canRead", Boolean.TRUE))
+//                                   .add(Restrictions.eq("account", account))
+//                                   .add(Restrictions.isNull("folder"))
+//                                   .add(Restrictions.isNull("group"));
+//                                   .add(Restrictions.eq("entry", entry))
+
+//        fullTextQuery.setCriteriaQuery(criteria);
+
         fullTextQuery.setSort(Sort.RELEVANCE);
         fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
+//        fullTextQuery.enableFullTextFilter("security").setParameter("account", account.getEmail());
 
         fullTextQuery.setFirstResult(start); //start from the "startth" element
         fullTextQuery.setMaxResults(limit); //return count elements
@@ -76,7 +104,7 @@ public class HibernateSearch {
 
         // execute search
         List result = fullTextQuery.list();
-        Logger.info("Found " + result.size() + " for " + fullTextQuery.getQueryString());
+        Logger.info("Found " + resultCount + " for " + fullTextQuery.getQueryString());
     }
 
     public SearchResults executeMultiTermQuery(Account account, String[] terms, EntryType[] types, int start, int count,
@@ -85,16 +113,6 @@ public class HibernateSearch {
         Session session = HibernateHelper.newSession();
         int resultCount;
         FullTextSession fullTextSession = Search.getFullTextSession(session);
-        List result;
-
-        // you can create several query builders (for each entity type involved in the root of the query)
-//        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Strain.class).get();
-//        boolean wildCard = queryString.endsWith("*");
-
-//        TermContext termContext = qb.keyword();
-//        if( wildCard)
-//            termContext = termContext.wildcard();
-
         BooleanQuery boolQuery = new BooleanQuery();
         Class<?>[] classes = new Class<?>[types.length];
 
@@ -114,16 +132,16 @@ public class HibernateSearch {
                 QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
                 TermContext termContext = qb.keyword();
                 org.apache.lucene.search.Query query;
-//                if( term.endsWith("?") || term.endsWith("*"))
-//                    query = termContext.wildcard()
-//                                       .onFields(fields)
-//                                       .matching(term)
-//                                       .createQuery();
-//                else
-                query = termContext.fuzzy().withThreshold(0.8f)
-                                   .onFields(fields)
-                                   .matching(term)
-                                   .createQuery();
+
+                if (term.endsWith("?") || term.endsWith("*")) {
+                    TermMatchingContext matchingContext = termContext.wildcard().onField(fields[0]);
+                    for (int j = 1; j < fields.length; j += 1)
+                        matchingContext = matchingContext.andField(fields[i]);
+
+                    query = matchingContext.matching(term).createQuery();
+                } else {
+                    query = termContext.fuzzy().withThreshold(0.8f).onFields(fields).matching(term).createQuery();
+                }
                 boolQuery.add(query, BooleanClause.Occur.MUST);
             }
         }
@@ -136,12 +154,12 @@ public class HibernateSearch {
 
         // for paging
         fullTextQuery.setFirstResult(start); //start from the startth element
-        fullTextQuery.setMaxResults(count); //return count elements
+        fullTextQuery.setMaxResults(count);  //return count elements
 
         resultCount = fullTextQuery.getResultSize(); // this is where you are hiding
 
         // execute search
-        result = fullTextQuery.list();
+        List result = fullTextQuery.list();
         Logger.info("Found " + resultCount + " for " + fullTextQuery.getQueryString());
 
         // sort
@@ -181,18 +199,8 @@ public class HibernateSearch {
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         List result;
 
-        // you can create several query builders (for each entity type involved in the root of the query)
-//        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Strain.class).get();
-//        boolean wildCard = queryString.endsWith("*");
-
-//        TermContext termContext = qb.keyword();
-//        if( wildCard)
-//            termContext = termContext.wildcard();
-
-        // use phrase (instead of keyword) for more than one word
-
+        boolean wildCard = queryString.endsWith("*") || queryString.endsWith("?");
         BooleanQuery b = new BooleanQuery();
-
         String[] fields;
 
         for (EntryType type : EntryType.values()) {
@@ -200,11 +208,20 @@ public class HibernateSearch {
             Class<?> clazz = SearchFieldFactory.entryClass(type);
 
             QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
-            org.apache.lucene.search.Query query = qb
-                    .keyword().fuzzy().withThreshold(0.8f)        // todo add threshold as params to fields
-                    .onFields(fields)
-                    .matching(queryString)
-                    .createQuery();
+            org.apache.lucene.search.Query query;
+            if (wildCard) {
+                TermMatchingContext context = qb.keyword().wildcard().onField(fields[0]);
+                for (int i = 1; i < fields.length; i += 1) {
+                    context = context.andField(fields[i]);
+                }
+                query = context.matching(queryString).createQuery();
+            } else {
+                query = qb
+                        .keyword().fuzzy().withThreshold(0.8f)        // todo add threshold as params to fields
+                        .onFields(fields)
+                        .matching(queryString)
+                        .createQuery();
+            }
 
             b.add(query, BooleanClause.Occur.SHOULD);
         }

@@ -10,7 +10,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.entry.filter.EntrySecurityFilterFactory;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.Visibility;
@@ -76,7 +78,8 @@ import org.jbei.ice.lib.entry.model.Parameter;
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
-@Indexed
+@Indexed(index = "Entry")
+@FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class)
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -201,6 +204,11 @@ public class Entry implements IModel {
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry", orphanRemoval = true)
     @OrderBy("id")
     private final List<Parameter> parameters = new ArrayList<Parameter>();
+
+    @OneToMany
+    @OrderBy("id")
+    @IndexedEmbedded
+    private final List<Permission> permissions = new ArrayList<Permission>();
 
     public Entry() {
     }
@@ -555,6 +563,10 @@ public class Entry implements IModel {
 
     public List<Parameter> getParameters() {
         return parameters;
+    }
+
+    public List<Permission> getPermissions() {
+        return this.permissions;
     }
 
     /**

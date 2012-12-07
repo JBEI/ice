@@ -2,6 +2,7 @@ package org.jbei.ice.lib.permissions.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -15,6 +16,8 @@ import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.ClassBridge;
 
 /**
  * Permission object for storing permissions related to either folders or entries
@@ -24,6 +27,7 @@ import org.hibernate.annotations.GenericGenerator;
  */
 @Entity
 @Table(name = "PERMISSION")
+@ClassBridge(name = "permission", analyze = Analyze.NO, impl = PermissionEntryBridge.class)
 public class Permission implements IModel {
 
     private static final long serialVersionUID = 1L;
@@ -47,8 +51,8 @@ public class Permission implements IModel {
     @Column(name = "can_write")
     private boolean canWrite;
 
-    @ManyToOne
-    @JoinColumn(name = "entry_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "entry_id", nullable = false)
     private Entry entry;
 
     @ManyToOne

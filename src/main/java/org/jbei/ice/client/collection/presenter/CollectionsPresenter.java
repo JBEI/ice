@@ -64,7 +64,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     private FolderEntryDataProvider folderDataProvider;
     private final CollectionDataTable collectionsDataTable;
 
-    //  data providers for the sub menu
+    // data providers for the sub menu
     private final ListDataProvider<FolderDetails> userListProvider;
     private final ListDataProvider<FolderDetails> systemListProvider;
 
@@ -599,9 +599,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                                               public void onFolderRetrieve(FolderRetrieveEvent event) {
                                                   if (event == null || event.getItems() == null) {
                                                       display.showFeedbackMessage(
-                                                              "An error occured while removing entries. Please try " +
-                                                                      "again.",
-                                                              true);
+                                                              "An error occurred while removing entries.", true);
                                                       return;
                                                   }
 

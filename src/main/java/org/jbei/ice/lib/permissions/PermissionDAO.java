@@ -182,9 +182,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
 
     public void upgradePermissions() throws DAOException {
         Session session = currentSession();
-
         try {
-
             Logger.info("Upgrading permissions....please wait");
             // convert read group
             Query query = session.createQuery("from " + ReadGroup.class.getName());
@@ -193,7 +191,9 @@ class PermissionDAO extends HibernateRepository<Permission> {
                 Permission permission = new Permission();
                 permission.setGroup(readGroup.getGroup());
                 permission.setCanRead(true);
-                permission.setEntry(readGroup.getEntry());
+                Entry entry = readGroup.getEntry();
+                permission.setEntry(entry);
+                entry.getPermissions().add(permission);
                 session.save(permission);
                 session.delete(readGroup);
             }
@@ -205,7 +205,9 @@ class PermissionDAO extends HibernateRepository<Permission> {
                 Permission permission = new Permission();
                 permission.setAccount(readUser.getAccount());
                 permission.setCanRead(true);
-                permission.setEntry(readUser.getEntry());
+                Entry entry = readUser.getEntry();
+                permission.setEntry(entry);
+                entry.getPermissions().add(permission);
                 session.save(permission);
                 session.delete(readUser);
             }
@@ -217,7 +219,9 @@ class PermissionDAO extends HibernateRepository<Permission> {
                 Permission permission = new Permission();
                 permission.setGroup(writeGroup.getGroup());
                 permission.setCanWrite(true);
-                permission.setEntry(writeGroup.getEntry());
+                Entry entry = writeGroup.getEntry();
+                permission.setEntry(entry);
+                entry.getPermissions().add(permission);
                 session.save(permission);
                 session.delete(writeGroup);
             }
@@ -229,15 +233,15 @@ class PermissionDAO extends HibernateRepository<Permission> {
                 Permission permission = new Permission();
                 permission.setAccount(writeUser.getAccount());
                 permission.setCanWrite(true);
-                permission.setEntry(writeUser.getEntry());
+                Entry entry = writeUser.getEntry();
+                permission.setEntry(entry);
+                entry.getPermissions().add(permission);
                 session.save(permission);
                 session.delete(writeUser);
             }
             Logger.info("Permissions upgrade complete");
         } catch (HibernateException he) {
             throw new DAOException(he);
-        } finally {
-            closeSession();
         }
     }
 

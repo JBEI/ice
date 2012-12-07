@@ -94,6 +94,7 @@ public class ApplicationController {
                 account.setSalt(Utils.generateUUID());
             }
 
+            // add everyone to public group membership
             Group everyoneGroup = groupController.createOrRetrievePublicGroup();
             account.getGroups().add(everyoneGroup);
             accountController.save(account);
