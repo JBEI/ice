@@ -23,8 +23,10 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -146,15 +148,16 @@ public class FileUploadServlet extends UploadAction {
     }
 
     public String uploadFileToTemp(File file, String saveName, boolean isSequence) {
-//        if( isSequence ) {
-//            try {
-//                String sequenceString = FileUtils.readFileToString(file);
-//                if( SequenceController.parse(sequenceString) == null )
-//                    return "F\tCould not parse";
-//            } catch (IOException e) {
-//                return "F\tCould not upload";
-//            }
-//        }
+        if (isSequence) {
+            try {
+                String sequenceString = FileUtils.readFileToString(file);
+                if (SequenceController.parse(sequenceString) == null)
+                    return "F\tCould not parse the sequence file";
+            } catch (IOException e) {
+                Logger.error(e);
+                return "F\tError uploading file.";
+            }
+        }
 
         // if succeeds return "T\tfileId";
         String fileId = Utils.generateUUID();

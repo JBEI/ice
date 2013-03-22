@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.bulkupload.BulkUploadMenuItem;
 import org.jbei.ice.client.bulkupload.IDeleteMenuHandler;
+import org.jbei.ice.client.bulkupload.IRevertBulkUploadHandler;
 import org.jbei.ice.client.common.util.ImageUtil;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -18,6 +19,7 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -67,11 +69,32 @@ public class SavedDraftsMenu extends Composite {
         }
     }
 
+    public void setMenuItems(ArrayList<BulkUploadMenuItem> items, IRevertBulkUploadHandler handler) {
+        if (items == null || items.isEmpty())
+            return;
+
+        row = 0;
+
+        for (BulkUploadMenuItem item : items) {
+            addMenuItem(item, handler);
+        }
+    }
+
     public void addMenuItem(BulkUploadMenuItem item, IDeleteMenuHandler deleteHandler) {
         if (item == null)
             return;
 
         final MenuCell cell = new MenuCell(item, deleteHandler);
+        cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
+        row += 1;
+        table.setWidget(row, 0, cell);
+    }
+
+    public void addMenuItem(BulkUploadMenuItem item, IRevertBulkUploadHandler handler) {
+        if (item == null)
+            return;
+
+        final MenuCell cell = new MenuCell(item, handler);
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         row += 1;
         table.setWidget(row, 0, cell);
@@ -92,17 +115,14 @@ public class SavedDraftsMenu extends Composite {
         }
     }
 
-    public boolean removeMenuItem(BulkUploadMenuItem item) {
-        if (item == null)
-            return false;
-
+    public boolean removeMenuItem(long itemId) {
         for (int i = 0; i < table.getRowCount(); i += 1) {
             Widget w = table.getWidget(i, 0);
             if (!(w instanceof MenuCell))
                 continue;
 
             MenuCell cell = (MenuCell) w;
-            if (cell.getMenuItem().getId() != item.getId())
+            if (cell.getMenuItem().getId() != itemId)
                 continue;
 
             table.remove(cell);
@@ -119,12 +139,27 @@ public class SavedDraftsMenu extends Composite {
 
         @Override
         public void onSuccess(BulkUploadMenuItem item) {
-            removeMenuItem(item);
+            removeMenuItem(item.getId());
+            History.fireCurrentHistoryState();
         }
 
         @Override
         public void onFailure() {
             Window.alert("There was an error deleting. Please check the logs for details");
+        }
+    }
+
+    class RevertCallback extends Callback<Long> {
+
+        @Override
+        public void onSuccess(Long id) {
+            removeMenuItem(id);
+            History.fireCurrentHistoryState();
+        }
+
+        @Override
+        public void onFailure() {
+            Window.alert("There was an error reverting. Please check the logs for details");
         }
     }
 
@@ -139,15 +174,12 @@ public class SavedDraftsMenu extends Composite {
         private Label nameLabel;
         private Label dateLabel;
         private final String folderId;
-        private final Image delete;
+        private Image delete;
 
         public MenuCell(final BulkUploadMenuItem item, final IDeleteMenuHandler deleteHandler) {
+            this(item);
 
-            this.item = item;
             delete = ImageUtil.getDeleteIcon();
-
-            folderId = "menu_right_holder_" + item.getId();
-
             if (deleteHandler != null) {
                 delete.addClickHandler(new ClickHandler() {
 
@@ -165,7 +197,34 @@ public class SavedDraftsMenu extends Composite {
                     }
                 });
             }
+        }
 
+        public MenuCell(final BulkUploadMenuItem item, final IRevertBulkUploadHandler handler) {
+            this(item);
+
+            delete = ImageUtil.getUndoImage();
+            if (handler != null) {
+                delete.addClickHandler(new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        event.stopPropagation();
+                        Cell cell = table.getCellForEvent(event);
+                        if (cell == null)
+                            return;
+
+                        if (Window.confirm("This action cannot be undone. Continue?")) {
+//                            currentEditSelection = getMenuItem();
+                            handler.revert(item.getId(), new RevertCallback());
+                        }
+                    }
+                });
+            }
+        }
+
+        private MenuCell(final BulkUploadMenuItem item) {
+            this.item = item;
+            folderId = "menu_right_holder_" + item.getId();
             html = "<span class=\"collection_user_menu\" id=\"" + folderId + "_name\"></span>"
                     + "<span class=\"menu_count\" id=\"" + folderId + "\"></span> "
                     + "<div style=\"font-size: 10px; color: #999\"><span id=\"" + folderId + "_date\"></span>" +
@@ -190,7 +249,6 @@ public class SavedDraftsMenu extends Composite {
 
                 @Override
                 public void onMouseOver(MouseOverEvent event) {
-//                    panel.clear();
                     panel.remove(count);
                     panel.add(delete, folderId);
 
@@ -201,7 +259,6 @@ public class SavedDraftsMenu extends Composite {
 
                 @Override
                 public void onMouseOut(MouseOutEvent event) {
-//                    panel.clear();
                     panel.remove(delete);
                     panel.add(count, folderId);
                 }

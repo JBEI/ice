@@ -2,7 +2,9 @@ package org.jbei.ice.client.admin;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.admin.export.ExportPresenter;
 import org.jbei.ice.client.admin.group.GroupPresenter;
+import org.jbei.ice.client.admin.importentry.ImportPresenter;
 import org.jbei.ice.client.admin.usermanagement.UserPresenter;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -23,6 +25,8 @@ public class AdminPresenter extends AbstractPresenter {
 
     private UserPresenter userPresenter;
     private GroupPresenter groupPresenter;
+    private ExportPresenter exportPresenter;
+    private ImportPresenter importPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view) {
         this.service = service;
@@ -34,6 +38,8 @@ public class AdminPresenter extends AbstractPresenter {
         // presenters
         userPresenter = new UserPresenter();
         groupPresenter = new GroupPresenter();
+        exportPresenter = new ExportPresenter();
+        importPresenter = new ImportPresenter();
 
         setTabs();
     }
@@ -41,6 +47,8 @@ public class AdminPresenter extends AbstractPresenter {
     protected void setTabs() {
         view.setTabWidget(userPresenter.getView().getTab(), userPresenter.getView());
         view.setTabWidget(groupPresenter.getView().getTab(), groupPresenter.getView());
+        view.setTabWidget(exportPresenter.getView().getTab(), exportPresenter.getView());
+        view.setTabWidget(importPresenter.getView().getTab(), importPresenter.getView());
     }
 
     /**
@@ -60,6 +68,16 @@ public class AdminPresenter extends AbstractPresenter {
 
                 if (event.getSelectedItem() == userPresenter.getTabIndex()) {
                     userPresenter.go(service, eventBus);
+                    return;
+                }
+
+                if (event.getSelectedItem() == exportPresenter.getTabIndex()) {
+                    exportPresenter.go(service, eventBus);
+                    return;
+                }
+
+                if (event.getSelectedItem() == importPresenter.getTabIndex()) {
+                    importPresenter.go(service, eventBus);
                     return;
                 }
             }

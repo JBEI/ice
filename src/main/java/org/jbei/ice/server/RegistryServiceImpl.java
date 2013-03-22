@@ -1,16 +1,11 @@
 package org.jbei.ice.server;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
@@ -18,6 +13,7 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.entry.EntryController;
@@ -25,6 +21,7 @@ import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
@@ -51,10 +48,16 @@ import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.utils.IceXmlSerializer;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.RichTextRenderer;
+import org.jbei.ice.lib.utils.SerializationUtils;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.UtilsController;
+import org.jbei.ice.lib.vo.AttachmentData;
+import org.jbei.ice.lib.vo.CompleteEntry;
 import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.SequenceTraceFile;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
@@ -69,6 +72,7 @@ import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import org.apache.commons.io.FileUtils;
 
 public class RegistryServiceImpl extends RemoteServiceServlet implements RegistryService {
 
@@ -498,7 +502,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": retrieving user entries for " + userId);
             EntryController entryController = new EntryController();
             FolderDetails details = new FolderDetails(0, "My Entries", true);
-            ArrayList<Long> entries = entryController.getEntryIdsByOwner(userId, Visibility.OK, Visibility.PENDING);
+            ArrayList<Long> entries = entryController.getEntryIdsByOwner(account, userId, Visibility.OK,
+                                                                         Visibility.PENDING);
             details.setContents(entries);
             return details;
         } catch (ControllerException e) {
@@ -593,7 +598,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
-            return EntryToInfoFactory.getSequenceAnaylsis(sequences);
+            return ModelToInfoFactory.getSequenceAnalysis(sequences);
 
         } catch (ControllerException ce) {
             Logger.error(ce);
@@ -626,7 +631,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 controller.removeTraceSequence(account, sequence);
             }
             List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
-            return EntryToInfoFactory.getSequenceAnaylsis(sequences);
+            return ModelToInfoFactory.getSequenceAnalysis(sequences);
 
         } catch (ControllerException ce) {
             Logger.error(ce);
@@ -678,7 +683,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             SequenceController sequenceController = new SequenceController();
             boolean hasSequence = (sequenceController.getByEntry(entry) != null);
 
-            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, sampleMap,
+            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap,
                                                         sequences, hasSequence);
 
             //
@@ -749,7 +754,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             SequenceController sequenceController = new SequenceController();
             boolean hasSequence = (sequenceController.getByEntry(entry) != null);
 
-            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, sampleMap,
+            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap,
                                                         sequences, hasSequence);
 
             //
@@ -929,7 +934,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         // sort param
         try {
-            return sampleController.retrieveSamplesByDepositor(depositor, field, asc);
+            return sampleController.retrieveSamplesByDepositor(account, depositor, field, asc);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1218,6 +1223,26 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public boolean revertedSubmittedBulkUpload(String sid, long uploadId) throws AuthenticationException {
+        try {
+            Account account = retrieveAccountForSid(sid);
+            AccountController accountController = new AccountController();
+            if (!accountController.isAdministrator(account)) {
+                Logger.warn(account.getEmail() + ": attempting revert bulk upload. Admin only function.");
+                return false;
+            }
+
+            BulkUploadController controller = new BulkUploadController();
+            Logger.info(account.getEmail() + ": reverting submitted bulk upload " + uploadId);
+            return controller.revertSubmitted(account, uploadId);
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
+        }
+    }
+
+    @Override
     public BulkUploadInfo deleteSavedDraft(String sid, long draftId)
             throws AuthenticationException {
 
@@ -1282,9 +1307,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             BulkUploadController controller = new BulkUploadController();
-            Logger.info(
-                    account.getEmail() + ": saving bulk import \"" + name + "\" of type " + importType + " and size "
-                            + entryList.size());
+            Logger.info(account.getEmail() + ": saving bulk import draft \"" + name + "\" of type "
+                                + importType + " and size " + entryList.size());
             return controller.createBulkImportDraft(account, importType, name, entryList, groupUUID);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1338,6 +1362,166 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public boolean importXMLEntries(String sessionId, String fileId, String ownerEmail, String ownerName)
+            throws AuthenticationException {
+        // requires administrative privileges. check for them
+        Account account = retrieveAccountForSid(sessionId);
+        if (account.getType() != AccountType.ADMIN) {
+            Logger.warn(account.getEmail() + " attempting to import xml entries but is not admin");
+            return false;
+        }
+
+        Logger.info(account.getEmail() + ": Importing xml entries");
+        final String TMP_DIR = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+        File file = new File(TMP_DIR + File.separator + fileId);
+        if (!file.exists()) {
+            Logger.warn(account.getEmail() + " could not retrieve import file " + file.getAbsolutePath());
+            return false;
+        }
+
+        IceXmlSerializer iceXmlSerializer = new IceXmlSerializer();
+        List<CompleteEntry> completeEntries;
+        try {
+            String xmlString = null;
+            try {
+                xmlString = FileUtils.readFileToString(file);
+            } catch (IOException e) {
+                Logger.error(e);
+                return false;
+            }
+
+            completeEntries = iceXmlSerializer.deserializeJbeiXml(xmlString);
+            if (completeEntries == null) {
+                Logger.error("Could not parse file");
+                return false;
+            }
+        } catch (UtilityException e) {
+            Logger.error("Exception parsing xml.");
+            return false;
+        }
+
+        // controllers
+        EntryController entryController = new EntryController();
+        SequenceController sequenceController = new SequenceController();
+        AttachmentController attachmentController = new AttachmentController();
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        GroupController groupController = new GroupController();
+        Group publicGroup = null;
+
+        try {
+            publicGroup = groupController.createOrRetrievePublicGroup();
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+
+        // TODO: actual checking implementation.
+        ArrayList<CompleteEntry> existingEntries = new ArrayList<CompleteEntry>();
+        ArrayList<CompleteEntry> partNumberConflicts = new ArrayList<CompleteEntry>();
+
+        Iterator<CompleteEntry> iterator = completeEntries.iterator();
+        while (iterator.hasNext()) {
+            CompleteEntry completeEntry = iterator.next();
+
+            try {
+                Entry temp = entryController.getByRecordId(account, completeEntry.getEntry().getRecordId());
+                if (temp != null) {
+                    existingEntries.add(completeEntry);
+                    iterator.remove();
+                    continue;
+                }
+                for (PartNumber partNumber : completeEntry.getEntry().getPartNumbers()) {
+                    temp = entryController.getByPartNumber(account, partNumber.getPartNumber());
+                    if (temp != null) {
+                        partNumberConflicts.add(completeEntry);
+                        iterator.remove();
+                        break;
+                    }
+                }
+            } catch (ControllerException e) {
+                Logger.error(e);
+            } catch (PermissionException pe) {
+                Logger.error(pe);
+            }
+        }
+
+        // new owner, if specified
+        if (ownerEmail != null && !ownerEmail.isEmpty()) {
+            for (CompleteEntry completeEntry : completeEntries) {
+                completeEntry.getEntry().setOwnerEmail(ownerEmail.trim());
+                completeEntry.getEntry().setOwner(ownerEmail.trim());
+            }
+        }
+
+        for (CompleteEntry completeEntry : completeEntries) {
+            Entry newEntry = null;
+            Logger.info("Importing from xml " + completeEntry.getEntry().getRecordId());
+            try {
+                newEntry = entryController.createEntry(account, completeEntry.getEntry(), publicGroup);
+            } catch (ControllerException e) {
+                Logger.error("Controller error saving " + completeEntry.getEntry().getRecordId());
+            }
+            if (newEntry != null) {
+                // add sequence
+                if (completeEntry.getSequence() != null) {
+                    completeEntry.getSequence().setEntry(newEntry);
+                    try {
+                        sequenceController.save(account, completeEntry.getSequence());
+                    } catch (ControllerException e) {
+                        Logger.error("Controller error saving sequence  for " + newEntry.getRecordId());
+                    } catch (PermissionException e) {
+                        Logger.error("Permission error saving sequence  for " + newEntry.getRecordId());
+                    }
+                }
+
+                // add sequence traces
+                for (SequenceTraceFile traceFile : completeEntry.getTraceFiles()) {
+                    try {
+                        byte[] bytes = SerializationUtils.deserializeBase64StringToBytes(traceFile.getBase64Data());
+                        IDNASequence dnaSequence = sequenceAnalysisController.parse(bytes);
+                        if (dnaSequence == null || dnaSequence.getSequence() == null) {
+                            // parsing failed, continue.
+                            Logger.info("Trace file parsing failed");
+                        }
+                        sequenceAnalysisController.importTraceSequence(newEntry, traceFile
+                                .getFileName(), traceFile.getDepositorEmail(), dnaSequence
+                                .getSequence().toLowerCase(), traceFile.getFileId(), traceFile
+                                .getTimeStamp(), new ByteArrayInputStream(bytes));
+                    } catch (ControllerException e) {
+                        // parsing failed. Continue.
+                        Logger.info("Trace file parsing failed: " + e.toString());
+                    }
+                }
+
+                try {
+                    sequenceAnalysisController.rebuildAllAlignments(newEntry);
+                } catch (ControllerException e1) {
+                    Logger.error("Could not rebuild sequence alignments from trace files");
+                }
+
+                // add attachments
+                for (AttachmentData attachmentData : completeEntry.getAttachments()) {
+                    Attachment attachment = new Attachment();
+                    attachment.setDescription(attachmentData.getDescription());
+                    attachment.setFileId(attachmentData.getFileId());
+                    attachment.setFileName(attachmentData.getFileName());
+                    attachment.setEntry(newEntry);
+                    try {
+                        byte[] bytes = SerializationUtils
+                                .deserializeBase64StringToBytes(attachmentData.getBase64Data());
+                        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+                        attachmentController.save(account, attachment, inputStream);
+                    } catch (ControllerException e) {
+                        Logger.error("Controller error saving attachment for " + newEntry.getRecordId());
+                    } catch (PermissionException e) {
+                        Logger.error("Permission Error saving attachment for " + newEntry.getRecordId());
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
     public boolean approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList, String groupUUID)
             throws AuthenticationException {
         try {
@@ -1378,6 +1562,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             GroupController groupController = new GroupController();
             Group publicGroup = groupController.createOrRetrievePublicGroup(); // TODO group uuid should come from ui
+
+            entry = controller.createEntry(account, entry, publicGroup);
 
             if (sampleMap != null) {
                 for (SampleStorage sampleStorage : sampleMap) {
@@ -1442,7 +1628,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
             }
 
-            return controller.createEntry(account, entry, publicGroup).getId();
+            return entry.getId();
         } catch (ControllerException e) {
             Logger.error(e);
             return null;

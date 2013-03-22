@@ -130,12 +130,10 @@ public class IceXmlSerializer {
     private static final String SEQ = "seq";
 
     public static Namespace iceNamespace = new Namespace("ice", "http://jbei.org/ice");
-    public static Namespace xsiNamespace = new Namespace("xsi",
-                                                         "http://www.w3.org/2001/XMLSchema-instance");
+    public static Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
     public static Namespace expNamespace = new Namespace(EXP, "http://jbei.org/exp");
 
-    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     private final ArrayList<CompleteEntry> completeEntries = new ArrayList<CompleteEntry>();
 
@@ -321,8 +319,7 @@ public class IceXmlSerializer {
                 try {
                     file = attachmentController.getFile(account, attachment);
                     fileString = SerializationUtils
-                            .serializeBytesToBase64String(org.apache.commons.io.FileUtils
-                                                                               .readFileToByteArray(file));
+                            .serializeBytesToBase64String(org.apache.commons.io.FileUtils.readFileToByteArray(file));
 
                 } catch (FileNotFoundException e) {
                     throw new UtilityException(e);
@@ -374,12 +371,10 @@ public class IceXmlSerializer {
             if (getSelectionMarkers(plasmid) != null) {
                 fields.add(getSelectionMarkers(plasmid));
             }
-            fields.add(new DefaultElement(BACKBONE, iceNamespace).addText(emptyStringify(plasmid
-                                                                                                 .getBackbone())));
+            fields.add(new DefaultElement(BACKBONE, iceNamespace).addText(emptyStringify(plasmid.getBackbone())));
             fields.add(new DefaultElement(ORIGIN_OF_REPLICATION, iceNamespace)
                                .addText(emptyStringify(plasmid.getOriginOfReplication())));
-            fields.add(new DefaultElement(PROMOTERS, iceNamespace).addText(emptyStringify(plasmid
-                                                                                                  .getPromoters())));
+            fields.add(new DefaultElement(PROMOTERS, iceNamespace).addText(emptyStringify(plasmid.getPromoters())));
             fields.add(new DefaultElement(IS_CIRCULAR, iceNamespace).addText((plasmid.getCircular() ? "true"
                     : "false")));
         } else if (entry.getRecordType().equals(STRAIN)) {
@@ -387,212 +382,26 @@ public class IceXmlSerializer {
             if (getSelectionMarkers(strain) != null) {
                 fields.add(getSelectionMarkers(strain));
             }
-            fields.add(new DefaultElement(HOST, iceNamespace).addText(emptyStringify(strain
-                                                                                             .getHost())));
+            fields.add(new DefaultElement(HOST, iceNamespace).addText(emptyStringify(strain.getHost())));
             fields.add(new DefaultElement(GENOTYPE_PHENOTYPE, iceNamespace)
                                .addText(emptyStringify(strain.getGenotypePhenotype())));
-            fields.add(new DefaultElement(PLASMIDS, iceNamespace).addText(emptyStringify(strain
-                                                                                                 .getPlasmids())));
+            fields.add(new DefaultElement(PLASMIDS, iceNamespace).addText(emptyStringify(strain.getPlasmids())));
         } else if (entry.getRecordType().equals(PART)) {
             Part part = (Part) entry;
-            fields.add(new DefaultElement(PACKAGE_FORMAT, iceNamespace).addText(emptyStringify(part
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                       .getPackageFormat()
-                                                                                                       .toString())));
+            fields.add(new DefaultElement(PACKAGE_FORMAT, iceNamespace).addText(emptyStringify(part.getPackageFormat()
+                                                                                                   .toString())));
         } else if (entry.getRecordType().equals(ARABIDOPSIS)) {
             ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-            fields.add(new DefaultElement(HOMOZYGOSITY, iceNamespace).addText(emptyStringify(seed
-                                                                                                     .getHomozygosity())));
-            fields.add(new DefaultElement(ECOTYPE, iceNamespace).addText(emptyStringify(seed
-                                                                                                .getEcotype())));
+            fields.add(new DefaultElement(HOMOZYGOSITY, iceNamespace).addText(emptyStringify(seed.getHomozygosity())));
+            fields.add(new DefaultElement(ECOTYPE, iceNamespace).addText(emptyStringify(seed.getEcotype())));
 
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             fields.add(new DefaultElement(HARVEST_DATE, iceNamespace).addText(simpleDateFormat
                                                                                       .format(seed.getHarvestDate())));
 
-            fields.add(new DefaultElement(PARENTS, iceNamespace).addText(emptyStringify(seed
-                                                                                                .getParents())));
-            fields.add(new DefaultElement(GENERATION, iceNamespace).addText(seed.getGeneration()
-                                                                                .toString()));
-            fields.add(new DefaultElement(PLANT_TYPE, iceNamespace).addText(seed.getPlantType()
-                                                                                .toString()));
+            fields.add(new DefaultElement(PARENTS, iceNamespace).addText(emptyStringify(seed.getParents())));
+            fields.add(new DefaultElement(GENERATION, iceNamespace).addText(seed.getGeneration().toString()));
+            fields.add(new DefaultElement(PLANT_TYPE, iceNamespace).addText(seed.getPlantType().toString()));
         }
 
         return fields;

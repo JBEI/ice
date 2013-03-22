@@ -1,15 +1,8 @@
 package org.jbei.ice.client.entry.view.view;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.MultiSelectionModel;
-import gwtupload.client.IUploader;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-import gwtupload.client.IUploader.OnStartUploaderHandler;
-import gwtupload.client.SingleUploader;
+import java.util.ArrayList;
+import java.util.Date;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.util.ImageUtil;
@@ -27,8 +20,16 @@ import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
-import java.util.ArrayList;
-import java.util.Date;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.MultiSelectionModel;
+import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+import gwtupload.client.IUploader.OnStartUploaderHandler;
+import gwtupload.client.SingleUploader;
 
 public class EntryView extends Composite implements IEntryView {
 
@@ -193,8 +194,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public IEntryFormUpdateSubmit showUpdateForm(EntryInfo info) {
-        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(info,
-                                                                              AppController.autoCompleteData);
+        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(info, AppController.autoCompleteData);
         if (form == null)
             return form;
 
@@ -308,8 +308,7 @@ public class EntryView extends Composite implements IEntryView {
             panel.add(rightBtn, "rightBtn");
 
             entryDetailMenuWrapper.setWidget(0, 0, panel);
-            entryDetailMenuWrapper.getFlexCellFormatter().setHorizontalAlignment(0, 0,
-                                                                                 HasAlignment.ALIGN_CENTER);
+            entryDetailMenuWrapper.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
             entryDetailMenuWrapper.getFlexCellFormatter().setStyleName(0, 0, "pad-6");
         } else {
             entryDetailMenuWrapper.setHTML(0, 0, "");
@@ -377,6 +376,7 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.setWidget(1, 0, detailView);
         SequenceViewPanel sequencePanel = detailView.getSequencePanel();
 
+        this.permissions.setVisible(showEdit);
         this.permissions.addReadWriteLinks(showEdit);
         sequencePanel.getPresenter().setIsCanEdit(showEdit, deleteHandler);
         return sequencePanel.getPresenter();

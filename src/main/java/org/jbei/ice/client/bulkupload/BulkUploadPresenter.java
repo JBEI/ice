@@ -166,6 +166,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 view.setSheet(currentInput, true, false);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
                 view.setDraftMenuVisibility(false, false);
+                currentInput.getSheet().resetWidth();
                 createSelection.setSelected(selection, false);
             }
         });
@@ -212,8 +213,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 }
 
                 if (!data.isEmpty())
-                    view.setPendingDraftsData(data, new DeleteBulkUploadHandler(model.getService(),
-                                                                                model.getEventBus()));
+                    view.setPendingDraftsData(data, new RevertPendingBulkUploadHandler(model.getService(),
+                                                                                       model.getEventBus()));
             }
         });
     }
@@ -333,6 +334,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
             BulkUploadSaveHandler handler = new BulkUploadSaveHandler();
             String uuid = view.getPermissionSelection();
             model.saveBulkImportDraftData(currentInput.getImportType(), name, cellData, uuid, handler);
+            sheetCache.clear();
         }
     }
 

@@ -6,11 +6,10 @@ import org.eclipse.mylyn.wikitext.mediawiki.core.MediaWikiLanguage;
 
 /**
  * Render marked up text to html.
- * <p>
+ * <p/>
  * Currently MediaWiki, Confluence mark ups are supported. No markup is indicated as "text".
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham, Hector Plahar
- * 
  */
 public class RichTextRenderer {
     public static final String WIKI = "wiki";
@@ -19,7 +18,7 @@ public class RichTextRenderer {
 
     /**
      * Render Mediawiki syntax marked text to html.
-     * 
+     *
      * @param text
      * @return Html rendering of marked up text.
      */
@@ -29,7 +28,7 @@ public class RichTextRenderer {
 
     /**
      * Render Confluence syntax marked text to html.
-     * 
+     *
      * @param text
      * @return Html rendering of marked up text.
      */
@@ -39,26 +38,19 @@ public class RichTextRenderer {
 
     /**
      * Render given text to html using the given type.
-     * 
-     * @param type
-     *            Markup type: Mediawiki, Confluence, or Text.
-     * @param text
-     *            markup text.
+     *
+     * @param type Markup type: Mediawiki, Confluence, or Text.
+     * @param text markup text.
      * @return Html rendering of given text.
      */
     public static String richTextToHtml(String type, String text) {
-        String result = "";
+        String result;
 
-        if (type == null) {
-            result = text;
-        }
         if (WIKI.equals(type)) {
             MarkupParser markupParser = new MarkupParser(new MediaWikiLanguage());
-
             result = markupParser.parseToHtml(text);
         } else if (CONFLUENCE.equals(type)) {
             MarkupParser markupParser = new MarkupParser(new ConfluenceLanguage());
-
             result = markupParser.parseToHtml(text);
         } else {
             result = text;

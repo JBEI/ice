@@ -12,7 +12,7 @@ public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
         Header header = datum.getTypeHeader();
         String value = datum.getValue();
 
-        if (header == null || value == null || value.isEmpty())
+        if (header == null || value == null)
             return info;
 
         switch (header) {
@@ -21,8 +21,13 @@ public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
                 break;
 
             case CIRCULAR:
-                if (value.isEmpty())
+                if (value.isEmpty() || (!"Yes".equalsIgnoreCase(value)
+                        && !"True".equalsIgnoreCase(value)
+                        && !"False".equalsIgnoreCase(value)
+                        && !"No".equalsIgnoreCase(value))) {
                     info.setCircular(null);
+                    break;
+                }
 
                 boolean circular = "Yes".equalsIgnoreCase(value) || "True".equalsIgnoreCase(value);
                 info.setCircular(circular);

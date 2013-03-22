@@ -12,6 +12,7 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
@@ -127,13 +128,23 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     // experimental
     public void decreaseWidthBy(int amount) {
+        GWT.log("Decreasing sheet width by " + amount + ". New size is " + (sheetTableFocusPanelWrapper
+                .getOffsetWidth() - amount));
         sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() - amount) + "px");
         headerWrapper.setWidth((headerWrapper.getOffsetWidth() - amount) + "px");
     }
 
     public void increaseWidthBy(int amount) {
+        GWT.log("Increasing sheet width by " + amount + ". New size is " + (sheetTableFocusPanelWrapper
+                .getOffsetWidth() + amount));
         sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + amount) + "px");
         headerWrapper.setWidth((headerWrapper.getOffsetWidth() + amount) + "px");
+    }
+
+    public void resetWidth() {
+        GWT.log("Resetting sheet width");
+        sheetTableFocusPanelWrapper.setWidth((Window.getClientWidth() - 40) + "px");
+        headerWrapper.setWidth((Window.getClientWidth() - 15) + "px");
     }
 
     private void addWindowResizeHandler() {
@@ -208,8 +219,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         createHeaderCells();
 
+        int rowCount = presenter.getEntryRowCount() < ROW_COUNT ? ROW_COUNT : presenter.getEntryRowCount();
+
         // add rows
-        for (row = 0; row < ROW_COUNT; row += 1) {
+        for (row = 0; row < rowCount; row += 1) {
             presenter.addRow(row);
             // index col
             HTML indexCell = new HTML((row + 1) + "");
@@ -232,10 +245,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     event.preventDefault();
                 } else if (event.isRightArrow()) {
                     dealWithRightArrowPress();
-                    event.preventDefault();
+//                    event.preventDefault();
                 } else if (event.isLeftArrow()) {
                     dealWithLeftArrowPress();
-                    event.preventDefault();
+//                    event.preventDefault();
                 } else {
                     int code = event.getNativeKeyCode();
 

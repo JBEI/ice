@@ -3,6 +3,7 @@ package org.jbei.ice.lib.entry;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -157,21 +158,33 @@ class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     public Entry getByName(String name) throws DAOException {
-        Entry entry = null;
         Session session = newSession();
 
         try {
             session.getTransaction().begin();
-            Query query = session.createQuery("from " + Name.class.getName()
-                                                      + " where name = :name");
+            Query query = session.createQuery("from " + Name.class.getName() + " where name = :name");
             query.setParameter("name", name);
-            Object queryResult = query.uniqueResult();
-            if (queryResult == null) {
+            List list = query.list();
+            if (list == null)
                 return null;
-            }
 
-            entry = ((Name) queryResult).getEntry();
+            ArrayList<Name> results = new ArrayList<Name>(list);
             session.getTransaction().commit();
+
+            Iterator<Name> iterator = results.iterator();
+            while (iterator.hasNext()) {
+                Entry next = iterator.next().getEntry();
+                if (next.getVisibility() != Visibility.OK.getValue())
+                    iterator.remove();
+            }
+            if (results.size() > 1)
+                throw new DAOException("Entry by name " + name + " yielded " + results.size() + " results");
+
+            if (results.isEmpty())
+                return null;
+
+            return results.get(0).getEntry();
+
         } catch (HibernateException e) {
             Logger.error("Failed to retrieve entry by JBEI name: " + name, e);
             session.getTransaction().rollback();
@@ -179,8 +192,6 @@ class EntryDAO extends HibernateRepository<Entry> {
         } finally {
             closeSession(session);
         }
-
-        return entry;
     }
 
     public int getOwnerEntryCount(String ownerEmail, Integer... visibilities) throws DAOException {
@@ -246,17 +257,19 @@ class EntryDAO extends HibernateRepository<Entry> {
             list = criteria.setProjection(Projections.property("entry.id")).list();
             results.addAll(list);
 
-            // check read user
-            criteria = session.createCriteria(ReadUser.class);
-            criteria.add(Restrictions.eq("account", account));
-            list = criteria.setProjection(Projections.property("entry.id")).list();
-            results.addAll(list);
+            if (account != null) {
+                // check read user
+                criteria = session.createCriteria(ReadUser.class);
+                criteria.add(Restrictions.eq("account", account));
+                list = criteria.setProjection(Projections.property("entry.id")).list();
+                results.addAll(list);
 
-            // check write user
-            criteria = session.createCriteria(WriteUser.class);
-            criteria.add(Restrictions.eq("account", account));
-            list = criteria.setProjection(Projections.property("entry.id")).list();
-            results.addAll(list);
+                // check write user
+                criteria = session.createCriteria(WriteUser.class);
+                criteria.add(Restrictions.eq("account", account));
+                list = criteria.setProjection(Projections.property("entry.id")).list();
+                results.addAll(list);
+            }
 
             // check entries (retrieve only ok or submitted drafts)
             Integer[] visibility = new Integer[]{Visibility.OK.getValue(), Visibility.PENDING.getValue()};
@@ -266,8 +279,15 @@ class EntryDAO extends HibernateRepository<Entry> {
                               .add(Restrictions.eq("ownerEmail", account.getEmail()))
                               .setProjection(Projections.id());
             results.addAll(criteria.list());
+
+            // remove drafts
+            criteria = session.createCriteria(Entry.class)
+                              .add(Restrictions.eq("visibility", new Integer(Visibility.DRAFT.getValue())))
+                              .setProjection(Projections.id());
+            List remove = criteria.list();
+            results.removeAll(remove);
+
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve number of visible entries!", e);
         } finally {
             closeSession(session);
@@ -327,6 +347,13 @@ class EntryDAO extends HibernateRepository<Entry> {
             if (list != null) {
                 entries = (ArrayList<Long>) list;
             }
+
+            // remove drafts
+            Criteria criteria = session.createCriteria(Entry.class)
+                                       .add(Restrictions.eq("visibility", new Integer(Visibility.DRAFT.getValue())))
+                                       .setProjection(Projections.id());
+            List remove = criteria.list();
+            entries.removeAll(remove);
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entries!", e);
         } finally {

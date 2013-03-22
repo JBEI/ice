@@ -4,5 +4,5 @@ package org.jbei.ice.client.admin;
  * @author Hector Plahar
  */
 public enum AdminTab {
-    USERS, GROUPS;
+    USERS, GROUPS, EXPORT, IMPORT;
 }

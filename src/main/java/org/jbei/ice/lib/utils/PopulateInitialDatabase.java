@@ -1,5 +1,13 @@
 package org.jbei.ice.lib.utils;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -20,14 +28,6 @@ import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * Populate an empty database with necessary objects and values.
  *
@@ -46,7 +46,7 @@ public class PopulateInitialDatabase {
     // Setting the correct parent schema version may help you in the future.
     public static final String DATABASE_SCHEMA_VERSION = "3.1.0";
     public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.9.0";
-    private static final String ICE_2_DATABASE_SCHEMA_VERSION = "0.8.1";
+//    private static final String ICE_2_DATABASE_SCHEMA_VERSION = "0.8.1";
 
     // This is a global "everyone" uuid
     public static String everyoneGroup = "8746a64b-abd5-4838-a332-02c356bbeac0";
@@ -77,10 +77,47 @@ public class PopulateInitialDatabase {
 
                 createSystemAccount();
                 createAdminAccount();
-
                 populateDefaultStorageLocationsAndSchemes();
             }
             updateDatabaseSchema(dao);
+            modifySeedStorageDefault();
+
+            // create the arabidopsisSeed freezer scheme
+            StorageController storageController = new StorageController();
+            Storage storage = null;
+
+            try {
+                Configuration config = dao.get(ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT);
+                storage = storageController.retrieveByUUID(config.getValue());
+                if (storage == null)
+                    return;
+                storage = storageController.get(storage.getId(), true);
+            } catch (DAOException ex) {
+                Logger.error(ex);
+                return;
+            }
+
+            if (storage == null)
+                return;
+
+            for (Storage child : storage.getChildren()) {
+                if (child.getName().equalsIgnoreCase("Arabidopsis Freezer Samples"))
+                    return;
+            }
+
+            //create freezer sample
+            Storage freezerStorage = new Storage("Arabidopsis Freezer Samples", "Arabidopsis Freezer Samples",
+                                                 StorageType.SCHEME, systemAccountEmail, storage);
+            ArrayList<Storage> schemes = new ArrayList<Storage>();
+            schemes.add(new Storage("Plate", "", StorageType.PLATE81, "", null));
+            schemes.add(new Storage("Well", "", StorageType.WELL, "", null));
+            schemes.add(new Storage("Tube", "", StorageType.TUBE, "", null));
+            freezerStorage.setSchemes(schemes);
+            freezerStorage = storageController.save(freezerStorage);
+            if (freezerStorage == null)
+                Logger.error("Could not create freezer storage");
+            else
+                Logger.info("Freezer storage created for sample");
 
         } catch (ControllerException e) {
             throw new UtilityException(e);
@@ -92,14 +129,14 @@ public class PopulateInitialDatabase {
      */
     private static void populateDefaultStorageLocationsAndSchemes() throws UtilityException {
         ConfigurationDAO dao = new ConfigurationDAO();
-        Configuration strainRootConfig = null;
-        Configuration plasmidRootConfig = null;
-        Configuration partRootConfig = null;
-        Configuration arabidopsisRootConfig = null;
-        Storage strainRoot = null;
-        Storage plasmidRoot = null;
-        Storage partRoot = null;
-        Storage arabidopsisSeedRoot = null;
+        Configuration strainRootConfig;
+        Configuration plasmidRootConfig;
+        Configuration partRootConfig;
+        Configuration arabidopsisRootConfig;
+        Storage strainRoot;
+        Storage plasmidRoot;
+        Storage partRoot;
+        Storage arabidopsisSeedRoot;
 
         try {
             // read configuration
@@ -192,8 +229,9 @@ public class PopulateInitialDatabase {
                                                          systemAccountEmail, arabidopsisSeedRoot);
                 ArrayList<Storage> schemes = new ArrayList<Storage>();
                 schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
-                schemes.add(new Storage("Box", "", StorageType.BOX_UNINDEXED, "", null));
-                schemes.add(new Storage("Tube", "", StorageType.TUBE, "", null));
+                schemes.add(new Storage("Box", "", StorageType.BOX_INDEXED, "", null));
+                schemes.add(new Storage("Tube Number", "", StorageType.WELL, "", null));
+                schemes.add(new Storage("Tube Barcode", "", StorageType.TUBE, "", null));
                 defaultArabidopsis.setSchemes(schemes);
                 defaultArabidopsis = storageController.save(defaultArabidopsis);
                 dao.save(new Configuration(ConfigurationKey.ARABIDOPSIS_STORAGE_DEFAULT,
@@ -239,6 +277,37 @@ public class PopulateInitialDatabase {
 
         } catch (DAOException e) {
             throw new UtilityException(e);
+        }
+    }
+
+    private static void modifySeedStorageDefault() {
+        StorageController storageController = new StorageController();
+
+        try {
+            // get arabidopsis storage default
+            List<Storage> storageSchemes = storageController.retrieveAllStorageSchemes();
+            Storage defaultSeedScheme = null;
+
+            for (Storage storage : storageSchemes) {
+                if (DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME.equals(storage.getName())) {
+                    defaultSeedScheme = storage;
+                    break;
+                }
+            }
+
+            if (defaultSeedScheme == null || defaultSeedScheme.getSchemes().size() == 4)
+                return;
+
+            // update schemes
+            ArrayList<Storage> schemes = new ArrayList<Storage>();
+            schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
+            schemes.add(new Storage("Box", "", StorageType.BOX_INDEXED, "", null));
+            schemes.add(new Storage("Tube Number", "", StorageType.WELL, "", null));
+            schemes.add(new Storage("Tube Barcode", "", StorageType.TUBE, "", null));
+            defaultSeedScheme.setSchemes(schemes);
+            storageController.update(defaultSeedScheme);
+        } catch (ControllerException ce) {
+            Logger.error(ce);
         }
     }
 

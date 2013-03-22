@@ -15,6 +15,7 @@ import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
@@ -197,10 +198,11 @@ public class RegistryAPI {
      */
     public long getNumberOfPublicEntries() throws ServiceException {
         long result = 0;
+        log("getNumberPublicEntries");
 
         try {
             EntryController controller = new EntryController();
-            result = controller.getNumberOfVisibleEntries(null);
+            result = controller.getNumberOfPublicEntries();
         } catch (Exception e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -511,17 +513,6 @@ public class RegistryAPI {
         return (Strain) newEntry;
     }
 
-    public List<Entry> getAllEntries() throws ServiceException {
-        EntryController controller = new EntryController();
-        try {
-            ArrayList<Long> list = controller.getEntryIdsByOwner("wjholtz@lbl.gov");
-            Account system = new AccountController().getByEmail("system");
-            return controller.getEntriesByIdSet(system, list);
-        } catch (ControllerException e) {
-            throw new ServiceException(e);
-        }
-    }
-
     /**
      * Create a new {@link Part} on the server.
      *
@@ -552,6 +543,28 @@ public class RegistryAPI {
         }
 
         return (Part) newEntry;
+    }
+
+    public ArabidopsisSeed createSeed(@WebParam(name = "sessionId") String sessionId, @WebParam(
+            name = "seed") ArabidopsisSeed seed) throws SessionException, ServiceException {
+        log(sessionId, "createSeed");
+        Entry newEntry;
+        Account account = validateAccount(sessionId);
+        try {
+            EntryController controller = new EntryController();
+            Entry remoteEntry = createEntry(sessionId, seed);
+            Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+            newEntry = controller.createEntry(account, remoteEntry, publicGroup);
+            log("User '" + account.getEmail() + "' created arabidopsis seed: '" + seed.getRecordId());
+        } catch (ControllerException e) {
+            Logger.error(e);
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new ServiceException("Registry Service Internal Error!");
+        }
+
+        return (ArabidopsisSeed) newEntry;
     }
 
     /**

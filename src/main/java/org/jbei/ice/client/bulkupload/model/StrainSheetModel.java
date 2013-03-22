@@ -13,7 +13,7 @@ public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
         Header header = datum.getTypeHeader();
         String value = datum.getValue();
 
-        if (header == null || value == null || value.isEmpty())
+        if (header == null || value == null)
             return strain;
 
         switch (header) {

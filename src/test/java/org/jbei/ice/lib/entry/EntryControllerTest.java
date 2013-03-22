@@ -50,7 +50,7 @@ public class EntryControllerTest {
         Assert.assertTrue(entry.getId() > 0);
 
         // account should only have a single entry
-        ArrayList<Long> list = controller.getEntryIdsByOwner(email);
+        ArrayList<Long> list = controller.getEntryIdsByOwner(account, email);
         Assert.assertNotNull(list);
         Assert.assertEquals(1, list.size());
 

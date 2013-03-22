@@ -213,33 +213,31 @@ public class InfoToModelFactory {
             entry.setEntryFundingSources(fundingSources);
         }
 
-        if (fundingSourcesStr != null && !fundingSourcesStr.isEmpty()) {
+        if (fundingSourcesStr != null) {
             String[] itemsAsString = fundingSourcesStr.split("\\s*,+\\s*");
 
             for (int i = 0; i < itemsAsString.length; i++) {
                 String currentItem = itemsAsString[i];
-                if (!currentItem.trim().isEmpty()) {
-                    EntryFundingSource entryFundingSource;
-                    FundingSource fundingSource;
+                EntryFundingSource entryFundingSource;
+                FundingSource fundingSource;
 
-                    if (fundingSources.size() > i) {
-                        entryFundingSource = (EntryFundingSource) fundingSources.toArray()[i];
-                        fundingSource = entryFundingSource.getFundingSource();
-                    } else {
-                        fundingSource = new FundingSource();
-                        entryFundingSource = new EntryFundingSource();
-                        fundingSources.add(entryFundingSource);
-                        entryFundingSource.setFundingSource(fundingSource);
-                    }
-
-                    fundingSource.setFundingSource(currentItem);
-                    if (pI == null)
-                        pI = "";
-                    fundingSource.setPrincipalInvestigator(pI);
-                    entryFundingSource.setEntry(entry);
+                if (fundingSources.size() > i) {
+                    entryFundingSource = (EntryFundingSource) fundingSources.toArray()[i];
+                    fundingSource = entryFundingSource.getFundingSource();
+                } else {
+                    fundingSource = new FundingSource();
+                    entryFundingSource = new EntryFundingSource();
+                    fundingSources.add(entryFundingSource);
+                    entryFundingSource.setFundingSource(fundingSource);
                 }
+
+                fundingSource.setFundingSource(currentItem);
+                if (pI == null)
+                    pI = "";
+                fundingSource.setPrincipalInvestigator(pI);
+                entryFundingSource.setEntry(entry);
             }
-        } else if (pI != null && !pI.trim().isEmpty()) {
+        } else if (pI != null) {
 
             EntryFundingSource entryFundingSource;
             FundingSource fundingSource;
@@ -254,8 +252,7 @@ public class InfoToModelFactory {
                 entryFundingSource.setFundingSource(fundingSource);
             }
 
-            if (fundingSourcesStr == null)
-                fundingSourcesStr = "";
+            fundingSourcesStr = "";
             fundingSource.setFundingSource(fundingSourcesStr);
             fundingSource.setPrincipalInvestigator(pI);
             entryFundingSource.setEntry(entry);
@@ -266,28 +263,30 @@ public class InfoToModelFactory {
 
     private static Set<SelectionMarker> getSelectionMarkers(String markerStr, Entry entry) {
 
-        Set<SelectionMarker> markers = entry.getSelectionMarkers();
-        if (markers == null)
-            markers = new HashSet<SelectionMarker>();
+        Set<SelectionMarker> existingMarkers = entry.getSelectionMarkers();
+        Set<SelectionMarker> markers = new HashSet<SelectionMarker>();
 
-        if (markerStr != null && !markerStr.isEmpty()) {
+        if (existingMarkers == null)
+            existingMarkers = new HashSet<SelectionMarker>();
+
+        if (markerStr != null) {
             String[] itemsAsString = markerStr.split("\\s*,+\\s*");
+            int itemLength = itemsAsString.length;
 
-            for (int i = 0; i < itemsAsString.length; i++) {
+            for (int i = 0; i < itemLength; i++) {
                 String currentItem = itemsAsString[i];
-                if (!currentItem.trim().isEmpty()) {
-                    SelectionMarker marker;
+                SelectionMarker marker;
 
-                    if (markers.size() > i) {
-                        marker = (SelectionMarker) markers.toArray()[i];
-                    } else {
-                        marker = new SelectionMarker();
-                        markers.add(marker);
-                    }
-
-                    marker.setName(currentItem);
-                    marker.setEntry(entry);
+                if (existingMarkers.size() > i) {
+                    marker = (SelectionMarker) existingMarkers.toArray()[i];
+                } else {
+                    marker = new SelectionMarker();
+                    existingMarkers.add(marker);
                 }
+
+                marker.setName(currentItem);
+                marker.setEntry(entry);
+                markers.add(marker);
             }
         }
 
@@ -295,27 +294,28 @@ public class InfoToModelFactory {
     }
 
     private static Set<Link> getLinks(String linkString, Entry entry) {
-        Set<Link> links = entry.getLinks();
-        if (links == null)
-            links = new HashSet<Link>();
+        Set<Link> existingLinks = entry.getLinks();
+        Set<Link> links = new HashSet<Link>();
 
-        if (linkString != null && !linkString.isEmpty()) {
+        if (existingLinks == null)
+            existingLinks = new HashSet<Link>();
+
+        if (linkString != null) {
             String[] itemsAsString = linkString.split("\\s*,+\\s*");
 
             for (int i = 0; i < itemsAsString.length; i++) {
                 String currentItem = itemsAsString[i];
-                if (!currentItem.trim().isEmpty()) {
-                    Link link;
+                Link link;
 
-                    if (links.size() > i) {
-                        link = (Link) links.toArray()[i];
-                    } else {
-                        link = new Link();
-                        links.add(link);
-                    }
-                    link.setLink(currentItem);
-                    link.setEntry(entry);
+                if (existingLinks.size() > i) {
+                    link = (Link) existingLinks.toArray()[i];
+                } else {
+                    link = new Link();
+                    existingLinks.add(link);
                 }
+                link.setLink(currentItem);
+                link.setEntry(entry);
+                links.add(link);
             }
         }
 
@@ -323,28 +323,29 @@ public class InfoToModelFactory {
     }
 
     private static Set<Name> getNames(String nameStr, Entry entry) {
-        Set<Name> names = entry.getNames();
-        if (names == null)
-            names = new HashSet<Name>();
+        Set<Name> existingNames = entry.getNames();
+        Set<Name> names = new HashSet<Name>();
 
-        if (nameStr == null || nameStr.isEmpty())
-            return names;
+        if (existingNames == null)
+            existingNames = new HashSet<Name>();
+
+        if (nameStr == null)
+            return existingNames;
 
         String[] items = nameStr.split("\\s*,+\\s*");
         for (int i = 0; i < items.length; i++) {
             String item = items[i];
-            if (!item.trim().isEmpty()) {
-                Name name;
+            Name name;
 
-                if (names.size() > i) {
-                    name = (Name) names.toArray()[i];
-                } else {
-                    name = new Name();
-                    names.add(name);
-                }
-                name.setName(item);
-                name.setEntry(entry);
+            if (existingNames.size() > i) {
+                name = (Name) existingNames.toArray()[i];
+            } else {
+                name = new Name();
+                existingNames.add(name);
             }
+            name.setName(item);
+            name.setEntry(entry);
+            names.add(name);
         }
 
         return names;

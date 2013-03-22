@@ -174,4 +174,9 @@ public interface RegistryService extends RemoteService {
 
     boolean submitBulkImportDraft(String sid, long draftId,
             ArrayList<EntryInfo> entryList, String groupUUID) throws AuthenticationException;
+
+    boolean importXMLEntries(String sessionId, String fileId, String ownerEmail, String ownerName)
+            throws AuthenticationException;
+
+    boolean revertedSubmittedBulkUpload(String sid, long uploadId) throws AuthenticationException;
 }

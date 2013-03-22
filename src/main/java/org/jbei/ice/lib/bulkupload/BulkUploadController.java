@@ -25,12 +25,13 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.server.EntryToInfoFactory;
 import org.jbei.ice.server.InfoToModelFactory;
+import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AttachmentInfo;
@@ -172,7 +173,7 @@ public class BulkUploadController {
         // retrieve the entries associated with the bulk import
         for (Entry entry : draft.getContents()) {
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
-            boolean hasSequence = sequenceController.getByEntry(entry) != null;
+            Sequence sequence = sequenceController.getByEntry(entry);
             ArrayList<Sample> samples = sampleController.getSamples(entry);
             SampleStorage sampleStorage = null;
 
@@ -200,13 +201,12 @@ public class BulkUploadController {
                         break;
                     }
 
-                    sampleStorage.getStorageList().add(EntryToInfoFactory.getStorageInfo(storage));
+                    sampleStorage.getStorageList().add(ModelToInfoFactory.getStorageInfo(storage));
                     storage = storage.getParent();
                 }
             }
 
-            // convert to info object (no samples or trace sequences since bulk import does not have the ui for it yet)
-            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, null, null, hasSequence);
+            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, null, null, sequence != null);
             if (type == EntryAddType.STRAIN_WITH_PLASMID) {
 
                 // get plasmids
@@ -214,9 +214,9 @@ public class BulkUploadController {
                 Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController, plasmids);
                 if (plasmid != null) {
                     attachments = attachmentController.getByEntry(account, plasmid);
-                    hasSequence = sequenceController.getByEntry(entry) != null;
-                    EntryInfo plasmidInfo = EntryToInfoFactory.getInfo(account, plasmid,
-                                                                       attachments, null, null, hasSequence);
+                    sequence = sequenceController.getByEntry(plasmid);
+                    EntryInfo plasmidInfo = ModelToInfoFactory.getInfo(account, plasmid,
+                                                                       attachments, null, null, sequence != null);
                     info.setInfo(plasmidInfo);
                 }
             }
@@ -315,11 +315,26 @@ public class BulkUploadController {
 
             for (Entry entry : draft.getContents()) {
                 if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
-                    entryController.delete(requesting, entry);
+                    try {
+                        entryController.delete(requesting, entry);
+                        // delete associated plasmids if bulk import type is strain with plasmid
+                        if (EntryAddType.stringToType(draft.getImportType()) == EntryAddType.STRAIN_WITH_PLASMID) {
+                            String plasmids = ((Strain) entry).getPlasmids();
+                            Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(requesting, entryController,
+                                                                                         plasmids);
+                            if (plasmid != null) {
+                                entryController.delete(requesting, entry);
+                            }
+                        }
+                    } catch (PermissionException pe) {
+                        Logger.warn("Could not delete entry " + entry.getRecordId() + " for bulk upload " + draftId);
+                    }
+                } else {
+                    Logger.info("Encountered non-draft entry while deleting bulk upload " + entry.getId());
                 }
             }
 
-            draft.getContents().clear();
+            draft.setContents(null);
             dao.delete(draft);
 
         } catch (DAOException e) {
@@ -519,7 +534,7 @@ public class BulkUploadController {
 
         // cycle through list of new attachments
         for (AttachmentInfo attachmentInfo : attachmentInfoArrayList) {
-            if (existingIds.remove(attachmentInfo.getFileId()))
+            if (existingIds.remove(attachmentInfo.getFileId()) || attachmentInfo.getFileId().isEmpty())
                 continue;
 
             // create and save attachment
@@ -528,7 +543,8 @@ public class BulkUploadController {
             attachment.setDescription(""); // no way of entering description in bulk import
             attachment.setFileName(attachmentInfo.getFilename());
             attachment.setFileId(attachmentInfo.getFileId());
-            attachmentController.saveExistingFile(account, attachment);
+            attachmentController.saveExistingFile(account, attachment, BulkUploadUtil.getFileInputStream(
+                    attachmentInfo.getFileId()));
         }
 
         // delete whatever files are remaining
@@ -722,8 +738,7 @@ public class BulkUploadController {
                 draft.setContents(null);
                 dao.delete(draft);
             } catch (DAOException e) {
-                throw new ControllerException("Could not delete draft " + draft.getId()
-                                                      + ". Delete manually.", e);
+                throw new ControllerException("Could not delete draft " + draft.getId() + ". Delete manually.", e);
             }
             return true;
         }
@@ -736,10 +751,52 @@ public class BulkUploadController {
         draft.setName(account.getEmail());
 
         try {
-            return dao.update(draft) != null;
+            boolean success = dao.update(draft) != null;
+            if (success) {
+                String email = JbeirSettings.getSetting("BULK_UPLOAD_APPROVER_EMAIL");
+                if (email != null && !email.isEmpty()) {
+                    String subject = JbeirSettings.getSetting("PROJECT_NAME") + " Bulk Upload Notification";
+                    String body = "A bulk upload has been submitted and is pending verification.\n\n";
+                    body += "Please go to the following link to verify.\n\n";
+                    body += JbeirSettings.getSetting("URI_PREFIX") + "/#page=bulk";
+                    Emailer.send(email, subject, body);
+                }
+            }
+            return success;
         } catch (DAOException e) {
             throw new ControllerException("Could not assign draft " + draftId + " to system", e);
         }
+    }
+
+    public boolean revertSubmitted(Account account, long uploadId) throws ControllerException {
+        boolean isAdmin = accountController.isAdministrator(account);
+        if (!isAdmin) {
+            Logger.warn(account.getEmail() + " attempting to revert submitted bulk upload "
+                                + uploadId + " without admin privs");
+            return false;
+        }
+
+        try {
+            BulkUpload upload = dao.retrieveById(uploadId);
+            if (upload == null) {
+                Logger.warn("Could not retrieve bulk upload " + uploadId + " for reversal");
+                return false;
+            }
+
+            String previousOwner = upload.getName();
+            Account prevOwnerAccount = accountController.getByEmail(previousOwner);
+            if (prevOwnerAccount == null)
+                return false;
+
+            upload.setAccount(prevOwnerAccount);
+            upload.setName("Returned Upload");
+            upload.setLastUpdateTime(new Date());
+            dao.update(upload);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        return true;
     }
 
     /**
@@ -818,11 +875,11 @@ public class BulkUploadController {
         // retrieve bulk upload in question (at this point it is owned by system)
         BulkUpload bulkUpload;
 
+
         try {
             bulkUpload = dao.retrieveByIdWithContents(id);
             if (bulkUpload == null)
-                throw new ControllerException("Could not retrieve bulk upload with id \"" + id
-                                                      + "\" for approval");
+                throw new ControllerException("Could not retrieve bulk upload with id \"" + id + "\" for approval");
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -855,12 +912,34 @@ public class BulkUploadController {
 
     protected void saveSequence(Account account, ArrayList<SequenceAnalysisInfo> sequenceInfoList,
             Entry entry) throws ControllerException {
-        if (sequenceInfoList == null || sequenceInfoList.isEmpty())
+
+        // check for has entry
+        if (sequenceInfoList != null && !sequenceInfoList.isEmpty()) {
+            if ("has sequence".equalsIgnoreCase(sequenceInfoList.get(0).getFileId()) && "has sequence".equalsIgnoreCase(
+                    sequenceInfoList.get(0).getName()))
+                return;
+        }
+
+        // get and clear any existing entry
+        SequenceController controller = new SequenceController();
+        Sequence sequence = controller.getByEntry(entry);
+        if (sequence != null) {
+            try {
+                controller.delete(account, sequence, false);
+            } catch (PermissionException e) {
+                Logger.error(e);
+            }
+        }
+
+        if (sequenceInfoList == null || sequenceInfoList.isEmpty()) {
             return;
+        }
 
         String fileId = sequenceInfoList.get(0).getFileId();
-        File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar
-                                     + fileId);
+        if (fileId.isEmpty())    // delete sequence?
+            return;
+
+        File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar + fileId);
 
         if (!file.exists()) {
             Logger.error("Could not find sequence file \"" + file.getAbsolutePath() + "\"");
@@ -869,7 +948,6 @@ public class BulkUploadController {
 
         try {
             String sequenceString = FileUtils.readFileToString(file);
-            SequenceController controller = new SequenceController();
             controller.parseAndSaveSequence(account, entry, sequenceString);
         } catch (IOException e) {
             Logger.error(e);

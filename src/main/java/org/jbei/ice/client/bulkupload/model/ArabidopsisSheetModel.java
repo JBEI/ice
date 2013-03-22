@@ -8,6 +8,7 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedInfo> {
@@ -20,24 +21,45 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
         Header header = datum.getTypeHeader();
         String value = datum.getValue();
 
-        if (header == null || value == null || value.isEmpty())
+        if (header == null || value == null)
             return info;
 
         // arabidopsis seed specific fields
         switch (header) {
             case PLANT_TYPE:
-                ArabidopsisSeedInfo.PlantType type = ArabidopsisSeedInfo.PlantType.valueOf(value);
-                info.setPlantType(type);
+                if (value.isEmpty())
+                    break;
+
+                try {
+                    ArabidopsisSeedInfo.PlantType type = ArabidopsisSeedInfo.PlantType.valueOf(value);
+                    info.setPlantType(type);
+                } catch (IllegalArgumentException iae) {
+                    GWT.log(iae.getMessage());
+                }
                 break;
 
             case GENERATION:
-                ArabidopsisSeedInfo.Generation generation = ArabidopsisSeedInfo.Generation.valueOf(value);
-                info.setGeneration(generation);
+                if (value.isEmpty())
+                    break;
+
+                try {
+                    ArabidopsisSeedInfo.Generation generation = ArabidopsisSeedInfo.Generation.valueOf(value);
+                    info.setGeneration(generation);
+                } catch (IllegalArgumentException iae) {
+                    GWT.log(iae.getMessage());
+                }
                 break;
 
             case HARVEST_DATE:
-                Date date = DateTimeFormat.getFormat("MM/dd/yyyy").parse(value);
-                info.setHarvestDate(date);
+                if (value.isEmpty())
+                    break;
+
+                try {
+                    Date date = DateTimeFormat.getFormat("MM/dd/yyyy").parse(value);
+                    info.setHarvestDate(date);
+                } catch (IllegalArgumentException ia) {
+                    GWT.log("Could not parse date " + value);
+                }
                 break;
 
             case PARENTS:

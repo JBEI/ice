@@ -20,7 +20,7 @@ import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.search.lucene.AggregateSearch;
 import org.jbei.ice.lib.search.lucene.SearchException;
 import org.jbei.ice.lib.search.lucene.SearchResult;
-import org.jbei.ice.server.EntryToInfoFactory;
+import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.server.QueryFilter;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
@@ -59,8 +59,6 @@ public class SearchController {
                 hasStringQuery = true;
                 ArrayList<SearchResult> searchResults = find(account, operand);
                 if (searchResults != null) {
-
-                    // filter results by permission
                     for (SearchResult searchResult : searchResults) {
                         Entry entry = searchResult.getEntry();
                         stringQueryResult.add(entry.getId());
@@ -70,8 +68,7 @@ public class SearchController {
 
                 QueryOperator operator = filter.getOperator();
                 try {
-                    Set<Long> intermediateResults = dao.runSearchFilter(type, operator,
-                                                                        operand);
+                    Set<Long> intermediateResults = dao.runSearchFilter(type, operator, operand);
 
                     if (results == null) {
                         results = new HashSet<Long>();
@@ -101,15 +98,12 @@ public class SearchController {
             while (resultsIter.hasNext()) {
                 Long next = resultsIter.next();
                 try {
-                    Entry nextEntry;
                     try {
-                        nextEntry = entryController.get(account, next);
+                        entryController.get(account, next);
                     } catch (PermissionException e) {
-                        Logger.error(e);
+                        resultsIter.remove();
                         continue;
                     }
-                    if (!permissionsController.hasReadPermission(account, nextEntry))
-                        resultsIter.remove();
                 } catch (ControllerException ce) {
                     Logger.error("Error retrieving permission for entry Id " + next);
                 }
@@ -172,6 +166,7 @@ public class SearchController {
         cleanedQuery = cleanedQuery.replace("^", "\\^");
         cleanedQuery = cleanedQuery.replace("&", "\\&");
 
+        cleanedQuery = cleanedQuery.endsWith("'") ? cleanedQuery.substring(0, cleanedQuery.length() - 1) : cleanedQuery;
         cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
                                                                              cleanedQuery.length() - 1) : cleanedQuery);
         if (cleanedQuery.startsWith("*")) {
@@ -284,7 +279,7 @@ public class SearchController {
                     try {
                         entry = entryController.getByRecordId(account, blastResult.getSubjectId());
                     } catch (PermissionException e) {
-                        Logger.error(e);
+//                        Logger.error(e);
                         continue;
                     }
 
@@ -295,7 +290,7 @@ public class SearchController {
                         BlastResultInfo info = new BlastResultInfo();
                         info.setBitScore(blastResult.getBitScore());
 
-                        EntryInfo view = EntryToInfoFactory.getSummaryInfo(blastResult.getEntry());
+                        EntryInfo view = ModelToInfoFactory.getSummaryInfo(blastResult.getEntry());
                         info.setEntryInfo(view);
 
                         info.seteValue(blastResult.geteValue());

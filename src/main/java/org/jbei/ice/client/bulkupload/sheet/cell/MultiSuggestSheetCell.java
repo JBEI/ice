@@ -10,8 +10,11 @@ import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
@@ -44,7 +47,10 @@ public class MultiSuggestSheetCell extends SheetCell {
             @Override
             public void onBlur(BlurEvent event) {
                 String s = setDataForRow(currentRow);
-                textBox.setText(s);
+                if (MultiSuggestSheetCell.this.commaSeparatedAllowed)
+                    ((MultipleTextBox) textBox).setBaseText(s);
+                else
+                    box.setText(s);
             }
         });
 
@@ -58,6 +64,13 @@ public class MultiSuggestSheetCell extends SheetCell {
                 textBox.setFocus(false);
             }
         });
+
+        box.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
+            @Override
+            public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
+                textBox.setFocus(true);
+            }
+        });
     }
 
     public MultiSuggestSheetCell(ArrayList<String> data, boolean commaSeparatedAllowed) {
@@ -68,7 +81,10 @@ public class MultiSuggestSheetCell extends SheetCell {
 
     @Override
     public void setText(String text) {
-        box.setText(text);
+        if (commaSeparatedAllowed)
+            ((MultipleTextBox) textBox).setBaseText(text);
+        else
+            textBox.setText(text);
     }
 
     /**

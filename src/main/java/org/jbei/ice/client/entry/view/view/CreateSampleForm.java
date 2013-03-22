@@ -10,14 +10,10 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -48,7 +44,7 @@ public class CreateSampleForm extends Composite {
         table = new FlexTable();
         table.setWidth("100%");
         table.setStyleName("bg_f8");
-        table.addStyleName("font-80em");
+        table.addStyleName("font-85em");
         table.addStyleName("pad-6");
         initWidget(table);
         sampleLocationScheme = new ArrayList<TextBox>();
@@ -106,29 +102,13 @@ public class CreateSampleForm extends Composite {
         } else
             sampleLabel.setStyleName("input_box");
 
-        String location = locationOptions.getValue(locationOptions.getSelectedIndex());
-        ArrayList<String> passedLocationList = sampleLocation.getListForLocation(location);
-        ArrayList<Integer> defaultValueIndexes = new ArrayList<Integer>();
-        int i = 0;
         for (TextBox scheme : sampleLocationScheme) {
-
             String schemeText = scheme.getText();
             scheme.setStyleName("input_box");
 
-            boolean hasDefaultText = (passedLocationList != null && passedLocationList
-                    .contains(schemeText.trim()));
-            if (hasDefaultText)
-                defaultValueIndexes.add(i);
-
-            i += 1;
-        }
-
-        if (!defaultValueIndexes.isEmpty()
-                && defaultValueIndexes.size() < sampleLocationScheme.size()) {
-            isValid = false;
-            for (Integer index : defaultValueIndexes) {
-                TextBox scheme = sampleLocationScheme.get(index);
+            if (schemeText.trim().isEmpty()) {
                 scheme.setStyleName("entry_input_error");
+                isValid = false;
             }
         }
 
@@ -154,14 +134,10 @@ public class CreateSampleForm extends Composite {
         info.setLocationId(location);
 
         LinkedList<StorageInfo> storageInfos = new LinkedList<StorageInfo>();
-        ArrayList<String> passedLocationList = sampleLocation.getListForLocation(location);
 
         for (TextBox scheme : sampleLocationScheme) {
             StorageInfo storageInfo = new StorageInfo();
             String schemeText = scheme.getText();
-
-            if (passedLocationList != null && passedLocationList.contains(schemeText.trim()))
-                continue;
 
             storageInfo.setDisplay(schemeText);
             storageInfos.add(storageInfo);
@@ -185,6 +161,8 @@ public class CreateSampleForm extends Composite {
 
         sampleNotes = new TextArea();
         sampleNotes.setStyleName("input_box");
+        sampleNotes.setVisibleLines(4);
+        sampleNotes.setWidth("180px");
 
         panel.add(sampleNotes, "sample_notes");
         table.setWidget(0, 0, panel);
@@ -197,7 +175,7 @@ public class CreateSampleForm extends Composite {
                 + "<div id=\"location_data\" style=\"padding-left: 56px\"></div>";
         HTMLPanel panel = new HTMLPanel(html);
         final VerticalPanel vPanel = new VerticalPanel();
-        vPanel.setWidth("170px");
+        vPanel.setWidth("140px");
         panel.add(locationOptions, "storage_options");
         panel.add(vPanel, "location_data");
 
@@ -206,8 +184,6 @@ public class CreateSampleForm extends Composite {
 
         for (SampleInfo location : sampleLocation.getLocations()) {
             locationOptions.addItem(location.getLocation(), location.getLocationId());
-            if (location.getLocation().equals(location.getLabel()))
-                locationOptions.setSelectedIndex(locationOptions.getItemCount() - 1);
         }
 
         String value = locationOptions.getValue(0);
@@ -219,25 +195,8 @@ public class CreateSampleForm extends Composite {
 
         for (final String item : list) {
             final TextBox shelf = new TextBox();
-            shelf.setText(item);
+            shelf.getElement().setAttribute("placeholder", item);
             shelf.setStyleName("input_box");
-            shelf.addFocusHandler(new FocusHandler() {
-
-                @Override
-                public void onFocus(FocusEvent event) {
-                    if (item.equals(shelf.getText().trim()))
-                        shelf.setText("");
-                }
-            });
-
-            shelf.addBlurHandler(new BlurHandler() {
-
-                @Override
-                public void onBlur(BlurEvent event) {
-                    if ("".equals(shelf.getText().trim()))
-                        shelf.setText(item);
-                }
-            });
             vPanel.add(shelf);
             sampleLocationScheme.add(shelf);
         }
@@ -258,25 +217,8 @@ public class CreateSampleForm extends Composite {
 
                 for (final String item : list) {
                     final TextBox shelf = new TextBox();
-                    shelf.setText(item);
+                    shelf.getElement().setAttribute("placeholder", item);
                     shelf.setStyleName("input_box");
-                    shelf.addFocusHandler(new FocusHandler() {
-
-                        @Override
-                        public void onFocus(FocusEvent event) {
-                            if (item.equals(shelf.getText().trim()))
-                                shelf.setText("");
-                        }
-                    });
-
-                    shelf.addBlurHandler(new BlurHandler() {
-
-                        @Override
-                        public void onBlur(BlurEvent event) {
-                            if ("".equals(shelf.getText().trim()))
-                                shelf.setText(item);
-                        }
-                    });
                     vPanel.add(shelf);
                     sampleLocationScheme.add(shelf);
                 }
@@ -300,7 +242,7 @@ public class CreateSampleForm extends Composite {
         panel.add(depositor, "sample_depositor");
 
         table.setWidget(0, 2, panel);
-        table.getFlexCellFormatter().setStyleName(0, 2, "font-85em");
+//        table.getFlexCellFormatter().setStyleName(0, 2, "font-85em");
         table.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
     }
 

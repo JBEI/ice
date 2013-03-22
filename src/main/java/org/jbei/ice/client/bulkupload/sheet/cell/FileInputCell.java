@@ -81,6 +81,47 @@ public class FileInputCell extends SheetCell {
 
         if (cellUploader == null) {
             cellUploader = new CellUploader(sequenceUpload);
+
+            final SheetCellData datum = getDataForRow(row);
+            if (datum != null) {
+                String name = datum.getValue();
+                if (name != null && name.length() > 13)
+                    name = (name.substring(0, 10) + "...");
+
+                Label label = new Label(name);
+                label.setStyleName("display-inline");
+                label.addStyleName("font-85em");
+
+                final Label delete = new Label("x");
+                delete.setStyleName("x-delete");
+
+                cellUploader.getPanel().addDomHandler(new MouseOverHandler() {
+                    @Override
+                    public void onMouseOver(MouseOverEvent event) {
+                        delete.setVisible(true);
+                    }
+                }, MouseOverEvent.getType());
+
+                cellUploader.getPanel().addDomHandler(new MouseOutHandler() {
+                    @Override
+                    public void onMouseOut(MouseOutEvent event) {
+                        delete.setVisible(false);
+                    }
+                }, MouseOutEvent.getType());
+
+                String html = "<span><span id=\"name_link\"></span> <span id=\"delete_link\"></span></span>";
+                HTMLPanel panel = new HTMLPanel(html);
+
+                delete.addStyleName("display-inline");
+                delete.setVisible(false);
+                panel.add(label, "name_link");
+                panel.add(delete, "delete_link");
+                delete.addClickHandler(new DeleteFileClickHandler(cellUploader, row));
+
+                cellUploader.setPanelWidget(panel);
+                cellUploader.reset();
+            }
+
             FileFinishHandler handler = new FileFinishHandler(cellUploader, row);
             cellUploader.addOnFinishUploadHandler(handler);
             rowUploaderMap.put(row, cellUploader);
@@ -143,16 +184,23 @@ public class FileInputCell extends SheetCell {
                     return;
                 }
 
+                String[] split = fileId.split("\t");
+                if (split.length == 2 && split[0].charAt(0) == 'F') {
+                    Window.alert(split[1]);
+                    return;
+                }
+
                 SheetCellData datum = new SheetCellData();
                 datum.setId(fileId);
                 datum.setValue(info.name);
                 setWidgetValue(row, datum);
                 String name = info.name;
-                if (name != null && name.length() > 14)
-                    name = (name.substring(0, 11) + "...");
+                if (name != null && name.length() > 13)
+                    name = (name.substring(0, 10) + "...");
 
                 Label label = new Label(name);
                 label.setStyleName("display-inline");
+                label.addStyleName("font-85em");
 
                 final Label delete = new Label("x");
                 delete.setStyleName("x-delete");

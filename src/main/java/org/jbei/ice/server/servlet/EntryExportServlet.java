@@ -66,6 +66,7 @@ public class EntryExportServlet extends HttpServlet {
         }
     }
 
+    // attempts to retrieve entry by id and then by part number
     private ArrayList<Entry> retrieveEntries(Account account, String commaSeparated,
             EntryController controller) {
         ArrayList<Entry> entries = new ArrayList<Entry>();
@@ -77,8 +78,15 @@ public class EntryExportServlet extends HttpServlet {
                 long id = Long.decode(idStr.trim());
                 entry = controller.get(account, id);
             } catch (NumberFormatException nfe) {
-                Logger.error("Could not convert string id to long : " + idStr);
-                continue;
+                try {
+                    entry = controller.getByPartNumber(account, idStr.trim());
+                } catch (ControllerException e) {
+                    Logger.error(e);
+                    continue;
+                } catch (PermissionException e) {
+                    Logger.error(e);
+                    continue;
+                }
             } catch (ControllerException e) {
                 Logger.error(e);
                 continue;

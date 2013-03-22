@@ -60,7 +60,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     private TextArea sampleNotes;
     private ListBox sampleLocation;
     private ArrayList<TextBox> sampleLocationScheme;
-    private SampleLocation passedLocation;
 
     public NewSingleEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             String creatorName, String creatorEmail, T entryInfo) {
@@ -126,8 +125,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         references = createTextArea("640px", "50px");
         ip = createTextArea("640px", "50px");
         notesText = new TextArea();
-
-        sample = new FlexTable();
     }
 
     public T getEntryInfo() {
@@ -216,28 +213,23 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     }
 
     @Override
-    public void setSampleLocation(final SampleLocation widget) {
-
-        passedLocation = widget;
-
+    public void setSampleLocation(final SampleLocation sampleLocation) {
         // location
         sample.setWidget(4, 0, new HTML("<span class=\"font-80em\">Location</span>"));
         sample.getFlexCellFormatter().setStyleName(4, 0, "entry_add_sub_label");
 
-        sampleLocation = new ListBox();
-        sampleLocation.setStyleName("pull_down");
-        sampleLocation.setVisibleItemCount(1);
+        this.sampleLocation = new ListBox();
+        this.sampleLocation.setStyleName("pull_down");
+        this.sampleLocation.setVisibleItemCount(1);
 
-        for (SampleInfo location : widget.getLocations()) {
-            sampleLocation.addItem(location.getLocation(), location.getLocationId());
-            if (location.getLocation().equals(location.getLabel()))
-                sampleLocation.setSelectedIndex(sampleLocation.getItemCount() - 1);
+        for (SampleInfo location : sampleLocation.getLocations()) {
+            this.sampleLocation.addItem(location.getLocation(), location.getLocationId());
         }
 
-        sample.setWidget(4, 1, sampleLocation);
+        sample.setWidget(4, 1, this.sampleLocation);
 
-        String value = sampleLocation.getValue(0);
-        ArrayList<String> list = widget.getListForLocation(value);
+        String value = this.sampleLocation.getValue(0);
+        ArrayList<String> list = sampleLocation.getListForLocation(value);
         if (list == null) {
             sampleLocationScheme.clear();
             return;
@@ -257,14 +249,14 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
             sampleLocationScheme.add(shelf);
         }
 
-        sampleLocation.addChangeHandler(new ChangeHandler() {
+        this.sampleLocation.addChangeHandler(new ChangeHandler() {
 
             @Override
             public void onChange(ChangeEvent event) {
 
-                int index = sampleLocation.getSelectedIndex();
-                String value = sampleLocation.getValue(index);
-                ArrayList<String> list = widget.getListForLocation(value);
+                int index = NewSingleEntryForm.this.sampleLocation.getSelectedIndex();
+                String value = NewSingleEntryForm.this.sampleLocation.getValue(index);
+                ArrayList<String> list = sampleLocation.getListForLocation(value);
                 if (list == null) {
                     sampleLocationScheme.clear();
                     return;
@@ -468,29 +460,28 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         }
 
         // samples
-        // TODO : there is a bug here. uncomment when fixed
-        //        String location = sampleLocation.getValue(sampleLocation.getSelectedIndex());
-        //
-        //        ArrayList<String> passedLocationList = passedLocation.getListForLocation(location);
-        //        boolean hasValidScheme = false;
-        //        for (TextBox scheme : sampleLocationScheme) {
-        //
-        //            String schemeText = scheme.getText();
-        //
-        //            if (passedLocationList != null && passedLocationList.contains(schemeText.trim()))
-        //                continue;
-        //
-        //            hasValidScheme = true;
-        //            break;
-        //        }
-        //
-        //        if (hasValidScheme && sampleName.getText().trim().isEmpty()) {
-        //            sampleName.setStyleName("entry_input_error");
-        //            if (invalid == null)
-        //                invalid = sampleName;
-        //        } else {
-        //            sampleName.setStyleName("input_box");
-        //        }
+        boolean userEnteredSampleName = !sampleName.getText().trim().isEmpty();
+        sampleName.setStyleName("input_box");
+
+        for (TextBox scheme : sampleLocationScheme) {
+            scheme.setStyleName("input_box");
+
+            if (userEnteredSampleName) {
+                // if there is a name, all schemes must be filled
+                if (scheme.getText().trim().isEmpty()) {
+                    scheme.setStyleName("entry_input_error");
+                    if (invalid == null)
+                        invalid = scheme;
+                }
+            } else {
+                // there is no name all schemes must be empty
+                if (!scheme.getText().trim().isEmpty()) {
+                    sampleName.setStyleName("entry_input_error");
+                    if (invalid == null)
+                        invalid = sampleName;
+                }
+            }
+        }
 
         return invalid;
     }
@@ -499,8 +490,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
      * populates the entry info fields that are common to all. this is meant to be sub-classed so
      * that the specializations can
      * input their class specific fields.
-     *
-     * @return
      */
     @Override
     public void populateEntries() {
@@ -561,14 +550,10 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         info.setLocationId(location);
 
         LinkedList<StorageInfo> storageInfos = new LinkedList<StorageInfo>();
-        ArrayList<String> passedLocationList = passedLocation.getListForLocation(location);
 
         for (TextBox scheme : sampleLocationScheme) {
             StorageInfo storageInfo = new StorageInfo();
             String schemeText = scheme.getText();
-
-            if (passedLocationList != null && passedLocationList.contains(schemeText.trim()))
-                continue;
 
             storageInfo.setDisplay(schemeText);
             storageInfos.add(storageInfo);

@@ -110,6 +110,44 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                         value = "No";
                 }
                 break;
+
+            case PLASMID_NAME:
+                value = plasmid.getName();
+                break;
+
+            case PLASMID_ALIAS:
+                value = plasmid.getAlias();
+                break;
+
+            case PLASMID_KEYWORDS:
+                value = plasmid.getKeywords();
+                break;
+
+            case PLASMID_SUMMARY:
+                value = plasmid.getShortDescription();
+                break;
+
+            case PLASMID_NOTES:
+                value = plasmid.getLongDescription();
+                break;
+
+            case PLASMID_REFERENCES:
+                value = plasmid.getReferences();
+                break;
+
+            case PLASMID_LINKS:
+                value = plasmid.getReferences();
+                break;
+
+            case PLASMID_STATUS:
+                value = plasmid.getStatus();
+                break;
+
+            case PLASMID_SELECTION_MARKERS:
+                value = plasmid.getSelectionMarkers();
+                break;
+
+
         }
 
         if (value == null)

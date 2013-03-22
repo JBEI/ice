@@ -1,12 +1,16 @@
 package org.jbei.ice.client.entry.view;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
+
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class DeletePermissionHandler implements ClickHandler {
 
@@ -14,51 +18,38 @@ public class DeletePermissionHandler implements ClickHandler {
     private final RegistryServiceAsync service;
     private final long entryId;
     private Callback<PermissionInfo> callback;
+    private final HandlerManager eventBus;
 
-    public DeletePermissionHandler(RegistryServiceAsync service, PermissionInfo info, long entryId) {
+    public DeletePermissionHandler(RegistryServiceAsync service, HandlerManager eventBus, PermissionInfo info,
+            long entryId, Callback<PermissionInfo> callback) {
         this.info = info;
         this.service = service;
+        this.eventBus = eventBus;
         this.entryId = entryId;
-    }
-
-    public DeletePermissionHandler(RegistryServiceAsync service, PermissionInfo info, long entryId,
-            Callback<PermissionInfo> callback) {
-        this(service, info, entryId);
-        this.callback = callback;
-    }
-
-    public void setPermissionInfo(PermissionInfo info) {
-        this.info = info;
-    }
-
-    public Callback<PermissionInfo> getCallback() {
-        return this.callback;
-    }
-
-    public void setCallback(Callback<PermissionInfo> callback) {
         this.callback = callback;
     }
 
     @Override
     public void onClick(ClickEvent event) {
-        try {
-            service.removePermission(AppController.sessionId, entryId, info,
-                                     new AsyncCallback<Boolean>() {
 
-                                         @Override
-                                         public void onSuccess(Boolean result) {
-                                             if (callback != null)
-                                                 callback.onSuccess(info);
-                                         }
+        new IceAsyncCallback<Boolean>() {
 
-                                         @Override
-                                         public void onFailure(Throwable caught) {
-                                             if (callback != null)
-                                                 callback.onFailure();
-                                         }
-                                     });
-        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+            @Override
+            protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                service.removePermission(AppController.sessionId, entryId, info, callback);
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                if (callback != null && result)
+                    callback.onSuccess(info);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                if (callback != null)
+                    callback.onFailure();
+            }
+        }.go(eventBus);
     }
 }
