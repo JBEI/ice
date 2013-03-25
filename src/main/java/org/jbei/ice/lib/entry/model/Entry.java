@@ -216,7 +216,7 @@ public class Entry implements IModel {
     private final Set<Permission> permissions = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents")
-    private Set<Folder> folders;
+    private Set<Folder> folders = new HashSet<>();
 
     public Entry() {
         setStatus("");

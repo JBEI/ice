@@ -262,10 +262,15 @@ public class EntryController {
 
         partNumber.setEntry(entry);
 
-        entry.setRecordId(Utils.generateUUID());
-        entry.setVersionId(entry.getRecordId());
-        entry.setCreationTime(Calendar.getInstance().getTime());
-        entry.setModificationTime(entry.getCreationTime());
+        if (entry.getRecordId() == null) {
+            entry.setRecordId(Utils.generateUUID());
+            entry.setVersionId(entry.getRecordId());
+        }
+
+        if (entry.getCreationTime() == null) {
+            entry.setCreationTime(Calendar.getInstance().getTime());
+            entry.setModificationTime(entry.getCreationTime());
+        }
 
         if (entry.getSelectionMarkers() != null) {
             for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
