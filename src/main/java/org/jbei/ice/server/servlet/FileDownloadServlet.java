@@ -94,7 +94,7 @@ public class FileDownloadServlet extends HttpServlet {
         OutputStream os = response.getOutputStream();
         DataInputStream is = new DataInputStream(new FileInputStream(file));
 
-        int read = 0;
+        int read;
         byte[] bytes = new byte[BYTES_DOWNLOAD];
 
         while ((read = is.read(bytes)) != -1) {
