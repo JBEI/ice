@@ -45,7 +45,7 @@ public class ArabidopsisSeed extends Entry {
      * @author Timothy Ham
      */
     public enum Generation {
-        NULL, M0, M1, M2, T0, T1, T2, T3, T4, T5;
+        NULL, UNKNOWN, M0, M1, M2, T0, T1, T2, T3, T4, T5;
 
         @Override
         public String toString() {

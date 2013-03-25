@@ -10,7 +10,7 @@ public class ArabidopsisSeedInfo extends EntryInfo {
     private static final long serialVersionUID = 1L;
 
     public enum Generation implements IsSerializable {
-        M0, M1, M2, T0, T1, T2, T3, T4, T5;
+        UNKNOWN, M0, M1, M2, T0, T1, T2, T3, T4, T5;
 
         public static ArrayList<String> getDisplayList() {
             ArrayList<String> list = new ArrayList<String>();

@@ -67,6 +67,7 @@ public class EntryTablePager extends AbstractPager {
     private final NavLink next;
     private final NavLink prev;
 
+
     private FlexTable nav; // left
     private FlexTable jump; // right
     private final Label label; // center
