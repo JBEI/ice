@@ -71,6 +71,7 @@ class FolderDAO extends HibernateRepository<Folder> {
             query.setLong("id", id);
             Number result = ((Number) query.uniqueResult());
             return result.longValue();
+
         } catch (HibernateException he) {
             throw new DAOException(he);
         }
@@ -80,23 +81,31 @@ class FolderDAO extends HibernateRepository<Folder> {
     public ArrayList<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit)
             throws DAOException {
         Session session = currentSession();
-
         try {
             Folder folder = get(folderId);
             if (folder == null)
                 throw new DAOException();
 
-            String queryString = "order by";
+            String queryString = " order by";
 
             switch (sort) {
                 default:
                 case CREATED:
-                    queryString += " creation_time";
+                    queryString += " id";
+                    break;
+
+                case STATUS:
+                    queryString += " status";
+                    break;
+
+                case TYPE:
+                    queryString += " recordType";
+                    break;
             }
 
             queryString += (asc ? " asc" : " desc");
-            List list = session.createFilter(folder.getContents(), queryString).setFirstResult(start)
-                               .setMaxResults(limit).list();
+            Query query = session.createFilter(folder.getContents(), queryString);
+            List list = query.setFirstResult(start).setMaxResults(limit).list();
             ArrayList<Entry> results = new ArrayList<Entry>(list);
             return results;
         } catch (HibernateException he) {
@@ -146,7 +155,7 @@ class FolderDAO extends HibernateRepository<Folder> {
 
     @SuppressWarnings({"unchecked"})
     public List<Folder> getFoldersByEntry(Entry entry) throws DAOException {
-        ArrayList<Folder> folders = new ArrayList<Folder>();
+        ArrayList<Folder> folders = new ArrayList<>();
         Session session = currentSession();
 
         try {
