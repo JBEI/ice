@@ -356,7 +356,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                 public void onSelectionChange(SelectionChangeEvent event) {
                     boolean enable = (searchPresenter.getResultSelectedSet().size() > 0);
                     display.setSubMenuEnable(enable, false, false);
-                    display.enableExportAs(enable);
+                    if (ClientController.account.isAdmin())
+                        display.enableExportAs(enable);
                 }
             });
         }

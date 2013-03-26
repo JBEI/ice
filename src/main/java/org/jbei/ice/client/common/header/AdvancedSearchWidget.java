@@ -41,17 +41,15 @@ public class AdvancedSearchWidget extends Composite {
     private final ListBox bioSafetyOptions;
     private final TextArea blastSequence;
     private final ListBox blastProgram;
-    private final Button mainSearchBtn;
-    private HandlerRegistration mainBtnRegistration;
+    private HandlerRegistration runSearchRegistration;
 
-    public AdvancedSearchWidget(SearchCompositeBox searchInput, Button mainSearchBtn) {
+    public AdvancedSearchWidget(SearchCompositeBox searchInput) {
         panel = new FlexTable();
         panel.setCellPadding(0);
         panel.setCellSpacing(0);
         initWidget(panel);
         panel.setStyleName("bg_white");
         this.searchInput = searchInput;
-        this.mainSearchBtn = mainSearchBtn;
 
         // init components
         runSearch = new Button("Search");
@@ -165,16 +163,10 @@ public class AdvancedSearchWidget extends Composite {
         History.newItem(url);
     }
 
-    public void addSearchHandler(final ClickHandler handler) {
-        runSearch.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                handler.onClick(event);
-                parseSearchOptions();
-            }
-        });
-        if (mainBtnRegistration != null)
-            mainBtnRegistration = mainSearchBtn.addClickHandler(handler);
+    public void addSearchHandler(ClickHandler handler) {
+        if (runSearchRegistration != null)
+            runSearchRegistration.removeHandler();
+        runSearchRegistration = runSearch.addClickHandler(handler);
     }
 
     private void addResetHandler() {
@@ -187,8 +179,12 @@ public class AdvancedSearchWidget extends Composite {
     }
 
     public void reset() {
-        initializeWidget();
         searchInput.reset();
+        entryTypes.reset();
+        entryWidget.reset();
+        blastSequence.setText("");
+        bioSafetyOptions.setSelectedIndex(0);
+        blastProgram.setSelectedIndex(0);
     }
 
     // meant to be called only once to set the options available for searching
@@ -294,6 +290,10 @@ public class AdvancedSearchWidget extends Composite {
             return selected;
         }
 
+        public void reset() {
+            allCheck.setValue(true, true);
+        }
+
         private class CheckBoxHandler implements ValueChangeHandler<Boolean> {
 
             private final boolean isAll;
@@ -362,6 +362,12 @@ public class AdvancedSearchWidget extends Composite {
 
         public boolean isHasSequenceChecked() {
             return hasSequenceCheck.getValue().booleanValue();
+        }
+
+        public void reset() {
+            hasAttachmentCheck.setValue(false);
+            hasSampleCheck.setValue(false);
+            hasSequenceCheck.setValue(false);
         }
     }
 }

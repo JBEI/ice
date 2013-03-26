@@ -147,6 +147,8 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
         }
 
         AbstractPresenter presenter;
+        if (page != Page.LOGIN && page != Page.QUERY)
+            HeaderView.getInstance().resetSearchBox();
 
         switch (page) {
             case ENTRY_VIEW:

@@ -34,9 +34,7 @@ public abstract class AbstractLayout extends Composite {
      * sub-classes that override should make sure to call
      * super.initComponents();
      */
-    protected void initComponents() {
-        HeaderView.getInstance().resetSearchBox();
-    }
+    protected void initComponents() {}
 
     public void reset() {}
 }
