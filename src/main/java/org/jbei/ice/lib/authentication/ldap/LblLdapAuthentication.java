@@ -71,7 +71,7 @@ public class LblLdapAuthentication implements IAuthentication, Serializable {
                 account = localBackend.authenticate(loginId, password);
             }
         } catch (LblLdapAuthenticationWrapperException e) {
-            Logger.error(e.getMessage());
+            Logger.warn(e.getMessage());
             throw new InvalidCredentialsException("Invalid credentials!");
         } catch (ControllerException e) {
             throw new AuthenticationException("LDAP authentication failed for " + loginId, e);
