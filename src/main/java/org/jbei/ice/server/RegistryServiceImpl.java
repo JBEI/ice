@@ -931,7 +931,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                                     + " but does not have permissions");
             }
 
-            SequenceController sequenceController = new SequenceController();
+            SequenceController sequenceController = ApplicationController.getSequenceController();
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {

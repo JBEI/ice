@@ -983,7 +983,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = new SequenceController();
+            SequenceController sequenceController = ApplicationController.getSequenceController();
             Entry entry = ApplicationController.getEntryController().getByRecordId(account, entryId);
             FeaturedDNASequence sequence = SequenceController.sequenceToDNASequence(
                     sequenceController.getByEntry(entry));
@@ -1033,7 +1033,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = new SequenceController();
+            SequenceController sequenceController = ApplicationController.getSequenceController();
             EntryController entryController = ApplicationController.getEntryController();
             Entry entry = entryController.getByRecordId(account, entryId);
             Sequence sequence = sequenceController.getByEntry(entry);
@@ -1078,7 +1078,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = new SequenceController();
+            SequenceController sequenceController = ApplicationController.getSequenceController();
             EntryController entryController = ApplicationController.getEntryController();
             Entry entry = entryController.getByRecordId(account, entryId);
             Sequence sequence = sequenceController.getByEntry(entry);
@@ -1128,7 +1128,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = new SequenceController();
+            SequenceController sequenceController = ApplicationController.getSequenceController();
             EntryController entryController = ApplicationController.getEntryController();
 
             Entry entry = entryController.getByRecordId(account, entryId);
@@ -1180,7 +1180,7 @@ public class RegistryAPI implements IRegistryAPI {
 
         try {
             EntryController entryController = ApplicationController.getEntryController();
-            SequenceController sequenceController = new SequenceController();
+            SequenceController sequenceController = ApplicationController.getSequenceController();
 
             try {
                 entry = entryController.getByRecordId(account, entryId);
@@ -1248,7 +1248,7 @@ public class RegistryAPI implements IRegistryAPI {
                 throw new ServicePermissionException("No permission to read this entry");
             }
 
-            SequenceController sequenceController = new SequenceController();
+            SequenceController sequenceController = ApplicationController.getSequenceController();
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {

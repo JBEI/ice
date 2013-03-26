@@ -190,7 +190,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getFasta(HttpServletResponse response, Entry entry, Account account) {
-        SequenceController sequenceController = new SequenceController();
+        SequenceController sequenceController = ApplicationController.getSequenceController();
         Sequence sequence = null;
 
         try {
@@ -227,7 +227,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getSBOL(HttpServletResponse response, Entry entry, Account account) {
-        SequenceController sequenceController = new SequenceController();
+        SequenceController sequenceController = ApplicationController.getSequenceController();
         Sequence sequence;
 
         try {

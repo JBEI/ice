@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -143,7 +144,7 @@ public class IceXmlSerializer {
      */
     public static String serializeToJbeiXml(Account account, List<Entry> entries) throws UtilityException {
         ArrayList<Sequence> sequences = new ArrayList<>();
-        SequenceController sequenceController = new SequenceController();
+        SequenceController sequenceController = ApplicationController.getSequenceController();
         for (Entry entry : entries) {
             try {
                 sequences.add(sequenceController.getByEntry(entry));

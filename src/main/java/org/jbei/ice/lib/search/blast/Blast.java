@@ -564,7 +564,7 @@ public class Blast {
      */
     private void writeBigFastaFile(BufferedWriter writer) throws BlastException {
         List<Sequence> sequencesList;
-        SequenceController sequenceController = new SequenceController();
+        SequenceController sequenceController = ApplicationController.getSequenceController();
         try {
             sequencesList = sequenceController.getAllSequences(); // TODO potential performance impact
         } catch (ControllerException e) {
