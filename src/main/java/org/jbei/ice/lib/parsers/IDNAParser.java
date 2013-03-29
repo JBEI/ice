@@ -44,8 +44,7 @@ public interface IDNAParser {
      * @throws IOException
      * @throws InvalidFormatParserException
      */
-    IDNASequence parse(File file) throws FileNotFoundException, IOException,
-            InvalidFormatParserException;
+    IDNASequence parse(File file) throws FileNotFoundException, IOException, InvalidFormatParserException;
 
     /**
      * Parse the given string to {@link IDNASequence} annotated sequence.

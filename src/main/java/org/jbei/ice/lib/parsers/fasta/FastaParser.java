@@ -1,9 +1,11 @@
-package org.jbei.ice.lib.parsers;
+package org.jbei.ice.lib.parsers.fasta;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.LinkedList;
 
+import org.jbei.ice.lib.parsers.AbstractParser;
+import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;

@@ -59,8 +59,7 @@ public class Feature implements IModel {
         super();
     }
 
-    public Feature(String name, String identification, String sequence, int autoFind,
-            String genbankType) {
+    public Feature(String name, String identification, String sequence, int autoFind, String genbankType) {
         super();
 
         this.name = name;

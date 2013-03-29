@@ -34,7 +34,6 @@
 
         <!-- hibernate search -->
         <property name="hibernate.search.default.directory_provider">ram</property>
-        <property name="hibernate.search.default.indexBase">/tmp/ice_search_index</property>
 
         <!-- mapping files -->
         <mapping class="org.jbei.ice.lib.entry.model.Entry"/>
@@ -48,8 +47,6 @@
         <mapping class="org.jbei.ice.lib.models.SelectionMarker"/>
         <mapping class="org.jbei.ice.lib.models.Sequence"/>
         <mapping class="org.jbei.ice.lib.models.Feature"/>
-        <mapping class="org.jbei.ice.lib.models.FeatureFeatureRelationship"/>
-        <mapping class="org.jbei.ice.lib.models.FeatureRelationship"/>
         <mapping class="org.jbei.ice.lib.models.SequenceFeature"/>
         <mapping class="org.jbei.ice.lib.models.SequenceFeatureAttribute"/>
         <mapping class="org.jbei.ice.lib.models.AssemblyRelationship"/>

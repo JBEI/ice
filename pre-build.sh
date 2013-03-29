@@ -8,4 +8,4 @@ mvn install:install-file -Dfile=flex-messaging-core.jar -DgroupId=org.jbei.ice -
 mvn install:install-file -Dfile=flex-messaging-opt.jar -DgroupId=org.jbei.ice -DartifactId=flex-messaging-opt -Dversion=SNAPSHOT -Dpackaging=jar
 mvn install:install-file -Dfile=flex-messaging-proxy.jar -DgroupId=org.jbei.ice -DartifactId=flex-messaging-proxy -Dversion=SNAPSHOT -Dpackaging=jar
 mvn install:install-file -Dfile=flex-messaging-remoting.jar -DgroupId=org.jbei.ice -DartifactId=flex-messaging-remoting -Dversion=SNAPSHOT -Dpackaging=jar
-mvn install:install-file -Dfile=libSBOLj.jar -DgroupId=org.jbei.ice -DartifactId=libSBOLj -Dversion=SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=libSBOLj-0.7.0-SNAPSHOT.jar -DgroupId=org.jbei.ice -DartifactId=libSBOLj -Dversion=0.7.0 -Dpackaging=jar

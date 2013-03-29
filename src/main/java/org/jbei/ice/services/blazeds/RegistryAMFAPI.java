@@ -16,7 +16,6 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
-import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -268,10 +267,10 @@ public class RegistryAMFAPI extends BaseService {
         genbankFormatter.setCircular(isCircular);
 
         try {
-            result = SequenceController.compose(sequence, genbankFormatter);
+            result = ApplicationController.getSequenceController().compose(sequence, genbankFormatter);
 
             logInfo(account.getEmail() + " generated and fetched genbank sequence");
-        } catch (SequenceComposerException e) {
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
 
             return result;
@@ -505,16 +504,14 @@ public class RegistryAMFAPI extends BaseService {
         genbankFormatter.setCircular(true);
 
         try {
-            result = SequenceController.compose(sequence, genbankFormatter);
+            result = ApplicationController.getSequenceController().compose(sequence, genbankFormatter);
 
             logInfo("Generated and fetched sequence");
-        } catch (SequenceComposerException e) {
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
-
             return result;
         } catch (Exception e) {
             Logger.error(getLoggerPrefix(), e);
-
             return result;
         }
 

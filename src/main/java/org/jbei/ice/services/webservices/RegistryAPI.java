@@ -1085,24 +1085,20 @@ public class RegistryAPI implements IRegistryAPI {
 
             if (sequence != null) {
                 GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getNamesAsString());
-                genbankFormatter
-                        .setCircular((sequence.getEntry() instanceof Plasmid) ? ((Plasmid) entry)
-                                .getCircular() : false);
+                genbankFormatter.setCircular((sequence.getEntry() instanceof Plasmid) ? ((Plasmid) entry)
+                        .getCircular() : false);
 
-                genbankSequence = SequenceController.compose(sequence, genbankFormatter);
+                genbankSequence = sequenceController.compose(sequence, genbankFormatter);
             }
 
-            log("User '" + account.getEmail() + "' pulled generated genbank sequence: '" + entryId
-                        + "'");
+            log("User '" + account.getEmail() + "' pulled generated genbank sequence: '" + entryId + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         } catch (Exception e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 
@@ -1130,27 +1126,21 @@ public class RegistryAPI implements IRegistryAPI {
         try {
             SequenceController sequenceController = ApplicationController.getSequenceController();
             EntryController entryController = ApplicationController.getEntryController();
-
             Entry entry = entryController.getByRecordId(account, entryId);
-
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {
-                fastaSequence = SequenceController.compose(sequence,
-                                                           new FastaFormatter(entry.getNamesAsString()));
+                fastaSequence = sequenceController.compose(sequence, new FastaFormatter(entry.getNamesAsString()));
             }
 
-            log("User '" + account.getEmail() + "' pulled generated fasta sequence: '" + entryId
-                        + "'");
+            log("User '" + account.getEmail() + "' pulled generated fasta sequence: '" + entryId + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         } catch (Exception e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 
@@ -1198,7 +1188,6 @@ public class RegistryAPI implements IRegistryAPI {
             }
 
             Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
-
             sequence.setEntry(entry);
 
             try {

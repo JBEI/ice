@@ -13,11 +13,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class FeaturedDNASequence extends SimpleDNASequence {
     private static final long serialVersionUID = 1L;
 
-    private List<DNAFeature> features = new LinkedList<DNAFeature>();
+    private List<DNAFeature> features = new LinkedList<>();
     private String accessionNumber = "";
     private String identifier = "";
     private String name = "";
     private boolean isCircular = true;
+    private String description;
 
     public FeaturedDNASequence() {
         super();
@@ -78,5 +79,13 @@ public class FeaturedDNASequence extends SimpleDNASequence {
 
     public void setIsCircular(boolean isCircular) {
         this.isCircular = isCircular;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

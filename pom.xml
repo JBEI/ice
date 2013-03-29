@@ -226,7 +226,7 @@
         <dependency>
             <groupId>org.jbei.ice</groupId>
             <artifactId>libSBOLj</artifactId>
-            <version>SNAPSHOT</version>
+            <version>0.7.0</version>
         </dependency>
         <dependency>
             <groupId>net.sf.opencsv</groupId>

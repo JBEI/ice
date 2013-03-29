@@ -19,22 +19,11 @@ public class DNAFeature implements Serializable {
     private String name = "";
     private int strand = 1;
     private String annotationType;
-    private List<DNAFeatureNote> notes = new LinkedList<DNAFeatureNote>();
-    private List<DNAFeatureLocation> locations = new LinkedList<DNAFeatureLocation>();
+    private List<DNAFeatureNote> notes = new LinkedList<>();
+    private List<DNAFeatureLocation> locations = new LinkedList<>();
 
     public DNAFeature() {
         super();
-    }
-
-    public DNAFeature(String type, String name, int strand, List<DNAFeatureNote> notes,
-            String annotationType) {
-        super();
-
-        this.type = type;
-        this.name = name;
-        this.strand = strand;
-        this.notes = notes;
-        this.annotationType = annotationType; // Is this used?
     }
 
     public String getType() {
