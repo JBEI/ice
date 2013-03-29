@@ -50,8 +50,7 @@ public class IceSequenceOntology {
         map.put("mat_peptide", "SO_0000419");
         map.put("misc_binding", "SO_0000409");
         map.put("misc_difference", "SO_0000413");
-        map.put("misc_feature", "SO_0001645");
-
+        map.put("misc_marker", "SO_0001645");
         map.put("misc_recomb", "SO_0000298");
         map.put("misc_RNA", "SO_0000233");
         map.put("misc_signal", "SO_0005836");

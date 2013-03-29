@@ -344,6 +344,7 @@ public class SequenceController {
                     }
 
                     Feature feature = new Feature(dnaFeature.getName(), "", featureSequence, 0, dnaFeature.getType());
+                    feature.setUri(dnaFeature.getUri());
 
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
                                                                           dnaFeature.getStrand(), dnaFeature.getName(),

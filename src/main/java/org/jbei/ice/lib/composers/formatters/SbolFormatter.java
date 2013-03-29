@@ -21,6 +21,7 @@ import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
 import org.sbolstandard.core.SequenceAnnotation;
 import org.sbolstandard.core.StrandType;
+import org.sbolstandard.core.util.SBOLPrettyWriter;
 
 /**
  * Format to SBOL v 1.1 using libSBOLj
@@ -55,6 +56,7 @@ public class SbolFormatter extends AbstractFormatter {
         // populate the annotations
         Set<SequenceFeature> features = sequence.getSequenceFeatures();
         dnaComponent = addAnnotations(uriString, dnaComponent, features);
+        new SBOLPrettyWriter().write(dnaComponent, System.out);
         SBOLFactory.write(createXmlDocument(dnaComponent), outputStream);
     }
 
@@ -66,8 +68,13 @@ public class SbolFormatter extends AbstractFormatter {
 
         for (SequenceFeature feature : features) {
             SequenceAnnotation annotation = SBOLFactory.createSequenceAnnotation();
-            String annotationHash = feature.getFeature().getHash();
-            annotation.setURI(URI.create(uriString + "/sa#" + annotationHash));
+            String uri = feature.getFeature().getUri();
+            if (uri == null || uri.isEmpty()) {
+                uri = feature.getFeature().getHash();
+                annotation.setURI(URI.create(uriString + "/sa#" + uri));
+            } else
+                annotation.setURI(URI.create(uri));
+
             String dcUri = null;
 
             if (feature.getAnnotationLocations() != null && !feature.getAnnotationLocations().isEmpty()) {
@@ -75,23 +82,25 @@ public class SbolFormatter extends AbstractFormatter {
                 annotation.setBioStart(location.getGenbankStart());
                 annotation.setBioEnd(location.getEnd());
                 try {
-                    String sequence = feature.getSequence().getSequence().substring(location.getGenbankStart(),
+                    String sequence = feature.getSequence().getSequence().substring(location.getGenbankStart() - 1,
                                                                                     location.getEnd());
                     dcUri = SequenceUtils.calculateSequenceHash(sequence);
                     if (uriSet.contains(dcUri))
                         dcUri = UUID.randomUUID().toString();
+                    else
+                        uriSet.add(dcUri);
                 } catch (IndexOutOfBoundsException ioe) {
                     dcUri = UUID.randomUUID().toString();
                 }
             }
 
             annotation.setStrand(feature.getStrand() == 1 ? StrandType.POSITIVE : StrandType.NEGATIVE);
-            DnaComponent dnaComponent = SBOLFactory.createDnaComponent();
-            dnaComponent.setURI(URI.create(uriString + "/dc#" + dcUri));
-            dnaComponent.setDisplayId(feature.getName());
-            dnaComponent.setName(feature.getName());
-            dnaComponent.addType(IceSequenceOntology.getURI(feature.getGenbankType()));
-            annotation.setSubComponent(dnaComponent);
+            DnaComponent subComponent = SBOLFactory.createDnaComponent();
+            subComponent.setURI(URI.create(uriString + "/dc#" + dcUri));
+            subComponent.setDisplayId(feature.getName());
+            subComponent.setName(feature.getName());
+            subComponent.addType(IceSequenceOntology.getURI(feature.getGenbankType()));
+            annotation.setSubComponent(subComponent);
             component.addAnnotation(annotation);
         }
 

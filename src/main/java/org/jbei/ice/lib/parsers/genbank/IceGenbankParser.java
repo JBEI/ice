@@ -480,7 +480,7 @@ public class IceGenbankParser extends AbstractParser {
             line = line2;
 
             if ('/' == line.charAt(apparentQualifierColumn)) { // new tag starts
-                if (dnaFeatureNote != null) { // deleteExpiredSessions previous note
+                if (dnaFeatureNote != null && qualifierItem.length() < 4096) { // deleteExpiredSessions previous note
                     addQualifierItemToDnaFeatureNote(dnaFeatureNote, qualifierItem);
                     notes.add(dnaFeatureNote);
                 }
@@ -496,6 +496,8 @@ public class IceGenbankParser extends AbstractParser {
                     continue;
                 } else {
                     String putativeName = chunk[0].trim().substring(1);
+                    if (putativeName.startsWith("SBOL"))
+                        continue;
                     dnaFeatureNote.setName(putativeName);
                     chunk[0] = "";
                     qualifierItem.append(Utils.join(" ", Arrays.asList(chunk)).trim());
@@ -507,7 +509,7 @@ public class IceGenbankParser extends AbstractParser {
             }
         }
 
-        if (dnaFeatureNote != null) { // deleteExpiredSessions last one
+        if (dnaFeatureNote != null && qualifierItem.length() < 4096) { // deleteExpiredSessions last one
             addQualifierItemToDnaFeatureNote(dnaFeatureNote, qualifierItem);
             notes.add(dnaFeatureNote);
         }

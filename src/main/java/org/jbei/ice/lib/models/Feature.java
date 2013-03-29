@@ -55,6 +55,9 @@ public class Feature implements IModel {
     @Column(name = "genbank_type", length = 127)
     private String genbankType;
 
+    @Column(name = "uri")
+    private String uri;
+
     public Feature() {
         super();
     }
@@ -129,5 +132,13 @@ public class Feature implements IModel {
 
     public String getSequence() {
         return sequence;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 }
