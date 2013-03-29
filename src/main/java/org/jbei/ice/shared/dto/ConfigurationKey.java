@@ -24,6 +24,7 @@ public enum ConfigurationKey implements IsSerializable {
     TRACE_FILES_DIRECTORY("/tmp/traces", "sequence trace file directory", true),
     BLAST_DIRECTORY("/tmp/blast", "blast directory", true),
     SITE_SECRET("Site Secret", "", false),
+    // deprecated. use the user account salt instead.
     SECRET_KEY("o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+", "", false),
     COOKIE_NAME("jbei-ice", "Cookie Name", true),
     BULK_UPLOAD_APPROVER_EMAIL("", "bulk upload approver email", true), //TODO this should be a role

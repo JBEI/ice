@@ -72,14 +72,13 @@ public class AccountController {
      * @param url       current site url
      * @throws ControllerException if account could not be retrieved using unique identifier
      */
-    public void resetPassword(String email, boolean sendEmail, String url)
-            throws ControllerException {
+    public void resetPassword(String email, boolean sendEmail, String url) throws ControllerException {
         Account account = getByEmail(email);
         if (account == null)
             throw new ControllerException("Could not retrieve account for account id " + email);
 
         String newPassword = Utils.generateUUID().substring(24);
-        String encryptedNewPassword = AccountUtils.encryptPassword(newPassword);
+        String encryptedNewPassword = AccountUtils.encryptPassword(newPassword, account.getSalt());
         account.setPassword(encryptedNewPassword);
 
         save(account);
@@ -107,7 +106,7 @@ public class AccountController {
         if (account == null)
             throw new ControllerException("Could not retrieve account for account id " + email);
 
-        account.setPassword(AccountUtils.encryptPassword(password));
+        account.setPassword(AccountUtils.encryptPassword(password, account.getSalt()));
         save(account);
     }
 
@@ -145,13 +144,14 @@ public class AccountController {
             description = "";
         }
 
+        String salt = Utils.generateSaltForUserAccount();
         String newPassword = Utils.generateUUID().substring(24);
-        String encryptedPassword = AccountUtils.encryptPassword(newPassword);
+        String encryptedPassword = AccountUtils.encryptPassword(newPassword, salt);
         Account account = new Account(firstName, lastName, initials, email, encryptedPassword,
                                       institution, description);
         account.setIp("");
         account.setIsSubscribed(1);
-        account.setSalt(Utils.generateUUID());
+        account.setSalt(salt);
         account.setCreationTime(Calendar.getInstance().getTime());
         save(account);
         return newPassword;
@@ -168,7 +168,8 @@ public class AccountController {
         adminAccount.setFirstName("");
         adminAccount.setInitials("");
         adminAccount.setInstitution("");
-        adminAccount.setPassword(AccountUtils.encryptPassword(ADMIN_ACCOUNT_PASSWORD));
+        adminAccount.setSalt(Utils.generateSaltForUserAccount());
+        adminAccount.setPassword(AccountUtils.encryptPassword(ADMIN_ACCOUNT_PASSWORD, adminAccount.getSalt()));
         adminAccount.setDescription("Administrator Account");
         adminAccount.setIsSubscribed(0);
 
@@ -221,7 +222,7 @@ public class AccountController {
         try {
             account.setModificationTime(Calendar.getInstance().getTime());
             if (account.getSalt() == null || account.getSalt().isEmpty())
-                account.setSalt(Utils.generateUUID());
+                account.setSalt(Utils.generateSaltForUserAccount());
             result = dao.save(account);
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -260,7 +261,7 @@ public class AccountController {
 
         Boolean result = false;
 
-        if (account.getPassword().equals(AccountUtils.encryptPassword(password))) {
+        if (account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()))) {
             result = true;
         }
 
@@ -457,7 +458,7 @@ public class AccountController {
             return;
 
         String newPassword = Utils.generateUUID().substring(24);
-        account.setPassword(AccountUtils.encryptPassword(newPassword));
+        account.setPassword(AccountUtils.encryptPassword(newPassword, account.getSalt()));
         save(account);
         String subject = "JBEI Registry Password Reminder";
         String body = "A request has been made to reset your password.\n\n";
@@ -494,7 +495,7 @@ public class AccountController {
             EntryController entryController = new EntryController();
             LinkedList<Account> accounts = dao.retrieveAccounts(start, limit);
 
-            ArrayList<AccountInfo> infos = new ArrayList<AccountInfo>();
+            ArrayList<AccountInfo> infos = new ArrayList<>();
             for (Account userAccount : accounts) {
                 AccountInfo info = new AccountInfo();
                 long count;

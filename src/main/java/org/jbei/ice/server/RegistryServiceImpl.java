@@ -431,7 +431,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             account.setIsSubscribed(1);
             account.setModificationTime(Calendar.getInstance().getTime());
-            account.setSalt(Utils.generateUUID());
+            account.setSalt(Utils.generateSaltForUserAccount());
             account.setFirstName(info.getFirstName());
             account.setLastName(info.getLastName());
             account.setInitials(info.getInitials());

@@ -18,10 +18,13 @@ public class AccountUtils {
      * @param password non-empty string
      * @return 40 character encrypted string.
      */
-    public static String encryptPassword(String password) {
+    public static String encryptPassword(String password, String userSalt) {
         if (password == null || password.isEmpty())
             throw new IllegalArgumentException("Cannot encrypt null or empty password");
-        return Utils.encryptSHA(Utils.getConfigValue(ConfigurationKey.SECRET_KEY) + password);
+        String salt = Utils.getConfigValue(ConfigurationKey.SECRET_KEY);
+        if (salt == null || salt.isEmpty())
+            salt = userSalt;
+        return Utils.encryptSHA(salt + password);
     }
 
     public static AccountInfo accountToInfo(Account account) {

@@ -50,7 +50,7 @@ public class LblLdapAuthentication implements IAuthentication, Serializable {
                 if (account == null) {
                     account = new Account();
                     account.setCreationTime(currentTime);
-                    account.setSalt(Utils.generateUUID());
+                    account.setSalt(Utils.generateSaltForUserAccount());
                 }
 
                 account.setEmail(lblLdapAuthenticationWrapper.geteMail());
