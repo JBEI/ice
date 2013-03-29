@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -184,7 +184,7 @@ public class ModelToInfoFactory {
         if (sequences == null)
             return infos;
 
-        AccountController accountController = ApplicationController.getAccountController();
+        AccountController accountController = ControllerFactory.getAccountController();
         for (TraceSequence sequence : sequences) {
             SequenceAnalysisInfo info = new SequenceAnalysisInfo();
             info.setCreated(sequence.getCreationTime());
@@ -295,7 +295,7 @@ public class ModelToInfoFactory {
         info.setCreator(entry.getCreator());
         info.setCreatorEmail(entry.getCreatorEmail());
 
-        AccountController accountController = ApplicationController.getAccountController();
+        AccountController accountController = ControllerFactory.getAccountController();
         try {
             long ownerId = accountController.getAccountId(entry.getOwnerEmail());
             info.setOwnerId(ownerId);
@@ -409,7 +409,7 @@ public class ModelToInfoFactory {
         view.setOwner(entry.getOwner());
         view.setOwnerEmail(entry.getOwnerEmail());
 
-        AccountController accountController = ApplicationController.getAccountController();
+        AccountController accountController = ControllerFactory.getAccountController();
         try {
             Account account1;
             if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
@@ -449,7 +449,7 @@ public class ModelToInfoFactory {
             view.setOwner(entry.getOwner());
             view.setOwnerEmail(entry.getOwnerEmail());
 
-            AccountController accountController = ApplicationController.getAccountController();
+            AccountController accountController = ControllerFactory.getAccountController();
             try {
                 Account account1;
                 if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
@@ -464,7 +464,7 @@ public class ModelToInfoFactory {
         // attachments
         boolean hasAttachment = false;
         try {
-            AttachmentController attachmentController = ApplicationController.getAttachmentController();
+            AttachmentController attachmentController = ControllerFactory.getAttachmentController();
             hasAttachment = attachmentController.hasAttachment(entry);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -473,7 +473,7 @@ public class ModelToInfoFactory {
 
         // has sample
         try {
-            SampleController sampleController = ApplicationController.getSampleController();
+            SampleController sampleController = ControllerFactory.getSampleController();
             view.setHasSample(sampleController.hasSample(entry));
         } catch (ControllerException e) {
             Logger.error(e);
@@ -481,7 +481,7 @@ public class ModelToInfoFactory {
 
         // has sequence
         try {
-            SequenceController sequenceController = ApplicationController.getSequenceController();
+            SequenceController sequenceController = ControllerFactory.getSequenceController();
             view.setHasSequence(sequenceController.hasSequence(entry));
         } catch (ControllerException e) {
             Logger.error(e);

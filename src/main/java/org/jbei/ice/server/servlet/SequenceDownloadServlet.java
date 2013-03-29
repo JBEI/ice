@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -39,7 +39,7 @@ public class SequenceDownloadServlet extends HttpServlet {
         String entryId = request.getParameter("entry");
         String type = request.getParameter(TYPE);
         String sid = request.getParameter("sid");
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
 
         try {
             account = isLoggedIn(request.getCookies());
@@ -60,7 +60,7 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        EntryController entryController = ApplicationController.getEntryController();
+        EntryController entryController = ControllerFactory.getEntryController();
         Entry entry;
         try {
             entry = entryController.get(account, Long.parseLong(entryId));
@@ -93,7 +93,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
 
         for (Cookie cookie : cookies) {
             if ("gd-ice".equals(cookie.getName())) {
@@ -110,7 +110,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getOriginal(HttpServletResponse response, Entry entry, Account account) {
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         Sequence sequence;
 
         try {
@@ -144,7 +144,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getGenbank(HttpServletResponse response, Entry entry) {
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getNamesAsString());
         genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false); // TODO
 
@@ -187,7 +187,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getFasta(HttpServletResponse response, Entry entry) {
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         Sequence sequence;
 
         try {
@@ -224,7 +224,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getSBOL(HttpServletResponse response, Entry entry) {
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         Sequence sequence;
 
         try {

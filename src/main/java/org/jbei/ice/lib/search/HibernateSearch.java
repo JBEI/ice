@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountType;
@@ -388,7 +388,7 @@ public class HibernateSearch {
 
         Set<String> groupUUIDs = new HashSet<>();
         try {
-            groupUUIDs = ApplicationController.getGroupController().retrieveAccountGroupUUIDs(account);
+            groupUUIDs = ControllerFactory.getGroupController().retrieveAccountGroupUUIDs(account);
         } catch (ControllerException e) {
             Logger.error(e);
         }

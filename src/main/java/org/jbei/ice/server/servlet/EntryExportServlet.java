@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -78,7 +78,7 @@ public class EntryExportServlet extends HttpServlet {
             Entry entry;
             try {
                 long id = Long.decode(idStr.trim());
-                entry = ApplicationController.getEntryController().get(account, id);
+                entry = ControllerFactory.getEntryController().get(account, id);
             } catch (NumberFormatException nfe) {
                 Logger.error("Could not convert string id to long : " + idStr);
                 continue;
@@ -143,7 +143,7 @@ public class EntryExportServlet extends HttpServlet {
                 if (!AccountController.isAuthenticated(sid))
                     return null;
 
-                AccountController controller = ApplicationController.getAccountController();
+                AccountController controller = ControllerFactory.getAccountController();
                 return controller.getAccountBySessionKey(sid);
             }
         }

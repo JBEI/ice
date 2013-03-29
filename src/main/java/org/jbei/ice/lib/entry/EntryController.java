@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -62,12 +63,12 @@ public class EntryController {
 
     public EntryController() {
         dao = new EntryDAO();
-        permissionsController = ApplicationController.getPermissionController();
-        accountController = ApplicationController.getAccountController();
-        attachmentController = ApplicationController.getAttachmentController();
-        sampleController = ApplicationController.getSampleController();
-        sequenceAnalysisController = ApplicationController.getSequenceAnalysisController();
-        sequenceController = ApplicationController.getSequenceController();
+        permissionsController = ControllerFactory.getPermissionController();
+        accountController = ControllerFactory.getAccountController();
+        attachmentController = ControllerFactory.getAttachmentController();
+        sampleController = ControllerFactory.getSampleController();
+        sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
+        sequenceController = ControllerFactory.getSequenceController();
     }
 
     public Set<String> getMatchingAutoCompleteField(AutoCompleteField field, String token, int limit)
@@ -234,7 +235,7 @@ public class EntryController {
 
         // retrieve all public groups that this user is a part of an assign read permissions to those groups
         // for this entry
-        for (Group group : ApplicationController.getGroupController().getAllPublicGroupsForAccount(account)) {
+        for (Group group : ControllerFactory.getGroupController().getAllPublicGroupsForAccount(account)) {
             PermissionInfo permissionInfo = new PermissionInfo();
             permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
             permissionInfo.setTypeId(entry.getId());
@@ -383,7 +384,7 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        Group publicGroup = ApplicationController.getGroupController().createOrRetrievePublicGroup();
+        Group publicGroup = ControllerFactory.getGroupController().createOrRetrievePublicGroup();
         Set<Group> groups = new HashSet<>();
         groups.add(publicGroup);
         if (entry != null && !permissionsController.groupHasReadPermission(groups, entry)) {
@@ -456,7 +457,7 @@ public class EntryController {
             } else {
                 // retrieve groups for account and filter by permission
                 Set<Group> accountGroups = new HashSet<>(account.getGroups());
-                GroupController controller = ApplicationController.getGroupController();
+                GroupController controller = ControllerFactory.getGroupController();
                 Group everybodyGroup = controller.createOrRetrievePublicGroup();
                 accountGroups.add(everybodyGroup);
 
@@ -490,7 +491,7 @@ public class EntryController {
         }
 
         Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        GroupController controller = ApplicationController.getGroupController();
+        GroupController controller = ControllerFactory.getGroupController();
         Group everybodyGroup = controller.createOrRetrievePublicGroup();
         accountGroups.add(everybodyGroup);
         try {
@@ -508,7 +509,7 @@ public class EntryController {
             }
 
             Set<Group> accountGroups = new HashSet<>(account.getGroups());
-            GroupController controller = ApplicationController.getGroupController();
+            GroupController controller = ControllerFactory.getGroupController();
             Group everybodyGroup = controller.createOrRetrievePublicGroup();
             accountGroups.add(everybodyGroup);
             return dao.retrieveUserEntries(account, ownerEmail, accountGroups, sort, asc, start, limit);
@@ -524,7 +525,7 @@ public class EntryController {
             }
 
             Set<Group> accountGroups = new HashSet<>(account.getGroups());
-            GroupController controller = ApplicationController.getGroupController();
+            GroupController controller = ControllerFactory.getGroupController();
             Group everybodyGroup = controller.createOrRetrievePublicGroup();
             accountGroups.add(everybodyGroup);
             return dao.ownerEntryCount(account, ownerEmail, accountGroups);

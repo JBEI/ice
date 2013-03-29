@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
@@ -152,8 +152,6 @@ public class AccountController {
         account.setIp("");
         account.setIsSubscribed(1);
         account.setSalt(Utils.generateUUID());
-        Group publicGroup = ApplicationController.getGroupController().createOrRetrievePublicGroup();
-        account.getGroups().add(publicGroup);
         account.setCreationTime(Calendar.getInstance().getTime());
         save(account);
         return newPassword;
@@ -552,7 +550,7 @@ public class AccountController {
         if (account == null)
             throw new ControllerException("Could not find account " + email);
 
-        Group group = ApplicationController.getGroupController().getGroupById(id);
+        Group group = ControllerFactory.getGroupController().getGroupById(id);
         if (group == null)
             throw new ControllerException("Could not find group " + id);
         account.getGroups().remove(group);

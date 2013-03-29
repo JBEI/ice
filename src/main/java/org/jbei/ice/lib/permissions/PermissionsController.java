@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -30,9 +30,9 @@ public class PermissionsController {
     private final PermissionDAO dao;
 
     public PermissionsController() {
-        accountController = ApplicationController.getAccountController();
-        groupController = ApplicationController.getGroupController();
-        folderController = ApplicationController.getFolderController();
+        accountController = ControllerFactory.getAccountController();
+        groupController = ControllerFactory.getGroupController();
+        folderController = ControllerFactory.getFolderController();
         dao = new PermissionDAO();
     }
 
@@ -71,7 +71,7 @@ public class PermissionsController {
         Entry entry = null;
         Folder folder = null;
 
-        EntryController entryController = ApplicationController.getEntryController();
+        EntryController entryController = ControllerFactory.getEntryController();
 
         try {
             if (info.isEntry()) {
@@ -393,7 +393,7 @@ public class PermissionsController {
             return true;
 
         // then check if moderator
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
         if (controller.isAdministrator(account)) {
             return true;
         }
@@ -516,7 +516,7 @@ public class PermissionsController {
             Logger.info("Upgrading permissions....please wait");
             dao.upgradePermissions();
 
-            LinkedList<Long> entries = ApplicationController.getEntryController().getAllEntryIds();
+            LinkedList<Long> entries = ControllerFactory.getEntryController().getAllEntryIds();
             int count = entries.size();
             int i = -1;
 

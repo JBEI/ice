@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
@@ -144,7 +145,7 @@ public class Blast {
      * @return ArrayList of SearchResultInfo.
      */
     private HashMap<String, SearchResultInfo> processBlastOutput(Account account, String blastOutput, int queryLength) {
-        EntryController controller = ApplicationController.getEntryController();
+        EntryController controller = ControllerFactory.getEntryController();
         HashMap<String, SearchResultInfo> hashMap = new HashMap<>();
 
         ArrayList<String> lines = new ArrayList<>(Arrays.asList(blastOutput.split("\n")));
@@ -564,7 +565,7 @@ public class Blast {
      */
     private void writeBigFastaFile(BufferedWriter writer) throws BlastException {
         List<Sequence> sequencesList;
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         try {
             sequencesList = sequenceController.getAllSequences(); // TODO potential performance impact
         } catch (ControllerException e) {
@@ -620,7 +621,7 @@ public class Blast {
      */
     private void writeFeatureFastaFile(BufferedWriter fastaFileWriter) throws BlastException {
         ArrayList<Feature> featureList;
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
 
         try {
             featureList = sequenceController.getAllFeatures();

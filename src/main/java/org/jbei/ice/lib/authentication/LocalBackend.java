@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.authentication;
 
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -23,7 +23,7 @@ public class LocalBackend implements IAuthentication {
         }
 
         Account account;
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
 
         try {
             account = controller.getByEmail(userId);

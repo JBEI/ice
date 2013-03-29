@@ -65,8 +65,6 @@
         <mapping class="org.jbei.ice.lib.models.SelectionMarker"/>
         <mapping class="org.jbei.ice.lib.models.Sequence"/>
         <mapping class="org.jbei.ice.lib.models.Feature"/>
-        <mapping class="org.jbei.ice.lib.models.FeatureFeatureRelationship"/>
-        <mapping class="org.jbei.ice.lib.models.FeatureRelationship"/>
         <mapping class="org.jbei.ice.lib.models.SequenceFeature"/>
         <mapping class="org.jbei.ice.lib.models.SequenceFeatureAttribute"/>
         <mapping class="org.jbei.ice.lib.models.AssemblyRelationship"/>

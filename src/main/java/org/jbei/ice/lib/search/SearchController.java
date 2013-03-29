@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.config.ConfigurationController;
@@ -81,7 +81,7 @@ public class SearchController {
 
     public SearchResults runLocalSearch(Account account, SearchQuery query) throws ControllerException {
         // TODO run this only if we are searching from the api.
-        ConfigurationController configurationController = ApplicationController.getConfigurationController();
+        ConfigurationController configurationController = ControllerFactory.getConfigurationController();
         String projectName = configurationController.getPropertyValue(ConfigurationKey.PROJECT_NAME);
         String projectURI = configurationController.getPropertyValue(ConfigurationKey.URI_PREFIX);
 

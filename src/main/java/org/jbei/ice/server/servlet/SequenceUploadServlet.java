@@ -4,7 +4,7 @@ import java.util.List;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -46,7 +46,7 @@ public class SequenceUploadServlet extends UploadAction {
     @Override
     public String executeAction(HttpServletRequest request, List<FileItem> sessionFiles) throws UploadActionException {
         Account account;
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
 
         try {
             account = isLoggedIn(controller, request.getCookies());
@@ -73,7 +73,7 @@ public class SequenceUploadServlet extends UploadAction {
         String type = request.getParameter("type");
 
         // check entry
-        EntryController entryController = ApplicationController.getEntryController();
+        EntryController entryController = ControllerFactory.getEntryController();
         Entry entry;
         try {
             entry = entryController.get(account, Long.decode(entryId));
@@ -107,7 +107,7 @@ public class SequenceUploadServlet extends UploadAction {
     }
 
     private String saveSequence(Entry entry, Account account, String sequenceUser) {
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         try {
             sequenceController.parseAndSaveSequence(account, entry, sequenceUser);
             return "";

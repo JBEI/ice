@@ -2,7 +2,7 @@ package org.jbei.ice.lib.utils;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.config.ConfigurationDAO;
@@ -38,7 +38,7 @@ public class PopulateInitialDatabase {
      * @throws UtilityException
      */
     public static void initializeDatabase() throws UtilityException {
-        GroupController groupController = ApplicationController.getGroupController();
+        GroupController groupController = ControllerFactory.getGroupController();
         Group group1;
         try {
             group1 = groupController.getGroupByUUID(PUBLIC_GROUP_UUID);
@@ -214,7 +214,7 @@ public class PopulateInitialDatabase {
      */
     private static void createAdminAccount() throws UtilityException {
         try {
-            AccountController controller = ApplicationController.getAccountController();
+            AccountController controller = ControllerFactory.getAccountController();
             controller.createAdminAccount();
         } catch (ControllerException e) {
             throw new UtilityException(e);
@@ -227,7 +227,7 @@ public class PopulateInitialDatabase {
      * @throws UtilityException
      */
     private static void createSystemAccount() throws UtilityException {
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
         try {
             controller.createSystemAccount();
         } catch (ControllerException e) {

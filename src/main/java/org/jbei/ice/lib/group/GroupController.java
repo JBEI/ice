@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountUtils;
@@ -30,7 +30,7 @@ public class GroupController {
 
     public GroupController() {
         dao = new GroupDAO();
-        accountController = ApplicationController.getAccountController();
+        accountController = ControllerFactory.getAccountController();
     }
 
     public Group getGroupByUUID(String uuid) throws ControllerException {
@@ -200,7 +200,7 @@ public class GroupController {
                     accountController.removeMemberFromGroup(group.getId(), member.getEmail());
                 }
             }
-            ApplicationController.getPermissionController().clearGroupPermissions(account, group);
+            ControllerFactory.getPermissionController().clearGroupPermissions(account, group);
             GroupInfo groupInfo = Group.toDTO(group);
             dao.delete(group);
             return groupInfo;

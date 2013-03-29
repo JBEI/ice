@@ -9,7 +9,7 @@ import java.util.Map;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -73,7 +73,7 @@ public class RegistryAPI implements IRegistryAPI {
         String sessionId;
 
         try {
-            AccountController controller = ApplicationController.getAccountController();
+            AccountController controller = ControllerFactory.getAccountController();
             AccountInfo info = controller.authenticate(login, password);
             sessionId = info.getSessionId();
         } catch (InvalidCredentialsException e) {
@@ -151,7 +151,7 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean isModerator(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "login") String login) throws SessionException, ServiceException {
         Account account = validateAccount(sessionId);
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
 
         try {
             return controller.isAdministrator(account);
@@ -175,7 +175,7 @@ public class RegistryAPI implements IRegistryAPI {
         log(sessionId, "getEntryByName: " + name);
         try {
             Account account = validateAccount(sessionId);
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             return entryController.getByName(account, name);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -193,8 +193,8 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean hasSequence(@WebParam(name = "recordId") String recordId) throws ServiceException {
         try {
             log("hasSequence " + recordId);
-            Entry entry = ApplicationController.getEntryController().getPublicEntryByRecordId(recordId);
-            return ApplicationController.getSequenceController().hasSequence(entry);
+            Entry entry = ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
+            return ControllerFactory.getSequenceController().hasSequence(entry);
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
         }
@@ -218,7 +218,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            return ApplicationController.getEntryController().getByRecordId(account, entryId);
+            return ControllerFactory.getEntryController().getByRecordId(account, entryId);
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -234,7 +234,7 @@ public class RegistryAPI implements IRegistryAPI {
     public Entry getPublicEntryByRecordId(@WebParam(name = "recordId") String recordId) throws ServiceException {
         log("getByRecordId " + recordId);
         try {
-            return ApplicationController.getEntryController().getPublicEntryByRecordId(recordId);
+            return ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
         } catch (Exception e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -261,7 +261,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             entry = entryController.getByPartNumber(account, partNumber);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -296,8 +296,8 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
-            PermissionsController permissionsController = ApplicationController.getPermissionController();
+            EntryController entryController = ControllerFactory.getEntryController();
+            PermissionsController permissionsController = ControllerFactory.getPermissionController();
             Entry entry = entryController.getByRecordId(account, entryId);
             result = permissionsController.hasReadPermission(account, entry);
         } catch (ControllerException e) {
@@ -328,8 +328,8 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
-            PermissionsController permissionsController = ApplicationController.getPermissionController();
+            EntryController entryController = ControllerFactory.getEntryController();
+            PermissionsController permissionsController = ControllerFactory.getPermissionController();
             Entry entry = entryController.getByRecordId(account, entryId);
             result = permissionsController.hasWritePermission(account, entry);
         } catch (ControllerException e) {
@@ -359,7 +359,7 @@ public class RegistryAPI implements IRegistryAPI {
         Entry newEntry;
         Account account = validateAccount(sessionId);
         try {
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             Entry remoteEntry = createEntry(plasmid);
             newEntry = entryController.createEntry(account, remoteEntry, null);
             log("User '" + account.getEmail() + "' created plasmid: '" + plasmid.getRecordId()
@@ -392,7 +392,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             Entry remoteEntry = createEntry(strain);
             newEntry = entryController.createEntry(account, remoteEntry, null);
             log("User '" + account.getEmail() + "' created strain: '" + strain.getRecordId() + "', " + strain.getId());
@@ -423,7 +423,7 @@ public class RegistryAPI implements IRegistryAPI {
         Entry newEntry;
         Account account = validateAccount(sessionId);
         try {
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             Entry remoteEntry = createEntry(part);
             newEntry = entryController.createEntry(account, remoteEntry, null);
             log("User '" + account.getEmail() + "' created part: '" + part.getRecordId() + "', " + part.getId());
@@ -445,7 +445,7 @@ public class RegistryAPI implements IRegistryAPI {
         Entry newEntry;
         Account account = validateAccount(sessionId);
         try {
-            EntryController controller = ApplicationController.getEntryController();
+            EntryController controller = ControllerFactory.getEntryController();
             Entry remoteEntry = createEntry(seed);
             newEntry = controller.createEntry(account, remoteEntry, null);
             log("User '" + account.getEmail() + "' created arabidopsis seed: '" + seed.getRecordId());
@@ -479,7 +479,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
 
             savedEntry = entryController.update(account, updateEntry(account, plasmid), null);
 
@@ -519,7 +519,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             savedEntry = entryController.update(account, updateEntry(account, strain), null);
             log("User '" + account.getEmail() + "' update strain: '" + savedEntry.getRecordId()
                         + "', " + savedEntry.getId());
@@ -556,7 +556,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             savedEntry = entryController.update(account, updateEntry(account, part), null);
 
             log("User '" + account.getEmail() + "' update part: '" + savedEntry.getRecordId()
@@ -718,8 +718,8 @@ public class RegistryAPI implements IRegistryAPI {
             ServiceException, ServicePermissionException {
         Entry currentEntry;
         try {
-            EntryController entryController = ApplicationController.getEntryController();
-            PermissionsController permissionsController = ApplicationController.getPermissionController();
+            EntryController entryController = ControllerFactory.getEntryController();
+            PermissionsController permissionsController = ControllerFactory.getPermissionController();
 
             try {
                 currentEntry = entryController.getByRecordId(account, entry.getRecordId());
@@ -948,7 +948,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             Entry entry = entryController.getByRecordId(account, entryId);
             entryController.delete(account, entry);
             log("User '" + account.getEmail() + "' removed entry: '" + entryId + "'");
@@ -983,8 +983,8 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = ApplicationController.getSequenceController();
-            Entry entry = ApplicationController.getEntryController().getByRecordId(account, entryId);
+            SequenceController sequenceController = ControllerFactory.getSequenceController();
+            Entry entry = ControllerFactory.getEntryController().getByRecordId(account, entryId);
             FeaturedDNASequence sequence = SequenceController.sequenceToDNASequence(
                     sequenceController.getByEntry(entry));
 
@@ -1005,8 +1005,8 @@ public class RegistryAPI implements IRegistryAPI {
     public FeaturedDNASequence getPublicSequence(@WebParam(name = "entryId") String entryId) throws ServiceException {
         log("getPublicSequence: " + entryId);
         try {
-            SequenceController sequenceController = ApplicationController.getSequenceController();
-            Entry entry = ApplicationController.getEntryController().getPublicEntryByRecordId(entryId);
+            SequenceController sequenceController = ControllerFactory.getSequenceController();
+            Entry entry = ControllerFactory.getEntryController().getPublicEntryByRecordId(entryId);
             return SequenceController.sequenceToDNASequence(sequenceController.getByEntry(entry));
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
@@ -1033,8 +1033,8 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = ApplicationController.getSequenceController();
-            EntryController entryController = ApplicationController.getEntryController();
+            SequenceController sequenceController = ControllerFactory.getSequenceController();
+            EntryController entryController = ControllerFactory.getEntryController();
             Entry entry = entryController.getByRecordId(account, entryId);
             Sequence sequence = sequenceController.getByEntry(entry);
 
@@ -1078,8 +1078,8 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = ApplicationController.getSequenceController();
-            EntryController entryController = ApplicationController.getEntryController();
+            SequenceController sequenceController = ControllerFactory.getSequenceController();
+            EntryController entryController = ControllerFactory.getEntryController();
             Entry entry = entryController.getByRecordId(account, entryId);
             Sequence sequence = sequenceController.getByEntry(entry);
 
@@ -1124,8 +1124,8 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = ApplicationController.getSequenceController();
-            EntryController entryController = ApplicationController.getEntryController();
+            SequenceController sequenceController = ControllerFactory.getSequenceController();
+            EntryController entryController = ControllerFactory.getEntryController();
             Entry entry = entryController.getByRecordId(account, entryId);
             Sequence sequence = sequenceController.getByEntry(entry);
 
@@ -1169,8 +1169,8 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
-            SequenceController sequenceController = ApplicationController.getSequenceController();
+            EntryController entryController = ControllerFactory.getEntryController();
+            SequenceController sequenceController = ControllerFactory.getSequenceController();
 
             try {
                 entry = entryController.getByRecordId(account, entryId);
@@ -1228,7 +1228,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             Entry entry;
 
             try {
@@ -1237,7 +1237,7 @@ public class RegistryAPI implements IRegistryAPI {
                 throw new ServicePermissionException("No permission to read this entry");
             }
 
-            SequenceController sequenceController = ApplicationController.getSequenceController();
+            SequenceController sequenceController = ControllerFactory.getSequenceController();
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {
@@ -1277,8 +1277,8 @@ public class RegistryAPI implements IRegistryAPI {
             throws SessionException, ServiceException, ServicePermissionException {
         log(sessionId, "uploadSequence: " + entryId);
         Account account = validateAccount(sessionId);
-        EntryController entryController = ApplicationController.getEntryController();
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        EntryController entryController = ControllerFactory.getEntryController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         FeaturedDNASequence dnaSequence = (FeaturedDNASequence) SequenceController.parse(sequence);
 
         if (dnaSequence == null) {
@@ -1342,8 +1342,8 @@ public class RegistryAPI implements IRegistryAPI {
             ServicePermissionException {
         log(sessionId, "retrieveEntrySamples: " + entryId);
         Account account = validateAccount(sessionId);
-        SampleController sampleController = ApplicationController.getSampleController();
-        EntryController entryController = ApplicationController.getEntryController();
+        SampleController sampleController = ControllerFactory.getSampleController();
+        EntryController entryController = ControllerFactory.getEntryController();
 
         try {
             Entry entry = entryController.getByRecordId(account, entryId);
@@ -1371,8 +1371,8 @@ public class RegistryAPI implements IRegistryAPI {
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException {
         log(sessionId, "retrieveSamplesByBarcode: " + barcode);
-        SampleController sampleController = ApplicationController.getSampleController();
-        StorageController storageController = ApplicationController.getStorageController();
+        SampleController sampleController = ControllerFactory.getSampleController();
+        StorageController storageController = ControllerFactory.getStorageController();
 
         try {
             Storage storage = storageController.retrieveStorageTube(barcode.trim());
@@ -1401,7 +1401,7 @@ public class RegistryAPI implements IRegistryAPI {
     public String samplePlate(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "samples") Sample[] samples) throws SessionException, ServiceException {
         log(sessionId, "samplePlate");
-        StorageController storageController = ApplicationController.getStorageController();
+        StorageController storageController = ControllerFactory.getStorageController();
         HashMap<String, Integer> plateIndex = new HashMap<String, Integer>();
 
         Sample initial = samples[0];
@@ -1489,7 +1489,7 @@ public class RegistryAPI implements IRegistryAPI {
             throws ServiceException, PermissionException, SessionException {
         log(sessionId, "createStrainsample: " + recordId + "," + location + "," + barcode);
         Account account;
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
 
         try {
             account = controller.getAccountBySessionKey(sessionId);
@@ -1509,8 +1509,8 @@ public class RegistryAPI implements IRegistryAPI {
         }
 
         // check if there is an existing sample with barcode
-        StorageController storageController = ApplicationController.getStorageController();
-        SampleController sampleController = ApplicationController.getSampleController();
+        StorageController storageController = ControllerFactory.getStorageController();
+        SampleController sampleController = ControllerFactory.getSampleController();
 
         try {
             Storage storage = storageController.retrieveStorageTube(barcode.trim());
@@ -1547,7 +1547,7 @@ public class RegistryAPI implements IRegistryAPI {
                     location, barcode
             });
 
-            Entry entry = ApplicationController.getEntryController().getByRecordId(account, recordId);
+            Entry entry = ControllerFactory.getEntryController().getByRecordId(account, recordId);
             if (entry == null) {
                 throw new ServiceException("Could not retrieve entry with id " + recordId);
             }
@@ -1581,8 +1581,8 @@ public class RegistryAPI implements IRegistryAPI {
             @WebParam(name = "samples") Sample[] samples, @WebParam(name = "plateId") String plateId)
             throws SessionException, ServiceException {
         log(sessionId, "checkAndUpdateSamplesStorage: " + plateId);
-        StorageController storageController = ApplicationController.getStorageController();
-        SampleController sampleController = ApplicationController.getSampleController();
+        StorageController storageController = ControllerFactory.getStorageController();
+        SampleController sampleController = ControllerFactory.getSampleController();
 
         // count of plates seen so far
         List<Sample> retSamples = new LinkedList<Sample>();
@@ -1685,8 +1685,8 @@ public class RegistryAPI implements IRegistryAPI {
         log(sessionId, "listTraceSequenceFiles: " + recordId);
         Account account = validateAccount(sessionId);
         List<TraceSequence> result = new ArrayList<TraceSequence>();
-        SequenceAnalysisController sequenceAnalysisController = ApplicationController.getSequenceAnalysisController();
-        EntryController entryController = ApplicationController.getEntryController();
+        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
+        EntryController entryController = ControllerFactory.getEntryController();
 
         Entry entry;
         try {
@@ -1741,8 +1741,8 @@ public class RegistryAPI implements IRegistryAPI {
             SessionException {
         log(sessionId, "uploadTraceSequenceFile: " + recordId + "," + fileName);
 
-        SequenceAnalysisController sequenceAnalysisController = ApplicationController.getSequenceAnalysisController();
-        EntryController entryController = ApplicationController.getEntryController();
+        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
+        EntryController entryController = ControllerFactory.getEntryController();
         byte[] bytes = SerializationUtils.deserializeBase64StringToBytes(base64FileData);
         if (bytes == null) {
             throw new ServiceException("Invalid File Data!");
@@ -1802,7 +1802,7 @@ public class RegistryAPI implements IRegistryAPI {
     public SequenceTraceFile getTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
         log(sessionId, "getTraceSequenceFile: " + fileId);
-        SequenceAnalysisController sequenceAnalysisController = ApplicationController.getSequenceAnalysisController();
+        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
         SequenceTraceFile traceFile;
         try {
             TraceSequence traceSequence = sequenceAnalysisController.getTraceSequenceByFileId(fileId);
@@ -1832,7 +1832,7 @@ public class RegistryAPI implements IRegistryAPI {
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
         log(sessionId, "deleteTraceSequenceFile: " + fileId);
         Account account = validateAccount(sessionId);
-        SequenceAnalysisController sequenceAnalysisController = ApplicationController.getSequenceAnalysisController();
+        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
 
         TraceSequence traceSequence;
         try {
@@ -1855,7 +1855,7 @@ public class RegistryAPI implements IRegistryAPI {
     @Override
     public SearchResults runSearch(@WebParam(name = "searchQuery") SearchQuery query) throws ServiceException {
         Logger.info("Registry API: web search");
-        SearchController controller = ApplicationController.getSearchController();
+        SearchController controller = ControllerFactory.getSearchController();
         try {
             return controller.runLocalSearch(null, query);
         } catch (ControllerException e) {
@@ -1879,8 +1879,8 @@ public class RegistryAPI implements IRegistryAPI {
         if (!isWebEnabled)
             return false;
 
-        EntryController controller = ApplicationController.getEntryController();
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        EntryController controller = ControllerFactory.getEntryController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
 
         // process entries
         for (Map.Entry<Entry, String> mapEntry : entrySequenceMap.entrySet()) {
@@ -1931,7 +1931,7 @@ public class RegistryAPI implements IRegistryAPI {
         }
 
         Account account;
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
 
         try {
             account = controller.getAccountBySessionKey(sessionId);

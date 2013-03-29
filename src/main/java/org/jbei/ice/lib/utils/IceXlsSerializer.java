@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -103,9 +103,9 @@ public class IceXlsSerializer {
         stringBuilder.append("Has Sequence").append("\n");
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
-        SampleController sampleController = ApplicationController.getSampleController();
-        SequenceController sequenceController = ApplicationController.getSequenceController();
-        AttachmentController attachmentController = ApplicationController.getAttachmentController();
+        SampleController sampleController = ControllerFactory.getSampleController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
+        AttachmentController attachmentController = ControllerFactory.getAttachmentController();
 
         for (Iterator<Entry> iterator = entries.iterator(); iterator.hasNext(); ) {
             Entry entry = iterator.next();

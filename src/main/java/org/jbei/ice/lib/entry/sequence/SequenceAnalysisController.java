@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -151,7 +151,7 @@ public class SequenceAnalysisController {
 
         List<TraceSequence> traces = null;
 
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
 
         try {
             Sequence sequence = sequenceController.getByEntry(entry);
@@ -421,7 +421,7 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to rebuild alignment for null entry!");
         }
 
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         Sequence sequence = sequenceController.getByEntry(entry);
 
         if (sequence == null) {

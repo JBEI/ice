@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -27,8 +27,8 @@ public class SampleController {
 
     public SampleController() {
         dao = new SampleDAO();
-        permissionsController = ApplicationController.getPermissionController();
-        storageController = ApplicationController.getStorageController();
+        permissionsController = ControllerFactory.getPermissionController();
+        storageController = ControllerFactory.getStorageController();
     }
 
     /**

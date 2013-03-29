@@ -5,7 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -36,7 +36,7 @@ public class LblLdapAuthentication implements IAuthentication, Serializable {
         }
 
         Account account;
-        AccountController accountController = ApplicationController.getAccountController();
+        AccountController accountController = ControllerFactory.getAccountController();
 
         try {
             loginId = loginId.toLowerCase();
