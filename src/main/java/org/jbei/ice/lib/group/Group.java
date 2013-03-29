@@ -54,7 +54,7 @@ public class Group implements IModel {
     private Date modificationTime;
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    private Set<Group> children = new HashSet<Group>();
+    private Set<Group> children = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     private GroupType type;
@@ -63,7 +63,7 @@ public class Group implements IModel {
     private Boolean autoJoin;
 
     @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private Set<Account> members = new HashSet<Account>();
+    private Set<Account> members = new HashSet<>();
 
     // Getters and setters
     public long getId() {
@@ -104,10 +104,6 @@ public class Group implements IModel {
 
     public void setParent(Group parent) {
         this.parent = parent;
-    }
-
-    public Set<Group> getChildren() {
-        return children;
     }
 
     public GroupType getType() {
@@ -151,8 +147,10 @@ public class Group implements IModel {
     }
 
     public void setAutoJoin(Boolean autoJoin) {
-        if (autoJoin != null)
-            this.autoJoin = autoJoin;
+        if (autoJoin == null)
+            return;
+
+        this.autoJoin = autoJoin;
     }
 
     public static GroupInfo toDTO(Group group) {

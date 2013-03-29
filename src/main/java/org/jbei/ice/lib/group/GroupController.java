@@ -3,6 +3,7 @@ package org.jbei.ice.lib.group;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.controllers.ControllerFactory;
@@ -96,6 +97,10 @@ public class GroupController {
         try {
             if (group.getUuid() == null || group.getUuid().isEmpty())
                 group.setUuid(Utils.generateUUID());
+
+            if (group.getType() == GroupType.PRIVATE)
+                group.setAutoJoin(false);
+
             return dao.save(group);
         } catch (DAOException e) {
             Logger.error(e);
@@ -343,6 +348,14 @@ public class GroupController {
         }
     }
 
+    public List<Group> getAutoJoinGroups() throws ControllerException {
+        try {
+            return dao.getAutoJoinGroups();
+        } catch (DAOException de) {
+            throw new ControllerException();
+        }
+    }
+
     public ArrayList<AccountInfo> retrieveAccountsForGroupCreation(Account account) throws ControllerException {
         Set<Group> groups = getAllGroups(account);
         Set<AccountInfo> accounts = new HashSet<>();
@@ -358,7 +371,7 @@ public class GroupController {
         return new ArrayList<>(accounts);
     }
 
-    public ArrayList<AccountInfo> addGroupMembers(Account account, GroupInfo info, ArrayList<AccountInfo> members)
+    public ArrayList<AccountInfo> setGroupMembers(Account account, GroupInfo info, ArrayList<AccountInfo> members)
             throws ControllerException {
         Group group = getGroupById(info.getId());
         if (group == null) {
@@ -376,6 +389,17 @@ public class GroupController {
             }
         }
 
+        // is there an easier way to do this?
+        // remove
+        for (Account member : group.getMembers()) {
+            Account memberAccount = accountController.getByEmail(member.getEmail());
+            if (memberAccount == null)
+                continue;
+            memberAccount.getGroups().remove(group);
+            accountController.save(memberAccount);
+        }
+
+        // add
         ArrayList<Account> accounts = new ArrayList<>();
         for (AccountInfo accountInfo : members) {
             Account memberAccount = accountController.getByEmail(accountInfo.getEmail());
@@ -389,13 +413,13 @@ public class GroupController {
         try {
             group.getMembers().clear();
             group.getMembers().addAll(accounts);
-            group = dao.update(group);
+            dao.update(group);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
         members.clear();
-        for (Account addedAccount : group.getMembers()) {
+        for (Account addedAccount : accounts) {
             members.add(Account.toDTO(addedAccount));
         }
         return members;

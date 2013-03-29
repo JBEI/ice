@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.group.GroupMembersWidget;
 import org.jbei.ice.client.common.widget.FAIconType;
@@ -38,11 +37,11 @@ public class GroupsListWidget extends Composite {
     private final GroupAddMembersWidget addMembersWidget;
     private final GroupAddMembersWidget createGroupMembersWidget;
     private final CreateGroupCell newGroupCell;
-    private ServiceDelegate<GroupInfo> delegate;
+    private ServiceDelegate<GroupInfo> deleteGroupDelegate;
     private ServiceDelegate<GroupInfo> editGroupDelegate;
     private ServiceDelegate<String> emailVerifierDelegate;
-    private Delegate<GroupInfo> groupSelectionDelegate; // used to notify presenter which group is being worked on
-    private GroupInfo currentGroup;
+    private ServiceDelegate<GroupInfo> retrieveMembersDelegate;
+    private Mode mode;
 
     public GroupsListWidget() {
         groupList = new FlexTable();
@@ -104,10 +103,9 @@ public class GroupsListWidget extends Composite {
                 emailVerifierDelegate.execute(email);
             }
         });
-    }
 
-    public GroupInfo getCurrentGroup() {
-        return this.currentGroup;
+        // default mode of viewing group list
+        mode = Mode.VIEW_GROUP_LIST;
     }
 
     public void addVerifiedAccount(AccountInfo accountInfo) {
@@ -115,11 +113,7 @@ public class GroupsListWidget extends Composite {
     }
 
     public void setDeleteGroupDelegate(ServiceDelegate<GroupInfo> deleteGroupDelegate) {
-        delegate = deleteGroupDelegate;
-    }
-
-    public void setGroupSelectionDelegate(Delegate<GroupInfo> selectionDelegate) {
-        this.groupSelectionDelegate = selectionDelegate;
+        this.deleteGroupDelegate = deleteGroupDelegate;
     }
 
     public void setDeleteGroupMemberDelegate(ServiceDelegate<AccountInfo> deleteGroupMemberDelegate) {
@@ -160,8 +154,14 @@ public class GroupsListWidget extends Composite {
         return addMembersWidget.getSelectedMembers();
     }
 
-    public void setSaveHandler(ClickHandler handler) {
-        addMembersWidget.setSaveHandler(handler);
+    public void setSaveHandler(final ClickHandler handler) {
+        addMembersWidget.setSaveHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                handler.onClick(event);
+                mode = Mode.VIEW_GROUP_LIST;
+            }
+        });
     }
 
     public void setCreateNewHandler(ClickHandler handler) {
@@ -189,6 +189,7 @@ public class GroupsListWidget extends Composite {
 
     public void setAvailableAccounts(ArrayList<AccountInfo> available) {
         Collections.sort(available, new Comparator<AccountInfo>() {
+
             @Override
             public int compare(AccountInfo o1, AccountInfo o2) {
                 return o1.getFullName().compareTo(o2.getFullName());
@@ -199,28 +200,44 @@ public class GroupsListWidget extends Composite {
     }
 
     public void setGroupMembers(GroupInfo info, ArrayList<AccountInfo> members) {
-        groupMembers.setMemberList(members);
-        groupMembers.setVisible(true);
-        layout.setWidget(0, 1, groupMembers);
-        layout.getFlexCellFormatter().setVisible(0, 1, true);
-        layout.getFlexCellFormatter().removeStyleName(0, 1, "bg_gray_with_border");
+        if (mode == null || mode == Mode.VIEW_GROUP_LIST || mode == Mode.VIEW_GROUP_MEMBERS) {
+            groupMembers.setMemberList(members);
+            groupMembers.setVisible(true);
+            layout.setWidget(0, 1, groupMembers);
+            layout.getFlexCellFormatter().setVisible(0, 1, true);
+            layout.getFlexCellFormatter().removeStyleName(0, 1, "bg_gray_with_border");
 
-        for (int i = 0; i < groupList.getRowCount(); i += 1) {
-            Widget widget = groupList.getWidget(i, 0);
-            if (!(widget instanceof Cell))
-                continue;
+            for (int i = 0; i < groupList.getRowCount(); i += 1) {
+                Widget widget = groupList.getWidget(i, 0);
+                if (!(widget instanceof Cell))
+                    continue;
 
-            Cell cell = (Cell) widget;
+                Cell cell = (Cell) widget;
 
-            if (info.getId() == cell.getInfo().getId()) {
-                cell.updateGroupCount(info.getMemberCount());
-                return;
+                if (info.getId() == cell.getInfo().getId()) {
+                    cell.updateGroupCount(info.getMemberCount());
+                    return;
+                }
             }
+        } else if (mode == Mode.ADDING_MEMBER) {
+            addMembersWidget.setSelectedMembers(members);
         }
     }
 
-    public void setSelectionHandler(ClickHandler handler) {
-        groupList.addClickHandler(handler);
+    public void setSelectionHandler(ServiceDelegate<GroupInfo> delegate) {
+        if (delegate == null)
+            return;
+
+        retrieveMembersDelegate = delegate;
+        groupList.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                mode = Mode.VIEW_GROUP_MEMBERS;
+                GroupInfo info = getGroupSelection(event);
+                retrieveMembersDelegate.execute(info);
+            }
+        });
     }
 
     public void setGroupList(ArrayList<GroupInfo> list) {
@@ -311,6 +328,10 @@ public class GroupsListWidget extends Composite {
     //
     // inner classes
     //
+    private enum Mode {
+        ADDING_MEMBER, EDIT_GROUP, DELETE_GROUP, VIEW_GROUP_LIST, VIEW_GROUP_MEMBERS;
+    }
+
     private class Cell extends Composite {
 
         private final GroupInfo info;
@@ -393,14 +414,23 @@ public class GroupsListWidget extends Composite {
                     if (cell == null || cell.getCellIndex() > 0)
                         return;
 
+                    //set action mode
+                    mode = Mode.ADDING_MEMBER;
+                    // hide any group members that are being displayed
                     groupMembers.setVisible(false);
+                    // get current cell
                     final Cell widget = (Cell) groupList.getWidget(cell.getRowIndex(), cell.getCellIndex());
-                    groupSelectionDelegate.execute(widget.getInfo());
+                    // retrieve the existing group members
+                    retrieveMembersDelegate.execute(widget.getInfo());
+                    // highlight current selection and hide all others
                     setSelected(cell.getRowIndex(), false);
+                    // hide ??
                     groupList.getFlexCellFormatter().setVisible(0, 0, false);
+                    // show the add members widget (this will get updated with the existing members for the group)
                     addMembersWidget.setVisible(true);
                     layout.setWidget(0, 1, addMembersWidget);
                     layout.getFlexCellFormatter().setStyleName(0, 1, "bg_gray_with_border");
+                    // do not propagate click
                     event.stopPropagation();
                 }
             });
@@ -460,7 +490,7 @@ public class GroupsListWidget extends Composite {
                     if (!Window.confirm("This action cannot be undone. Continue?"))
                         return;
 
-                    delegate.execute(widget.getInfo());
+                    deleteGroupDelegate.execute(widget.getInfo());
                 }
             });
         }

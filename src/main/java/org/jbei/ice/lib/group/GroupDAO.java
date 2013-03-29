@@ -103,4 +103,21 @@ class GroupDAO extends HibernateRepository<Group> {
         List result = criteria.list();
         return new ArrayList<Group>(result);
     }
+
+    public List<Group> getAutoJoinGroups() throws DAOException {
+        Session session = currentSession();
+        Criteria criteria = session.createCriteria(Group.class);
+        criteria = criteria.add(Restrictions.eq("type", GroupType.PUBLIC));
+        criteria.add(Restrictions.conjunction()
+                                 .add(Restrictions.isNotNull("autoJoin"))
+                                 .add(Restrictions.eq("autoJoin", Boolean.TRUE)));
+
+        try {
+            List result = criteria.list();
+            return new ArrayList<Group>(result);
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException();
+        }
+    }
 }

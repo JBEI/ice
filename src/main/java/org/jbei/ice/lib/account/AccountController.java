@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -153,6 +154,15 @@ public class AccountController {
         account.setIsSubscribed(1);
         account.setSalt(salt);
         account.setCreationTime(Calendar.getInstance().getTime());
+        try {
+            List<Group> autoJoin = ControllerFactory.getGroupController().getAutoJoinGroups();
+            if (autoJoin != null && !autoJoin.isEmpty())
+                account.getGroups().addAll(autoJoin);
+        } catch (ControllerException ce) {
+            // not letting the exception interfere with group creation
+            Logger.warn("Error retrieving autoJoin groups: " + ce.getMessage());
+        }
+
         save(account);
         return newPassword;
     }

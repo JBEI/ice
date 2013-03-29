@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.ServiceDelegate;
@@ -42,7 +41,6 @@ public class UserGroupPresenter extends PanelPresenter {
         addGroupDeleteDelegate();
         addGroupUpdateDelegate();
         addVerifyMemberDelegate();
-        addGroupSelectionDelegate();
     }
 
     @Override
@@ -208,27 +206,15 @@ public class UserGroupPresenter extends PanelPresenter {
     }
 
     private void addGroupSelectionHandler() {
-        this.groupPanel.setGroupSelectionHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                GroupInfo info = groupPanel.getGroupSelection(event);
-                if (info == null)
-                    return;
-
-                currentGroup = info;
-                retrieveGroupMembers(info);
-            }
-        });
-    }
-
-    //set the current group on indirect selection of group (e.g. clicking on add member)
-    private void addGroupSelectionDelegate() {
-        this.groupPanel.setGroupSelectionDelegate(new Delegate<GroupInfo>() {
+        this.groupPanel.setGroupSelectionHandler(new ServiceDelegate<GroupInfo>() {
 
             @Override
             public void execute(GroupInfo groupInfo) {
+                if (groupInfo == null)
+                    return;
+
                 currentGroup = groupInfo;
+                retrieveGroupMembers(groupInfo);
             }
         });
     }

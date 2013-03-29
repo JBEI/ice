@@ -1191,7 +1191,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account account = retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": adding " + members.size() + " members to group " + info.getId());
             GroupController groupController = ControllerFactory.getGroupController();
-            return groupController.addGroupMembers(account, info, members);
+            return groupController.setGroupMembers(account, info, members);
         } catch (ControllerException ce) {
             return null;
         }
