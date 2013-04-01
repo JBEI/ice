@@ -1,151 +1,54 @@
 package org.jbei.ice.client.search.blast;
 
-import com.google.gwt.user.cellview.client.ColumnSortList;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
-import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
-import org.jbei.ice.client.common.IHasNavigableData;
-import org.jbei.ice.client.common.table.HasEntryDataTable;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.BlastResultInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.HasEntryInfo;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 
-public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastResultInfo>
-        implements IHasNavigableData {
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
+import org.jbei.ice.client.common.table.HasEntryDataTable;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.shared.dto.search.SearchResultInfo;
 
-    public BlastSearchDataProvider(HasEntryDataTable<BlastResultInfo> view,
-            RegistryServiceAsync service) {
+import com.google.gwt.view.client.Range;
 
+public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<SearchResultInfo> {
+
+    public BlastSearchDataProvider(HasEntryDataTable<SearchResultInfo> view, RegistryServiceAsync service) {
         super(view, service, ColumnField.BIT_SCORE);
     }
 
-    @Override
-    protected void retrieveValues(LinkedList<Long> values, final int rangeStart,
-            final int rangeEnd, ColumnField searchField, boolean asc) {
-        // check the cache first 
-        if (results.size() >= rangeEnd) {
-            LinkedList<BlastResultInfo> show = new LinkedList<BlastResultInfo>();
-            show.addAll(results.subList(rangeStart, rangeEnd));
-            updateRowData(rangeStart, show);
-        } else {
-
-            // TODO : with blast, all results are returned need to redo
-            //            Window.alert("Results has size " + results.size() + " but requesting range ["
-            //                    + rangeStart + ", " + rangeEnd + "]");
-        }
-    }
-
-    @Override
-    protected void onRangeChanged(HasData<BlastResultInfo> display) {
-
-        if (results
-                .isEmpty()) // problem here is that when the display is added to the dataProvider,
-            // onRangeChanged() is triggered
-            return;
-
-        final Range range = display.getVisibleRange();
-        final ColumnSortList sortList = this.getDataTable().getColumnSortList();
-        int start = range.getStart();
-        int end = range.getLength() + start;
-        if (end > results.size())
-            end = results.size();
-
-        sortByColumn(this.getSortField(), sortList.get(0).isAscending());
-        this.getDataTable().setRowData(start, results.subList(start, end));
-    }
-
-    protected void sortByColumn(final ColumnField field, final boolean asc) {
-        // sort the data by the sortList
-        Collections.sort(results, new Comparator<BlastResultInfo>() {
-
-            @Override
-            public int compare(BlastResultInfo o1, BlastResultInfo o2) {
-                if (o1 == o2)
-                    return 0;
-
-                int diff = -1;
-
-                switch (field) {
-                    case TYPE:
-                        diff = o1.getEntryInfo().getType().toString()
-                                 .compareToIgnoreCase(o2.getEntryInfo().getType().toString());
-                        break;
-
-                    case PART_ID:
-                        diff = o1.getEntryInfo().getPartId().compareTo(o2.getEntryInfo().getPartId());
-                        break;
-
-                    case NAME:
-                        diff = o1.getEntryInfo().getName().compareTo(o2.getEntryInfo().getName());
-                        break;
-
-                    case ALIGNED_BP:
-                        diff = (o1.getAlignmentLength() < o2.getAlignmentLength()) ? -1 : 1;
-                        break;
-
-                    case ALIGNED_IDENTITY:
-                        diff = (o1.getPercentId() < o2.getPercentId()) ? -1 : 1;
-                        break;
-
-                    case BIT_SCORE:
-                        diff = (o1.getBitScore() < o2.getBitScore()) ? -1 : 1;
-                        break;
-
-                    case E_VALUE:
-                        diff = (o1.geteValue() < o2.geteValue()) ? -1 : 1;
-                        break;
-                }
-
-                return asc ? diff : -diff;
-            }
-        });
-    }
-
-    public void setData(ArrayList<BlastResultInfo> data) {
+    public void setBlastData(LinkedList<SearchResultInfo> data) {
         reset();
-
-        if (data != null) {
-            for (BlastResultInfo info : data) {
-                valueIds.add(info.getEntryInfo().getId());
-            }
+        if (data == null) {
+            updateRowCount(0, true);
+            return;
         }
 
-        this.results.clear();
-        this.results.addAll(data);
-
-        updateRowCount(this.valueIds.size(), true);
-
-        lastSortAsc = false;
-        lastSortField = this.defaultSort;
+        results.addAll(data);
+        resultSize = data.size();  // todo : need a blastResult object as a wrapper
+        updateRowCount(resultSize, true);
 
         // retrieve the first page of results and updateRowData
         final Range range = this.dataTable.getVisibleRange();
-        final int rangeStart = range.getStart();
-        final int rangeEnd;
-        if ((rangeStart + range.getLength()) > valueIds.size())
-            rangeEnd = valueIds.size();
-        else
-            rangeEnd = (rangeStart + range.getLength());
+        final int rangeStart = 0;
+        int rangeEnd = rangeStart + range.getLength();
+        if (rangeEnd > resultSize)
+            rangeEnd = resultSize;
 
-        // TODO : you have access to the sort info from the table
-        // TODO : this goes with the above todo. if we clear all the sort info then we use default else use the top sort
-        // TODO : look at the sort method for an example of how to do this
-        fetchHasEntryData(this.getSortField(), true, rangeStart, rangeEnd);
+        updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
+        dataTable.setPageStart(0);
     }
 
     @Override
-    public EntryInfo getCachedData(long entryId) {
+    public EntryInfo getCachedData(long entryId, String recordId) {
         for (HasEntryInfo result : results) {
+            EntryInfo info = result.getEntryInfo();
+            if (recordId != null && info.getRecordId().equalsIgnoreCase(recordId))
+                return info;
 
-            if (result.getEntryInfo().getId() == entryId)
-                return result.getEntryInfo();
+            if (info.getId() == entryId)
+                return info;
         }
         return null;
     }
@@ -164,7 +67,7 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
 
     @Override
     public int getSize() {
-        return valueIds.size();
+        return resultSize;
     }
 
     @Override
@@ -181,5 +84,11 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
         if (idx == -1)
             return null;
         return results.get(idx - 1).getEntryInfo();
+    }
+
+    @Override
+    protected void fetchEntryData(ColumnField field, boolean ascending, int start, int factor, boolean reset) {
+        //To change body of implemented methods use File | Settings | File Templates.
+        // TODO
     }
 }

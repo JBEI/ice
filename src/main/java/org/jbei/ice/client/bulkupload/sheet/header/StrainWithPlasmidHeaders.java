@@ -1,6 +1,8 @@
 package org.jbei.ice.client.bulkupload.sheet.header;
 
-import org.jbei.ice.client.AppController;
+import java.util.HashMap;
+
+import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
@@ -9,10 +11,9 @@ import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.FileInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.StatusSheetCell;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.PlasmidInfo;
-import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 /**
  * Headers for strain with plasmid sheet
@@ -21,46 +22,67 @@ import org.jbei.ice.shared.dto.StrainInfo;
  */
 public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
 
-    public StrainWithPlasmidHeaders() {
-        headers.add(new CellColumnHeader(Header.PI, true));
-        headers.add(new CellColumnHeader(Header.FUNDING_SOURCE));
-        headers.add(new CellColumnHeader(Header.IP));
-        headers.add(new CellColumnHeader(Header.BIOSAFETY, true, new BioSafetySheetCell(), null));
-        headers.add(new CellColumnHeader(Header.STATUS, true, new StatusSheetCell(), null));
+    public StrainWithPlasmidHeaders(EntryInfoDelegate delegate, HashMap<String, String> preferences) {
+        headers.add(new CellColumnHeader(Header.PI, preferences, true));
+        headers.add(new CellColumnHeader(Header.FUNDING_SOURCE, preferences));
+        headers.add(new CellColumnHeader(Header.IP, preferences));
+        headers.add(new CellColumnHeader(Header.BIOSAFETY, preferences, true, new BioSafetySheetCell()));
+        headers.add(new CellColumnHeader(Header.STATUS, preferences, true, new StatusSheetCell()));
 
         //strain information
-        headers.add(new CellColumnHeader(Header.STRAIN_NAME, true, "e.g. JBEI-0001"));
-        headers.add(new CellColumnHeader(Header.STRAIN_ALIAS));
-        headers.add(new CellColumnHeader(Header.STRAIN_LINKS));
-        headers.add(new CellColumnHeader(Header.STRAIN_SELECTION_MARKERS, true, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
-        headers.add(new CellColumnHeader(Header.STRAIN_PARENTAL_STRAIN));
-        headers.add(new CellColumnHeader(Header.STRAIN_GEN_PHEN));
-        headers.add(new CellColumnHeader(Header.STRAIN_KEYWORDS));
-        headers.add(new CellColumnHeader(Header.STRAIN_SUMMARY, true));
-        headers.add(new CellColumnHeader(Header.STRAIN_NOTES));
-        headers.add(new CellColumnHeader(Header.STRAIN_REFERENCES));
-        headers.add(new CellColumnHeader(Header.STRAIN_SEQ_FILENAME, false, new FileInputCell(true), null));
-        headers.add(new CellColumnHeader(Header.STRAIN_ATT_FILENAME, false, new FileInputCell(false), null));
+        headers.add(new CellColumnHeader(Header.STRAIN_NAME, preferences, true, "e.g. JBEI-0001"));
+        headers.add(new CellColumnHeader(Header.STRAIN_ALIAS, preferences));
+        headers.add(new CellColumnHeader(Header.STRAIN_LINKS, preferences));
+        headers.add(new CellColumnHeader(Header.STRAIN_SELECTION_MARKERS, preferences, true,
+                                         new MultiSuggestSheetCell(true)));
+        headers.add(new CellColumnHeader(Header.STRAIN_PARENTAL_STRAIN, preferences));
+        headers.add(new CellColumnHeader(Header.STRAIN_GEN_PHEN, preferences));
+        headers.add(new CellColumnHeader(Header.STRAIN_KEYWORDS, preferences));
+        headers.add(new CellColumnHeader(Header.STRAIN_SUMMARY, preferences, true));
+        headers.add(new CellColumnHeader(Header.STRAIN_NOTES, preferences));
+        headers.add(new CellColumnHeader(Header.STRAIN_REFERENCES, preferences));
+        headers.add(new CellColumnHeader(Header.STRAIN_SEQ_FILENAME, preferences, false,
+                                         new FileInputCell(true, delegate, false)));
+        headers.add(new CellColumnHeader(Header.STRAIN_ATT_FILENAME, preferences, false,
+                                         new FileInputCell(false, delegate, false)));
 
         // plasmid information
-        headers.add(new CellColumnHeader(Header.PLASMID_NAME, true, "e.g. pTSH117"));
-        headers.add(new CellColumnHeader(Header.PLASMID_ALIAS));
-        headers.add(new CellColumnHeader(Header.PLASMID_LINKS));
-        headers.add(new CellColumnHeader(Header.PLASMID_SELECTION_MARKERS, true, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
-        headers.add(new CellColumnHeader(Header.CIRCULAR, false, new BooleanSheetCell(), null));
-        headers.add(new CellColumnHeader(Header.PLASMID_BACKBONE));
-        headers.add(new CellColumnHeader(Header.PLASMID_PROMOTERS, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.PROMOTERS), true), null));
-        headers.add(new CellColumnHeader(Header.PLASMID_ORIGIN_OF_REPLICATION, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.ORIGIN_OF_REPLICATION), true), null));
-        headers.add(new CellColumnHeader(Header.PLASMID_KEYWORDS));
-        headers.add(new CellColumnHeader(Header.PLASMID_SUMMARY, true));
-        headers.add(new CellColumnHeader(Header.PLASMID_NOTES));
-        headers.add(new CellColumnHeader(Header.PLASMID_REFERENCES));
-        headers.add(new CellColumnHeader(Header.PLASMID_SEQ_FILENAME, false, new FileInputCell(true), null));
-        headers.add(new CellColumnHeader(Header.PLASMID_ATT_FILENAME, false, new FileInputCell(false), null));
+        headers.add(new CellColumnHeader(Header.PLASMID_NAME, preferences, true, "e.g. pTSH117"));
+        headers.add(new CellColumnHeader(Header.PLASMID_ALIAS, preferences));
+        headers.add(new CellColumnHeader(Header.PLASMID_LINKS, preferences));
+        headers.add(new CellColumnHeader(Header.PLASMID_SELECTION_MARKERS, preferences, true, new MultiSuggestSheetCell(
+                true)));
+        headers.add(new CellColumnHeader(Header.CIRCULAR, preferences, false, new BooleanSheetCell()));
+        headers.add(new CellColumnHeader(Header.PLASMID_BACKBONE, preferences));
+        headers.add(new CellColumnHeader(Header.PLASMID_PROMOTERS, preferences, false,
+                                         new MultiSuggestSheetCell(true)));
+        headers.add(new CellColumnHeader(Header.PLASMID_ORIGIN_OF_REPLICATION, preferences, false,
+                                         new MultiSuggestSheetCell(true)));
+        headers.add(new CellColumnHeader(Header.PLASMID_KEYWORDS, preferences));
+        headers.add(new CellColumnHeader(Header.PLASMID_SUMMARY, preferences, true));
+        headers.add(new CellColumnHeader(Header.PLASMID_NOTES, preferences));
+        headers.add(new CellColumnHeader(Header.PLASMID_REFERENCES, preferences));
+        headers.add(new CellColumnHeader(Header.PLASMID_SEQ_FILENAME, preferences, false,
+                                         new FileInputCell(true, delegate, true)));
+        headers.add(new CellColumnHeader(Header.PLASMID_ATT_FILENAME, preferences, false,
+                                         new FileInputCell(false, delegate, true)));
+    }
+
+    public static boolean isPlasmidHeader(Header header) {
+        return (header == Header.PLASMID_NAME
+                || header == Header.PLASMID_ALIAS
+                || header == Header.PLASMID_LINKS
+                || header == Header.PLASMID_SELECTION_MARKERS
+                || header == Header.CIRCULAR
+                || header == Header.PLASMID_BACKBONE
+                || header == Header.PLASMID_PROMOTERS
+                || header == Header.PLASMID_ORIGIN_OF_REPLICATION
+                || header == Header.PLASMID_KEYWORDS
+                || header == Header.PLASMID_SUMMARY
+                || header == Header.PLASMID_NOTES
+                || header == Header.PLASMID_REFERENCES
+                || header == Header.PLASMID_SEQ_FILENAME
+                || header == Header.PLASMID_ATT_FILENAME);
     }
 
     @Override
@@ -136,7 +158,7 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                 break;
 
             case PLASMID_LINKS:
-                value = plasmid.getReferences();
+                value = plasmid.getLinks();
                 break;
 
             case PLASMID_STATUS:
@@ -146,8 +168,6 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
             case PLASMID_SELECTION_MARKERS:
                 value = plasmid.getSelectionMarkers();
                 break;
-
-
         }
 
         if (value == null)

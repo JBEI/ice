@@ -4,10 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.client.common.entry.IHasEntryId;
-import org.jbei.ice.client.common.table.cell.EntryOwnerCell;
+import org.jbei.ice.client.common.table.cell.EntrySelectionColumnHeaderCell;
+import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.client.common.table.column.ImageColumn;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -33,27 +34,29 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
  * @author Hector Plahar
  */
 
-public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements
-                                                                               IHasEntryId {
+public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements IHasEntryId {
 
-    private final EntrySelectionModel<T> selectionModel;
+    private EntrySelectionModel<T> selectionModel;
 
     public EntryDataTable() {
         super();
-        selectionModel = new EntrySelectionModel<T>();
-        this.setSelectionModel(selectionModel,
-                               DefaultSelectionEventManager.<T>createCheckboxManager());
     }
 
-    protected DataTableColumn<Boolean> addSelectionColumn() {
+    @Override
+    protected void init() {
+        selectionModel = new EntrySelectionModel<T>();
+        this.setSelectionModel(selectionModel, DefaultSelectionEventManager.<T>createCheckboxManager());
+    }
+
+    protected DataTableColumn<T, Boolean> addSelectionColumn() {
         final CheckboxCell columnCell = new CheckboxCell(true, false) {
+
             @Override
             public void onBrowserEvent(Context context, Element parent, Boolean value,
                     NativeEvent event, ValueUpdater<Boolean> valueUpdater) {
                 String type = event.getType();
 
-                boolean enterPressed = "keydown".equals(type)
-                        && event.getKeyCode() == KeyCodes.KEY_ENTER;
+                boolean enterPressed = "keydown".equals(type) && event.getKeyCode() == KeyCodes.KEY_ENTER;
                 if ("change".equals(type) || enterPressed) {
                     InputElement input = parent.getFirstChild().cast();
                     Boolean isChecked = input.isChecked();
@@ -65,8 +68,8 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
             }
         };
 
-        DataTableColumn<Boolean> selectionColumn = new DataTableColumn<Boolean>(columnCell,
-                                                                                ColumnField.SELECTION) {
+        DataTableColumn<T, Boolean> selectionColumn = new DataTableColumn<T, Boolean>(columnCell,
+                                                                                      ColumnField.SELECTION) {
 
             @Override
             public Boolean getValue(T object) {
@@ -90,9 +93,8 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return this.selectionModel;
     }
 
-    protected DataTableColumn<String> addTypeColumn(boolean sortable, double width, Unit unit) {
-        DataTableColumn<String> typeCol = new DataTableColumn<String>(new TextCell(),
-                                                                      ColumnField.TYPE) {
+    protected DataTableColumn<T, String> addTypeColumn(boolean sortable, double width, Unit unit) {
+        DataTableColumn<T, String> typeCol = new DataTableColumn<T, String>(new TextCell(), ColumnField.TYPE) {
 
             @Override
             public String getValue(T entry) {
@@ -105,10 +107,10 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return typeCol;
     }
 
-    protected DataTableColumn<SafeHtml> addNameColumn(final double width, Unit unit) {
+    protected DataTableColumn<T, SafeHtml> addNameColumn(final double width, Unit unit) {
 
-        DataTableColumn<SafeHtml> nameColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(),
-                                                                             ColumnField.NAME) {
+        DataTableColumn<T, SafeHtml> nameColumn = new DataTableColumn<T, SafeHtml>(new SafeHtmlCell(),
+                                                                                   ColumnField.NAME) {
 
             @Override
             public SafeHtml getValue(T object) {
@@ -116,15 +118,12 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
                 if (name == null)
                     return SafeHtmlUtils.EMPTY_SAFE_HTML;
 
-
                 return SafeHtmlUtils
                         .fromSafeConstant("<div style=\"width: "
                                                   + width + "px; "
-                                                  + "white-space: nowrap; overflow: hidden; text-overflow: " +
-                                                  "ellipsis;\" title=\""
-                                                  + name.replaceAll("\"", "'") + "\">"
+                                                  + "white-space: nowrap; overflow: hidden; text-overflow: "
+                                                  + "ellipsis;\" title=\"" + name.replaceAll("\"", "'") + "\">"
                                                   + name + "</div>");
-
             }
         };
 
@@ -134,9 +133,9 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return nameColumn;
     }
 
-    protected DataTableColumn<SafeHtml> addSummaryColumn() {
-        DataTableColumn<SafeHtml> summaryColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(),
-                                                                                ColumnField.SUMMARY) {
+    protected DataTableColumn<T, SafeHtml> addSummaryColumn() {
+        DataTableColumn<T, SafeHtml> summaryColumn = new DataTableColumn<T, SafeHtml>(
+                new SafeHtmlCell(), ColumnField.SUMMARY) {
 
             @Override
             public SafeHtml getValue(T object) {
@@ -146,7 +145,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
                 int size = (Window.getClientWidth() - 850);
                 if (size <= 0)
-                    size = 50;
+                    size = 200;
 
                 return SafeHtmlUtils
                         .fromSafeConstant("<div style=\"width: "
@@ -162,27 +161,8 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return summaryColumn;
     }
 
-    protected DataTableColumn<EntryInfo> addOwnerColumn() {
-        EntryOwnerCell<EntryInfo> cell = new EntryOwnerCell<EntryInfo>();
-
-        DataTableColumn<EntryInfo> ownerColumn = new DataTableColumn<EntryInfo>(cell,
-                                                                                ColumnField.OWNER) {
-
-            @Override
-            public EntryInfo getValue(T object) {
-                return object;
-            }
-        };
-
-        this.addColumn(ownerColumn, "Owner");
-        ownerColumn.setSortable(false);
-        this.setColumnWidth(ownerColumn, 150, Unit.PX);
-        return ownerColumn;
-    }
-
-    protected DataTableColumn<String> addStatusColumn() {
-        DataTableColumn<String> statusColumn = new DataTableColumn<String>(new TextCell(),
-                                                                           ColumnField.STATUS) {
+    protected DataTableColumn<T, String> addStatusColumn() {
+        DataTableColumn<T, String> statusColumn = new DataTableColumn<T, String>(new TextCell(), ColumnField.STATUS) {
 
             @Override
             public String getValue(T object) {
@@ -203,26 +183,37 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     protected void addHasAttachmentColumn() {
-        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT);
+        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT) {
+            public boolean showImage(EntryInfo info) {
+                return info.isHasAttachment();
+            }
+        };
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
     }
 
     protected void addHasSampleColumn() {
-        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE);
+        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE) {
+            public boolean showImage(EntryInfo info) {
+                return info.isHasSample();
+            }
+        };
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
     }
 
     protected void addHasSequenceColumn() {
-        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE);
+        ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE) {
+            public boolean showImage(EntryInfo info) {
+                return info.isHasSequence();
+            }
+        };
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
     }
 
-    protected DataTableColumn<String> addCreatedColumn() {
-        DataTableColumn<String> createdColumn = new DataTableColumn<String>(new TextCell(),
-                                                                            ColumnField.CREATED) {
+    protected DataTableColumn<T, String> addCreatedColumn() {
+        DataTableColumn<T, String> createdColumn = new DataTableColumn<T, String>(new TextCell(), ColumnField.CREATED) {
 
             @Override
             public String getValue(EntryInfo object) {
@@ -248,39 +239,10 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return entrySet;
     }
 
-    //
-    // inner classes
-    //
-
-    protected CheckboxCell createHeaderCell() {
-        return new CheckboxCell(true, false) {
-            @Override
-            public void onBrowserEvent(Context context, Element parent, Boolean value,
-                    NativeEvent event, ValueUpdater<Boolean> valueUpdater) {
-                String type = event.getType();
-
-                boolean enterPressed = "keydown".equals(type)
-                        && event.getKeyCode() == KeyCodes.KEY_ENTER;
-                if ("change".equals(type) || enterPressed) {
-                    InputElement input = parent.getFirstChild().cast();
-                    Boolean isChecked = input.isChecked();
-
-                    if (isChecked) {
-                        selectionModel.setAllSelected(true);
-                        EntryDataTable.this.redraw();
-                    } else {
-                        selectionModel.clear();
-                        selectionModel.setAllSelected(false);
-                    }
-                }
-            }
-        };
-    }
-
     private class SelectionColumnHeader extends Header<Boolean> {
 
         public SelectionColumnHeader() {
-            super(createHeaderCell());
+            super(new EntrySelectionColumnHeaderCell<T>(EntryDataTable.this, selectionModel, true, false));
         }
 
         @Override

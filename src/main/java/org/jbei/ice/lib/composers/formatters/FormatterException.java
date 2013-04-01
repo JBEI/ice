@@ -2,9 +2,8 @@ package org.jbei.ice.lib.composers.formatters;
 
 /**
  * Exception class for Formatters.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class FormatterException extends Exception {
     private static final long serialVersionUID = 3317923989605978686L;
@@ -18,7 +17,7 @@ public class FormatterException extends Exception {
 
     /**
      * Create a new FormatterException using the message.
-     * 
+     *
      * @param message
      */
     public FormatterException(String message) {
@@ -27,7 +26,7 @@ public class FormatterException extends Exception {
 
     /**
      * Create a new FormatterException using the message and a Throwable.
-     * 
+     *
      * @param message
      * @param cause
      */
@@ -37,7 +36,7 @@ public class FormatterException extends Exception {
 
     /**
      * Create a new FormatterException using a Throwable.
-     * 
+     *
      * @param cause
      */
     public FormatterException(Throwable cause) {

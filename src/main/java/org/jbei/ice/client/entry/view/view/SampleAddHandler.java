@@ -1,12 +1,12 @@
 package org.jbei.ice.client.entry.view.view;
 
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -42,7 +42,7 @@ public class SampleAddHandler implements ClickHandler {
             @Override
             protected void callService(AsyncCallback<SampleStorage> callback)
                     throws AuthenticationException {
-                service.createSample(AppController.sessionId, sample, currentInfo.getId(), callback);
+                service.createSample(ClientController.sessionId, sample, currentInfo.getId(), callback);
             }
 
             @Override

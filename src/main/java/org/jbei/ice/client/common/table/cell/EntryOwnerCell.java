@@ -1,24 +1,24 @@
 package org.jbei.ice.client.common.table.cell;
 
 import org.jbei.ice.client.Page;
-import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
-public class EntryOwnerCell<T extends EntryInfo> extends AbstractCell<T> {
+public abstract class EntryOwnerCell<T> extends AbstractCell<T> {
 
     @Override
     public void render(Context context, T value, SafeHtmlBuilder sb) {
-        String owner = value.getOwner();
-        String ownerEmail = value.getOwnerEmail();
-
-        if (ownerEmail == null || ownerEmail.isEmpty()) {
+        String owner = getOwnerName(value);
+        String ownerId = getOwnerId(value);
+        if (ownerId == null || ownerId.isEmpty())
             sb.appendHtmlConstant("<i>" + owner + "</i>");
-            return;
-        }
-
-        sb.appendHtmlConstant("<a href=\"#" + Page.PROFILE.getLink() + ";id="
-                + value.getOwnerEmail() + "\">" + owner + "</a>");
+        else
+            sb.appendHtmlConstant("<a href=\"#" + Page.PROFILE.getLink() + ";id="
+                                          + ownerId + ";s=profile\">" + owner + "</a>");
     }
+
+    public abstract String getOwnerName(T value);
+
+    public abstract String getOwnerId(T value);
 }

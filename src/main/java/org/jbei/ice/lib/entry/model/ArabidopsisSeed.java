@@ -10,7 +10,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.entry.EntryType;
+
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 
 /**
  * Store Arabidopsis Seed specific fields.
@@ -25,9 +29,10 @@ import org.jbei.ice.shared.dto.EntryType;
  * <li><b>Sent to ABRC</b></li>
  * </ul>
  *
- * @author Timothy Ham
+ * @author Timothy Ham, Hector Plahar
  */
 @Entity
+@Indexed
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "arabidopsis_seed")
 public class ArabidopsisSeed extends Entry {
@@ -40,7 +45,12 @@ public class ArabidopsisSeed extends Entry {
      * @author Timothy Ham
      */
     public enum Generation {
-        NULL, M0, M1, M2, T0, T1, T2, T3, T4, T5
+        NULL, UNKNOWN, M0, M1, M2, T0, T1, T2, T3, T4, T5;
+
+        @Override
+        public String toString() {
+            return name();
+        }
     }
 
     /**
@@ -53,9 +63,11 @@ public class ArabidopsisSeed extends Entry {
     }
 
     @Column(name = "homozygosity", nullable = false)
+    @Field
     private String homozygosity;
 
     @Column(name = "ecotype", nullable = false)
+    @Field
     private String ecotype;
 
     @Column(name = "harvest_date")
@@ -63,21 +75,27 @@ public class ArabidopsisSeed extends Entry {
     private Date harvestDate;
 
     @Column(name = "parents", nullable = false)
+    @Field
     private String parents;
 
     @Column(name = "generation", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Field(analyze = Analyze.NO)
     private Generation generation;
 
     @Column(name = "plant_type", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Field(analyze = Analyze.NO)
     private PlantType plantType;
 
     @Column(name = "sentToABRC")
     private Boolean sentToABRC = Boolean.FALSE;
 
     public ArabidopsisSeed() {
+        super();
         setRecordType(EntryType.ARABIDOPSIS.getName());
+        setGeneration(ArabidopsisSeed.Generation.NULL);
+        setPlantType(ArabidopsisSeed.PlantType.NULL);
     }
 
     // getters and setters

@@ -32,7 +32,7 @@ public class Feature implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "name", length = 127)
@@ -55,12 +55,14 @@ public class Feature implements IModel {
     @Column(name = "genbank_type", length = 127)
     private String genbankType;
 
+    @Column(name = "uri")
+    private String uri;
+
     public Feature() {
         super();
     }
 
-    public Feature(String name, String identification, String sequence, int autoFind,
-            String genbankType) {
+    public Feature(String name, String identification, String sequence, int autoFind, String genbankType) {
         super();
 
         this.name = name;
@@ -130,5 +132,13 @@ public class Feature implements IModel {
 
     public String getSequence() {
         return sequence;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 }

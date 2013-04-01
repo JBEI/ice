@@ -1,18 +1,20 @@
 package org.jbei.ice.client.collection.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.collection.event.FolderEvent;
-import org.jbei.ice.client.collection.event.FolderEventHandler;
-import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
-import org.jbei.ice.client.collection.event.FolderRetrieveEventHandler;
+import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.folder.FolderDetails;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -34,151 +36,129 @@ public class CollectionsModel {
         return this.eventBus;
     }
 
-    public void retrieveFolders(final FolderRetrieveEventHandler handler) {
-        service.retrieveCollections(AppController.sessionId,
-                                    new AsyncCallback<ArrayList<FolderDetails>>() {
+    public void retrieveFolders(final Callback<ArrayList<FolderDetails>> handler) {
+        new IceAsyncCallback<ArrayList<FolderDetails>>() {
 
-                                        @Override
-                                        public void onSuccess(ArrayList<FolderDetails> result) {
-                                            handler.onFolderRetrieve(new FolderRetrieveEvent(result));
-                                        }
+            @Override
+            protected void callService(AsyncCallback<ArrayList<FolderDetails>> callback)
+                    throws AuthenticationException {
+                service.retrieveCollections(ClientController.sessionId, callback);
+            }
 
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            handler.onFolderRetrieve(null);
-                                        }
-                                    });
+            @Override
+            public void onSuccess(ArrayList<FolderDetails> result) {
+                handler.onSuccess(result);
+            }
+        }.go(eventBus);
     }
 
-    public void updateFolder(final long id, final FolderDetails newFolder, final FolderEventHandler handler) {
+    public void updateFolder(final long id, final FolderDetails newFolder, final Callback<FolderDetails> callback) {
         new IceAsyncCallback<FolderDetails>() {
 
             @Override
             protected void callService(AsyncCallback<FolderDetails> folderDetailsAsyncCallback)
                     throws AuthenticationException {
-                try {
-                    service.updateFolder(AppController.sessionId, id, newFolder, folderDetailsAsyncCallback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+                service.updateFolder(ClientController.sessionId, id, newFolder, folderDetailsAsyncCallback);
             }
 
             @Override
             public void onSuccess(FolderDetails result) {
-                handler.onFolderEvent(new FolderEvent(result));
+                callback.onSuccess(result);
             }
         }.go(eventBus);
     }
 
-    public void createFolder(final String collectionName, final FolderEventHandler handler) {
+    public void createFolder(final String collectionName, final Callback<FolderDetails> callback) {
 
         new IceAsyncCallback<FolderDetails>() {
 
             @Override
             protected void callService(AsyncCallback<FolderDetails> folderDetailsAsyncCallback)
                     throws AuthenticationException {
-                try {
-                    service.createUserCollection(AppController.sessionId, collectionName, "", null,
-                                                 folderDetailsAsyncCallback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+                service.createUserCollection(ClientController.sessionId, collectionName, "", null,
+                                             folderDetailsAsyncCallback);
             }
 
             @Override
             public void onSuccess(FolderDetails result) {
-                handler.onFolderEvent(new FolderEvent(result));
+                callback.onSuccess(result);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                GWT.log("Error creating folder", t);
+                callback.onFailure();
             }
         }.go(eventBus);
     }
 
-    public void retrieveEntriesForFolder(long id, final FolderRetrieveEventHandler handler) {
-
+    public void retrieveEntriesForFolder(long id, final Callback<FolderDetails> callback, int start, int limit) {
         if (id == 0)
-            retrieveEntriesForCurrentUser(handler);
+            retrieveEntriesForCurrentUser(callback, start, limit);
         else if (id == -1)
-            retrieveAllVisibleEntries(handler);
+            retrieveAllVisibleEntries(callback, start, limit);
         else {
-            service.retrieveEntriesForFolder(AppController.sessionId, id,
-                                             new AsyncCallback<FolderDetails>() {
+            service.retrieveEntriesForFolder(
+                    ClientController.sessionId, id, ColumnField.CREATED, false, start, limit,
+                    new AsyncCallback<FolderDetails>() {
 
-                                                 @Override
-                                                 public void onSuccess(FolderDetails result) {
-                                                     handler.onFolderRetrieve(new FolderRetrieveEvent(result));
-                                                 }
+                        @Override
+                        public void onSuccess(FolderDetails result) {
+                            callback.onSuccess(result);
+                        }
 
-                                                 @Override
-                                                 public void onFailure(Throwable caught) {
-                                                     handler.onFolderRetrieve(null);
-                                                 }
-                                             });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            callback.onFailure();
+                        }
+                    });
         }
     }
 
-    public void retrieveAllVisibleEntries(final FolderRetrieveEventHandler handler) {
-        service.retrieveAllVisibleEntryIDs(AppController.sessionId,
-                                           new AsyncCallback<FolderDetails>() {
+    public void retrieveAllVisibleEntries(final Callback<FolderDetails> callback, int start, int limit) {
+        FolderDetails details = new FolderDetails(-1, "Available Entries", true);
+        service.retrieveAllVisibleEntrys(ClientController.sessionId, details, ColumnField.CREATED, false, start,
+                                         limit,
+                                         new AsyncCallback<FolderDetails>() {
 
-                                               @Override
-                                               public void onSuccess(FolderDetails result) {
-                                                   handler.onFolderRetrieve(new FolderRetrieveEvent(result));
-                                               }
+                                             @Override
+                                             public void onSuccess(FolderDetails result) {
+                                                 callback.onSuccess(result);
+                                             }
 
-                                               @Override
-                                               public void onFailure(Throwable caught) {
-                                                   handler.onFolderRetrieve(null);
-                                               }
-                                           });
+                                             @Override
+                                             public void onFailure(Throwable caught) {
+                                                 callback.onFailure();
+                                             }
+                                         });
     }
 
-    public void retrieveEntriesForCurrentUser(final FolderRetrieveEventHandler handler) {
-        service.retrieveUserEntries(AppController.sessionId, AppController.accountInfo.getEmail(),
+    public void retrieveEntriesForCurrentUser(final Callback<FolderDetails> callback, int start, int limit) {
+        String id = Long.toString(ClientController.account.getId());
+        service.retrieveUserEntries(ClientController.sessionId, id, ColumnField.CREATED, false, start, limit,
                                     new AsyncCallback<FolderDetails>() {
 
                                         @Override
                                         public void onSuccess(FolderDetails result) {
-                                            handler.onFolderRetrieve(new FolderRetrieveEvent(result));
+                                            callback.onSuccess(result);
                                         }
 
                                         @Override
                                         public void onFailure(Throwable caught) {
-                                            handler.onFolderRetrieve(null);
+                                            callback.onFailure();
                                         }
                                     });
     }
 
     public void addEntriesToFolder(final ArrayList<Long> destinationFolderIds, final ArrayList<Long> ids,
-            final FolderRetrieveEventHandler handler) {
-
-        new IceAsyncCallback<ArrayList<FolderDetails>>() {
-
-            @Override
-            protected void callService(AsyncCallback<ArrayList<FolderDetails>> folderDetailsAsyncCallback)
-                    throws AuthenticationException {
-                try {
-                    service.addEntriesToCollection(AppController.sessionId, destinationFolderIds, ids,
-                                                   folderDetailsAsyncCallback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
-            }
-
-            @Override
-            public void onSuccess(ArrayList<FolderDetails> result) {
-                handler.onFolderRetrieve(new FolderRetrieveEvent(result));
-            }
-        }.go(eventBus);
-    }
-
-    public void moveEntriesToFolder(final long source, final ArrayList<Long> destinationFolderIds,
-            final ArrayList<Long> ids, final FolderRetrieveEventHandler handler) {
+            final Callback<ArrayList<FolderDetails>> resultCallback) {
         new IceAsyncCallback<ArrayList<FolderDetails>>() {
 
             @Override
             protected void callService(AsyncCallback<ArrayList<FolderDetails>> callback)
                     throws AuthenticationException {
                 try {
-                    service.moveToUserCollection(AppController.sessionId, source, destinationFolderIds, ids, callback);
+                    service.addEntriesToCollection(ClientController.sessionId, destinationFolderIds, ids, callback);
                 } catch (AuthenticationException e) {
                     History.newItem(Page.LOGIN.getLink());
                 }
@@ -186,29 +166,105 @@ public class CollectionsModel {
 
             @Override
             public void onSuccess(ArrayList<FolderDetails> result) {
-                handler.onFolderRetrieve(new FolderRetrieveEvent(result));
+                resultCallback.onSuccess(result);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                resultCallback.onFailure();
+            }
+        }.go(eventBus);
+    }
+
+    public void moveEntriesToFolder(final long source, final ArrayList<Long> destinationFolderIds,
+            final ArrayList<Long> ids, final Callback<ArrayList<FolderDetails>> callback) {
+        new IceAsyncCallback<ArrayList<FolderDetails>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<FolderDetails>> callback)
+                    throws AuthenticationException {
+                service.moveToUserCollection(ClientController.sessionId, source, destinationFolderIds, ids, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<FolderDetails> result) {
+                callback.onSuccess(result);
             }
         }.go(eventBus);
     }
 
     public void removeEntriesFromFolder(final long source, final ArrayList<Long> ids,
-            final FolderRetrieveEventHandler handler) {
-
+            final Callback<FolderDetails> callback) {
         new IceAsyncCallback<FolderDetails>() {
 
             @Override
             protected void callService(AsyncCallback<FolderDetails> callback) throws AuthenticationException {
-                try {
-                    service.removeFromUserCollection(AppController.sessionId, source, ids, callback);
-                } catch (AuthenticationException e) {
-                    History.newItem(Page.LOGIN.getLink());
-                }
+                service.removeFromUserCollection(ClientController.sessionId, source, ids, callback);
             }
 
             @Override
             public void onSuccess(FolderDetails result) {
-                handler.onFolderRetrieve(new FolderRetrieveEvent(result));
+                callback.onSuccess(result);
             }
+        }.go(eventBus);
+    }
+
+    public void retrieveWebOfRegistrySettings(final Callback<HashMap<String, String>> callback) {
+        new IceAsyncCallback<HashMap<String, String>>() {
+
+            @Override
+            protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
+                service.retrieveWebOfRegistrySettings(ClientController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(HashMap<String, String> result) {
+                callback.onSuccess(result);
+            }
+        }.go(eventBus);
+    }
+
+    public void retrieveFolderPermissions(final ArrayList<Long> userFolderIds,
+            final Callback<ArrayList<PermissionInfo>> callback) {
+        if (userFolderIds == null || userFolderIds.isEmpty())
+            return;
+
+        new IceAsyncCallback<ArrayList<PermissionInfo>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<PermissionInfo>> callback)
+                    throws AuthenticationException {
+                service.retrieveFolderPermissions(ClientController.sessionId, userFolderIds, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<PermissionInfo> result) {
+                callback.onSuccess(result);
+            }
+        }.go(eventBus);
+    }
+
+    public void requestTransfer(final ArrayList<Long> ids, ArrayList<OptionSelect> selectedTransfer) {
+        if (selectedTransfer == null || ids == null || ids.isEmpty() || selectedTransfer.isEmpty())
+            return;
+
+        final ArrayList<String> sites = new ArrayList<String>();
+        for (OptionSelect select : selectedTransfer) {
+            sites.add(select.getName());
+        }
+
+        new IceAsyncCallback<Void>() {
+
+            @Override
+            protected void callService(AsyncCallback<Void> callback) throws AuthenticationException {
+                service.requestEntryTransfer(ClientController.sessionId, ids, sites, callback);
+            }
+
+            @Override
+            public void onSuccess(Void result) {}
+
+            @Override
+            public void onNullResult() {}
         }.go(eventBus);
     }
 }

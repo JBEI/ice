@@ -2,9 +2,8 @@ package org.jbei.ice.lib.utils;
 
 /**
  * Exception class for Utilities.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 public class UtilityException extends Exception {
 

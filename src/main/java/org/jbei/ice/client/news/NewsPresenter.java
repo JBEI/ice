@@ -3,7 +3,7 @@ package org.jbei.ice.client.news;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -29,14 +29,10 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class NewsPresenter extends AbstractPresenter {
 
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     private final INewsView display;
 
     public NewsPresenter(RegistryServiceAsync service, HandlerManager eventBus, INewsView news) {
-
-        this.service = service;
-        this.eventBus = eventBus;
+        super(service, eventBus);
         this.display = news;
         bind();
 
@@ -59,14 +55,14 @@ public class NewsPresenter extends AbstractPresenter {
     private void bind() {
         display.setAddNewsVisibility(false);
 
-        if (!AppController.accountInfo.isModerator()) {
+        if (!ClientController.account.isAdmin()) {
             display.setAddNewsButtonVisibilty(false);
         }
 
         new IceAsyncCallback<ArrayList<NewsItem>>() {
             @Override
             protected void callService(AsyncCallback<ArrayList<NewsItem>> callback) throws AuthenticationException {
-                service.retrieveNewsItems(AppController.sessionId, callback);
+                service.retrieveNewsItems(ClientController.sessionId, callback);
             }
 
             @Override
@@ -107,14 +103,14 @@ public class NewsPresenter extends AbstractPresenter {
 
     private void save(final NewsItem item) {
 
-        if (!AppController.accountInfo.isModerator())
+        if (!ClientController.account.isAdmin())
             return;
 
         new IceAsyncCallback<NewsItem>() {
 
             @Override
             protected void callService(AsyncCallback<NewsItem> callback) throws AuthenticationException {
-                service.createNewsItem(AppController.sessionId, item, callback);
+                service.createNewsItem(ClientController.sessionId, item, callback);
             }
 
             @Override

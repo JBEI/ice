@@ -1,25 +1,20 @@
 .panel {
-	width: 300px; 
-	padding: 5px; 
-	background-color: #f7e08f; 
-	font-size: 0.80em; 
-	border-radius: 3px; 
-	-webkit-box-shadow: 1px 1px 2px #bbb; 
-    -moz-box-shadow: 1px 1px 2px #bbb;
+    width: 300px;
+    padding: 6px;
+    border: 1px solid #f7e08f;
+    background-color: #F7EDC4;
+    font-size: 0.80em;
+    border-radius: 6px;
     text-align: left;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .error {
-	color: #ee5642; 
-	display: inline;
+    color: #ee5642;
+    display: inline;
 }
 
 .success {
-	color: #555;
-	display: inline;
+    color: #555;
+    display: inline;
 }
-
-.img {
-	vertical-align: -25%;
-}
-

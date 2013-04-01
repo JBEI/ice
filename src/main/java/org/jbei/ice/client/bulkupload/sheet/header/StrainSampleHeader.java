@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.Header;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 /**
  * @author Hector Plahar
@@ -12,7 +12,7 @@ import org.jbei.ice.shared.dto.EntryInfo;
 public class StrainSampleHeader extends SampleHeaders {
 
     public StrainSampleHeader(ArrayList<String> locationList) {
-        super(locationList);
+        super(locationList, null);
     }
 
     @Override

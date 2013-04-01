@@ -21,13 +21,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
 
-    private Timer timeoutTimer = null;
-    static final int TIMEOUT = 30; // 30 second timeout
-    private boolean abortFlag = false; // indicator when the computation should quit
+    private Timer timeoutTimer;
+    static final int TIMEOUT = 60;
+    private boolean abortFlag;
+    private HandlerManager eventBus;
 
     @Override
     public void onFailure(Throwable caught) {
-//        Window.alert("Error connecting to the server");
+        GWT.log(caught.getMessage());
     }
 
     public void go(HandlerManager eventBus) {
@@ -36,17 +37,21 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
             return;
         }
 
-        int retryCount = 3;
+        this.eventBus = eventBus;
+        int retryCount = 1;
         showBusyIndicator();
         execute(retryCount, eventBus);
     }
 
     private void execute(final int retryCount, final HandlerManager eventBus) {
-
         // Create a timer to abort if the RPC takes too long
+        if (timeoutTimer != null)
+            timeoutTimer.cancel();
+
         timeoutTimer = new Timer() {
             public void run() {
-                eventBus.fireEvent(new FeedbackEvent(true, "Error executing server call!"));
+                eventBus.fireEvent(new FeedbackEvent(true, "Timeout executing server call!"));
+                GWT.log("Timeout executing server call");
                 timeoutTimer = null;
                 abortFlag = true;
                 hideBusyIndicator();
@@ -68,7 +73,8 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
                     if (retryCount <= 0) {
                         hideBusyIndicator();
                         cancelTimer();
-                        IceAsyncCallback.this.onFailure(caught);
+                        eventBus.fireEvent(new FeedbackEvent(true, "Server call failure detected"));
+                        IceAsyncCallback.this.onFailure(caught);  // implementor is notified
                     } else {
                         execute(retryCount - 1, eventBus);
                     }
@@ -83,16 +89,22 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
                         return;
                     }
                     if (result == null) {
-                        eventBus.fireEvent(new FeedbackEvent(true, "Server returned invalid results!"));
+                        onNullResult();
                         return;
                     }
                     IceAsyncCallback.this.onSuccess(result);
                 }
             });
         } catch (AuthenticationException ae) {
-            GWT.log(ae.getMessage());
+            GWT.log(ae.getMessage(), ae);
             History.newItem(Page.LOGIN.getLink());
         }
+    }
+
+    // server returned successfully but result was null
+    public void onNullResult() {
+        if (eventBus != null)
+            eventBus.fireEvent(new FeedbackEvent(true, "Server returned invalid results!"));
     }
 
     protected abstract void callService(AsyncCallback<T> callback) throws AuthenticationException;

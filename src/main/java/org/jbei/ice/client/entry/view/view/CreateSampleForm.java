@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -97,7 +97,7 @@ public class CreateSampleForm extends Composite {
         boolean isValid = true;
 
         if (sampleLabel.getText().trim().isEmpty()) {
-            sampleLabel.setStyleName("entry_input_error");
+            sampleLabel.setStyleName("input_box_error");
             isValid = false;
         } else
             sampleLabel.setStyleName("input_box");
@@ -107,7 +107,7 @@ public class CreateSampleForm extends Composite {
             scheme.setStyleName("input_box");
 
             if (schemeText.trim().isEmpty()) {
-                scheme.setStyleName("entry_input_error");
+                scheme.setStyleName("input_box_error");
                 isValid = false;
             }
         }
@@ -234,7 +234,7 @@ public class CreateSampleForm extends Composite {
 
         depositor = new TextBox();
         depositor.setStyleName("input_box");
-        depositor.setText(AppController.accountInfo.getEmail());
+        depositor.setText(ClientController.account.getEmail());
         depositor.setEnabled(false);
         String html = builder.toSafeHtml().asString() + "<span id=\"sample_depositor\"></span>";
         HTMLPanel panel = new HTMLPanel(html);

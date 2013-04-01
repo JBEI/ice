@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload.model;
 
 import org.jbei.ice.client.bulkupload.sheet.Header;
-import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
 

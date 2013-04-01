@@ -1,53 +1,47 @@
 package org.jbei.ice.client.entry.view;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.collection.add.EntryAddPresenter;
+import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
+import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter.DeleteEntryHandler;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
-import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
-import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
 import org.jbei.ice.client.entry.view.view.EntryView;
 import org.jbei.ice.client.entry.view.view.IEntryView;
-import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
 import org.jbei.ice.client.entry.view.view.PermissionsPresenter;
 import org.jbei.ice.client.entry.view.view.SequenceFileUploadHandler;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.dto.AttachmentInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
-import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import gwtupload.client.IUploadStatus.Status;
-import gwtupload.client.IUploader;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-import gwtupload.client.IUploader.UploadedInfo;
 
 /**
  * Presenter for entry view
@@ -56,45 +50,30 @@ import gwtupload.client.IUploader.UploadedInfo;
  */
 public class EntryPresenter extends AbstractPresenter {
 
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     private final IEntryView display;
+    private final EntryModel model;
     private EntryInfo currentInfo;
     private EntryContext currentContext;
-    private SequenceViewPanelPresenter sequencePresenter;
+    private EntryAddPresenter entryAddPresenter;
+    private IEntryFormSubmit formSubmit;
 
-    private final EntryModel model;
-
-    public EntryPresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
-            EntryContext context) {
-        this.service = service;
-        this.eventBus = eventBus;
-        this.display = new EntryView();
+    public EntryPresenter(final RegistryServiceAsync service, CollectionsPresenter collectionsPresenter,
+            final HandlerManager eventBus, EntryContext context) {
+        super(service, eventBus);
+        this.display = new EntryView(retrieveEntryTraceSequenceDetailsDelegate());
         this.currentContext = context;
-
         this.model = new EntryModel(service, this.display, eventBus);
-
-        addEntryViewHandler();
-        display.getDetailMenu().addSelectionChangeHandler(
-                new MenuSelectionHandler(display.getDetailMenu()));
+        display.getMenu().setSelectionHandler(new MenuSelectionHandler());
+        entryAddPresenter = new EntryAddPresenter(collectionsPresenter, EntryPresenter.this, service, eventBus);
 
         setContextNavHandlers();
         showCurrentEntryView();
 
-        // trace sequence upload handler
-        display.setTraceSequenceStartUploader(new TraceSequenceStartUploaderHandler());
-
-        // SAMPLE
         // add sample button handler
         display.addSampleButtonHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (currentInfo == null) {
-                    Window.alert("Could not retrieve current information for entry");
-                    return; // TODO : show some error msg or wait till it is not null
-                }
-
                 model.retrieveStorageSchemes(currentInfo);
             }
         });
@@ -104,22 +83,13 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                IEntryFormUpdateSubmit formUpdate = display.showUpdateForm(currentInfo);
+                IEntryFormSubmit formUpdate = display.showUpdateForm(currentInfo);
                 if (formUpdate == null)
                     return;
 
                 formUpdate.addCancelHandler(new UpdateFormCancelHandler());
                 formUpdate.addSubmitHandler(new UpdateFormSubmitHandler(formUpdate));
-            }
-        });
-
-        // SEQUENCE
-        display.addSequenceAddButtonHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                boolean visible = display.getSequenceFormVisibility();
-                display.setSequenceFormVisibility(!visible);
+                formUpdate.setPreferences(entryAddPresenter.getPreferences());
             }
         });
 
@@ -127,9 +97,6 @@ public class EntryPresenter extends AbstractPresenter {
         final PermissionsPresenter pPresenter = display.getPermissionsWidget();
         pPresenter.setReadAddSelectionHandler(new PermissionReadBoxHandler(false));
         pPresenter.setWriteAddSelectionHandler(new PermissionReadBoxHandler(true));
-
-        // sequence upload handler
-        display.setSequenceFinishUploadHandler(new TraceSequenceUploaderFinishHandler());
 
         // attachment delete handler
         display.setAttachmentDeleteHandler(new HasAttachmentDeleteHandler() {
@@ -140,7 +107,7 @@ public class EntryPresenter extends AbstractPresenter {
 
                     @Override
                     protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        service.deleteEntryAttachment(AppController.sessionId, item.getFileId(), callback);
+                        service.deleteEntryAttachment(ClientController.sessionId, item.getFileId(), callback);
                     }
 
                     @Override
@@ -153,66 +120,36 @@ public class EntryPresenter extends AbstractPresenter {
                 }.go(eventBus);
             }
         });
-    }
 
-    //    public void setDeleteEntryHandler(new  DeleteEntryHandler() ) {
-    //     // delete handler
-    //        display.addDeleteEntryHandler(new ClickHandler() {
-    //
-    //            @Override
-    //            public void onClick(ClickEvent event) {
-    //                if (!Window.confirm("Confirm deletion of entry " + currentInfo.getPartId()))
-    //                    return;
-    //
-    //                deleteCurrentEntry();
-    //            }
-    //        });
-    //       
-    //    }
-
-    /**
-     * retrieves the existing permission for the current entry
-     */
-    private void retrievePermissionData() {
-        new IceAsyncCallback<ArrayList<PermissionInfo>>() {
-
-            @Override
-            protected void callService(AsyncCallback<ArrayList<PermissionInfo>> callback)
-                    throws AuthenticationException {
-                service.retrievePermissionData(AppController.sessionId, currentContext.getCurrent(), callback);
-            }
-
-            @Override
-            public void onSuccess(ArrayList<PermissionInfo> result) {
-                display.getPermissionsWidget().setPermissionData(result, service, eventBus,
-                                                                 currentContext.getCurrent());
-            }
-        }.go(eventBus);
-    }
-
-    private void showCurrentEntryView() {
-        setContextNavData();
-        retrieveEntryDetails();
+        DeleteSequenceHandler deleteHandler = new DeleteSequenceHandler(service, eventBus);
+        display.setDeleteSequenceHandler(deleteHandler);
+        display.setSequenceDeleteHandler(new DeleteSequenceTraceHandler());
     }
 
     public void setCurrentContext(EntryContext context) {
         this.currentContext = context;
-        showCurrentEntryView();
+        // todo : clear all data that is currently being displayed
     }
 
-    private void addEntryViewHandler() {
-        eventBus.addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
+    public void showCurrentEntryView() {
+        setContextNavData();
+        retrieveEntryDetails();
+    }
 
-            @Override
-            public void onEntryView(EntryViewEvent event) {
-                if (event != null && event.getContext() != null)
-                    currentContext = event.getContext();
-                showCurrentEntryView();
-            }
-        });
+    public void showCreateEntry(EntryAddType type) {
+        IEntryFormSubmit newForm = entryAddPresenter.getEntryForm(type, new NewFormCancelHandler());
+        this.formSubmit = newForm;
+        display.showNewForm(newForm);
+        display.setEntryHeader(newForm.getHeaderDisplay(), "", ClientController.account.getFullName(),
+                               ClientController.account.getEmail(), (new Date(System.currentTimeMillis())));
+        display.getPermissionsWidget().setCanEdit(true);
+        currentInfo = newForm.getEntry();
     }
 
     protected void setContextNavData() {
+        if (currentContext == null)
+            return;
+
         IHasNavigableData nav = this.currentContext.getNav();
         boolean show = (nav != null);
 
@@ -229,37 +166,36 @@ public class EntryPresenter extends AbstractPresenter {
             display.enablePrev(false);
         }
 
-        EntryInfo info = nav.getCachedData(this.currentContext.getCurrent());
-        // TODO : info == null ?
+        EntryInfo info = nav.getCachedData(this.currentContext.getId(), this.currentContext.getRecordId());
         int idx = nav.indexOfCached(info);
 
         display.enablePrev(!(idx == 0));
         boolean atEnd = ((idx + 1) == size);
         display.enableNext(!atEnd);
 
-        String text = (idx + 1) + " of " + size;
+        String text = formatNumber((idx + 1)) + " of " + formatNumber(size);
         display.setNavText(text);
     }
 
-    private void setContextNavHandlers() {
+    private String formatNumber(long l) {
+        if (l < 0)
+            return "";
 
-        // menu 
-        ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
-        menuItems.add(new MenuItem(Menu.GENERAL, -1));
-        menuItems.add(new MenuItem(Menu.SEQ_ANALYSIS, 0));
-        menuItems.add(new MenuItem(Menu.SAMPLES, 0));
-        display.setMenuItems(menuItems);
-        display.getDetailMenu().setSelection(Menu.GENERAL);
+        NumberFormat format = NumberFormat.getFormat("##,###");
+        return format.format(l);
+    }
+
+    private void setContextNavHandlers() {
+        if (currentContext == null)
+            return;
 
         display.setNextHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-
                 IHasNavigableData nav = currentContext.getNav();
-                EntryInfo currentInfo = nav.getCachedData(currentContext
-                                                                  .getCurrent()); // TODO : how is this current info
-                // different from EntryPresenter.this.currentInfo
+                EntryInfo currentInfo = nav.getCachedData(EntryPresenter.this.currentInfo.getId(),
+                                                          EntryPresenter.this.currentInfo.getRecordId());
                 int idx = nav.indexOfCached(currentInfo);
 
                 if (idx == -1) {
@@ -273,21 +209,16 @@ public class EntryPresenter extends AbstractPresenter {
                 if (next + 1 == size)
                     display.enableNext(false);
 
-                EntryInfo nextInfo = nav.getNext(
-                        currentInfo); // TODO : nextInfo can be null. look at the implementation of getNext for more
-                // info
-
-                // TODO :this needs to be folded into a single "Retrieve"
+                EntryInfo nextInfo = nav.getNext(currentInfo);
                 long currentId = nextInfo.getId();
                 History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId, false);
-                EntryPresenter.this.currentInfo = nextInfo;
-                currentContext.setCurrent(currentId);
+//                EntryPresenter.this.currentInfo = nextInfo;
+                currentContext.setId(currentId);
+                currentContext.setRecordId(nextInfo.getRecordId());
                 retrieveEntryDetails();
                 display.enablePrev(true);
-                String text = (next + 1) + " of " + size;
+                String text = formatNumber((next + 1)) + " of " + formatNumber(size);
                 display.setNavText(text);
-
-
             }
         });
 
@@ -298,7 +229,7 @@ public class EntryPresenter extends AbstractPresenter {
             public void onClick(ClickEvent event) {
 
                 IHasNavigableData nav = currentContext.getNav();
-                EntryInfo currentInfo = nav.getCachedData(currentContext.getCurrent());
+                EntryInfo currentInfo = nav.getCachedData(currentContext.getId(), currentContext.getRecordId());
                 int idx = nav.indexOfCached(currentInfo);
 
                 if (idx == -1) {
@@ -316,16 +247,16 @@ public class EntryPresenter extends AbstractPresenter {
 
                 long currentId = prevInfo.getId();
                 History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId, false);
-                currentContext.setCurrent(currentId);
+                currentContext.setId(currentId);
+                currentContext.setRecordId(prevInfo.getRecordId());
                 retrieveEntryDetails();
                 display.enableNext(true);
-                String text = (prev + 1) + " of " + nav.getSize();
+                String text = formatNumber((prev + 1)) + " of " + formatNumber(nav.getSize());
                 display.setNavText(text);
             }
         });
 
         // add go back handler
-        // TODO : this can be improved to show the current position of the viewed entry in the list
         display.setGoBackHandler(new ClickHandler() {
 
             @Override
@@ -335,142 +266,88 @@ public class EntryPresenter extends AbstractPresenter {
         });
     }
 
-    private void retrieveEntryTraceSequenceDetails() {
-
-        final long entryId = currentContext.getCurrent();
-        new IceAsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
-
+    private Delegate<Long> retrieveEntryTraceSequenceDetailsDelegate() {
+        return new Delegate<Long>() {
             @Override
-            protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback)
-                    throws AuthenticationException {
-                service.retrieveEntryTraceSequences(AppController.sessionId, entryId, callback);
-            }
+            public void execute(final Long aLong) {
+                if (currentInfo.getId() == 0) {
+//                    display.setSequenceData(result, currentInfo);
+//                    display.getMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
+                    // TODO :
+                    return;
+                }
 
-            @Override
-            public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
-                display.setSequenceData(result, currentInfo);
-                display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
+                //To change body of implemented methods use File | Settings | File Templates.
+                new IceAsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback)
+                            throws AuthenticationException {
+                        service.retrieveEntryTraceSequences(ClientController.sessionId, aLong.longValue(), callback);
+                    }
+
+                    @Override
+                    public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
+                        display.setSequenceData(result, currentInfo);
+                        display.getMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
+                    }
+                }.go(eventBus);
             }
-        }.go(eventBus);
+        };
     }
 
     private void retrieveEntryDetails() {
+        if (currentContext == null)
+            return;
 
-        display.showLoadingIndicator();
+        display.showLoadingIndicator(false);
 
-        final long entryId = currentContext.getCurrent();
-        service.retrieveEntryDetails(AppController.sessionId, entryId,
-                                     new AsyncCallback<EntryInfo>() {
+        new IceAsyncCallback<EntryInfo>() {
 
-                                         @Override
-                                         public void onFailure(Throwable caught) {
-                                             FeedbackEvent event = new FeedbackEvent(true,
-                                                                                     "There was an error retrieving " +
-                                                                                             "the entry. Please try " +
-                                                                                             "again later.");
-                                             eventBus.fireEvent(event);
-                                             // TODO : cancel loading indicator show
-                                             // display.showLoadingIndicator(false);
-                                         }
+            @Override
+            protected void callService(AsyncCallback<EntryInfo> callback) throws AuthenticationException {
+                service.retrieveEntryDetails(ClientController.sessionId, currentContext.getId(),
+                                             currentContext.getRecordId(), currentContext.getPartnerUrl(), callback);
+            }
 
-                                         @Override
-                                         public void onSuccess(EntryInfo result) {
+            @Override
+            public void onSuccess(EntryInfo result) {
+                if (result == null) {
+                    FeedbackEvent event = new FeedbackEvent(true, "Error retrieving entry with id \""
+                            + currentContext.getId() + "\"");
+                    eventBus.fireEvent(event);
+                    return;
+                }
 
-                                             if (result == null) {
-                                                 FeedbackEvent event = new FeedbackEvent(true,
-                                                                                         "Could not retrieve entry " +
-                                                                                                 "with id \"" +
-                                                                                                 entryId + "\"");
-                                                 eventBus.fireEvent(event);
-                                                 return;
-                                             }
+                currentInfo = result;
+                currentContext.setId(currentInfo.getId());
+                currentContext.setRecordId(currentInfo.getRecordId());
 
-                                             currentInfo = result;
-                                             currentContext.setCurrent(currentInfo.getId());
-                                             String name = result.getType().getDisplay().toUpperCase() + ": "
-                                                     + result.getName();
-                                             display.setEntryName(name);
+                // permission (order is important here)
+                SequenceViewPanelPresenter sequencePresenter = display.setEntryInfoForView(currentInfo);
+                display.getPermissionsWidget().setPermissionData(result.getPermissions(), new DeletePermission());
+                UploadPasteSequenceHandler handler = new UploadPasteSequenceHandler(service,
+                                                                                    eventBus, sequencePresenter);
+                sequencePresenter.addSequencePasteHandler(handler);
 
-                                             // can user edit ?
-                                             boolean canEdit = (AppController.accountInfo.isModerator() || result
-                                                     .isCanEdit());
-                                             display.getPermissionsWidget().
-                                                     setCanEdit(result.getVisibility() == Visibility.OK);
-                                             if (canEdit) {
-                                                 display.setSequenceDeleteHandler(new DeleteSequenceTraceHandler());
-                                             }
+                SequenceFileUploadHandler uploadHandler = new SequenceFileUploadHandler(sequencePresenter);
+                sequencePresenter.addSequenceFileUploadHandler(uploadHandler);
+                Menu menu = display.getMenu().getCurrentSelection();
+                handleMenuSelection(menu);
+            }
 
-                                             // visibility
-                                             display.getVisibilityWidget().setVisibility(result.getVisibility());
+            @Override
+            public void onFailure(Throwable caught) {
+                FeedbackEvent event = new FeedbackEvent(true, "There was an error retrieving the entry");
+                eventBus.fireEvent(event);
+                display.showLoadingIndicator(true);
+            }
 
-
-                                             // attachments
-                                             ArrayList<AttachmentInfo> attachments = result.getAttachments();
-                                             ArrayList<AttachmentItem> items = new ArrayList<AttachmentItem>();
-                                             if (attachments != null) {
-                                                 for (AttachmentInfo info : attachments) {
-                                                     AttachmentItem item = new AttachmentItem(info.getId(), info
-                                                             .getFilename(), info.getDescription());
-                                                     item.setFileId(info.getFileId());
-                                                     items.add(item);
-                                                 }
-                                             }
-
-                                             display.setAttachments(items, currentInfo.getId());
-
-                                             // menu views
-                                             display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS,
-                                                                                     result.getSequenceAnalysis()
-                                                                                           .size());
-                                             display.getDetailMenu().updateMenuCount(Menu.SAMPLES,
-                                                                                     result.getSampleStorage().size());
-
-                                             display.setSampleData(result.getSampleStorage());
-                                             display.setSequenceData(result.getSequenceAnalysis(), result);
-
-                                             MenuItem selection = display.getDetailMenu().getCurrentSelection();
-                                             Menu menu;
-                                             if (selection == null) {
-                                                 menu = Menu.GENERAL;
-                                             } else {
-                                                 menu = selection.getMenu();
-                                             }
-
-                                             switch (menu) {
-
-                                                 case GENERAL:
-                                                     sequencePresenter = display.showEntryDetailView(
-                                                             currentInfo,
-                                                             canEdit,
-                                                             new DeleteSequenceHandler(
-                                                                     service,
-                                                                     eventBus,
-                                                                     entryId));
-                                                     sequencePresenter.addSequencePasteHandler(
-                                                             new UploadPasteSequenceHandler(
-                                                                     service, sequencePresenter));
-                                                     sequencePresenter
-                                                             .addSequenceFileUploadHandler(
-                                                                     new SequenceFileUploadHandler(
-                                                                             sequencePresenter));
-                                                     break;
-
-
-                                                 case SEQ_ANALYSIS:
-                                                     boolean showFlash = (selection != null && selection
-                                                             .getCount() > 0);
-                                                     display.showSequenceView(currentInfo, showFlash);
-                                                     break;
-
-                                                 case SAMPLES:
-                                                     display.showSampleView();
-                                                     break;
-                                             }
-
-                                             // retrieve associated permission
-                                             retrievePermissionData();
-                                         }
-                                     });
+            @Override
+            public void onNullResult() {
+                display.showLoadingIndicator(true);
+            }
+        }.go(eventBus);
     }
 
     @Override
@@ -479,8 +356,8 @@ public class EntryPresenter extends AbstractPresenter {
         container.add(this.display.asWidget());
     }
 
-    public Widget getView() {
-        return this.display.asWidget();
+    public IEntryView getView() {
+        return this.display;
     }
 
     public EntryInfo getCurrentInfo() {
@@ -500,10 +377,32 @@ public class EntryPresenter extends AbstractPresenter {
         });
     }
 
+    private void handleMenuSelection(Menu menu) {
+        if (menu == null)
+            menu = Menu.GENERAL;
+
+        switch (menu) {
+            case GENERAL:
+                if (currentInfo.getId() == 0 && (currentContext == null || currentContext.getPartnerUrl() == null)) {
+                    display.showNewForm(formSubmit);
+                    return;
+                }
+                display.showEntryDetailView();
+                break;
+
+            case SEQ_ANALYSIS:
+                display.showSequenceView(currentInfo);
+                break;
+
+            case SAMPLES:
+                display.showSampleView();
+                break;
+        }
+    }
+
     //
     // inner classes
     //
-
     private class PermissionReadBoxHandler extends ReadBoxSelectionHandler {
 
         private final boolean isWrite;
@@ -513,36 +412,64 @@ public class EntryPresenter extends AbstractPresenter {
         }
 
         @Override
-        void updatePermission(final PermissionInfo info, PermissionType permissionType) {
-
-            final long id = currentInfo.getId();
+        public void updatePermission(final PermissionInfo info) {
             if (isWrite) {
-                switch (info.getType()) {
-                    case READ_ACCOUNT:
-                        info.setType(PermissionType.WRITE_ACCOUNT);
-                        break;
-                    case READ_GROUP:
-                        info.setType(PermissionType.WRITE_GROUP);
-                        break;
+                info.setType(PermissionInfo.Type.WRITE_ENTRY);
+            } else
+                info.setType(PermissionInfo.Type.READ_ENTRY);
+
+            if (currentInfo.getId() == 0) {
+                currentInfo.getPermissions().add(info);
+                displayPermission(info);
+                return;
+            }
+
+            info.setTypeId(currentInfo.getId());
+            new IceAsyncCallback<Boolean>() {
+
+                @Override
+                protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                    service.addPermission(ClientController.sessionId, info, callback);
                 }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (result.booleanValue())
+                        displayPermission(info);
+                }
+            }.go(eventBus);
+        }
+
+        protected void displayPermission(PermissionInfo info) {
+            DeletePermission deletePermission = new DeletePermission();
+            if (isWrite) {
+                display.getPermissionsWidget().addWriteItem(info, deletePermission);
+            } else {
+                display.getPermissionsWidget().addReadItem(info, deletePermission);
+            }
+        }
+    }
+
+    private class DeletePermission implements Delegate<PermissionInfo> {
+
+        @Override
+        public void execute(final PermissionInfo info) {
+            if (info.getTypeId() == 0) {
+                currentInfo.getPermissions().remove(info);
+                display.getPermissionsWidget().removeItem(info);
+                return;
             }
 
             new IceAsyncCallback<Boolean>() {
 
                 @Override
                 protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                    service.addPermission(AppController.sessionId, id, info, callback);
+                    service.removePermission(ClientController.sessionId, info, callback);
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
-                    if (isWrite) {
-                        display.getPermissionsWidget().addWriteItem(info, service, eventBus, id,
-                                                                    currentInfo.isCanEdit());
-                    } else {
-                        display.getPermissionsWidget().addReadItem(info, service, eventBus, id,
-                                                                   currentInfo.isCanEdit());
-                    }
+                    display.getPermissionsWidget().removeItem(info);
                 }
             }.go(eventBus);
         }
@@ -551,43 +478,26 @@ public class EntryPresenter extends AbstractPresenter {
     /*Handler for the entry detail menu*/
     public class MenuSelectionHandler implements SelectionChangeEvent.Handler {
 
-        private final EntryDetailViewMenu menu;
-        private MenuItem selection;
-
-        public MenuSelectionHandler(EntryDetailViewMenu menu) {
-            this.menu = menu;
-        }
+        private Menu currentSelection;
 
         @Override
         public void onSelectionChange(SelectionChangeEvent event) {
-            if (selection == menu.getCurrentSelection() || menu.getCurrentSelection() == null)
+            if (currentSelection == display.getMenu().getCurrentSelection()
+                    || display.getMenu().getCurrentSelection() == null) {
                 return;
-
-            selection = menu.getCurrentSelection();
-            menu.setSelection(selection.getMenu());
-
-            switch (selection.getMenu()) {
-
-                case GENERAL:
-                    boolean canEdit = (AppController.accountInfo.isModerator() || currentInfo.isCanEdit());
-                    sequencePresenter = display.showEntryDetailView(currentInfo, canEdit,
-                                                                    new DeleteSequenceHandler(service, eventBus,
-                                                                                              currentInfo.getId()));
-                    sequencePresenter.addSequencePasteHandler(new UploadPasteSequenceHandler(service,
-                                                                                             sequencePresenter));
-                    sequencePresenter.addSequenceFileUploadHandler(new SequenceFileUploadHandler(
-                            sequencePresenter));
-                    break;
-
-                case SEQ_ANALYSIS:
-                    boolean showFlash = (menu.getCurrentSelection().getCount() > 0);
-                    display.showSequenceView(currentInfo, showFlash);
-                    break;
-
-                case SAMPLES:
-                    display.showSampleView();
-                    break;
             }
+
+            currentSelection = display.getMenu().getCurrentSelection();
+            display.getMenu().setSelection(currentSelection);
+            handleMenuSelection(currentSelection);
+        }
+    }
+
+    private class NewFormCancelHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            History.fireCurrentHistoryState();
         }
     }
 
@@ -602,9 +512,9 @@ public class EntryPresenter extends AbstractPresenter {
 
     private class UpdateFormSubmitHandler implements ClickHandler {
 
-        private final IEntryFormUpdateSubmit formSubmit;
+        private final IEntryFormSubmit formSubmit;
 
-        public UpdateFormSubmitHandler(IEntryFormUpdateSubmit formSubmit) {
+        public UpdateFormSubmitHandler(IEntryFormSubmit formSubmit) {
             this.formSubmit = formSubmit;
         }
 
@@ -618,7 +528,7 @@ public class EntryPresenter extends AbstractPresenter {
                 return;
             }
 
-            formSubmit.populateEntry();
+            formSubmit.populateEntries();
             update(formSubmit.getEntry());
         }
 
@@ -633,56 +543,27 @@ public class EntryPresenter extends AbstractPresenter {
 
                 @Override
                 protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                    service.updateEntry(AppController.sessionId, info, callback);
+                    service.updateEntry(ClientController.sessionId, info, callback);
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
                     if (!result) {
-                        FeedbackEvent event = new FeedbackEvent(true, "Your entry could not be updated.");
-                        eventBus.fireEvent(event);
+                        eventBus.fireEvent(new FeedbackEvent(true, "Your entry could not be updated"));
                     } else {
                         showCurrentEntryView();
-                        FeedbackEvent event = new FeedbackEvent(false, "Entry successfully updated.");
-                        eventBus.fireEvent(event);
+                        eventBus.fireEvent(new FeedbackEvent(false, "Entry successfully updated"));
                         Window.scrollTo(0, 0);
                     }
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    eventBus.fireEvent(new FeedbackEvent(true, "Error updating record"));
                 }
             }.go(eventBus);
         }
     }
-
-    public class TraceSequenceStartUploaderHandler implements IUploader.OnStartUploaderHandler {
-
-        public void onStart(IUploader uploader) {
-            String servletPath = "servlet.gupld?eid=" + currentInfo.getId()
-                    + "&type=sequence&sid=" + AppController.sessionId;
-            uploader.setServletPath(servletPath);
-        }
-    }
-
-    private class TraceSequenceUploaderFinishHandler implements OnFinishUploaderHandler {
-
-        @Override
-        public void onFinish(IUploader uploader) {
-            if (uploader.getStatus() == Status.SUCCESS) {
-                UploadedInfo info = uploader.getServerInfo();
-                //                    uploader.reset();
-                //                    uploadPanel.setVisibility(false);
-                retrieveEntryTraceSequenceDetails();
-            } else {
-                UploadedInfo info = uploader.getServerInfo();
-                if (uploader.getStatus() == Status.ERROR) {
-                    Window.alert(
-                            "There was a problem uploading your file.\n\nPlease contact your administrator if this " +
-                                    "problem persists");
-                }
-            }
-            uploader.reset();
-            display.setSequenceFormVisibility(false);
-        }
-    }
-
 
     public class DeleteSequenceTraceHandler implements ClickHandler {
 
@@ -703,13 +584,13 @@ public class EntryPresenter extends AbstractPresenter {
                 @Override
                 protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback)
                         throws AuthenticationException {
-                    service.deleteEntryTraceSequences(AppController.sessionId, entryId, fileIds, callback);
+                    service.deleteEntryTraceSequences(ClientController.sessionId, entryId, fileIds, callback);
                 }
 
                 @Override
                 public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
                     display.setSequenceData(result, currentInfo);
-                    display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
+                    display.getMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
                 }
             }.go(eventBus);
         }

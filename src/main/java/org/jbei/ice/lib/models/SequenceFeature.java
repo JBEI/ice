@@ -7,8 +7,6 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
-import org.hibernate.annotations.Cascade;
-
 import org.hibernate.annotations.Type;
 
 /**
@@ -30,7 +28,7 @@ public class SequenceFeature implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -41,9 +39,8 @@ public class SequenceFeature implements IModel {
     @JoinColumn(name = "feature_id")
     private Feature feature;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
-    @OrderBy("id")
-    private final Set<AnnotationLocation> annotationLocations = new LinkedHashSet<AnnotationLocation>();
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "sequenceFeature", orphanRemoval = true)
+    private final Set<AnnotationLocation> annotationLocations = new LinkedHashSet<>();
 
     @Deprecated
     @Column(name = "feature_start")
@@ -79,10 +76,7 @@ public class SequenceFeature implements IModel {
     private AnnotationType annotationType;
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
-    @JoinColumn(name = "sequence_feature_id")
-    @OrderBy("id")
-    private final Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new
-            LinkedHashSet<SequenceFeatureAttribute>();
+    private final Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new LinkedHashSet<>();
 
     public SequenceFeature() {
         super();
@@ -137,17 +131,17 @@ public class SequenceFeature implements IModel {
         this.feature = feature;
     }
 
-    public void setAnnotationLocations(Set<AnnotationLocation> annotationLocations) {
-        // for JAXB web services
-        if (annotationLocations == null) {
-            this.annotationLocations.clear();
-            return;
-        }
-        if (annotationLocations != this.annotationLocations) {
-            annotationLocations.clear();
-            this.annotationLocations.addAll(annotationLocations);
-        }
-    }
+//    public void setAnnotationLocations(Set<AnnotationLocation> annotationLocations) {
+//        // for JAXB web services
+//        if (annotationLocations == null) {
+//            this.annotationLocations.clear();
+//            return;
+//        }
+//        if (annotationLocations != this.annotationLocations) {
+//            annotationLocations.clear();
+//            this.annotationLocations.addAll(annotationLocations);
+//        }
+//    }
 
     public Set<AnnotationLocation> getAnnotationLocations() {
         return annotationLocations;
@@ -157,38 +151,37 @@ public class SequenceFeature implements IModel {
      * Use locations instead. This field exists to allow scripted migration of data using
      * the new database schema.
      */
-    @Deprecated
-    public int getGenbankStart() {
-        return genbankStart;
-    }
+//    @Deprecated
+//    public int getGenbankStart() {
+//        return genbankStart;
+//    }
 
     /**
      * Use locations instead. This field exists to allow scripted migration of data using
      * the new database schema.
      */
-    @Deprecated
-    public void setGenbankStart(int genbankStart) {
-        this.genbankStart = genbankStart;
-    }
+//    @Deprecated
+//    public void setGenbankStart(int genbankStart) {
+//        this.genbankStart = genbankStart;
+//    }
 
     /**
      * Use locations instead. This field exists to allow scripted migration of data using
      * the new database schema.
      */
-    @Deprecated
-    public int getEnd() {
-        return end;
-    }
+//    @Deprecated
+//    public int getEnd() {
+//        return end;
+//    }
 
-    /**
-     * Use locations instead. This field exists to allow scripted migration of data using
-     * the new database schema.
-     */
-    @Deprecated
-    public void setEnd(int end) {
-        this.end = end;
-    }
-
+//    /**
+//     * Use locations instead. This field exists to allow scripted migration of data using
+//     * the new database schema.
+//     */
+//    @Deprecated
+//    public void setEnd(int end) {
+//        this.end = end;
+//    }
     public int getStrand() {
         return strand;
     }
@@ -212,13 +205,13 @@ public class SequenceFeature implements IModel {
         return genbankType;
     }
 
-    public void setGenbankType(String genbankType) {
-        this.genbankType = genbankType;
-    }
-
-    public void setAnnotationType(AnnotationType annotationType) {
-        this.annotationType = annotationType;
-    }
+//    public void setGenbankType(String genbankType) {
+//        this.genbankType = genbankType;
+//    }
+//
+//    public void setAnnotationType(AnnotationType annotationType) {
+//        this.annotationType = annotationType;
+//    }
 
     public AnnotationType getAnnotationType() {
         return annotationType;
@@ -228,18 +221,18 @@ public class SequenceFeature implements IModel {
         return sequenceFeatureAttributes;
     }
 
-    public void setSequenceFeatureAttributes(Set<SequenceFeatureAttribute> sequenceFeatureAttributes) {
-        if (sequenceFeatureAttributes == null) {
-            this.sequenceFeatureAttributes.clear();
-            return;
-        }
-
-        if (this.sequenceFeatureAttributes != sequenceFeatureAttributes) {
-            sequenceFeatureAttributes.clear();
-            sequenceFeatureAttributes.addAll(sequenceFeatureAttributes);
-        }
-
-    }
+//    public void setSequenceFeatureAttributes(Set<SequenceFeatureAttribute> sequenceFeatureAttributes) {
+//        if (sequenceFeatureAttributes == null) {
+//            this.sequenceFeatureAttributes.clear();
+//            return;
+//        }
+//
+//        if (this.sequenceFeatureAttributes != sequenceFeatureAttributes) {
+//            sequenceFeatureAttributes.clear();
+//            sequenceFeatureAttributes.addAll(sequenceFeatureAttributes);
+//        }
+//
+//    }
 
     public Integer getUniqueGenbankStart() {
         Integer result = null;

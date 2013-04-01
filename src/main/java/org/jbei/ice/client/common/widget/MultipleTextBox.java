@@ -48,7 +48,8 @@ public class MultipleTextBox extends TextBoxBase {
                     wholeString += ", ";
                 }
 
-                wholeString = wholeString + text; // + ", ";
+                if (text != null)
+                    wholeString = wholeString + text; // + ", ";
                 super.setText(wholeString);
             }
         }

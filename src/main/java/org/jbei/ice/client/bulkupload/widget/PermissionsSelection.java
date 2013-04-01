@@ -1,12 +1,22 @@
 package org.jbei.ice.client.bulkupload.widget;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
-import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.Icon;
+import org.jbei.ice.client.common.widget.PopupHandler;
+import org.jbei.ice.client.entry.view.ReadBoxSelectionHandler;
+import org.jbei.ice.client.entry.view.view.PermissionsWidget;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Widget that allows user to select the global readable permissions for
@@ -14,64 +24,87 @@ import com.google.gwt.user.client.ui.ListBox;
  *
  * @author Hector Plahar
  */
-public class PermissionsSelection extends Composite {
+public class PermissionsSelection implements IsWidget {
 
-    private ListBox selection;
-    private HTMLPanel panel;
+    private final FocusPanel parent;
+    private final PermissionsWidget permissionsWidget;
+    private final HashSet<PermissionInfo> permissions;
 
     public PermissionsSelection() {
-        initComponents();
+        Icon icon = new Icon(FAIconType.KEY);
+        icon.setTitle("Click to set permissions");
+        icon.addStyleName("display-inline");
+        icon.removeStyleName("font-awesome");
 
-        initWidget(panel);
-        panel.add(selection, "selection_visibility");
+        HTMLPanel panel = new HTMLPanel("<span id=\"creator_icon\"></span> Permissions");
+        panel.add(icon, "creator_icon");
+        panel.setStyleName("display-inline");
+
+        parent = new FocusPanel(panel);
+        parent.setStyleName("bulk_upload_visibility");
+        parent.addStyleName("opacity_hover");
+
+        permissionsWidget = new PermissionsWidget();
+        permissionsWidget.setStyleName("bg_fc");
+        permissions = new HashSet<PermissionInfo>();
+        permissionsWidget.getPresenter().setCanEdit(true);
+        permissionsWidget.getPresenter().setReadAddSelectionHandler(new PermissionReadBoxHandler(false));
+        permissionsWidget.getPresenter().setWriteAddSelectionHandler(new PermissionReadBoxHandler(true));
+
+        final PopupHandler popUp = new PopupHandler(this.permissionsWidget, icon.getElement(), false);
+        popUp.setCloseHandler(new CloseHandler<PopupPanel>() {
+
+            @Override
+            public void onClose(CloseEvent<PopupPanel> event) {
+                // TODO : when closing the permission widget
+            }
+        });
+        parent.addClickHandler(popUp);
     }
 
-    protected void initComponents() {
-
-        panel = new HTMLPanel(
-                "<span class=\"bulk_upload_visibility\">Group visibility: </span><span " +
-                        "id=\"selection_visibility\"></span>");
-        panel.addStyleName("display-inline");
-
-        selection = new ListBox();
-        selection.setStyleName("pull_down");
+    @Override
+    public Widget asWidget() {
+        return parent;
     }
 
-    public void setGroups(ArrayList<GroupInfo> result) {
-        if (result == null)
-            return;
+    //
+    // inner classes
+    //
+    private class PermissionReadBoxHandler extends ReadBoxSelectionHandler {
 
-        selection.clear();
-        for (GroupInfo info : result) {
-            selection.addItem(info.getLabel(), info.getUuid());
+        private final boolean isWrite;
+
+        public PermissionReadBoxHandler(boolean isWrite) {
+            this.isWrite = isWrite;
         }
 
-        // add private
-        selection.addItem("Private", "");
+        @Override
+        public void updatePermission(final PermissionInfo info) {
+            if (isWrite) {
+                info.setType(PermissionInfo.Type.WRITE_ENTRY);
+            } else
+                info.setType(PermissionInfo.Type.READ_ENTRY);
 
-        // TODO : this is a hack and needs to go away when we have groups management
-        if (selection.getItemCount() > 1)
-            selection.setSelectedIndex(1);
+            permissions.add(info);
+            displayPermission(info);
+        }
+
+        protected void displayPermission(PermissionInfo info) {
+            DeletePermission deletePermission = new DeletePermission();
+            if (isWrite) {
+                permissionsWidget.addWriteItem(info, deletePermission);
+            } else {
+                permissionsWidget.addReadItem(info, deletePermission);
+            }
+        }
     }
 
-    public String getSelectedGroupUUID() {
-        return selection.getValue(selection.getSelectedIndex());
-    }
+    private class DeletePermission implements Delegate<PermissionInfo> {
 
-    public void setSelected(GroupInfo groupInfo) {
-
-        for (int i = 0; i < selection.getItemCount(); i += 1) {
-
-            // null group implies private selection
-            String uuid = "";
-            if (groupInfo != null) {
-                uuid = groupInfo.getUuid();
-            }
-
-            if (uuid.equals(selection.getValue(i).trim())) {
-                selection.setSelectedIndex(i);
-                break;
-            }
+        @Override
+        public void execute(final PermissionInfo info) {
+            permissions.remove(info);
+            permissionsWidget.removeReadItem(info);
         }
     }
 }

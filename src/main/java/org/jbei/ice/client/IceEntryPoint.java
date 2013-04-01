@@ -21,7 +21,7 @@ public class IceEntryPoint implements EntryPoint {
     @Override
     public void onModuleLoad() {
         HandlerManager eventBus = new HandlerManager(null);
-        AppController appViewer = new AppController(service, eventBus);
-        appViewer.go(RootPanel.get());
+        ClientController clientViewer = new ClientController(service, eventBus);
+        clientViewer.go(RootPanel.get());
     }
 }

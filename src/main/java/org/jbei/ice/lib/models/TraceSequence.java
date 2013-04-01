@@ -22,7 +22,7 @@ public class TraceSequence implements IModel {
 
     @XmlTransient
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @OneToOne(fetch = FetchType.EAGER)
@@ -47,7 +47,7 @@ public class TraceSequence implements IModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
 
-    @OneToOne(mappedBy = "traceSequence", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "traceSequence", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private TraceSequenceAlignment traceSequenceAlignment;
 
     public TraceSequence() {

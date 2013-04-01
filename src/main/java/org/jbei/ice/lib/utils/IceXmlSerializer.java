@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -35,8 +36,6 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
@@ -44,6 +43,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.vo.AttachmentData;
 import org.jbei.ice.lib.vo.CompleteEntry;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -132,10 +132,8 @@ public class IceXmlSerializer {
     public static Namespace iceNamespace = new Namespace("ice", "http://jbei.org/ice");
     public static Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
     public static Namespace expNamespace = new Namespace(EXP, "http://jbei.org/exp");
-
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-    private final ArrayList<CompleteEntry> completeEntries = new ArrayList<CompleteEntry>();
+    private final ArrayList<CompleteEntry> completeEntries = new ArrayList<>();
 
     /**
      * Generate ice-xml from given List of {@link Entry}s.
@@ -145,8 +143,8 @@ public class IceXmlSerializer {
      * @throws UtilityException
      */
     public static String serializeToJbeiXml(Account account, List<Entry> entries) throws UtilityException {
-        ArrayList<Sequence> sequences = new ArrayList<Sequence>();
-        SequenceController sequenceController = new SequenceController();
+        ArrayList<Sequence> sequences = new ArrayList<>();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         for (Entry entry : entries) {
             try {
                 sequences.add(sequenceController.getByEntry(entry));
@@ -160,7 +158,6 @@ public class IceXmlSerializer {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         try {
-
             writer = new XMLWriter(byteArrayOutputStream, format);
             writer.write(serializeToJbeiXml(account, entries, sequences));
             String temp = byteArrayOutputStream.toString("utf8");
@@ -234,8 +231,7 @@ public class IceXmlSerializer {
         }
         DefaultElement partNumbers = new DefaultElement(PART_NUMBERS, iceNamespace);
         for (PartNumber partNumber : entry.getPartNumbers()) {
-            partNumbers.add(new DefaultElement(PART_NUMBER, iceNamespace).addText(partNumber
-                                                                                          .getPartNumber()));
+            partNumbers.add(new DefaultElement(PART_NUMBER, iceNamespace).addText(partNumber.getPartNumber()));
         }
         entryRoot.add(partNumbers);
 
@@ -246,39 +242,32 @@ public class IceXmlSerializer {
         entryRoot.add(partNames);
 
         DefaultElement owner = new DefaultElement(OWNER, iceNamespace);
-        owner.add(new DefaultElement(PERSON_NAME, iceNamespace).addText(emptyStringify(entry
-                                                                                               .getOwner())));
-        owner.add(new DefaultElement(EMAIL, iceNamespace).addText(emptyStringify(entry
-                                                                                         .getOwnerEmail())));
+        owner.add(new DefaultElement(PERSON_NAME, iceNamespace).addText(emptyStringify(entry.getOwner())));
+        owner.add(new DefaultElement(EMAIL, iceNamespace).addText(emptyStringify(entry.getOwnerEmail())));
         entryRoot.add(owner);
 
         DefaultElement creator = new DefaultElement(CREATOR, iceNamespace);
-        creator.add(new DefaultElement(PERSON_NAME, iceNamespace).addText(emptyStringify(entry
-                                                                                                 .getCreator())));
-        creator.add(new DefaultElement(EMAIL, iceNamespace).addText(emptyStringify(entry
-                                                                                           .getCreatorEmail())));
+        creator.add(new DefaultElement(PERSON_NAME, iceNamespace).addText(emptyStringify(entry.getCreator())));
+        creator.add(new DefaultElement(EMAIL, iceNamespace).addText(emptyStringify(entry.getCreatorEmail())));
         entryRoot.add(creator);
 
         if (entry.getLinks().size() > 0) {
             DefaultElement links = new DefaultElement(LINKS, iceNamespace);
             for (Link link : entry.getLinks()) {
-                links.add(new DefaultElement(LINK, iceNamespace).addAttribute(URL,
-                                                                              emptyStringify(link.getUrl())).addText(
-                        emptyStringify(link.getLink())));
+                links.add(new DefaultElement(LINK, iceNamespace)
+                                  .addAttribute(URL, emptyStringify(link.getUrl()))
+                                  .addText(emptyStringify(link.getLink())));
             }
             entryRoot.add(links);
         }
 
         entryRoot.add(new DefaultElement(STATUS, iceNamespace).addText(emptyStringify(entry.getStatus())));
 
-        entryRoot.add(new DefaultElement(SHORT_DESCRIPTION, iceNamespace)
-                              .addText(emptyStringify(entry.getShortDescription())));
         entryRoot.add(new DefaultElement(LONG_DESCRIPTION, iceNamespace)
                               .addText(emptyStringify(entry.getLongDescription())));
         entryRoot.add(new DefaultElement(LONG_DESCRIPTION_MARKUP_TYPE, iceNamespace).addText(
                 entry.getLongDescriptionType()));
-        entryRoot.add(new DefaultElement(REFERENCES, iceNamespace).addText(emptyStringify(entry
-                                                                                                  .getReferences())));
+        entryRoot.add(new DefaultElement(REFERENCES, iceNamespace).addText(emptyStringify(entry.getReferences())));
         entryRoot.add(getEntryTypeSpecificFields(entry));
 
         entryRoot.add(new DefaultElement(BIO_SAFETY_LEVEL, iceNamespace)
@@ -286,15 +275,15 @@ public class IceXmlSerializer {
         entryRoot.add(new DefaultElement(INTELLECTUAL_PROPERTY, iceNamespace)
                               .addText(emptyStringify(entry.getIntellectualProperty())));
 
-        if (entry.getEntryFundingSources().size() > 0) {
+        if (entry.getFundingSources().size() > 0) {
             DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
-            for (EntryFundingSource fundingSource : entry.getEntryFundingSources()) {
-                fundingSources.add(
-                        new DefaultElement(FUNDING_SOURCE, iceNamespace)
-                                .addText(emptyStringify(fundingSource.getFundingSource().getFundingSource()))
-                                .addAttribute(
-                                        PRINCIPAL_INVESTIGATOR,
-                                        emptyStringify(fundingSource.getFundingSource().getPrincipalInvestigator())));
+            for (EntryFundingSource fundingSource : entry.getFundingSources()) {
+                fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace)
+                                           .addText(emptyStringify(fundingSource.getFundingSource().getFundingSource()))
+                                           .addAttribute(
+                                                   PRINCIPAL_INVESTIGATOR,
+                                                   emptyStringify(fundingSource.getFundingSource()
+                                                                               .getPrincipalInvestigator())));
             }
             entryRoot.add(fundingSources);
         }
@@ -319,7 +308,8 @@ public class IceXmlSerializer {
                 try {
                     file = attachmentController.getFile(account, attachment);
                     fileString = SerializationUtils
-                            .serializeBytesToBase64String(org.apache.commons.io.FileUtils.readFileToByteArray(file));
+                            .serializeBytesToBase64String(org.apache.commons.io.FileUtils
+                                                                               .readFileToByteArray(file));
 
                 } catch (FileNotFoundException e) {
                     throw new UtilityException(e);
@@ -371,10 +361,12 @@ public class IceXmlSerializer {
             if (getSelectionMarkers(plasmid) != null) {
                 fields.add(getSelectionMarkers(plasmid));
             }
-            fields.add(new DefaultElement(BACKBONE, iceNamespace).addText(emptyStringify(plasmid.getBackbone())));
+            fields.add(new DefaultElement(BACKBONE, iceNamespace).addText(emptyStringify(plasmid
+                                                                                                 .getBackbone())));
             fields.add(new DefaultElement(ORIGIN_OF_REPLICATION, iceNamespace)
                                .addText(emptyStringify(plasmid.getOriginOfReplication())));
-            fields.add(new DefaultElement(PROMOTERS, iceNamespace).addText(emptyStringify(plasmid.getPromoters())));
+            fields.add(new DefaultElement(PROMOTERS, iceNamespace).addText(emptyStringify(plasmid
+                                                                                                  .getPromoters())));
             fields.add(new DefaultElement(IS_CIRCULAR, iceNamespace).addText((plasmid.getCircular() ? "true"
                     : "false")));
         } else if (entry.getRecordType().equals(STRAIN)) {
@@ -382,26 +374,213 @@ public class IceXmlSerializer {
             if (getSelectionMarkers(strain) != null) {
                 fields.add(getSelectionMarkers(strain));
             }
-            fields.add(new DefaultElement(HOST, iceNamespace).addText(emptyStringify(strain.getHost())));
+            fields.add(new DefaultElement(HOST, iceNamespace).addText(emptyStringify(strain
+                                                                                             .getHost())));
             fields.add(new DefaultElement(GENOTYPE_PHENOTYPE, iceNamespace)
                                .addText(emptyStringify(strain.getGenotypePhenotype())));
-            fields.add(new DefaultElement(PLASMIDS, iceNamespace).addText(emptyStringify(strain.getPlasmids())));
+            fields.add(new DefaultElement(PLASMIDS, iceNamespace).addText(emptyStringify(strain
+                                                                                                 .getPlasmids())));
         } else if (entry.getRecordType().equals(PART)) {
             Part part = (Part) entry;
-            fields.add(new DefaultElement(PACKAGE_FORMAT, iceNamespace).addText(emptyStringify(part.getPackageFormat()
-                                                                                                   .toString())));
+            fields.add(new DefaultElement(PACKAGE_FORMAT, iceNamespace).addText(emptyStringify(part
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                       .getPackageFormat()
+                                                                                                       .toString())));
         } else if (entry.getRecordType().equals(ARABIDOPSIS)) {
             ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-            fields.add(new DefaultElement(HOMOZYGOSITY, iceNamespace).addText(emptyStringify(seed.getHomozygosity())));
-            fields.add(new DefaultElement(ECOTYPE, iceNamespace).addText(emptyStringify(seed.getEcotype())));
+            fields.add(new DefaultElement(HOMOZYGOSITY, iceNamespace).addText(emptyStringify(seed
+                                                                                                     .getHomozygosity())));
+            fields.add(new DefaultElement(ECOTYPE, iceNamespace).addText(emptyStringify(seed
+                                                                                                .getEcotype())));
 
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             fields.add(new DefaultElement(HARVEST_DATE, iceNamespace).addText(simpleDateFormat
                                                                                       .format(seed.getHarvestDate())));
 
-            fields.add(new DefaultElement(PARENTS, iceNamespace).addText(emptyStringify(seed.getParents())));
-            fields.add(new DefaultElement(GENERATION, iceNamespace).addText(seed.getGeneration().toString()));
-            fields.add(new DefaultElement(PLANT_TYPE, iceNamespace).addText(seed.getPlantType().toString()));
+            fields.add(new DefaultElement(PARENTS, iceNamespace).addText(emptyStringify(seed
+                                                                                                .getParents())));
+            fields.add(new DefaultElement(GENERATION, iceNamespace).addText(seed.getGeneration()
+                                                                                .toString()));
+            fields.add(new DefaultElement(PLANT_TYPE, iceNamespace).addText(seed.getPlantType()
+                                                                                .toString()));
         }
 
         return fields;
@@ -437,13 +616,15 @@ public class IceXmlSerializer {
      * @throws UtilityException
      */
     private static Element getExperimentElement(Entry entry) throws UtilityException {
+        String traceFilePath = Utils.getConfigValue(ConfigurationKey.TRACE_FILES_DIRECTORY);
+
         Element result = null;
         DefaultElement expElement = new DefaultElement(EXP, expNamespace);
         DefaultElement tracesElement = new DefaultElement(SEQUENCE_TRACES, expNamespace);
         List<TraceSequence> traces = null;
         try {
             traces = TraceSequenceDAO.getByEntry(entry);
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             throw new UtilityException(e);
         }
 
@@ -455,7 +636,7 @@ public class IceXmlSerializer {
                 File traceFile;
                 String traceString;
                 try {
-                    traceFile = TraceSequenceDAO.getFile(trace);
+                    traceFile = TraceSequenceDAO.getFile(new File(traceFilePath), trace);
                     traceString = SerializationUtils
                             .serializeBytesToBase64String(org.apache.commons.io.FileUtils
                                                                                .readFileToByteArray(traceFile));
@@ -697,20 +878,16 @@ public class IceXmlSerializer {
         entry.setBioSafetyLevel(Integer.parseInt(entryDocument.elementText(BIO_SAFETY_LEVEL)));
         entry.setIntellectualProperty(entryDocument.elementText(INTELLECTUAL_PROPERTY));
 
-        if (entryDocument.element(FUNDING_SOURCES) != null) {
-            HashSet<EntryFundingSource> entryFundingSources = new HashSet<EntryFundingSource>();
-            for (Object element : entryDocument.element(FUNDING_SOURCES).elements(FUNDING_SOURCE)) {
-                FundingSource fundingSource = new FundingSource();
-                fundingSource.setFundingSource(((Element) element).getText());
-                fundingSource.setPrincipalInvestigator(((Element) element)
-                                                               .attributeValue(PRINCIPAL_INVESTIGATOR));
-                EntryFundingSource entryFundingSource = new EntryFundingSource();
-                entryFundingSource.setEntry(entry);
-                entryFundingSource.setFundingSource(fundingSource);
-                entryFundingSources.add(entryFundingSource);
-            }
-            entry.getEntryFundingSources().addAll(entryFundingSources);
-        }
+//        if (entryDocument.element(FUNDING_SOURCES) != null) {
+//            HashSet<FundingSource> entryFundingSources = new HashSet<FundingSource>();
+//            for (Object element : entryDocument.element(FUNDING_SOURCES).elements(FUNDING_SOURCE)) {
+//                FundingSource fundingSource = new FundingSource();
+//                fundingSource.setFundingSource(((Element) element).getText());
+//                fundingSource.setPrincipalInvestigator(((Element) element).attributeValue(PRINCIPAL_INVESTIGATOR));
+//                entryFundingSources.add(fundingSource);
+//            }
+//            entry.setFundingSources(entryFundingSources);
+//        }
 
         if (entryDocument.element(ATTACHMENTS) != null) {
             completeEntry.getAttachments().addAll(

@@ -1,6 +1,6 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -118,7 +118,7 @@ public class UploadSequenceFileWidget extends Composite {
             @Override
             public void onStart(IUploader uploader) {
                 uploader.setServletPath("/sequence_upload?eid=" + entryId + "&type=file&sid="
-                                                + AppController.sessionId);
+                                                + ClientController.sessionId);
             }
         });
 
@@ -145,8 +145,9 @@ public class UploadSequenceFileWidget extends Composite {
                     feedback.setVisible(true);
                     uploader.reset();
                 } else {
-                    feedback.setText("Your file could not be uploaded. Please try again. If this error persists, " +
-                                             "please contact your administrator.");
+                    feedback.setText(
+                            "You file could not be uploaded. Please try again. If this error persists, " +
+                                    "please contact your administrator.");
                     feedback.setVisible(true);
                     uploader.reset();
                 }

@@ -1,7 +1,6 @@
 package org.jbei.ice.client.bulkupload.sheet;
 
-import java.util.ArrayList;
-
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.SheetPresenter;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
@@ -10,9 +9,10 @@ import org.jbei.ice.client.bulkupload.widget.SampleSelectionWidget;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
 
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
@@ -63,14 +63,17 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private SampleSelectionWidget sampleSelectionWidget;
     private HandlerRegistration sampleSelectionRegistration;
 
-    public final static int ROW_COUNT = 40;
+    public final static int ROW_COUNT = 35;
+    private int dragRow = -1;
+    private int dragCol = -1;
+    private boolean dragging;
+    private String startText;
 
-    public Sheet(EntryAddType type) {
-        this(type, null);
+    public Sheet(EntryAddType type, ServiceDelegate<PreferenceInfo> serviceDelegate) {
+        this(type, serviceDelegate, null);
     }
 
-    public Sheet(EntryAddType type, BulkUploadInfo info) {
-
+    public Sheet(EntryAddType type, ServiceDelegate<PreferenceInfo> serviceDelegate, BulkUploadInfo info) {
         headerCol = 0;
 
         layout = new FlexTable();
@@ -93,14 +96,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
         // then wrap it in a scroll panel that expands to fill area given by browser
         sheetTableFocusPanelWrapper = new ScrollPanel(sheetTable);
         sheetTableFocusPanelWrapper.setWidth((Window.getClientWidth() - 40) + "px");
-        sheetTableFocusPanelWrapper.setHeight((Window.getClientHeight() - 340 - 30) + "px");
+        sheetTableFocusPanelWrapper.setHeight((Window.getClientHeight() - 340) + "px");
 
         colIndex = new FlexTable();
         colIndex.setCellPadding(0);
         colIndex.setCellSpacing(0);
         colIndex.setStyleName("sheet_col_index");
         colIndexWrapper = new ScrollPanel(colIndex);
-        colIndexWrapper.setHeight((Window.getClientHeight() - 340 - 30 - 15) + "px");
+        colIndexWrapper.setHeight((Window.getClientHeight() - 340 - 15) + "px");
 
         addPanelHandlers();
         addWindowResizeHandler();
@@ -118,31 +121,49 @@ public class Sheet extends Composite implements SheetPresenter.View {
         addScrollHandlers();
 
         // presenter
-        presenter = new SheetPresenter(this, type, info);
+        presenter = new SheetPresenter(this, type, info, serviceDelegate);
         init();
+
+//        sheetTable.addDomHandler(new MouseMoveHandler() {
+//
+//            @Override
+//            public void onMouseMove(MouseMoveEvent event) {
+//                if (dragging) {
+//                        // clear everything from c to maxColumn
+////                            CellWidget widget = (CellWidget) sheetTable.getWidget(dragRow + maxColumn, dragCol);
+////                            widget.removeStyleName("cell_drag");
+//////                            widget.setValue("");
+////
+////                        CellWidget widget = (CellWidget) sheetTable.getWidget(dragRow + c, dragCol);
+//////                        if (startText != null)
+//////                            widget.setValue(startText);
+////                        widget.addStyleName("cell_drag");
+////                        widget.getElement().scrollIntoView();
+//                }
+//            }
+//        }, MouseMoveEvent.getType());
     }
 
-    public void setCurrentInfo(BulkUploadInfo info) {
-        presenter.setCurrentInfo(info);
+    public SheetPresenter getPresenter() {
+        return this.presenter;
+    }
+
+    public BulkUploadInfo setUpdatedEntry(BulkUploadAutoUpdate bulkUploadAutoUpdate) {
+        return presenter.setUpdateEntry(bulkUploadAutoUpdate);
     }
 
     // experimental
     public void decreaseWidthBy(int amount) {
-        GWT.log("Decreasing sheet width by " + amount + ". New size is " + (sheetTableFocusPanelWrapper
-                .getOffsetWidth() - amount));
         sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() - amount) + "px");
         headerWrapper.setWidth((headerWrapper.getOffsetWidth() - amount) + "px");
     }
 
     public void increaseWidthBy(int amount) {
-        GWT.log("Increasing sheet width by " + amount + ". New size is " + (sheetTableFocusPanelWrapper
-                .getOffsetWidth() + amount));
         sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + amount) + "px");
         headerWrapper.setWidth((headerWrapper.getOffsetWidth() + amount) + "px");
     }
 
     public void resetWidth() {
-        GWT.log("Resetting sheet width");
         sheetTableFocusPanelWrapper.setWidth((Window.getClientWidth() - 40) + "px");
         headerWrapper.setWidth((Window.getClientWidth() - 15) + "px");
     }
@@ -160,15 +181,17 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     return;
 
                 int delta = event.getWidth() - previousWidth;
+                if (delta < 0)
+                    delta = 0;
                 previousWidth = event.getWidth();
                 sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + delta) + "px");
                 headerWrapper.setWidth((headerWrapper.getOffsetWidth() + delta) + "px");
 
-                int wrapperHeight = (event.getHeight() - 340 - 30);
+                int wrapperHeight = (event.getHeight() - 340);
                 if (wrapperHeight >= 0)
                     sheetTableFocusPanelWrapper.setHeight(wrapperHeight + "px");
 
-                int rowIndexHeight = (event.getHeight() - 340 - 30 - 15);
+                int rowIndexHeight = (event.getHeight() - 340 - 15);
                 if (rowIndexHeight >= 0)
                     colIndexWrapper.setHeight(rowIndexHeight + "px");
             }
@@ -217,10 +240,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
         layout.setWidget(1, 1, sheetTableFocusPanelWrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
 
-        createHeaderCells();
+        createHeaderCells(presenter.getPreferenceDelegate());
 
         int rowCount = presenter.getEntryRowCount() < ROW_COUNT ? ROW_COUNT : presenter.getEntryRowCount();
 
+        long start = System.currentTimeMillis();
         // add rows
         for (row = 0; row < rowCount; row += 1) {
             presenter.addRow(row);
@@ -230,6 +254,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
             indexCell.setStyleName("index_cell");
             colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
         }
+        long end = System.currentTimeMillis();
+        GWT.log("Adding " + rowCount + " took " + (end - start) + "ms");
     }
 
     private void addPanelHandlers() {
@@ -237,7 +263,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             @Override
             public void onKeyDown(KeyDownEvent event) {
-
                 if (event.isUpArrow()) {
                     dealWithUpArrowPress();
                 } else if (event.isDownArrow()) {
@@ -253,7 +278,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     int code = event.getNativeKeyCode();
 
                     if (KeyCodes.KEY_TAB == code || KeyCodes.KEY_ENTER == code) {
-
                         if (currentIndex == presenter.getFieldSize() - 1) {
                             selectCell(currentRow + 1, 0);
                         } else {
@@ -291,13 +315,17 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     @Override
-    public void createHeaderCells() {
+    public void createHeaderCells(ServiceDelegate<PreferenceInfo> lockUnlockDelegate) {
         headerCol = 0;
         header.clear();
         addLeadHeader(0);
-        SheetHeader.createHeaders(presenter.getAllHeaders(), headerCol, 0, header);
+        SheetHeaderUtil.createHeaders(presenter.getAllHeaders(), headerCol, 0, header, lockUnlockDelegate);
         headerCol += (presenter.getFieldSize());
         addTailHeader(0);
+    }
+
+    public void setAutoUpdateDelegate(ServiceDelegate<BulkUploadAutoUpdate> delegate) {
+        presenter.setAutoUpdateDelegate(delegate);
     }
 
     @Override
@@ -317,11 +345,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 }
             }
         }
-        return true;
-    }
 
-    public ArrayList<EntryInfo> getCellData(String ownerEmail, String owner, String creator, String creatorEmail) {
-        return presenter.getCellEntryList(ownerEmail, owner, creator, creatorEmail);
+        presenter.reset();
+        return true;
     }
 
     @Override
@@ -335,7 +361,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     public void highlightHeaders(int row, int col) {
-        SheetHeader.highlightHeader(col, header);
+        SheetHeaderUtil.highlightHeader(col, header);
 
         int count = colIndex.getRowCount();
         for (int i = 0; i < count; i += 1) {
@@ -396,7 +422,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             return;
 
         sheetTable.setWidget(currentRow, currentIndex, newCellSelection.getWidget(currentRow, true, tabIndex));
-        // all cell to set focus to whatever their input mechanism is.
+        // allow cell to set focus to whatever their input mechanism is.
         // e.g. if an input box, allow focus on that box
         newCellSelection.setFocus(currentRow);
         cellHasFocus = true;
@@ -454,9 +480,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // handle previous selection
         SheetCell prevSelection = newCellSelection;
-
         if (prevSelection != null) {
-
             if (cellHasFocus && replaced != null) {
                 // switch from input
 
@@ -469,6 +493,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 else
                     replaced.setValue(data.getValue());
 
+                // auto updating even for blank cells since data might be cleared
+                presenter.autoUpdate(inputIndex, inputRow);
+
+                replaced.hideCorner();
                 sheetTable.setWidget(inputRow, inputIndex, replaced);
 
                 // reset
@@ -515,31 +543,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
             if (widget instanceof CellWidget) {
                 ((CellWidget) widget).setFocus(true);
             }
-
-
-//            if (cellWidget instanceof Label) {
-//                Label label = (Label) cellWidget;
-//
-//                HTMLPanel panel;
-//                if (label.getText().isEmpty()) {
-//                    panel = new HTMLPanel(
-//                            "<div class=\"cell cell_selected\"><div style=\"position: relative; width: 5px; height:"
-//                                    + "5px; background-color: #0082C0; top: "
-//                                    + "12px; right: -122px; border: 3px solid white; cursor:
-// crosshair\"></div></div>");
-//                }
-//                else {
-//                    panel = new HTMLPanel(
-//                            "<div class=\"cell cell_selected\">"
-//                                    + label.getText()
-//                                    + "<div style=\"position: relative; width: 5px; height: 5px; background-color: "
-//                                    + "#0082C0; top: -2px; right: -124px; border: 3px solid white; cursor:
-// crosshair\"></div></div>");
-//                }
-//                sheetTable.setWidget(newRow, newCol, panel);
-//            }
         }
         widget.getElement().scrollIntoView();
+
         // update current
         currentRow = newRow;
         currentIndex = newCol;
@@ -547,7 +553,23 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     @Override
     public void setCellWidgetForCurrentRow(String value, int row, int col, int size) {
-        sheetTable.setWidget(row, col, new CellWidget(value, row, col, size));
+        Widget widget = null;
+        int rowSize = sheetTable.getRowCount();
+        if (row < rowSize) {
+            int colSize = sheetTable.getCellCount(row);
+            if (col < colSize) {
+                widget = sheetTable.getWidget(row, col);
+            }
+        }
+
+        if (widget == null || !(widget instanceof CellWidget)) {
+            widget = new CellWidget(value, row, col, size);
+            ((CellWidget) widget).addWidgetCallback(new SheetCallback());
+        } else {
+            ((CellWidget) widget).setValue(value);
+        }
+
+        sheetTable.setWidget(row, col, widget);
     }
 
     @Override
@@ -577,9 +599,57 @@ public class Sheet extends Composite implements SheetPresenter.View {
         presenter.selectSample(type, locationId);
     }
 
+    public BulkUploadInfo setUpdateBulkUploadId(Long result) {
+        return presenter.setUpdateBulkUploadId(result);
+    }
+
     //
     // inner classes
     //
+    protected class SheetCallback implements CellWidgetCallback {
+
+        @Override
+        public void onMouseDown(int row, int col) {
+            dragging = true;
+            dragRow = row;
+            dragCol = col;
+            Widget widget = sheetTable.getWidget(row, col);
+            if (widget instanceof CellWidget) {
+                CellWidget cellWidget = (CellWidget) widget;
+                startText = cellWidget.getValue();
+            }
+        }
+
+        @Override
+        public void onMouseUp(int row, int col) {
+            if (dragging) {
+                dragging = false;
+
+                for (int i = dragRow; i <= row; i += 1) {
+                    CellWidget widget = (CellWidget) sheetTable.getWidget(i, dragCol);
+                    widget.setValue(startText);
+                    if (startText != null && !startText.isEmpty())
+                        presenter.autoUpdate(dragCol, i);
+                }
+
+                dragRow = dragCol = -1;
+                startText = null;
+            }
+        }
+
+        @Override
+        public void onMouseOver(int row, int col) {
+            if (!dragging)
+                return;
+
+            CellWidget widget = (CellWidget) sheetTable.getWidget(row, dragCol);
+            widget.addStyleName("cell_drag");
+            if (dragCol > 0) {
+                widget = (CellWidget) sheetTable.getWidget(row, dragCol - 1);
+                widget.addStyleName("cell_drag");
+            }
+        }
+    }
 
     protected class CellClick implements ClickHandler {
 

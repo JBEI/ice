@@ -2,8 +2,6 @@ package org.jbei.ice.lib.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,9 +12,8 @@ import org.jbei.ice.lib.dao.IModel;
 
 /**
  * Place to store installation specific values. For example, uuids for default site install groups.
- * 
- * @author Timothy Ham
- * 
+ *
+ * @author Hector Plahar, Timothy Ham
  */
 @Entity
 @Table(name = "configuration")
@@ -25,31 +22,20 @@ public class Configuration implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "key", length = 255, nullable = false, unique = true)
-    @Enumerated(EnumType.STRING)
-    private ConfigurationKey key;
+    private String key;
 
     @Column(name = "value", length = 1024, nullable = false)
     private String value;
-
-    /**
-     * Possible configuration key values.
-     * 
-     * @author Timothy Ham
-     * 
-     */
-    public enum ConfigurationKey {
-        PLASMID_STORAGE_ROOT, STRAIN_STORAGE_ROOT, PART_STORAGE_ROOT, ARABIDOPSIS_STORAGE_ROOT, PLASMID_STORAGE_DEFAULT, STRAIN_STORAGE_DEFAULT, PART_STORAGE_DEFAULT, ARABIDOPSIS_STORAGE_DEFAULT, DATABASE_SCHEMA_VERSION
-    }
 
     public Configuration() {
         super();
     }
 
-    public Configuration(ConfigurationKey key, String value) {
+    public Configuration(String key, String value) {
         setKey(key);
         setValue(value);
     }
@@ -62,11 +48,11 @@ public class Configuration implements IModel {
         this.id = id;
     }
 
-    public ConfigurationKey getKey() {
+    public String getKey() {
         return key;
     }
 
-    public void setKey(ConfigurationKey key) {
+    public void setKey(String key) {
         this.key = key;
     }
 
@@ -77,5 +63,4 @@ public class Configuration implements IModel {
     public void setValue(String value) {
         this.value = value;
     }
-
 }

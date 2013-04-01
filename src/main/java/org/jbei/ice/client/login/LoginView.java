@@ -2,161 +2,151 @@ package org.jbei.ice.client.login;
 
 import org.jbei.ice.client.common.footer.Footer;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 /**
+ * View for the Login page. Companion to the ${@link LoginPresenter}
+ *
  * @author Hector Plahar
  */
 public class LoginView extends Composite implements ILoginView {
 
     private Button submitButton;
     private TextBox loginInput;
-    private Label loginErrorLabel;
-
     private TextBox passwordInput;
-    private Label passwordErrorLabel;
     private CheckBox remember;
     private Label forgotPasswordLabel;
     private Label registerLabel;
-    private Label rememberLabel;
-    private Label passwordLabel;
+    private HTML loginMessagePanel;
     private FlexTable loginTable;
-    private RegistrationPanel regiPanel;
+    private RegistrationPanel registrationPanel;
+    private ForgotPasswordPanel forgotPasswordPanel;
+    private FlexTable layout;
     private HandlerRegistration submitRegistration;
 
-    private FlexTable inputTable;
-    private FlowPanel mainPanel;
-
     public LoginView() {
-        FlexTable layout = new FlexTable();
+        initComponents();
+        initWidget(layout);
+
+        layout.setWidget(0, 0, createLoginWidget());
+        layout.getFlexCellFormatter().setHeight(0, 0, "100%");
+        layout.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
+        layout.setWidget(1, 0, createFooter());
+
+        ClickHandler cancelHandler = new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                switchToLoginMode();
+            }
+        };
+        forgotPasswordPanel.setCancelHandler(cancelHandler);
+        addKeyHandlerToClearErrorInput(loginInput);
+        addKeyHandlerToClearErrorInput(passwordInput);
+    }
+
+    private void initComponents() {
+        // layout
+        layout = new FlexTable();
         layout.setWidth("100%");
         layout.setHeight("100%");
         layout.setCellSpacing(0);
         layout.setCellPadding(0);
-        initWidget(layout);
 
-        initComponents();
-
-        layout.setWidget(0, 0, registerLabel);
-        layout.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_RIGHT);
-
-        layout.setWidget(1, 0, createContents());
-        layout.getCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
-        layout.getCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
-        layout.getCellFormatter().setHeight(1, 0, "100%");
-
-        layout.setWidget(2, 0, createFooter());
-    }
-
-    private void initComponents() {
         loginInput = new TextBox();
         loginInput.setStyleName("login_input");
+        loginInput.getElement().setAttribute("placeHolder", "Username");
+
+        forgotPasswordPanel = new ForgotPasswordPanel();
 
         passwordInput = new PasswordTextBox();
         passwordInput.setStyleName("login_input");
+        passwordInput.getElement().setAttribute("placeHolder", "Password");
 
-        submitButton = new Button("Login");
+        submitButton = new Button("Sign in");
         submitButton.setStyleName("login_btn");
-        remember = new CheckBox();
-        loginErrorLabel = new Label();
-        loginErrorLabel.setStyleName("login_error_msg");
-        loginErrorLabel.setVisible(false);
-        passwordErrorLabel = new Label();
-        passwordErrorLabel.setStyleName("login_error_msg");
-        passwordErrorLabel.setVisible(false);
 
+        remember = new CheckBox();
         forgotPasswordLabel = new Label("Forgot your password?");
         forgotPasswordLabel.setStyleName("footer_feedback_widget");
         forgotPasswordLabel.addStyleName("display-inline");
-        forgotPasswordLabel.addStyleName("font-70em");
+        forgotPasswordLabel.addStyleName("font-80em");
         forgotPasswordLabel.setVisible(false);
 
         // register
-        registerLabel = new Label("Register");
+        registerLabel = new Label("Create account");
         registerLabel.setStyleName("footer_feedback_widget");
-        registerLabel.addStyleName("font-70em");
+        registerLabel.addStyleName("font-80em");
         registerLabel.addStyleName("display-inline");
         registerLabel.setVisible(false);
 
-        // remember me on this computer label
-        rememberLabel = new Label("Remember me on this computer");
-        rememberLabel.setStyleName("font-80em");
-        rememberLabel.addStyleName("display-inline");
-
-        // password Label
-        passwordLabel = new Label("Password");
-        passwordLabel.setStyleName("font-90em");
-        passwordLabel.addStyleName("display-inline");
-
-        // input table
-        inputTable = new FlexTable();
-        inputTable.setWidth("365px");
+        // login message panel
+        loginMessagePanel = new HTML();
+        loginMessagePanel.setStyleName("login_message_panel");
+        loginMessagePanel.setHTML(
+                "The Joint BioEnergy Institute (<a href=\"http://www.jbei.org\" target=\"_blank\">JBEI</a>) "
+                        + "is a San Francisco Bay Area scientific partnership led by "
+                        + "<a href=\"http://www.lbl.gov\" target=\"_blank\">Lawrence Berkeley National Laboratory</a> "
+                        + "and including the <a href=\"http://www.sandia.gov\" target=\"_blank\">"
+                        + "Sandia National Laboratories</a>, the "
+                        + "<a href=\"http://www.universityofcalifornia.edu\" target=\"_blank\">University of "
+                        + "California</a> campuses of Berkeley and Davis, the "
+                        + "<a href=\"http://carnegiescience.edu\" target=\"_blank\">Carnegie Institution for "
+                        + "Science</a>, <a href=\"http://www.llnl.gov\" target=\"_blank\">"
+                        + "Lawrence Livermore National Laboratory</a>, and "
+                        + "<a href=\"http://www.pnnl.gov\" target=\"_blank\">Pacific Northwest National Laboratory</a>."
+                        + "<p>JBEI's primary scientific mission is to advance the development of the next generation "
+                        + "of biofuels - drop-in liquid fuels derived from the solar energy stored in plant biomass. "
+                        + "JBEI is one of three U.S. <a href=\"http://energy.gov\" target=\"_blank\">Department of "
+                        + "Energy</a> Bioenergy Research Centers.");
     }
 
-    protected Widget createContents() {
-        mainPanel = new FlowPanel();
-        mainPanel.add(createLoginWidget());
-        return mainPanel;
+    private void addKeyHandlerToClearErrorInput(final TextBox box) {
+        box.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                if (box.getText().isEmpty() || box.getText().length() > 1)
+                    return;
+
+                if (box.getStyleName().contains("login_input_error"))
+                    box.removeStyleName("login_input_error");
+            }
+        });
     }
 
     private Widget createLoginWidget() {
-        FlowPanel panel = new FlowPanel();
-        panel.setStyleName("login_panel");
         loginTable = new FlexTable();
-        loginTable.setStyleName("login_table");
+        loginTable.setStyleName("login_layout");
         loginTable.setCellPadding(0);
         loginTable.setCellSpacing(0);
-        loginTable.setHTML(1, 0, "<b>LOG IN</b>");
-        loginTable.getCellFormatter().setStyleName(1, 0, "pad-15");
 
-        loginTable.setHTML(2, 0, "<div style=\"height: 2px; background-color: #0082C0;"
-                + "-webkit-box-shadow: 0px 1px 1px #999\"></div>"); // TODO : move it to styles
+        loginTable.setWidget(0, 0, loginMessagePanel);
+        loginTable.setHTML(0, 1, "&nbsp;");
+        loginTable.getFlexCellFormatter().setWidth(0, 1, "50px");
 
-        HTMLPanel userInputPanel = new HTMLPanel(
-                "<span><span class=\"font-90em\">Username</span><span id=\"register_link\" style=\"float: right\"></span></span><br><span id=\"user_login_input\"></span><div id=\"user_login_error_message\"></div>");
-        userInputPanel.add(loginInput, "user_login_input");
-        userInputPanel.add(loginErrorLabel, "user_login_error_message");
-        userInputPanel.add(registerLabel, "register_link");
+        String html = "<br><img src=\"static/images/logo.png\" /><br><br><br>"
+                + "<span id=\"user_login_input\"></span><br>"
+                + "<span id=\"user_password_input\"></span><br>"
+                + "<span id=\"remember_user_login_checkbox\"></span>"
+                + "<span class=\"font-80em\">"
+                + "Remember me on this computer</span><br>"
+                + "<span id=\"login_button\"></span> &nbsp; <span id=\"create_new_account\"></span>"
+                + "<div style=\"margin-top: 45px;\" id=\"forgot_password\"></div>";
+        HTMLPanel htmlPanel = new HTMLPanel(html);
+        htmlPanel.add(loginInput, "user_login_input");
+        htmlPanel.add(passwordInput, "user_password_input");
+        htmlPanel.add(remember, "remember_user_login_checkbox");
+        htmlPanel.add(submitButton, "login_button");
+        htmlPanel.add(registerLabel, "create_new_account");
+        htmlPanel.add(forgotPasswordLabel, "forgot_password");
+        loginTable.setWidget(0, 2, htmlPanel);
 
-        HTMLPanel passwordInputPanel = new HTMLPanel(
-                "<span><span id=\"password_label\"></span><span id=\"forgot_password_link\" style=\"float: right\"></span></span><br><span id=\"user_password_input\"></span><div id=\"user_password_error_message\"></div>");
-
-        passwordInputPanel.add(passwordInput, "user_password_input");
-        passwordInputPanel.add(passwordErrorLabel, "user_password_error_message");
-        passwordInputPanel.add(forgotPasswordLabel, "forgot_password_link");
-        passwordInputPanel.add(passwordLabel, "password_label");
-
-        inputTable.setWidget(0, 0, userInputPanel);
-        inputTable.setHTML(1, 0, "&nbsp;");
-        inputTable.setWidget(2, 0, passwordInputPanel);
-
-        loginTable.setWidget(3, 0, inputTable);
-        loginTable.getFlexCellFormatter().setStyleName(3, 0, "pad-40");
-        HTMLPanel submitPanel = new HTMLPanel(
-                "<span id=\"login_button\"></span> <span id=\"remember_user_login_checkbox\"></span> <span id=\"remember_user_label\"></span>");
-        submitPanel.add(submitButton, "login_button");
-        submitPanel.add(remember, "remember_user_login_checkbox");
-        submitPanel.add(rememberLabel, "remember_user_label");
-
-        loginTable.setWidget(4, 0, submitPanel);
-        loginTable.getFlexCellFormatter().setStyleName(4, 0, "pad-left-40");
-
-        panel.add(loginTable);
-        return panel;
+        return loginTable;
     }
 
     protected Widget createFooter() {
@@ -171,9 +161,10 @@ public class LoginView extends Composite implements ILoginView {
     }
 
     @Override
-    public void setSubmitClickHandler(ClickHandler handler) {
+    public void setLoginHandler(ClickHandler handler) {
         if (submitRegistration != null)
             submitRegistration.removeHandler();
+
         submitRegistration = submitButton.addClickHandler(handler);
     }
 
@@ -201,28 +192,27 @@ public class LoginView extends Composite implements ILoginView {
 
     @Override
     public void setLoginNameError(String errorMsg) {
-        loginErrorLabel.setText(errorMsg);
         loginInput.addStyleName("login_input_error");
-        loginErrorLabel.setVisible(true);
+        loginInput.getElement().setAttribute("placeHolder", errorMsg);
     }
 
     @Override
     public void setLoginPassError(String errorMsg) {
-        passwordErrorLabel.setText(errorMsg);
         passwordInput.addStyleName("login_input_error");
-        passwordErrorLabel.setVisible(true);
+        passwordInput.setText("");
+        passwordInput.getElement().setAttribute("placeHolder", errorMsg);
     }
 
     @Override
     public void clearErrorMessages() {
-        loginErrorLabel.setVisible(false);
         passwordInput.removeStyleName("login_input_error");
         loginInput.removeStyleName("login_input_error");
-        passwordErrorLabel.setVisible(false);
+        passwordInput.getElement().setAttribute("placeHolder", "Password");
+        loginInput.getElement().setAttribute("placeHolder", "Username");
     }
 
     @Override
-    public void addForgotPasswordHandler(ClickHandler forgotPasswordHandler) {
+    public void addForgotPasswordLinkHandler(ClickHandler forgotPasswordHandler) {
         forgotPasswordLabel.addClickHandler(forgotPasswordHandler);
         forgotPasswordLabel.setVisible(true);
     }
@@ -235,39 +225,42 @@ public class LoginView extends Composite implements ILoginView {
 
     @Override
     public void switchToForgotPasswordMode() {
-        submitButton.setText("Submit");
-        remember.setVisible(false);
-        rememberLabel.setVisible(false);
-
-        inputTable.getFlexCellFormatter().setVisible(1, 0, false);
-        inputTable.getFlexCellFormatter().setVisible(2, 0, false);
-        loginTable.setHTML(1, 0, "<b>PASSWORD REMINDER</b>");
+        forgotPasswordPanel.reset();
+        loginTable.setWidget(0, 2, forgotPasswordPanel);
     }
 
     @Override
     public void switchToRegisterMode(ClickHandler submitHandler, ClickHandler cancelHandler) {
-        regiPanel = new RegistrationPanel();
-        regiPanel.getPresenter().addCancelHandler(cancelHandler);
-        regiPanel.getPresenter().addSubmitHandler(submitHandler);
-        mainPanel.clear();
-        mainPanel.add(regiPanel);
+        registrationPanel = new RegistrationPanel();
+        registrationPanel.getPresenter().addCancelHandler(cancelHandler);
+        registrationPanel.getPresenter().addSubmitHandler(submitHandler);
+        loginTable.setWidget(0, 2, registrationPanel);
     }
 
     @Override
-    public void informOfDuplidateRegistrationEmail() {
-        if (regiPanel == null)
+    public void informOfDuplicateRegistrationEmail() {
+        if (registrationPanel == null)
             return;
-        regiPanel.showAlreadyRegisteredEmailAlert();
+        registrationPanel.showAlreadyRegisteredEmailAlert();
+    }
+
+    @Override
+    public void setResetPasswordHandler(ClickHandler handler) {
+        forgotPasswordPanel.setSubmitClickHandler(handler);
     }
 
     @Override
     public void switchToLoginMode() {
-        mainPanel.clear();
-        mainPanel.add(createLoginWidget());
+        layout.setWidget(0, 0, createLoginWidget());
     }
 
     @Override
     public RegistrationDetails getRegistrationDetails() {
-        return regiPanel.getDetails();
+        return registrationPanel.getDetails();
+    }
+
+    @Override
+    public String getForgotPasswordLogin() {
+        return forgotPasswordPanel.getLogin();
     }
 }

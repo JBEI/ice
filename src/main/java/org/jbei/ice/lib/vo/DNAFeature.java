@@ -9,9 +9,8 @@ import org.jbei.ice.lib.models.SequenceFeature;
 /**
  * Value object to hold a combination of {@link SequenceFeature} and
  * {@link org.jbei.ice.lib.models.Feature Feature} data.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham
- * 
  */
 public class DNAFeature implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -20,22 +19,12 @@ public class DNAFeature implements Serializable {
     private String name = "";
     private int strand = 1;
     private String annotationType;
-    private List<DNAFeatureNote> notes = new LinkedList<DNAFeatureNote>();
-    private List<DNAFeatureLocation> locations = new LinkedList<DNAFeatureLocation>();
+    private String uri;
+    private List<DNAFeatureNote> notes = new LinkedList<>();
+    private List<DNAFeatureLocation> locations = new LinkedList<>();
 
     public DNAFeature() {
         super();
-    }
-
-    public DNAFeature(String type, String name, int strand, List<DNAFeatureNote> notes,
-            String annotationType) {
-        super();
-
-        this.type = type;
-        this.name = name;
-        this.strand = strand;
-        this.notes = notes;
-        this.annotationType = annotationType; // Is this used?
     }
 
     public String getType() {
@@ -88,5 +77,13 @@ public class DNAFeature implements Serializable {
 
     public List<DNAFeatureLocation> getLocations() {
         return locations;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 }

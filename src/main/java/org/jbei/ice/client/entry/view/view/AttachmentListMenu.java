@@ -2,8 +2,9 @@ package org.jbei.ice.client.entry.view.view;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
 
@@ -40,7 +41,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
     private final Button saveAttachment;
     private final Widget attachmentForm;
     private final AttachmentListMenuPresenter presenter;
-    private final Image quickAdd;
+    private final Icon quickAdd;
     private long entryId;
     private final TextArea attachmentDescription;
     private HasAttachmentDeleteHandler handler;
@@ -51,12 +52,13 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
-        layout.addStyleName("attachment_list_menu");
+        layout.addStyleName("entry_attribute");
         HorizontalPanel panel = new HorizontalPanel();
-        panel.add(new HTML("Attachments"));
+        panel.add(new HTML("<i class=\"" + FAIconType.PAPER_CLIP.getStyleName()
+                                   + " font-80em\"></i> &nbsp;Attachments"));
 
-        quickAdd = ImageUtil.getPlusIcon();
-        quickAdd.setStyleName("collection_quick_add_image");
+        quickAdd = new Icon(FAIconType.PLUS_SIGN);
+        quickAdd.addStyleName("edit_icon");
         attachmentDescription = new TextArea();
         attachmentDescription.setStyleName("attachment_description_input");
         attachmentDescription.getElement().setAttribute("placeholder", "Enter File Description");
@@ -69,13 +71,13 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         attachmentForm = createAddToAttachment();
 
         layout.setWidget(0, 0, panel);
-        layout.getCellFormatter().setStyleName(0, 0, "entry_view_sub_menu_header");
+        layout.getCellFormatter().setStyleName(0, 0, "entry_attributes_sub_header");
         layout.setWidget(1, 0, attachmentForm);
 
         attachmentForm.setVisible(false);
 
         // this is replaced when menu data is set
-        layout.setHTML(2, 0, "No attachments available");
+        layout.setHTML(2, 0, "&nbsp;");
         layout.getCellFormatter().setStyleName(2, 0, "font-75em");
         layout.getCellFormatter().addStyleName(2, 0, "pad-6");
 
@@ -87,6 +89,10 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         return quickAdd.addClickHandler(handler);
     }
 
+    public void setCanEdit(boolean visible) {
+        quickAdd.setVisible(visible);
+    }
+
     /**
      * sets the attachment upload form visibility and the corresponding button user clicks to enable/disable it
      */
@@ -96,12 +102,8 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             return;
 
         if (attachmentForm.isVisible()) {
-            quickAdd.setUrl(ImageUtil.getPlusIcon().getUrl());
-            quickAdd.setStyleName("collection_quick_add_image");
             attachmentForm.setVisible(false);
         } else {
-            quickAdd.setUrl(ImageUtil.getMinusIcon().getUrl());
-            quickAdd.setStyleName("collection_quick_add_image");
             attachmentForm.setVisible(true);
         }
     }
@@ -117,9 +119,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         }
 
         if (items.isEmpty()) {
-            layout.setHTML(2, 0, "No attachments available");
-            layout.getCellFormatter().setStyleName(2, 0, "font-75em");
-            layout.getCellFormatter().addStyleName(2, 0, "pad-6");
+            reset();
             return;
         }
 
@@ -134,11 +134,16 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         }
     }
 
-    /**
-     * Add attachment item to the menu
-     *
-     * @param item
-     */
+    public void reset() {
+        for (int i = 2; i < layout.getRowCount(); i += 1)
+            layout.removeRow(i);
+
+        layout.setHTML(2, 0, "<i>No attachments available</i>");
+        layout.getCellFormatter().setStyleName(2, 0, "font-75em");
+        layout.getCellFormatter().addStyleName(2, 0, "pad-6");
+        presenter.reset();
+    }
+
     @Override
     public void addMenuItem(AttachmentItem item, int itemCount) {
         int row;
@@ -155,8 +160,11 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         layout.setWidget(row, 0, cell);
     }
 
-    protected Widget createAddToAttachment() {
+    public ArrayList<AttachmentItem> getAttachmentItems() {
+        return presenter.getAttachmentItems();
+    }
 
+    protected Widget createAddToAttachment() {
         final VerticalPanel vPanel = new VerticalPanel();
         vPanel.setWidth("180px");
 
@@ -183,7 +191,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             public void onStart(IUploader uploader) {
                 String attDesc = attachmentDescription.getText().trim();
                 uploader.setServletPath("servlet.gupld?desc=" + attDesc + "&eid="
-                                                + entryId + "&type=attachment&sid=" + AppController.sessionId);
+                                                + entryId + "&type=attachment&sid=" + ClientController.sessionId);
                 attachmentDescription.setVisible(false);
             }
         });
@@ -241,13 +249,12 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
     private class MenuCell extends Composite implements HasMouseOverHandlers, HasMouseOutHandlers {
 
-        private final Image delete;
+        private final Icon delete;
         private final HTMLPanel panel;
         private final AttachmentItem item;
         private final Label fileName;
 
         public MenuCell(AttachmentItem item) {
-
             String name = item.getName();
             if (name.length() > 20) {
                 name = (name.substring(0, 18) + "...");
@@ -256,12 +263,15 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             this.item = item;
             fileName = new Label(name);
             fileName.setStyleName("display-inline");
-            delete = ImageUtil.getDeleteIcon();
+            delete = new Icon(FAIconType.TRASH);
             delete.setVisible(false);
 
-            String description = (item.getDescription() == null || item.getDescription()
-                                                                       .isEmpty()) ? "No description provided"
-                    : item.getDescription();
+            String description;
+            if (item.getDescription() == null || item.getDescription().isEmpty())
+                description = "No description provided";
+            else
+                description = item.getDescription();
+
             String html = "<span class=\"collection_user_menu\"><span id=\"attachment_file_name\"></span>"
                     + "<span id=\"delete_link\" style=\"cursor: pointer; float: right\"></span></span><br>";
 

@@ -1,19 +1,20 @@
 package org.jbei.ice.test.parsers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-import org.jbei.ice.lib.parsers.IceGenbankParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
+import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
 import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
+
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class IceGenbankParserTest {
 

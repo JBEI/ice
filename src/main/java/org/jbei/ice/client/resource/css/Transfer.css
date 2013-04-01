@@ -1,0 +1,78 @@
+.subMenuTransfer {
+    height: 28px;
+    cursor: pointer;
+    color: #393939;
+    font-weight: bold;
+    font-size: 0.75em;
+    text-align: center;
+    border-radius: 2px;
+    font-family: Arial;
+    border-top: 2px solid #f1f1f1;
+    border: 1px solid #A5A5A5;
+    background-image: -webkit-linear-gradient(top, #FEFEFE, #F2F2F2);
+    background-image: -o-linear-gradient(top, #FEFEFE, #F2F2F2);
+    background-image: linear-gradient(to bottom, #FEFEFE, #F2F2F2);
+    background-image: -moz-linear-gradient(top, #FEFEFE, #F2F2F2);
+}
+
+.subMenuTransfer:hover {
+    border-top: 2px solid #0082C0;
+    background-color: #f2f2f2;
+    color: #111;
+    box-shadow: 0 0 1px 1px #ddd;
+}
+
+.subMenuTransfer[disabled] {
+    height: 28px;
+    color: #393939;
+    font-weight: bold;
+    font-size: 0.75em;
+    text-align: center;
+    background-color: #c2c2c2;
+    border-top: 2px solid #f1f1f1;
+    border: 1px solid #c2c2c2;
+    border-radius: 2px;
+    font-family: Arial;
+    opacity: 0.4;
+    background-image: -webkit-linear-gradient(top, #f1f1f1, #F2F2F2);
+    background-image: -o-linear-gradient(top, #f1f1f1, #F2F2F2);
+    background-image: linear-gradient(to bottom, #f1f1f1, #F2F2F2);
+    background-image: -moz-linear-gradient(top, #f1f1f1, #F2F2F2);
+}
+
+.subMenuTransfer[disabled]:hover {
+    cursor: default;
+    box-shadow: 0 0 0 0 #ddd;
+    border-top: 2px solid #f1f1f1;
+    border-top: 1px solid #c2c2c2;
+}
+
+.cellListKeyboardSelectedItem {
+}
+
+.cellListOddItem, .cellListEvenItem {
+    padding: 4px;
+    padding-left: 10px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.cellListSelectedItem {
+    background-color: #F1F1F1;
+    border: 1px solid #BBB;
+    color: #333;
+}
+
+.cellListOddItem:hover, .cellListEvenItem:hover {
+    background-color: #ededed;
+}
+
+.cellListWidget {
+    background-color: #FFF;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    width: 120px;
+    font-family: Arial;
+    font-size: 13px;
+}

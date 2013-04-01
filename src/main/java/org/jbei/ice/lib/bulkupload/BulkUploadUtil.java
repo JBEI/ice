@@ -1,30 +1,19 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.attachment.Attachment;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.server.ModelToInfoFactory;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * Utility class for Bulk Import
@@ -32,10 +21,8 @@ import org.jbei.ice.shared.dto.GroupInfo;
  * @author Hector Plahar
  */
 public class BulkUploadUtil {
-    private final static String TMP_DIR = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
 
-    public static BulkUploadInfo modelToInfo(BulkUpload model) {
-
+    public static BulkUploadInfo modelToInfo(BulkUpload model, int size) {
         BulkUploadInfo info = new BulkUploadInfo();
         Account draftAccount = model.getAccount();
         AccountInfo accountInfo = new AccountInfo();
@@ -46,74 +33,18 @@ public class BulkUploadUtil {
 
         info.setId(model.getId());
         info.setLastUpdate(model.getLastUpdateTime());
-        info.setCount(model.getContents().size());
+        info.setCount(size);
         info.setType(EntryAddType.stringToType(model.getImportType()));
         info.setCreated(model.getCreationTime());
         info.setName(model.getName());
-        Group group = model.getReadGroup();
-
-        if (group != null) {
-            GroupInfo groupInfo = new GroupInfo();
-            groupInfo.setUuid(group.getUuid());
-            groupInfo.setLabel(group.getLabel());
-            groupInfo.setId(group.getId());
-            info.setGroupInfo(groupInfo);
-        }
         return info;
     }
 
-    public static EntryInfo toEntryInfo(AttachmentController attachmentController,
-            SequenceController sequenceController, Account account, Entry entry, Entry enclosed) {
-
-        ArrayList<Attachment> attachments = null;
-        try {
-            attachments = attachmentController.getByEntry(account, entry);
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
-
-        boolean hasSequence = false;
-        try {
-            hasSequence = sequenceController.getByEntry(entry) != null;
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
-
-        // convert to info object (no samples or trace sequences since bulk import does not have the ui for
-        // it yet)
-        EntryInfo entryInfo = ModelToInfoFactory.getInfo(account, entry, attachments, null, null, hasSequence);
-        if (entryInfo != null && enclosed != null) {
-            attachments = null;
-            try {
-                attachments = attachmentController.getByEntry(account, entry);
-            } catch (ControllerException e) {
-                Logger.error(e);
-            }
-
-            hasSequence = false;
-            try {
-                hasSequence = sequenceController.getByEntry(entry) != null;
-            } catch (ControllerException e) {
-                Logger.error(e);
-            }
-
-            // convert to info object (no samples or trace sequences since bulk import does not have the ui for
-            // it yet)
-            EntryInfo enclosedInfo = ModelToInfoFactory.getInfo(account, enclosed, attachments, null, null,
-                                                                hasSequence);
-            entryInfo.setInfo(enclosedInfo);
-        }
-        return entryInfo;
-    }
-
     public static Entry getPartNumberForStrainPlasmid(Account account, EntryController controller, String text) {
-
-        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                "WIKILINK_PREFIX") + ":.*?\\]\\]");
-        Pattern partNumberPattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                "WIKILINK_PREFIX") + ":(.*)\\]\\]");
-        Pattern descriptivePattern = Pattern.compile("\\[\\[" + JbeirSettings.getSetting(
-                "WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
+        String wikiLinkPrefix = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
+        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLinkPrefix + ":.*?\\]\\]");
+        Pattern partNumberPattern = Pattern.compile("\\[\\[" + wikiLinkPrefix + ":(.*)\\]\\]");
+        Pattern descriptivePattern = Pattern.compile("\\[\\[" + wikiLinkPrefix + ":(.*)\\|(.*)\\]\\]");
 
         if (text == null) {
             return null;
@@ -144,19 +75,5 @@ public class BulkUploadUtil {
             }
         }
         return null;
-    }
-
-    public static InputStream getFileInputStream(String fileName) {
-
-        File file = new File(TMP_DIR + File.separator + fileName);
-        if (!file.exists())
-            return null;
-
-        try {
-            return new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            Logger.error(e);
-            return null;
-        }
     }
 }

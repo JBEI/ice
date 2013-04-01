@@ -1,23 +1,60 @@
-@sprite .dropDownAdd {
-	gwt-image: 'sortDown';
-    background-position: 64px 9px;
-    padding-right: 11px;
-    height: 24px;
-    width: 80px;
-    background-color: #F1F1F1;
-    font-family: Arial;
+.buttonAddTo {
+    border-right: 0px;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    width: 90px;
 }
 
-.subMenuRemove {
-	height: 24px;
+.buttonAddTo:hover i > icon-plus {
+    color: #709F35
+}
+
+.buttonRemove {
     width: 80px;
 }
 
-@sprite .dropDownMove {
-	gwt-image: 'sortDown';
-	height: 24px;
-	width: 85px;
-	background-position: 63px 9px;
-	padding-right: 15px; 
-	background-color: #F1F1F1;
+.buttonMoveTo {
+    border-left: 0px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    width: 93px;
+    margin-right: 12px;
 }
+
+.buttonGroupItem {
+    cursor: pointer;
+    color: #393939;
+    font-weight: bold;
+    font-size: 0.75em;
+    text-align: center;
+    border-top: 2px solid #f1f1f1;
+    font-family: Arial, serif;
+    border: 1px solid #c2c2c2;
+    height: 28px;
+    background-image: -webkit-linear-gradient(top, #fefefe, #F2F2F2);
+    background-image: -o-linear-gradient(top, #fefefe, #F2F2F2);
+    background-image: linear-gradient(to bottom, #fefefe, #F2F2F2);
+    background-image: -moz-linear-gradient(top, #fefefe, #F2F2F2);
+}
+
+.buttonGroupItem:hover {
+    border-top: 2px solid #0082C0;
+    background-color: #f2f2f2;
+    color: #0f3f33;
+}
+
+.buttonGroupItem[disabled] {
+    opacity: 0.4;
+    background-image: -webkit-linear-gradient(top, #f1f1f1, #F2F2F2);
+    background-image: -o-linear-gradient(top, #f1f1f1, #F2F2F2);
+    background-image: linear-gradient(to bottom, #f1f1f1, #F2F2F2);
+    background-image: -moz-linear-gradient(top, #f1f1f1, #F2F2F2);
+}
+
+.buttonGroupItem[disabled]:hover {
+    color: #393939;
+    border-top: 2px solid #f1f1f1;
+    cursor: default;
+    border-top: 1px solid #c2c2c2;
+}
+

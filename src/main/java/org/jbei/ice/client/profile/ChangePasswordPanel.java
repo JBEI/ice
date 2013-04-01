@@ -38,6 +38,7 @@ public class ChangePasswordPanel extends Composite implements IChangePasswordVie
         initComponents();
         createInputTable();
         initWidget(inputTable);
+        inputTable.setStyleName("margin-top-20");
         presenter = new ChangePasswordPresenter(this);
     }
 
@@ -73,7 +74,8 @@ public class ChangePasswordPanel extends Composite implements IChangePasswordVie
         passwordPanel = new HTMLPanel(
                 "<span id=\"password_input_box\"></span> <span id=\"password_input_box_error_msg\"></span>");
         passwordConfirmPanel = new HTMLPanel(
-                "<span id=\"password_confirm_input_box\"></span> <span id=\"password_confirm_input_box_error_msg\"></span>");
+                "<span id=\"password_confirm_input_box\"></span> <span " +
+                        "id=\"password_confirm_input_box_error_msg\"></span>");
     }
 
     @Override
@@ -146,11 +148,8 @@ public class ChangePasswordPanel extends Composite implements IChangePasswordVie
     private Widget createInputTable() {
 
         // password
-        inputTable
-                .setHTML(
-                    0,
-                    0,
-                    "<span class=\"font-80em\" style=\"white-space:nowrap\">Password <span class=\"required\">*</span></span>");
+        inputTable.setHTML(0, 0, "<span class=\"font-80em\" style=\"white-space:nowrap\"> "
+                + "New Password <span class=\"required\">*</span></span>");
         inputTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
         inputTable.getFlexCellFormatter().setWidth(0, 0, "150px");
         passwordPanel.add(password, "password_input_box");
@@ -158,11 +157,8 @@ public class ChangePasswordPanel extends Composite implements IChangePasswordVie
         inputTable.setWidget(0, 1, passwordPanel);
 
         // password confirm
-        inputTable
-                .setHTML(
-                    1,
-                    0,
-                    "<span class=\"font-80em\" style=\"white-space:nowrap\">Confirm <span class=\"required\">*</span></span>");
+        inputTable.setHTML(1, 0, "<span class=\"font-80em\" style=\"white-space:nowrap\">"
+                + "Confirm Password <span class=\"required\">*</span></span>");
         inputTable.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         inputTable.getFlexCellFormatter().setWidth(1, 0, "150px");
         passwordConfirmPanel.add(passwordConfirm, "password_confirm_input_box");

@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Dialog box for using vector editor
- * 
+ *
  * @author Hector Plahar
  */
 public class VectorEditorDialog extends DialogBox {

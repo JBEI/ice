@@ -9,8 +9,7 @@ public class BulkUploadMenuItem extends OptionSelect {
     private String type;
     private String email;
 
-    public BulkUploadMenuItem(long id, String name, long count, String datetime, String type,
-            String email) {
+    public BulkUploadMenuItem(long id, String name, long count, String datetime, String type, String email) {
         super(id, name);
         this.setCount(count);
         this.setDateTime(datetime);

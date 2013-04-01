@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.view.view;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,7 +11,7 @@ import com.google.gwt.user.client.Window;
 
 /**
  * Presenter for the attachment list menu
- * 
+ *
  * @author Hector Plahar
  */
 public class AttachmentListMenuPresenter {
@@ -26,10 +28,16 @@ public class AttachmentListMenuPresenter {
     private final IAttachmentListMenuView view;
     private HandlerRegistration quickAddHandler;
     private int itemCount;
+    private final ArrayList<AttachmentItem> list;
 
     public AttachmentListMenuPresenter(IAttachmentListMenuView view) {
         this.view = view;
         addClickHandlers();
+        list = new ArrayList<AttachmentItem>();
+    }
+
+    public ArrayList<AttachmentItem> getAttachmentItems() {
+        return list;
     }
 
     protected void addClickHandlers() {
@@ -49,13 +57,18 @@ public class AttachmentListMenuPresenter {
         if (item == null)
             return;
 
+        list.add(item);
         view.addMenuItem(item, itemCount);
         itemCount += 1;
     }
 
+    public void reset() {
+        list.clear();
+        itemCount = 0;
+    }
+
     /**
-     * @param item
-     *            attachment item in the cell being clicked on
+     * @param item attachment item in the cell being clicked on
      * @return Clickhandler for each cell in the attachment list menu
      *         to download
      */
@@ -64,14 +77,12 @@ public class AttachmentListMenuPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                Window.Location.replace("/download?type=attachment&name=" + item.getName() + "&id="
-                        + item.getFileId());
+                Window.Location.replace("/download?type=attachment&name=" + item.getName() + "&id=" + item.getFileId());
             }
         };
     }
 
-    public ClickHandler getDeleteClickHandler(final HasAttachmentDeleteHandler handler,
-            final AttachmentItem item) {
+    public ClickHandler getDeleteClickHandler(final HasAttachmentDeleteHandler handler, final AttachmentItem item) {
         return new ClickHandler() {
 
             @Override

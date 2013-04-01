@@ -24,7 +24,7 @@ public class Comment implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -45,7 +45,6 @@ public class Comment implements IModel {
     private Date creationTime;
 
     public Comment() {
-
     }
 
     public Comment(Entry entry, Account account, String body) {

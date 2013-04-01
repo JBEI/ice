@@ -4,9 +4,8 @@ import java.io.Serializable;
 
 /**
  * Value object for sequence trace data.
- * 
+ *
  * @author Ziovii Dmytriv
- * 
  */
 public class TraceData implements Serializable {
     private static final long serialVersionUID = 1L;

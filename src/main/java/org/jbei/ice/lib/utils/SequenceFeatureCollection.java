@@ -13,14 +13,13 @@ import org.jbei.ice.lib.models.SequenceFeature;
 
 /**
  * Container class for {@link SequenceFeature} objects.
- * <p>
+ * <p/>
  * Implement the Collection class and add some useful SequenceFeature specific convenience methods.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 public class SequenceFeatureCollection implements Cloneable, Collection<SequenceFeature>,
-        Serializable, Set<SequenceFeature> {
+                                                  Serializable, Set<SequenceFeature> {
 
     private static final long serialVersionUID = 1L;
     private final ArrayList<SequenceFeature> sequenceFeatures = new ArrayList<SequenceFeature>();
@@ -35,9 +34,8 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
 
     /**
      * Constructor that takes a Collection of {@link SequenceFeature}s.
-     * 
-     * @param c
-     *            Collection of SequenceFeatures.
+     *
+     * @param c Collection of SequenceFeatures.
      */
     public SequenceFeatureCollection(Collection<SequenceFeature> c) {
         if (c == null) {
@@ -48,11 +46,11 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
     }
 
     // unique methods
+
     /**
      * Determine if the given {@link Feature} exists.
-     * 
-     * @param feature
-     *            Feature to find.
+     *
+     * @param feature Feature to find.
      * @return True if a feature with the same sequence as the given feature exists.
      */
     public boolean exists(Feature feature) {
@@ -67,9 +65,8 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
     /**
      * Determine if the given {@link org.jbei.ice.lib.models.SequenceFeature.AnnotationType
      * SequenceFeature.AnnotationType} exists.
-     * 
-     * @param flag
-     *            AnnotationType to find.
+     *
+     * @param flag AnnotationType to find.
      * @return True if a feature with the given AnnotationType exists.
      */
     public boolean exists(SequenceFeature.AnnotationType flag) {
@@ -83,9 +80,8 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
 
     /**
      * Retrieve a list of {@link SequenceFeature}s with the identical hash as the given feature.
-     * 
-     * @param feature
-     *            Feature to find.
+     *
+     * @param feature Feature to find.
      * @return List of {@link SequenceFeature}s.
      */
     public List<SequenceFeature> get(Feature feature) {
@@ -102,9 +98,8 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * Retrieve a list of {@link SequenceFeature}s with the given
      * {@link org.jbei.ice.lib.models.SequenceFeature.AnnotationType SequenceFeature.AnnotationType}
      * .
-     * 
-     * @param flag
-     *            AnnotationType to search for.
+     *
+     * @param flag AnnotationType to search for.
      * @return List of SequenceFeatures.
      */
     public List<SequenceFeature> get(SequenceFeature.AnnotationType flag) {
@@ -119,9 +114,8 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
 
     /**
      * Retrieve a list of {@link SequenceFeature}s with the given sequence string.
-     * 
-     * @param sequenceString
-     *            sequence to search for.
+     *
+     * @param sequenceString sequence to search for.
      * @return List of SequenceFeatures.
      */
     public List<SequenceFeature> getBySequence(String sequenceString) {
@@ -137,9 +131,8 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
 
     /**
      * Retrieve the {@link SequenceFeature}s that contain the given sequence position.
-     * 
-     * @param genbankPosition
-     *            1 based position
+     *
+     * @param genbankPosition 1 based position
      * @return List of SequeceFeatures.
      */
     public List<SequenceFeature> getFeaturesAt(int genbankPosition) {

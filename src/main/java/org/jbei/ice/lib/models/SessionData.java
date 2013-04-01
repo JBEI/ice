@@ -1,9 +1,7 @@
 package org.jbei.ice.lib.models;
 
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.utils.Utils;
-
+import java.util.Calendar;
+import java.util.HashMap;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,8 +9,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.util.Calendar;
-import java.util.HashMap;
+
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.utils.Utils;
 
 /**
  * Store session information for a logged in user.
@@ -91,10 +91,7 @@ public class SessionData implements IModel {
     }
 
     private static String generateSessionKey(String secret) {
-        String temp = java.util.UUID.randomUUID().toString() + secret + ";"
-                + Calendar.getInstance().getTimeInMillis();
-
+        String temp = java.util.UUID.randomUUID().toString() + secret + ";" + Calendar.getInstance().getTimeInMillis();
         return Utils.encryptSHA(temp);
     }
-
 }

@@ -2,13 +2,21 @@ package org.jbei.ice.client;
 
 /**
  * Represents the major pages of the application
- * 
+ *
  * @author Hector Plahar
  */
 public enum Page {
-    LOGIN("login"), MAIN("main"), COLLECTIONS("collections"), ADD_ENTRY("add"), BULK_IMPORT("bulk"), ENTRY_VIEW(
-            "entry"), PROFILE("profile"), ADMIN("admin"), QUERY("query"), BLAST("blast"), DEBUG(
-            "debug"), LOGOUT("logout"), NEWS("news");
+    LOGIN("login"),
+    MAIN("main"),
+    COLLECTIONS("collections"),
+    ADD_ENTRY("add"),
+    BULK_IMPORT("bulk"),
+    ENTRY_VIEW("entry"),
+    PROFILE("profile"),
+    ADMIN("admin"),
+    QUERY("query"),
+    LOGOUT("logout"),
+    NEWS("news");
 
     private String token;
 

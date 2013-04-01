@@ -7,10 +7,16 @@ import java.util.Enumeration;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
-import org.jbei.ice.lib.utils.UtilityException;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.internal.SessionFactoryImpl;
+import org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider;
+import org.hibernate.service.jdbc.connections.spi.ConnectionProvider;
 
 /**
  * Ice servlet context listener for running initializing
@@ -19,19 +25,18 @@ import org.jbei.ice.lib.utils.UtilityException;
  * @author Hector Plahar
  */
 public class IceServletContextListener implements ServletContextListener {
-    private Thread jobThread;
 
     public void contextInitialized(ServletContextEvent event) {
         init();
     }
 
     public void contextDestroyed(ServletContextEvent event) {
-        Logger.info("DESTROYING CONTEXT");
+        Logger.info("Destroying Servlet Context");
 
-        if (jobThread != null) {
-            Logger.info("INTERRUPTING JOB THREAD");
-            jobThread.interrupt();
-        }
+        // shutdown executor service
+        IceExecutorService.getInstance().stopService();
+
+        closeSessionFactory(HibernateHelper.getSessionFactory());
 
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
@@ -45,23 +50,35 @@ public class IceServletContextListener implements ServletContextListener {
         }
     }
 
-    /**
-     * Start the job cue thread.
-     */
-    private void initializeQueueingSystem() {
-        JobCue jobCue = JobCue.getInstance();
-        jobThread = new Thread(jobCue);
-        jobThread.setPriority(Thread.MIN_PRIORITY);
-        jobThread.start();
+    // work
+    private void closeSessionFactory(SessionFactory factory) {
+        if (factory instanceof SessionFactoryImpl) {
+            SessionFactoryImpl sf = (SessionFactoryImpl) factory;
+            ConnectionProvider conn = sf.getConnectionProvider();
+            if (conn instanceof C3P0ConnectionProvider) {
+                ((C3P0ConnectionProvider) conn).close();
+            }
+        }
+        factory.close();
     }
 
     protected void init() {
-
-        initializeQueueingSystem();
         try {
+            HibernateHelper.beginTransaction();
             PopulateInitialDatabase.initializeDatabase();
-        } catch (UtilityException e) {
+            ApplicationController.upgradeDatabaseIfNecessary();
+            HibernateHelper.commitTransaction();
+
+            checkBlast();
+        } catch (Throwable e) {
+            HibernateHelper.rollbackTransaction();
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    protected void checkBlast() {
+        Logger.info("Checking blast database");
+        ApplicationController.scheduleBlastIndexRebuildTask(false);
     }
 }

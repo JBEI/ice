@@ -1,11 +1,10 @@
 package org.jbei.ice.lib.news;
 
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.models.News;
-
 import java.util.ArrayList;
 import java.util.Date;
+
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.dao.DAOException;
 
 /**
  * @auther Hector Plahar
@@ -20,7 +19,7 @@ public class NewsController {
     public News update(News news) throws ControllerException {
         news.setModificationTime(new Date(System.currentTimeMillis()));
         try {
-            return dao.save(news);
+            return dao.update(news);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

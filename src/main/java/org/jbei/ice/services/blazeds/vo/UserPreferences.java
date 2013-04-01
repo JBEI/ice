@@ -4,9 +4,8 @@ import java.io.Serializable;
 
 /**
  * Value object to store User Preferences for flex apps.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class UserPreferences implements Serializable {
     private static final long serialVersionUID = 2980171409897004909L;

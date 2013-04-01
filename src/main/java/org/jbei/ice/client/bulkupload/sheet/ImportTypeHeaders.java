@@ -1,30 +1,36 @@
 package org.jbei.ice.client.bulkupload.sheet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.sheet.header.*;
 import org.jbei.ice.shared.EntryAddType;
 
-// utility class for returning the headers for specific import type
+/**
+ * utility class for returning the headers for specific import type
+ *
+ * @author Hector Plahar
+ */
 public class ImportTypeHeaders {
 
-    public static BulkUploadHeaders getHeadersForType(EntryAddType type) {
-
+    public static BulkUploadHeaders getHeadersForType(EntryAddType type, EntryInfoDelegate delegate,
+            HashMap<String, String> preferences) {
         switch (type) {
             case STRAIN:
-                return new StrainHeaders();
+                return new StrainHeaders(delegate, preferences);
 
             case PLASMID:
-                return new PlasmidHeader();
+                return new PlasmidHeader(delegate, preferences);
 
             case PART:
-                return new PartHeader();
+                return new PartHeader(delegate, preferences);
 
             case ARABIDOPSIS:
-                return new ArabidopsisSeedHeaders();
+                return new ArabidopsisSeedHeaders(delegate, preferences);
 
             case STRAIN_WITH_PLASMID:
-                return new StrainWithPlasmidHeaders();
+                return new StrainWithPlasmidHeaders(delegate, preferences);
 
             default:
                 return null;

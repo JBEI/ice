@@ -1,20 +1,18 @@
-function pagingInit()
-{
-	var nav = document.getElementById("nav");
-	var tabs = nav.getElementsByTagName("li");
-	for(ii = 0; ii < nav.length; ++ii) {
-		tabs[ii].className = "close";
-		aa = nav[ii].getElementsByTagName("a")
+function pagingInit() {
+    var nav = document.getElementById("nav");
+    var tabs = nav.getElementsByTagName("li");
+    for (ii = 0; ii < nav.length; ++ii) {
+        tabs[ii].className = "close";
+        aa = nav[ii].getElementsByTagName("a")
 //		aa.onclick = function() { activate(this.href); return false; }
-		if ( ii = 0 ) {
-			aa.className = "current";
-		}
-	}
-	print("DONE!");
+        if (ii = 0) {
+            aa.className = "current";
+        }
+    }
+    print("DONE!");
 }
 
-function pagingActivate(name)
-{
+function pagingActivate(name) {
 // 	var page
 //   if (curHeader.className=="close")
 //   {

@@ -6,11 +6,15 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 
 import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.FieldBridge;
+import org.hibernate.search.annotations.Indexed;
 
 /**
  * Stores the unique sequence for an {@link org.jbei.ice.lib.entry.model.Entry} object.
@@ -28,12 +32,13 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name = "sequences")
+@Indexed(index = "Sequence")
 @SequenceGenerator(name = "sequence", sequenceName = "sequences_id_seq", allocationSize = 1)
 public class Sequence implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "sequence")
@@ -54,17 +59,18 @@ public class Sequence implements IModel {
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "entries_id", nullable = true, unique = true)
+    @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
+            @org.hibernate.search.annotations.Parameter(name = "boolean", value = "hasSequence")
+    }))
     private Entry entry;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequence")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "sequence")
     @OrderBy("id")
     private Set<SequenceFeature> sequenceFeatures = new SequenceFeatureCollection();
 
-    public Sequence() {
-    }
+    public Sequence() {}
 
-    public Sequence(String sequence, String sequenceUser, String fwdHash, String revHash,
-            Entry entry) {
+    public Sequence(String sequence, String sequenceUser, String fwdHash, String revHash, Entry entry) {
         super();
 
         this.sequence = sequence;
@@ -95,7 +101,6 @@ public class Sequence implements IModel {
         } catch (UtilityException e) {
             setRevHash("");
         }
-
     }
 
     @XmlTransient
@@ -134,21 +139,6 @@ public class Sequence implements IModel {
         this.entry = entry;
     }
 
-//    @Override
-//    public void setSequenceFeatures(Set<SequenceFeature> inputSequenceFeatures) {
-//        // for JAXB webservices should be this way
-//        if (inputSequenceFeatures == null) {
-//            sequenceFeatures.clear();
-//
-//            return;
-//        }
-//
-//        if (inputSequenceFeatures != sequenceFeatures) {
-//            sequenceFeatures.clear();
-//            sequenceFeatures.addAll(inputSequenceFeatures);
-//        }
-//    }
-
     public Set<SequenceFeature> getSequenceFeatures() {
 
         /* Hibernate hack.
@@ -164,5 +154,9 @@ public class Sequence implements IModel {
             sequenceFeatures = newSequenceFeatures;
         }
         return sequenceFeatures;
+    }
+
+    public void setSequenceFeatures(Set<SequenceFeature> features) {
+        sequenceFeatures = features;
     }
 }

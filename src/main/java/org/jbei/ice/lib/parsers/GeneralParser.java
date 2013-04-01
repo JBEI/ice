@@ -1,9 +1,12 @@
 package org.jbei.ice.lib.parsers;
 
-import org.jbei.ice.lib.vo.IDNASequence;
-
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import org.jbei.ice.lib.parsers.fasta.FastaParser;
+import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
+import org.jbei.ice.lib.parsers.sbol.SbolParser;
+import org.jbei.ice.lib.vo.IDNASequence;
 
 /**
  * Helper class to set up a list of parsers to iterate over, to try to parse the input file.
@@ -32,7 +35,6 @@ public class GeneralParser {
         for (AbstractParser parser : parsers) {
             try {
                 parsedSequence = parser.parse(sequence);
-
                 break;
             } catch (InvalidFormatParserException e) {
                 // it's ok
@@ -48,7 +50,6 @@ public class GeneralParser {
         for (AbstractParser parser : parsers) {
             try {
                 parsedSequence = parser.parse(bytes);
-
                 break;
             } catch (InvalidFormatParserException e) {
                 // it's ok

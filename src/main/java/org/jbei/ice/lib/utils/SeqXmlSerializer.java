@@ -1,12 +1,8 @@
 package org.jbei.ice.lib.utils;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.Namespace;
-import org.dom4j.QName;
-import org.dom4j.tree.DefaultElement;
+import java.util.HashSet;
+import java.util.List;
+
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -19,8 +15,10 @@ import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
-import java.util.HashSet;
-import java.util.List;
+import org.dom4j.Element;
+import org.dom4j.Namespace;
+import org.dom4j.QName;
+import org.dom4j.tree.DefaultElement;
 
 /**
  * SeqXML serializer/deserializer.
@@ -45,23 +43,7 @@ public class SeqXmlSerializer {
     private static final String FEATURES = "features";
     private static final String COMPLEMENT = "complement";
     public static Namespace seqNamespace = new Namespace("seq", "http://jbei.org/sequence");
-    public static Namespace xsiNamespace = new Namespace("xsi",
-                                                         "http://www.w3.org/2001/XMLSchema-instance");
-
-    /**
-     * Generate seq-xml from the given {@link Sequence}.
-     *
-     * @param sequence Sequence to sereialize.
-     * @return Xml document.
-     * @throws UtilityException
-     */
-    public static Document serializeToSeqXml(Sequence sequence) throws UtilityException {
-        Document document = DocumentHelper.createDocument();
-
-        document.setRootElement(serializeToSeqXmlAsElement(sequence));
-
-        return document;
-    }
+    public static Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
     /**
      * Generate seq xml {@link Element} from the give {@link Sequence}.
@@ -73,7 +55,7 @@ public class SeqXmlSerializer {
     public static Element serializeToSeqXmlAsElement(Sequence sequence) throws UtilityException {
         Element seq = new DefaultElement("seq", seqNamespace);
 
-        HashSet<String> validGenbankTypes = new HashSet<String>();
+        HashSet<String> validGenbankTypes = new HashSet<>();
         initializeValidGenbankTypes(validGenbankTypes);
 
         seq.add(seqNamespace);
@@ -109,92 +91,16 @@ public class SeqXmlSerializer {
                 }
                 feature.add(new DefaultElement(COMPLEMENT, seqNamespace).addText(complement));
                 if (validGenbankTypes.contains(sequenceFeature.getGenbankType())) {
-                    feature.add(new DefaultElement("type", seqNamespace).addText(sequenceFeature
-                                                                                         .getGenbankType()));
+                    feature.add(new DefaultElement("type", seqNamespace).addText(sequenceFeature.getGenbankType()));
                 } else {
                     feature.add(new DefaultElement("type", seqNamespace).addText("misc_feature"));
                 }
 
                 for (AnnotationLocation location : sequenceFeature.getAnnotationLocations()) {
                     DefaultElement locations = new DefaultElement(LOCATION, seqNamespace);
-                    locations.add(new DefaultElement(GENBANK_START, seqNamespace).addText(String
-                                                                                                  .valueOf(
-                                                                                                          location
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                                  .getGenbankStart())));
-                    locations.add(new DefaultElement(END, seqNamespace).addText(String
-                                                                                        .valueOf(location.getEnd())));
+                    String genStart = String.valueOf(location.getGenbankStart());
+                    locations.add(new DefaultElement(GENBANK_START, seqNamespace).addText(genStart));
+                    locations.add(new DefaultElement(END, seqNamespace).addText(String.valueOf(location.getEnd())));
                     feature.add(locations);
                 }
                 for (SequenceFeatureAttribute sequenceFeatureAttribute : sequenceFeature
@@ -202,17 +108,15 @@ public class SeqXmlSerializer {
                     DefaultElement newAttribute = new DefaultElement(ATTRIBUTE, seqNamespace);
                     newAttribute.addText(sequenceFeatureAttribute.getValue());
                     newAttribute.addAttribute(NAME, sequenceFeatureAttribute.getKey());
-                    newAttribute.addAttribute(QUOTED, sequenceFeatureAttribute.getQuoted()
-                                                                              .toString());
+                    newAttribute.addAttribute(QUOTED, sequenceFeatureAttribute.getQuoted().toString());
                     feature.add(newAttribute);
                 }
-                sequence.getSequence();
-                String tempSequence = sequenceFeature.getFeature().getSequence();
                 int genbankStart = sequenceFeature.getUniqueGenbankStart();
                 int end = sequenceFeature.getUniqueEnd();
 
                 // this is needed because sometimes sequence stored in this local database
                 // is the reverse complement of what's being exported, and thus must be recalculated.
+                String tempSequence;
                 if (genbankStart > end) {
                     tempSequence = sequence.getSequence().trim()
                                            .substring(genbankStart - 1, sequence.getSequence().length());
@@ -231,28 +135,6 @@ public class SeqXmlSerializer {
             seq.add(features);
         }
         return seq;
-    }
-
-    /**
-     * Deserialize given xml to {@link Sequence} object.
-     *
-     * @param xml xml to parse.
-     * @return Sequence object.
-     * @throws UtilityException
-     */
-    public static Sequence parseSeqXml(String xml) throws UtilityException {
-        Document seqDocument = null;
-
-        try {
-            seqDocument = DocumentHelper.parseText(xml);
-        } catch (DocumentException e) {
-            throw new UtilityException(e);
-        }
-
-        Element seq = seqDocument.getRootElement();
-
-        return parseSeqXml(seq);
-
     }
 
     /**
@@ -286,8 +168,8 @@ public class SeqXmlSerializer {
 
                 @SuppressWarnings("unchecked")
                 List<Element> locations = featureElement.elements(LOCATION);
-                int genbankStart = 0;
-                int end = 0;
+                int genbankStart;
+                int end;
                 List<DNAFeatureLocation> dnaFeatureLocations = dnaFeature.getLocations();
                 for (Element location : locations) {
                     try {

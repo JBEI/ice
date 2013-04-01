@@ -1,46 +1,39 @@
 package org.jbei.ice.lib.utils;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.shared.dto.ConfigurationKey;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * Utility methods for file handling.
- * 
- * @author Zinovii Dmytriv, Timothy Ham
- * 
+ *
+ * @author Zinovii Dmytriv, Timothy Ham, Hector Plahar
  */
 public class FileUtils {
     /**
      * Read file specified by the path into a string.
-     * 
-     * @param path
-     *            Path of the file.
+     *
+     * @param path Path of the file.
      * @return Content of file as String.
      * @throws IOException
      * @throws FileNotFoundException
      */
-    public static String readFileToString(String path) throws IOException, FileNotFoundException {
+    public static String readFileToString(String path) throws IOException {
         return readFileToString(new File(path));
     }
 
     /**
      * Read the given {@link File} into a string.
-     * 
-     * @param file
-     *            File to read.
+     *
+     * @param file File to read.
      * @return File content as string.
      * @throws IOException
      * @throws FileNotFoundException
      */
-    public static String readFileToString(File file) throws IOException, FileNotFoundException {
+    public static String readFileToString(File file) throws IOException {
         StringBuilder contents = new StringBuilder();
 
         BufferedReader input = new BufferedReader(new FileReader(file));
@@ -66,33 +59,27 @@ public class FileUtils {
 
     /**
      * Write the given string content into a file with the specified path.
-     * 
-     * @param path
-     *            Path of the file to be written.
-     * @param content
-     *            Content of the file.
+     *
+     * @param path    Path of the file to be written.
+     * @param content Content of the file.
      * @throws FileNotFoundException
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public static void writeStringToFile(String path, String content) throws FileNotFoundException,
-            IOException, IllegalArgumentException {
+    public static void writeStringToFile(String path, String content) throws IOException, IllegalArgumentException {
         writeStringToFile(new File(path), content);
     }
 
     /**
      * Write the given string content into the given {@link File}.
-     * 
-     * @param file
-     *            File to write.
-     * @param content
-     *            Content of the file.
+     *
+     * @param file    File to write.
+     * @param content Content of the file.
      * @throws FileNotFoundException
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public static void writeStringToFile(File file, String content) throws FileNotFoundException,
-            IOException, IllegalArgumentException {
+    public static void writeStringToFile(File file, String content) throws IOException, IllegalArgumentException {
         if (file == null) {
             throw new IllegalArgumentException("File should not be null.");
         }
@@ -109,43 +96,59 @@ public class FileUtils {
             throw new IllegalArgumentException("File cannot be written: " + file);
         }
 
-        Writer output = new BufferedWriter(new FileWriter(file));
-        try {
+        try (Writer output = new BufferedWriter(new FileWriter(file))) {
             //FileWriter always assumes default encoding is OK!
             output.write(content);
-        } finally {
-            output.close();
+        }
+    }
+
+    /**
+     * Write the given {@link java.io.InputStream} to the file with the given fileName.
+     *
+     * @param fileName
+     * @param inputStream
+     * @throws java.io.IOException
+     * @throws org.jbei.ice.lib.dao.DAOException
+     *
+     */
+    public static void writeFile(File attDir, String fileName, InputStream inputStream) throws IOException {
+        File file = new File(attDir + File.separator + fileName);
+        if (!attDir.exists()) {
+            if (!attDir.mkdirs()) {
+                throw new IOException("Could not create attachment directory");
+            }
+        }
+
+        if (!file.exists()) {
+            if (!file.createNewFile()) {
+                throw new IOException("Could not create attachment file " + file.getName());
+            }
+        }
+
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            IOUtils.copy(inputStream, outputStream);
         }
     }
 
     /**
      * Save the given text to a file in the temporary directory, and alert the admin.
-     * <p>
+     * <p/>
      * Use this to capture interesting files and alert the admin of the fact.
-     * 
+     *
      * @param message
      * @param fileText
      * @param e
      * @throws UtilityException
      */
-    public static void recordAndReportFile(String message, String fileText, Exception e)
-            throws UtilityException {
-        String tempFileDirectory = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+    public static void recordAndReportFile(String message, String fileText, Exception e) throws UtilityException {
+        String tempFileDirectory = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         String filePath = tempFileDirectory + File.separator + Utils.generateUUID();
-
         message = "File has been written to: " + filePath + ". The caller message is :\n" + message;
         Logger.error(message, e);
-
         try {
             FileUtils.writeStringToFile(filePath, fileText);
-        } catch (FileNotFoundException e1) {
-            throw new UtilityException(e1);
-        } catch (IllegalArgumentException e1) {
-            throw new UtilityException(e1);
-        } catch (IOException e1) {
+        } catch (IllegalArgumentException | IOException e1) {
             throw new UtilityException(e1);
         }
-
     }
-
 }

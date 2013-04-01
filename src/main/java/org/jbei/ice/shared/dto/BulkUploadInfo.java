@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class BulkUploadInfo implements IsSerializable {
+public class BulkUploadInfo implements IDTOModel {
 
     private long id;
     private String name;
@@ -16,11 +16,12 @@ public class BulkUploadInfo implements IsSerializable {
     private Date created;
     private Date lastUpdate;
     private AccountInfo account;
-    private GroupInfo group;
     private ArrayList<EntryInfo> entryList;
+    private ArrayList<PreferenceInfo> preferences;
 
     public BulkUploadInfo() {
         entryList = new ArrayList<EntryInfo>();
+        preferences = new ArrayList<PreferenceInfo>();
     }
 
     public long getId() {
@@ -71,14 +72,6 @@ public class BulkUploadInfo implements IsSerializable {
         this.account = account;
     }
 
-    public GroupInfo getGroupInfo() {
-        return this.group;
-    }
-
-    public void setGroupInfo(GroupInfo info) {
-        this.group = info;
-    }
-
     public Date getLastUpdate() {
         return lastUpdate;
     }
@@ -91,8 +84,7 @@ public class BulkUploadInfo implements IsSerializable {
         return entryList;
     }
 
-    public void setEntryList(ArrayList<EntryInfo> entryList) {
-        this.entryList.clear();
-        this.entryList.addAll(entryList);
+    public ArrayList<PreferenceInfo> getPreferences() {
+        return preferences;
     }
 }

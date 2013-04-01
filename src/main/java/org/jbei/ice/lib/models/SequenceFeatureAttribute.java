@@ -1,23 +1,13 @@
 package org.jbei.ice.lib.models;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 
 /**
  * Store genbank style attributes.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 @Entity
 @Table(name = "sequence_feature_attribute")
@@ -26,7 +16,7 @@ public class SequenceFeatureAttribute implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "key", length = 511)
@@ -44,15 +34,6 @@ public class SequenceFeatureAttribute implements IModel {
 
     public SequenceFeatureAttribute() {
         super();
-    }
-
-    public SequenceFeatureAttribute(String key, String value, Boolean quoted,
-            SequenceFeature sequenceFeature) {
-        super();
-        setKey(key);
-        setValue(value);
-        setQuoted(quoted);
-        setSequenceFeature(sequenceFeature);
     }
 
     public long getId() {

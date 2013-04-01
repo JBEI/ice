@@ -8,8 +8,6 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 
-import org.hibernate.annotations.Cascade;
-
 /**
  * Store sample storage location information as well as the hierarchical structure information.
  * <p/>
@@ -71,7 +69,7 @@ public class Storage implements IModel {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -101,7 +99,7 @@ public class Storage implements IModel {
     @Lob
     private ArrayList<Storage> schemes;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "parent")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "parent", orphanRemoval = true)
     @OrderBy("id")
     private final Set<Storage> children = null;
 
@@ -109,8 +107,7 @@ public class Storage implements IModel {
         super();
     }
 
-    public Storage(String name, String description, StorageType storageType, String ownerEmail,
-            Storage parent) {
+    public Storage(String name, String description, StorageType storageType, String ownerEmail, Storage parent) {
         setName(name);
         setDescription(description);
         setStorageType(storageType);

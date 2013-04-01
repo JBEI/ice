@@ -11,11 +11,12 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
+import org.hibernate.search.annotations.Field;
+
 /**
  * Store Funding Source information.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 @Entity
 @Table(name = "funding_source")
@@ -24,24 +25,16 @@ public class FundingSource implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "funding_source", length = 255, nullable = false)
+    @Field
     private String fundingSource;
 
     @Column(name = "principal_investigator", length = 255, nullable = false)
+    @Field
     private String principalInvestigator;
-
-    /*@OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "funding_source_id")
-    @OrderBy("id")
-    private Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
-
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "funding_source_id")
-    @OrderBy("id")
-    private Set<AccountFundingSource> accountFundingSources = new LinkedHashSet<AccountFundingSource>();*/
 
     //getters and setters
     @XmlTransient
@@ -68,23 +61,4 @@ public class FundingSource implements IModel {
     public void setPrincipalInvestigator(String principalInvestigator) {
         this.principalInvestigator = principalInvestigator;
     }
-
-    /*public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
-        // TODO: Tim; Implement setEntryFundingSources method for FundingSource
-        //this.entryFundingSources = entryFundingSources;
-    }
-
-    public Set<EntryFundingSource> getEntryFundingSources() {
-        return entryFundingSources;
-    }
-
-    public void setAccountFundingSources(Set<AccountFundingSource> accountFundingSources) {
-        // TODO: Tim; Implement setAccountFundingSources method for FundingSource
-        //this.accountFundingSources = accountFundingSources;
-    }
-
-    public Set<AccountFundingSource> getAccountFundingSources() {
-        return accountFundingSources;
-    }
-    */
 }

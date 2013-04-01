@@ -1,14 +1,15 @@
 package org.jbei.ice.lib.group;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
+import org.jbei.ice.shared.dto.group.GroupType;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -17,16 +18,16 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 /**
- * Manager to manipulate {@link org.jbei.ice.lib.models.Group} objects.
+ * Manager to manipulate {@link Group} objects.
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
+@SuppressWarnings("unchecked")
 class GroupDAO extends HibernateRepository<Group> {
-
     /**
-     * Retrieve {@link org.jbei.ice.lib.models.Group} object from the database by its uuid.
+     * Retrieve {@link Group} object from the database by its uuid.
      *
-     * @param uuid
+     * @param uuid universally unique identifier for group
      * @return Group object.
      * @throws DAOException
      */
@@ -34,10 +35,14 @@ class GroupDAO extends HibernateRepository<Group> {
         return super.getByUUID(Group.class, uuid);
     }
 
+    public long getMemberCount(String uuid) throws DAOException {
+        return get(uuid).getMembers().size();
+    }
+
     /**
      * Retrieve {@link Group} object from the database by its id.
      *
-     * @param id
+     * @param id group unique identifier
      * @return Group object.
      * @throws DAOException
      */
@@ -45,14 +50,11 @@ class GroupDAO extends HibernateRepository<Group> {
         return super.get(Group.class, id);
     }
 
-    @SuppressWarnings("unchecked")
     public HashSet<Group> getByIdList(Set<Long> idsSet) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
 
         try {
-            Criteria criteria = session.createCriteria(Group.class)
-                                       .add(Restrictions.in("id", idsSet));
-
+            Criteria criteria = session.createCriteria(Group.class).add(Restrictions.in("id", idsSet));
             List list = criteria.list();
             return new HashSet<Group>(list);
 
@@ -62,33 +64,8 @@ class GroupDAO extends HibernateRepository<Group> {
         }
     }
 
-    /**
-     * Retrieve all the {@link Group} objects in the database.
-     *
-     * @return SEt of Groups.
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    public Set<Group> getAll() throws DAOException {
-        LinkedHashSet<Group> groups = new LinkedHashSet<Group>();
-        Session session = newSession();
-        try {
-            String queryString = "from Group";
-            Query query = session.createQuery(queryString);
-            groups.addAll(query.list());
-        } catch (HibernateException e) {
-            String msg = "Could not retrieve all groups: " + e.toString();
-            Logger.warn(msg);
-            throw new DAOException(msg);
-        } finally {
-            closeSession(session);
-        }
-        return groups;
-    }
-
     public Set<Group> getMatchingGroups(String token, int limit) throws DAOException {
-        Session session = newSession();
-        session.beginTransaction();
+        Session session = currentSession();
         try {
             token = token.toUpperCase();
             String queryString = "from " + Group.class.getName() + " where (UPPER(label) like '%"
@@ -99,55 +76,48 @@ class GroupDAO extends HibernateRepository<Group> {
 
             @SuppressWarnings("unchecked")
             HashSet<Group> result = new HashSet<Group>(query.list());
-            session.getTransaction().commit();
             return result;
 
         } catch (HibernateException e) {
             Logger.error(e);
-            session.getTransaction().rollback();
             throw new DAOException("Error retrieving matching groups", e);
-        } finally {
-            closeSession(session);
         }
     }
 
-    /**
-     * Update the given {@link Group} object in the database.
-     *
-     * @param group
-     * @return Saved Group object.
-     * @throws DAOException
-     */
-    public Group update(Group group) throws DAOException {
-        return super.saveOrUpdate(group);
+    public ArrayList<Group> retrieveGroups(Account account, GroupType type) throws DAOException {
+        Session session = currentSession();
+        Criteria criteria = session.createCriteria(Group.class);
+        if (type != null) {
+            criteria = criteria.add(Restrictions.eq("type", type));
+        }
+
+        criteria.add(Restrictions.eq("owner", account));
+        List result = criteria.list();
+        return new ArrayList<Group>(result);
     }
 
-    /**
-     * Delete the given {@link Group} object in the database.
-     *
-     * @param group
-     * @throws DAOException
-     */
-    public void delete(Group group) throws DAOException {
-        super.delete(group);
+    public ArrayList<Group> retrievePublicGroups() throws DAOException {
+        Session session = currentSession();
+        Criteria criteria = session.createCriteria(Group.class);
+        criteria = criteria.add(Restrictions.eq("type", GroupType.PUBLIC));
+        List result = criteria.list();
+        return new ArrayList<Group>(result);
     }
 
-    /**
-     * Save the given {@link Group} object in the database.
-     *
-     * @param group
-     * @return Saved Group object.
-     * @throws DAOException
-     */
-    public Group save(Group group) throws DAOException {
-        return super.saveOrUpdate(group);
-    }
+    public List<Group> getAutoJoinGroups() throws DAOException {
+        Session session = currentSession();
+        Criteria criteria = session.createCriteria(Group.class);
+        criteria = criteria.add(Restrictions.eq("type", GroupType.PUBLIC));
+        criteria.add(Restrictions.conjunction()
+                                 .add(Restrictions.isNotNull("autoJoin"))
+                                 .add(Restrictions.eq("autoJoin", Boolean.TRUE)));
 
-//    public Set<Group> retrieveAll(Set<Group> groups) {
-//        Session session = newSession();
-//
-//        String queryStr = "from " + Group.class.getName() + " where group in :group";
-//        Query query = session.createQuery(queryStr);
-//        query.setParameterList("group", groups);
-//    }
+        try {
+            List result = criteria.list();
+            return new ArrayList<Group>(result);
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException();
+        }
+    }
 }

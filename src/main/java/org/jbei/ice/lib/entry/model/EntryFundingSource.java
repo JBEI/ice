@@ -1,18 +1,13 @@
 package org.jbei.ice.lib.entry.model;
 
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.FundingSource;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlTransient;
+import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.IndexedEmbedded;
 
 /**
  * Many-to-Many representation between {@link Entry} and {@link org.jbei.ice.lib.models.FundingSource}.
@@ -30,14 +25,16 @@ public class EntryFundingSource implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "funding_source_id", nullable = false)
+    @IndexedEmbedded
     private FundingSource fundingSource;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @ContainedIn
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 

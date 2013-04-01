@@ -23,28 +23,13 @@ public class ImageUtil {
         @Source("org/jbei/ice/client/resource/image/blank.png")
         ImageResource blank();
 
-        @Source("org/jbei/ice/client/resource/image/plus.png")
-        ImageResource plus();
-
-        @Source("org/jbei/ice/client/resource/image/delete.png")
-        ImageResource deleteImage();
-
         @Source("org/jbei/ice/client/resource/image/busy.gif")
         ImageResource busyIndicatorImage();
 
-        @Source("org/jbei/ice/client/resource/image/minus.png")
-        ImageResource minusImage();
-
-        @Source("org/jbei/ice/client/resource/image/edit.png")
-        ImageResource editImage();
-
-        @Source("org/jbei/ice/client/resource/image/prev.png")
-        ImageResource prevImage();
-
-        @Source("org/jbei/ice/client/resource/image/show_menu.png")
+        @Source("org/jbei/ice/client/resource/image/show_sidebar.png")
         ImageResource showSideImage();
 
-        @Source("org/jbei/ice/client/resource/image/hide_menu.png")
+        @Source("org/jbei/ice/client/resource/image/hide_sidebar.png")
         ImageResource hideSideImage();
 
         @Source("org/jbei/ice/client/resource/image/upload_file.png")
@@ -52,9 +37,6 @@ public class ImageUtil {
 
         @Source("org/jbei/ice/client/resource/image/file_upload.png")
         ImageResource fileUpload();
-
-        @Source("org/jbei/ice/client/resource/image/undo.png")
-        ImageResource undoImage();
     }
 
     public static Image getSampleIcon() {
@@ -73,28 +55,8 @@ public class ImageUtil {
         return new Image(Resources.INSTANCE.blank());
     }
 
-    public static Image getPlusIcon() {
-        return new Image(Resources.INSTANCE.plus());
-    }
-
-    public static Image getDeleteIcon() {
-        return new Image(Resources.INSTANCE.deleteImage());
-    }
-
-    public static Image getEditIcon() {
-        return new Image(Resources.INSTANCE.editImage());
-    }
-
     public static Image getBusyIcon() {
         return new Image(Resources.INSTANCE.busyIndicatorImage());
-    }
-
-    public static Image getMinusIcon() {
-        return new Image(Resources.INSTANCE.minusImage());
-    }
-
-    public static Image getPrevIcon() {
-        return new Image(Resources.INSTANCE.prevImage());
     }
 
     public static Image getShowSideImage() {
@@ -103,10 +65,6 @@ public class ImageUtil {
 
     public static Image getHideSideImage() {
         return new Image(Resources.INSTANCE.hideSideImage());
-    }
-
-    public static Image getUndoImage() {
-        return new Image(Resources.INSTANCE.undoImage());
     }
 
     public static Image getFileUpload() {

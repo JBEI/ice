@@ -3,21 +3,17 @@ package org.jbei.ice.lib.entry.sample;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.ColumnField;
 
 /**
  * ABI to manipulate {@link Sample}s.
@@ -31,8 +27,8 @@ public class SampleController {
 
     public SampleController() {
         dao = new SampleDAO();
-        permissionsController = new PermissionsController();
-        storageController = new StorageController();
+        permissionsController = ControllerFactory.getPermissionController();
+        storageController = ControllerFactory.getStorageController();
     }
 
     /**
@@ -60,8 +56,8 @@ public class SampleController {
     }
 
     /**
-     * Checks if the user has write permission of the {@link Sample}. This is based on the entry that is associated
-     * with the sample
+     * Checks if the user has write permission of the {@link Sample}. This is based on the entry that is
+     * associated with the sample
      *
      * @param account Account of user
      * @param sample  sample being checked
@@ -84,40 +80,16 @@ public class SampleController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Sample saveSample(Account account, Sample sample) throws ControllerException,
-            PermissionException {
-        return saveSample(account, sample, true);
-    }
-
-    /**
-     * Save the {@link Sample} into the database, with the option to rebuild the search index.
-     *
-     * @param account              user saving sample.
-     * @param sample
-     * @param scheduleIndexRebuild
-     * @return saved sample.
-     * @throws ControllerException
-     * @throws PermissionException
-     */
-    public Sample saveSample(Account account, Sample sample, boolean scheduleIndexRebuild)
-            throws ControllerException, PermissionException {
+    public Sample saveSample(Account account, Sample sample) throws ControllerException, PermissionException {
         if (!hasWritePermission(account, sample)) {
             throw new PermissionException("No permissions to save sample!");
         }
 
-        Sample savedSample = null;
-
         try {
-            savedSample = dao.save(sample);
-
-            if (scheduleIndexRebuild) {
-                ApplicationController.scheduleSearchIndexRebuildJob();
-            }
+            return dao.save(sample);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
-        return savedSample;
     }
 
     /**
@@ -128,37 +100,16 @@ public class SampleController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public void deleteSample(Account account, Sample sample) throws ControllerException,
-            PermissionException {
-        deleteSample(account, sample, true);
-    }
-
-    /**
-     * Delete the {@link Sample} in the database, with the option to rebuild the search index. Also
-     * deletes the associated {@link Storage}, if it is a tube.
-     *
-     * @param sample
-     * @param scheduleIndexRebuild
-     * @throws ControllerException
-     * @throws PermissionException
-     */
-    public void deleteSample(Account account, Sample sample, boolean scheduleIndexRebuild)
-            throws ControllerException, PermissionException {
+    public void deleteSample(Account account, Sample sample) throws ControllerException, PermissionException {
         if (!hasWritePermission(account, sample)) {
             throw new PermissionException("No permissions to delete sample!");
         }
 
         try {
             Storage storage = sample.getStorage();
-
-            dao.deleteSample(sample);
-
+            dao.delete(sample);
             if (storage.getStorageType() == Storage.StorageType.TUBE) {
                 storageController.delete(storage);
-            }
-
-            if (scheduleIndexRebuild) {
-                ApplicationController.scheduleSearchIndexRebuildJob();
             }
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -173,8 +124,7 @@ public class SampleController {
      * @throws ControllerException
      */
     public ArrayList<Sample> getSamples(Entry entry) throws ControllerException {
-        ArrayList<Sample> samples = null;
-
+        ArrayList<Sample> samples;
         try {
             samples = dao.getSamplesByEntry(entry);
         } catch (DAOException e) {
@@ -192,7 +142,6 @@ public class SampleController {
      * @throws ControllerException
      */
     public ArrayList<Sample> getSamplesByStorage(Storage storage) throws ControllerException {
-
         try {
             return dao.getSamplesByStorage(storage);
         } catch (DAOException e) {
@@ -200,63 +149,9 @@ public class SampleController {
         }
     }
 
-    public LinkedList<Long> retrieveSamplesByDepositor(Account account, String email, ColumnField field, boolean asc)
-            throws ControllerException {
-
-        LinkedList<Long> results;
-        try {
-            switch (field) {
-
-                default:
-                case CREATED:
-                    results = dao.retrieveSamplesByDepositorSortByCreated(email, asc);
-                    break;
-            }
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        Iterator<Long> resultsIter = results.iterator();
-
-        while (resultsIter.hasNext()) {
-            Long next = resultsIter.next();
-            try {
-                try {
-                    Sample sample = dao.get(next);
-                    if (!permissionsController.hasReadPermission(account, sample.getEntry()))
-                        resultsIter.remove();
-                } catch (DAOException e) {
-                    Logger.error(e);
-                    resultsIter.remove();
-                }
-            } catch (ControllerException ce) {
-                Logger.error("Error retrieving permission for entry Id " + next);
-            }
-        }
-        return results;
-    }
-
-    public LinkedList<Sample> retrieveSamplesByIdSet(LinkedList<Long> ids, boolean asc)
-            throws ControllerException {
-        try {
-            return dao.getSamplesByIdSet(ids, asc);
-        } catch (DAOException e) {
-            Logger.error(e);
-            return null;
-        }
-    }
-
     public ArrayList<Sample> getSamplesByEntry(Entry entry) throws ControllerException {
         try {
             return dao.getSamplesByEntry(entry);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public int getSampleCountBy(String email) throws ControllerException {
-        try {
-            return dao.getSampleCountBy(email);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

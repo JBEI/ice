@@ -5,15 +5,13 @@ import java.util.List;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.client.common.widget.FAIconType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.ImportedWithPrefix;
-import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.resources.client.ImageResource.ImageOptions;
-import com.google.gwt.resources.client.ImageResource.RepeatStyle;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -22,9 +20,8 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * Sub-menu for manipulating collection of entries.
  * Actions are "Add To", "Remove" and "Move To"
- * 
+ *
  * @author Hector Plahar
- * 
  */
 public class CollectionEntryActionMenu implements IsWidget {
 
@@ -34,10 +31,6 @@ public class CollectionEntryActionMenu implements IsWidget {
     public interface Resources extends ClientBundle {
 
         static Resources INSTANCE = GWT.create(Resources.class);
-
-        @Source("org/jbei/ice/client/resource/image/arrow_down.png")
-        @ImageOptions(repeatStyle = RepeatStyle.None)
-        ImageResource sortDown();
 
         /**
          * The styles used in this widget.
@@ -57,11 +50,13 @@ public class CollectionEntryActionMenu implements IsWidget {
          */
         String DEFAULT_CSS = "org/jbei/ice/client/resource/css/SubMenu.css";
 
-        String dropDownAdd();
+        String buttonGroupItem();
 
-        String dropDownMove();
+        String buttonAddTo();
 
-        String subMenuRemove();
+        String buttonRemove();
+
+        String buttonMoveTo();
     }
 
     private final FlexTable menuHolder;
@@ -74,12 +69,14 @@ public class CollectionEntryActionMenu implements IsWidget {
     public CollectionEntryActionMenu() {
 
         this.menuHolder = new FlexTable();
-        this.menuHolder.setStyleName("button_group");
         this.menuHolder.setWidth(WIDTH + "px");
         this.menuHolder.setCellPadding(0);
         this.menuHolder.setCellSpacing(0);
 
-        this.add = new AddToMenuItem<OptionSelect>("Add To", true);
+        this.add = new AddToMenuItem<OptionSelect>("<i class=\"" + FAIconType.PLUS.getStyleName()
+                                                           + "\" style=\"opacity:0.85;\"></i> Add To");
+        this.add.setStyleName(Resources.INSTANCE.subMenuStyle().buttonGroupItem());
+        this.add.addStyleName(Resources.INSTANCE.subMenuStyle().buttonAddTo());
         this.menuHolder.setWidget(0, 0, add);
         this.add.setEnabled(false);
 
@@ -87,7 +84,10 @@ public class CollectionEntryActionMenu implements IsWidget {
         this.menuHolder.setWidget(0, 1, removeButton);
         this.removeButton.setEnabled(false);
 
-        this.move = new AddToMenuItem<OptionSelect>("Move To", false);
+        this.move = new AddToMenuItem<OptionSelect>("<i class=\"" + FAIconType.SHARE.getStyleName()
+                                                            + "\" style=\"opacity:0.85;\"></i> Move To");
+        this.move.setStyleName(Resources.INSTANCE.subMenuStyle().buttonGroupItem());
+        this.move.addStyleName(Resources.INSTANCE.subMenuStyle().buttonMoveTo());
         this.menuHolder.setWidget(0, 2, move);
         this.move.setEnabled(false);
 
@@ -95,9 +95,10 @@ public class CollectionEntryActionMenu implements IsWidget {
     }
 
     private Button createRemoveMenu() {
-        Button remove = new Button("Remove");
-        remove.setStyleName("button_group_item");
-        remove.addStyleName(Resources.INSTANCE.subMenuStyle().subMenuRemove());
+        Button remove = new Button("<i class=\"" + FAIconType.MINUS.getStyleName()
+                                           + "\" style=\"opacity:0.85;\"></i> Remove");
+        remove.setStyleName(Resources.INSTANCE.subMenuStyle().buttonGroupItem());
+        remove.addStyleName(Resources.INSTANCE.subMenuStyle().buttonRemove());
         return remove;
     }
 

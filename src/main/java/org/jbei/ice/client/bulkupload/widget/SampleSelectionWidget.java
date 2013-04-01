@@ -7,7 +7,6 @@ import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Composite;
@@ -30,10 +29,6 @@ public class SampleSelectionWidget extends Composite {
 
         static SampleResource INSTANCE = GWT.create(SampleResource.class);
 
-        @Source("org/jbei/ice/client/resource/image/arrow_down.png")
-        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.None)
-        ImageResource sortDown();
-
         @Source("org/jbei/ice/client/resource/css/SampleSelectionWidget.css")
         CellList.Style cellListStyle();
     }
@@ -41,6 +36,7 @@ public class SampleSelectionWidget extends Composite {
     public SampleSelectionWidget() {
         SampleResource.INSTANCE.cellListStyle().ensureInjected();
         sampleImg = ImageUtil.getSampleIcon();
+        sampleImg.setHeight("14px");
         sampleImg.setTitle("Add sample locations");
         sampleImg.setAltText("Add sample locations");
         initWidget(sampleImg);
@@ -55,7 +51,7 @@ public class SampleSelectionWidget extends Composite {
             }
         }, SampleResource.INSTANCE);
 
-        popup = new PopupHandler(options, sampleImg.getElement(), -130, 7, false);
+        popup = new PopupHandler(options, sampleImg.getElement(), false);
         sampleImg.addClickHandler(popup);
         // TODO : set empty Widget for options
 

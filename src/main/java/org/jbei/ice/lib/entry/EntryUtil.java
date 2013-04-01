@@ -3,18 +3,25 @@ package org.jbei.ice.lib.entry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.PartNumber;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import com.google.common.base.Joiner;
 
@@ -24,20 +31,6 @@ import com.google.common.base.Joiner;
  * @author Hector Plahar
  */
 public class EntryUtil {
-
-    /**
-     * Generate the options map of entry types containing friendly names for entryType field.
-     *
-     * @return Map of entry types and names.
-     */
-    public static Map<String, String> getEntryTypeOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-        for (EntryType type : EntryType.values()) {
-            resultMap.put(type.getName(), type.getDisplay());
-        }
-
-        return resultMap;
-    }
 
     /**
      * Generate the comma separated string representation of {@link org.jbei.ice.lib.entry.model.PartNumber}s
@@ -62,7 +55,7 @@ public class EntryUtil {
     private static String makeEntryLink(Account account, IceLink iceLink) throws ControllerException {
         String result;
 
-        EntryController entryController = new EntryController();
+        EntryController entryController = ControllerFactory.getEntryController();
 
         long id = 0;
         Entry entry;
@@ -77,7 +70,7 @@ public class EntryUtil {
             id = entry.getId();
         }
 
-        String descriptiveLabel = "";
+        String descriptiveLabel;
         if (iceLink.getDescriptiveLabel() == null) {
             descriptiveLabel = iceLink.getPartNumber();
         } else if (iceLink.getDescriptiveLabel().equals("")) {
@@ -87,8 +80,37 @@ public class EntryUtil {
         }
 
         result = "<a href=/entry/view/" + id + ">" + descriptiveLabel + "</a>";
-
         return result;
+    }
+
+    public static String principalInvestigatorToString(Set<EntryFundingSource> fundingSources) {
+        if (fundingSources == null || fundingSources.isEmpty())
+            return "";
+
+        String str = null;
+        for (EntryFundingSource source : fundingSources) {
+            if (str != null)
+                str += (", " + source.getFundingSource().getPrincipalInvestigator());
+            else
+                str = source.getFundingSource().getPrincipalInvestigator();
+        }
+
+        return str;
+    }
+
+    public static String fundingSourceToString(Set<EntryFundingSource> fundingSources) {
+        if (fundingSources == null || fundingSources.isEmpty())
+            return "";
+
+        String str = null;
+        for (EntryFundingSource source : fundingSources) {
+            if (str != null)
+                str += (", " + source.getFundingSource().getFundingSource());
+            else
+                str = source.getFundingSource().getFundingSource();
+        }
+
+        return str;
     }
 
     /**
@@ -156,7 +178,7 @@ public class EntryUtil {
         }
         UrlComparator urlComparator = new UrlComparator();
 
-        ArrayList<UrlLinkText> urls = new ArrayList<UrlLinkText>();
+        ArrayList<UrlLinkText> urls = new ArrayList<>();
         Matcher urlMatcher = urlPattern.matcher(text);
         while (urlMatcher.find()) {
             urls.add(new UrlLinkText(urlMatcher.group(0).trim(), urlMatcher.start(), urlMatcher
@@ -172,8 +194,7 @@ public class EntryUtil {
         for (int i = urls.size() - 1; i > -1; i = i - 1) {
             String before = newText.substring(0, urls.get(i).getStart());
             String after = newText.substring(urls.get(i).getEnd());
-            newText = before + "<a href=" + urls.get(i).getUrl() + ">" + urls.get(i).getUrl()
-                    + "</a>" + after;
+            newText = before + "<a href=" + urls.get(i).getUrl() + ">" + urls.get(i).getUrl() + "</a>" + after;
         }
 
         return newText;
@@ -182,7 +203,6 @@ public class EntryUtil {
     public static String linkifyText(Account account, String text) {
         String newText = wikiLinkifyText(account, text);
         newText = urlLinkifyText(newText);
-
         return newText;
     }
 
@@ -193,21 +213,15 @@ public class EntryUtil {
      * @return Html &lt;a&gt; link.
      */
     private static String wikiLinkifyText(Account account, String text) {
-
         String newText;
 
         try {
-            EntryController entryController = new EntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
+            String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
 
-            Pattern basicWikiLinkPattern = Pattern.compile("\\[\\["
-                                                                   + JbeirSettings.getSetting(
-                    "WIKILINK_PREFIX") + ":.*?\\]\\]");
-            Pattern partNumberPattern = Pattern.compile("\\[\\["
-                                                                + JbeirSettings.getSetting(
-                    "WIKILINK_PREFIX") + ":(.*)\\]\\]");
-            Pattern descriptivePattern = Pattern.compile("\\[\\["
-                                                                 + JbeirSettings.getSetting(
-                    "WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
+            Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLink + ":.*?\\]\\]");
+            Pattern partNumberPattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\]\\]");
+            Pattern descriptivePattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\|(.*)\\]\\]");
 
             if (text == null) {
                 return "";
@@ -223,8 +237,7 @@ public class EntryUtil {
                 String descriptive = null;
 
                 Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher.group());
-                Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher
-                                                                                       .group());
+                Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher.group());
 
                 if (descriptivePatternMatcher.find()) {
                     partNumber = descriptivePatternMatcher.group(1).trim();
@@ -245,6 +258,7 @@ public class EntryUtil {
                         }
                     } catch (PermissionException pe) {
                         Logger.warn(account.getEmail() + ": No permissions for part_number " + partNumber);
+                        return text;
                     }
                 }
             }
@@ -261,6 +275,47 @@ public class EntryUtil {
         }
 
         return newText;
+    }
+
+    public static String getParsedNotes(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        final StringBuilder buffer = new StringBuilder();
+        int newlineCount = 0;
+
+        buffer.append("<p>");
+        for (int i = 0; i < s.length(); i++) {
+            final char c = s.charAt(i);
+
+            switch (c) {
+                case '\n':
+                    newlineCount++;
+                    break;
+
+                case '\r':
+                    break;
+
+                default:
+                    if (newlineCount == 1) {
+                        buffer.append("<br/>");
+                    } else if (newlineCount > 1) {
+                        buffer.append("</p><p>");
+                    }
+
+                    buffer.append(c);
+                    newlineCount = 0;
+                    break;
+            }
+        }
+        if (newlineCount == 1) {
+            buffer.append("<br/>");
+        } else if (newlineCount > 1) {
+            buffer.append("</p><p>");
+        }
+        buffer.append("</p>");
+        return buffer.toString();
     }
 
     /**
@@ -307,5 +362,86 @@ public class EntryUtil {
         public String getPartNumber() {
             return partNumber;
         }
+    }
+
+    /**
+     * Retrieve the {@link org.jbei.ice.lib.entry.model.Strain} objects associated with the given {@link
+     * org.jbei.ice.lib.entry.model.Plasmid}.
+     * <p/>
+     * Strain objects have a field "plasmids", which is maybe wiki text of plasmids that the strain
+     * may harbor. However, since plasmids can be harbored in multiple strains, the reverse lookup
+     * must be computed in order to find which strains harbor a plasmid. And since it is possible to
+     * import/export strains separately from plasmids, it is possible that even though the strain
+     * claims to have a plasmid, that plasmid may not be in this system, but some other. So, in
+     * order to find out which strains actually harbor the given plasmid, we must query the strains
+     * table for the plasmid, parse the wiki text, and check that those plasmids actually exist
+     * before being certain that strain actually harbors this plasmid.
+     *
+     * @param plasmid
+     * @return LinkedHashSet of Strain objects.
+     */
+    public static LinkedHashSet<Strain> getStrainsForPlasmid(Plasmid plasmid) {
+        LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
+        EntryController entryController = ControllerFactory.getEntryController();
+        String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
+
+        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLink + ":.*?\\]\\]");
+        Pattern partNumberPattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\]\\]");
+        Pattern descriptivePattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\|(.*)\\]\\]");
+
+        AccountController accountController = ControllerFactory.getAccountController();
+        HashSet<Long> strainIds;
+
+        Account account;
+        try {
+            // TODO : temp measure till utils manager is also converted
+            strainIds = entryController.retrieveStrainsForPlasmid(plasmid);
+            account = accountController.getSystemAccount();
+            if (strainIds == null)
+                return null;
+
+            for (long strainId : strainIds) {
+                Strain strain = (Strain) entryController.get(account, strainId);
+
+                String[] strainPlasmids = strain.getPlasmids().split(",");
+                for (String strainPlasmid : strainPlasmids) {
+                    strainPlasmid = strainPlasmid.trim();
+                    Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(strainPlasmid);
+                    String strainPlasmidNumber = null;
+                    if (basicWikiLinkMatcher.matches()) {
+                        Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher.group());
+                        Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher.group());
+
+                        if (descriptivePatternMatcher.find()) {
+                            strainPlasmidNumber = descriptivePatternMatcher.group(1).trim();
+                        } else if (partNumberMatcher.find()) {
+                            strainPlasmidNumber = partNumberMatcher.group(1).trim();
+                        }
+
+                        if (strainPlasmidNumber != null) {
+                            for (PartNumber plasmidPartNumber : plasmid.getPartNumbers()) {
+                                if (plasmidPartNumber.getPartNumber().equals(strainPlasmidNumber)) {
+                                    resultStrains.add(strain);
+                                    break;
+                                }
+                            }
+                        }
+
+                    } else {
+                        if (plasmid.getPartNumbers().contains(strainPlasmid)) {
+                            resultStrains.add(strain);
+                        }
+                    }
+                }
+            }
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        } catch (PermissionException e) {
+            Logger.warn(e.getMessage());
+            return null;
+        }
+
+        return resultStrains;
     }
 }

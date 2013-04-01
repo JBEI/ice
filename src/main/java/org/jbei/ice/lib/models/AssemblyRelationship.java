@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import org.jbei.ice.lib.dao.IModel;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,6 +7,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import org.jbei.ice.lib.dao.IModel;
 
 /**
  * Represent the relationship as to how an {@link org.jbei.ice.lib.entry.model.Entry} relates to another. For example,
@@ -24,7 +24,7 @@ public class AssemblyRelationship implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "name", length = 128)

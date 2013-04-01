@@ -2,28 +2,30 @@ package org.jbei.ice.lib.entry.model;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.entry.filter.BlastFilterFactory;
+import org.jbei.ice.lib.entry.filter.EntryHasFilterFactory;
+import org.jbei.ice.lib.entry.filter.EntrySecurityFilterFactory;
+import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.permissions.model.Permission;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.Visibility;
 
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.DateBridge;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.IndexedEmbedded;
-import org.hibernate.search.annotations.Resolution;
+import org.hibernate.search.annotations.*;
+
+import org.jbei.ice.lib.entry.model.Parameter;
 
 /**
  * Entry class is the most important class in gd-ice. Other record types extend this class.
@@ -80,7 +82,13 @@ import org.hibernate.search.annotations.Resolution;
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
-@Indexed
+@Indexed(index = "Entry")
+
+@FullTextFilterDefs({
+                            @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class),
+                            @FullTextFilterDef(name = "blastFilter", impl = BlastFilterFactory.class),
+                            @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class)
+                    })
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -89,56 +97,61 @@ public class Entry implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @DocumentId
     private long id;
 
     @Column(name = "record_id", length = 36, nullable = false, unique = true)
-    @Field
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String recordId;
 
     @Column(name = "version_id", length = 36, nullable = false)
     private String versionId;
 
     @Column(name = "record_type", length = 127, nullable = false)
-    @Field
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String recordType;
 
     @Column(name = "owner", length = 127)
-    @Field
+    @Field(store = Store.YES)
     private String owner;
 
     @Column(name = "owner_email", length = 127)
-    @Field
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String ownerEmail;
 
     @Column(name = "creator", length = 127)
-    @Field
+    @Field(store = Store.YES)
     private String creator;
 
     @Column(name = "creator_email", length = 127)
-    @Field
+    @Field(store = Store.YES, analyze = Analyze.NO)
     private String creatorEmail;
 
     @Column(name = "alias", length = 127)
-    @Field
+    @Field(store = Store.YES)
     private String alias;
 
     @Column(name = "keywords", length = 127)
     @Field
+    @Boost(1.2f)
     private String keywords;
 
     @Column(name = "status", length = 127)
     private String status;
 
     @Column(name = "visibility")
+    @Field(analyze = Analyze.NO)
     private Integer visibility = Visibility.OK.getValue();
 
     @Column(name = "short_description")
+    @Field
     @Lob
     @Type(type = "org.hibernate.type.TextType")
     private String shortDescription;
 
     @Column(name = "long_description")
+    @Field
     @Lob
     @Type(type = "org.hibernate.type.TextType")
     private String longDescription;
@@ -147,56 +160,68 @@ public class Entry implements IModel {
     private String longDescriptionType = "text";
 
     @Column(name = "literature_references")
+    @Field
     @Lob
     @Type(type = "org.hibernate.type.TextType")
     private String references;
 
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
+    @Field(index = Index.YES, analyze = Analyze.NO, store = Store.YES)
+    @DateBridge(resolution = Resolution.DAY)
     private Date creationTime;
 
     @Column(name = "modification_time")
     @Temporal(TemporalType.TIMESTAMP)
-    @DateBridge(resolution = Resolution.HOUR)
+    @Field(index = Index.YES, analyze = Analyze.NO, store = Store.YES)
+    @DateBridge(resolution = Resolution.DAY)
     private Date modificationTime;
 
     @Column(name = "bio_safety_level")
+    @Field(analyze = Analyze.NO)
     private Integer bioSafetyLevel;
 
     @Column(name = "intellectual_property")
+    @Field
     @Lob
     @Type(type = "org.hibernate.type.TextType")
-    @Field
     private String intellectualProperty;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
-    @OrderBy("id")
-//    @IndexedEmbedded
-    private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<SelectionMarker>();
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
-    @OrderBy("id")
-//    @IndexedEmbedded
-    private final Set<Link> links = new LinkedHashSet<Link>();
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry", targetEntity = Name.class)
-    @OrderBy("id")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
     @IndexedEmbedded
-    private final Set<Name> names = new LinkedHashSet<Name>();
+    private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<>();
 
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
-    @OrderBy("id")
-    private final Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
+    @IndexedEmbedded
+    private final Set<Link> links = new LinkedHashSet<>();
 
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
-    @OrderBy("id")
-    private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
+    @IndexedEmbedded
+    private final Set<Name> names = new LinkedHashSet<>();
 
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
-    @OrderBy("id")
-    private final List<Parameter> parameters = new ArrayList<Parameter>();
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
+    @IndexedEmbedded
+    private final Set<PartNumber> partNumbers = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "entry", fetch = FetchType.EAGER)
+    @IndexedEmbedded
+    private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<>();
+
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
+    private final List<Parameter> parameters = new ArrayList<>();
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, mappedBy = "entry", orphanRemoval = true,
+               fetch = FetchType.EAGER)
+    @IndexedEmbedded
+    private final Set<Permission> permissions = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents")
+    private Set<Folder> folders = new HashSet<>();
 
     public Entry() {
+        setStatus("");
+        setLongDescriptionType("text");
+        setBioSafetyLevel(new Integer(0));
     }
 
     @XmlTransient
@@ -265,7 +290,7 @@ public class Entry implements IModel {
 
     public String getNamesAsString() {
         String result;
-        ArrayList<String> names = new ArrayList<String>();
+        ArrayList<String> names = new ArrayList<>();
         for (Name name : this.names) {
             names.add(name.getName());
         }
@@ -288,7 +313,8 @@ public class Entry implements IModel {
         // prefer local part number prefix over other prefixes
         if (partNumbers.size() > 0) {
             for (PartNumber partNumber : partNumbers) {
-                if (partNumber.getPartNumber().contains(JbeirSettings.getSetting("PART_NUMBER_PREFIX"))) {
+                String partNumberPrefix = Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX);
+                if (partNumber.getPartNumber().contains(partNumberPrefix)) {
                     result = partNumber;
                     break;
                 }
@@ -300,18 +326,18 @@ public class Entry implements IModel {
         return result;
     }
 
-    public void setPartNumbers(Set<PartNumber> inputPartNumbers) {
-        // for JAXB webservices should be this way
-        if (inputPartNumbers == null) {
-            partNumbers.clear();
-            return;
-        }
-
-        if (inputPartNumbers != partNumbers) {
-            partNumbers.clear();
-            partNumbers.addAll(inputPartNumbers);
-        }
-    }
+//    public void setPartNumbers(Set<PartNumber> inputPartNumbers) {
+//        // for JAXB webservices should be this way
+//        if (inputPartNumbers == null) {
+//            partNumbers.clear();
+//            return;
+//        }
+//
+//        if (inputPartNumbers != partNumbers) {
+//            partNumbers.clear();
+//            partNumbers.addAll(inputPartNumbers);
+//        }
+//    }
 
     public String getOwner() {
         return owner;
@@ -372,7 +398,7 @@ public class Entry implements IModel {
      */
     public String getSelectionMarkersAsString() {
         String result;
-        ArrayList<String> markers = new ArrayList<String>();
+        ArrayList<String> markers = new ArrayList<>();
         for (SelectionMarker marker : selectionMarkers) {
             markers.add(marker.getName());
         }
@@ -407,7 +433,7 @@ public class Entry implements IModel {
      */
     public String getLinksAsString() {
         String result;
-        ArrayList<String> links = new ArrayList<String>();
+        ArrayList<String> links = new ArrayList<>();
         for (Link link : this.links) {
             links.add(link.getLink());
         }
@@ -550,72 +576,8 @@ public class Entry implements IModel {
         return parameters;
     }
 
-    /**
-     * Get the principalInvestigator field of the entry's EntryFundingSource.
-     *
-     * @return principalInvestigator field as String.
-     */
-    public String principalInvestigatorToString() {
-        String principalInvestigator = "";
-
-        for (EntryFundingSource entryFundingSource : entryFundingSources) {
-            principalInvestigator = entryFundingSource.getFundingSource()
-                                                      .getPrincipalInvestigator();
-        }
-
-        if (principalInvestigator == null) {
-            principalInvestigator = "";
-        }
-
-        return principalInvestigator;
-    }
-
-    /**
-     * Get the funding source field of the entry's EntryFundingSource.
-     *
-     * @return funding source field as String.
-     */
-    public String fundingSourceToString() {
-        String fundingSource = "";
-
-        for (EntryFundingSource entryFundingSource : entryFundingSources) {
-            fundingSource = entryFundingSource.getFundingSource().getFundingSource();
-        }
-
-        if (fundingSource == null) {
-            fundingSource = "";
-        }
-
-        return fundingSource;
-    }
-
-    /**
-     * Generate the options map of the bioSafetyLevel field containing friendly names for the fields.
-     *
-     * @return Map of biosafety levels and names.
-     */
-    public static Map<String, String> getBioSafetyLevelOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-
-        resultMap.put("1", "Level 1");
-        resultMap.put("2", "Level 2");
-
-        return resultMap;
-    }
-
-    /**
-     * Generate the options map of status options containing friendly names for status field.
-     *
-     * @return Map of options and names.
-     */
-    public static Map<String, String> getStatusOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-
-        resultMap.put("complete", JbeiConstants.getStatus("complete"));
-        resultMap.put("in progress", JbeiConstants.getStatus("in progress"));
-        resultMap.put("planned", JbeiConstants.getStatus("planned"));
-
-        return resultMap;
+    public Set<Permission> getPermissions() {
+        return this.permissions;
     }
 
     @Override
@@ -636,5 +598,13 @@ public class Entry implements IModel {
         return Objects.equal(this.recordId, other.getRecordId())
                 && Objects.equal(this.recordType, other.getRecordType())
                 && Objects.equal(this.getId(), other.getId());
+    }
+
+    public Set<Folder> getFolders() {
+        return folders;
+    }
+
+    public Set<EntryFundingSource> getFundingSources() {
+        return entryFundingSources;
     }
 }

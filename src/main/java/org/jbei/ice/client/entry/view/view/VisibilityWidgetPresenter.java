@@ -1,8 +1,9 @@
 package org.jbei.ice.client.entry.view.view;
 
+import org.jbei.ice.shared.dto.Visibility;
+
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
-import org.jbei.ice.shared.dto.Visibility;
 
 /**
  * @author Hector Plahar

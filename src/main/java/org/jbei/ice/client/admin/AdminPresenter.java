@@ -1,16 +1,25 @@
 package org.jbei.ice.client.admin;
 
-import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.admin.export.ExportPresenter;
-import org.jbei.ice.client.admin.group.GroupPresenter;
-import org.jbei.ice.client.admin.importentry.ImportPresenter;
-import org.jbei.ice.client.admin.usermanagement.UserPresenter;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
+import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.admin.group.GroupPresenter;
+import org.jbei.ice.client.admin.setting.SystemSettingPresenter;
+import org.jbei.ice.client.admin.user.UserPresenter;
+import org.jbei.ice.client.admin.web.WebOfRegistriesPresenter;
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.shared.dto.AccountResults;
+import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupType;
+
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * Presenter for the admin page
@@ -20,68 +29,144 @@ import com.google.gwt.user.client.ui.HasWidgets;
 public class AdminPresenter extends AbstractPresenter {
 
     private final AdminView view;
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
-
-    private UserPresenter userPresenter;
+    private AdminOption currentOption;
     private GroupPresenter groupPresenter;
-    private ExportPresenter exportPresenter;
-    private ImportPresenter importPresenter;
+    private UserPresenter userPresenter;
+    private SystemSettingPresenter systemSettingPresenter;
+    private WebOfRegistriesPresenter webPresenter;
 
-    public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view) {
-        this.service = service;
+    public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view, String optionStr) {
+        super(service, eventBus);
         this.view = view;
-        this.eventBus = eventBus;
-
-        addSelectionChangeHandler();
-
-        // presenters
-        userPresenter = new UserPresenter();
-        groupPresenter = new GroupPresenter();
-        exportPresenter = new ExportPresenter();
-        importPresenter = new ImportPresenter();
-
-        setTabs();
+        AdminOption option = AdminOption.urlToOption(optionStr);
+        view.showMenuSelection(option);
+        setViewForOption(option);
+        setSelectionHandler();
     }
 
-    protected void setTabs() {
-        view.setTabWidget(userPresenter.getView().getTab(), userPresenter.getView());
-        view.setTabWidget(groupPresenter.getView().getTab(), groupPresenter.getView());
-        view.setTabWidget(exportPresenter.getView().getTab(), exportPresenter.getView());
-        view.setTabWidget(importPresenter.getView().getTab(), importPresenter.getView());
-    }
-
-    /**
-     * Adds a tab selection change handler to the view
-     */
-    private void addSelectionChangeHandler() {
-
-        this.view.addLayoutHandler(new SelectionHandler<Integer>() {
+    protected void setSelectionHandler() {
+        this.view.getUserSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
             @Override
-            public void onSelection(SelectionEvent<Integer> event) {
-
-                if (event.getSelectedItem() == groupPresenter.getTabIndex()) {
-                    groupPresenter.go(service, eventBus);
-                    return;
-                }
-
-                if (event.getSelectedItem() == userPresenter.getTabIndex()) {
-                    userPresenter.go(service, eventBus);
-                    return;
-                }
-
-                if (event.getSelectedItem() == exportPresenter.getTabIndex()) {
-                    exportPresenter.go(service, eventBus);
-                    return;
-                }
-
-                if (event.getSelectedItem() == importPresenter.getTabIndex()) {
-                    importPresenter.go(service, eventBus);
-                    return;
-                }
+            public void onSelectionChange(SelectionChangeEvent event) {
+                setViewForOption(view.getUserSelectionModel().getSelectedObject());
             }
         });
+    }
+
+    private void setViewForOption(AdminOption option) {
+        if (option == null)
+            return;
+
+        currentOption = option;
+
+        switch (option) {
+            case SETTINGS:
+                if (systemSettingPresenter == null)
+                    systemSettingPresenter = new SystemSettingPresenter(service, eventBus);
+                retrieveSystemSettings();
+                break;
+
+            case WEB:
+                if (webPresenter == null)
+                    webPresenter = new WebOfRegistriesPresenter(service, eventBus);
+                retrieveWebOfRegistriesSettings();
+                break;
+
+            case GROUPS:
+                if (groupPresenter == null)
+                    groupPresenter = new GroupPresenter(service, eventBus);
+                retrieveGroups();
+                break;
+
+            case USERS:
+                if (userPresenter == null)
+                    userPresenter = new UserPresenter(service, eventBus);
+                retrieveUsers();
+                break;
+
+//            case TRANSFER:
+//                view.show(currentOption, new TransferEntryPanel());
+//                break;
+        }
+    }
+
+    // GROUPS
+    private void retrieveGroups() {
+        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+                service.retrieveGroups(ClientController.sessionId, GroupType.PUBLIC, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<GroupInfo> result) {
+                if (result == null || currentOption != AdminOption.GROUPS)
+                    return;
+
+                groupPresenter.setGroups(result);
+                view.show(currentOption, groupPresenter.getView().asWidget());
+            }
+        }.go(eventBus);
+    }
+
+    // SYSTEMS
+    private void retrieveSystemSettings() {
+        new IceAsyncCallback<HashMap<String, String>>() {
+
+            @Override
+            protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
+                service.retrieveSystemSettings(ClientController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(HashMap<String, String> settings) {
+                if (settings == null || currentOption != AdminOption.SETTINGS)
+                    return;
+
+                systemSettingPresenter.setData(settings);
+                view.show(currentOption, systemSettingPresenter.getView().asWidget());
+            }
+        }.go(eventBus);
+    }
+
+    private void retrieveWebOfRegistriesSettings() {
+        new IceAsyncCallback<HashMap<String, String>>() {
+
+            @Override
+            protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
+                service.retrieveWebOfRegistrySettings(ClientController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(HashMap<String, String> settings) {
+                if (settings == null || currentOption != AdminOption.WEB)
+                    return;
+
+                webPresenter.setData(settings);
+                view.show(currentOption, webPresenter.getView().asWidget());
+            }
+        }.go(eventBus);
+    }
+
+    private void retrieveUsers() {
+        new IceAsyncCallback<AccountResults>() {
+
+            @Override
+            protected void callService(AsyncCallback<AccountResults> callback) throws AuthenticationException {
+                service.retrieveAllUserAccounts(ClientController.sessionId, 0, 30, callback);
+            }
+
+            @Override
+            public void onSuccess(AccountResults result) {
+                if (result == null || currentOption != AdminOption.USERS)
+                    return;
+
+                userPresenter.setData(result);
+                view.show(currentOption, userPresenter.getView().asWidget());
+            }
+        }.go(eventBus);
     }
 
     @Override

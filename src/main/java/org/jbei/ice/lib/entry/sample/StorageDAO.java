@@ -5,13 +5,13 @@ import java.util.List;
 
 import org.jbei.ice.lib.config.ConfigurationDAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -34,8 +34,8 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @throws DAOException
      */
     public Storage get(long id, boolean fetchChildren) throws DAOException {
-        Storage result = null;
-        Session session = newSession();
+        Storage result;
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName() + " where id = :id");
             query.setLong("id", id);
@@ -44,11 +44,9 @@ public class StorageDAO extends HibernateRepository<Storage> {
                 result.getChildren().size();
             }
         } catch (HibernateException e) {
-            String msg = "Could not get Location by id: " + id + " " + e.toString();
+            String msg = "Could not get location by id: " + id + " " + e.toString();
             Logger.error(msg, e);
             throw new DAOException(msg);
-        } finally {
-            closeSession(session);
         }
 
         return result;
@@ -98,7 +96,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
     @SuppressWarnings("unchecked")
     public List<Storage> retrieveStorageByIndex(String index, StorageType type) throws DAOException {
         List<Storage> result = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
                                                       + " where index = :index and storage_type = :type");
@@ -113,10 +111,6 @@ public class StorageDAO extends HibernateRepository<Storage> {
             String msg = "Could not get Storage by index: " + index + " " + e.toString();
             Logger.error(msg, e);
             throw new DAOException(msg);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
         }
         return result;
 
@@ -143,27 +137,6 @@ public class StorageDAO extends HibernateRepository<Storage> {
     }
 
     /**
-     * Save the given {@link Storage} object in the database.
-     *
-     * @param storage storage object to save
-     * @return Saved Storage object.
-     * @throws DAOException
-     */
-    public Storage save(Storage storage) throws DAOException {
-        return super.saveOrUpdate(storage);
-    }
-
-    /**
-     * Delete the given {@link Storage} object in the database.
-     *
-     * @param location storage object to delete
-     * @throws DAOException
-     */
-    public void delete(Storage location) throws DAOException {
-        super.delete(location);
-    }
-
-    /**
      * Retrieve all {@link Storage} objects with non-empty schemes.
      *
      * @return List of Storage objects with schemes.
@@ -172,7 +145,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
     @SuppressWarnings("unchecked")
     public List<Storage> getAllStorageSchemes() throws DAOException {
         ArrayList<Storage> result = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
                                                       + " storage where storage.storageType = :storageType");
@@ -187,10 +160,6 @@ public class StorageDAO extends HibernateRepository<Storage> {
             String msg = "Could not get all schemes " + e.toString();
             Logger.error(msg, e);
             throw new DAOException(msg);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
         }
         return result;
     }
@@ -198,7 +167,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
     @SuppressWarnings("unchecked")
     public List<Storage> getStorageSchemesForEntryType(String entryType) throws DAOException {
         ArrayList<Storage> result = new ArrayList<Storage>();
-        Session session = newSession();
+        Session session = currentSession();
         String uuid = null;
         EntryType type = EntryType.nameToType(entryType);
         if (type == null)
@@ -310,7 +279,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      */
     public Storage retrieveStorageBy(String name, String index, StorageType type, long parentId)
             throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
                                                       + " storage where storage.name = :name and storage.index = " +
@@ -328,10 +297,6 @@ public class StorageDAO extends HibernateRepository<Storage> {
             String msg = "Could not retrieve storage " + e.toString();
             Logger.error(msg, e);
             throw new DAOException(msg);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
         }
     }
 

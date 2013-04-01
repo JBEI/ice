@@ -1,11 +1,19 @@
 package org.jbei.ice.lib.entry.sequence;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
+
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
@@ -24,14 +32,7 @@ import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * ABI to manipulate DNA sequence trace analysis
@@ -42,20 +43,15 @@ public class SequenceAnalysisController {
 
     private final TraceSequenceDAO traceDao;
     private final PermissionsController permissionsController;
+    private final File traceSequenceFileDir;
 
     public SequenceAnalysisController() {
         traceDao = new TraceSequenceDAO();
         permissionsController = new PermissionsController();
-    }
-
-    /**
-     * Check if the user has write permission for {@link TraceSequence}.
-     *
-     * @param traceSequence
-     * @return True if user has write permission for traceSequence
-     */
-    public boolean hasWritePermission(Account account, TraceSequence traceSequence) throws ControllerException {
-        return permissionsController.hasWritePermission(account, traceSequence.getEntry());
+        String tracesDir = Utils.getConfigValue(ConfigurationKey.TRACE_FILES_DIRECTORY);
+        if (tracesDir == null)
+            tracesDir = "/tmp/traces";
+        traceSequenceFileDir = new File(tracesDir);
     }
 
     /**
@@ -73,9 +69,8 @@ public class SequenceAnalysisController {
      * @return Saved traceSequence
      * @throws ControllerException
      */
-    public TraceSequence importTraceSequence(Entry entry, String filename, String depositor,
-            String sequence, String uuid, Date date, InputStream inputStream)
-            throws ControllerException {
+    public TraceSequence importTraceSequence(Entry entry, String filename, String depositor, String sequence,
+            String uuid, Date date, InputStream inputStream) throws ControllerException {
         if (entry == null) {
             throw new ControllerException("Failed to save trace sequence with null entry!");
         }
@@ -92,7 +87,7 @@ public class SequenceAnalysisController {
                                                         date);
 
         try {
-            return traceDao.create(traceSequence, inputStream);
+            return traceDao.create(traceSequenceFileDir, traceSequence, inputStream);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -131,12 +126,12 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to delete null Trace Sequence!");
         }
 
-        if (!hasWritePermission(account, traceSequence)) {
+        if (!permissionsController.hasWritePermission(account, traceSequence.getEntry())) {
             throw new PermissionException("No permissions to delete trace sequence!");
         }
 
         try {
-            traceDao.delete(traceSequence);
+            traceDao.delete(traceSequenceFileDir, traceSequence);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -156,7 +151,7 @@ public class SequenceAnalysisController {
 
         List<TraceSequence> traces = null;
 
-        SequenceController sequenceController = new SequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
 
         try {
             Sequence sequence = sequenceController.getByEntry(entry);
@@ -186,7 +181,7 @@ public class SequenceAnalysisController {
                     traces = TraceSequenceDAO.getByEntry(entry);
                 }
             }
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
@@ -241,7 +236,7 @@ public class SequenceAnalysisController {
     public File getFile(TraceSequence traceSequence) throws ControllerException {
 
         try {
-            return traceDao.getFile(traceSequence);
+            return TraceSequenceDAO.getFile(traceSequenceFileDir, traceSequence);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -264,7 +259,7 @@ public class SequenceAnalysisController {
 
         File file = getFile(traceSequence);
 
-        byte[] bytes = null;
+        byte[] bytes;
 
         try {
             FileInputStream fileStream = new FileInputStream(file);
@@ -285,38 +280,20 @@ public class SequenceAnalysisController {
         result.setFileId(traceSequence.getFileId());
         result.setFileName(traceSequence.getFilename());
         result.setTimeStamp(new Date());
-
         result.setBase64Data(base64Data);
 
         return result;
     }
 
     /**
-     * Retrieve the number of {@link TraceSequence}s associated with the given {@link Entry}.
-     *
-     * @param entry
-     * @return Number of trace sequences.
-     * @throws ControllerException
-     */
-    public long getNumberOfTraceSequences(Entry entry) throws ControllerException {
-
-        try {
-            return traceDao.getNumberOfTraceSequences(entry);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    /**
      * Calculate sequence alignment between the given {@link TraceSequence} and {@link Sequence}
      * using bl2seq, and save the result into the database.
      *
-     * @param traceSequence
-     * @param sequence
+     * @param traceSequence traceSequence
+     * @param sequence      sequence
      * @throws ControllerException
      */
-    public void buildOrRebuildAlignment(TraceSequence traceSequence, Sequence sequence)
-            throws ControllerException {
+    public void buildOrRebuildAlignment(TraceSequence traceSequence, Sequence sequence) throws ControllerException {
         if (traceSequence == null) {
             throw new ControllerException("Failed to rebuild alignment for null trace sequence!");
         }
@@ -331,17 +308,14 @@ public class SequenceAnalysisController {
         String entrySequenceString = sequence.getSequence();
 
         int entrySequenceLength = entrySequenceString.length();
-
-        String bl2seqOutput;
-
-        boolean isCircular = (sequence.getEntry() instanceof Plasmid)
-                && ((Plasmid) sequence.getEntry()).getCircular();
+        boolean isCircular = (sequence.getEntry() instanceof Plasmid) && ((Plasmid) sequence.getEntry()).getCircular();
 
         if (isCircular) {
             entrySequenceString += entrySequenceString;
         }
 
         Blast blast = new Blast();
+        String bl2seqOutput;
         try {
             bl2seqOutput = blast.runBl2Seq(entrySequenceString, traceSequenceString);
         } catch (BlastException e) {
@@ -418,11 +392,8 @@ public class SequenceAnalysisController {
                         traceSequenceAlignment.setQueryEnd(queryEnd);
                         traceSequenceAlignment.setSubjectStart(subjectStart);
                         traceSequenceAlignment.setSubjectEnd(subjectEnd);
-                        traceSequenceAlignment
-                                .setQueryAlignment(maxBl2SeqResult.getQuerySequence());
-                        traceSequenceAlignment.setSubjectAlignment(maxBl2SeqResult
-                                                                           .getSubjectSequence());
-
+                        traceSequenceAlignment.setQueryAlignment(maxBl2SeqResult.getQuerySequence());
+                        traceSequenceAlignment.setSubjectAlignment(maxBl2SeqResult.getSubjectSequence());
                         traceSequenceAlignment.setSequenceHash(sequence.getFwdHash());
                     }
 
@@ -450,7 +421,7 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to rebuild alignment for null entry!");
         }
 
-        SequenceController sequenceController = new SequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         Sequence sequence = sequenceController.getByEntry(entry);
 
         if (sequence == null) {

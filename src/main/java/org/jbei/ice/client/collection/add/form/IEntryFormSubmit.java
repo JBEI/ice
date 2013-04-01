@@ -1,8 +1,11 @@
 package org.jbei.ice.client.collection.add.form;
 
-import org.jbei.ice.shared.dto.EntryInfo;
+import java.util.HashMap;
 
-import com.google.gwt.user.client.ui.Button;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.user.PreferenceKey;
+
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -14,9 +17,9 @@ import com.google.gwt.user.client.ui.Widget;
 
 public interface IEntryFormSubmit {
 
-    Button getSubmit();
+    void addSubmitHandler(ClickHandler handler);
 
-    Button getCancel();
+    void addCancelHandler(ClickHandler handler);
 
     FocusWidget validateForm();
 
@@ -24,9 +27,9 @@ public interface IEntryFormSubmit {
 
     void populateEntries();
 
-    EntryInfo getPrimaryEntry();
+    EntryInfo getEntry();
 
-    EntryInfo getSecondaryEntry();
+    void setPreferences(HashMap<PreferenceKey, String> preferences);
 
-    void setSampleLocation(SampleLocation sampleLocation);
+    String getHeaderDisplay();
 }

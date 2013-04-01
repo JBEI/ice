@@ -9,7 +9,7 @@
         <sect1 id="welcome">
             <title>Welcome</title>
             <para>
-                Welcome to the JBEI Registry Software Version 3 (ICE). We hope you
+                Welcome to the JBEI Registry Software Version 3.3 (ICE). We hope you
                 find our tools useful. More information, feature requests, bug
                 reports, as well as discussions are available from our Google
                 Project
@@ -65,7 +65,7 @@
                 <title>Postgresql</title>
                 <para>ICE requires postgres 8.x to run. It is relatively easy to set up and use.
                     There are plenty of walk throughs on the internet to guide you. We
-                    recommend (and use) the pgadmin3 software. Please be ware: If different
+                    recommend (and use) the pgadmin3 software. Please beware: If different
                     versions of postgres is installed on your machine, they may be listening
                     on different ports (5432 and/or 5433).
                 </para>
@@ -195,7 +195,7 @@
                     <title>Configuration</title>
                     <para>First, unzip the war file using any unzip utility (a war file is just a zip file with another
                         name). The configuration files
-                        are located in the 'gd-ice-2.0-SNAPSHOT/WEB-INF/classes' directory. See the
+                        are located in the 'gd-ice-3.3-SNAPSHOT/WEB-INF/classes' directory. See the
                         <xref linkend="configuration">Configuration</xref>
                         section for details.
                     </para>
@@ -203,7 +203,7 @@
                 <sect2 id="install-war">
                     <title>Installation</title>
                     <para>
-                        After configuration has bee properly changed in the 'gd-ice-2.0-SNASHOPT' directory,
+                        After configuration has been properly changed in the 'gd-ice-3.3-SNASHOPT' directory,
                         you can deploy gd-ice to an application server as an "exploded war". First, configure SSL, see
                         <xref linkend="ssl-setup"/>. Then
                         see
@@ -348,17 +348,6 @@
                         mvn install:install-file -Dfile=flex-messaging-remoting.jar -DgroupId=org.jbei.ice
                         -DartifactId=flex-messaging-remoting -Dversion=SNAPSHOT -Dpackaging=jar
                         mvn install:install-file -Dfile=libSBOLj.jar -DgroupId=org.jbei.ice -DartifactId=libSBOLj
-                        -Dversion=SNAPSHOT -Dpackaging=jar
-                        mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.core_1.4.0.I20100805-0500-e3x.jar
-                        -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.core -Dversion=SNAPSHOT
-                        -Dpackaging=jar
-                        mvn install:install-file
-                        -Dfile=org.eclipse.mylyn.wikitext.mediawiki.core_1.4.0.I20100805-0500-e3x.jar
-                        -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.mediawiki.core -Dversion=SNAPSHOT
-                        -Dpackaging=jar
-                        mvn install:install-file
-                        -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0.I20100805-0500-e3x.jar
-                        -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.confluence.core
                         -Dversion=SNAPSHOT -Dpackaging=jar
                     </programlisting>
                 </para>
@@ -535,7 +524,7 @@
                 <para>
                     The configurations for logfile location and format is located in
                     'src/main/resources/log4j.properties'
-                    or 'gd-ice-2.0-SNAPSHOT/WEB-INF/classes/log4j.properties'. Change the file location if you want to
+                    or 'gd-ice-3.3-SNAPSHOT/WEB-INF/classes/log4j.properties'. Change the file location if you want to
                     keep log files between server reboots. The 'FILE' directive should be in unix format, even for
                     Windows.
                 </para>

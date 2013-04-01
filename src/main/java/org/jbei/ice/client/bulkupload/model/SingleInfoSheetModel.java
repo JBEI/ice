@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.dto.AttachmentInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 
 /**
  * Extracts common elements of entries from sheet

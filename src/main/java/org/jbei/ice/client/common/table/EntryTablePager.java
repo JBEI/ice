@@ -1,5 +1,7 @@
 package org.jbei.ice.client.common.table;
 
+import org.jbei.ice.client.common.widget.FAIconType;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -7,14 +9,13 @@ import com.google.gwt.user.cellview.client.AbstractPager;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.HasRows;
 
 /**
  * Pager for the Entry Table
- * 
+ *
  * @author Hector Plahar
  */
 public class EntryTablePager extends AbstractPager {
@@ -22,30 +23,37 @@ public class EntryTablePager extends AbstractPager {
     private static class NavLink extends Button {
 
         private int page;
+        private String defaultHTML;
 
         public NavLink(int page) {
-
             super(String.valueOf(page));
             this.page = page;
             this.setStyleName("button_to_link");
         }
 
         public NavLink(String html, ClickHandler handler) {
-
             super(html, handler);
             this.setStyleName("button_to_link");
+            defaultHTML = html;
         }
 
         public void setDisabled(boolean isDisabled) {
-
             if (this.isEnabled() == !isDisabled)
                 return;
 
             this.setEnabled(!isDisabled);
-            if (!this.isEnabled())
-                setStyleName("button_to_link_disabled");
-            else
+            if (!this.isEnabled()) {
                 setStyleName("button_to_link");
+            }
+        }
+
+        public void setLoading() {
+            setHTML("<i class=\"icon-spin " + FAIconType.REFRESH.getStyleName() + "\"></i>");
+        }
+
+        public void setDefaultHTML() {
+            if (defaultHTML != null)
+                setHTML(defaultHTML);
         }
 
         // value of 0 is invalid
@@ -55,9 +63,10 @@ public class EntryTablePager extends AbstractPager {
     }
 
     private final NavLink first;
-    //    private final NavLink last;
+    private final NavLink last;
     private final NavLink next;
     private final NavLink prev;
+
 
     private FlexTable nav; // left
     private FlexTable jump; // right
@@ -67,45 +76,49 @@ public class EntryTablePager extends AbstractPager {
     private final NavLink btn50Count;
     private final NavLink btn100Count;
 
-    public final static int JUMP_PAGE_COUNT = 5;
+    public final static int JUMP_PAGE_COUNT = 3;
     private int start;
 
     public EntryTablePager() {
-
         label = new Label();
-        first = new NavLink("&lt;&lt;", new ClickHandler() {
+        first = new NavLink("<i class=\"" + FAIconType.FAST_BACKWARD.getStyleName() + "\"></i>",
+                            new ClickHandler() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                EntryTablePager.super.firstPage();
-            }
-        });
+                                @Override
+                                public void onClick(ClickEvent event) {
+                                    EntryTablePager.super.firstPage();
+                                }
+                            });
 
-        //        last = new NavLink("&gt;&gt;", new ClickHandler() {
-        //
-        //            @Override
-        //            public void onClick(ClickEvent event) {
-        //                EntryTablePager.super.lastPage();
-        //            }
-        //        });
+        last = new NavLink("<i class=\"" + FAIconType.FAST_FORWARD.getStyleName() + "\"></i>",
+                           new ClickHandler() {
 
-        next = new NavLink("&gt;", new ClickHandler() {
+                               @Override
+                               public void onClick(ClickEvent event) {
+                                   EntryTablePager.super.lastPage();
+                               }
+                           });
+        last.setVisible(false);
 
-            @Override
-            public void onClick(ClickEvent event) {
-                int indx = EntryTablePager.super.getPage() + 1;
-                EntryTablePager.super.setPage(indx);
-            }
-        });
+        next = new NavLink("<i class=\"" + FAIconType.STEP_FORWARD.getStyleName() + "\"></i>",
+                           new ClickHandler() {
 
-        prev = new NavLink("&lt;", new ClickHandler() {
+                               @Override
+                               public void onClick(ClickEvent event) {
+                                   int indx = EntryTablePager.super.getPage() + 1;
+                                   EntryTablePager.super.setPage(indx);
+                               }
+                           });
 
-            @Override
-            public void onClick(ClickEvent event) {
-                int indx = EntryTablePager.super.getPage() - 1;
-                EntryTablePager.super.setPage(indx);
-            }
-        });
+        prev = new NavLink("<i class=\"" + FAIconType.STEP_BACKWARD.getStyleName() + "\"></i>",
+                           new ClickHandler() {
+
+                               @Override
+                               public void onClick(ClickEvent event) {
+                                   int indx = EntryTablePager.super.getPage() - 1;
+                                   EntryTablePager.super.setPage(indx);
+                               }
+                           });
 
         // result count
         btn15Count = new NavLink("15", new VisibleRangeChanger(15));
@@ -137,6 +150,21 @@ public class EntryTablePager extends AbstractPager {
         layout.setCellSpacing(0);
     }
 
+    public void setLoading() {
+        next.setLoading();
+        next.setDisabled(true);
+    }
+
+    public void determineSetNextEnabled() {
+        if (isRangeLimited()) {
+            setNextPageButtonsDisabled(!hasNextPage());
+        }
+    }
+
+    public void setDefaultHTML() {
+        next.setDefaultHTML();
+    }
+
     public void goToFirstPage() {
         this.firstPage();
     }
@@ -145,7 +173,6 @@ public class EntryTablePager extends AbstractPager {
      * creates first (<<) prev (<) navigation
      */
     protected void createNavigation() {
-
         if (this.nav != null)
             return;
 
@@ -153,7 +180,7 @@ public class EntryTablePager extends AbstractPager {
         this.nav.setWidget(0, 0, first);
         this.nav.setWidget(0, 1, prev);
         this.nav.setCellPadding(0);
-        this.nav.setCellSpacing(0);
+        this.nav.setCellSpacing(3);
     }
 
     // called every time row is updated
@@ -199,16 +226,15 @@ public class EntryTablePager extends AbstractPager {
         } else
             this.nav.setWidget(0, 2, next);
 
-        //        this.nav.setWidget(0, 4, last);
+        this.nav.setWidget(0, 4, last);
     }
 
     protected Widget createRangeOptions() {
-
-        HorizontalPanel panel = new HorizontalPanel();
-        panel.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
-        panel.add(btn15Count);
-        panel.add(btn50Count);
-        panel.add(btn100Count);
+        FlexTable panel = new FlexTable();
+        panel.setWidget(0, 0, btn15Count);
+        panel.setWidget(0, 1, btn50Count);
+        panel.setWidget(0, 2, btn100Count);
+        panel.setVisible(false);
 
         // styles       
         panel.setWidth("90px");
@@ -217,7 +243,6 @@ public class EntryTablePager extends AbstractPager {
 
     @Override
     protected void onRangeOrRowCountChanged() {
-
         String txt = this.createText();
         label.setText(txt);
         label.setStyleName("pager_nav");
@@ -237,21 +262,21 @@ public class EntryTablePager extends AbstractPager {
     protected void setRowCountButtons() {
         HasRows table = this.getDisplay();
         switch (table.getVisibleRange().getLength()) {
-        case 15:
-            btn15Count.setDisabled(true);
-            btn50Count.setDisabled(false);
-            btn100Count.setDisabled(false);
-            break;
-        case 50:
-            btn15Count.setDisabled(false);
-            btn50Count.setDisabled(true);
-            btn100Count.setDisabled(false);
-            break;
-        case 100:
-            btn15Count.setDisabled(false);
-            btn50Count.setDisabled(false);
-            btn100Count.setDisabled(true);
-            break;
+            case 15:
+                btn15Count.setDisabled(true);
+                btn50Count.setDisabled(false);
+                btn100Count.setDisabled(false);
+                break;
+            case 50:
+                btn15Count.setDisabled(false);
+                btn50Count.setDisabled(true);
+                btn100Count.setDisabled(false);
+                break;
+            case 100:
+                btn15Count.setDisabled(false);
+                btn50Count.setDisabled(false);
+                btn100Count.setDisabled(true);
+                break;
         }
     }
 
@@ -272,15 +297,14 @@ public class EntryTablePager extends AbstractPager {
         endIndex = Math.max(pageStart, endIndex);
         boolean exact = display.isRowCountExact();
 
-        return "Showing " + formatter.format(pageStart) + " to " + formatter.format(endIndex)
+        return formatter.format(pageStart) + " - " + formatter.format(endIndex)
                 + (exact ? " of " : " of over ") + formatter.format(dataSize);
     }
 
     /**
      * Enable or disable the previous page buttons.
-     * 
-     * @param disabled
-     *            true to disable, false to enable
+     *
+     * @param disabled true to disable, false to enable
      */
     private void setPrevPageButtonsDisabled(boolean disabled) {
         first.setDisabled(disabled);
@@ -289,34 +313,31 @@ public class EntryTablePager extends AbstractPager {
 
     /**
      * Enable or disable the next page buttons.
-     * 
-     * @param disabled
-     *            true to disable, false to enable
+     *
+     * @param disabled true to disable, false to enable
      */
     private void setNextPageButtonsDisabled(boolean disabled) {
         next.setDisabled(disabled);
-        //        last.setDisabled(disabled);
+        last.setDisabled(disabled);
     }
 
     protected class VisibleRangeChanger implements ClickHandler {
+
         private final int range;
 
         public VisibleRangeChanger(int range) {
-
             super();
             this.range = range;
         }
 
         @Override
         public void onClick(ClickEvent event) {
-
             HasRows rows = getDisplay();
             if (rows.getVisibleRange().getLength() == range)
                 return;
 
             int start = rows.getVisibleRange().getStart();
             rows.setVisibleRange(start, range);
-
             updateNavigation();
         }
     }

@@ -8,7 +8,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Represents cell in a sheet. Not that a single instance is associated with each header (column)
+ * Represents cell in a sheet. Note that a single instance is associated with each header (column)
  * so this class keeps track of the data across all rows of the column
  *
  * @author Hector Plahar

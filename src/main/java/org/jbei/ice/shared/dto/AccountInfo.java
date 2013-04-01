@@ -1,9 +1,12 @@
 package org.jbei.ice.shared.dto;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class AccountInfo implements IsSerializable {
 
+    private long id;
     private String sessionId;
     private String email;
     private String initials;
@@ -11,12 +14,11 @@ public class AccountInfo implements IsSerializable {
     private String lastName;
     private String institution;
     private String description;
-    private String since;
-    private int entriesAvailable;
+    private Date lastLogin;
     private long userEntryCount;
-    private int userSampleCount;
     private long visibleEntryCount;
-    private boolean isModerator;
+    private boolean isAdmin;
+    private int newMessageCount;
 
     public AccountInfo() {
     }
@@ -49,10 +51,6 @@ public class AccountInfo implements IsSerializable {
         this.description = description;
     }
 
-    public void setSince(String since) {
-        this.since = since;
-    }
-
     public String getLastName() {
         return lastName;
     }
@@ -69,24 +67,12 @@ public class AccountInfo implements IsSerializable {
         return description;
     }
 
-    public String getSince() {
-        return since;
-    }
-
     public String getSessionId() {
         return sessionId;
     }
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
-    }
-
-    public int getEntriesAvailable() {
-        return entriesAvailable;
-    }
-
-    public void setEntriesAvailable(int entriesAvailable) {
-        this.entriesAvailable = entriesAvailable;
     }
 
     public long getUserEntryCount() {
@@ -97,14 +83,6 @@ public class AccountInfo implements IsSerializable {
         this.userEntryCount = ownerEntryCount;
     }
 
-    public int getUserSampleCount() {
-        return userSampleCount;
-    }
-
-    public void setUserSampleCount(int userSampleCount) {
-        this.userSampleCount = userSampleCount;
-    }
-
     public long getVisibleEntryCount() {
         return visibleEntryCount;
     }
@@ -113,12 +91,12 @@ public class AccountInfo implements IsSerializable {
         this.visibleEntryCount = visibleEntryCount;
     }
 
-    public boolean isModerator() {
-        return isModerator;
+    public boolean isAdmin() {
+        return isAdmin;
     }
 
-    public void setModerator(boolean isModerator) {
-        this.isModerator = isModerator;
+    public void setAdmin(boolean isModerator) {
+        this.isAdmin = isModerator;
     }
 
     public String getInitials() {
@@ -127,5 +105,29 @@ public class AccountInfo implements IsSerializable {
 
     public void setInitials(String initials) {
         this.initials = initials;
+    }
+
+    public Date getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(Date date) {
+        this.lastLogin = date;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public int getNewMessageCount() {
+        return newMessageCount;
+    }
+
+    public void setNewMessageCount(int newMessageCount) {
+        this.newMessageCount = newMessageCount;
     }
 }

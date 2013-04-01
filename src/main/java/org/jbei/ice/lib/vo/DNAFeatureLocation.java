@@ -6,9 +6,8 @@ import org.jbei.ice.lib.models.AnnotationLocation;
 
 /**
  * Value object to hold {@link AnnotationLocation} data.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 public class DNAFeatureLocation implements Serializable {
 

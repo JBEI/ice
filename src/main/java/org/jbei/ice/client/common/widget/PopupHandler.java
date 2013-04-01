@@ -11,12 +11,9 @@ import com.google.gwt.user.client.ui.Widget;
 public class PopupHandler implements ClickHandler {
 
     private final PopupPanel popup;
-    private final int xOffset;
-    private final int yOffset;
     private HandlerRegistration closeHandlerRegistration;
 
-    public PopupHandler(Widget widget, Element autoHide, int xoffset, int yoffset,
-            boolean enableGlass) {
+    public PopupHandler(Widget widget, Element autoHide, boolean enableGlass) {
         this.popup = new PopupPanel();
         this.popup.setStyleName("add_to_popup");
         this.popup.setAutoHideEnabled(true);
@@ -24,8 +21,6 @@ public class PopupHandler implements ClickHandler {
             this.popup.addAutoHidePartner(autoHide);
         this.popup.setWidget(widget);
         this.popup.setGlassEnabled(enableGlass);
-        this.xOffset = xoffset;
-        this.yOffset = yoffset;
     }
 
     public void setCloseHandler(CloseHandler<PopupPanel> handler) {
@@ -34,17 +29,25 @@ public class PopupHandler implements ClickHandler {
         closeHandlerRegistration = this.popup.addCloseHandler(handler);
     }
 
+    public void addAutoHidePartner(Element autoHidePartner) {
+        this.popup.addAutoHidePartner(autoHidePartner);
+    }
+
+    public void show() {
+        popup.show();
+    }
+
     @Override
     public void onClick(ClickEvent event) {
         if (!popup.isShowing()) {
-            Widget source = (Widget) event.getSource();
-            int x = source.getAbsoluteLeft() + xOffset;
-            int y = source.getOffsetHeight() + source.getAbsoluteTop() + this.yOffset;
-            popup.setPopupPosition(x, y);
-            popup.show();
+            popup.showRelativeTo((Widget) event.getSource());
         } else {
             popup.hide();
         }
+    }
+
+    public boolean popupIsShowing() {
+        return popup.isShowing();
     }
 
     public void hidePopup() {
@@ -52,12 +55,5 @@ public class PopupHandler implements ClickHandler {
             return;
 
         this.popup.hide();
-    }
-
-    public void showPopup() {
-        if (this.popup == null || this.popup.isShowing())
-            return;
-
-        this.popup.show();
     }
 }

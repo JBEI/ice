@@ -1,21 +1,23 @@
 package org.jbei.ice.lib.entry.sequence;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -44,10 +46,16 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             throw new DAOException("Failed to save sequence without entry!");
         }
 
-        normalizeAnnotationLocations(sequence);
-        Set<SequenceFeature> sequenceFeatureSet = sequence.getSequenceFeatures();
+        Set<SequenceFeature> sequenceFeatureSet = null;
 
-        if (sequenceFeatureSet != null && sequenceFeatureSet.size() > 0) {
+        normalizeAnnotationLocations(sequence);
+        if (sequence.getSequenceFeatures() != null) {
+            sequenceFeatureSet = new HashSet<>(sequence.getSequenceFeatures());
+            sequence.setSequenceFeatures(null);
+        }
+        sequence = super.save(sequence);
+
+        if (sequenceFeatureSet != null) {
             for (SequenceFeature sequenceFeature : sequenceFeatureSet) {
                 Feature feature = sequenceFeature.getFeature();
 
@@ -62,10 +70,42 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
                 }
 
                 sequenceFeature.setFeature(existingFeature);
+                sequenceFeature.setSequence(sequence);
+                currentSession().saveOrUpdate(sequenceFeature);
             }
         }
 
-        sequence = super.saveOrUpdate(sequence);
+        return sequence;
+    }
+
+    public Sequence updateSequence(Sequence sequence, Set<SequenceFeature> newFeatures) throws DAOException {
+        if (sequence == null) {
+            throw new DAOException("Failed to update null sequence!");
+        }
+
+        if (sequence.getEntry() == null) {
+            throw new DAOException("Failed to update sequence without entry!");
+        }
+
+        // clear features
+        for (SequenceFeature feature : sequence.getSequenceFeatures())
+            currentSession().delete(feature);
+        sequence.setSequenceFeatures(null);
+        sequence = update(sequence);
+
+        // new features
+        if (newFeatures != null) {
+            for (SequenceFeature sequenceFeature : newFeatures) {
+                Feature newFeature = sequenceFeature.getFeature();
+                Feature newFeatureExisting = getFeatureBySequence(newFeature.getSequence());
+                if (newFeatureExisting == null) {
+                    newFeatureExisting = saveFeature(newFeature);
+                }
+                sequenceFeature.setFeature(newFeatureExisting);
+                sequenceFeature.setSequence(sequence);
+                currentSession().saveOrUpdate(sequenceFeature);
+            }
+        }
 
         return sequence;
     }
@@ -78,7 +118,9 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      */
     public void deleteSequence(Sequence sequence) throws DAOException {
         sequence.setEntry(null);
+        sequence.getSequenceFeatures();
         super.delete(sequence);
+        currentSession().flush();
     }
 
     /**
@@ -93,20 +135,14 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             throw new DAOException("Failed to save null model!");
         }
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
-            session.getTransaction().begin();
             session.saveOrUpdate(feature);
-            session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
-            session.getTransaction().rollback();
             Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
-        } finally {
-            closeSession(session);
         }
 
         return feature;
@@ -122,12 +158,9 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     public Sequence getByEntry(Entry entry) throws DAOException {
         Sequence sequence = null;
 
-        Session session = newSession();
+        Session session = currentSession();
         try {
-            session.beginTransaction();
-            String queryString = "from " + Sequence.class.getName()
-                    + " as sequence where sequence.entry = :entry";
-
+            String queryString = "from " + Sequence.class.getName() + " as sequence where sequence.entry = :entry";
             Query query = session.createQuery(queryString);
             query.setEntity("entry", entry);
             Object queryResult = query.uniqueResult();
@@ -135,31 +168,25 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             if (queryResult != null) {
                 sequence = (Sequence) queryResult;
             }
-            session.getTransaction().commit();
         } catch (HibernateException e) {
             Logger.error(e);
-            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
-        } finally {
-            closeSession(session);
         }
         normalizeAnnotationLocations(sequence);
         return sequence;
     }
 
     public boolean hasSequence(Entry entry) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
 
-            Long itemCount = (Long) session.createCriteria(Sequence.class)
-                                           .setProjection(Projections.countDistinct("id"))
-                                           .add(Restrictions.eq("entry", entry)).uniqueResult();
+            Number itemCount = (Number) session.createCriteria(Sequence.class)
+                                               .setProjection(Projections.countDistinct("id"))
+                                               .add(Restrictions.eq("entry", entry)).uniqueResult();
 
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
-        } finally {
-            closeSession(session);
         }
     }
 
@@ -170,24 +197,15 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public ArrayList<Sequence> getAllSequences() throws DAOException {
-        ArrayList<Sequence> sequences = null;
-
-        Session session = newSession();
+    public List<Sequence> getAllSequences() throws DAOException {
+        Session session = currentSession();
         try {
-            Query query = session.createQuery("from " + Sequence.class.getName());
-            @SuppressWarnings("rawtypes")
-            List list = query.list();
-            if (list != null) {
-                sequences = (ArrayList<Sequence>) list;
-            }
-        } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve entries!", e);
-        } finally {
-            closeSession(session);
+            Criteria criteria = session.createCriteria(Sequence.class).setFirstResult(0);
+            return new LinkedList<Sequence>(criteria.list());
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
-
-        return sequences;
     }
 
     /**
@@ -218,12 +236,12 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * Retrieve all {@link Feature} objects in the database.
      *
      * @return ArrayList of Feature objects.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public ArrayList<Feature> getAllFeatures() throws ManagerException {
+    public ArrayList<Feature> getAllFeatures() throws DAOException {
         ArrayList<Feature> features = null;
-        Session session = newSession();
+        Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Feature.class.getName());
             @SuppressWarnings("rawtypes")
@@ -233,9 +251,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
                 features = (ArrayList<Feature>) list;
             }
         } catch (HibernateException e) {
-            throw new ManagerException(e);
-        } finally {
-            closeSession(session);
+            throw new DAOException(e);
         }
 
         return features;
@@ -244,14 +260,14 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     /**
      * Retrieve the {@link Feature} object with the given DNA sequence string.
      *
-     * @param featureDnaSequence
+     * @param featureDnaSequence dna sequence of feature
      * @return Feature object.
      * @throws DAOException
      */
     private Feature getFeatureBySequence(String featureDnaSequence) throws DAOException {
         featureDnaSequence = featureDnaSequence.toLowerCase();
-        Feature result = null;
-        Session session = newSession();
+        Feature result;
+        Session session = currentSession();
 
         try {
             String queryString = "from " + Feature.class.getName() + " where hash = :hash";
@@ -263,24 +279,18 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             if (queryResult != null) {
                 result = (Feature) queryResult;
             } else {
-                query.setParameter("hash", SequenceUtils.calculateSequenceHash(SequenceUtils
-                                                                                       .reverseComplement(
-                                                                                               featureDnaSequence)));
-
+                String reverseComplement = SequenceUtils.reverseComplement(featureDnaSequence);
+                String sequenceHash = SequenceUtils.calculateSequenceHash(reverseComplement);
+                query.setParameter("hash", sequenceHash);
                 queryResult = query.uniqueResult();
-
                 if (queryResult != null) {
                     result = (Feature) queryResult;
                 } else {
                     result = null;
                 }
             }
-        } catch (HibernateException e) {
+        } catch (HibernateException | UtilityException e) {
             throw new DAOException("Failed to get Feature by sequence!", e);
-        } catch (UtilityException e) {
-            throw new DAOException("Failed to get Feature by sequence!", e);
-        } finally {
-            closeSession(session);
         }
 
         return result;

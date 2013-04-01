@@ -1,16 +1,16 @@
 package org.jbei.ice.lib.parsers;
 
-import org.apache.commons.lang.NotImplementedException;
-import org.biojava.bio.program.abi.ABITrace;
-import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SimpleDNASequence;
 
+import org.apache.commons.lang.NotImplementedException;
+import org.biojava.bio.program.abi.ABITrace;
+import org.biojava.bio.symbol.SymbolList;
+
 /**
  * Parse ABI sequence trace file by wrappying BioJava.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham
- * 
  */
 public class ABIParser extends AbstractParser {
     private static final String ABI_PARSER = "ABI";

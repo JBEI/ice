@@ -1,9 +1,5 @@
 package org.jbei.ice.lib.permissions.model;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.models.Group;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,6 +9,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.group.Group;
+
 /**
  * Give a {@link Group} write permission to an {@link Entry}.
  * <p/>
@@ -20,6 +20,7 @@ import javax.persistence.Table;
  * the Entry.
  *
  * @author Timothy Ham, Zinovii Dmytriv
+ * @deprecated this has been replaced by Permission
  */
 @Entity
 @Table(name = "permission_write_groups")
@@ -29,7 +30,7 @@ public class WriteGroup implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private int id;
 
     @ManyToOne

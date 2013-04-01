@@ -1,5 +1,11 @@
 package org.jbei.ice.client.collection.menu;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.jbei.ice.client.collection.view.OptionSelect;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -10,11 +16,6 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
-import org.jbei.ice.client.collection.view.OptionSelect;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Presenter for menus that provide options on click.
@@ -31,8 +32,7 @@ public class SubMenuOptionsPresenter<T extends OptionSelect> {
 
         void addOption(T option);
 
-        void setSelectionModel(SelectionModel<T> selectionModel,
-                CellPreviewEvent.Handler<T> selectionEventManager);
+        void setSelectionModel(SelectionModel<T> selectionModel, CellPreviewEvent.Handler<T> selectionEventManager);
 
         void setSubmitEnable(boolean enable);
 
@@ -53,10 +53,9 @@ public class SubMenuOptionsPresenter<T extends OptionSelect> {
         dataProvider = new ListDataProvider<T>();
         model = new MultiSelectionModel<T>();
 
-        this.view
-                .setSelectionModel(model, DefaultSelectionEventManager.<T>createCheckboxManager());
-        view.setSubmitEnable(false);
-        view.setClearEnable(false);
+        this.view.setSelectionModel(model, DefaultSelectionEventManager.<T>createCheckboxManager());
+        this.view.setSubmitEnable(false);
+        this.view.setClearEnable(false);
 
         // logic to enable and disable submission button
         model.addSelectionChangeHandler(new Handler() {
@@ -70,7 +69,7 @@ public class SubMenuOptionsPresenter<T extends OptionSelect> {
         });
 
         // clear button clickhandler
-        view.addClearHandler(new ClickHandler() {
+        this.view.addClearHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -103,7 +102,6 @@ public class SubMenuOptionsPresenter<T extends OptionSelect> {
             return;
 
         Iterator<T> it = data.iterator();
-
         int index = 0;
 
         while (it.hasNext()) {

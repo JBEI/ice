@@ -24,7 +24,11 @@ public class MenuItem {
 
     public enum Menu {
 
-        GENERAL("General"), SEQ_ANALYSIS("Sequence Analysis"), SAMPLES("Samples");
+        GENERAL("General Information"),
+        SEQ_ANALYSIS("Sequence Analysis"),
+        //        COMMENTS("Comments"),
+        //        AUDIT_LOG("Audit Log"),
+        SAMPLES("Samples");
 
         private String display;
 

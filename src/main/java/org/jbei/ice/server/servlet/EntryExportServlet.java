@@ -1,19 +1,20 @@
 package org.jbei.ice.server.servlet;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -21,15 +22,14 @@ import org.jbei.ice.lib.utils.IceXlsSerializer;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
 import org.jbei.ice.lib.utils.UtilityException;
 
+import org.apache.commons.io.IOUtils;
+
 public class EntryExportServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private static final String XML_EXPORT = "xml";
-    private static final String EXCEL_EXPORT = "excel";
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
         Logger.info(EntryExportServlet.class.getSimpleName() + ": attempt to download file");
         Account account;
 
@@ -54,91 +54,68 @@ public class EntryExportServlet extends HttpServlet {
         Logger.info(EntryExportServlet.class.getSimpleName() + ": user = " + account.getEmail()
                             + ", type = " + type + ", entries = " + commaSeparated);
 
-        EntryController controller = new EntryController();
-        ArrayList<Entry> entries = retrieveEntries(account, commaSeparated, controller);
+        Set<String> typeSet = new HashSet<>();
+        List<Entry> entries = retrieveEntries(account, commaSeparated, typeSet);
         if (entries == null || entries.isEmpty())
             return;
 
-        if (XML_EXPORT.equalsIgnoreCase(type)) {
-            exportXML(account, entries, response);
-        } else if (EXCEL_EXPORT.equalsIgnoreCase(type)) {
-            exportExcel(entries, response, controller);
+        switch (type.toLowerCase()) {
+            case "xml":
+                exportXML(account, entries, response);
+                break;
+
+            case "excel":
+                exportExcel(entries, typeSet, response);
+                break;
         }
     }
 
-    // attempts to retrieve entry by id and then by part number
-    private ArrayList<Entry> retrieveEntries(Account account, String commaSeparated,
-            EntryController controller) {
-        ArrayList<Entry> entries = new ArrayList<Entry>();
+    private List<Entry> retrieveEntries(Account account, String commaSeparated, Set<String> types) {
+        LinkedList<Entry> entries = new LinkedList<>();
         String[] idStrs = commaSeparated.split(",");
 
         for (String idStr : idStrs) {
             Entry entry;
             try {
                 long id = Long.decode(idStr.trim());
-                entry = controller.get(account, id);
+                entry = ControllerFactory.getEntryController().get(account, id);
             } catch (NumberFormatException nfe) {
-                try {
-                    entry = controller.getByPartNumber(account, idStr.trim());
-                } catch (ControllerException e) {
-                    Logger.error(e);
-                    continue;
-                } catch (PermissionException e) {
-                    Logger.error(e);
-                    continue;
-                }
-            } catch (ControllerException e) {
-                Logger.error(e);
+                Logger.error("Could not convert string id to long : " + idStr);
                 continue;
-            } catch (PermissionException e) {
+            } catch (ControllerException | PermissionException e) {
                 Logger.error(e);
                 continue;
             }
 
-            if (entry != null)
+            if (entry != null) {
+                types.add(entry.getRecordType().toUpperCase());
                 entries.add(entry);
+            }
         }
         return entries;
     }
 
-    private void exportXML(Account account, ArrayList<Entry> entries, HttpServletResponse response) {
+    private void exportXML(Account account, List<Entry> entries, HttpServletResponse response) {
         try {
             String xmlDocument = IceXmlSerializer.serializeToJbeiXml(account, entries);
 
             // write to file
             String saveName = "data.xml";
-
             byte[] bytes = xmlDocument.getBytes();
-            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
-
             response.setContentType("text/xml");
             response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=" + saveName);
-
-            OutputStream os = response.getOutputStream();
-            DataInputStream is = new DataInputStream(byteInputStream);
-
-            int read = 0;
-
-            while ((read = is.read(bytes)) != -1) {
-                os.write(bytes, 0, read);
-            }
-            os.flush();
-            os.close();
-
-        } catch (IOException e) {
-            Logger.error(e);
-        } catch (UtilityException e) {
+            IOUtils.write(bytes, response.getOutputStream());
+        } catch (IOException | UtilityException e) {
             Logger.error(e);
         }
     }
 
-    private void exportExcel(ArrayList<Entry> entries, HttpServletResponse response,
-            EntryController controller) {
+    private void exportExcel(List<Entry> entries, Set<String> types, HttpServletResponse response) {
         try {
             String data;
             try {
-                data = IceXlsSerializer.serialize(controller, entries);
+                data = IceXlsSerializer.serialize(entries, new TreeSet<>(types));
             } catch (ControllerException e) {
                 Logger.error(e);
                 return;
@@ -147,22 +124,10 @@ public class EntryExportServlet extends HttpServlet {
             // write to file
             String saveName = "data.xls";
             byte[] bytes = data.getBytes();
-            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
-
             response.setContentType("application/vnd.ms-excel");
             response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=" + saveName);
-
-            OutputStream os = response.getOutputStream();
-            DataInputStream is = new DataInputStream(byteInputStream);
-
-            int read = 0;
-            while ((read = is.read(bytes)) != -1) {
-                os.write(bytes, 0, read);
-            }
-            os.flush();
-            os.close();
-
+            IOUtils.write(bytes, response.getOutputStream());
         } catch (IOException e) {
             Logger.error(e);
         }
@@ -178,7 +143,7 @@ public class EntryExportServlet extends HttpServlet {
                 if (!AccountController.isAuthenticated(sid))
                     return null;
 
-                AccountController controller = new AccountController();
+                AccountController controller = ControllerFactory.getAccountController();
                 return controller.getAccountBySessionKey(sid);
             }
         }

@@ -4,11 +4,15 @@ import org.jbei.ice.client.RegistryServiceAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
 
-public interface AdminPanelPresenter<T> {
+public abstract class AdminPanelPresenter {
 
-    void go(RegistryServiceAsync service, HandlerManager eventBus);
+    protected final RegistryServiceAsync service;
+    protected final HandlerManager eventBus;
 
-    AdminPanel<T> getView();
+    public AdminPanelPresenter(final RegistryServiceAsync service, HandlerManager eventBus) {
+        this.service = service;
+        this.eventBus = eventBus;
+    }
 
-    int getTabIndex();
+    public abstract IAdminPanel getView();
 }

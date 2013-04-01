@@ -1,25 +1,19 @@
-@sprite .subMenuCreateNew {
-    height: 26px;
-    width: 106px;
-    gwt-image: 'sortDown';
-    color: #f3f3f3;
-    background-position: 90px 9px;
-    padding-right: 12px;
-    background-color: #709F35;
+.subMenuCreateNew {
+    height: 28px;
+    color: #f2f2f2;
     font-weight: bold;
-    border: 1px solid #777;
+    background-color: #709F35;
+    border: 1px solid #3f7f00;
     cursor: pointer;
     font-size: 0.75em;
-    text-align: center;
-    -webkit-border-radius: 1px;
-    -moz-border-radius: 1px;
     font-family: Arial;
+    padding: 2px 9px 2px 9px;
 }
 
 .subMenuCreateNew:hover {
-	color: #FFF;
-	border: 1px solid #333;
-	box-shadow: 0 0 1px 1px #ddd;
+    color: #FFF;
+    border: 1px solid #333;
+    box-shadow: 0 0 1px 1px #ddd;
 }
 
 .cellListKeyboardSelectedItem {

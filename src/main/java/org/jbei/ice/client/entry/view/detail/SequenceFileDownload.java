@@ -32,8 +32,7 @@ class SequenceFileDownload implements IsWidget {
 
     interface SequenceFileDownloadResource extends CellList.Resources {
 
-        static SequenceFileDownloadResource INSTANCE = GWT
-                .create(SequenceFileDownloadResource.class);
+        static SequenceFileDownloadResource INSTANCE = GWT.create(SequenceFileDownloadResource.class);
 
         @Source("org/jbei/ice/client/resource/image/arrow_down.png")
         @ImageOptions(repeatStyle = RepeatStyle.None)
@@ -59,7 +58,7 @@ class SequenceFileDownload implements IsWidget {
 
         options.setRowData(Arrays.asList(DownloadOption.values()));
 
-        final PopupHandler popupHandler = new PopupHandler(options, label.getElement(), 0, 1, false);
+        final PopupHandler popupHandler = new PopupHandler(options, label.getElement(), false);
 
         label.addClickHandler(popupHandler);
         optionSelection = new SingleSelectionModel<DownloadOption>();
@@ -72,7 +71,7 @@ class SequenceFileDownload implements IsWidget {
                     return;
                 popupHandler.hidePopup();
                 Window.Location.replace("/sequence?type=" + selected.getType() + "&entry="
-                        + entryId);
+                                                + entryId);
                 optionSelection.setSelected(selected, false);
             }
         });

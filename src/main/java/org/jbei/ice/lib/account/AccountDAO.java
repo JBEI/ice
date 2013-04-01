@@ -1,20 +1,21 @@
 package org.jbei.ice.lib.account;
 
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.models.Moderator;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.models.SessionData;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 
 /**
  * DAO to manipulate {@link Account} objects in the database.
@@ -34,15 +35,9 @@ class AccountDAO extends HibernateRepository<Account> {
         return super.get(Account.class, id);
     }
 
-    public ArrayList<Account> getAllAccounts() throws DAOException {
-        ArrayList<Account> result = new ArrayList<Account>(super.retrieveAll(Account.class));
-        return result;
-    }
-
     public Set<Account> getMatchingAccounts(String token, int limit) throws DAOException {
-        Session session = newSession();
+        Session session = currentSession();
         try {
-            session.beginTransaction();
             token = token.toUpperCase();
             String queryString = "from " + Account.class.getName()
                     + " where (UPPER(firstName) like '%" + token
@@ -53,13 +48,9 @@ class AccountDAO extends HibernateRepository<Account> {
 
             @SuppressWarnings("unchecked")
             HashSet<Account> result = new HashSet<Account>(query.list());
-            session.getTransaction().commit();
             return result;
         } catch (Exception e) {
-            session.getTransaction().rollback();
             throw new DAOException(e);
-        } finally {
-            closeSession(session);
         }
     }
 
@@ -72,11 +63,9 @@ class AccountDAO extends HibernateRepository<Account> {
      */
     public Account getByEmail(String email) throws DAOException {
         Account account = null;
-
-        Session session = newSession();
+        Session session = currentSession();
         try {
-            Query query = session.createQuery("from " + Account.class.getName()
-                                                      + " where email = :email");
+            Query query = session.createQuery("from " + Account.class.getName() + " where email = :email");
             query.setParameter("email", email);
             Object result = query.uniqueResult();
 
@@ -85,23 +74,8 @@ class AccountDAO extends HibernateRepository<Account> {
             }
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve Account by email: " + email);
-        } finally {
-            closeSession(session);
         }
-
         return account;
-    }
-
-    /**
-     * Save the given {@link Account} into the database.
-     *
-     * @param account account object to save
-     * @return Saved account.
-     * @throws DAOException
-     */
-
-    public Account save(Account account) throws DAOException {
-        return super.saveOrUpdate(account);
     }
 
     /**
@@ -113,51 +87,34 @@ class AccountDAO extends HibernateRepository<Account> {
      */
     public Account getAccountByAuthToken(String authToken) throws DAOException {
         Account account = null;
-
         String queryString = "from " + SessionData.class.getName()
                 + " sessionData where sessionData.sessionKey = :sessionKey";
-        Session session = newSession();
+        Session session = currentSession();
         try {
-            session.getTransaction().begin();
             Query query = session.createQuery(queryString);
             query.setString("sessionKey", authToken);
             SessionData sessionData = (SessionData) query.uniqueResult();
             if (sessionData != null) {
                 account = sessionData.getAccount();
             }
-            session.getTransaction().commit();
         } catch (HibernateException e) {
-            session.getTransaction().rollback();
             throw new DAOException("Failed to get Account by token: " + authToken);
-        } finally {
-            closeSession(session);
         }
-
         return account;
     }
 
-    @SuppressWarnings("deprecation")
-    public void updateModeratorAccounts() throws DAOException {
-        Session session = newSession();
+    @SuppressWarnings("unchecked")
+    public LinkedList<Account> retrieveAccounts(int start, int limit) throws DAOException {
+        Session session = currentSession();
+        Criteria criteria = session.createCriteria(Account.class).setFirstResult(start).setMaxResults(limit);
+        criteria.addOrder(Order.asc("email"));
+        List list = criteria.list();
+        return new LinkedList<Account>(list);
+    }
 
-        try {
-            session.getTransaction().begin();
-            Query query = session.createQuery("from " + Moderator.class.getName());
-            @SuppressWarnings("unchecked")
-            List<Moderator> results = new ArrayList<Moderator>(query.list());
-            for (Moderator moderator : results) {
-                Account account = moderator.getAccount();
-                account.setType(AccountType.ADMIN);
-                session.update(account);
-            }
-            session.getTransaction().commit();
-        } catch (HibernateException he) {
-            session.getTransaction().rollback();
-            throw new DAOException(he);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
+    public int retrieveAllAccountCount() throws DAOException {
+        Number number = (Number) currentSession().createCriteria(Account.class)
+                .setProjection(Projections.rowCount()).uniqueResult();
+        return number.intValue();
     }
 }

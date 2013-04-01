@@ -1,12 +1,15 @@
 package org.jbei.ice.lib.folder;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.entry.model.Entry;
-
-import javax.persistence.*;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import javax.persistence.*;
+
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.entry.model.Entry;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 /**
  * Encapsulates the notion of a collection of {@link org.jbei.ice.lib.entry.model.Entry}s
@@ -22,7 +25,7 @@ public class Folder implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,7 +52,8 @@ public class Folder implements IModel {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
                inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
-    private Set<Entry> contents = new LinkedHashSet<Entry>();
+    @LazyCollection(LazyCollectionOption.EXTRA)
+    private Set<Entry> contents = new LinkedHashSet<>();
 
     public Folder() {
     }
@@ -58,17 +62,8 @@ public class Folder implements IModel {
         this.name = name;
     }
 
-    public Folder(String name, Set<Entry> contents) {
-        this.name = name;
-        this.contents = contents;
-    }
-
     public void setId(long id) {
         this.id = id;
-    }
-
-    public void setParent(Folder parent) {
-        this.parent = parent;
     }
 
     public void setName(String name) {
@@ -83,16 +78,8 @@ public class Folder implements IModel {
         this.ownerEmail = ownerEmail;
     }
 
-    public void setContents(Set<Entry> contents) {
-        this.contents = contents;
-    }
-
     public long getId() {
         return id;
-    }
-
-    public Folder getParent() {
-        return parent;
     }
 
     public String getName() {

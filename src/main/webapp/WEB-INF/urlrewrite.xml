@@ -18,22 +18,22 @@
         <from>/test/status/</from>
         <to type="redirect">%{context-path}/rewrite-status</to>
     </rule>
-    
+
     <rule>
         <from>/entry/view/(.*)</from>
         <to type="redirect">/#page=entry;id=$1</to>
     </rule>
-    
+
     <rule>
         <from>/folders(.*)</from>
         <to type="redirect">/#page=collections</to>
     </rule>
-    
+
     <rule>
         <from>/admin(.*)</from>
         <to type="redirect">/#page=admin</to>
     </rule>
-    
+
     <rule>
         <from>/login</from>
         <to type="redirect">/#page=login</to>

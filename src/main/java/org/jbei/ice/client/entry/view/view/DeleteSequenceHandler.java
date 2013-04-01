@@ -1,7 +1,7 @@
 package org.jbei.ice.client.entry.view.view;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -22,13 +22,17 @@ public class DeleteSequenceHandler implements ClickHandler {
 
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
-    private final long entryId;
+    private long entryId;
     private Callback<Boolean> callback;
 
     public DeleteSequenceHandler(RegistryServiceAsync service, HandlerManager eventBus, long entryId) {
         this.service = service;
         this.eventBus = eventBus;
         this.entryId = entryId;
+    }
+
+    public DeleteSequenceHandler(RegistryServiceAsync service, HandlerManager eventBus) {
+        this(service, eventBus, 0);
     }
 
     public void setCallback(Callback<Boolean> callback) {
@@ -42,7 +46,7 @@ public class DeleteSequenceHandler implements ClickHandler {
             @Override
             protected void callService(AsyncCallback<Boolean> serviceCallback) throws AuthenticationException {
                 try {
-                    service.removeSequence(AppController.sessionId, entryId, serviceCallback);
+                    service.removeSequence(ClientController.sessionId, entryId, serviceCallback);
                 } catch (AuthenticationException e) {
                     History.newItem(Page.LOGIN.getLink());
                 }
@@ -60,5 +64,9 @@ public class DeleteSequenceHandler implements ClickHandler {
                     callback.onFailure();
             }
         }.go(eventBus);
+    }
+
+    public void setEntryId(long entryId) {
+        this.entryId = entryId;
     }
 }

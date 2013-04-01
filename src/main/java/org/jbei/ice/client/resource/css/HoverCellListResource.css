@@ -1,0 +1,29 @@
+.cellListKeyboardSelectedItem {
+}
+
+.cellListOddItem, .cellListEvenItem {
+    padding: 2px;
+    padding-left: 8px;
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.cellListSelectedItem {
+    background-color: #F1F1F1;
+    border: 1px solid #BBB;
+    color: #333;
+}
+
+.cellListOddItem:hover, .cellListEvenItem:hover {
+    background-color: #0088cc;
+    color: white;
+}
+
+.cellListWidget {
+    background-color: #FFF;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    font-family: sans-serif, Arial;
+    font-size: 11px;
+}

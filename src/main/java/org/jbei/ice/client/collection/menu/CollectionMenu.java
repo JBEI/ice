@@ -4,23 +4,27 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.collection.ShareCollectionData;
+import org.jbei.ice.client.collection.widget.ShareCollectionWidget;
 import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.entry.view.ReadBoxSelectionHandler;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
@@ -29,84 +33,82 @@ import com.google.gwt.view.client.SingleSelectionModel;
  *
  * @author Hector Plahar
  */
-public class CollectionMenu extends Composite {
+public class CollectionMenu extends Composite implements CollectionMenuPresenter.IView {
 
-    private final FlexTable table;
+    private final FlexTable layout;
     private MenuItem currentEditSelection;
 
     private int row;
-    private final TextBox editCollectionNameBox;
     private int editRow = -1;
     private int editIndex = -1;
     private final SingleSelectionModel<MenuItem> selectionModel;
+    private final CollectionMenuPresenter presenter;
+    private final boolean hasQuickEdit;
+    private final QuickAddWidget editName;
 
     // quick add
-    private TextBox quickAddBox;
-    private Image quickAddButton;
-    private HandlerRegistration quickAddBoxHandlerRegisteration;
-    private HandlerRegistration quickAddBoxKeyHandlerRegisteration;
+    private QuickAddWidget quickAddWidget;
+    private Delegate<ShareCollectionData> permissionInfoDelegate;
 
     public CollectionMenu(boolean addQuickEdit, String header) {
-        table = new FlexTable();
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-        table.setStyleName("collection_menu_table");
-        initWidget(table);
+        layout = new FlexTable();
+        layout.setCellPadding(0);
+        layout.setCellSpacing(0);
+        layout.setStyleName("collection_menu_table");
+        initWidget(layout);
+
+        // quick add
+        quickAddWidget = new QuickAddWidget(true);
+        quickAddWidget.setVisible(false);
 
         // quick edit
-        editCollectionNameBox = new TextBox();
-        editCollectionNameBox.setStyleName("input_box");
-        editCollectionNameBox.setWidth("99%");
-        editCollectionNameBox.setVisible(false);
+        editName = new QuickAddWidget(false);
+        editName.setVisible(false);
 
+        hasQuickEdit = addQuickEdit;
+
+        // header panel
+        final MenuHeader menuHeaderPanel = new MenuHeader(header, addQuickEdit);
+        menuHeaderPanel.addQuickAddHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                switchButton();
+            }
+        });
+        layout.setWidget(row, 0, menuHeaderPanel);
+        layout.getCellFormatter().setStyleName(row, 0, "collections_menu_header");
         if (addQuickEdit) {
-            // quick add widgets
-            quickAddBox = new TextBox();
-            quickAddBox.setStyleName("input_box");
-            quickAddBox.setWidth("99%");
-            quickAddButton = ImageUtil.getPlusIcon();
-            quickAddButton.setStyleName("collection_quick_add_image");
-            quickAddBox.addFocusHandler(new FocusHandler() {
-
-                @Override
-                public void onFocus(FocusEvent event) {
-                    quickAddBox.setText("");
-                }
-            });
-
-            quickAddButton.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    switchButton();
-                }
-            });
-
-            HTMLPanel menuHeaderPanel = new HTMLPanel("<span>" + header
-                                                              + "</span><span style=\"float: right\" " +
-                                                              "id=\"quick_add\"></span>");
-            menuHeaderPanel.add(quickAddButton, "quick_add");
-            table.setWidget(row, 0, menuHeaderPanel);
-            table.getFlexCellFormatter().setStyleName(row, 0, "collections_menu_header");
-
             row += 1;
-            table.setWidget(row, 0, quickAddBox);
-
-        } else {
-            table.setHTML(row, 0, header);
-            table.getFlexCellFormatter().setStyleName(row, 0, "collections_menu_header");
+            layout.setWidget(row, 0, quickAddWidget);
         }
 
+        menuHeaderPanel.addExpandCollapseHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                int start = hasQuickEdit ? 2 : 1;
+                for (int i = start; i < layout.getRowCount(); i += 1) {
+                    layout.getWidget(i, 0).setVisible(!menuHeaderPanel.isCollapsed());
+                }
+            }
+        });
         selectionModel = new SingleSelectionModel<MenuItem>();
+        presenter = new CollectionMenuPresenter(this);
     }
 
-    // todo : move to model/presenter/handler
-    protected boolean validate() {
-        if (quickAddBox != null && quickAddBox.getText().trim().isEmpty()) {
-            quickAddBox.setStyleName("entry_input_error");
-            return false;
-        }
-        return true;
+    public void setPermissionInfoDelegate(Delegate<ShareCollectionData> infoDelegate) {
+        this.permissionInfoDelegate = infoDelegate;
+    }
+
+    public void setEmptyCollectionMessage(String msg) {
+        int messageRow = hasQuickEdit ? 2 : 1;
+        HTML html = new HTML("<span style=\"font-size: 0.70em; color: #666; padding: 4px; font-style:italic\">"
+                                     + msg + "</span>");
+        layout.setWidget(messageRow, 0, html);
+    }
+
+    public String getQuickAddInputName() {
+        return this.quickAddWidget.getInputName();
     }
 
     public SingleSelectionModel<MenuItem> getSelectionModel() {
@@ -114,72 +116,28 @@ public class CollectionMenu extends Composite {
     }
 
     public String getQuickEditText() {
-        return this.editCollectionNameBox.getText();
+        return editName.getInputName();
     }
 
     public boolean isQuickEditVisible() {
-        return this.editCollectionNameBox.isVisible();
+        return editName.isVisible();
     }
 
-    public void addQuickEditBlurHandler(BlurHandler handler) {
-        this.editCollectionNameBox.addBlurHandler(handler);
-    }
-
-    public void addQuickEditKeyDownHandler(final KeyDownHandler handler) {
-        this.editCollectionNameBox.addKeyDownHandler(new KeyDownHandler() {
-
-            @Override
-            public void onKeyDown(KeyDownEvent event) {
-                if (event.getNativeKeyCode() != KeyCodes.KEY_ENTER)
-                    return;
-                handler.onKeyDown(event);
-            }
-        });
-    }
-
-    public void addQuickAddKeyPressHandler(final KeyPressHandler handler) {
-        if (quickAddBox == null)
-            return;
-
-        if (quickAddBoxKeyHandlerRegisteration != null)
-            quickAddBoxKeyHandlerRegisteration.removeHandler();
-
-        quickAddBoxKeyHandlerRegisteration = quickAddBox.addKeyPressHandler(new KeyPressHandler() {
+    public void addQuickEditKeyPressHandler(final KeyPressHandler handler) {
+        editName.addQuickAddKeyPressHandler(new KeyPressHandler() {
 
             @Override
             public void onKeyPress(KeyPressEvent event) {
                 if (event.getNativeEvent().getKeyCode() != KeyCodes.KEY_ENTER)
                     return;
-
-                if (!validate())
-                    return;
-
-                quickAddBox.setVisible(false);
                 handler.onKeyPress(event);
             }
         });
     }
 
-    public void addQuickAddBlurHandler(final BlurHandler blurHandler) {
-        if (quickAddBox == null)
-            return;
-
-        if (quickAddBoxHandlerRegisteration != null)
-            quickAddBoxHandlerRegisteration.removeHandler();
-        quickAddBoxHandlerRegisteration = quickAddBox.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (!validate())
-                    return;
-                blurHandler.onBlur(event);
-            }
-        });
-    }
-
     public void setSelection(long id) {
-        for (int i = 0; i < table.getRowCount(); i += 1) {
-            Widget w = table.getWidget(i, 0);
+        for (int i = 0; i < layout.getRowCount(); i += 1) {
+            Widget w = layout.getWidget(i, 0);
             if (!(w instanceof MenuCell))
                 continue;
 
@@ -200,6 +158,20 @@ public class CollectionMenu extends Composite {
         }
     }
 
+    public void setPermissions(ArrayList<PermissionInfo> list) {
+        presenter.setPermissions(list);
+
+        for (int i = 0; i < layout.getRowCount(); i += 1) {
+            Widget w = layout.getWidget(i, 0);
+            if (!(w instanceof MenuCell))
+                continue;
+
+            MenuCell cell = (MenuCell) w;
+            cell.setShared(presenter.getPermissionCount(cell.getMenuItem().getId()));
+            // TODO : include the shared info in a tooltip. All the information is contained in here
+        }
+    }
+
     /**
      * replaces current edit cell (in menu)
      * with new cell with folder
@@ -210,8 +182,8 @@ public class CollectionMenu extends Composite {
 
         final MenuCell cell = new MenuCell(item, deleteHandler);
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
-        table.setWidget(editRow, editIndex, cell);
-        this.editCollectionNameBox.setVisible(false);
+        layout.setWidget(editRow, editIndex, cell);
+        this.editName.setVisible(true);
     }
 
     public void addMenuItem(MenuItem item, IDeleteMenuHandler deleteHandler) {
@@ -219,9 +191,10 @@ public class CollectionMenu extends Composite {
             return;
 
         final MenuCell cell = new MenuCell(item, deleteHandler);
+        cell.setShared(0);
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         row += 1;
-        table.setWidget(row, 0, cell);
+        layout.setWidget(row, 0, cell);
     }
 
     // currently this is being used for deleted cells only
@@ -229,8 +202,8 @@ public class CollectionMenu extends Composite {
         if (item == null)
             return;
 
-        for (int i = 0; i < table.getRowCount(); i += 1) {
-            Widget w = table.getWidget(i, 0);
+        for (int i = 0; i < layout.getRowCount(); i += 1) {
+            Widget w = layout.getWidget(i, 0);
             if (!(w instanceof DeletedCell))
                 continue;
 
@@ -240,7 +213,7 @@ public class CollectionMenu extends Composite {
 
             final MenuCell newCell = new MenuCell(item, deleteHandler);
             newCell.addClickHandler(new CellSelectionHandler(selectionModel, newCell));
-            table.setWidget(i, 0, newCell);
+            layout.setWidget(i, 0, newCell);
             break;
         }
     }
@@ -249,21 +222,21 @@ public class CollectionMenu extends Composite {
      * sets the busy indicator where the folder counts are displayed
      * to indicate that some form of update is taking place
      */
-    public void setBusyIndicator(Set<Long> ids) {
-        for (int i = 0; i < table.getRowCount(); i += 1) {
-            Widget w = table.getWidget(i, 0);
+    public void setBusyIndicator(Set<Long> ids, boolean visible) {
+        for (int i = 0; i < layout.getRowCount(); i += 1) {
+            Widget w = layout.getWidget(i, 0);
             if (!(w instanceof MenuCell))
                 continue;
 
             MenuCell cell = (MenuCell) w;
             if (ids.contains(cell.getMenuItem().getId()))
-                cell.showBusyIndicator();
+                cell.setBusyIndicatorVisibility(visible);
         }
     }
 
     public void updateCounts(ArrayList<MenuItem> items) {
-        for (int i = 0; i < table.getRowCount(); i += 1) {
-            Widget w = table.getWidget(i, 0);
+        for (int i = 0; i < layout.getRowCount(); i += 1) {
+            Widget w = layout.getWidget(i, 0);
             if (!(w instanceof MenuCell))
                 continue;
 
@@ -279,60 +252,43 @@ public class CollectionMenu extends Composite {
         }
     }
 
-    public TextBox getQuickAddBox() {
-        return this.quickAddBox;
-    }
-
     public MenuItem getCurrentEditSelection() {
         return currentEditSelection;
     }
 
     public void switchButton() {
-        if (quickAddBox == null)
+        if (quickAddWidget == null)
             return;
 
-        if (quickAddBox.isVisible()) {
-            quickAddButton.setUrl(ImageUtil.getPlusIcon().getUrl());
-            quickAddButton.setStyleName("collection_quick_add_image");
-            quickAddBox.setVisible(false);
-            quickAddBox.setStyleName("input_box");
-        } else {
-            quickAddButton.setUrl(ImageUtil.getMinusIcon().getUrl());
-            quickAddButton.setStyleName("collection_quick_add_image");
-            quickAddBox.setText("");
-            quickAddBox.setVisible(true);
-            quickAddBox.setFocus(true);
+        if (!quickAddWidget.isVisible()) {
+            quickAddWidget.setVisible(true);
         }
     }
 
     public void hideQuickText() {
-        if (quickAddBox == null)
-            return;
-
-        quickAddButton.setUrl(ImageUtil.getPlusIcon().getUrl());
-        quickAddButton.setStyleName("collection_quick_add_image");
-        quickAddBox.setVisible(false);
-        quickAddBox.setStyleName("input_box");
+        quickAddWidget.setVisible(false);
     }
 
-    // inner class
+    public void addQuickAddKeyPressHandler(final KeyPressHandler handler) {
+        this.quickAddWidget.addQuickAddKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getNativeEvent().getKeyCode() != KeyCodes.KEY_ENTER)
+                    return;
+                handler.onKeyPress(event);
+            }
+        });
+    }
 
-    // TODO : this needs to go into a presenter;
+    // inner classes
     class DeleteCallBack extends Callback<MenuItem> {
-
-        private final IDeleteMenuHandler deleteHandler;
-
-        public DeleteCallBack(IDeleteMenuHandler deleteHandler) {
-            this.deleteHandler = deleteHandler;
-        }
 
         @Override
         public void onSuccess(MenuItem item) {
-            MenuHiderTimer timer = new MenuHiderTimer(table, editRow);
-            DeletedCell deletedCell = new DeletedCell(currentEditSelection,
-                                                      deleteHandler.getUndoHandler(item, CollectionMenu.this, timer));
-            table.setWidget(editRow, editIndex, deletedCell);
-            timer.schedule(6000);
+            if (layout == null || layout.getRowCount() <= editRow)
+                return;
+
+            layout.removeRow(editRow);
         }
 
         @Override
@@ -345,70 +301,237 @@ public class CollectionMenu extends Composite {
 
         private final HTMLPanel panel;
         private final MenuItem item;
-        private final String html;
 
         private Label count;
         private final HoverCell action;
         private final String folderId;
+        private final Widget busyIndicator;
+        private ShareCollectionWidget shareCollectionWidget;
+        private final HTML shared;
 
-        public MenuCell(final MenuItem item, final IDeleteMenuHandler deleteHandler) {
-
-            super.sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
-            // text box used when user wishes to edit a collection name
-
+        public MenuCell(final MenuItem item, final IDeleteMenuHandler handler) {
             this.item = item;
             folderId = "right" + item.getId();
             action = new HoverCell();
-            action.getEdit().addClickHandler(new ClickHandler() {
-
+            shareCollectionWidget = new ShareCollectionWidget(item.getName(), new Delegate<PermissionInfo>() {
                 @Override
-                public void onClick(ClickEvent event) {
-                    event.stopPropagation();
-                    Cell cell = table.getCellForEvent(event);
-                    editCollectionNameBox.setText(getMenuItem().getName());
-                    editRow = cell.getRowIndex();
-                    editIndex = cell.getCellIndex();
-                    currentEditSelection = getMenuItem();
-                    table.setWidget(editRow, editIndex, editCollectionNameBox);
-                    editCollectionNameBox.setVisible(true);
-                    editCollectionNameBox.setFocus(true);
-                    editCollectionNameBox.selectAll();
+                public void execute(PermissionInfo info) {
+                    if (permissionInfoDelegate == null)
+                        return;
+
+                    presenter.removePermission(info);
+                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getRemoveCallback());
+                    data.setDelete(true);
+                    permissionInfoDelegate.execute(data);
                 }
             });
 
-            if (deleteHandler != null) {
-                action.getDelete().addClickHandler(new ClickHandler() {
+            shareCollectionWidget.getPermissionsPresenter().setWriteAddSelectionHandler(new ReadBoxSelectionHandler() {
 
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        event.stopPropagation();
-                        Cell cell = table.getCellForEvent(event);
-                        if (cell == null)
-                            return;
+                @Override
+                public void updatePermission(PermissionInfo info) {
+                    if (permissionInfoDelegate == null)
+                        return;
 
-                        editRow = cell.getRowIndex();
-                        editIndex = cell.getCellIndex();
-                        currentEditSelection = getMenuItem();
-                        deleteHandler.delete(item.getId(), new DeleteCallBack(deleteHandler));
+                    presenter.addPermission(info);
+                    info.setType(PermissionInfo.Type.WRITE_FOLDER);
+                    info.setTypeId(item.getId());
+                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
+                    permissionInfoDelegate.execute(data);
+                }
+            });
+
+            shareCollectionWidget.getPermissionsPresenter().setReadAddSelectionHandler(new ReadBoxSelectionHandler() {
+
+                @Override
+                public void updatePermission(PermissionInfo info) {
+                    if (permissionInfoDelegate == null)
+                        return;
+
+                    presenter.addPermission(info);
+                    info.setType(PermissionInfo.Type.READ_FOLDER);
+                    info.setTypeId(item.getId());
+                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
+                    permissionInfoDelegate.execute(data);
+                }
+            });
+
+            action.getOptionSelection().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+                @Override
+                public void onSelectionChange(SelectionChangeEvent event) {
+                    HoverCell.HoverOptions selected = action.getOptionSelection().getSelectedObject();
+                    if (selected == null)
+                        return;
+
+                    String name = getMenuItem().getName();
+                    long id = getMenuItem().getId();
+
+                    switch (selected) {
+                        case EDIT:
+                            for (int i = 0; i < layout.getRowCount(); i += 1) {
+                                Widget widget = layout.getWidget(i, 0);
+                                if (widget == null || !(widget instanceof MenuCell))
+                                    continue;
+
+                                MenuCell cell = (MenuCell) widget;
+                                long cellId = cell.getMenuItem().getId();
+                                String cellName = cell.getMenuItem().getName();
+
+                                if (!cellName.equals(name) && id != cellId)
+                                    continue;
+
+                                // found cell (need a better way of looking this stuff up)
+                                currentEditSelection = getMenuItem();
+                                editRow = i;
+                                editIndex = 0;
+                                layout.setWidget(editRow, editIndex, editName);
+                                editName.setVisible(true);
+                                editName.setInputName(name);
+                                editName.setFocus(true);
+                                break;
+                            }
+                            break;
+
+                        case DELETE:
+                            if (handler == null)
+                                break;
+
+                            for (int i = 0; i < layout.getRowCount(); i += 1) {
+                                Widget widget = layout.getWidget(i, 0);
+                                if (widget == null || !(widget instanceof MenuCell))
+                                    continue;
+
+                                MenuCell cell = (MenuCell) widget;
+                                long cellId = cell.getMenuItem().getId();
+                                String cellName = cell.getMenuItem().getName();
+
+                                if (!cellName.equals(name) && id != cellId)
+                                    continue;
+
+                                // found cell (need a better way of looking this stuff up)
+                                currentEditSelection = getMenuItem();
+                                editRow = i;
+                                editIndex = 0;
+                                if (Window.confirm("Delete \"" + currentEditSelection.getName()
+                                                           + "\"? This action cannot be undone")) {
+                                    handler.delete(item.getId(), new DeleteCallBack());
+                                }
+                                break;
+                            }
+                            break;
+
+                        case SHARE:
+                            for (int i = 0; i < layout.getRowCount(); i += 1) {
+                                Widget widget = layout.getWidget(i, 0);
+                                if (widget == null || !(widget instanceof MenuCell))
+                                    continue;
+
+                                MenuCell cell = (MenuCell) widget;
+                                long cellId = cell.getMenuItem().getId();
+                                String cellName = cell.getMenuItem().getName();
+
+                                if (!cellName.equals(name) && id != cellId)
+                                    continue;
+
+                                // found cell (need a better way of looking this stuff up)
+                                currentEditSelection = getMenuItem();
+                                editRow = i;
+                                editIndex = 0;
+                                shareCollectionWidget.showDialog(presenter.getFolderPermissions(cellId));
+                            }
+                            break;
                     }
-                });
-            }
+
+                    action.getOptionSelection().setSelected(selected, false);
+                    action.hideOptions();
+                }
+            });
+
+            // close handler
+            action.addOptionsCloseHandler(new CloseHandler<PopupPanel>() {
+                @Override
+                public void onClose(CloseEvent<PopupPanel> event) {
+                    if (item.isSystem())
+                        return;
+                    busyIndicator.setVisible(false);
+                    action.setVisible(false);
+                    count.setVisible(true);
+                }
+            });
+            action.setVisible(false);
 
             String name = item.getName();
             if (name.length() > 25)
                 name = (name.substring(0, 22) + "...");
 
-            html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">" + name
-                    + "</span><span class=\"menu_count\" id=\"" + folderId + "\"></span>";
+            shared = new HTML("<span style=\"color: #999; font-size: 9px\">Private</span>");
+            shared.setVisible(false);
+
+            busyIndicator = ImageUtil.getBusyIcon();
+            busyIndicator.setVisible(false);
+
+            String html = "<span class=\"collection_user_menu\">" + name
+                    + "</span><span class=\"menu_count\" id=\"count_" + folderId + "\"></span>"
+                    + "<span class=\"menu_count\" " + "id=\"submenu_" + folderId + "\"></span>"
+                    + "<span class=\"menu_count\" " + "id=\"busy_indicator_" + folderId + "\"></span>"
+                    + "<span id=\"shared_row_info\">";
 
             panel = new HTMLPanel(html);
+            panel.add(shared, "shared_row_info");
             panel.setTitle(item.getName());
+            count = new Label(presenter.formatNumber(item.getCount()));
+            panel.add(count, "count_" + folderId);
+            panel.add(action, "submenu_" + folderId);
+            panel.add(busyIndicator, "busy_indicator_" + folderId);
 
-            count = new Label(formatNumber(item.getCount()));
+            if (item.isSystem())
+                panel.setStyleName("system_collection_user_menu_row");
+            else
+                panel.setStyleName("user_collection_user_menu_row");
 
-            panel.add(count, folderId);
-            panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
+
+            // mouse handlers
+            addMouseOutHandler(new MouseOutHandler() {
+                @Override
+                public void onMouseOut(MouseOutEvent event) {
+                    if (item.isSystem())
+                        return;
+
+                    if (action.optionsAreVisible())
+                        return;
+                    busyIndicator.setVisible(false);
+                    action.setVisible(false);
+                    count.setVisible(true);
+                }
+            });
+
+            addMouseOverHandler(new MouseOverHandler() {
+                @Override
+                public void onMouseOver(MouseOverEvent event) {
+                    if (item.isSystem())
+                        return;
+                    busyIndicator.setVisible(false);
+                    action.setVisible(true);
+                    count.setVisible(false);
+                }
+            });
+        }
+
+        public void setShared(int count) {
+            if (item.getId() <= 0 || item.isSystem())
+                return;
+
+            item.setShared(count > 0);
+            if (item.isShared()) {
+                String html = "<span style=\"color: #999; font-size: 9px\">Shared&nbsp;";
+                html += "<i class=\"" + FAIconType.EYE_OPEN.getStyleName() + "\"></i></span>";
+                shared.setHTML(html);
+            }
+            shared.setVisible(true);
+            action.setVisible(false);
+            this.count.setVisible(true);
         }
 
         public void setSelected(boolean selected) {
@@ -418,17 +541,19 @@ public class CollectionMenu extends Composite {
                 this.removeStyleName("collection_user_menu_row_selected");
         }
 
-        public void showBusyIndicator() {
-            setRightPanel(ImageUtil.getBusyIcon());
+        public void setBusyIndicatorVisibility(boolean visible) {
+            busyIndicator.setVisible(visible);
         }
 
         public void showFolderCount() {
-            setRightPanel(count);
+            busyIndicator.setVisible(false);
+            action.setVisible(false);
+            count.setVisible(true);
         }
 
         public void updateCount(long newCount) {
             item.setCount(newCount);
-            count = new Label(formatNumber(item.getCount()));
+            count.setText(presenter.formatNumber(item.getCount()));
         }
 
         public MenuItem getMenuItem() {
@@ -436,50 +561,16 @@ public class CollectionMenu extends Composite {
         }
 
         @Override
-        public void onBrowserEvent(Event event) {
-            super.onBrowserEvent(event);
-
-            if (item.isSystem())
-                return;
-
-            switch (DOM.eventGetType(event)) {
-                case Event.ONMOUSEOVER:
-                    setRightPanel(action);
-                    break;
-
-                case Event.ONMOUSEOUT:
-                    EventTarget target = event.getRelatedEventTarget(); // image
-
-                    if (Element.is(target)) {
-                        Element element = Element.as(target);
-                        Element eDelete = action.getDelete().getElement();
-                        Element eEdit = action.getEdit().getElement();
-
-                        if (element.equals(eEdit) || element.equals(eDelete))
-                            break;
-                    }
-                    setRightPanel(count);
-                    break;
-            }
-        }
-
-        private void setRightPanel(Widget widget) {
-            Widget toReplace = panel.getWidget(0);
-            if (toReplace == null)
-                return;
-
-            panel.remove(0);
-            panel.add(widget, folderId);
-        }
-
-        @Override
         public HandlerRegistration addClickHandler(ClickHandler handler) {
             return addDomHandler(handler, ClickEvent.getType());
         }
 
-        private String formatNumber(long l) {
-            NumberFormat format = NumberFormat.getFormat("##,###");
-            return format.format(l);
+        public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+            return addDomHandler(handler, MouseOverEvent.getType());
+        }
+
+        public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
+            return addDomHandler(handler, MouseOutEvent.getType());
         }
     }
 }

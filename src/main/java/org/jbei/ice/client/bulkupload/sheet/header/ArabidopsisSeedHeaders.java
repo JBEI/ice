@@ -1,19 +1,18 @@
 package org.jbei.ice.client.bulkupload.sheet.header;
 
 import java.util.Date;
+import java.util.HashMap;
 
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.GenerationSheetCell;
-import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 
@@ -24,18 +23,15 @@ import com.google.gwt.i18n.client.DateTimeFormat;
  */
 public class ArabidopsisSeedHeaders extends PartHeader {
 
-    public ArabidopsisSeedHeaders() {
-        super();
-
-        headers.add(new CellColumnHeader(Header.HOMOZYGOSITY));
-        headers.add(new CellColumnHeader(Header.HARVEST_DATE, false, new DateInputCell(), null));
-        headers.add(new CellColumnHeader(Header.ECOTYPE));
-        headers.add(new CellColumnHeader(Header.PARENTS));
-        headers.add(new CellColumnHeader(Header.GENERATION, true, new GenerationSheetCell(), null));
-        headers.add(new CellColumnHeader(Header.PLANT_TYPE, true, new PlantTypeSheetCell(), null));
-        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, false, new MultiSuggestSheetCell(
-                AppController.autoCompleteData.get(AutoCompleteField.SELECTION_MARKERS), true), null));
-        headers.add(new CellColumnHeader(Header.SENT_TO_ABRC, false, new BooleanSheetCell(), null));
+    public ArabidopsisSeedHeaders(EntryInfoDelegate delegate, HashMap<String, String> preferences) {
+        super(delegate, preferences);
+        headers.add(new CellColumnHeader(Header.HOMOZYGOSITY, preferences));
+        headers.add(new CellColumnHeader(Header.HARVEST_DATE, preferences, false, new DateInputCell()));
+        headers.add(new CellColumnHeader(Header.ECOTYPE, preferences));
+        headers.add(new CellColumnHeader(Header.PARENTS, preferences));
+        headers.add(new CellColumnHeader(Header.GENERATION, preferences, true, new GenerationSheetCell()));
+        headers.add(new CellColumnHeader(Header.PLANT_TYPE, preferences, true, new PlantTypeSheetCell()));
+        headers.add(new CellColumnHeader(Header.SENT_TO_ABRC, preferences, false, new BooleanSheetCell()));
     }
 
     @Override
@@ -48,7 +44,6 @@ public class ArabidopsisSeedHeaders extends PartHeader {
         String value = null;
 
         switch (header) {
-
             case HOMOZYGOSITY:
                 value = seed.getHomozygosity();
                 break;

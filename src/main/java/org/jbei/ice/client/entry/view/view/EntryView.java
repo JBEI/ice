@@ -2,34 +2,36 @@ package org.jbei.ice.client.entry.view.view;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
-import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.collection.add.EntryFormFactory;
+import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.client.common.util.ImageUtil;
-import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.ViewFactory;
-import org.jbei.ice.client.entry.view.detail.EntryDetailView;
+import org.jbei.ice.client.entry.view.detail.EntryInfoView;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanel;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.client.entry.view.table.EntrySampleTable;
-import org.jbei.ice.client.entry.view.table.EntrySequenceTable;
-import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
-import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+import org.jbei.ice.client.entry.view.panel.EntrySamplePanel;
+import org.jbei.ice.client.entry.view.panel.EntrySequenceAnalysisPanel;
+import org.jbei.ice.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
-import gwtupload.client.IUploader;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-import gwtupload.client.IUploader.OnStartUploaderHandler;
-import gwtupload.client.SingleUploader;
 
 public class EntryView extends Composite implements IEntryView {
 
@@ -37,19 +39,13 @@ public class EntryView extends Composite implements IEntryView {
     private final AttachmentListMenu attachmentMenu;
 
     // general header
-    private HorizontalPanel generalHeaderPanel;
-    private Button editGeneralButton;
-    private Label deleteLabel;
-    private HandlerRegistration deleteRegistration;
+    private FlexTable generalHeaderPanel;
 
-    // sequence Analysis
-    private HTMLPanel seqPanel;
-    private Button addSeqButton;
+    // edit / delete widget
+    private EntryActionWidget entryAction;
 
     // samples
-    private HTMLPanel samplesPanel;
-    private Button addSampleButton;
-    private CreateSampleForm sampleForm;
+//    private CreateSampleForm sampleForm;
 
     // permissions
     private final PermissionsWidget permissions;
@@ -57,61 +53,26 @@ public class EntryView extends Composite implements IEntryView {
     // visibility
     private final VisibilityWidget visibility;
 
-    private final Widget uploadPanel;
-    private FlexTable entryDetailMenuWrapper; // left side of the page with menu
-
     // navigation buttons for context navigation.
-    // TODO : create a widget for it
-    private final Image goBack;
-    private final Button leftBtn;
-    private final Label navText;
-    private final Button rightBtn;
-
-    private final Label headerLabel;
-    private final EntrySampleTable sampleTable;
-    private final EntrySequenceTable sequenceTable;
-    private final SequenceAnalysisHeaderPanel traceHeaderPanel;
-    private HandlerRegistration sequenceUploadFinish;
-    private SingleUploader sequenceUploader;
-
-    private Button sequenceAddCancelbutton;
-    private long entryId;
+    private final PagerWidget contextPager;
+    private final EntrySamplePanel samplePanel;
+    private final EntrySequenceAnalysisPanel sequencePanel;
+    private DeleteSequenceHandler deleteSequenceHandler;
+    private final EntryLoadingWidget loadingWidget;
 
     // menu
-    private EntryDetailViewMenu detailMenu;
+    private EntryViewMenu menu;
+    private final HashMap<EntryType, EntryInfoView> viewCache;
+    private EntryInfoView currentView;
 
-    public EntryView() {
+    public EntryView(Delegate<Long> retrieveSequenceTracesDelegate) {
         permissions = new PermissionsWidget();
         visibility = new VisibilityWidget();
-        headerLabel = new Label();
-        goBack = ImageUtil.getPrevIcon();
-        goBack.setTitle("Back");
-        goBack.setStyleName("cursor_pointer");
 
-        leftBtn = new Button("&lt;");
-        leftBtn.setStyleName("nav");
-        leftBtn.addStyleName("nav-left");
-        rightBtn = new Button("&gt;");
-        rightBtn.setStyleName("nav");
-        rightBtn.addStyleName("nav-right");
-        navText = new Label();
-        navText.setStyleName("display-inline");
-        navText.addStyleName("font-80em");
-        navText.addStyleName("pad-6");
-
-        uploadPanel = createSequenceUploadPanel();
-        uploadPanel.setVisible(false);
         attachmentMenu = new AttachmentListMenu();
-
-        sequenceAddCancelbutton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                uploadPanel.setVisible(false);
-            }
-        });
-
-        createMenu();
+        contextPager = new PagerWidget();
+        entryAction = new EntryActionWidget();
+        this.menu = new EntryViewMenu();
 
         FlexTable contentTable = new FlexTable();
         initWidget(contentTable);
@@ -123,83 +84,85 @@ public class EntryView extends Composite implements IEntryView {
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
 
         // sample panel
-        initSamplePanel();
-        sampleTable = new EntrySampleTable();
+        samplePanel = new EntrySamplePanel();
 
         // sequence panel
-        sequenceTable = new EntrySequenceTable();
-        traceHeaderPanel = new SequenceAnalysisHeaderPanel(sequenceTable.getSelectionModel());
+        sequencePanel = new EntrySequenceAnalysisPanel(retrieveSequenceTracesDelegate);
 
         // general panel
         initGeneralPanel();
 
-        // sequence
-        initSequencePanel();
+        // audit trail
+//        initAuditTrailPanel();
+
+        loadingWidget = new EntryLoadingWidget();
+        entryAction.setVisible(false);
+        viewCache = new HashMap<EntryType, EntryInfoView>();
+    }
+
+    @Override
+    public void setDeleteSequenceHandler(DeleteSequenceHandler handler) {
+        this.deleteSequenceHandler = handler;
     }
 
     @Override
     public MultiSelectionModel<SequenceAnalysisInfo> getSequenceTableSelectionModel() {
-        return sequenceTable.getSelectionModel();
+        return sequencePanel.getSelectionModel();
     }
 
     @Override
     public void setSequenceDeleteHandler(ClickHandler handler) {
-        traceHeaderPanel.setDeleteHandler(handler);
-    }
-
-    private void initSequencePanel() {
-        seqPanel = new HTMLPanel(
-                "<span class=\"entry_general_info_header\">Sequence Analysis</span> <span " +
-                        "id=\"add_trace_button\"></span>");
-        addSeqButton = new Button("Add");
-        addSeqButton.setStyleName("top_menu");
-        seqPanel.add(addSeqButton, "add_trace_button");
+        sequencePanel.setTraceSequenceDeleteHandler(handler);
     }
 
     private void initGeneralPanel() {
-        //        generalHeaderPanel = new HTMLPanel(
-        //                "<span id=\"go_back_button\"></span> <span class=\"entry_general_info_header\"
-        // id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
-        generalHeaderPanel = new HorizontalPanel();
-        generalHeaderPanel.setVerticalAlignment(HasAlignment.ALIGN_MIDDLE);
-        editGeneralButton = new Button("Edit");
-        editGeneralButton.setStyleName("top_menu");
-        deleteLabel = new Label("Delete");
-        deleteLabel.setStyleName("entry_delete_link");
-        generalHeaderPanel.add(goBack);
-        generalHeaderPanel.add(headerLabel);
-        headerLabel.setStyleName("entry_general_info_header");
-        generalHeaderPanel.add(editGeneralButton);
-        generalHeaderPanel.add(deleteLabel);
-    }
+        generalHeaderPanel = new FlexTable();
+        generalHeaderPanel.setCellPadding(0);
+        generalHeaderPanel.setCellSpacing(0);
 
-    private void initSamplePanel() {
-        samplesPanel = new HTMLPanel(
-                "<span class=\"entry_general_info_header\">Samples</span> &nbsp; <span " +
-                        "id=\"add_sample_button\"></span>");
-        addSampleButton = new Button("Add");
-        addSampleButton.setStyleName("top_menu");
-        samplesPanel.add(addSampleButton, "add_sample_button");
-    }
+        // go back icon
+        generalHeaderPanel.setWidget(0, 0, contextPager.getGoBack());
+        generalHeaderPanel.setHTML(0, 1, "&nbsp;");
+        generalHeaderPanel.setWidget(0, 2, entryAction);
+        generalHeaderPanel.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
+        generalHeaderPanel.getFlexCellFormatter().setStyleName(0, 2, "entry_general_info_header");
 
-    protected Widget createMenu() {
-        entryDetailMenuWrapper = new FlexTable();
-        entryDetailMenuWrapper.setCellPadding(0);
-        entryDetailMenuWrapper.setCellSpacing(0);
-        this.detailMenu = new EntryDetailViewMenu();
-        entryDetailMenuWrapper.setHTML(0, 0, "");
-        entryDetailMenuWrapper.setWidget(1, 0, detailMenu);
-        return entryDetailMenuWrapper;
+        mainContent.setWidget(0, 0, generalHeaderPanel);
+        mainContent.getCellFormatter().setHeight(0, 0, "30px");
+        mainContent.getFlexCellFormatter().setStyleName(0, 0, "entry_general_header_td");
+
+        mainContent.setWidget(0, 1, contextPager);
+        mainContent.getFlexCellFormatter().setStyleName(0, 1, "entry_general_header_td");
     }
 
     @Override
-    public IEntryFormUpdateSubmit showUpdateForm(EntryInfo info) {
-        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(info, AppController.autoCompleteData);
+    public IEntryFormSubmit showUpdateForm(EntryInfo info) {
+        if (info.getCreatorEmail() == null || info.getCreatorEmail().isEmpty())
+            info.setCreatorEmail(ClientController.account.getEmail());
+        if (info.getCreator() == null || info.getCreator().isEmpty())
+            info.setCreator(ClientController.account.getFullName());
+
+        IEntryFormSubmit form = EntryFormFactory.updateForm(info);
         if (form == null)
             return form;
 
-        mainContent.setWidget(1, 0, form);
+        mainContent.setWidget(1, 0, form.asWidget());
         return form;
+    }
+
+    @Override
+    public void showNewForm(IEntryFormSubmit form) {
+        entryAction.setVisible(false);
+        contextPager.setVisible(false);
+
+        mainContent.setWidget(1, 0, form.asWidget());
+        permissions.resetPermissionDisplay();
+        attachmentMenu.reset();
+        sequencePanel.reset();
+        samplePanel.reset();
+        visibility.setVisible(false);
+        menu.reset();
+        History.newItem(Page.COLLECTIONS.getLink() + ";id=0", false);
     }
 
     @Override
@@ -207,285 +170,230 @@ public class EntryView extends Composite implements IEntryView {
         attachmentMenu.removeAttachment(item);
     }
 
-    @Override
-    public void setSequenceFinishUploadHandler(OnFinishUploaderHandler handler) {
-        if (sequenceUploadFinish != null)
-            sequenceUploadFinish.removeHandler();
-
-        sequenceUploadFinish = sequenceUploader.addOnFinishUploadHandler(handler);
-    }
-
     /**
      * Center content
      */
-
     protected Widget createMainContent() {
         mainContent = new FlexTable();
-        mainContent.setStyleName("entry_view_main_content_table");
         mainContent.setWidth("100%");
         mainContent.setCellPadding(0);
         mainContent.setCellSpacing(0);
 
         mainContent.setHTML(0, 0, "&nbsp;");
-        mainContent.getFlexCellFormatter().setColSpan(0, 0, 2);
+        mainContent.setHTML(0, 1, "&nbsp;");
 
         // second row
         mainContent.setWidget(1, 0, new EntryLoadingWidget());
-        mainContent.getFlexCellFormatter().setStyleName(1, 0, "entry_view_content");
         mainContent.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         mainContent.getCellFormatter().setWidth(1, 0, "100%");
 
         HTMLPanel panel = new HTMLPanel(
                 "<div class=\"entry_view_right_menu\" id=\"entry_sub_header_div\"></div>&nbsp;"
                         + "<div class=\"entry_view_right_menu\" id=\"attachments_div\"></div>"
-                        + "<div style=\"padding-top: 20px\" class=\"entry_view_right_menu\" " +
-                        "id=\"permissions_div\"></div>"
-                        + "<div class=\"entry_view_right_menu\" id=\"visibility_div\"></div>&nbsp;");
+                        + "<div style=\"padding-top: 20px\" class=\"entry_view_right_menu\" "
+                        + "id=\"permissions_div\"></div>"
+                        + "<br><div class=\"entry_view_right_menu\" id=\"visibility_div\"></div>&nbsp;");
 
-        panel.add(entryDetailMenuWrapper, "entry_sub_header_div");
+        panel.add(menu, "entry_sub_header_div");
         panel.add(attachmentMenu, "attachments_div");
         panel.add(permissions, "permissions_div");
         panel.add(visibility, "visibility_div");
 
         mainContent.setWidget(1, 1, panel);
         mainContent.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
-
         return mainContent;
     }
 
     @Override
     public void setNextHandler(ClickHandler handler) {
-        rightBtn.addClickHandler(handler);
+        contextPager.setNextHandler(handler);
     }
 
     @Override
     public void setGoBackHandler(ClickHandler handler) {
-        goBack.addClickHandler(handler);
+        contextPager.setGoBackHandler(handler);
     }
 
     @Override
     public void setPrevHandler(ClickHandler handler) {
-        leftBtn.addClickHandler(handler);
+        contextPager.setPrevHandler(handler);
     }
 
     @Override
     public void enablePrev(boolean enabled) {
-        leftBtn.setEnabled(enabled);
-        if (enabled) {
-            leftBtn.removeStyleName("nav_disabled");
-            leftBtn.addStyleName("nav");
-        } else {
-            leftBtn.removeStyleName("nav");
-            leftBtn.addStyleName("nav_disabled");
-        }
+        contextPager.enablePrev(enabled);
     }
 
     @Override
     public void enableNext(boolean enabled) {
-        rightBtn.setEnabled(enabled);
-        if (enabled) {
-            rightBtn.removeStyleName("nav_disabled");
-            rightBtn.addStyleName("nav");
-        } else {
-            rightBtn.removeStyleName("nav");
-            rightBtn.addStyleName("nav_disabled");
-        }
+        contextPager.enableNext(enabled);
     }
 
     @Override
     public void setNavText(String text) {
-        this.navText.setText(text);
+        this.contextPager.setNavText(text);
     }
 
     @Override
     public void showContextNav(boolean show) {
-        if (show) {
-            HTMLPanel panel = new HTMLPanel(
-                    "<span id=\"leftBtn\"></span> <span id=\"navText\" class=\"font-bold\"></span><span " +
-                            "id=\"rightBtn\"></span>");
-            panel.add(leftBtn, "leftBtn");
-            panel.add(navText, "navText");
-            panel.add(rightBtn, "rightBtn");
-
-            entryDetailMenuWrapper.setWidget(0, 0, panel);
-            entryDetailMenuWrapper.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
-            entryDetailMenuWrapper.getFlexCellFormatter().setStyleName(0, 0, "pad-6");
-        } else {
-            entryDetailMenuWrapper.setHTML(0, 0, "");
-        }
-
-        goBack.setVisible(show);
+        contextPager.setVisible(show);
     }
 
     @Override
-    public EntryDetailViewMenu getDetailMenu() {
-        return this.detailMenu;
-    }
-
-    private Widget createSequenceUploadPanel() {
-        FlexTable table = new FlexTable();
-        table.setWidth("100%");
-
-        sequenceUploader = new SingleUploader();
-        sequenceUploader.setAutoSubmit(true);
-
-        sequenceUploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
-
-            @Override
-            public void onStart(IUploader uploader) {
-                uploader.setServletPath(uploader.getServletPath() + "?eid=" + entryId
-                                                + "&type=sequence&sid=" + AppController.sessionId);
-            }
-        });
-
-        String html = "<div style=\"outline:none; padding: 4px\"><span id=\"upload\"></span><span style=\"color: " +
-                "#777777;font-size: 9px;\">Fasta, GenBank, or ABI formats, optionally in zip file.</span></div>";
-        HTMLPanel panel = new HTMLPanel(html);
-        panel.add(sequenceUploader, "upload");
-
-        table.setWidget(0, 0, panel);
-        sequenceAddCancelbutton = new Button("Cancel");
-        table.setWidget(0, 1, sequenceAddCancelbutton);
-        table.getFlexCellFormatter().setWidth(0, 1, "20%");
-
-        return table;
+    public EntryViewMenu getMenu() {
+        return this.menu;
     }
 
     protected String formatDate(Date date) {
         if (date == null)
             return "";
 
-        DateTimeFormat format = DateTimeFormat.getFormat("EEE MMM d, y h:m a");
-        return format.format(date);
+        return DateTimeFormat.getFormat("MMM dd, yyyy h:mm a").format(date);
     }
 
     @Override
-    public void setMenuItems(ArrayList<MenuItem> items) {
-        this.detailMenu.setMenuItems(items);
-    }
+    @SuppressWarnings("unchecked")
+    public SequenceViewPanelPresenter setEntryInfoForView(EntryInfo info) {
+        boolean showEdit = info.isCanEdit();
+        currentView = viewCache.get(info.getType());
+        if (currentView == null) {
+            currentView = ViewFactory.createDetailView(info);
+            viewCache.put(info.getType(), currentView);
+        } else {
+            currentView.setInfo(info);
+        }
 
-    @Override
-    public SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit,
-            DeleteSequenceHandler deleteHandler) {
-        EntryDetailView<? extends EntryInfo> detailView = ViewFactory.createDetailView(info);
-        detailView.getSequencePanel().setDeleteHandler(deleteHandler);
-        editGeneralButton.setVisible(showEdit);
-        deleteLabel.setVisible(showEdit);
-        mainContent.setWidget(0, 0, generalHeaderPanel);
-        mainContent.getCellFormatter().setHeight(0, 0, "30px");
-        mainContent.setWidget(1, 0, detailView);
-        SequenceViewPanel sequencePanel = detailView.getSequencePanel();
+        deleteSequenceHandler.setEntryId(info.getId());
+        currentView.getSequencePanel().setDeleteHandler(deleteSequenceHandler);
+        entryAction.setVisible(showEdit);
 
-        this.permissions.setVisible(showEdit);
+        mainContent.setWidget(1, 0, currentView);
+        SequenceViewPanel sequenceViewPanel = currentView.getSequencePanel();
+
         this.permissions.addReadWriteLinks(showEdit);
-        sequencePanel.getPresenter().setIsCanEdit(showEdit, deleteHandler);
-        return sequencePanel.getPresenter();
+        sequenceViewPanel.getPresenter().setIsCanEdit(showEdit, deleteSequenceHandler);
+
+        getPermissionsWidget().setCanEdit(showEdit);
+        getVisibilityWidget().setVisibility(info.getVisibility());
+
+        String ownerId = info.getOwnerId() == 0 ? null : Long.toString(info.getOwnerId());
+        setEntryHeader(info.getType().getDisplay(), info.getName(), info.getOwner(), ownerId, info.getCreationTime());
+
+        // attachments
+        ArrayList<AttachmentInfo> attachments = info.getAttachments();
+        ArrayList<AttachmentItem> items = new ArrayList<AttachmentItem>();
+        if (attachments != null) {
+            for (AttachmentInfo attachmentInfo : attachments) {
+                AttachmentItem item = new AttachmentItem(
+                        attachmentInfo.getId(), attachmentInfo.getFilename(), attachmentInfo.getDescription());
+                item.setFileId(attachmentInfo.getFileId());
+                items.add(item);
+            }
+        }
+
+        attachmentMenu.setMenuItems(items, info.getId());
+        attachmentMenu.setCanEdit(info.isCanEdit());
+
+        // menu views
+        getMenu().updateMenuCount(MenuItem.Menu.SEQ_ANALYSIS, info.getSequenceAnalysis().size());
+        getMenu().updateMenuCount(MenuItem.Menu.SAMPLES, info.getSampleStorage().size());
+
+        samplePanel.setData(info.getSampleStorage());
+        sequencePanel.setSequenceData(info.getSequenceAnalysis(), info);
+        return sequenceViewPanel.getPresenter();
     }
 
     @Override
     public void addSampleButtonHandler(ClickHandler handler) {
-        addSampleButton.addClickHandler(handler);
+        samplePanel.setAddSampleHandler(handler);
+    }
+
+    @Override
+    public ArrayList<AttachmentItem> getAttachmentItems() {
+        return attachmentMenu.getAttachmentItems();
     }
 
     @Override
     public void addGeneralEditButtonHandler(ClickHandler handler) {
-        editGeneralButton.addClickHandler(handler);
+        entryAction.addEditButtonHandler(handler);
     }
 
     @Override
     public void addDeleteEntryHandler(ClickHandler handler) {
-        if (deleteRegistration != null)
-            deleteRegistration.removeHandler();
-
-        deleteRegistration = deleteLabel.addClickHandler(handler);
+        entryAction.addDeleteEntryHandler(handler);
     }
 
     @Override
     public void showSampleView() {
-        mainContent.setWidget(0, 0, samplesPanel);
-        mainContent.setWidget(1, 0, sampleTable);
+        mainContent.setWidget(1, 0, samplePanel);
     }
 
     @Override
-    public void showLoadingIndicator() {
-        mainContent.setWidget(1, 0, new EntryLoadingWidget());
+    public void showLoadingIndicator(boolean showErrorLoad) {
+        if (showErrorLoad)
+            loadingWidget.showErrorLoad();
+        else
+            loadingWidget.showLoad();
+        mainContent.setWidget(1, 0, loadingWidget);
+        generalHeaderPanel.setHTML(0, 1, "");
     }
 
     @Override
-    public void showSequenceView(EntryInfo info, boolean showFlash) {
-
-        mainContent.setWidget(0, 0, seqPanel);
-
-        VerticalPanel panel = new VerticalPanel();
-        panel.setWidth("100%");
-        panel.add(traceHeaderPanel);
-        panel.add(uploadPanel);
-        panel.add(sequenceTable);
-
-        if (showFlash) {
-            Flash.Parameters params = new Flash.Parameters();
-            params.setSwfPath("sc/SequenceChecker.swf");
-            params.setSessiondId(AppController.sessionId);
-            params.setMovieName("SequenceChecker.swf");
-            params.setEntryId(info.getRecordId());
-
-            Flash flash = new Flash(params);
-            panel.add(flash);
-            panel.setCellHeight(flash, "600px");
-        }
-
-        mainContent.setWidget(1, 0, panel);
-    }
-
-    public void addSequenceButtonHandler(ClickHandler handler) {
-        addSeqButton.addClickHandler(handler);
+    public void showSequenceView(EntryInfo info) {
+        sequencePanel.setCurrentInfo(info);
+        mainContent.setWidget(1, 0, sequencePanel);
     }
 
     @Override
-    public void setEntryName(String name) {
-        headerLabel.setText(name);
+    public void showEntryDetailView() {
+        mainContent.setWidget(1, 0, currentView);
+    }
+
+    @Override
+    public void setEntryHeader(String typeDisplay, String name, String owner, String ownerId, Date creationDate) {
+        String html = "<span style=\"color: #888; letter-spacing: -1px;\">"
+                + typeDisplay.toUpperCase() + "</span> "
+                + name + "<br><span style=\"font-weight: normal; font-size: 10px; text-transform: uppercase; "
+                + "color: #999;\">" + formatDate(creationDate);
+
+        if (ownerId == null)
+            html += " - <i>" + owner + "</i>";
+        else
+            html += " - <a href=\"#" + Page.PROFILE.getLink() + ";id=" + ownerId + ";s=profile\">" + owner + "</a>";
+
+        html += "</span>";
+        generalHeaderPanel.setHTML(0, 1, html);
+        generalHeaderPanel.getFlexCellFormatter().setStyleName(0, 1, "entry_general_info_header");
     }
 
     @Override
     public void setSampleData(ArrayList<SampleStorage> data) {
-        sampleTable.setData(data);
+        samplePanel.setData(data);
     }
 
     @Override
     public void setSampleOptions(SampleLocation options) {
-        sampleForm = new CreateSampleForm(options);
-        sampleForm.setVisible(false);
-        mainContent.setWidget(0, 0, samplesPanel);
-        HTMLPanel panel = new HTMLPanel(
-                "<div id=\"create_sample_form\"></div><div id=\"sample_table\"></div>");
-        panel.add(sampleForm, "create_sample_form");
-        panel.add(sampleTable, "sample_table");
-
-        mainContent.setWidget(1, 0, panel);
+        samplePanel.setSampleOptions(options);
     }
 
     @Override
     public void addSampleSaveHandler(ClickHandler handler) {
-        if (sampleForm == null)
-            return;
-        sampleForm.addSaveHandler(handler);
+        samplePanel.addSampleSaveHandler(handler);
     }
 
     @Override
     public SampleStorage getSampleAddFormValues() {
-        if (sampleForm == null)
-            return null;
-        return sampleForm.populateSample();
+        return samplePanel.getSampleAddFormValues();
     }
 
     @Override
     public boolean getSampleFormVisibility() {
-        return this.sampleForm.isVisible();
+        return samplePanel.getSampleFormVisibility();
     }
 
     @Override
     public void setSampleFormVisibility(boolean visible) {
-        this.sampleForm.setVisible(visible);
+        samplePanel.setSampleFormVisibility(visible);
     }
 
     @Override
@@ -499,58 +407,13 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void setAttachments(ArrayList<AttachmentItem> items, long entryId) {
-        attachmentMenu.setMenuItems(items, entryId);
-    }
-
-    @Override
     public void setAttachmentDeleteHandler(HasAttachmentDeleteHandler handler) {
         attachmentMenu.setDeleteHandler(handler);
     }
 
     @Override
-    public void setTraceSequenceStartUploader(OnStartUploaderHandler handler) {
-        sequenceUploader.addOnStartUploadHandler(handler);
-    }
-
-    @Override
     public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, EntryInfo info) {
-        sequenceTable.setData(data);
-        this.entryId = info.getId();
-
-        VerticalPanel panel = new VerticalPanel();
-        panel.setWidth("100%");
-        panel.add(traceHeaderPanel);
-        panel.add(uploadPanel);
-        panel.add(sequenceTable);
-
-        if (info.isHasSequence()) {
-            Flash.Parameters params = new Flash.Parameters();
-            params.setSwfPath("sc/SequenceChecker.swf");
-            params.setSessiondId(AppController.sessionId);
-            params.setMovieName("SequenceChecker.swf");
-            params.setEntryId(info.getRecordId());
-
-            Flash flash = new Flash(params);
-            panel.add(flash);
-            panel.setCellHeight(flash, "600px");
-        }
-
-        mainContent.setWidget(1, 0, panel);
-    }
-
-    @Override
-    public void addSequenceAddButtonHandler(ClickHandler clickHandler) {
-        addSeqButton.addClickHandler(clickHandler);
-    }
-
-    @Override
-    public boolean getSequenceFormVisibility() {
-        return uploadPanel.isVisible();
-    }
-
-    @Override
-    public void setSequenceFormVisibility(boolean visible) {
-        uploadPanel.setVisible(visible);
+        sequencePanel.setSequenceData(data, info);
+        mainContent.setWidget(1, 0, sequencePanel);
     }
 }

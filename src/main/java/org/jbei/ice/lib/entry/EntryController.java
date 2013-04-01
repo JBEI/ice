@@ -2,35 +2,48 @@ package org.jbei.ice.lib.entry;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.StorageDAO;
+import org.jbei.ice.lib.entry.sample.model.Sample;
+import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.server.EntryViewFactory;
+import org.jbei.ice.server.ModelToInfoFactory;
+import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 /**
@@ -42,45 +55,81 @@ public class EntryController {
 
     private EntryDAO dao;
     private PermissionsController permissionsController;
-    private AttachmentController attachmentController;
     private AccountController accountController;
+    private AttachmentController attachmentController;
+    private SampleController sampleController;
+    private SequenceAnalysisController sequenceAnalysisController;
+    private SequenceController sequenceController;
 
     public EntryController() {
         dao = new EntryDAO();
-        permissionsController = new PermissionsController();
-        attachmentController = new AttachmentController();
-        accountController = new AccountController();
+        permissionsController = ControllerFactory.getPermissionController();
+        accountController = ControllerFactory.getAccountController();
+        attachmentController = ControllerFactory.getAttachmentController();
+        sampleController = ControllerFactory.getSampleController();
+        sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
+        sequenceController = ControllerFactory.getSequenceController();
+    }
+
+    public Set<String> getMatchingAutoCompleteField(AutoCompleteField field, String token, int limit)
+            throws ControllerException {
+
+        String a, b;
+
+        switch (field) {
+            case SELECTION_MARKERS:
+                a = "selectionMarker.name";
+                b = "SelectionMarker selectionMarker";
+                break;
+
+            case ORIGIN_OF_REPLICATION:
+                a = "plasmid.originOfReplication";
+                b = "Plasmid plasmid";
+                break;
+
+            case PROMOTERS:
+                a = "plasmid.promoters";
+                b = "Plasmid plasmid";
+                break;
+
+            default:
+            case PLASMID_NAME:
+//                "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name" +
+//                    ".name <> '' order by name.name asc");
+                return new HashSet<>();
+        }
+
+        try {
+            return dao.getMatchingSelectionMarkers(a, b, token, limit);
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
     }
 
     /**
-     * Create an entry in the database.
-     * <p/>
-     * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
-     * Sets the record globally visible and schedule an index rebuild.
+     * Retrieves the IDs of all part records in the system
      *
-     * @param account   account of user creating the record
-     * @param entry     entry record being created
-     * @param readGroup group that can has read access to entry
-     * @return entry that was saved in the database.
-     * @throws ControllerException // TODO : visibility should be a parameter
+     * @return list of ids
+     * @throws ControllerException on DAOException retrieving the IDs
      */
-    public Entry createEntry(Account account, Entry entry, Group readGroup) throws ControllerException {
-        return createEntry(account, entry, true, readGroup);
+    public LinkedList<Long> getAllEntryIds() throws ControllerException {
+        try {
+            return dao.getAllEntryIds();
+        } catch (DAOException e) {
+            Logger.error(e);
+            throw new ControllerException(e);
+        }
     }
 
-    public HashSet<Entry> createStrainWithPlasmid(Account account, Entry strain, Entry plasmid, Group readGroup)
-            throws ControllerException {
-
-        HashSet<Entry> results = new HashSet<Entry>();
-
-        plasmid = createEntry(account, plasmid, readGroup);
+    public HashSet<Entry> createStrainWithPlasmid(Account account, Entry strain, Entry plasmid,
+            ArrayList<PermissionInfo> permissions) throws ControllerException {
+        HashSet<Entry> results = new HashSet<>();
+        plasmid = createEntry(account, plasmid, permissions);
         results.add(plasmid);
-
-        String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
-                + plasmid.getOnePartNumber().getPartNumber() + "|" + plasmid.getOneName().getName()
-                + "]]";
+        String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX) + ":"
+                + plasmid.getOnePartNumber().getPartNumber() + "|" + plasmid.getOneName().getName() + "]]";
         ((Strain) strain).setPlasmids(plasmidPartNumberString);
-        strain = createEntry(account, strain, readGroup);
+        strain = createEntry(account, strain, permissions);
         results.add(strain);
         return results;
     }
@@ -93,9 +142,9 @@ public class EntryController {
      */
     private String getNextPartNumber() throws ControllerException {
         try {
-            return dao.generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"),
-                                              JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),
-                                              JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
+            return dao.generateNextPartNumber(Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX),
+                                              Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DELIMITER),
+                                              Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX));
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);
@@ -108,20 +157,18 @@ public class EntryController {
      * Generates a new Part Number, the record id (UUID), version id, and timestamps.
      * Optionally set the record globally visible or schedule an index rebuild.
      *
-     * @param account              account of user creating entry
-     * @param entry                entry record being created
-     * @param scheduleIndexRebuild Set true to schedule search index rebuild.
-     * @param readGroup            group that will have read privileges.set to null if private entry
+     * @param account     account of user creating entry
+     * @param entry       entry record being created
+     * @param permissions list of permissions to associate with created entry
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
-    public Entry createEntry(Account account, Entry entry, boolean scheduleIndexRebuild, Group readGroup)
+    public Entry createEntry(Account account, Entry entry, ArrayList<PermissionInfo> permissions)
             throws ControllerException {
-
         PartNumber partNumber = new PartNumber();
         String nextPart = getNextPartNumber();
         partNumber.setPartNumber(nextPart);
-        Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
+        Set<PartNumber> partNumbers = new LinkedHashSet<>();
         partNumbers.add(partNumber);
         entry.getPartNumbers().add(partNumber);
 
@@ -134,23 +181,146 @@ public class EntryController {
         entry.setOwner(account.getFullName());
         entry.setOwnerEmail(account.getEmail());
 
+        if (entry.getSelectionMarkers() != null) {
+            for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
+                selectionMarker.setEntry(entry);
+            }
+        }
+
+        if (entry.getLinks() != null) {
+            for (Link link : entry.getLinks()) {
+                link.setEntry(entry);
+            }
+        }
+
+        if (entry.getNames() != null) {
+            for (Name name : entry.getNames()) {
+                name.setEntry(entry);
+            }
+        }
+
+        if (entry.getPartNumbers() != null) {
+            for (PartNumber pNumber : entry.getPartNumbers()) {
+                pNumber.setEntry(entry);
+            }
+        }
+
+        if (entry.getStatus() == null)
+            entry.setStatus("");
+
+        if (entry.getBioSafetyLevel() == null)
+            entry.setBioSafetyLevel(new Integer(0));
+
+        if (entry.getLongDescriptionType() == null)
+            entry.setLongDescriptionType("text");
+
+        entry.setModificationTime(entry.getCreationTime());
+
         try {
-            dao.saveOrUpdate(entry);
+            entry = dao.saveEntry(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
-        if (readGroup != null) {
-            try {
-                permissionsController.addReadGroup(account, entry, readGroup);
-            } catch (PermissionException pe) {
-                Logger.error("Could add group permissions to entry \"" + entry.getId() + "\"", pe);
+        PermissionInfo info = new PermissionInfo(PermissionInfo.Article.ACCOUNT, account.getId(),
+                                                 PermissionInfo.Type.WRITE_ENTRY, entry.getId(), account.getFullName());
+        permissionsController.addPermission(account, info);
+
+        if (permissions != null) {
+            for (PermissionInfo permissionInfo : permissions) {
+                permissionInfo.setTypeId(entry.getId());
+                permissionsController.addPermission(account, permissionInfo);
             }
         }
 
-        if (scheduleIndexRebuild) {
-            ApplicationController.scheduleBlastIndexRebuildJob();
-            ApplicationController.scheduleSearchIndexRebuildJob();
+        // retrieve all public groups that this user is a part of an assign read permissions to those groups
+        // for this entry
+        for (Group group : ControllerFactory.getGroupController().getAllPublicGroupsForAccount(account)) {
+            PermissionInfo permissionInfo = new PermissionInfo();
+            permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
+            permissionInfo.setTypeId(entry.getId());
+            permissionInfo.setArticle(PermissionInfo.Article.GROUP);
+            permissionInfo.setArticleId(group.getId());
+            permissionInfo.setDisplay(group.getLabel());
+            permissionsController.addPermission(account, permissionInfo);
+        }
+
+        if (sequenceController.hasSequence(entry)) {
+            ApplicationController.scheduleBlastIndexRebuildTask(true);
+        }
+
+        return entry;
+    }
+
+    public Entry recordEntry(Entry entry, ArrayList<PermissionInfo> permissions) throws ControllerException {
+        entry.setId(0);
+        PartNumber partNumber = new PartNumber();
+        String nextPart = getNextPartNumber();
+        partNumber.setPartNumber(nextPart);
+        Set<PartNumber> partNumbers = new LinkedHashSet<>();
+        partNumbers.add(partNumber);
+        entry.getPartNumbers().add(partNumber);
+
+        partNumber.setEntry(entry);
+
+        if (entry.getRecordId() == null) {
+            entry.setRecordId(Utils.generateUUID());
+            entry.setVersionId(entry.getRecordId());
+        }
+
+        if (entry.getCreationTime() == null) {
+            entry.setCreationTime(Calendar.getInstance().getTime());
+            entry.setModificationTime(entry.getCreationTime());
+        }
+
+        if (entry.getSelectionMarkers() != null) {
+            for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
+                selectionMarker.setEntry(entry);
+            }
+        }
+
+        if (entry.getLinks() != null) {
+            for (Link link : entry.getLinks()) {
+                link.setEntry(entry);
+            }
+        }
+
+        if (entry.getNames() != null) {
+            for (Name name : entry.getNames()) {
+                name.setEntry(entry);
+            }
+        }
+
+        if (entry.getPartNumbers() != null) {
+            for (PartNumber pNumber : entry.getPartNumbers()) {
+                pNumber.setEntry(entry);
+            }
+        }
+
+        if (entry.getStatus() == null)
+            entry.setStatus("");
+
+        if (entry.getBioSafetyLevel() == null)
+            entry.setBioSafetyLevel(new Integer(0));
+
+        if (entry.getLongDescriptionType() == null)
+            entry.setLongDescriptionType("text");
+
+        try {
+            entry = dao.saveEntry(entry);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        if (permissions != null) {
+            for (PermissionInfo permissionInfo : permissions) {
+                permissionInfo.setTypeId(entry.getId());
+                permissionsController.addPermission(accountController.getSystemAccount(), permissionInfo);
+            }
+        }
+
+        if (sequenceController.hasSequence(entry)) {
+            ApplicationController.scheduleBlastIndexRebuildTask(true);
         }
 
         return entry;
@@ -175,16 +345,10 @@ public class EntryController {
         }
 
         if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
-            throw new PermissionException("No read permission for entry!");
+            throw new PermissionException(account.getEmail() + ": No read permission for entry " + id);
         }
 
         return entry;
-    }
-
-    public ArrayList<PermissionInfo> retrievePermissions(Account account, Entry entry)
-            throws ControllerException, PermissionException {
-
-        return permissionsController.retrieveSetEntryPermissions(account, entry);
     }
 
     /**
@@ -195,8 +359,7 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Entry getByRecordId(Account account, String recordId) throws ControllerException,
-            PermissionException {
+    public Entry getByRecordId(Account account, String recordId) throws ControllerException, PermissionException {
         Entry entry;
 
         try {
@@ -212,6 +375,27 @@ public class EntryController {
         return entry;
     }
 
+    public Entry getPublicEntryByRecordId(String recordId) throws ControllerException {
+        Entry entry;
+
+        try {
+            entry = dao.getByRecordId(recordId);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        Group publicGroup = ControllerFactory.getGroupController().createOrRetrievePublicGroup();
+        Set<Group> groups = new HashSet<>();
+        groups.add(publicGroup);
+        if (entry != null && !permissionsController.groupHasReadPermission(groups, entry)) {
+            String errMsg = "Entry " + recordId + " is not public";
+            Logger.warn(errMsg);
+            throw new ControllerException(errMsg);
+        }
+
+        return entry;
+    }
+
     /**
      * Retrieve {@link Entry} from the database by part number.
      * <p/>
@@ -222,10 +406,8 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Entry getByPartNumber(Account account, String partNumber) throws ControllerException,
-            PermissionException {
+    public Entry getByPartNumber(Account account, String partNumber) throws ControllerException, PermissionException {
         Entry entry;
-
         try {
             entry = dao.getByPartNumber(partNumber);
         } catch (DAOException e) {
@@ -249,11 +431,8 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Entry getByName(Account account, String name) throws ControllerException,
-            PermissionException {
-
+    public Entry getByName(Account account, String name) throws ControllerException, PermissionException {
         Entry entry;
-
         try {
             entry = dao.getByName(name);
         } catch (DAOException e) {
@@ -267,41 +446,32 @@ public class EntryController {
         return entry;
     }
 
-    /**
-     * Checks if the given entry has {@link org.jbei.ice.lib.entry.attachment.Attachment}s
-     * associated with it.
-     *
-     * @param entry entry
-     * @return True if there are associated attachments.
-     * @throws ControllerException
-     * @deprecated call attachment controller directly
-     */
-    public boolean hasAttachments(Account account, Entry entry) throws ControllerException, PermissionException {
-        return attachmentController.hasAttachment(account, entry);
-    }
-
-    public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
-
-        Set<Group> accountGroups = new HashSet<Group>(account.getGroups());
-
-        // TODO : retrieve all parent groups
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
-        accountGroups.add(everybodyGroup);
-
+    public FolderDetails retrieveVisibleEntries(Account account, ColumnField field, boolean asc, int start, int limit)
+            throws ControllerException {
+        LinkedList<Entry> results;
+        FolderDetails details = new FolderDetails();
         try {
-            return dao.getAllVisibleEntries(accountGroups, account);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
+            if (accountController.isAdministrator(account)) {
+                // no filters
+                results = dao.retrieveAllEntries(field, asc, start, limit);
+            } else {
+                // retrieve groups for account and filter by permission
+                Set<Group> accountGroups = new HashSet<>(account.getGroups());
+                GroupController controller = ControllerFactory.getGroupController();
+                Group everybodyGroup = controller.createOrRetrievePublicGroup();
+                accountGroups.add(everybodyGroup);
 
-    public ArrayList<Long> getAllEntryIDs() throws ControllerException {
-        try {
-            return dao.getEntries("creationTime", true);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+                results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit);
+            }
+            for (Entry entry : results) {
+                EntryInfo info = ModelToInfoFactory.createTableViewData(entry, false);
+                details.getEntries().add(info);
+            }
+        } catch (DAOException de) {
+            throw new ControllerException(de);
         }
+
+        return details;
     }
 
     /**
@@ -312,116 +482,60 @@ public class EntryController {
      * @throws ControllerException
      */
     public long getNumberOfVisibleEntries(Account account) throws ControllerException {
-        long numberOfVisibleEntries;
+        if (accountController.isAdministrator(account)) {
+            try {
+                return dao.getAllEntryCount();
+            } catch (DAOException e) {
+                throw new ControllerException(e);
+            }
+        }
 
-        Set<Group> accountGroups = new HashSet<Group>(account.getGroups());
-
-        // TODO : retrieve all parent groups
-        GroupController controller = new GroupController();
+        Set<Group> accountGroups = new HashSet<>(account.getGroups());
+        GroupController controller = ControllerFactory.getGroupController();
         Group everybodyGroup = controller.createOrRetrievePublicGroup();
         accountGroups.add(everybodyGroup);
-
         try {
-            numberOfVisibleEntries = dao.getNumberOfVisibleEntries(accountGroups, account);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return numberOfVisibleEntries;
-    }
-
-    public long getNumberOfPublicEntries() throws ControllerException {
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
-        Set<Group> accountGroups = new HashSet<Group>();
-        accountGroups.add(everybodyGroup);
-
-        try {
-            return dao.getNumberOfVisibleEntries(accountGroups, null);
+            return dao.visibleEntryCount(account, accountGroups);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }
 
-    public ArrayList<Long> getEntryIdsByOwner(Account account, String ownerEmail, Visibility... visibilityList)
-            throws ControllerException {
+    public List<Entry> retrieveOwnerEntries(Account account, String ownerEmail,
+            ColumnField sort, boolean asc, int start, int limit) throws ControllerException {
         try {
-            Integer[] list = new Integer[visibilityList.length];
-            int i = 0;
-            for (Visibility visibility : visibilityList) {
-                list[i] = visibility.getValue();
-                i += 1;
+            if (accountController.isAdministrator(account) || account.getEmail().equals(ownerEmail)) {
+                return dao.retrieveOwnerEntries(ownerEmail, sort, asc, start, limit);
             }
 
-            ArrayList<Long> results = dao.getEntriesByOwner(ownerEmail, list);
-            if (results == null)
-                return results;
-
-            Iterator<Long> resultsIter = results.iterator();
-
-            while (resultsIter.hasNext()) {
-                Long next = resultsIter.next();
-                try {
-                    try {
-                        get(account, next);
-                    } catch (PermissionException e) {
-                        resultsIter.remove();
-                        continue;
-                    }
-                } catch (ControllerException ce) {
-                    Logger.error("Error retrieving permission for entry Id " + next);
-                }
-            }
-            return results;
+            Set<Group> accountGroups = new HashSet<>(account.getGroups());
+            GroupController controller = ControllerFactory.getGroupController();
+            Group everybodyGroup = controller.createOrRetrievePublicGroup();
+            accountGroups.add(everybodyGroup);
+            return dao.retrieveUserEntries(account, ownerEmail, accountGroups, sort, asc, start, limit);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }
 
-    /**
-     * Save the entry into the database. Then schedule index rebuild.
-     *
-     * @param entry entry object to save
-     * @return Saved entry.
-     * @throws ControllerException
-     */
-    public Entry save(Entry entry) throws ControllerException {
-        return save(entry, true);
-    }
-
-    /**
-     * Save the entry into the database. Optionally schedule an index rebuild.
-     *
-     * @param entry
-     * @param scheduleIndexRebuild Set True to schedule index rebuild.
-     * @return Entry saved into the database.
-     * @throws ControllerException
-     */
-    public Entry save(Entry entry, boolean scheduleIndexRebuild) throws ControllerException {
-        if (entry == null) {
-            throw new ControllerException("Failed to save null entry!");
-        }
-
-        Entry savedEntry;
-
+    public long getNumberOfOwnerEntries(Account account, String ownerEmail) throws ControllerException {
         try {
-            entry.setModificationTime(Calendar.getInstance().getTime());
-            savedEntry = dao.saveOrUpdate(entry);
-
-            if (scheduleIndexRebuild) {
-                ApplicationController.scheduleSearchIndexRebuildJob();
-                ApplicationController.scheduleBlastIndexRebuildJob();
+            if (accountController.isAdministrator(account) || account.getEmail().equals(ownerEmail)) {
+                return dao.ownerEntryCount(ownerEmail);
             }
+
+            Set<Group> accountGroups = new HashSet<>(account.getGroups());
+            GroupController controller = ControllerFactory.getGroupController();
+            Group everybodyGroup = controller.createOrRetrievePublicGroup();
+            accountGroups.add(everybodyGroup);
+            return dao.ownerEntryCount(account, ownerEmail, accountGroups);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
-        return savedEntry;
     }
 
-    public Entry update(Account account, Entry entry, boolean scheduleIndexRebuild, Group readGroup)
+    public Entry update(Account account, Entry entry, ArrayList<PermissionInfo> permissions)
             throws ControllerException, PermissionException {
-
         if (entry == null) {
             throw new ControllerException("Failed to update null entry!");
         }
@@ -430,31 +544,29 @@ public class EntryController {
             throw new PermissionException("No write permission for entry!");
         }
 
+        boolean scheduleRebuild = sequenceController.hasSequence(entry);
         Entry savedEntry;
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
-            savedEntry = dao.saveOrUpdate(entry);
+            savedEntry = dao.updateEntry(entry);
 
-            // update read permissions
-            // TODO : until the permissions overhaul, no method is expected to call update on entry
-            // TODO : and update the groups at the same time. a different mechanism is used
-            if (readGroup != null && savedEntry.getVisibility() != Visibility.OK.getValue()) {
-                HashSet<Group> groups = new HashSet<Group>();
-                groups.add(readGroup);
-                permissionsController.setReadGroup(account, entry, groups);
+            if (permissions != null && !permissions.isEmpty()) {
+                permissionsController.clearPermissions(account, entry);
+                for (PermissionInfo permissionInfo : permissions) {
+                    permissionInfo.setTypeId(entry.getId());
+                    permissionsController.addPermission(account, permissionInfo);
+                }
             }
 
-            if (scheduleIndexRebuild) {
-                ApplicationController.scheduleSearchIndexRebuildJob();
-                ApplicationController.scheduleBlastIndexRebuildJob();
+            if (scheduleRebuild) {
+                ApplicationController.scheduleBlastIndexRebuildTask(true);
             }
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
         return savedEntry;
-
     }
 
     /**
@@ -464,15 +576,16 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public void delete(Account account, Entry entry) throws ControllerException,
-            PermissionException {
-        delete(account, entry, true);
+    public void delete(Account account, Entry entry) throws ControllerException, PermissionException {
+        // TODO : check status and if draft, actually delete. not just mark for delete
+        boolean schedule = sequenceController.hasSequence(entry);
+        delete(account, entry, schedule);
     }
 
     /**
      * Delete the entry in the database. Optionally schedule an index rebuild.
      *
-     * @param entry
+     * @param entry                entry to deleted
      * @param scheduleIndexRebuild True if index rebuild is scheduled.
      * @throws ControllerException
      * @throws PermissionException
@@ -485,28 +598,22 @@ public class EntryController {
         if (!permissionsController.hasWritePermission(account, entry)) {
             throw new PermissionException("No write permission for entry");
         }
-        String deletionString = "This entry is deleted. It was owned by " + entry.getOwnerEmail()
-                + "\n";
+        String deletionString = "This entry is deleted. It was owned by " + entry.getOwnerEmail();
         entry.setLongDescription(deletionString + entry.getLongDescription());
         Account sysAccount = accountController.getSystemAccount();
         entry.setOwnerEmail(sysAccount.getEmail());
-        // save(entry, true); // Cannot use save, as owner has changed. Must call manager directly
 
-        permissionsController.setReadGroup(sysAccount, entry, new HashSet<Group>());
-        permissionsController.setWriteGroup(sysAccount, entry, new HashSet<Group>());
-        permissionsController.setReadUser(sysAccount, entry, new HashSet<Account>());
-        permissionsController.setWriteUser(sysAccount, entry, new HashSet<Account>());
+        permissionsController.clearPermissions(sysAccount, entry);
         entry.setModificationTime(Calendar.getInstance().getTime());
 
         try {
-            dao.saveOrUpdate(entry);
+            dao.update(entry);
         } catch (DAOException e1) {
             throw new ControllerException("Failed to save entry deletion", e1);
         }
 
         if (scheduleIndexRebuild) {
-            ApplicationController.scheduleSearchIndexRebuildJob();
-            ApplicationController.scheduleBlastIndexRebuildJob();
+            ApplicationController.scheduleBlastIndexRebuildTask(true);
         }
     }
 
@@ -519,8 +626,7 @@ public class EntryController {
      * @return List of Entry ids.
      * @throws ControllerException
      */
-    List<Long> filterEntriesByPermission(Account account, List<Long> ids)
-            throws ControllerException {
+    List<Long> filterEntriesByPermission(Account account, List<Long> ids) throws ControllerException {
         ArrayList<Long> result = new ArrayList<Long>();
         for (Long id : ids) {
             Entry entry;
@@ -538,82 +644,6 @@ public class EntryController {
         return result;
     }
 
-    public long getAllEntryCount() throws ControllerException {
-        try {
-            return dao.getAllEntryCount();
-        } catch (ManagerException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
-    }
-
-    public long getOwnerEntryCount(Account account, Visibility... exclude)
-            throws ControllerException {
-        try {
-            if (exclude.length == 0)
-                return dao.getOwnerEntryCount(account.getEmail());
-
-            Integer[] excludeInt = new Integer[exclude.length];
-            for (int i = 0; i < exclude.length; i += 1)
-                excludeInt[i] = exclude[i].getValue();
-            return dao.getOwnerEntryCount(account.getEmail(), excludeInt);
-
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
-    }
-
-    public ArrayList<Entry> getAllEntries() throws ControllerException {
-        try {
-            return dao.getAllEntries();
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
-    }
-
-    public LinkedList<EntryInfo> retrieveEntriesByIdSetSort(Account account,
-            LinkedList<Long> entryIds, ColumnField field, boolean asc) throws ControllerException {
-
-        List<Entry> entries;
-
-        try {
-            switch (field) {
-                case TYPE:
-                    entries = dao.getEntriesByIdSetSortByType(entryIds, asc);
-                    break;
-
-                case STATUS:
-                    entries = dao.getEntriesByIdSetSortByStatus(entryIds, asc);
-                    break;
-
-                case CREATED:
-                    entries = dao.getEntriesByIdSetSortByCreated(entryIds, asc);
-                    break;
-
-                default:
-                    entries = dao.getEntriesByIdSet(entryIds);
-            }
-        } catch (DAOException ce) {
-            throw new ControllerException("Could not retrieve entries by sort ", ce);
-        }
-
-        if (entries == null)
-            return null;
-        LinkedList<EntryInfo> results = new LinkedList<EntryInfo>();
-
-        for (Entry entry : entries) {
-            EntryInfo view = EntryViewFactory.createTableViewData(account, entry);
-            if (view == null)
-                continue;
-
-            results.add(view);
-        }
-
-        return results;
-    }
-
     public ArrayList<Entry> getEntriesByIdSet(Account account, ArrayList<Long> queryResultIds)
             throws ControllerException {
         List<Long> filtered = this.filterEntriesByPermission(account, queryResultIds);
@@ -625,21 +655,50 @@ public class EntryController {
         }
     }
 
-    public LinkedList<Long> sortList(LinkedList<Long> ids, ColumnField field, boolean asc)
-            throws ControllerException {
-        try {
-
-            return dao.sortList(ids, field, asc);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
     public HashSet<Long> retrieveStrainsForPlasmid(Plasmid plasmid) throws ControllerException {
         try {
             return dao.retrieveStrainsForPlasmid(plasmid);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public EntryInfo retrieveEntryDetails(Account account, Entry entry) throws ControllerException {
+        ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
+        ArrayList<Sample> samples = sampleController.getSamplesByEntry(entry);
+        List<TraceSequence> sequences = sequenceAnalysisController.getTraceSequences(entry);
+
+        // samples
+        Map<Sample, LinkedList<Storage>> sampleMap = new HashMap<Sample, LinkedList<Storage>>();
+        for (Sample sample : samples) {
+            Storage storage = sample.getStorage();
+            LinkedList<Storage> storageList = new LinkedList<Storage>();
+            List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
+            if (storages != null)
+                storageList.addAll(storages);
+            Storage scheme = StorageDAO.getSchemeContainingParentStorage(storage);
+            if (scheme != null)
+                storageList.add(scheme);
+
+            sampleMap.put(sample, storageList);
+        }
+
+        boolean hasSequence = (sequenceController.getByEntry(entry) != null);
+        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence);
+
+        // permissions
+        info.setCanEdit(permissionsController.hasWritePermission(account, entry));
+
+        // viewing permissions is restricted to users who have write access
+        if (info.isCanEdit()) {
+            try {
+                ArrayList<PermissionInfo> permissions = permissionsController.retrieveSetEntryPermissions(account,
+                                                                                                          entry);
+                info.getPermissions().addAll(permissions);
+            } catch (PermissionException e) {
+                Logger.error(e);
+            }
+        }
+        return info;
     }
 }

@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.utils;
 
+import java.util.List;
+
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
@@ -10,8 +12,6 @@ import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.vo.TraceData;
-
-import java.util.List;
 
 /**
  * Utility methods for sequence trace alignments.

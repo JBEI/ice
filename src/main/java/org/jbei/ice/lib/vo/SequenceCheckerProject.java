@@ -4,9 +4,8 @@ import java.util.Date;
 
 /**
  * Value object for Sequence Checker project.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class SequenceCheckerProject extends Project {
     private static final long serialVersionUID = 1L;

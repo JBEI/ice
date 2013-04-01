@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
 
 /**
  * @author Hector Plahar

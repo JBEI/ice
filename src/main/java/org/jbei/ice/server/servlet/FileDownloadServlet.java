@@ -1,5 +1,16 @@
 package org.jbei.ice.server.servlet;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -9,16 +20,6 @@ import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Servlet for serving the different kinds of files
@@ -51,7 +52,7 @@ public class FileDownloadServlet extends HttpServlet {
                 if (!AccountController.isAuthenticated(sid))
                     return;
 
-                AccountController controller = new AccountController();
+                AccountController controller = ControllerFactory.getAccountController();
                 account = controller.getAccountBySessionKey(sid);
                 if (account == null)
                     return;
@@ -93,7 +94,7 @@ public class FileDownloadServlet extends HttpServlet {
         OutputStream os = response.getOutputStream();
         DataInputStream is = new DataInputStream(new FileInputStream(file));
 
-        int read = 0;
+        int read;
         byte[] bytes = new byte[BYTES_DOWNLOAD];
 
         while ((read = is.read(bytes)) != -1) {
@@ -104,7 +105,7 @@ public class FileDownloadServlet extends HttpServlet {
     }
 
     private File getTraceSequenceFile(Account account, String fileId) {
-        SequenceAnalysisController controller = new SequenceAnalysisController();
+        SequenceAnalysisController controller = ControllerFactory.getSequenceAnalysisController();
 
         try {
             TraceSequence sequence = controller.getTraceSequenceByFileId(fileId);
@@ -121,7 +122,7 @@ public class FileDownloadServlet extends HttpServlet {
     }
 
     private File getAttachmentFile(Account account, String fileId) {
-        AttachmentController controller = new AttachmentController();
+        AttachmentController controller = ControllerFactory.getAttachmentController();
         try {
             Attachment attachment = controller.getAttachmentByFileId(fileId);
             if (attachment == null)
@@ -150,7 +151,7 @@ public class FileDownloadServlet extends HttpServlet {
                 if (!AccountController.isAuthenticated(sid))
                     return null;
 
-                AccountController controller = new AccountController();
+                AccountController controller = ControllerFactory.getAccountController();
                 return controller.getAccountBySessionKey(sid);
             }
         }

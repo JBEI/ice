@@ -5,9 +5,8 @@ import com.google.gwt.user.client.ui.FlexTable;
 
 /**
  * Timer used to hide a deleted folder menu
- * 
+ *
  * @author hplahar
- * 
  */
 public class MenuHiderTimer extends Timer {
 

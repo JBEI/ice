@@ -1,5 +1,11 @@
 package org.jbei.ice.client.collection.menu;
 
+import java.util.List;
+
+import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.PopupHandler;
+
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,11 +15,6 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.resources.client.ImageResource.ImageOptions;
-import com.google.gwt.resources.client.ImageResource.RepeatStyle;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -26,48 +27,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
-import org.jbei.ice.client.collection.view.OptionSelect;
-import org.jbei.ice.client.common.widget.PopupHandler;
 
-import java.util.List;
-
-public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implements
-                                                                       SubMenuOptionsPresenter.View<T> {
-
-    /**
-     * Resources to access images and styles
-     */
-    public interface Resources extends ClientBundle {
-
-        static Resources INSTANCE = GWT.create(Resources.class);
-
-        @Source("org/jbei/ice/client/resource/image/arrow_down.png")
-        @ImageOptions(repeatStyle = RepeatStyle.None)
-        ImageResource sortDown();
-
-        /**
-         * The styles used in this widget.
-         */
-        @Source(Style.DEFAULT_CSS)
-        Style subMenuStyle();
-    }
-
-    /**
-     * Styles used by this widget.
-     */
-
-    interface Style extends CssResource {
-        /**
-         * The path to the default CSS styles used by this resource.
-         */
-        String DEFAULT_CSS = "org/jbei/ice/client/resource/css/SubMenu.css";
-
-        String dropDownAdd();
-
-        String dropDownMove();
-
-        String subMenuRemove();
-    }
+public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implements SubMenuOptionsPresenter.View<T> {
 
     interface SelectionResource extends CellTable.Resources {
 
@@ -84,16 +45,12 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
     private final SubMenuOptionsPresenter<T> presenter;
     private final Button addWidget;
     private final PopupHandler addToHandler;
-    private final boolean addFirstStyle;
 
-    public AddToMenuItem(String label, boolean addFirstStyle) {
-        this.addFirstStyle = addFirstStyle;
+    public AddToMenuItem(String label) {
         addWidget = createAddWidget(label);
         initWidget(addWidget);
 
-        table = new CellTable<T>(30,
-                                 SelectionResource.INSTANCE); // TODO : a pager is needed for when the list size
-                                 // exceeds 30
+        table = new CellTable<T>(30, SelectionResource.INSTANCE); //TODO : a pager is needed for when the size > 30
         addSelectionColumn();
         addNameColumn();
 
@@ -114,11 +71,9 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         });
 
         // message to display when no collections are created
-        table.setEmptyTableWidget(new HTML(
-                "<i class=\"font-75em\">No user collections available.</i>"));
+        table.setEmptyTableWidget(new HTML("<i class=\"font-75em\">No user collections available.</i>"));
 
         submitButton = new Button("Submit");
-        submitButton.setStyleName("saved_draft_button");
         submitButton.addKeyPressHandler(new EnterClickHandler(submitButton));
         submitButton.addClickHandler(new ClickHandler() {
 
@@ -130,11 +85,10 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         });
 
         clearButton = new Button("Clear");
-        clearButton.setStyleName("saved_draft_button");
-        clearButton.addKeyPressHandler(new EnterClickHandler(submitButton));
+        clearButton.addKeyPressHandler(new EnterClickHandler(clearButton));
 
         final Widget popup = createPopupWidget();
-        addToHandler = new PopupHandler(popup, addWidget.getElement(), -1, 1, false);
+        addToHandler = new PopupHandler(popup, addWidget.getElement(), false);
         addWidget.addClickHandler(addToHandler);
         addToHandler.setCloseHandler(new CloseHandler<PopupPanel>() {
             @Override
@@ -142,8 +96,6 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
                 presenter.clearAllSelected();
             }
         });
-
-        Resources.INSTANCE.subMenuStyle().ensureInjected();
 
         presenter = new SubMenuOptionsPresenter<T>(this);
         presenter.addDisplay(table);
@@ -154,7 +106,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
      */
     protected Widget createPopupWidget() {
         FlexTable wrapper = new FlexTable();
-        wrapper.addStyleName("background_white");
+        wrapper.addStyleName("bg_white");
         wrapper.setWidget(0, 0, table);
         wrapper.getFlexCellFormatter().setColSpan(0, 0, 2);
 
@@ -165,13 +117,14 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         return wrapper;
     }
 
+    /**
+     * "Add to" button widget
+     *
+     * @param label button label
+     * @return created button widget
+     */
     protected Button createAddWidget(String label) {
-        final Button addTo = new Button(label);
-        addTo.setStyleName("button_group_item");
-        if (addFirstStyle)
-            addTo.addStyleName("firstItem");
-        addTo.addStyleName(Resources.INSTANCE.subMenuStyle().dropDownAdd());
-        return addTo;
+        return new Button(label + " <i class=\"" + FAIconType.CARET_DOWN.getStyleName() + "\"></i>");
     }
 
     protected void addNameColumn() {

@@ -2,9 +2,8 @@ package org.jbei.ice.lib.search.blast;
 
 /**
  * Program Took Too Long exception
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class ProgramTookTooLongException extends Exception {
     private static final long serialVersionUID = 1L;

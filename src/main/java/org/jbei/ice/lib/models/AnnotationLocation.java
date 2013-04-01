@@ -1,25 +1,15 @@
 package org.jbei.ice.lib.models;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 
 /**
  * Store the basepair location annotation for a {@link SequenceFeature} object.
- * <p>
+ * <p/>
  * Is able to record single residue or inbetween annotations.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 @Entity
 @Table(name = "sequence_annotation_location")
@@ -28,7 +18,7 @@ public class AnnotationLocation implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "genbank_start", nullable = false)
@@ -48,7 +38,7 @@ public class AnnotationLocation implements IModel {
     // genbank "site between two residues" notation (e.g. 4^5)
     private boolean inbetween;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sequence_feature_id")
     private SequenceFeature sequenceFeature;
 

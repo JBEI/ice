@@ -2,9 +2,8 @@ package org.jbei.ice.controllers.common;
 
 /**
  * Exception class for controllers.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class ControllerException extends Exception {
     private static final long serialVersionUID = -4198825232452614310L;
@@ -17,7 +16,7 @@ public class ControllerException extends Exception {
 
     /**
      * Create a new ControllerException with a message.
-     * 
+     *
      * @param message
      */
     public ControllerException(String message) {
@@ -26,7 +25,7 @@ public class ControllerException extends Exception {
 
     /**
      * Create a new ControllerException with a {@link Throwable}.
-     * 
+     *
      * @param cause
      */
     public ControllerException(Throwable cause) {
@@ -35,7 +34,7 @@ public class ControllerException extends Exception {
 
     /**
      * Create a new ControllerException with a message and a {@link Throwable}.
-     * 
+     *
      * @param message
      * @param cause
      */

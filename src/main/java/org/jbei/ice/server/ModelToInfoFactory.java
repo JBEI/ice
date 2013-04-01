@@ -7,40 +7,55 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.controllers.ControllerFactory;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
+import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.lib.utils.UtilsDAO;
-import org.jbei.ice.shared.dto.*;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
+import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.ParameterInfo;
+import org.jbei.ice.shared.dto.ParameterType;
+import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.StorageInfo;
+import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.Generation;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
+import org.jbei.ice.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.shared.dto.entry.PartInfo;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 /**
- * Factory for converting {@link Entry}s to their corresponding {@link EntryInfo} data transfer
- * objects
- * <p/>
- * TODO : this duplicates some of the functionality of EntryViewFactory. Consolidate
+ * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.shared.dto.entry.EntryInfo} data
+ * transfer objects
  *
  * @author Hector Plahar
  */
 public class ModelToInfoFactory {
 
     public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
-            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences,
-            boolean hasSequence) {
+            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences, boolean hasSequence) {
         EntryInfo info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
@@ -48,7 +63,7 @@ public class ModelToInfoFactory {
 
         switch (type) {
             case PLASMID:
-                info = plasmidInfo(entry);
+                info = plasmidInfo(account, entry);
                 break;
 
             case STRAIN:
@@ -56,11 +71,11 @@ public class ModelToInfoFactory {
                 break;
 
             case ARABIDOPSIS:
-                info = seedInfo(entry);
+                info = seedInfo(account, entry);
                 break;
 
             case PART:
-                info = partInfo(entry);
+                info = partInfo(account, entry);
                 break;
 
             default:
@@ -150,7 +165,6 @@ public class ModelToInfoFactory {
             info.setLocationId(String.valueOf(storage.getId()));
             info.setLocation(storage.getIndex());
         }
-
         return info;
     }
 
@@ -159,11 +173,9 @@ public class ModelToInfoFactory {
         if (storage == null)
             return info;
 
-        //        info.setChildCount(storage.getChildren().size());
         info.setDisplay(storage.getIndex());
         info.setId(storage.getId());
         info.setType(storage.getStorageType().name());
-
         return info;
     }
 
@@ -172,13 +184,23 @@ public class ModelToInfoFactory {
         if (sequences == null)
             return infos;
 
+        AccountController accountController = ControllerFactory.getAccountController();
         for (TraceSequence sequence : sequences) {
             SequenceAnalysisInfo info = new SequenceAnalysisInfo();
             info.setCreated(sequence.getCreationTime());
             info.setName(sequence.getFilename());
-            AccountInfo account = new AccountInfo();
-            account.setEmail(sequence.getDepositor());
-            info.setDepositor(account);
+            AccountInfo accountInfo = new AccountInfo();
+            try {
+                Account account = accountController.getByEmail(sequence.getDepositor());
+                if (account != null) {
+                    accountInfo.setFirstName(account.getFirstName());
+                    accountInfo.setLastName(account.getLastName());
+                    accountInfo.setId(account.getId());
+                }
+            } catch (ControllerException e) {
+                Logger.warn(e.getMessage());
+            }
+            info.setDepositor(accountInfo);
             infos.add(info);
             info.setFileId(sequence.getFileId());
         }
@@ -186,9 +208,9 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static PartInfo partInfo(Entry entry) {
+    private static PartInfo partInfo(Account account, Entry entry) {
         PartInfo info = new PartInfo();
-        info = (PartInfo) getCommon(info, entry);
+        info = (PartInfo) getCommon(account, info, entry);
 
         // part specific
         Part part = (Part) entry;
@@ -201,9 +223,9 @@ public class ModelToInfoFactory {
         return info;
     }
 
-    private static ArabidopsisSeedInfo seedInfo(Entry entry) {
+    private static ArabidopsisSeedInfo seedInfo(Account account, Entry entry) {
         ArabidopsisSeedInfo info = new ArabidopsisSeedInfo();
-        info = (ArabidopsisSeedInfo) getCommon(info, entry);
+        info = (ArabidopsisSeedInfo) getCommon(account, info, entry);
 
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -228,20 +250,20 @@ public class ModelToInfoFactory {
 
     private static StrainInfo strainInfo(Account account, Strain strain) {
         StrainInfo info = new StrainInfo();
-        info = (StrainInfo) getCommon(info, strain);
+        info = (StrainInfo) getCommon(account, info, strain);
 
         // strain specific
         info.setGenotypePhenotype(strain.getGenotypePhenotype());
         info.setPlasmids(strain.getPlasmids());
         info.setLinkifiedPlasmids(EntryUtil.linkifyText(account, info.getPlasmids()));
         info.setHost(strain.getHost());
-
+        info.setLinkifiedHost(EntryUtil.linkifyText(account, info.getHost()));
         return info;
     }
 
-    private static PlasmidInfo plasmidInfo(Entry entry) {
+    private static PlasmidInfo plasmidInfo(Account account, Entry entry) {
         PlasmidInfo info = new PlasmidInfo();
-        info = (PlasmidInfo) getCommon(info, entry);
+        info = (PlasmidInfo) getCommon(account, info, entry);
         Plasmid plasmid = (Plasmid) entry;
 
         // plasmid specific fields
@@ -250,52 +272,59 @@ public class ModelToInfoFactory {
         info.setOriginOfReplication(plasmid.getOriginOfReplication());
         info.setPromoters(plasmid.getPromoters());
 
-        /// get strains for plasmid
-        try {
-            Set<Strain> strains = UtilsDAO.getStrainsForPlasmid(plasmid);
-            if (strains != null) {
-                for (Strain strain : strains) {
-                    info.getStrains()
-                        .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
-                }
+        // get strains for plasmid
+        Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
+        if (strains != null) {
+            for (Strain strain : strains) {
+                info.getStrains()
+                    .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
             }
-        } catch (ManagerException e) {
-            Logger.error(e);
         }
 
         return info;
     }
 
-    private static EntryInfo getCommon(EntryInfo info, Entry entry) {
-
+    private static EntryInfo getCommon(Account account, EntryInfo info, Entry entry) {
         info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
+        info.setPartId(EntryUtil.getPartNumbersAsString(entry));
         info.setVersionId(entry.getVersionId());
         info.setName(entry.getNamesAsString());
-        info.setSelectionMarkers(entry.getSelectionMarkersAsString());
-
         info.setOwner(entry.getOwner());
         info.setOwnerEmail(entry.getOwnerEmail());
         info.setCreator(entry.getCreator());
         info.setCreatorEmail(entry.getCreatorEmail());
+
+        AccountController accountController = ControllerFactory.getAccountController();
+        try {
+            long ownerId = accountController.getAccountId(entry.getOwnerEmail());
+            info.setOwnerId(ownerId);
+            if (entry.getCreatorEmail() != null) {
+                long creatorId = accountController.getAccountId(entry.getCreatorEmail());
+                info.setCreatorId(creatorId);
+            }
+        } catch (ControllerException ce) {
+        }
+
         info.setAlias(entry.getAlias());
         info.setKeywords(entry.getKeywords());
         info.setStatus(entry.getStatus());
         info.setShortDescription(entry.getShortDescription());
-        info.setLongDescription(entry.getLongDescription());
-        info.setLongDescriptionType(entry.getLongDescriptionType());
-        info.setShortDescription(entry.getShortDescription());
-        info.setReferences(entry.getReferences());
         info.setCreationTime(entry.getCreationTime());
         info.setModificationTime(entry.getModificationTime());
         info.setBioSafetyLevel(entry.getBioSafetyLevel());
-        info.setPartId(EntryUtil.getPartNumbersAsString(entry));
+
+        info.setLongDescription(entry.getLongDescription());
+        info.setLongDescriptionType(entry.getLongDescriptionType());
         info.setIntellectualProperty(entry.getIntellectualProperty());
+        info.setSelectionMarkers(entry.getSelectionMarkersAsString());
+
         if (!entry.getEntryFundingSources().isEmpty()) {
             EntryFundingSource source = entry.getEntryFundingSources().iterator().next();
             info.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
             info.setFundingSource(source.getFundingSource().getFundingSource());
         }
+
         info.setLinks(entry.getLinksAsString());
         ArrayList<ParameterInfo> params = new ArrayList<ParameterInfo>();
 
@@ -304,7 +333,7 @@ public class ModelToInfoFactory {
                 ParameterInfo paramInfo = new ParameterInfo();
                 paramInfo.setName(parameter.getKey());
                 paramInfo.setValue(parameter.getValue());
-                paramInfo.setType(ParameterInfo.Type.valueOf(parameter.getParameterType().name()));
+                paramInfo.setType(ParameterType.valueOf(parameter.getParameterType().name()));
                 params.add(paramInfo);
             }
         }
@@ -313,11 +342,33 @@ public class ModelToInfoFactory {
         // get visibility
         info.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 
+        String parsed = EntryUtil.getParsedNotes(entry.getLongDescriptionType());
+        info.setLongDescription(entry.getLongDescription());
+        info.setParsedDescription(parsed);
+        if (account != null) {
+            String parsedShortDesc = EntryUtil.linkifyText(account, entry.getShortDescription());
+            info.setLinkifiedShortDescription(parsedShortDesc);
+
+            String linkStr = "";
+            if (entry.getLinks() != null) {
+                for (Link link : entry.getLinks()) {
+                    if (link.getLink() != null && !link.getLink().isEmpty())
+                        linkStr += (link.getLink() + ", ");
+                    else if (link.getUrl() != null && !link.getUrl().isEmpty())
+                        linkStr += (link.getUrl() + ", ");
+                }
+                if (!linkStr.isEmpty())
+                    linkStr = linkStr.substring(0, linkStr.length() - 1);
+            }
+            String parsedLinks = EntryUtil.linkifyText(account, linkStr);
+            info.setLinkifiedLinks(parsedLinks);
+            String parsedReferences = EntryUtil.linkifyText(account, entry.getReferences());
+            info.setReferences(parsedReferences);
+        }
         return info;
     }
 
     public static EntryInfo getSummaryInfo(Entry entry) {
-
         EntryInfo info = null;
         EntryType type = EntryType.nameToType(entry.getRecordType());
 
@@ -340,8 +391,175 @@ public class ModelToInfoFactory {
         }
 
         info.setId(entry.getId());
+        info.setRecordId(entry.getRecordId());
         info.setPartId(EntryUtil.getPartNumbersAsString(entry));
         info.setName(entry.getNamesAsString());
         return info;
+    }
+
+    private static void getTipViewCommon(EntryInfo view, Entry entry) {
+        view.setId(entry.getId());
+        view.setRecordId(entry.getRecordId());
+        view.setPartId(EntryUtil.getPartNumbersAsString(entry));
+        view.setName(entry.getNamesAsString());
+        view.setAlias(entry.getAlias());
+        view.setCreator(entry.getCreator());
+        view.setCreatorEmail(entry.getCreatorEmail());
+        view.setStatus(entry.getStatus());
+        view.setOwner(entry.getOwner());
+        view.setOwnerEmail(entry.getOwnerEmail());
+
+        AccountController accountController = ControllerFactory.getAccountController();
+        try {
+            Account account1;
+            if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
+                view.setOwnerId(account1.getId());
+
+            if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
+                view.setCreatorId(account1.getId());
+        } catch (ControllerException ce) {
+        }
+
+        view.setKeywords(entry.getKeywords());
+        view.setShortDescription(entry.getShortDescription());
+        view.setCreationTime(entry.getCreationTime());
+        view.setModificationTime(entry.getModificationTime());
+        view.setBioSafetyLevel(entry.getBioSafetyLevel());
+        if (!entry.getEntryFundingSources().isEmpty()) {
+            EntryFundingSource source = entry.getEntryFundingSources().iterator().next();
+            view.setFundingSource(source.getFundingSource().getFundingSource());
+            view.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
+        }
+    }
+
+    public static EntryInfo createTableViewData(Entry entry, boolean includeOwnerInfo) {
+        if (entry == null)
+            return null;
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        EntryInfo view = new EntryInfo();
+        view.setType(type);
+        view.setId(entry.getId());
+        view.setRecordId(entry.getRecordId());
+        view.setPartId(EntryUtil.getPartNumbersAsString(entry));
+        view.setName(entry.getNamesAsString());
+        view.setShortDescription(entry.getShortDescription());
+        view.setCreationTime(entry.getCreationTime());
+        view.setStatus(entry.getStatus());
+        if (includeOwnerInfo) {
+            view.setOwner(entry.getOwner());
+            view.setOwnerEmail(entry.getOwnerEmail());
+
+            AccountController accountController = ControllerFactory.getAccountController();
+            try {
+                Account account1;
+                if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
+                    view.setOwnerId(account1.getId());
+
+                if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
+                    view.setCreatorId(account1.getId());
+            } catch (ControllerException ce) {
+            }
+        }
+
+        // attachments
+        boolean hasAttachment = false;
+        try {
+            AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+            hasAttachment = attachmentController.hasAttachment(entry);
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+        view.setHasAttachment(hasAttachment);
+
+        // has sample
+        try {
+            SampleController sampleController = ControllerFactory.getSampleController();
+            view.setHasSample(sampleController.hasSample(entry));
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+
+        // has sequence
+        try {
+            SequenceController sequenceController = ControllerFactory.getSequenceController();
+            view.setHasSequence(sequenceController.hasSequence(entry));
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+
+        return view;
+    }
+
+    public static EntryInfo createTipView(Entry entry) {
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        switch (type) {
+
+            case STRAIN: {
+                StrainInfo view = new StrainInfo();
+
+                // common
+                getTipViewCommon(view, entry);
+
+                // strain specific
+                Strain strain = (Strain) entry;
+                view.setHost(strain.getHost());
+                view.setGenotypePhenotype(strain.getGenotypePhenotype());
+                view.setPlasmids(strain.getPlasmids());
+                view.setSelectionMarkers(strain.getSelectionMarkersAsString());
+
+                return view;
+            }
+
+            case ARABIDOPSIS: {
+                ArabidopsisSeedInfo view = new ArabidopsisSeedInfo();
+                getTipViewCommon(view, entry);
+
+                ArabidopsisSeed seed = (ArabidopsisSeed) entry;
+                PlantType plantType = PlantType.valueOf(seed.getPlantType().toString());
+                view.setPlantType(plantType);
+
+                Generation generation = Generation.valueOf(seed.getGeneration().toString());
+                view.setGeneration(generation);
+                view.setHomozygosity(seed.getHomozygosity());
+                view.setEcotype(seed.getEcotype());
+                view.setParents(seed.getParents());
+                view.setHarvestDate(seed.getHarvestDate());
+
+                return view;
+            }
+
+            case PART: {
+                PartInfo view = new PartInfo();
+
+                getTipViewCommon(view, entry);
+
+                Part part = (Part) entry;
+                view.setPackageFormat(part.getPackageFormat().toString());
+                return view;
+            }
+
+            case PLASMID: {
+                PlasmidInfo view = new PlasmidInfo();
+                getTipViewCommon(view, entry);
+
+                Plasmid plasmid = (Plasmid) entry;
+                view.setBackbone(plasmid.getBackbone());
+                view.setOriginOfReplication(plasmid.getOriginOfReplication());
+                view.setPromoters(plasmid.getPromoters());
+
+                // get strains for plasmid
+                Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
+                if (strains != null) {
+                    for (Strain strain : strains) {
+                        view.getStrains().put(strain.getId(), strain.getOnePartNumber().getPartNumber());
+                    }
+                }
+
+                return view;
+            }
+
+            default:
+                return null;
+        }
     }
 }

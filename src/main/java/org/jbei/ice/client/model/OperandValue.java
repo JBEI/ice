@@ -2,7 +2,7 @@ package org.jbei.ice.client.model;
 
 /**
  * Wrapper around enum options for insertion into a listbox
- * 
+ *
  * @author Hector Plahar
  */
 

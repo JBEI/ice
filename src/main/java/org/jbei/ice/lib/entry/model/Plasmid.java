@@ -5,7 +5,10 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.entry.EntryType;
+
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 
 /**
  * Store Plasmid specific fields.
@@ -17,9 +20,10 @@ import org.jbei.ice.shared.dto.EntryType;
  * <li><b>circular: </b>True if plasmid is circular.</li>
  * </ul>
  *
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
+@Indexed
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "plasmids")
 public class Plasmid extends Entry {
@@ -27,19 +31,24 @@ public class Plasmid extends Entry {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "backbone", length = 127)
+    @Field
     private String backbone;
 
     @Column(name = "origin_of_replication", length = 127)
+    @Field
     private String originOfReplication;
 
     @Column(name = "promoters", length = 512)
+    @Field
     private String promoters;
 
     @Column(name = "circular")
     private Boolean circular;
 
     public Plasmid() {
+        super();
         setRecordType(EntryType.PLASMID.getName());
+        setCircular(Boolean.TRUE);
     }
 
     public String getBackbone() {

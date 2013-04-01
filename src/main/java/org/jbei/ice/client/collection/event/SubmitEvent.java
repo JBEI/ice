@@ -11,7 +11,7 @@ public class SubmitEvent extends GwtEvent<SubmitHandler> {
 
     /**
      * Handler hook.
-     * 
+     *
      * @return the handler hook
      */
     public static Type<SubmitHandler> getType() {
