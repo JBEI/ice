@@ -11,7 +11,8 @@ A. The site settings are now stored in the database. When upgrading from 3.1, th
    all the settings to make sure they are set correctly.
 
 Q. How do I change the authentication mechanism?
-A. Coming soon...spring.
+A. In org.jbei.ice.lib.account.AccountController.java:335, change to the Authentication instance you wish to use and
+   rebuild. For LDAP authentication, place the ldap-config.properties file in src/main/java
 
 Q. Can I upgrade from previous versions?
 A. Upgrade from v3.1 is supported. Contact me if you wish to upgrade from older versions.
