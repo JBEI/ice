@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -55,7 +55,7 @@ public class EntryUtil {
     private static String makeEntryLink(Account account, IceLink iceLink) throws ControllerException {
         String result;
 
-        EntryController entryController = ApplicationController.getEntryController();
+        EntryController entryController = ControllerFactory.getEntryController();
 
         long id = 0;
         Entry entry;
@@ -216,7 +216,7 @@ public class EntryUtil {
         String newText;
 
         try {
-            EntryController entryController = ApplicationController.getEntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
 
             Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLink + ":.*?\\]\\]");
@@ -382,14 +382,14 @@ public class EntryUtil {
      */
     public static LinkedHashSet<Strain> getStrainsForPlasmid(Plasmid plasmid) {
         LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
-        EntryController entryController = ApplicationController.getEntryController();
+        EntryController entryController = ControllerFactory.getEntryController();
         String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
 
         Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLink + ":.*?\\]\\]");
         Pattern partNumberPattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\]\\]");
         Pattern descriptivePattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\|(.*)\\]\\]");
 
-        AccountController accountController = ApplicationController.getAccountController();
+        AccountController accountController = ControllerFactory.getAccountController();
         HashSet<Long> strainIds;
 
         Account account;

@@ -183,6 +183,18 @@ public class GroupAddMembersWidget extends Composite {
         return selectedGroupMembersWidget.getMemberList();
     }
 
+    public void setSelectedMembers(ArrayList<AccountInfo> members) {
+        for (AccountInfo member : members) {
+            AccountInfo info = available.get(member.getId());
+            selectedGroupMembersWidget.addMember(member);
+            if (info != null) {
+                int index = listList.indexOf(info);
+                listList.remove(info);
+                listBox.removeItem(index);
+            }
+        }
+    }
+
     private void setClickHandler() {
         icon.addClickHandler(new ClickHandler() {
             @Override

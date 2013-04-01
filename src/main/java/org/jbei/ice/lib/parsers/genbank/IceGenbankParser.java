@@ -1,9 +1,7 @@
-package org.jbei.ice.lib.parsers;
+package org.jbei.ice.lib.parsers.genbank;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,6 +14,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jbei.ice.lib.parsers.AbstractParser;
+import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
@@ -24,6 +24,8 @@ import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * Genbank parser and generator.
@@ -81,7 +83,7 @@ public class IceGenbankParser extends AbstractParser {
     private static final Pattern startOnlyPattern = Pattern.compile("\\d+");
 
     private Boolean hasErrors = false;
-    private List<String> errors = new ArrayList<String>();
+    private List<String> errors = new ArrayList<>();
 
     @Override
     public String getName() {
@@ -97,36 +99,16 @@ public class IceGenbankParser extends AbstractParser {
         return errors;
     }
 
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
-    }
-
     @Override
     public IDNASequence parse(byte[] bytes) throws InvalidFormatParserException {
         return parse(new String(bytes));
     }
 
     @Override
-    public IDNASequence parse(File file) throws FileNotFoundException, IOException,
-            InvalidFormatParserException {
-        if (file.canRead()) {
-            BufferedReader br = null;
-
-            br = new BufferedReader(new FileReader(file));
-
-            StringBuilder sb = new StringBuilder();
-            while (br.ready()) {
-                sb.append((char) br.read());
-            }
-            br.close();
-
-            IceGenbankParser iceGenbankParser = new IceGenbankParser();
-
-            return iceGenbankParser.parse(sb.toString());
-
-        } else {
-            return null;
-        }
+    public IDNASequence parse(File file) throws IOException, InvalidFormatParserException {
+        String s = IOUtils.toString(new FileInputStream(file));
+        IceGenbankParser iceGenbankParser = new IceGenbankParser();
+        return iceGenbankParser.parse(s);
     }
 
     // TODO parse source feature tag with xdb_ref
@@ -150,9 +132,7 @@ public class IceGenbankParser extends AbstractParser {
                     sequence.setFeatures(((FeaturesTag) tag).getFeatures());
                 }
             }
-        } catch (NullPointerException e) {
-            recordParsingError(textSequence, e);
-        } catch (StringIndexOutOfBoundsException e) {
+        } catch (NullPointerException | StringIndexOutOfBoundsException e) {
             recordParsingError(textSequence, e);
         }
         return sequence;
@@ -160,10 +140,6 @@ public class IceGenbankParser extends AbstractParser {
 
     /**
      * If there is a parsing error of interest, write the file to disk, and send an email to admin.
-     *
-     * @param fileText
-     * @param e
-     * @throws UtilityException
      */
     private void recordParsingError(String fileText, Exception e)
             throws InvalidFormatParserException {
@@ -177,11 +153,11 @@ public class IceGenbankParser extends AbstractParser {
 
     private ArrayList<Tag> splitTags(String block, String[] acceptedTags, String[] ignoredTags)
             throws InvalidFormatParserException {
-        ArrayList<Tag> result = new ArrayList<Tag>();
+        ArrayList<Tag> result = new ArrayList<>();
 
         StringBuilder rawBlock = new StringBuilder();
         String[] lines = block.split("\n");
-        String[] lineChunks = null;
+        String[] lineChunks;
         Tag currentTag = null;
 
         // see if first two lines contain the "LOCUS" keyword. If not, don't even bother
@@ -209,7 +185,7 @@ public class IceGenbankParser extends AbstractParser {
                     rawBlock = new StringBuilder();
                     rawBlock.append(line);
                     rawBlock.append("\n");
-                    currentTag = new Tag();
+                    currentTag = new Tag(Tag.Type.REGULAR);
                     currentTag.setKey(putativeTag);
 
                 } else {
@@ -225,21 +201,32 @@ public class IceGenbankParser extends AbstractParser {
     }
 
     private ArrayList<Tag> parseTags(ArrayList<Tag> tags) throws InvalidFormatParserException {
-
         for (int i = 0; i < tags.size(); i++) {
             Tag tag = tags.get(i);
-            if (ORIGIN_TAG.equals(tag.getKey())) {
-                tags.set(i, parseOriginTag(tag));
-            } else if (FEATURES_TAG.equals(tag.getKey())) {
-                tags.set(i, parseFeaturesTag(tag));
-            } else if (REFERENCE_TAG.equals(tag.getKey())) {
-                tags.set(i, parseReferenceTag(tag));
-            } else if (LOCUS_TAG.equals(tag.getKey())) {
-                tags.set(i, parseLocusTag(tag));
-            } else if (SOURCE_TAG.equals(tag.getKey())) {
+            switch (tag.getKey()) {
+                default:
+                    parseNormalTag(tag);
+                    break;
 
-            } else {
-                parseNormalTag(tag);
+                case ORIGIN_TAG:
+                    tags.set(i, parseOriginTag(tag));
+                    break;
+
+                case FEATURES_TAG:
+                    tags.set(i, parseFeaturesTag(tag));
+                    break;
+
+                case REFERENCE_TAG:
+                    tags.set(i, parseReferenceTag(tag));
+                    break;
+
+                case LOCUS_TAG:
+                    tags.set(i, parseLocusTag(tag));
+                    break;
+
+                case SOURCE_TAG:
+                    // ??
+                    break;
             }
         }
         return tags;
@@ -284,7 +271,6 @@ public class IceGenbankParser extends AbstractParser {
                 chunks[0] = "";
             }
             sequence.append(Utils.join("", Arrays.asList(chunks)).toLowerCase());
-
         }
 
         result.setKey(tag.getKey());
@@ -299,8 +285,7 @@ public class IceGenbankParser extends AbstractParser {
         result.setKey(tag.getKey());
         result.setRawBody(tag.getRawBody());
 
-        int apparentFeatureKeyColumn = 0;
-
+        int apparentFeatureKeyColumn;
         String[] lines = tag.getRawBody().split("\n");
         String[] chunks;
 
@@ -399,7 +384,7 @@ public class IceGenbankParser extends AbstractParser {
                     continue;
                 }
 
-                LinkedList<DNAFeatureLocation> dnaFeatureLocations = new LinkedList<DNAFeatureLocation>();
+                LinkedList<DNAFeatureLocation> dnaFeatureLocations = new LinkedList<>();
                 for (GenbankLocation genbankLocation : genbankLocations) {
                     DNAFeatureLocation dnaFeatureLocation = new DNAFeatureLocation(
                             genbankLocation.getGenbankStart(), genbankLocation.getEnd());
@@ -462,57 +447,6 @@ public class IceGenbankParser extends AbstractParser {
         return result;
     }
 
-    /**
-     * Represent a contiguous Genbank location, including a single base pair.
-     *
-     * @author Timothy Ham
-     */
-    public class GenbankLocation {
-        private int genbankStart = -1;
-        private int end = -1;
-        private boolean inbetween = false;
-        private boolean singleResidue = false;
-
-        public GenbankLocation(int genbankStart, int end) {
-            super();
-            setGenbankStart(genbankStart);
-            setEnd(end);
-        }
-
-        public int getGenbankStart() {
-            return genbankStart;
-        }
-
-        public void setGenbankStart(int genbankStart) {
-            this.genbankStart = genbankStart;
-        }
-
-        public int getEnd() {
-            return end;
-        }
-
-        public void setEnd(int end) {
-            this.end = end;
-        }
-
-        public void setInbetween(boolean inbetween) {
-            this.inbetween = inbetween;
-        }
-
-        public boolean isInbetween() {
-            return inbetween;
-        }
-
-        public void setSingleResidue(boolean singleResidue) {
-            this.singleResidue = singleResidue;
-        }
-
-        public boolean isSingleResidue() {
-            return singleResidue;
-        }
-
-    }
-
     private DNAFeature parseQualifiers(String block, DNAFeature dnaFeature) {
         /* 
          * Qualifiers are interesting beasts. The values can be quoted 
@@ -537,18 +471,16 @@ public class IceGenbankParser extends AbstractParser {
 
         DNAFeatureNote dnaFeatureNote = null;
         String[] lines = block.split("\n");
-        String line = null;
+        String line;
         String[] chunk;
         StringBuilder qualifierItem = new StringBuilder();
-        String qualifierValue = null;
-
         int apparentQualifierColumn = lines[0].indexOf("/");
 
         for (String line2 : lines) {
             line = line2;
 
             if ('/' == line.charAt(apparentQualifierColumn)) { // new tag starts
-                if (dnaFeatureNote != null) { // deleteExpiredSessions previous note
+                if (dnaFeatureNote != null && qualifierItem.length() < 4096) { // deleteExpiredSessions previous note
                     addQualifierItemToDnaFeatureNote(dnaFeatureNote, qualifierItem);
                     notes.add(dnaFeatureNote);
                 }
@@ -564,6 +496,8 @@ public class IceGenbankParser extends AbstractParser {
                     continue;
                 } else {
                     String putativeName = chunk[0].trim().substring(1);
+                    if (putativeName.startsWith("SBOL"))
+                        continue;
                     dnaFeatureNote.setName(putativeName);
                     chunk[0] = "";
                     qualifierItem.append(Utils.join(" ", Arrays.asList(chunk)).trim());
@@ -575,7 +509,7 @@ public class IceGenbankParser extends AbstractParser {
             }
         }
 
-        if (dnaFeatureNote != null) { // deleteExpiredSessions last one
+        if (dnaFeatureNote != null && qualifierItem.length() < 4096) { // deleteExpiredSessions last one
             addQualifierItemToDnaFeatureNote(dnaFeatureNote, qualifierItem);
             notes.add(dnaFeatureNote);
         }
@@ -662,7 +596,6 @@ public class IceGenbankParser extends AbstractParser {
 
     // TODO 
     private ReferenceTag parseReferenceTag(Tag tag) throws InvalidFormatParserException {
-
         String lines[] = tag.getRawBody().split("\n");
         String putativeValue = lines[0].split(" +")[1];
         tag.setValue(putativeValue);
@@ -677,8 +610,7 @@ public class IceGenbankParser extends AbstractParser {
         String locusLine = tag.getRawBody();
         String[] locusChunks = locusLine.split(" +");
 
-        if (Arrays.asList(locusChunks).contains("circular")
-                || Arrays.asList(locusChunks).contains("CIRCULAR")) {
+        if (Arrays.asList(locusChunks).contains("circular") || Arrays.asList(locusChunks).contains("CIRCULAR")) {
             result.setCircular(true);
         } else {
             result.setCircular(false);
@@ -701,174 +633,4 @@ public class IceGenbankParser extends AbstractParser {
 
         return result;
     }
-
-    public static void main(String[] args) throws IOException {
-        /*
-        File file = new File(
-                "src/main/java/org/jbei/ice/lib/parsers/examples/AcrR_geneart_badlocus_badsequence.gb");
-        //         "src/main/java/org/jbei/ice/lib/parsers/examples/pcI-LasI_ape_no_locusname.ape");
-        //        "src/main/java/org/jbei/ice/lib/parsers/examples/pUC19.gb");
-
-        if (file.canRead()) {
-            BufferedReader br = null;
-            try {
-
-                br = new BufferedReader(new FileReader(file));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            StringBuilder sb = new StringBuilder();
-            while (br.ready()) {
-                sb.append((char) br.read());
-            }
-
-            IceGenbankParser igp = new IceGenbankParser();
-            try {
-                igp.parse(sb.toString());
-            } catch (InvalidFormatParserException e) {
-                e.printStackTrace();
-            }
-            
-        }
-         */
-    }
-
-    private class Tag {
-        private String key;
-        private String rawBody;
-        private String value;
-
-        public String getKey() {
-            return key;
-        }
-
-        public void setKey(String key) {
-            this.key = key;
-        }
-
-        public String getRawBody() {
-            return rawBody;
-        }
-
-        public void setRawBody(String rawBody) {
-            this.rawBody = rawBody;
-        }
-
-        @SuppressWarnings("unused")
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-    }
-
-    private class OriginTag extends Tag {
-        private String sequence;
-
-        public String getSequence() {
-            return sequence;
-        }
-
-        public void setSequence(String sequence) {
-            this.sequence = sequence;
-        }
-    }
-
-    private class ReferenceTag extends Tag {
-        private ArrayList<Tag> references = new ArrayList<Tag>();
-
-        @SuppressWarnings("unused")
-        public void setReferences(ArrayList<Tag> references) {
-            this.references = references;
-        }
-
-        @SuppressWarnings("unused")
-        public ArrayList<Tag> getReferences() {
-            return references;
-        }
-
-    }
-
-    private class FeaturesTag extends Tag {
-        private List<DNAFeature> features = new ArrayList<DNAFeature>();
-
-        @SuppressWarnings("unused")
-        public void setFeatures(List<DNAFeature> features) {
-            this.features = features;
-        }
-
-        public List<DNAFeature> getFeatures() {
-            return features;
-        }
-
-    }
-
-    private class LocusTag extends Tag {
-        private String locusName = "";
-        private boolean isCircular = true;
-        private String naType = "DNA";
-        private String strandType = "ds";
-        private String divisionCode = "";
-        private Date date;
-
-        public String getLocusName() {
-            return locusName;
-        }
-
-        public void setLocusName(String locusName) {
-            this.locusName = locusName;
-        }
-
-        public boolean isCircular() {
-            return isCircular;
-        }
-
-        public void setCircular(boolean isCircular) {
-            this.isCircular = isCircular;
-        }
-
-        @SuppressWarnings("unused")
-        public String getNaType() {
-            return naType;
-        }
-
-        @SuppressWarnings("unused")
-        public void setNaType(String naType) {
-            this.naType = naType;
-        }
-
-        @SuppressWarnings("unused")
-        public String getStrandType() {
-            return strandType;
-        }
-
-        @SuppressWarnings("unused")
-        public void setStrandType(String strandType) {
-            this.strandType = strandType;
-        }
-
-        @SuppressWarnings("unused")
-        public String getDivisionCode() {
-            return divisionCode;
-        }
-
-        @SuppressWarnings("unused")
-        public void setDivisionCode(String divisionCode) {
-            this.divisionCode = divisionCode;
-        }
-
-        @SuppressWarnings("unused")
-        public Date getDate() {
-            return date;
-        }
-
-        public void setDate(Date date) {
-            this.date = date;
-        }
-
-    }
-
 }

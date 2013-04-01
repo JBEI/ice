@@ -89,7 +89,7 @@ public class LblLdapAuthenticationWrapper {
             authContext = getAuthenticatedContext(employeeNumber, passWord);
             return true;
         } catch (NamingException e) {
-            Logger.error(e);
+            Logger.warn(e.getMessage());
             throw new LblLdapAuthenticationWrapperException("Got LDAP NamingException", e);
         } finally {
             if (authContext != null) {

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
@@ -70,13 +70,13 @@ public class BulkUploadController {
      */
     public BulkUploadController() {
         dao = new BulkUploadDAO();
-        accountController = ApplicationController.getAccountController();
-        entryController = ApplicationController.getEntryController();
-        attachmentController = ApplicationController.getAttachmentController();
-        sequenceController = ApplicationController.getSequenceController();
-        sampleController = ApplicationController.getSampleController();
-        storageController = ApplicationController.getStorageController();
-        preferencesController = ApplicationController.getPreferencesController();
+        accountController = ControllerFactory.getAccountController();
+        entryController = ControllerFactory.getEntryController();
+        attachmentController = ControllerFactory.getAttachmentController();
+        sequenceController = ControllerFactory.getSequenceController();
+        sampleController = ControllerFactory.getSampleController();
+        storageController = ControllerFactory.getStorageController();
+        preferencesController = ControllerFactory.getPreferencesController();
     }
 
     /**

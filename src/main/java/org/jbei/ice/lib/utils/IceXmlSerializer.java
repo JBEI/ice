@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -24,6 +25,7 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed.Generation;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.Part;
@@ -128,14 +130,10 @@ public class IceXmlSerializer {
     private static final String SEQ = "seq";
 
     public static Namespace iceNamespace = new Namespace("ice", "http://jbei.org/ice");
-    public static Namespace xsiNamespace = new Namespace("xsi",
-                                                         "http://www.w3.org/2001/XMLSchema-instance");
+    public static Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
     public static Namespace expNamespace = new Namespace(EXP, "http://jbei.org/exp");
-
-    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-    private final ArrayList<CompleteEntry> completeEntries = new ArrayList<CompleteEntry>();
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private final ArrayList<CompleteEntry> completeEntries = new ArrayList<>();
 
     /**
      * Generate ice-xml from given List of {@link Entry}s.
@@ -145,8 +143,8 @@ public class IceXmlSerializer {
      * @throws UtilityException
      */
     public static String serializeToJbeiXml(Account account, List<Entry> entries) throws UtilityException {
-        ArrayList<Sequence> sequences = new ArrayList<Sequence>();
-        SequenceController sequenceController = new SequenceController();
+        ArrayList<Sequence> sequences = new ArrayList<>();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         for (Entry entry : entries) {
             try {
                 sequences.add(sequenceController.getByEntry(entry));
@@ -160,7 +158,6 @@ public class IceXmlSerializer {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         try {
-
             writer = new XMLWriter(byteArrayOutputStream, format);
             writer.write(serializeToJbeiXml(account, entries, sequences));
             String temp = byteArrayOutputStream.toString("utf8");
@@ -257,9 +254,9 @@ public class IceXmlSerializer {
         if (entry.getLinks().size() > 0) {
             DefaultElement links = new DefaultElement(LINKS, iceNamespace);
             for (Link link : entry.getLinks()) {
-                links.add(new DefaultElement(LINK, iceNamespace).addAttribute(URL,
-                                                                              emptyStringify(link.getUrl())).addText(
-                        emptyStringify(link.getLink())));
+                links.add(new DefaultElement(LINK, iceNamespace)
+                                  .addAttribute(URL, emptyStringify(link.getUrl()))
+                                  .addText(emptyStringify(link.getLink())));
             }
             entryRoot.add(links);
         }
@@ -278,23 +275,18 @@ public class IceXmlSerializer {
         entryRoot.add(new DefaultElement(INTELLECTUAL_PROPERTY, iceNamespace)
                               .addText(emptyStringify(entry.getIntellectualProperty())));
 
-//        if (entry.getFundingSources().size() > 0) {
-//            DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
-//            for (Funding funding : entry.getFundingSources()) {
-//                fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace)
-//                                .addText(emptyStringify(funding.getFundingSource())));
-//            }
-//            entryRoot.add(fundingSources);
-//        }
-//
-//        if (entry.getPrincipalInvestigators().size() > 0) {
-//            DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
-//            for (Funding funding : entry.getFundingSources()) {
-//                fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace)
-//                                           .addText(emptyStringify(funding.getFundingSource())));
-//            }
-//            entryRoot.add(fundingSources);
-//        }                     todo
+        if (entry.getFundingSources().size() > 0) {
+            DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
+            for (EntryFundingSource fundingSource : entry.getFundingSources()) {
+                fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace)
+                                           .addText(emptyStringify(fundingSource.getFundingSource().getFundingSource()))
+                                           .addAttribute(
+                                                   PRINCIPAL_INVESTIGATOR,
+                                                   emptyStringify(fundingSource.getFundingSource()
+                                                                               .getPrincipalInvestigator())));
+            }
+            entryRoot.add(fundingSources);
+        }
 
         if (sequence != null) {
             entryRoot.add(SeqXmlSerializer.serializeToSeqXmlAsElement(sequence));

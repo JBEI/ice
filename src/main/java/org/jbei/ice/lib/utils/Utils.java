@@ -15,6 +15,8 @@ import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 
+import org.apache.commons.lang.RandomStringUtils;
+
 /**
  * General utility methods.
  *
@@ -141,6 +143,10 @@ public class Utils {
      */
     public static String generateUUID() {
         return UUID.randomUUID().toString();
+    }
+
+    public static String generateSaltForUserAccount() {
+        return RandomStringUtils.randomAscii(30);
     }
 
     public static String getConfigValue(ConfigurationKey key) {

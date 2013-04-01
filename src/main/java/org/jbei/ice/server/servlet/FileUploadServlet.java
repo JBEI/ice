@@ -14,7 +14,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -66,7 +66,7 @@ public class FileUploadServlet extends UploadAction {
 
                 if (!AccountController.isAuthenticated(sid))
                     return null;
-                AccountController controller = ApplicationController.getAccountController();
+                AccountController controller = ControllerFactory.getAccountController();
                 return controller.getAccountBySessionKey(sid);
             }
         }
@@ -91,7 +91,7 @@ public class FileUploadServlet extends UploadAction {
             if (account == null) {
                 if (!AccountController.isAuthenticated(sid))
                     return "";
-                AccountController controller = ApplicationController.getAccountController();
+                AccountController controller = ControllerFactory.getAccountController();
                 account = controller.getAccountBySessionKey(sid);
                 if (account == null)
                     return "";
@@ -158,8 +158,8 @@ public class FileUploadServlet extends UploadAction {
                 return uploadFileToTemp(file, saveName, isSequence);
 
             // associate with entry
-            EntryController entryController = ApplicationController.getEntryController();
-            AttachmentController attachmentController = ApplicationController.getAttachmentController();
+            EntryController entryController = ControllerFactory.getEntryController();
+            AttachmentController attachmentController = ControllerFactory.getAttachmentController();
 
             Entry entry = null;
             try {
@@ -172,7 +172,7 @@ public class FileUploadServlet extends UploadAction {
 
             if (isSequence) {
                 String sequenceString = FileUtils.readFileToString(file);
-                ApplicationController.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
+                ControllerFactory.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
                 return saveName;
             } else {
                 FileInputStream inputStream = new FileInputStream(file);
@@ -230,7 +230,7 @@ public class FileUploadServlet extends UploadAction {
     // TODO : this needs to go to manager/controller
     private String uploadSequenceTraceFile(File file, String entryId, Account account, String uploadFileName)
             throws IOException {
-        EntryController controller = ApplicationController.getEntryController();
+        EntryController controller = ControllerFactory.getEntryController();
         Entry entry = null;
         try {
             entry = controller.get(account, Long.decode(entryId));
@@ -241,7 +241,7 @@ public class FileUploadServlet extends UploadAction {
         if (entry == null)
             return "Unknown entry (" + entryId + "). Upload aborted";
 
-        SequenceAnalysisController sequenceAnalysisController = ApplicationController.getSequenceAnalysisController();
+        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
         IDNASequence dnaSequence;
 
         ArrayList<ByteHolder> byteHolders = new ArrayList<>();
@@ -311,7 +311,7 @@ public class FileUploadServlet extends UploadAction {
 
     // TODO : check for path information in filename. safari includes it
     private String uploadAttachment(Account account, File file, String entryId, String desc, String filename) {
-        EntryController controller = ApplicationController.getEntryController();
+        EntryController controller = ControllerFactory.getEntryController();
         Entry entry = null;
         try {
             entry = controller.get(account, Long.decode(entryId));
@@ -327,7 +327,7 @@ public class FileUploadServlet extends UploadAction {
                     attachment.setEntry(entry);
                     attachment.setDescription(desc);
                     attachment.setFileName(filename);
-                    AttachmentController attachmentController = ApplicationController.getAttachmentController();
+                    AttachmentController attachmentController = ControllerFactory.getAttachmentController();
                     Attachment saved = attachmentController.save(account, attachment, inputStream);
                     if (saved != null)
                         return saved.getFileId();

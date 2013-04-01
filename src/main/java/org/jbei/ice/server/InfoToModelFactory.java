@@ -505,11 +505,6 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    public static boolean isSharedField(String field) {
-        return ("Principal Investigator".equals(field) || "Funding Source".equals(field) ||
-                "Intellectual Property".equals(field) || "BioSafety Level".equals(field) || "Status".equals(field));
-    }
-
     private static Entry infoToStrainForField(Entry entry, String value, String field) {
         if (!entry.getRecordType().equals(EntryType.STRAIN.toString()))
             return entry;

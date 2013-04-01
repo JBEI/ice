@@ -5,7 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -36,7 +36,7 @@ public class LblLdapAuthentication implements IAuthentication, Serializable {
         }
 
         Account account;
-        AccountController accountController = ApplicationController.getAccountController();
+        AccountController accountController = ControllerFactory.getAccountController();
 
         try {
             loginId = loginId.toLowerCase();
@@ -50,7 +50,7 @@ public class LblLdapAuthentication implements IAuthentication, Serializable {
                 if (account == null) {
                     account = new Account();
                     account.setCreationTime(currentTime);
-                    account.setSalt(Utils.generateUUID());
+                    account.setSalt(Utils.generateSaltForUserAccount());
                 }
 
                 account.setEmail(lblLdapAuthenticationWrapper.geteMail());
@@ -71,7 +71,7 @@ public class LblLdapAuthentication implements IAuthentication, Serializable {
                 account = localBackend.authenticate(loginId, password);
             }
         } catch (LblLdapAuthenticationWrapperException e) {
-            Logger.error(e.getMessage());
+            Logger.warn(e.getMessage());
             throw new InvalidCredentialsException("Invalid credentials!");
         } catch (ControllerException e) {
             throw new AuthenticationException("LDAP authentication failed for " + loginId, e);

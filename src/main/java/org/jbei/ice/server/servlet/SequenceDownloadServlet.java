@@ -7,11 +7,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.composers.formatters.SbolFormatter;
@@ -40,7 +39,7 @@ public class SequenceDownloadServlet extends HttpServlet {
         String entryId = request.getParameter("entry");
         String type = request.getParameter(TYPE);
         String sid = request.getParameter("sid");
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
 
         try {
             account = isLoggedIn(request.getCookies());
@@ -61,7 +60,7 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        EntryController entryController = ApplicationController.getEntryController();
+        EntryController entryController = ControllerFactory.getEntryController();
         Entry entry;
         try {
             entry = entryController.get(account, Long.parseLong(entryId));
@@ -84,17 +83,17 @@ public class SequenceDownloadServlet extends HttpServlet {
         if ("original".equals(type))
             getOriginal(response, entry, account);
         else if ("genbank".equals(type))
-            getGenbank(response, entry, account);
+            getGenbank(response, entry);
         else if ("fasta".equals(type))
-            getFasta(response, entry, account);
+            getFasta(response, entry);
         else if ("sbol".equals(type))
-            getSBOL(response, entry, account);
+            getSBOL(response, entry);
         else
             Logger.error("Unrecognized sequence download type " + type);
     }
 
     private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
 
         for (Cookie cookie : cookies) {
             if ("gd-ice".equals(cookie.getName())) {
@@ -111,7 +110,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getOriginal(HttpServletResponse response, Entry entry, Account account) {
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         Sequence sequence;
 
         try {
@@ -144,11 +143,10 @@ public class SequenceDownloadServlet extends HttpServlet {
         }
     }
 
-    private void getGenbank(HttpServletResponse response, Entry entry, Account account) {
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+    private void getGenbank(HttpServletResponse response, Entry entry) {
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getNamesAsString());
-        genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular()
-                                             : false); // TODO
+        genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false); // TODO
 
         Sequence sequence;
         try {
@@ -164,8 +162,8 @@ public class SequenceDownloadServlet extends HttpServlet {
 
         String sequenceString;
         try {
-            sequenceString = SequenceController.compose(sequence, genbankFormatter);
-        } catch (SequenceComposerException e) {
+            sequenceString = sequenceController.compose(sequence, genbankFormatter);
+        } catch (ControllerException e) {
             Logger.error("Failed to generate genbank file for download!", e);
             return;
         }
@@ -186,12 +184,11 @@ public class SequenceDownloadServlet extends HttpServlet {
         } catch (IOException e) {
             Logger.error(e);
         }
-
     }
 
-    private void getFasta(HttpServletResponse response, Entry entry, Account account) {
-        SequenceController sequenceController = new SequenceController();
-        Sequence sequence = null;
+    private void getFasta(HttpServletResponse response, Entry entry) {
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
+        Sequence sequence;
 
         try {
             sequence = sequenceController.getByEntry(entry);
@@ -207,8 +204,8 @@ public class SequenceDownloadServlet extends HttpServlet {
         String sequenceString;
         try {
             FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getNamesAsString());
-            sequenceString = SequenceController.compose(sequence, formatter);
-        } catch (SequenceComposerException e) {
+            sequenceString = sequenceController.compose(sequence, formatter);
+        } catch (ControllerException e) {
             Logger.error("Failed to generate fasta file for download!", e);
             return;
         }
@@ -226,8 +223,8 @@ public class SequenceDownloadServlet extends HttpServlet {
         }
     }
 
-    private void getSBOL(HttpServletResponse response, Entry entry, Account account) {
-        SequenceController sequenceController = new SequenceController();
+    private void getSBOL(HttpServletResponse response, Entry entry) {
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         Sequence sequence;
 
         try {
@@ -243,8 +240,8 @@ public class SequenceDownloadServlet extends HttpServlet {
 
         String sequenceString;
         try {
-            sequenceString = SequenceController.compose(sequence, new SbolFormatter());
-        } catch (SequenceComposerException e) {
+            sequenceString = sequenceController.compose(sequence, new SbolFormatter());
+        } catch (ControllerException e) {
             Logger.error("Failed to generate sbol file for download!", e);
             return;
         }

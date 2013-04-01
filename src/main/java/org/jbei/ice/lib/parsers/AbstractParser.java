@@ -2,10 +2,11 @@ package org.jbei.ice.lib.parsers;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.jbei.ice.lib.vo.IDNASequence;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * This class provides skeletal implementation of {@link IDNAParser} interface.
@@ -13,6 +14,7 @@ import org.jbei.ice.lib.vo.IDNASequence;
  * @author Zinovii Dmytriv, Timothy Ham
  */
 public abstract class AbstractParser implements IDNAParser {
+
     @Override
     public abstract IDNASequence parse(String textSequence) throws InvalidFormatParserException;
 
@@ -20,14 +22,8 @@ public abstract class AbstractParser implements IDNAParser {
     public abstract IDNASequence parse(byte[] bytes) throws InvalidFormatParserException;
 
     @Override
-    public IDNASequence parse(File file) throws FileNotFoundException, IOException,
-            InvalidFormatParserException {
-        FileInputStream fileInputStream = new FileInputStream(file);
-
-        int availableBytes = fileInputStream.available();
-        byte[] bytes = new byte[availableBytes];
-        fileInputStream.read(bytes);
-        fileInputStream.close();
+    public IDNASequence parse(File file) throws IOException, InvalidFormatParserException {
+        byte[] bytes = IOUtils.toByteArray(new FileInputStream(file));
         return parse(bytes);
     }
 

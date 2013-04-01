@@ -67,6 +67,7 @@ public class EntryTablePager extends AbstractPager {
     private final NavLink next;
     private final NavLink prev;
 
+
     private FlexTable nav; // left
     private FlexTable jump; // right
     private final Label label; // center
@@ -97,6 +98,7 @@ public class EntryTablePager extends AbstractPager {
                                    EntryTablePager.super.lastPage();
                                }
                            });
+        last.setVisible(false);
 
         next = new NavLink("<i class=\"" + FAIconType.STEP_FORWARD.getStyleName() + "\"></i>",
                            new ClickHandler() {

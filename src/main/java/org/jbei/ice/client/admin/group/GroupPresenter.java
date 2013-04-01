@@ -207,16 +207,15 @@ public class GroupPresenter extends AdminPanelPresenter {
     }
 
     private void addGroupSelectionHandler() {
-        this.view.setGroupSelectionHandler(new ClickHandler() {
+        this.view.setGroupSelectionHandler(new ServiceDelegate<GroupInfo>() {
 
             @Override
-            public void onClick(ClickEvent event) {
-                GroupInfo info = view.getGroupSelection(event);
-                if (info == null)
+            public void execute(GroupInfo groupInfo) {
+                if (groupInfo == null)
                     return;
 
-                currentGroupSelection = info;
-                retrieveGroupMembers(info);
+                currentGroupSelection = groupInfo;
+                retrieveGroupMembers(groupInfo);
             }
         });
     }

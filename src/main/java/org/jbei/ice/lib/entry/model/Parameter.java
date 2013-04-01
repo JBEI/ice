@@ -7,8 +7,6 @@ import org.jbei.ice.shared.dto.ParameterType;
 
 import org.hibernate.search.annotations.ContainedIn;
 
-// TODO Make advanced search filter for parameters
-
 /**
  * Stores key-value information for {@link org.jbei.ice.lib.entry.model.Entry}.
  * <p/>

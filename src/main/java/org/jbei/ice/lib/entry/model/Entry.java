@@ -603,4 +603,8 @@ public class Entry implements IModel {
     public Set<Folder> getFolders() {
         return folders;
     }
+
+    public Set<EntryFundingSource> getFundingSources() {
+        return entryFundingSources;
+    }
 }

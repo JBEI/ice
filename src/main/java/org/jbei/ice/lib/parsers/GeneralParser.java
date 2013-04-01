@@ -3,6 +3,9 @@ package org.jbei.ice.lib.parsers;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.jbei.ice.lib.parsers.fasta.FastaParser;
+import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
+import org.jbei.ice.lib.parsers.sbol.SbolParser;
 import org.jbei.ice.lib.vo.IDNASequence;
 
 /**

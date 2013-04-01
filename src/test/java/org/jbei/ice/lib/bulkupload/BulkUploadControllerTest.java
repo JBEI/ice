@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 
@@ -21,7 +21,7 @@ public class BulkUploadControllerTest {
 //        HibernateHelper.initializeMock();
         HibernateHelper.beginTransaction();
         controller = new BulkUploadController();
-        AccountController accountController = ApplicationController.getAccountController();
+        AccountController accountController = ControllerFactory.getAccountController();
         if (accountController.getByEmail("system") == null)
             accountController.createNewAccount("System", "Account", "", "system", "", "");
     }

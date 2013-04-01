@@ -29,8 +29,7 @@ public abstract class DataTable<T> extends CellTable<T> {
         DataTableStyle cellTableStyle();
     }
 
-    public interface DataTableStyle extends Style {
-    }
+    public interface DataTableStyle extends Style {}
 
     // TODO : this list is also maintained in the parent class look for a way to merge them
     private ArrayList<DataTableColumn<T, ?>> columns;

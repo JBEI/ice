@@ -2,7 +2,6 @@ package org.jbei.ice.client.common.group;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.profile.group.GroupsListWidget;
@@ -17,6 +16,8 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
+ * Parent panel class for displaying groups and managing them
+ *
  * @author Hector Plahar
  */
 public abstract class GroupPanel extends Composite {
@@ -76,10 +77,6 @@ public abstract class GroupPanel extends Composite {
         groupsWidget.setEditGroupDelegate(updateGroupDelegate);
     }
 
-    public void setGroupSelectionDelegate(Delegate<GroupInfo> delegate) {
-        groupsWidget.setGroupSelectionDelegate(delegate);
-    }
-
     public void setGroupMemberSaveHandler(ClickHandler handler) {
         groupsWidget.setSaveHandler(handler);
     }
@@ -100,12 +97,8 @@ public abstract class GroupPanel extends Composite {
         groupsWidget.removeGroup(info);
     }
 
-    public void setGroupSelectionHandler(ClickHandler handler) {
+    public void setGroupSelectionHandler(ServiceDelegate<GroupInfo> handler) {
         groupsWidget.setSelectionHandler(handler);
-    }
-
-    public GroupInfo getGroupSelection(ClickEvent event) {
-        return groupsWidget.getGroupSelection(event);
     }
 
     public void setGroupMembers(GroupInfo group, ArrayList<AccountInfo> list) {

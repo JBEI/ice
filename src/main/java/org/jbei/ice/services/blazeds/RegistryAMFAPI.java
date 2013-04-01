@@ -11,12 +11,11 @@ import javax.xml.ws.Service;
 import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManager;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManagerException;
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
-import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -65,7 +64,7 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         try {
-            return ApplicationController.getEntryController().getByRecordId(account, entryId);
+            return ControllerFactory.getEntryController().getByRecordId(account, entryId);
         } catch (ControllerException e) {
             Logger.error("Failed to get entry!", e);
             return null;
@@ -90,8 +89,8 @@ public class RegistryAMFAPI extends BaseService {
             return result;
         }
 
-        EntryController entryController = ApplicationController.getEntryController();
-        PermissionsController permissionsController = ApplicationController.getPermissionController();
+        EntryController entryController = ControllerFactory.getEntryController();
+        PermissionsController permissionsController = ControllerFactory.getPermissionController();
 
         try {
             Entry entry = entryController.getByRecordId(account, entryId);
@@ -123,7 +122,7 @@ public class RegistryAMFAPI extends BaseService {
             return null;
         }
 
-        EntryController entryController = ApplicationController.getEntryController();
+        EntryController entryController = ControllerFactory.getEntryController();
 
         Entry entry = null;
         try {
@@ -161,7 +160,7 @@ public class RegistryAMFAPI extends BaseService {
         // TODO
 
         try {
-            Sequence sequence = ApplicationController.getSequenceController().getByEntry(entry);
+            Sequence sequence = ControllerFactory.getSequenceController().getByEntry(entry);
             return SequenceController.sequenceToDNASequence(sequence);
         } catch (ControllerException e) {
             Logger.error("Failed to get entry!", e);
@@ -183,8 +182,8 @@ public class RegistryAMFAPI extends BaseService {
             return false;
         }
 
-        EntryController entryController = ApplicationController.getEntryController();
-        SequenceController sequenceController = ApplicationController.getSequenceController();
+        EntryController entryController = ControllerFactory.getEntryController();
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
 
         try {
             Entry entry = entryController.getByRecordId(account, entryId);
@@ -218,7 +217,7 @@ public class RegistryAMFAPI extends BaseService {
             return null;
         }
 
-        EntryController entryController = ApplicationController.getEntryController();
+        EntryController entryController = ControllerFactory.getEntryController();
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
 
         Entry entry;
@@ -268,10 +267,10 @@ public class RegistryAMFAPI extends BaseService {
         genbankFormatter.setCircular(isCircular);
 
         try {
-            result = SequenceController.compose(sequence, genbankFormatter);
+            result = ControllerFactory.getSequenceController().compose(sequence, genbankFormatter);
 
             logInfo(account.getEmail() + " generated and fetched genbank sequence");
-        } catch (SequenceComposerException e) {
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
 
             return result;
@@ -291,7 +290,7 @@ public class RegistryAMFAPI extends BaseService {
      * @return UserPreferences object for the specified user.
      */
     public UserPreferences getUserPreferences(String sessionId) {
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
         UserPreferences userPreferences = null;
         try {
             Account account = getAccountBySessionId(sessionId);
@@ -333,7 +332,7 @@ public class RegistryAMFAPI extends BaseService {
     public boolean saveUserPreferences(String sessionId, UserPreferences preferences) {
         try {
             Account account = getAccountBySessionId(sessionId);
-            AccountController controller = ApplicationController.getAccountController();
+            AccountController controller = ControllerFactory.getAccountController();
             if (account == null) {
                 return false;
             }
@@ -349,9 +348,9 @@ public class RegistryAMFAPI extends BaseService {
 
             if (accountPreferences != null) {
                 accountPreferences.setPreferences(serializedPreferences);
-                ApplicationController.getAccountController().saveAccountPreferences(accountPreferences);
+                ControllerFactory.getAccountController().saveAccountPreferences(accountPreferences);
             } else {
-                ApplicationController.getAccountController().saveAccountPreferences(
+                ControllerFactory.getAccountController().saveAccountPreferences(
                         new AccountPreferences(account, serializedPreferences, ""));
             }
 
@@ -374,7 +373,7 @@ public class RegistryAMFAPI extends BaseService {
      */
     public UserRestrictionEnzymes getUserRestrictionEnzymes(String sessionId) {
         UserRestrictionEnzymes userRestrictionEnzymes = null;
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
 
         try {
             Account account = getAccountBySessionId(sessionId);
@@ -411,7 +410,7 @@ public class RegistryAMFAPI extends BaseService {
      */
     public void saveUserRestrictionEnzymes(String sessionId, UserRestrictionEnzymes userRestrictionEnzymes) {
         try {
-            AccountController controller = ApplicationController.getAccountController();
+            AccountController controller = ControllerFactory.getAccountController();
             Account account = getAccountBySessionId(sessionId);
 
             if (account == null) {
@@ -425,9 +424,9 @@ public class RegistryAMFAPI extends BaseService {
 
             if (accountPreferences != null) {
                 accountPreferences.setRestrictionEnzymes(serializedUserRestrictionEnzymes);
-                ApplicationController.getAccountController().saveAccountPreferences(accountPreferences);
+                ControllerFactory.getAccountController().saveAccountPreferences(accountPreferences);
             } else {
-                ApplicationController.getAccountController().saveAccountPreferences(
+                ControllerFactory.getAccountController().saveAccountPreferences(
                         new AccountPreferences(account, "", serializedUserRestrictionEnzymes));
             }
 
@@ -505,16 +504,14 @@ public class RegistryAMFAPI extends BaseService {
         genbankFormatter.setCircular(true);
 
         try {
-            result = SequenceController.compose(sequence, genbankFormatter);
+            result = ControllerFactory.getSequenceController().compose(sequence, genbankFormatter);
 
             logInfo("Generated and fetched sequence");
-        } catch (SequenceComposerException e) {
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
-
             return result;
         } catch (Exception e) {
             Logger.error(getLoggerPrefix(), e);
-
             return result;
         }
 
@@ -759,7 +756,7 @@ public class RegistryAMFAPI extends BaseService {
         TraceData traceData = null;
 
         try {
-            IDNASequence dnaSequence = ApplicationController.getSequenceAnalysisController().parse(data);
+            IDNASequence dnaSequence = ControllerFactory.getSequenceAnalysisController().parse(data);
 
             if (dnaSequence == null) {
                 logInfo("Failed to parse trace file!");

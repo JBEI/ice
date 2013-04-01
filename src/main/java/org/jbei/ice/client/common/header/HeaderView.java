@@ -66,7 +66,7 @@ public class HeaderView extends Composite {
         table.setWidget(0, 2, panel);
 
         // search Option
-        widgetAdvanced = new AdvancedSearchWidget(searchInput, searchBtn);
+        widgetAdvanced = new AdvancedSearchWidget(searchInput);
         widgetAdvanced.setWidth("394px");
         widgetAdvanced.setHeight("150px");
 

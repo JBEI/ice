@@ -26,7 +26,7 @@ public class Bl2SeqParser {
             throw new Bl2SeqException("bl2seq parser input is empty!");
         }
 
-        ArrayList<Bl2SeqResult> results = new ArrayList<Bl2SeqResult>();
+        ArrayList<Bl2SeqResult> results = new ArrayList<>();
 
         try {
             boolean isFirstRun = true;
@@ -42,13 +42,15 @@ public class Bl2SeqParser {
                 if (scoreMatcher.find()) {
                     if (!isFirstRun) {
                         if (queryDataSequence != null && score >= MIN_SCORE) {
-                            Bl2SeqResult bl2seqResult = new Bl2SeqResult(score, new Integer(
-                                    queryDataSequence.get(0)),
-                                                                         new Integer(queryDataSequence.get(1)),
-                                                                         queryDataSequence.get(2), new Integer(
-                                    subjectDataSequence.get(0)), new Integer(
-                                    subjectDataSequence.get(1)),
-                                                                         subjectDataSequence.get(2), orientation);
+                            Bl2SeqResult bl2seqResult = new Bl2SeqResult(
+                                    score,
+                                    new Integer(queryDataSequence.get(0)),
+                                    new Integer(queryDataSequence.get(1)),
+                                    queryDataSequence.get(2),
+                                    new Integer(subjectDataSequence.get(0)),
+                                    new Integer(subjectDataSequence.get(1)),
+                                    subjectDataSequence.get(2),
+                                    orientation);
 
                             results.add(bl2seqResult);
                         }
@@ -68,9 +70,7 @@ public class Bl2SeqParser {
                     // get orientation
                     String orientationLetter = line.substring(17, 18);
                     orientation = (orientationLetter.equals("P")) ? 0 : 1;
-
                     isFirstRun = false;
-
                     continue;
                 }
 
@@ -81,9 +81,7 @@ public class Bl2SeqParser {
                         queryDataSequence = parseSequenceLine(line);
                     } else {
                         ArrayList<String> queryDataSequencePartial = parseSequenceLine(line);
-
-                        queryDataSequence.set(2,
-                                              queryDataSequence.get(2).concat(queryDataSequencePartial.get(2)));
+                        queryDataSequence.set(2, queryDataSequence.get(2).concat(queryDataSequencePartial.get(2)));
                         queryDataSequence.set(1, queryDataSequencePartial.get(1));
                     }
 
@@ -109,8 +107,7 @@ public class Bl2SeqParser {
                         Bl2SeqResult bl2seqResult = new Bl2SeqResult(score, new Integer(
                                 queryDataSequence.get(0)), new Integer(queryDataSequence.get(1)),
                                                                      queryDataSequence.get(2), new Integer(
-                                subjectDataSequence.get(0)),
-                                                                     new Integer(subjectDataSequence.get(1)),
+                                subjectDataSequence.get(0)), new Integer(subjectDataSequence.get(1)),
                                                                      subjectDataSequence.get(2), orientation);
 
                         results.add(bl2seqResult);
@@ -128,7 +125,7 @@ public class Bl2SeqParser {
 
     private static ArrayList<String> parseSequenceLine(String sequenceLine) {
         //returns start, stop, sequence
-        ArrayList<String> result = new ArrayList<String>(3);
+        ArrayList<String> result = new ArrayList<>(3);
 
         Matcher matcher = SEQ_REGEXP_PATTERN.matcher(sequenceLine);
         if (matcher.find()) {
@@ -138,25 +135,5 @@ public class Bl2SeqParser {
         }
 
         return result;
-    }
-
-    public static void main(String args[]) {
-        /*String content = "";
-        try {
-            content = FileUtils.readFileToString(new File("/home/zenyk/output.bl2seq"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        ArrayList<Bl2SeqResult> results = null;
-        try {
-            results = Bl2SeqParser.parse(content);
-        } catch (Bl2SeqException e) {
-            e.printStackTrace();
-        }
-
-        for (int i = 0; i < results.size(); i++) {
-            System.out.println(results.get(i).toString());
-        }*/
     }
 }

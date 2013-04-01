@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -26,7 +26,7 @@ public class AttachmentController {
     private File attachmentFile;
 
     public AttachmentController() {
-        permissionsController = ApplicationController.getPermissionController();
+        permissionsController = ControllerFactory.getPermissionController();
         dao = new AttachmentDAO();
         String attachmentFileLocation = Utils.getConfigValue(ConfigurationKey.ATTACHMENTS_DIRECTORY);
         if (attachmentFileLocation == null)

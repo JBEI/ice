@@ -3,6 +3,7 @@ package org.jbei.ice.lib.utils;
 import java.util.List;
 import java.util.Set;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part.AssemblyStandard;
@@ -59,7 +60,7 @@ public class RawAssemblyUtils implements IAssemblyUtils {
             }
         }
         try {
-            SequenceController controller = new SequenceController();
+            SequenceController controller = ControllerFactory.getSequenceController();
             controller.saveSequence(partSequence);
         } catch (ControllerException e) {
             throw new UtilityException(e);

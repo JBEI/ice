@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -30,8 +30,8 @@ public class FolderController {
 
     public FolderController() {
         dao = new FolderDAO();
-        accountController = ApplicationController.getAccountController();
-//        permissionsController = ApplicationController.getPermissionController();
+        accountController = ControllerFactory.getAccountController();
+//        permissionsController = ControllerFactory.getPermissionController();
     }
 
     public Folder removeFolderContents(Account account, long folderId, ArrayList<Long> entryIds)
@@ -110,7 +110,7 @@ public class FolderController {
     }
 
     public void delete(Account account, Folder folder) throws ControllerException, PermissionException {
-        PermissionsController controller = ApplicationController.getPermissionController();
+        PermissionsController controller = ControllerFactory.getPermissionController();
         if (!controller.hasWritePermission(account, folder))
             throw new PermissionException("No write permission for folder");
 
@@ -163,7 +163,7 @@ public class FolderController {
     }
 
     public ArrayList<FolderDetails> retrieveFoldersForUser(Account account) throws ControllerException {
-        AccountController controller = ApplicationController.getAccountController();
+        AccountController controller = ControllerFactory.getAccountController();
         ArrayList<FolderDetails> results = new ArrayList<>();
 
         // publicly visible collections are owned by the system
@@ -194,7 +194,7 @@ public class FolderController {
         }
 
         // get folders shared with this user
-        Set<Folder> sharedFolders = ApplicationController.getPermissionController().retrievePermissionFolders(account);
+        Set<Folder> sharedFolders = ControllerFactory.getPermissionController().retrievePermissionFolders(account);
         if (sharedFolders != null) {
             for (Folder folder : sharedFolders) {
                 long id = folder.getId();
