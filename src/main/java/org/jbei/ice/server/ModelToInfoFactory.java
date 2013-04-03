@@ -408,6 +408,7 @@ public class ModelToInfoFactory {
         view.setStatus(entry.getStatus());
         view.setOwner(entry.getOwner());
         view.setOwnerEmail(entry.getOwnerEmail());
+        view.setSelectionMarkers(entry.getSelectionMarkersAsString());
 
         AccountController accountController = ControllerFactory.getAccountController();
         try {
@@ -505,8 +506,6 @@ public class ModelToInfoFactory {
                 view.setHost(strain.getHost());
                 view.setGenotypePhenotype(strain.getGenotypePhenotype());
                 view.setPlasmids(strain.getPlasmids());
-                view.setSelectionMarkers(strain.getSelectionMarkersAsString());
-
                 return view;
             }
 
