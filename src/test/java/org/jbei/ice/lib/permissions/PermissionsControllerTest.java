@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.permissions;
 
-import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
@@ -9,6 +8,7 @@ import org.jbei.ice.lib.entry.model.Strain;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -18,9 +18,13 @@ public class PermissionsControllerTest {
 
     private PermissionsController controller;
 
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        HibernateHelper.initializeMock();
+    }
+
     @Before
     public void setUp() throws Exception {
-//        HibernateHelper.initializeMock();
         HibernateHelper.beginTransaction();
         controller = new PermissionsController();
     }
@@ -32,7 +36,6 @@ public class PermissionsControllerTest {
 
     @Test
     public void testAddPermission() throws Exception {
-
         String email = "testAddPermission@TESTER.org";
         String email2 = "testAddPermissionOther@TESTER.org";
 
@@ -125,15 +128,5 @@ public class PermissionsControllerTest {
 
     @Test
     public void test() throws Exception {
-//        Account account = new AccountController().getByEmail("haplahar@lbl.gov");
-//        Entry entry = new EntryController().get(account, 27340);
-//        ArrayList<PermissionInfo> permissionInfos = controller.retrieveSetEntryPermissions(account, entry);
-//        System.out.println(permissionInfos.size());
-////        controller.addReadUser(account, entry, account);
-//        int count = controller.clearPermissions(account, entry);
-//        System.out.println(count);
-//        permissionInfos = controller.retrieveSetEntryPermissions(account, entry);
-//        System.out.println(permissionInfos.size());
-        ApplicationController.initializeHibernateSearch();
     }
 }

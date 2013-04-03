@@ -20,7 +20,7 @@ public class EntryControllerTest {
 
     @Before
     public void setUp() {
-//        HibernateHelper.initializeMock();
+        HibernateHelper.initializeMock();
         HibernateHelper.beginTransaction();
         controller = new EntryController();
     }
@@ -129,19 +129,6 @@ public class EntryControllerTest {
 
     @Test
     public void testDelete() throws Exception {
-
-    }
-
-    @Test
-    public void testGetAllEntryCount() throws Exception {
-        AccountController accountController = new AccountController();
-        Account account = accountController.getByEmail("haplahar@lbl.gov");
-        long count = controller.getNumberOfVisibleEntries(account);
-        System.out.println(count);
-
-        account = accountController.getByEmail("mjdougherty@lbl.gov");
-        count = controller.getNumberOfVisibleEntries(account);
-        System.out.println(count);
 
     }
 

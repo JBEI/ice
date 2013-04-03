@@ -1,12 +1,10 @@
 package org.jbei.ice.lib.config;
 
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.models.Configuration;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -15,6 +13,11 @@ import org.junit.Test;
 public class ConfigurationDAOTest {
 
     private ConfigurationDAO dao;
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        HibernateHelper.initializeMock();
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -33,7 +36,5 @@ public class ConfigurationDAOTest {
 
     @Test
     public void testGet() throws Exception {
-        Configuration vaa = dao.get(ConfigurationKey.PROJECT_NAME);
-        Assert.assertNotNull(vaa);
     }
 }
