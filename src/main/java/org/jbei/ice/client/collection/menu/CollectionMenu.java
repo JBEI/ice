@@ -9,7 +9,7 @@ import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.widget.ShareCollectionWidget;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.entry.view.ReadBoxSelectionHandler;
+import org.jbei.ice.client.entry.view.handler.ReadBoxSelectionHandler;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.*;

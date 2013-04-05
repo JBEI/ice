@@ -676,6 +676,7 @@ public class BulkUploadController {
 
         // retrieve bulk upload in question (at this point it is owned by system)
         BulkUpload bulkUpload;
+
         try {
             bulkUpload = dao.retrieveById(id);
             if (bulkUpload == null)

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
-import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
+import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
 
 import com.google.gwt.event.dom.client.ClickHandler;

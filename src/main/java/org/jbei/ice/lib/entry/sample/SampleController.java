@@ -157,6 +157,14 @@ public class SampleController {
         }
     }
 
+    public Sample getSampleById(long id) throws ControllerException {
+        try {
+            return dao.get(id);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
     public boolean hasSample(Entry entry) throws ControllerException {
         try {
             return dao.hasSample(entry);

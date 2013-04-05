@@ -7,17 +7,19 @@ import java.util.HashMap;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.EntryFormFactory;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.ViewFactory;
 import org.jbei.ice.client.entry.view.detail.EntryInfoView;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanel;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.panel.EntrySamplePanel;
 import org.jbei.ice.client.entry.view.panel.EntrySequenceAnalysisPanel;
+import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
@@ -253,7 +255,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     @SuppressWarnings("unchecked")
-    public SequenceViewPanelPresenter setEntryInfoForView(EntryInfo info) {
+    public SequenceViewPanelPresenter setEntryInfoForView(EntryInfo info, ServiceDelegate<SampleInfo> handler) {
         boolean showEdit = info.isCanEdit();
         currentView = viewCache.get(info.getType());
         if (currentView == null) {
@@ -298,7 +300,7 @@ public class EntryView extends Composite implements IEntryView {
         getMenu().updateMenuCount(MenuItem.Menu.SEQ_ANALYSIS, info.getSequenceAnalysis().size());
         getMenu().updateMenuCount(MenuItem.Menu.SAMPLES, info.getSampleStorage().size());
 
-        samplePanel.setData(info.getSampleStorage());
+        samplePanel.setData(info.getSampleStorage(), handler);
         sequencePanel.setSequenceData(info.getSequenceAnalysis(), info);
         return sequenceViewPanel.getPresenter();
     }
@@ -367,8 +369,8 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void setSampleData(ArrayList<SampleStorage> data) {
-        samplePanel.setData(data);
+    public void setSampleData(ArrayList<SampleStorage> data, ServiceDelegate<SampleInfo> deleteSampleHandler) {
+        samplePanel.setData(data, deleteSampleHandler);
     }
 
     @Override

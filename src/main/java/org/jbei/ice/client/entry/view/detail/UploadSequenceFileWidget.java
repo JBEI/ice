@@ -123,6 +123,7 @@ public class UploadSequenceFileWidget extends Composite {
         });
 
         uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+
             @Override
             public void onFinish(IUploader uploader) {
                 if (uploader.getStatus() == Status.SUCCESS) {

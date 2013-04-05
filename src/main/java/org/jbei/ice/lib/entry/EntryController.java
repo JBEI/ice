@@ -627,7 +627,7 @@ public class EntryController {
      * @throws ControllerException
      */
     List<Long> filterEntriesByPermission(Account account, List<Long> ids) throws ControllerException {
-        ArrayList<Long> result = new ArrayList<Long>();
+        ArrayList<Long> result = new ArrayList<>();
         for (Long id : ids) {
             Entry entry;
             try {
@@ -648,7 +648,7 @@ public class EntryController {
             throws ControllerException {
         List<Long> filtered = this.filterEntriesByPermission(account, queryResultIds);
         try {
-            ArrayList<Entry> results = new ArrayList<Entry>(dao.getEntriesByIdSet(filtered));
+            ArrayList<Entry> results = new ArrayList<>(dao.getEntriesByIdSet(filtered));
             return results;
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -669,10 +669,10 @@ public class EntryController {
         List<TraceSequence> sequences = sequenceAnalysisController.getTraceSequences(entry);
 
         // samples
-        Map<Sample, LinkedList<Storage>> sampleMap = new HashMap<Sample, LinkedList<Storage>>();
+        Map<Sample, LinkedList<Storage>> sampleMap = new HashMap<>();
         for (Sample sample : samples) {
             Storage storage = sample.getStorage();
-            LinkedList<Storage> storageList = new LinkedList<Storage>();
+            LinkedList<Storage> storageList = new LinkedList<>();
             List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
             if (storages != null)
                 storageList.addAll(storages);

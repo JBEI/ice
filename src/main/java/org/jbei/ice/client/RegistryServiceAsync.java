@@ -219,4 +219,6 @@ public interface RegistryServiceAsync {
     void removeAccountFromGroup(String sessionId, GroupInfo info, AccountInfo account, AsyncCallback<Boolean> callback);
 
     void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites, AsyncCallback<Void> callback);
+
+    void deleteSample(String sessionId, SampleInfo info, AsyncCallback<Boolean> async);
 }

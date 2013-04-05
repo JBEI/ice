@@ -4,7 +4,7 @@
     <groupId>org.jbei</groupId>
     <artifactId>gd-ice</artifactId>
     <packaging>war</packaging>
-    <version>3.3-SNAPSHOT</version>
+    <version>3.3.1-SNAPSHOT</version>
     <!-- TODO project name  -->
     <name>gd-ice</name>
     <description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
@@ -181,11 +181,6 @@
         <dependency>
             <groupId>org.jbei.ice</groupId>
             <artifactId>biojava</artifactId>
-            <version>SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jbei.ice</groupId>
-            <artifactId>bytecode</artifactId>
             <version>SNAPSHOT</version>
         </dependency>
         <dependency>

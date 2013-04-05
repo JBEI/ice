@@ -29,6 +29,7 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.StorageController;
+import org.jbei.ice.lib.entry.sample.StorageDAO;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -720,9 +721,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public EntryInfo retrieveEntryTipDetails(String sid, String recordId, String url) throws AuthenticationException {
+        Account account = null;
         if (url == null) {
             try {
-                Account account = retrieveAccountForSid(sid);
+                account = retrieveAccountForSid(sid);
                 Entry entry;
                 try {
                     entry = ControllerFactory.getEntryController().getByRecordId(account, recordId);
@@ -732,7 +734,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
 
                 Logger.info(account.getEmail() + ": retrieving entry tip details for " + entry.getId());
-                return ModelToInfoFactory.createTipView(entry);
+                return ModelToInfoFactory.createTipView(account, entry);
             } catch (ControllerException e) {
                 Logger.error(e);
                 return null;
@@ -742,7 +744,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
         try {
             Entry entry = api.getPublicEntryByRecordId(recordId);
-            return ModelToInfoFactory.createTipView(entry);
+            return ModelToInfoFactory.createTipView(account, entry);
         } catch (ServiceException e) {
             Logger.error(e);
         }
@@ -1323,6 +1325,25 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public boolean deleteSample(String sessionId, SampleInfo info) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        Logger.info(account.getEmail() + ": deleting sample " + info.getSampleId());
+        SampleController sampleController = ControllerFactory.getSampleController();
+        try {
+            long id = Long.decode(info.getSampleId());
+            Sample sample = sampleController.getSampleById(id);
+            sampleController.deleteSample(account, sample);
+            return true;
+        } catch (ControllerException | NumberFormatException he) {
+            Logger.error(he);
+            return false;
+        } catch (PermissionException pe) {
+            Logger.warn(pe.getMessage());
+            return false;
+        }
+    }
+
+    @Override
     public SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
@@ -1350,8 +1371,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         SampleInfo sampleInfo = sampleStorage.getSample();
         LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
 
-        Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(),
-                                                      sampleInfo.getNotes());
+        Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(), sampleInfo.getNotes());
         sample.setEntry(entry);
 
         if (locations == null || locations.isEmpty()) {
@@ -1388,6 +1408,19 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             storage = storageController.update(storage);
             sample.setStorage(storage);
             sample = sampleController.saveSample(account, sample);
+            sampleStorage.getStorageList().clear();
+
+            List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
+            if (storages != null) {
+                for (Storage storage1 : storages) {
+                    StorageInfo info = new StorageInfo();
+                    info.setDisplay(storage1.getIndex());
+                    info.setId(storage1.getId());
+                    info.setType(storage1.getStorageType().name());
+                    sampleStorage.getStorageList().add(info);
+                }
+            }
+
             sampleStorage.getSample().setSampleId(sample.getId() + "");
             sampleStorage.getSample().setDepositor(account.getEmail());
             return sampleStorage;

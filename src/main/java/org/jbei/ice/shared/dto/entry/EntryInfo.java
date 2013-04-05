@@ -296,7 +296,6 @@ public class EntryInfo implements IDTOModel {
         return sampleStorage.get(0);
     }
 
-
     public void setSampleMap(ArrayList<SampleStorage> sampleStorage) {
         this.sampleStorage.clear();
         this.sampleStorage.addAll(sampleStorage);

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.view.IEntryView;
@@ -55,9 +56,8 @@ public class EntryModel {
 
                                            @Override
                                            public void onFailure(Throwable caught) {
-                                               eventBus.fireEvent(new FeedbackEvent(true,
-                                                                                    "Failed to retrieve the sample " +
-                                                                                            "location data."));
+                                               String msg = "Failed to retrieve the sample location data";
+                                               eventBus.fireEvent(new FeedbackEvent(true, msg));
                                            }
 
                                            @Override
@@ -73,6 +73,26 @@ public class EntryModel {
                                                display.addSampleSaveHandler(handler);
                                            }
                                        });
+    }
+
+    public ServiceDelegate<SampleInfo> createDeleteSampleHandler() {
+        return new ServiceDelegate<SampleInfo>() {
+            @Override
+            public void execute(final SampleInfo sampleInfo) {
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        service.deleteSample(ClientController.sessionId, sampleInfo, callback);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        // TODO : remove from display
+                    }
+                }.go(eventBus);
+            }
+        };
     }
 
     private class SampleAddHandler implements ClickHandler {
@@ -106,7 +126,7 @@ public class EntryModel {
                     }
                     display.setSampleFormVisibility(false);
                     currentInfo.getSampleStorage().add(result);
-                    display.setSampleData(currentInfo.getSampleStorage());
+                    display.setSampleData(currentInfo.getSampleStorage(), createDeleteSampleHandler());
                     // TODO : update counts and show the loading indicator when the sample is being created
                     // TODO : on click.
                 }
