@@ -3,11 +3,13 @@ package org.jbei.ice.client.entry.view.view;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 
@@ -55,7 +57,7 @@ public interface IEntryView {
 
     void setSampleFormVisibility(boolean visible);
 
-    void setSampleData(ArrayList<SampleStorage> data);
+    void setSampleData(ArrayList<SampleStorage> data, ServiceDelegate<SampleInfo> delegate);
 
     void setSampleOptions(SampleLocation sampleLocation);
 
@@ -69,7 +71,7 @@ public interface IEntryView {
 
     void setSequenceDeleteHandler(ClickHandler handler);
 
-    SequenceViewPanelPresenter setEntryInfoForView(EntryInfo info);
+    SequenceViewPanelPresenter setEntryInfoForView(EntryInfo info, ServiceDelegate<SampleInfo> delegate);
 
     void setAttachmentDeleteHandler(HasAttachmentDeleteHandler handler);
 

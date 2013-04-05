@@ -10,6 +10,7 @@ import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.EntryAddPresenter;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
@@ -17,6 +18,9 @@ import org.jbei.ice.client.collection.presenter.CollectionsPresenter.DeleteEntry
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
+import org.jbei.ice.client.entry.view.handler.ReadBoxSelectionHandler;
+import org.jbei.ice.client.entry.view.handler.UploadPasteSequenceHandler;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
 import org.jbei.ice.client.entry.view.view.EntryView;
@@ -28,6 +32,7 @@ import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
@@ -324,7 +329,8 @@ public class EntryPresenter extends AbstractPresenter {
                 currentContext.setRecordId(currentInfo.getRecordId());
 
                 // permission (order is important here)
-                SequenceViewPanelPresenter sequencePresenter = display.setEntryInfoForView(currentInfo);
+                ServiceDelegate<SampleInfo> delegate = model.createDeleteSampleHandler();
+                SequenceViewPanelPresenter sequencePresenter = display.setEntryInfoForView(currentInfo, delegate);
                 display.getPermissionsWidget().setPermissionData(result.getPermissions(), new DeletePermission());
                 UploadPasteSequenceHandler handler = new UploadPasteSequenceHandler(service,
                                                                                     eventBus, sequencePresenter);

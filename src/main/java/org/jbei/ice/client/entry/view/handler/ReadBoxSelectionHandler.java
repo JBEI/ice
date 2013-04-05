@@ -1,4 +1,4 @@
-package org.jbei.ice.client.entry.view;
+package org.jbei.ice.client.entry.view.handler;
 
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionSuggestion;

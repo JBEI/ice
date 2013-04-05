@@ -2149,7 +2149,6 @@ td.selected i.font-awesome {
 .generic_storage_panel {
     border: 1px solid #c5c5c5;
     line-height: 90%;
-    padding: 5px;
 }
 
 .generic_storage_panel #type {
@@ -2165,7 +2164,7 @@ td.selected i.font-awesome {
 }
 
 .generic_storage_panel td.footer {
-    padding: 4px;
+    padding: 8px;
     background-color: #f1f1f1;
     font-weight: bold;
 }

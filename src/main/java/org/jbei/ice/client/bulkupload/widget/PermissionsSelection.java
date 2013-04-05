@@ -6,7 +6,7 @@ import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.client.entry.view.ReadBoxSelectionHandler;
+import org.jbei.ice.client.entry.view.handler.ReadBoxSelectionHandler;
 import org.jbei.ice.client.entry.view.view.PermissionsWidget;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 

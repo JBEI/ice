@@ -2,7 +2,7 @@ package org.jbei.ice.client.entry.view.view;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
+import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

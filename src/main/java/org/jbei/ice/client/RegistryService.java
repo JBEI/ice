@@ -192,4 +192,6 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites);
+
+    boolean deleteSample(String sessionId, SampleInfo info) throws AuthenticationException;
 }

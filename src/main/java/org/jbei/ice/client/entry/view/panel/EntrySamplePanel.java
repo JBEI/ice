@@ -5,17 +5,24 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.panel.sample.Storage96WellPanel;
 import org.jbei.ice.client.entry.view.view.CreateSampleForm;
+import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -45,6 +52,7 @@ public class EntrySamplePanel extends Composite {
     }
 
     public void reset() {
+        table.removeAllRows();
         table.setWidget(0, 0, addSample);
         table.setHTML(1, 0, "");
         table.setHTML(2, 0, "<i class=\"font-75em pad-8\">No Samples Available</i>");
@@ -77,8 +85,10 @@ public class EntrySamplePanel extends Composite {
         this.sampleForm.setVisible(visible);
     }
 
-    public void setData(ArrayList<SampleStorage> data) {
-        reset();
+    public void setData(ArrayList<SampleStorage> data, ServiceDelegate<SampleInfo> deleteHandler) {
+        table.removeAllRows();
+        table.setWidget(0, 0, addSample);
+        table.setHTML(1, 0, "");
 
         Collections.sort(data, new Comparator<SampleStorage>() {
             @Override
@@ -87,7 +97,7 @@ public class EntrySamplePanel extends Composite {
             }
         });
 
-        int row = 1;
+        int row = 2;
         int col = 0;
         for (int i = 0; i < data.size(); i += 1) {
             SampleStorage datum = data.get(i);
@@ -98,7 +108,7 @@ public class EntrySamplePanel extends Composite {
                 String plateName = getPlateName(datum.getStorageList());
                 widget = new Storage96WellPanel(datum, wellName, tubeName, plateName);
             } else {
-                widget = new GenericStoragePanel(datum);
+                widget = new GenericStoragePanel(datum, deleteHandler);
             }
 
             table.setWidget(row, col, widget);
@@ -112,7 +122,7 @@ public class EntrySamplePanel extends Composite {
 
     public boolean isShelf(List<StorageInfo> storageInfoList) {
         for (StorageInfo info : storageInfoList) {
-            if (info.getType().equalsIgnoreCase("SHELF"))  // TODO : use enums
+            if (info.getType().equalsIgnoreCase("SHELF"))  //TODO : use enums
                 return true;
         }
         return false;
@@ -136,7 +146,7 @@ public class EntrySamplePanel extends Composite {
 
     private boolean isPlate96(List<StorageInfo> storageInfoList) {
         for (StorageInfo info : storageInfoList) {
-            if (info.getType().equalsIgnoreCase("PLATE96"))  // TODO : use enums
+            if ("PLATE96".equalsIgnoreCase(info.getType()))  // TODO : use enums
                 return true;
         }
         return false;
@@ -168,7 +178,13 @@ public class EntrySamplePanel extends Composite {
 
     private static class GenericStoragePanel extends Composite {
 
-        public GenericStoragePanel(SampleStorage storage) {
+        private final SampleStorage storage;
+        private final ServiceDelegate<SampleInfo> deleteHandler;
+
+        public GenericStoragePanel(SampleStorage storage, ServiceDelegate<SampleInfo> deleteHandler) {
+            this.storage = storage;
+            this.deleteHandler = deleteHandler;
+
             FlexTable panel = new FlexTable();
 
             panel.setCellPadding(0);
@@ -179,7 +195,7 @@ public class EntrySamplePanel extends Composite {
 
             panel.setHTML(0, 0, storage.getSample().getLocation());
             panel.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
-            panel.getFlexCellFormatter().setStyleName(0, 0, "pad-2");
+            panel.getFlexCellFormatter().setStyleName(0, 0, "pad-4");
 
             int i = 0;
             for (; i < storage.getStorageList().size(); i += 1) {
@@ -197,9 +213,39 @@ public class EntrySamplePanel extends Composite {
             panel.getFlexCellFormatter().setColSpan(0, 0, i);
 
             // footer
-            panel.setHTML(2, 0, storage.getSample().getLabel());
+            panel.setWidget(2, 0, createFooter());
             panel.getFlexCellFormatter().setColSpan(2, 0, i);
             panel.getFlexCellFormatter().setStyleName(2, 0, "footer");
+        }
+
+        protected Widget createFooter() {
+            FlexTable table = new FlexTable();
+            table.setCellPadding(0);
+            table.setCellSpacing(0);
+            table.setWidth("100%");
+
+            table.setHTML(0, 0, storage.getSample().getLabel());
+            if (ClientController.account.isAdmin() ||
+                    ClientController.account.getEmail().equalsIgnoreCase(storage.getSample().getDepositor())) {
+                HTML label = new HTML("<i class=\"" + FAIconType.TRASH.getStyleName() + "\"></i> Delete");
+                label.setStyleName("footer_feedback_widget");
+                label.addStyleName("font-70em");
+
+                if (deleteHandler != null) {
+                    label.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            if (Window.confirm("Confirm deletion of sample \"" + storage.getSample().getLabel() + "\""))
+                                deleteHandler.execute(storage.getSample());
+                        }
+                    });
+                }
+
+                table.setWidget(0, 1, label);
+                table.getFlexCellFormatter().setWidth(0, 1, "50px");
+            }
+
+            return table;
         }
     }
 }

@@ -155,6 +155,7 @@ public class ModelToInfoFactory {
         if (sample == null)
             return info;
 
+        info.setSampleId(Long.toString(sample.getId()));
         info.setCreationTime(sample.getCreationTime());
         info.setLabel(sample.getLabel());
         info.setNotes(sample.getNotes());
