@@ -7,6 +7,7 @@ import org.jbei.ice.shared.dto.group.GroupType;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -16,9 +17,13 @@ public class GroupControllerTest {
 
     private GroupController controller;
 
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        HibernateHelper.initializeMock();
+    }
+
     @Before
     public void setUp() throws Exception {
-        HibernateHelper.initializeMock();
         HibernateHelper.beginTransaction();
         controller = new GroupController();
     }

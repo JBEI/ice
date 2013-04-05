@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.entry;
 
-import java.util.List;
-
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.utils.Utils;
@@ -10,6 +8,7 @@ import org.jbei.ice.shared.dto.entry.EntryType;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -20,9 +19,13 @@ import org.junit.Test;
 public class EntryDAOTest {
     private EntryDAO dao;
 
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        HibernateHelper.initializeMock();
+    }
+
     @Before
     public void setUp() {
-//        HibernateHelper.initializeMock();
         HibernateHelper.beginTransaction();
         dao = new EntryDAO();
     }
@@ -92,10 +95,6 @@ public class EntryDAOTest {
 
     @Test
     public void testGetEntriesByOwner() throws Exception {
-        List<Entry> entries = dao.retrieveOwnerEntries("haplahar@lbl.gov", null, true, 0, 15);
-        for (Entry entry : entries) {
-            System.out.println(entry.getId());
-        }
     }
 
     @Test
@@ -149,6 +148,4 @@ public class EntryDAOTest {
     @Test
     public void testDelete() throws Exception {
     }
-
-
 }
