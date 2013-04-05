@@ -118,7 +118,7 @@ public class TipViewContentFactory {
         addField(table, 1, 2, "Selection Markers", view.getSelectionMarkers(), "135px", "230px");
         addField(table, 2, 2, "Host", view.getLinkifiedHost(), "125px", "200px");
         addField(table, 3, 2, "Genotype/Phenotype", view.getGenotypePhenotype(), "135px", "230px");
-        addField(table, 4, 2, "Plasmids", view.getPlasmids(), "135px", "230px");
+        addField(table, 4, 2, "Plasmids", view.getLinkifiedPlasmids(), "135px", "230px");
         addField(table, 5, 2, "Funding Source", view.getFundingSource(), "135px", "230px");
         return 6;
     }

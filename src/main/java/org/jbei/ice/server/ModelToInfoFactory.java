@@ -492,7 +492,7 @@ public class ModelToInfoFactory {
         return view;
     }
 
-    public static EntryInfo createTipView(Entry entry) {
+    public static EntryInfo createTipView(Account account, Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         switch (type) {
 
@@ -506,7 +506,9 @@ public class ModelToInfoFactory {
                 Strain strain = (Strain) entry;
                 view.setHost(strain.getHost());
                 view.setGenotypePhenotype(strain.getGenotypePhenotype());
+                view.setLinkifiedHost(EntryUtil.linkifyText(account, strain.getHost()));
                 view.setPlasmids(strain.getPlasmids());
+                view.setLinkifiedPlasmids(EntryUtil.linkifyText(account, strain.getPlasmids()));
                 return view;
             }
 
