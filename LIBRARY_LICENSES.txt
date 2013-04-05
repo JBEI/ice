@@ -9,11 +9,11 @@ these great software and for making them available as open source.
 * Apache Lucene: Apache License Version 2.0
 * Apache log4j: Apache License Version 2.0
 * BioJava: LGPL Version 2.1
-* Font Awesome
+* Font Awesome font: SIL Open Font License - http://scripts.sil.org/OFL
+* Font Awesome CSS, LESS, and SASS: MIT License - http://opensource.org/licenses/mit-license.html
 * Google Web Toolkit (GWT): Apache License Version 2.0
 * GwtUpload: Apache License Version 2.0
 * hibernate: LGPL
-* JAMWiki: LGPL Version 2.1
 * javassist: MPL 1.1
 * jetty: Apache License version 2.0
 * junit: CPL Version 1.0
