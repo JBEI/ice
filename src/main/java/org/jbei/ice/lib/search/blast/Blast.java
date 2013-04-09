@@ -91,7 +91,7 @@ public class Blast {
     public void rebuildDatabase(boolean force) throws BlastException {
         try {
             if (!Files.exists(Paths.get(BLAST_DATABASE_DIR)))
-                Files.createDirectory(Paths.get(BLAST_DATABASE_DIR));
+                Files.createDirectories(Paths.get(BLAST_DATABASE_DIR));
 
             if (!force && isBlastDatabaseExists()) {
                 Logger.info("Blast database exists");
@@ -282,7 +282,8 @@ public class Blast {
     private static void formatBlastDb(File fastaFileDir, String fastaFileName, String logFileName,
             String databaseName) throws BlastException {
         ArrayList<String> commands = new ArrayList<>();
-        commands.add(Utils.getConfigValue(ConfigurationKey.BLAST_FORMATDB));
+        String path = Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_FORMATDB)).toFile().getAbsolutePath();
+        commands.add(path);
         commands.add("-i");
         commands.add(fastaFileName);
         commands.add("-l");

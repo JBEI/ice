@@ -1,8 +1,6 @@
 package org.jbei.ice.lib.models;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 
@@ -186,21 +184,6 @@ public class Storage implements IModel {
      */
     public Set<Storage> getChildren() {
         return children;
-    }
-
-    public static Map<String, String> getLocationTypeOptionsMap() {
-        Map<String, String> result = new HashMap<String, String>();
-
-        result.put(StorageType.GENERIC.toString(), "Generic");
-        result.put(StorageType.FREEZER.toString(), "Freezer");
-        result.put(StorageType.SHELF.toString(), "Shelf");
-        result.put(StorageType.BOX_INDEXED.toString(), "Indexed Box");
-        result.put(StorageType.BOX_UNINDEXED.toString(), "Unindexed Box");
-        result.put(StorageType.PLATE96.toString(), "96 Well Plate");
-        result.put(StorageType.WELL.toString(), "Numbered Well");
-        result.put(StorageType.TUBE.toString(), "Labeled Tube");
-
-        return result;
     }
 
     public void setSchemes(ArrayList<Storage> schemes) {

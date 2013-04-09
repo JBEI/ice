@@ -29,7 +29,7 @@ public class ApplicationController {
     }
 
     public static void initializeHibernateSearch() {
-        SearchController controller = new SearchController();
+        SearchController controller = ControllerFactory.getSearchController();
         try {
             controller.initHibernateSearch();
         } catch (ControllerException ce) {
@@ -39,18 +39,14 @@ public class ApplicationController {
 
     public static void upgradeDatabaseIfNecessary() {
         ConfigurationController controller = ControllerFactory.getConfigurationController();
-        String dbVersion = null;
 
         try {
-            dbVersion = controller.retrieveDatabaseVersion();
-        } catch (ControllerException e) {
-            Logger.info("New database");
-        }
-
-        try {
+            String dbVersion = controller.retrieveDatabaseVersion();
             if (dbVersion == null) {
+                // new database
                 controller.setPropertyValue(ConfigurationKey.DATABASE_SCHEMA_VERSION, RELEASE_DATABASE_SCHEMA_VERSION);
-                dbVersion = RELEASE_DATABASE_SCHEMA_VERSION;
+                controller.initPropertyValues();
+                return;
             }
 
             if (RELEASE_DATABASE_SCHEMA_VERSION.equalsIgnoreCase(dbVersion)) {
@@ -98,7 +94,6 @@ public class ApplicationController {
 
     // upgrade to system settings
     private static void upgradeConfiguration() throws ControllerException {
-        ConfigurationController configurationController = new ConfigurationController();
-        configurationController.upgradeConfiguration();
+        ControllerFactory.getConfigurationController().upgradeConfiguration();
     }
 }
