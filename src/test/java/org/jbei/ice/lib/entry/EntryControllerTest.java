@@ -6,6 +6,7 @@ import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -25,6 +26,16 @@ public class EntryControllerTest {
         controller = new EntryController();
     }
 
+    protected Account createTestAccount() throws Exception {
+        String email = "test@TESTER";
+        AccountController accountController = new AccountController();
+        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
+        Assert.assertNotNull(pass);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
+        return account;
+    }
+
     @After
     public void tearDown() {
         HibernateHelper.rollbackTransaction();
@@ -32,17 +43,16 @@ public class EntryControllerTest {
 
     @Test
     public void testCreateEntry() throws Exception {
+        Account account = createTestAccount();
+        Entry strain = new Strain();
+        strain = controller.createEntry(account, strain, null);
+        Assert.assertNotNull(strain);
+        Assert.assertTrue(strain.getId() > 0);
     }
 
     @Test
     public void testGet() throws Exception {
-        String email = "testGet@TESTER.org";
-        AccountController accountController = new AccountController();
-        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
-        Assert.assertNotNull(pass);
-        Account account = accountController.getByEmail(email);
-        Assert.assertNotNull(account);
-
+        Account account = createTestAccount();
         Entry plasmid = new Plasmid();
         plasmid = controller.createEntry(account, plasmid, null);
         Entry ret = controller.get(account, plasmid.getId());
@@ -51,13 +61,7 @@ public class EntryControllerTest {
 
     @Test
     public void testGetByRecordId() throws Exception {
-        String email = "testGetByRecordId@TESTER.org";
-        AccountController accountController = new AccountController();
-        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
-        Assert.assertNotNull(pass);
-        Account account = accountController.getByEmail(email);
-        Assert.assertNotNull(account);
-
+        Account account = createTestAccount();
         ArabidopsisSeed seed = new ArabidopsisSeed();
         seed.setEcotype("ecotype");
         seed.setGeneration(ArabidopsisSeed.Generation.M0);
