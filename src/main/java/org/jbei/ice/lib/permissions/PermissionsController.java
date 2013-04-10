@@ -169,7 +169,7 @@ public class PermissionsController {
     }
 
     public int clearGroupPermissions(Account account, Group group) throws ControllerException, PermissionException {
-        if (!group.getOwner().equals(account.getEmail()) || !accountController.isAdministrator(account)) {
+        if (!group.getOwner().getEmail().equals(account.getEmail()) && !accountController.isAdministrator(account)) {
             throw new PermissionException(account.getEmail() + " does not have permission to delete group "
                                                   + group.getId());
         }

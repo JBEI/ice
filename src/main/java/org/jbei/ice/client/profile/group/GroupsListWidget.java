@@ -104,12 +104,27 @@ public class GroupsListWidget extends Composite {
             }
         });
 
+        addMembersWidget.setAddUserClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (emailVerifierDelegate == null)
+                    return;
+
+                mode = Mode.ADDING_MEMBER;
+                String email = addMembersWidget.getRegisteredUserEmailInput();
+                emailVerifierDelegate.execute(email);
+            }
+        });
+
         // default mode of viewing group list
         mode = Mode.VIEW_GROUP_LIST;
     }
 
     public void addVerifiedAccount(AccountInfo accountInfo) {
-        createGroupMembersWidget.addVerifiedMember(accountInfo);
+        if (mode == Mode.ADDING_MEMBER)
+            addMembersWidget.addVerifiedMember(accountInfo);
+        else
+            createGroupMembersWidget.addVerifiedMember(accountInfo);
     }
 
     public void setDeleteGroupDelegate(ServiceDelegate<GroupInfo> deleteGroupDelegate) {
@@ -429,6 +444,7 @@ public class GroupsListWidget extends Composite {
                     // show the add members widget (this will get updated with the existing members for the group)
                     addMembersWidget.setVisible(true);
                     layout.setWidget(0, 1, addMembersWidget);
+                    layout.getFlexCellFormatter().setVisible(0, 1, true);
                     layout.getFlexCellFormatter().setStyleName(0, 1, "bg_gray_with_border");
                     // do not propagate click
                     event.stopPropagation();

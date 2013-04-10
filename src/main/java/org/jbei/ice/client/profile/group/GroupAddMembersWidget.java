@@ -184,11 +184,15 @@ public class GroupAddMembersWidget extends Composite {
     }
 
     public void setSelectedMembers(ArrayList<AccountInfo> members) {
+        selectedGroupMembersWidget.setMemberList(members);
+
         for (AccountInfo member : members) {
             AccountInfo info = available.get(member.getId());
-            selectedGroupMembersWidget.addMember(member);
+
             if (info != null) {
                 int index = listList.indexOf(info);
+                if (index < 0)
+                    continue;
                 listList.remove(info);
                 listBox.removeItem(index);
             }
