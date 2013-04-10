@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.logging.Logger;
@@ -150,7 +151,7 @@ public class Utils {
     }
 
     public static String getConfigValue(ConfigurationKey key) {
-        ConfigurationController controller = new ConfigurationController();
+        ConfigurationController controller = ControllerFactory.getConfigurationController();
         try {
             String value = controller.getPropertyValue(key);
             if (value != null)

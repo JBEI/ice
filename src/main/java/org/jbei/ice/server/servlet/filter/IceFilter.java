@@ -33,32 +33,18 @@ public class IceFilter implements Filter {
             chain.doFilter(request, response);
             HibernateHelper.commitTransaction();
         } catch (Throwable t) {
+            HibernateHelper.rollbackTransaction();
             try {
-                Logger.error(t);    // todo : need to rollback current transaction and start new one for logging
+                HibernateHelper.beginTransaction();
+                Logger.error(t);
+                HibernateHelper.commitTransaction();
             } catch (Throwable e) {
+                HibernateHelper.rollbackTransaction();
                 Logger.warn("Could not log error " + e.getMessage());
             }
-            HibernateHelper.rollbackTransaction();
-
-            /*
-            // Rollback only
-            ex.printStackTrace();
-            try {
-                if (sf.getCurrentSession().getTransaction().isActive()) {
-                    log.debug("Trying to rollback database transaction after exception");
-                    sf.getCurrentSession().getTransaction().rollback();
-                }
-            } catch (Throwable rbEx) {
-                log.error("Could not rollback transaction after exception!", rbEx);
-            }
-
-            // Let others handle it... maybe another interceptor for exceptions?
-            throw new ServletException(ex);
-             */
         }
     }
 
     @Override
-    public void destroy() {
-    }
+    public void destroy() {}
 }

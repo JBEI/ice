@@ -23,8 +23,7 @@ public class ConfigurationController {
         try {
             Configuration configuration = dao.get(ConfigurationKey.DATABASE_SCHEMA_VERSION);
             if (configuration == null)
-                throw new ControllerException("Could not retrieve database schema record");
-
+                return null;
             return configuration.getValue();
         } catch (DAOException e) {
             Logger.error(e);
@@ -65,6 +64,14 @@ public class ConfigurationController {
                 Logger.info("Adding {key, value} -> " + type.name() + ", " + value);
                 dao.save(config);
             }
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+    }
+
+    public Configuration getConfiguration(ConfigurationKey key) throws ControllerException {
+        try {
+            return dao.get(key);
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
@@ -117,6 +124,25 @@ public class ConfigurationController {
         } catch (DAOException de) {
             Logger.error(de);
             throw new ControllerException();
+        }
+    }
+
+    /**
+     * Initializes the database on new install
+     */
+    public void initPropertyValues() throws ControllerException {
+        for (ConfigurationKey key : ConfigurationKey.values()) {
+            try {
+                Configuration config = dao.get(key);
+                if (config != null || key.getDefaultValue().isEmpty())
+                    continue;
+
+                Logger.info("Setting value for " + key.toString() + " to " + key.getDefaultValue());
+                setPropertyValue(key, key.getDefaultValue());
+            } catch (DAOException e) {
+                continue;
+            }
+
         }
     }
 }

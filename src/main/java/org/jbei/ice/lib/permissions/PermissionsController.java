@@ -36,37 +36,6 @@ public class PermissionsController {
         dao = new PermissionDAO();
     }
 
-    // add permission no questions asked. Cannot be write (stopgap till I get the right architecture in place)
-    public void addEntryPermissionNoCheck(Entry entry, PermissionInfo info) throws ControllerException {
-        if (info.isCanWrite())
-            throw new ControllerException("Cannot call this method for write permissions");
-
-        // account or group
-        Account account = accountController.get(info.getArticleId());
-
-        // does the permissions already exists
-        try {
-            if (dao.hasPermission(entry, null, account, null, info.isCanRead(), info.isCanWrite())) {
-                return;
-            }
-
-            // add the permission if not
-            Permission permission = new Permission();
-            permission.setEntry(entry);
-            if (entry != null)
-                entry.getPermissions().add(permission);
-            permission.setGroup(null);
-            permission.setFolder(null);
-            permission.setAccount(account);
-            permission.setCanRead(info.isCanRead());
-            permission.setCanWrite(info.isCanWrite());
-            dao.save(permission);
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
-    }
-
     public void addPermission(Account requestingAccount, PermissionInfo info) throws ControllerException {
         Entry entry = null;
         Folder folder = null;
@@ -200,7 +169,7 @@ public class PermissionsController {
     }
 
     public int clearGroupPermissions(Account account, Group group) throws ControllerException, PermissionException {
-        if (!group.getOwner().equals(account.getEmail()) && !accountController.isAdministrator(account)) {
+        if (!group.getOwner().getEmail().equals(account.getEmail()) && !accountController.isAdministrator(account)) {
             throw new PermissionException(account.getEmail() + " does not have permission to delete group "
                                                   + group.getId());
         }

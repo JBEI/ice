@@ -16,7 +16,7 @@ import org.hibernate.Session;
  *
  * @author Timothy Ham, Hector Plahar
  */
-public class ConfigurationDAO extends HibernateRepository<Configuration> {
+class ConfigurationDAO extends HibernateRepository<Configuration> {
 
     /**
      * Save the given {@link Configuration} object in the database.

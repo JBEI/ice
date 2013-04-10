@@ -19,42 +19,41 @@ public enum ConfigurationKey implements IsSerializable {
 
     DATABASE_SCHEMA_VERSION("", "", false),
     TEMPORARY_DIRECTORY("", "temp directory", true),
-    DATA_DIRECTORY("", "data directory", true),
-    ATTACHMENTS_DIRECTORY("/tmp/attachments", "attachment directory", true),
-    TRACE_FILES_DIRECTORY("/tmp/traces", "sequence trace file directory", true),
-    BLAST_DIRECTORY("/tmp/blast", "blast directory", true),
+    DATA_DIRECTORY("data", "data directory", true),
+    ATTACHMENTS_DIRECTORY("data/attachments", "attachment directory", true),
+    TRACE_FILES_DIRECTORY("data/traces", "sequence trace file directory", true),
+    BLAST_DIRECTORY("blast", "blast directory", true),
     SITE_SECRET("Site Secret", "", false),
     // deprecated. use the user account salt instead.
     SECRET_KEY("o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+", "", false),
     COOKIE_NAME("jbei-ice", "Cookie Name", true),
     BULK_UPLOAD_APPROVER_EMAIL("", "bulk upload approver email", true), //TODO this should be a role
     ADMIN_EMAIL("", "administrative email", true), // ditto
-    SMTP_HOST("SMTP Host", "SMTP Host", true),
+    SMTP_HOST("", "SMTP Host", true),
     ERROR_EMAIL_EXCEPTION_PREFIX("ERROR", "Error email title prefix", true),
     SEND_EMAIL_ON_ERRORS("NO", "send email on error", true),
-    PROJECT_NAME("JBEI-ICE", "Project Name", true),
-    URI_PREFIX("", "", true),
+    PROJECT_NAME("JBEI Registry", "Project Name", true),
+    URI_PREFIX("localhost:8443", "", true),
     PART_NUMBER_PREFIX("TEST", "", true),
     PART_NUMBER_DIGITAL_SUFFIX("000001", "", true),
     PART_NUMBER_DELIMITER("_", "", true),
     WIKILINK_PREFIX("", "Wikilink Prefix", true),
-    BLAST_BLASTALL("", "", true),
-    BLAST_BL2SEQ("", "", true),
-    BLAST_FORMATDB("", "", true),
-    BLAST_DATABASE_NAME("", "", true),
+    BLAST_BLASTALL("blast-2.2.26/bin/blastall", "", true),
+    BLAST_BL2SEQ("blast-2.2.26/bin/bl2seq", "", true),
+    BLAST_FORMATDB("blast-2.2.26/bin/formatdb", "", true),
+    BLAST_DATABASE_NAME("jbeiblast", "", true),
 
-    NEW_REGISTRATION_ALLOWED("", "Allow user registration", true),
-    PASSWORD_CHANGE_ALLOWED("", "allow password change", true),
-    PROFILE_EDIT_ALLOWED("", "Allow Profile Edit", true),
+    NEW_REGISTRATION_ALLOWED("NO", "Allow user registration", true),
+    PASSWORD_CHANGE_ALLOWED("YES", "allow password change", true),
+    PROFILE_EDIT_ALLOWED("YES", "Allow Profile Edit", true),
     WEB_PARTNERS("", "Web of Registry Partners", true),
-    JOIN_WEB_OF_REGISTRIES("no", "Join Web of Registries", true);
+    JOIN_WEB_OF_REGISTRIES("NO", "Join Web of Registries", true);
 
     private String displayName;
     private String defaultValue;
     private boolean editable;
 
-    ConfigurationKey() {
-    }
+    ConfigurationKey() {}
 
     ConfigurationKey(String defaultValue, String display, boolean isEditable) {
         this.displayName = display;
