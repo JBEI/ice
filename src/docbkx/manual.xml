@@ -2,689 +2,260 @@
 <book id="gdIceManual" lang="en" xmlns="http://docbook.org/ns/docbook" version="5.0"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://docbook.org/ns/docbook ">
     <bookinfo>
-        <title>GD-ICE Manual</title>
+        <title>JBEI-ICE Manual</title>
     </bookinfo>
     <chapter id="introduction">
         <title>Introduction</title>
-        <sect1 id="welcome">
-            <title>Welcome</title>
-            <para>
-                Welcome to the JBEI Registry Software Version 3.3 (ICE). We hope you
-                find our tools useful. More information, feature requests, bug
-                reports, as well as discussions are available from our Google
-                Project
-                page:
-                <ulink url="http://code.google.com/p/gd-ice/">http://code.google.com/p/gd-ice/</ulink>
-            </para>
-        </sect1>
+        <para>
+            Welcome to the JBEI Registry Software Version 3.3.2 (ICE). We hope you
+            find our tools useful. More information, feature requests, bug
+            reports, as well as discussions are available from our Google
+            Project
+            page:
+            <ulink url="http://code.google.com/p/gd-ice/">http://code.google.com/p/gd-ice/</ulink>
+        </para>
     </chapter>
     <chapter id="installation">
         <title>Installation</title>
-        <sect1 id="requirements">
+        <sect2 id="requirements">
             <title>Requirements</title>
-            <para>ICE depends on external software. The minimum requirement to
-                run ICE
-                is Postgres and a Java based web server like Tomcat or Jetty. To use
-                BLAST to search sequences, it must be installed on your system.
-                Then,
-                update the jbeir.properties file to tell ICE where it is.
-            </para>
-            <sect2 id="requirements-java">
-                <title>Java</title>
-                <para>ICE requires Java 1.6 SE (also known as Java 6). Please download SDK version, either
-                    the OpenJDK or the Oracle version, instead of the GJC version. Most of our testing is done against
-                    the Oracle version.
-                </para>
-                <sect3 id="java-linux">
-                    <title>Debian Instructions</title>
-                    <para>The package name is "sun-java6-jdk". You may have to add external software
-                        repositories to be able to install it. To use sun java as default, you
-                        may have to run as root (type 'sudo su' or just 'su' depending on system)
-                        <screen>
-                            <prompt>#</prompt>
-                            <command>update-alternatives --list java</command>
-                        </screen>
-                        to see the available java on your system. To change it, run
-                        <screen>
-                            <prompt>#</prompt>
-                            <command>update-alternatives --config java</command>
-                        </screen>
-                        and choose "java-6-sun".
-                    </para>
-                </sect3>
-                <sect3 id="java-windows">
-                    <title>Windows</title>
-                    <para>Download Java from:
-                        <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">
-                            http://www.oracle.com/technetwork/java/javase/downloads/index.html
-                        </ulink>
-                    </para>
-                </sect3>
-            </sect2>
-            <sect2 id="requirements-postgresql">
-                <title>Postgresql</title>
-                <para>ICE requires postgres 8.x to run. It is relatively easy to set up and use.
-                    There are plenty of walk throughs on the internet to guide you. We
-                    recommend (and use) the pgadmin3 software. Please beware: If different
-                    versions of postgres is installed on your machine, they may be listening
-                    on different ports (5432 and/or 5433).
-                </para>
-                <sect3 id="postgres-linux">
-                    <title>Debian</title>
-                    <para>
-                        Install the postgresql package:
-                        <screen>
-                            <prompt>#</prompt>
-                            <command>apt-get install postgresql</command>
-                        </screen>
-                        Configure the root password for the root database user (called postgres)
-                        <screen>
-                            <prompt>#</prompt>
-                            <command>su postgres</command>
-                            <prompt>$</prompt>
-                            <command>psql
-                                <replaceable>postgres</replaceable>
-                            </command>
-                            <prompt>postgres=#</prompt>
-                            <command>\password postgres</command>
-                        </screen>
-                        After changing the password, type \q to quit.
-                    </para>
-                    <para>It is possible the database is named template1 instead of postgres. In this case type
-                        <screen>
-                            <prompt>$</prompt>
-                            <command>psql
-                                <replaceable>template1</replaceable>
-                            </command>
-                        </screen>
-                    </para>
-                    <para>Create a new database user
-                        <screen>
-                            <prompt>$</prompt>
-                            <command>createuser --pwprompt test_user</command>
-                        </screen>
-                        Type in the password, and select no to all options.
-                    </para>
-                    <para>
-                        Create a new database and assign it to the user
-                        <screen>
-                            <prompt>$</prompt>
-                            <command>createdb --owner test_user test_registry</command>
-                        </screen>
-                    </para>
-                    <para>
-                        Install pgAdmin3 (optional)
-                        <screen>
-                            <prompt>#</prompt>
-                            <command>apt-get install pgadmin3</command>
-                        </screen>
-                        When using pgadmin to connect to the database, make sure to use the correct port (see above).
-                    </para>
-                </sect3>
-                <sect3 id="postgres-windows">
-                    <title>Windows</title>
-                    <para>
-                        Postgresql has a Windows version with pgAdmin3 built in. See
-                        <ulink url="http://www.postgresql.org/download/windows">
-                            http://www.postgresql.org/download/windows
-                        </ulink>
-                    </para>
-                    <para>Choose the latest 8.x series (currently 8.4).
-                    </para>
-                    <para>Follow the prompts and set up the administrator password, and use the default port (5432).
-                    </para>
-                    <para>After the installation, launch pgAdmin III program, and connect to the
-                        database using the administrator password. Right click on Login Roles,
-                        select New Login Role, and enter test_user as the Role name and enter a
-                        password.
-                    </para>
-                    <para>To create a new database, right click on Databases, select New Database.
-                        Name it test_registry, and change the owner to test_user, then click Ok.
-                    </para>
-                </sect3>
-            </sect2>
-            <sect2 id="requirements-blast">
-                <title>BLAST</title>
-                <para>ICE needs to have ncbi-blast installed to use the nice BLAST features.
-                </para>
-                <para>
-                    On Ubuntu/Debian systems run:
-                    <screen>
-                        <prompt>#</prompt>
-                        <command>apt-get install blast2</command>
-                    </screen>
-                </para>
-                <para>TODO: Blast on Windows?</para>
-            </sect2>
-            <sect2 id="requirements-maven">
-                <title>Maven (optional, for building from sources or development)</title>
-                <para>We use Maven to help manage our dependencies. See
-                    <xref linkend="maven-setup"/>
-                    for details.
-                </para>
-            </sect2>
-            <sect2 id="requirements-eclipse">
-                <title>Eclipse IDE (optional, for development only)</title>
-                <para>We use Eclipse as our IDE. See
-                    <xref linkend="development">Development</xref>
-                    section for instructions.
-                </para>
-            </sect2>
-            <sect2 id="requirements-flex">
-                <title>Adobe Flex SDK (optional, for development only)</title>
-                <para>We include compiled versions of our Flex applications in our sources.
-                    However, if you would like to build your own, you need Adobe's
-                    SDK. The SDK is open source and freely available, which means
-                    you can compile our Flex tools without buying anything. The IDE for Windows and Mac is
-                    sadly not free. There is an unsupported version of the Linux IDE called fb4linux on google code
-                    which is what we use.
-                    See
-                    <xref linkend="development">Development</xref>
-                    section for instructions.
-                </para>
-            </sect2>
-        </sect1>
-        <sect1 id="install-from-war">
-            <title>Installing from the war file</title>
-            <para>For the most simple setup, one can run the pre-compiled war file available from the<ulink
-                    url="http://code.google.com/p/gd-ice/downloads/list">download site</ulink>.
-                Because gd-ice needs to talk to a postgres database, one must change some settings.
+            <para>
+                Running ICE as a web application requires deployment in a J2EE servlet container such as
+                Apache Tomcat and depends on JRE (or JDK) 7. The
+                <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Oracle version</ulink>
+                is recommended.
+                Ensure that the JAVA_HOME environment variable is pointing to the Java installation directory.
             </para>
             <para>
-                <sect2 id="configure-war">
-                    <title>Configuration</title>
-                    <para>First, unzip the war file using any unzip utility (a war file is just a zip file with another
-                        name). The configuration files
-                        are located in the 'gd-ice-3.3-SNAPSHOT/WEB-INF/classes' directory. See the
-                        <xref linkend="configuration">Configuration</xref>
-                        section for details.
-                    </para>
-                </sect2>
-                <sect2 id="install-war">
-                    <title>Installation</title>
-                    <para>
-                        After configuration has been properly changed in the 'gd-ice-3.3-SNASHOPT' directory,
-                        you can deploy gd-ice to an application server as an "exploded war". First, configure SSL, see
-                        <xref linkend="ssl-setup"/>. Then
-                        see
-                        <xref linkend="tomcat-configuration"/>
-                        for detailed tomcat instructions.
-                    </para>
-                </sect2>
+                To use BLAST to search sequences,
+                <ulink url="http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&amp;PAGE_TYPE=BlastDocs&amp;DOC_TYPE=Download">
+                    legacy ncbi-blast
+                </ulink>
+                must be installed on your system. We are working to upgrade to BLAST+.
             </para>
-        </sect1>
-        <sect1 id="install-from-sources">
+            <para>
+                JBEI-ICE is configured by default to use
+                <ulink url="http://hsqldb.org/">HSQLDB</ulink>
+                for data
+                storage. In a production environment, it is
+                highly recommended that a standalone database be used. Hibernate is used for Object/Relational
+                mapping and therefore JBEI-ICE can be configured and used with any of the Hibernate supported
+                databases. PostgreSQL has been tested more extensively with ICE and is therefore highly recommended.
+            </para>
+        </sect2>
+        <sect2 id="install-from-war">
+            <title>Installing from the WAR file</title>
+            <para>
+                Obtain the pre-compiled WAR file available from the
+                <ulink
+                        url="http://code.google.com/p/gd-ice/downloads/list">download site
+                </ulink>
+                and configure as
+                follows:
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem>Extract the contents of the WAR file using any unzip utility.</listitem>
+                    <listitem>Change the hibernate database connections in
+                        $ICE_HOME/WEB-INF/classes/hibernate.cfg.xml (where $ICE_HOME is the
+                        directory where the WAR file was extracted). The following is the example configuration for a
+                        PostgreSQL database running on the local machine:
+                        <programlisting><![CDATA[
+<property name="hibernate.connection.url">jdbc:postgresql://localhost/test_registry</property>
+<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+<property name="hibernate.connection.username">testuser</property>
+<property name="hibernate.connection.password">Pa55WorD</property>
+    ...
+<property name="dialect">org.hibernate.dialect.PostgreSQL82Dialect</property>]]>
+                        </programlisting>
+                    </listitem>
+                    <listitem>Specify the location of the log files in
+                        $ICE_HOME/WEB-INF/classes/log4j.properties.
+                    </listitem>
+                    <listitem>Deploy $ICE_HOME as the ROOT webapp in the servlet container.</listitem>
+                    <listitem>Change the value of the property
+                        <programlisting><![CDATA[
+<property name="hibernate.search.default.indexBase">/tmp/regindex</property>]]>
+                        </programlisting>
+                        in
+                        $ICE_HOME/WEB-INF/classes/hibernate.cfg.xml. This is where the lucene index is maintained.
+                    </listitem>
+                    <listitem>You may change the logo (which appears on the login page and the page headers) by
+                        replacing $ICE_HOME/static/images/logo.png with your custom logo.
+                    </listitem>
+                    <listitem>You may change the application page title by opening $ICE_HOME/Gwt_ice.html in any
+                        text editor and replacing "JBEI Registry".
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>
+                Start up the application container and use your web browser to access JBEI-ICE.
+                There are some settings stored in the database that also need to be configured. The default
+                administrator username and password is "Administrator" (for both). Be sure to change the password.
+                The rest of the system settings are on the Admin section of the application.
+                Please go through all the settings and make sure the values are correct. They can
+                be changed at any time while the application is running.
+            </para>
+        </sect2>
+        <sect2 id="install-from-sources">
             <title>Installing from source code</title>
-            <sect2 id="get-sources">
-                <title>Getting the Source Code</title>
-                <para>The best way to install gd-ice is to build from the source code, as there are two
-                    major benefits over installing from the war file. First is the ability to keep up-to-date with
-                    the latest bug fixes and updates. The second is the ability to customize gd-ice, letting
-                    you replace logos, themes, and page text.
-                </para>
-                <para>
-                    To download the sources from the git repository, run:
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>git clone https://code.google.com/p/gd-ice gd-ice-build</command>
-                    </screen>
-                </para>
-                <para>
-                    Under Windows, TortoiseGit is a nice client.
-                </para>
-            </sect2>
-            <sect2 id="source-prep">
-                <title>Preparing the source directory</title>
-                <para>Git has powerful features to allow management of different branches of source code.
-                    Because you'll be making changes to the source code (configurations or customizations), it
-                    would be wise to create a separate directory. Here, we will create a local branch called 'build'.
-                    This
-                    branch will only exist on your disk.
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>cd gd-ice-build</command>
-                    </screen>
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>git checkout -b build</command>
-                    </screen>
-                </para>
-                <para>
-                    Now you can make changes to the configuration files, or any file in the source code. See
-                    the
-                    <xref linkend="configuration">Configuration</xref>
-                    section for details.
-                </para>
-                <para>
-                    After you made changes to the configuration files you can commit the changes you have made to your
-                    local branch. To see the changes, run
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>git status</command>
-                    </screen>
-                    Now stage the changes to be commited ('add to index' in git parlance):
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>git add -u</command>
-                    </screen>
-                    Commit these changes to your local branch, with a message:
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>git commit -m "build: production settings"</command>
-                    </screen>
-                    If you make additional changes, you can repeat the 'git add' and 'git commit' commands. Use 'git
-                    log' to see
-                    the list of commits that have been made.
-                </para>
-            </sect2>
-            <sect2 id="source-update">
-                <title>Updating sources</title>
-                <para>
-                    With git you can keep up-to-date with the latest developments. First you fetch the latest version
-                    into your repository.
-                    This does not make changes to the files yet:
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>git fetch origin</command>
-                    </screen>
-                    No you can tell git to take the changes in your 'build' branch, and put it at the top (tip) of the
-                    development branch:
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>git rebase origin</command>
-                    </screen>
-                    In most cases this will succeed. If the main sources and your configurations altered the same line,
-                    git will
-                    prompt you to resolve any conflicts at this time. Fix these conflicts and run 'git add -u' and 'git
-                    rebase --continue'.
-                </para>
-                <para>
-                    For best results, instead of adding all the changes to a single git commit, commit each file change
-                    into
-                    individual commits, so they can be individually tracked.
-                </para>
-            </sect2>
-            <sect2 id="maven-setup">
-                <title>Setting up Maven</title>
-                <para>
-                    We use Maven as our dependency and build manager. As gd-ice uses external libraries, with
-                    dependencies of their own,
-                    Maven allows us to take care of these dependencies automatically.
-                </para>
-                <para>
-                    First, install maven on your system. For Debian linux, run 'apt-get install maven2'. For Windows,
-                    follow the installation instructions on
-                    the Maven website. Remember to add the appropriate environmental variables.
-                </para>
-                <para>
-                    Maven is configured via the pom.xml file, and most dependencies are defined there. However, there
-                    are some external
-                    libraries that maven does not know about, namely biojava and Flex components. We have provided these
-                    in the
-                    lib/ directory, and maven has to be told about these.
-                </para>
-                <para>Run the following commands in the lib/ directory of your sources. Make
-                    sure the long commands are not broken up into multiple lines. (both linux
-                    and Windows). You should be able to copy-paste the entire block and run all the commands at once. Be
-                    sure to hit enter at the end to
-                    make sure the last line was executed.
-                    <programlisting>
-                        mvn install:install-file -Dfile=bytecode.jar -DgroupId=org.jbei.ice -DartifactId=bytecode
-                        -Dversion=SNAPSHOT -Dpackaging=jar
-                        mvn install:install-file -Dfile=biojava-1.7-all.jar -DgroupId=org.jbei.ice
-                        -DartifactId=biojava-all -Dversion=SNAPSHOT -Dpackaging=jar
-                        mvn install:install-file -Dfile=biojava.jar -DgroupId=org.jbei.ice -DartifactId=biojava
-                        -Dversion=SNAPSHOT -Dpackaging=jar
-                        mvn install:install-file -Dfile=backport-util-concurrent.jar -DgroupId=org.jbei.ice
-                        -DartifactId=backport-util-concurrent -Dversion=SNAPSHOT -Dpackaging=jar
-                        mvn install:install-file -Dfile=flex-messaging-common.jar -DgroupId=org.jbei.ice
-                        -DartifactId=flex-messaging-common -Dversion=SNAPSHOT -Dpackaging=jar
-                        mvn install:install-file -Dfile=flex-messaging-core.jar -DgroupId=org.jbei.ice
-                        -DartifactId=flex-messaging-core -Dversion=SNAPSHOT -Dpackaging=jar
-                        mvn install:install-file -Dfile=flex-messaging-opt.jar -DgroupId=org.jbei.ice
-                        -DartifactId=flex-messaging-opt -Dversion=SNAPSHOT -Dpackaging=jar
-                        mvn install:install-file -Dfile=flex-messaging-proxy.jar -DgroupId=org.jbei.ice
-                        -DartifactId=flex-messaging-proxy -Dversion=SNAPSHOT -Dpackaging=jar
-                        mvn install:install-file -Dfile=flex-messaging-remoting.jar -DgroupId=org.jbei.ice
-                        -DartifactId=flex-messaging-remoting -Dversion=SNAPSHOT -Dpackaging=jar
-                        mvn install:install-file -Dfile=libSBOLj.jar -DgroupId=org.jbei.ice -DartifactId=libSBOLj
-                        -Dversion=SNAPSHOT -Dpackaging=jar
-                    </programlisting>
-                </para>
-                <para>
-                    Now you should have all the necessary librares in your local maven cache.
-                </para>
-            </sect2>
-            <sect2 id="maven-build">
-                <title>Building with Maven</title>
-                <para>
-                    After adjusting your configuration files as described in<xref linkend="ice-configuration"/>,
-                    gd-ice can be built as a war package by runinng:
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>mvn clean</command>
-                    </screen>
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>mvn package -Dmaven.test.skip=true</command>
-                    </screen>
-                    You will have to be patient, as maven will try to contact the library repositories, download all the
-                    dependent packages, and build
-                    gd-ice. Depending on how much the repository is overloaded, some packages may fail to download. If
-                    this happens, just
-                    re-run the above command. Eventually it will succeed. Once the packages are downloaded, they are
-                    saved to disk
-                    ($home/.m2), so the next time it wouldn't take so long.
-                </para>
-                <para>
-                    The exploded war and the compressed war file will be located in the target/ directory. You can
-                    deploy either to your webserver.
-                </para>
-            </sect2>
-            <sect2 id="maven-jetty">
-                <title>Running a test server without Tomcat</title>
-                <para>Gd-ice includes a jetty webserver, which can be used test out your compiled package without
-                    deploying it to tomcat. The jetty settings are
-                    defined in jetty-debug.xml.
-                </para>
-                <para>
-                    First, generate a self-signed certificate as described in<xref linkend="ssl-setup"/>, and copy
-                    the .keystore file to the
-                    root build directory (where LICENSE.txt is). Now you can start a server instance by running:
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>mvn jetty:run -Dmaven.test.skip=true</command>
-                    </screen>
-                    If everything is set up properly, this command will populate your
-                    database with the appropriate tables, and run a server on port
-                    8443 (https). Point your browser to https://localhost:8443. Don't
-                    forget the https bit.
-                </para>
-                <para>
-                    To stop the server, press Ctrl-C
-                </para>
-                <para>
-                    Hint (unix): To capture all the output that pass by use the 'script' utility
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>script capturefile.txt</command>
-                    </screen>
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>mvn jetty:run -Dmaven.test.skip=true</command>
-                    </screen>
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>exit</command>
-                    </screen>
-                    Now all the output has been captured to a file, which can be examined.
-                </para>
-            </sect2>
-
-            <sect2 id="doc-build">
-                <title>Building documentation</title>
-                <para>
-                    The online documentation is built by running:
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>mvn site -Dmaven.test.skip=true</command>
-                    </screen>
-                    The javadoc will be in 'target/site/apidocs', and this manual will be in 'target/docbkx/html'
-                    directories.
-                </para>
-                <para>
-                    To build the javadoc separately, run
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>mvn javadoc:javadoc</command>
-                    </screen>
-                    To build the manual separately, run
-                    <screen>
-                        <prompt>$</prompt>
-                        <command>mvn pre-site</command>
-                    </screen>
-                </para>
-            </sect2>
-        </sect1>
-        <sect1 id="ssl-setup">
-            <title>Setting up SSL</title>
             <para>
-                Gd-ice uses https secure connections by default. To use https, one must have an SSL certificate, either
-                purchased from
-                a commercial Certificate Authority or created by you. The advantage of a purchased certificate is that
-                browsers will
-                not complain about "invalid certificate" or "security warnings" about the self-generated certificate.
-            </para>
-            <para>
-                One can generate a self-signed certificate using the following commands:
+                To download the sources from the git repository, run:
                 <screen>
-                    <prompt>$</prompt>
-                    <command>keytool -genkey -alias tomcat -keyalg RSA -keystore .keystore</command>
+                    git clone https://code.google.com/p/gd-ice $ICE_HOME
                 </screen>
-                For Windows:
+                where $ICE_HOME is the folder name of your choice.
+                If you already have the sources and wish to get the latest version from the repository, run:
                 <screen>
-                    <prompt>$</prompt>
-                    <command>%JAVA_HOME%\bin\keytool.exe -genkey -alias tomcat -keyalg RSA -keystore .keystore</command>
+                    git fetch origin
                 </screen>
-                The password for the keystore should be "changeit" (without the quotes).
+                in $ICE_HOME.
             </para>
             <para>
-                The SSL certificate is used by tomcat. See
-                <xref linkend="tomcat-configuration"/>
-                for more information.
+                We use Maven as our dependency and build manager which allows us to automatically manage JBEI-ICE's
+                external libraries (and dependencies).
             </para>
-        </sect1>
+            <para>
+                You need to<ulink url="http://maven.apache.org/users/index.html">install maven on your system</ulink>.
+                Make sure to get version 2 as version 3 is not yet supported.
+                Maven is configured via the pom.xml file, and most dependencies are defined there. However, there
+                are some external
+                libraries that maven does not know about (e.g. biojava and Flex components). We have provided these
+                in the
+                lib/ directory, and maven has to be told about these.
+            </para>
+            <para>Run the following commands in the $ICE_HOME/lib directory
+                to update your local maven cache with external dependencies.
+                <programlisting>
+                    mvn install:install-file -Dfile=bytecode.jar -DgroupId=org.jbei.ice -DartifactId=bytecode
+                    -Dversion=SNAPSHOT -Dpackaging=jar
+                    mvn install:install-file -Dfile=biojava-1.7-all.jar -DgroupId=org.jbei.ice -DartifactId=biojava-all
+                    -Dversion=SNAPSHOT -Dpackaging=jar
+                    mvn install:install-file -Dfile=biojava.jar -DgroupId=org.jbei.ice -DartifactId=biojava
+                    -Dversion=SNAPSHOT -Dpackaging=jar
+                    mvn install:install-file -Dfile=flex-messaging-common.jar -DgroupId=org.jbei.ice
+                    -DartifactId=flex-messaging-common -Dversion=SNAPSHOT -Dpackaging=jar
+                    mvn install:install-file -Dfile=flex-messaging-core.jar -DgroupId=org.jbei.ice
+                    -DartifactId=flex-messaging-core -Dversion=SNAPSHOT -Dpackaging=jar
+                    mvn install:install-file -Dfile=flex-messaging-opt.jar -DgroupId=org.jbei.ice
+                    -DartifactId=flex-messaging-opt -Dversion=SNAPSHOT -Dpackaging=jar
+                    mvn install:install-file -Dfile=flex-messaging-proxy.jar -DgroupId=org.jbei.ice
+                    -DartifactId=flex-messaging-proxy -Dversion=SNAPSHOT -Dpackaging=jar
+                    mvn install:install-file -Dfile=flex-messaging-remoting.jar -DgroupId=org.jbei.ice
+                    -DartifactId=flex-messaging-remoting -Dversion=SNAPSHOT -Dpackaging=jar
+                    mvn install:install-file -Dfile=libSBOLj-0.7.0-SNAPSHOT.jar -DgroupId=org.jbei.ice
+                    -DartifactId=libSBOLj -Dversion=0.7.0 -Dpackaging=jar
+                </programlisting>
+                To generate the WAR package, run:
+                <screen>
+                    mvn clean package -Dmaven.test.skip=true
+                </screen>
+                This may take several minutes as maven attempts to fetch all additional dependencies and build JBEI-ICE.
+            </para>
+            <para>
+                The exploded war and the compressed war file will be located in the $ICE_HOME/target/ directory. You can
+                deploy to your application server using the instructions in<xref linkend="install-from-war"/>.
+            </para>
+        </sect2>
+        <sect2 id="test-server">
+            <title>Running a test server</title>
+            <para>JBEI-ICE includes a jetty webserver, which can be used test out your compiled package without
+                deploying it to tomcat. The jetty settings are defined in $ICE_HOME/jetty-debug.xml. You will need
+                to generate a self-signed certificate as JBEI-ICE uses HTTPS by default. To generate a self-signed
+                certificate run:
+                <screen>keytool -genkey -alias tomcat -keyalg RSA -keystore ./.keystore</screen>
+                Follow the prompts and enter the requested information. When prompted for a password, you may use
+                'changeit.' If you opt for a different password, make sure to enter that is jetty-debug.xml.
+                Copy the generated .keystore file to $ICE_HOME and start jetty by running:
+                <screen>mvn jetty:run -Dmaven.test.skip=true</screen>
+                Point your browser to https://localhost:8443 to access the application.
+            </para>
+            <para>
+                To stop the server, press Ctrl-C
+            </para>
+            <para>
+                Hint (unix): To capture all the output that pass by use the 'script' utility
+                <programlisting>
+                    script capturefile.txt
+                    mvn jetty:run -Dmaven.test.skip=true
+                    exit
+                </programlisting>
+                Now all the output has been captured to a file, which can be examined.
+            </para>
+            <para>
+                To run a tomcat server, you may also use the generated keystore file.
+                Update $TOMCAT_HOME/conf/server.xml to redirect port 8080 to port 8443 using the following
+                Connector directive:
+                <programlisting>
+                    <![CDATA[<Connector executor="tomcatThreadPool"
+                           port="8080" protocol="HTTP/1.1"
+                           connectionTimeout="20000"
+                           redirectPort="8443" />
+                <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"
+                           maxThreads="150" scheme="https" secure="true" keystoreFile="./.keystore"
+                           keystorePass="changeit" clientAuth="false" sslProtocol="TLS" />]]>
+                </programlisting>
 
+                In a production environment
+                you will need to purchase an SSL certificate, since self-generated certificates result in browser
+                warnings.
+            </para>
+        </sect2>
+        <sect2 id="doc-build">
+            <title>Building documentation</title>
+            <para>
+                The online documentation is built by running:
+                <screen>
+                    mvn site -Dmaven.test.skip=true
+                </screen>
+                The javadoc will be in 'target/site/apidocs', and this manual will be in 'target/docbkx/html'
+                directories.
+            </para>
+            <para>
+                To build the javadoc separately, run
+                <screen>
+                    mvn javadoc:javadoc
+                </screen>
+                To build the manual separately, run
+                <screen>
+                    mvn pre-site
+                </screen>
+            </para>
+        </sect2>
     </chapter>
 
-    <chapter id="configuration">
-        <title>Configuration</title>
-        <sect1 id="ice-configuration">
-            <title>ICE configuration</title>
-            <sect2 id="hibernate-configuration">
-                <title>Hibernate Configuration</title>
-                <para>The hibernate configuration file is located in 'src/main/java/hibernate.cfg.xml' or
-                    'gd-ice-2.0-SNAPSHOT/WEB-INF/classes/hibernate.cfg.xml' in the exploded war file.
-                </para>
-                <para>
-                    Tell gd-ice the name of your database by changing this line and replacing "test_registry" with the
-                    name of your database.
-                    <programlisting>
-                        <![CDATA[<property name="hibernate.connection.url">jdbc:postgresql://localhost/test_registry</property>]]></programlisting>
-                </para>
-                <para>
-                    Update the password of your database by replacing the password string in this line.
-                    <programlisting>
-                        <![CDATA[<property name="hibernate.connection.password">t@stuz@r</property>]]></programlisting>
-                </para>
-            </sect2>
-            <sect2 id="ice-properties-configuration>">
-                <title>ICE Properties Configuration</title>
-                <para>The ICE configuration file is located in 'src/main/java/jbeir.properties' or
-                    'gd-ice-2.0-SNAPSHOT/WEB-INF/classes/jbeir.properties' in
-                    the exploded war file.
-                </para>
-                <para>
-                    At minimum, change the 'SMTP_HOST' to use your mail host, and change 'ADMIN_EMAIL' and
-                    'MODERATOR_EMAIL' to the
-                    appropriate email addresses. Plese change the 'SITE_SECRET' and 'SECRET_KEY'. These strings are used
-                    as
-                    cryptographic salts in various places.
-                </para>
-                <para>
-                    Any "*_DIRECTORY" setting with '/tmp' should be changed if you want to use these
-                    features. For Windows, replace the directory names with Windows style folder
-                    names. For example, "/tmp/attachments" can become "c:\tmp\attachments".
-                    Be sure that the tomcat program has permissions to write to these directories, and
-                    double check that the location of blast programs are correct.
-                </para>
-            </sect2>
-            <sect2 id="logfile-properties-configuration">
-                <title>Logfile configuration</title>
-                <para>
-                    The configurations for logfile location and format is located in
-                    'src/main/resources/log4j.properties'
-                    or 'gd-ice-3.3-SNAPSHOT/WEB-INF/classes/log4j.properties'. Change the file location if you want to
-                    keep log files between server reboots. The 'FILE' directive should be in unix format, even for
-                    Windows.
-                </para>
-            </sect2>
-            <sect2 id="web-xml-configuration">
-                <title>web.xml configuration</title>
-                <para>
-                    The 'src/main/webapp/WEB-INF/web.xml' or 'gd-ice-2.0-SNAPSHOT/WEB-INF/web.xml' files can be left
-                    alone.
-                    If you must run your site on http instead of https (we do not recommend this), comment out the
-                    &lt;security-constraint&gt; section. By default, all the Flex components are built with the
-                    assumption of using https,
-                    which means that Flex apps will not work unless they are recompiled from sources without the https
-                    flag.
-                </para>
-            </sect2>
-        </sect1>
-        <sect1 id="tomcat-configuration">
-            <title>Tomcat configuration</title>
-            <para>Although gd-ice can be deployed to any web server, it has been tested with Tomcat6, and that is what
-                is used at JBEI.
-            </para>
-            <para>GD-ICE runs over SSL by default. Tomcat has to be configured to redirect port 80 to port 443, and
-                listen on port 443 with the appropriate
-                ssl keystore file by specifying the 'keystoreFile' parameter as shown below. The 'Connector' directive
-                goes inside the 'Server' directive.
-                <programlisting><![CDATA[
-<Connector executor="tomcatThreadPool"
-    port="80" protocol="HTTP/1.1"
-    connectionTimeout="20000"
-    redirectPort="443" />
-<Connector port="443" SSLEnabled="true"
-    keystoreFile="/usr/share/tomcat6/registry.jbei.org.keystore"
-    keystorePass="changeit" keystoreType="pkcs12"
-    maxThreads="150" schema="https" secure="true"
-    compression="on"
-    clientAuth="false" sslProtocol="TLS" />]]></programlisting>
-            </para>
-            <para>
-                Once SSL has been configured, deploy the exploded war file to your tomcat webapps directory. Usually it
-                is /var/lib/tomcat6/webapps.
-            </para>
-            <para>
-                For best compatibility, deploy ice as the root webapp in the webapps/ROOT directory.
-            </para>
-        </sect1>
+    <chapter id="upgrade">
+        <title>Upgrading from older versions</title>
+        <para>
+            At this time, only upgrading from version 3.1 to any of the 3.3.* versions is supported.
+            It is highly recommended that you perform a full database backup before attempting an upgrade.
+            There are some changes to the database schemas so ensure that the 'hbm2ddl.auto' property is set to 'update'
+            when first starting up the server after updating the webapp.
+        </para>
     </chapter>
+
     <chapter id="administration">
         <title>Administration</title>
-        <sect1 id="basic-administration">
-            <title>Basic Administration</title>
-            <para>This feature is still being developed. There are a few basic functions available from the the
-                Administrator's
-                page located at https://yoursite/admin.
-            </para>
-        </sect1>
+        <para>There are a few basic functions available from the the Administrator's
+            page located at https://yoursite/#page=admin. Any user with administrative privileges will see
+            and admin link in the main menu. The admin section currently has 4 subsections:
+            <itemizedlist>
+                <listitem>System settings: used for general site settings, email settings,
+                    and blast search settings.
+                </listitem>
+                <listitem>Web of registries settings: allows you include you site in the web of registries and
+                    partner with other JBEI-ICE installations.
+                </listitem>
+                <listitem>Manage User settings: shows list of site members and
+                    basic information about them.
+                </listitem>
+                <listitem>Manage Groups: permits public group creation and management.</listitem>
+            </itemizedlist>
+        </para>
     </chapter>
+
     <chapter id="development">
         <title>Development</title>
-        <sect1 id="ice-development-setup">
-            <title>Setup for ICE Development</title>
-            <para>We use Eclipse IDE for ICE development. It is a popular and full featured
-                JAVA Integrated Development Environment (IDE), with many powerful features.
-                Unfortunately Eclipse also comes with a steep learning curve.
-            </para>
-            <para>
-                To download Eclipse, go to
-                <ulink url="http://www.eclipse.org">eclipse.org</ulink>. After installing it, install the M2Eclipse
-                plugin:
-                Go to the Help menu, select "Install New Software", select
-                "Add...", and add a new software site (location is
-                http://download.eclipse.org/technology/m2e/releases), then follow
-                the prompts.
-            </para>
-            <para>
-                Once Eclipse is installed, import the root ICE directory (the one
-                with .project file) as an existing project. Select File from the menu, choose Import, then select
-                Maven -&gt; Existing Maven Projects, then select gd-ice as the Root.
-            </para>
-            <para>
-                It may take a while for Eclipse to "update indexes" when run for
-                the first time. You can see it's progress by clicking on the
-                button next to the small progress bar. Be patient.
-            </para>
-            <para>
-                To test the working functionality of the IDE, follow these steps.
-            </para>
-            <para>
-                Select Run from the menu, then select Debug Configurations...
-                Click on Maven Build, and click the New button. Put "jetty run"
-                in the name field, select the ICE root as the base directory by
-                clicking on Browse Workspace, and put "jetty:run" as the
-                goal. Select Apply then Debug.
-            </para>
-            <para>
-                To test a functioning debug set up, open up
-                WicketApplication.java file by pressing Shift-Ctrl-R, and type
-                in "WicketApplication.java"" in the search box. Set a breakpoint
-                on the line "mountPages();" (around line 53) by double clicking
-                on the left margin, below the green triangle. Launch jetty run
-                again, and Eclipse should stop at the specified line waiting
-                for your input. Press the green Play button in the Debug pane
-                to continue, red square to stop the program. If you see the
-                "Source not Found" error, click on the Edit Source Lookup Path
-                button, click Add, select Project, then check the gd-ice
-                project. Use F6 button to step through the source code.
-            </para>
-            <para>To debug unit tests, create a debug configuration with the following goal: "test -e -DforkMode=never"
-
-            </para>
-            <para>If you chose to allow Eclipse to "change to the debug
-                perspective", you will see a very differently layed out
-                screen. A Perspective is a group of windows visible on the screen, associated with a name.
-                Perspectives can be changed by pressing the perspective
-                buttons on the top right, (button tray can be resized) or by
-                going to the Window-&gt; Open Perspective menu. Typically, the
-                Java perspective and the Debug perspective are the most used.
-            </para>
-            <para>
-                Eclipse is a large and powerful program for software development.
-                It has a steep learning curve, so here are some tips.
-            </para>
-            <para>
-                Perspectives: These are groups of windows. They can be selected
-                from the top right of the screen. Initially, Java EE is available,
-                and when one starts to debug, a Debug perspective opens up. Each
-                perspective can display whatever kinds of windows.
-            </para>
-            <para>Views: Views are kinds of windows. Editor, Project Explorer, Console,
-                and Debug are some of these views. Any View can be added to any
-                Perspective by selecting the Window menu -&gt; Show View -&gt; etc.
-                When Eclipse is closed, the position and the layout of Views
-                is preserved for each Perspective.
-            </para>
-            <para>Sometimes Perspectives get confused. Select Window -&gt; Reset
-                Perspective to reset a customized Perspective.
-            </para>
-            <para>Sometimes Eclipse itself gets confused. It is a good idea to
-                make a backup copy of a working version of the eclipse settings
-                (.metadata folder in the workspace folder) periodically. Same
-                goes with .settings folder in the project directory.
-            </para>
-            <para>To show line numbers in the editor, go to Window -&gt; Preferences
-                -&gt; General -&gt; Editors -&gt; Text Editors and select 'Show line
-                numbers'.
-            </para>
-            <para>
-                Eclipse has a very powerful automatic completion. Press
-                Ctrl-Space to get context assistance, and Ctrl-1 for "quick
-                fix", which can fix many different types of compilation errors
-                almost automatically.
-            </para>
-            <para>Use the ICE source formatter. Go to Window -&gt; Preferences -&gt;
-                Java -&gt; Code Style -&gt; Formatter and import the Registry Team
-                Formatter.xml file. Format can then be performed by pressing
-                Ctrl-Shift-F. Eclipse can be configured to automatically format
-                Java code all the time by selecting Preferences -&gt; Java -&gt;
-                Editor -&gt; Save Actions and selecting Format source code on save.
-            </para>
-        </sect1>
         <sect1 id="flex-development-setup">
             <title>Set up for Flex Development</title>
             <sect2 id="flex-quick-start">
@@ -701,9 +272,7 @@
                 <para>
                     You can obtain the source code by running
                     <screen>
-                        <prompt>$</prompt>
                         <command>git clone https://code.google.com/p/vectoreditor/</command>
-                        <prompt>$</prompt>
                         <command>git clone https://code.google.com/p/bioflex/</command>
                     </screen>
                 </para>
@@ -758,33 +327,6 @@
                     is an experimental version that can save to the gd-ice instance as Projects. This
                     flag is not complete.
                 </para>
-                <para>
-                    To debug the entryEdition of the VectorEditor, it is necessary to have the gd-ice serve up the debug
-                    swf file.
-                    This means that the Flex IDE must compile the debug swf into the gd-ice src directory, compile
-                    gd-ice,
-                    and run it to serve up the debug swf file. We accomplish this by running two instances of Eclipse,
-                    one for
-                    gd-ice and another for Flex. We clean/compile the flex app using the flex ide, then clean/compile
-                    gd-ice using
-                    java ide, launch gd-ice on the java ide, then launch the flex app by having the flex ide load the
-                    webpage where the java ide is serving the flex app. For example to launch VectorEditor in
-                    entryEdition mode, the debug launch
-                    dialog has this in the launch URL field:
-                    <programlisting>
-                        <![CDATA[https://localhost:8443/?wicket:bookmarkablePage=:org.jbei.ice.web.pages.VectorEditorPage&entryId=3e6eb5a1-6ce0-4476-a474-338be106394f]]></programlisting>
-                    Replace the entryId field as appropriate.
-                </para>
-                <para>
-                    In addition, the Flex IDE has to be told to talk to a java server for data. This can be set in the
-                    Project Properties dialag, under
-                    Flex Server tab. Select J2EE from the drop down, and BlazeDS in the check box. The root folder would
-                    be 'yourworkspace/gd-ice/src/main/webapp',
-                    Root url is 'https://localhost:8443', and the context root is '/'. The output folder is naturally
-                    the gd-ice source folder, for example
-                    'yourworkspace/gd-ice/src/main/java/org/jbei/ice/web/pages/static/ve' for VectorEditor. Other apps
-                    are configured similarly.
-                </para>
                 <para>This has the effect of adding '-services
                     "/yourworkspace/gd-ice/src/main/webapp/WEB-INF/flex/services-config.xml" ' to
                     the compiler flag, and creating the services-config.xml in the target WEB-INF directory.
@@ -793,7 +335,7 @@
         </sect1>
         <sect1 id="contributing">
             <title>Contributing Code</title>
-            <para>GD-ICE is an open source software, and we gladly accept patches to our code. Just send us an email
+            <para>JBEI-ICE is an open source software, and we gladly accept patches to our code. Just send us an email
                 and/or a patch file.
             </para>
             <para>When you send us a submission, we ask that you conform to our formatting guidelines. Simply set up
@@ -802,24 +344,23 @@
             </para>
         </sect1>
     </chapter>
+
     <chapter id="Credits">
         <title>Credits</title>
-        <sect1 id="credits">
-            <title>Credits</title>
-            <para>GD-ICE was developed by the following people:
-                <itemizedlist>
-                    <listitem>Timothy Ham</listitem>
-                    <listitem>Zinovii Dmytriv</listitem>
-                    <listitem>Hector Plahar</listitem>
-                    <listitem>Joanna Chen</listitem>
-                </itemizedlist>
-            </para>
-            <para>
-                The development of gd-ice, VectorEditor, and BioFlex was funded by the U.S. Department of Energy,
-                Office of Science, Office of Biological and Environmental Research, through contract
-                DE-AC02-05CH11231 between Lawrence Berkeley National Laboratory and the U.S. Department of Energy.
-            </para>
-        </sect1>
+        <title>Credits</title>
+        <para>JBEI-ICE was developed by the following people:
+            <itemizedlist>
+                <listitem>Timothy Ham</listitem>
+                <listitem>Zinovii Dmytriv</listitem>
+                <listitem>Hector Plahar</listitem>
+                <listitem>Joanna Chen</listitem>
+            </itemizedlist>
+        </para>
+        <para>
+            The development of JBEI-ICE, VectorEditor, and BioFlex was funded by the U.S. Department of Energy,
+            Office of Science, Office of Biological and Environmental Research, through contract
+            DE-AC02-05CH11231 between Lawrence Berkeley National Laboratory and the U.S. Department of Energy.
+        </para>
     </chapter>
 
 </book>

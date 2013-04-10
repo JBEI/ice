@@ -3,15 +3,12 @@ package org.jbei.ice.lib.entry.sample;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jbei.ice.lib.config.ConfigurationDAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.entry.EntryType;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -165,44 +162,20 @@ public class StorageDAO extends HibernateRepository<Storage> {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Storage> getStorageSchemesForEntryType(String entryType) throws DAOException {
-        ArrayList<Storage> result = new ArrayList<Storage>();
+    public List<Storage> getStorageSchemesForEntryType(String uuid) throws DAOException {
+        ArrayList<Storage> result = new ArrayList<>();
         Session session = currentSession();
-        String uuid = null;
-        EntryType type = EntryType.nameToType(entryType);
-        if (type == null)
+
+        if (uuid == null)
             return null;
 
-        ConfigurationDAO configurationDAO = new ConfigurationDAO();
-        switch (type) {
-            case STRAIN:
-                uuid = configurationDAO.get(ConfigurationKey.STRAIN_STORAGE_ROOT).getValue();
-                break;
-
-            case PLASMID:
-                uuid = configurationDAO.get(ConfigurationKey.PLASMID_STORAGE_ROOT).getValue();
-                break;
-
-            case PART:
-                uuid = configurationDAO.get(ConfigurationKey.PART_STORAGE_ROOT).getValue();
-                break;
-
-            case ARABIDOPSIS:
-                uuid = configurationDAO.get(ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT).getValue();
-                break;
-        }
-
-        if (uuid != null) {
-            Storage parent = get(uuid);
-            Query query = session.createQuery("from " + Storage.class.getName()
-                                                      + " storage where storage.parent = :parent AND storage" +
-                                                      ".storageType = "
-                                                      + ":storageType");
-            query.setParameter("parent", parent);
-            query.setParameter("storageType", StorageType.SCHEME);
-            result.addAll(query.list());
-
-        }
+        Storage parent = get(uuid);
+        Query query = session.createQuery("from " + Storage.class.getName()
+                                                  + " storage where storage.parent = :parent AND storage"
+                                                  + ".storageType = " + ":storageType");
+        query.setParameter("parent", parent);
+        query.setParameter("storageType", StorageType.SCHEME);
+        result.addAll(query.list());
         return result;
     }
 

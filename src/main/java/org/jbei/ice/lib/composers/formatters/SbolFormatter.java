@@ -21,7 +21,6 @@ import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
 import org.sbolstandard.core.SequenceAnnotation;
 import org.sbolstandard.core.StrandType;
-import org.sbolstandard.core.util.SBOLPrettyWriter;
 
 /**
  * Format to SBOL v 1.1 using libSBOLj
@@ -56,7 +55,6 @@ public class SbolFormatter extends AbstractFormatter {
         // populate the annotations
         Set<SequenceFeature> features = sequence.getSequenceFeatures();
         dnaComponent = addAnnotations(uriString, dnaComponent, features);
-        new SBOLPrettyWriter().write(dnaComponent, System.out);
         SBOLFactory.write(createXmlDocument(dnaComponent), outputStream);
     }
 

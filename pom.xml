@@ -4,7 +4,7 @@
     <groupId>org.jbei</groupId>
     <artifactId>gd-ice</artifactId>
     <packaging>war</packaging>
-    <version>3.3.1-SNAPSHOT</version>
+    <version>3.3.2-SNAPSHOT</version>
     <!-- TODO project name  -->
     <name>gd-ice</name>
     <description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
@@ -131,7 +131,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>4.1.9.Final</version>
+            <version>4.1.7.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -146,7 +146,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-c3p0</artifactId>
-            <version>4.1.7.Final</version>
+            <version>4.2.0.Final</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
@@ -181,6 +181,11 @@
         <dependency>
             <groupId>org.jbei.ice</groupId>
             <artifactId>biojava</artifactId>
+            <version>SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jbei.ice</groupId>
+            <artifactId>bytecode</artifactId>
             <version>SNAPSHOT</version>
         </dependency>
         <dependency>
