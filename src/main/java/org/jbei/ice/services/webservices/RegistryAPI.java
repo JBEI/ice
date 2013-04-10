@@ -1386,6 +1386,35 @@ public class RegistryAPI implements IRegistryAPI {
         }
     }
 
+    @Override
+    public Strain retrieveStrainForSampleBarcode(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException {
+        log(sessionId, "retrieveEntryForSampleBarcode: " + barcode);
+        SampleController sampleController = ControllerFactory.getSampleController();
+        StorageController storageController = ControllerFactory.getStorageController();
+
+        try {
+            Storage storage = storageController.retrieveStorageTube(barcode.trim());
+            if (storage == null) {
+                return null;
+            }
+
+            List<Sample> samples = sampleController.getSamplesByStorage(storage);
+            for (Sample sample : samples) {
+                Storage sampleStorage = sample.getStorage();
+                if (sampleStorage == null)
+                    continue;
+                if (sampleStorage.getStorageType() != StorageType.TUBE)
+                    continue;
+                return (Strain) sample.getEntry();
+            }
+            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            throw new ServiceException(e);
+        }
+    }
+
     /**
      * Checks if all samples have a common plate. If not, it determines which plate
      * is the most likely.

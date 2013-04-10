@@ -152,4 +152,7 @@ public interface IRegistryAPI {
      */
     boolean transmitEntries(@WebParam(name = "entrySequenceMap") HashMap<Entry, String> entrySequenceMap)
             throws ServiceException;
+
+    Strain retrieveStrainForSampleBarcode(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException;
 }
