@@ -220,8 +220,25 @@ public class GroupAddMembersWidget extends Composite {
     }
 
     public void reset() {
+        listBox.clear();
+        listList.clear();
         selectedGroupMembersWidget.setMemberList(new ArrayList<AccountInfo>());
-        // TODO : clear all selections
-        // TODO : called when cancel is clicked
+
+        if (available.isEmpty())
+            return;
+
+        ArrayList<AccountInfo> accountInfos = new ArrayList<AccountInfo>(available.values());
+        Collections.sort(accountInfos, new Comparator<AccountInfo>() {
+
+            @Override
+            public int compare(AccountInfo o1, AccountInfo o2) {
+                return o1.getFullName().compareTo(o2.getFullName());
+            }
+        });
+
+        for (AccountInfo info : accountInfos) {
+            listBox.addItem(info.getFullName(), info.getId() + "");
+            listList.add(info);
+        }
     }
 }

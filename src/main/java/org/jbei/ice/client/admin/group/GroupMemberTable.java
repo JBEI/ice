@@ -95,6 +95,8 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
         Column<AccountInfo, String> column = new Column<AccountInfo, String>(new TextCell()) {
             @Override
             public String getValue(AccountInfo object) {
+                if (object == null)
+                    return "";
                 return object.getEmail();
             }
         };

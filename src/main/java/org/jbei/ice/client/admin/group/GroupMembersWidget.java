@@ -42,8 +42,13 @@ public class GroupMembersWidget extends Composite {
 
     public void setMemberList(ArrayList<AccountInfo> list) {
         infoList.clear();
+        dataProvider.getList().clear();
+
+        if (list.isEmpty())
+            return;
+
         infoList.addAll(list);
-        dataProvider.setList(infoList);
+        dataProvider.getList().addAll(infoList);
     }
 
     public ArrayList<AccountInfo> getMemberList() {
@@ -51,12 +56,23 @@ public class GroupMembersWidget extends Composite {
     }
 
     public void addMember(AccountInfo info) {
+        if (info == null)
+            return;
+
+        for (AccountInfo accountInfo : infoList) {
+            if (info.getEmail().equals(accountInfo.getEmail()))
+                return;
+        }
+
         infoList.add(info);
         dataProvider.getList().add(info);
         memberTable.setRowCount(infoList.size());
     }
 
     public void removeMember(AccountInfo info) {
+        if (info == null)
+            return;
+
         infoList.remove(info);
         dataProvider.getList().remove(info);
         memberTable.setRowCount(infoList.size());
