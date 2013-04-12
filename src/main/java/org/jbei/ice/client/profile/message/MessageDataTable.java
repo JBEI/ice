@@ -22,7 +22,6 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 
 /**
  * @author Hector Plahar
- *         TODO : duplicates EntrySelectionColumnHeaderCell
  */
 public class MessageDataTable extends CellTable<MessageInfo> {
 
@@ -57,7 +56,6 @@ public class MessageDataTable extends CellTable<MessageInfo> {
             public void onRowHover(RowHoverEvent event) {
                 GWT.log("" + event.getHoveringRow().getRowIndex());
                 event.isUnHover();
-                //To change body of implemented methods use File | Settings | File Templates.
             }
         });
     }

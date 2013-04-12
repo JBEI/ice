@@ -21,6 +21,7 @@ import org.jbei.ice.client.profile.message.UserMessagesPresenter;
 import org.jbei.ice.client.profile.preferences.UserPreferencesPresenter;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.MessageInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.group.GroupInfo;
@@ -166,11 +167,11 @@ public class ProfilePresenter extends AbstractPresenter {
                 retrieveGroups();
                 break;
 
-//            case MESSAGES:
-//                if (messagesPresenter == null)
-//                    messagesPresenter = new UserMessagesPresenter(service, eventBus);
-//                retrieveMessages();
-//                break;
+            case MESSAGES:
+                if (messagesPresenter == null)
+                    messagesPresenter = new UserMessagesPresenter(service, eventBus);
+                retrieveMessages();
+                break;
 
             case ENTRIES:
                 retrieveUserEntries();
@@ -178,25 +179,24 @@ public class ProfilePresenter extends AbstractPresenter {
         }
     }
 
-//    private void retrieveMessages() {
-//        new IceAsyncCallback<ArrayList<MessageInfo>>() {
-//
-//            @Override
-//            protected void callService(AsyncCallback<ArrayList<MessageInfo>> callback) throws
-// AuthenticationException {
-//                service.retrieveMessages(ClientController.sessionId, 0, 20, callback);
-//            }
-//
-//            @Override
-//            public void onSuccess(ArrayList<MessageInfo> result) {
-//                if (result == null || currentOption != UserOption.MESSAGES)
-//                    return;
-//
-//                messagesPresenter.setMessages(result);
-//                display.show(currentOption, messagesPresenter.getView().asWidget());
-//            }
-//        }.go(eventBus);
-//    }
+    private void retrieveMessages() {
+        new IceAsyncCallback<ArrayList<MessageInfo>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<MessageInfo>> callback) throws AuthenticationException {
+                service.retrieveMessages(ClientController.sessionId, 0, 20, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<MessageInfo> result) {
+                if (result == null || currentOption != UserOption.MESSAGES)
+                    return;
+
+                messagesPresenter.setMessages(result);
+                display.show(currentOption, messagesPresenter.getView().asWidget());
+            }
+        }.go(eventBus);
+    }
 
     private void retrieveProfileInfo() {
         new IceAsyncCallback<AccountInfo>() {
