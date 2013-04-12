@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.MessageInfo;
 
 /**

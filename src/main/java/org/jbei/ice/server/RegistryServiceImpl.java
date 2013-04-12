@@ -18,7 +18,6 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.config.ConfigurationController;
@@ -60,6 +59,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountResults;
+import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.MessageInfo;
@@ -317,20 +317,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public AccountResults retrieveAllUserAccounts(String sid, int start, int limit) throws AuthenticationException {
-        AccountController controller = ControllerFactory.getAccountController();
-
         try {
             Account account = retrieveAccountForSid(sid);
-            boolean isModerator = controller.isAdministrator(account);
-            if (!isModerator) {
-                Logger.warn(account.getEmail()
-                                    + " attempting to retrieve all user accounts without moderation privileges");
-                return null;
-            }
-
-            Logger.info(account.getEmail() + ": retrieving all user accounts [" + start + " - " + start + limit + "]");
-            return controller.retrieveAccounts(account, start, limit);
-
+            Logger.info(account.getEmail() + ": retrieving all accounts [" + start + " - " + limit + "]");
+            return ControllerFactory.getAccountController().retrieveAccounts(account, start, limit);
         } catch (ControllerException e) {
             Logger.error(e);
         }

@@ -45,7 +45,7 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
                 + " <span id=\"change_password_btn\"></span>";
 
         HTMLPanel panel = new HTMLPanel(html);
-//        panel.add(sendMessage, "send_message_btn");
+        panel.add(sendMessage, "send_message_btn");
         panel.add(editProfile, "edit_profile_btn");
         panel.add(changePasswordButton, "change_password_btn");
 
