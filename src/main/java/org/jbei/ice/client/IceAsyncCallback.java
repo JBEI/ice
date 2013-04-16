@@ -27,9 +27,17 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
     private HandlerManager eventBus;
 
     @Override
-    public void onFailure(Throwable caught) {
-        GWT.log(caught.getMessage());
+    public final void onFailure(Throwable caught) {
+        if (caught instanceof AuthenticationException) {
+            ClientController.sessionId = null;
+            History.newItem(Page.LOGIN.getLink());
+            return;
+        }
+
+        serverFailure();
     }
+
+    protected void serverFailure() {}
 
     public void go(HandlerManager eventBus) {
         if (timeoutTimer != null) {
@@ -68,6 +76,11 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
 
                 @Override
                 public void onFailure(Throwable caught) {
+                    if (caught instanceof AuthenticationException) {
+                        History.newItem(Page.LOGIN.getLink());
+                        return;
+                    }
+
                     GWT.log(caught.toString(), caught);
 
                     if (retryCount <= 0) {

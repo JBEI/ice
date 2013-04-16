@@ -165,7 +165,7 @@ public class EntryAddPresenter {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void serverFailure() {
                 eventBus.fireEvent(new FeedbackEvent(true, "Error creating record"));
                 presenter.getView().setBusyIndicator(list, false);
             }

@@ -14,7 +14,6 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -85,8 +84,7 @@ public class CollectionsModel {
             }
 
             @Override
-            public void onFailure(Throwable t) {
-                GWT.log("Error creating folder", t);
+            public void serverFailure() {
                 callback.onFailure();
             }
         }.go(eventBus);
@@ -128,6 +126,12 @@ public class CollectionsModel {
 
                                              @Override
                                              public void onFailure(Throwable caught) {
+                                                 if (caught instanceof AuthenticationException) {
+                                                     ClientController.sessionId = null;
+                                                     History.newItem(Page.LOGIN.getLink());
+                                                     return;
+                                                 }
+
                                                  callback.onFailure();
                                              }
                                          });
@@ -145,6 +149,12 @@ public class CollectionsModel {
 
                                         @Override
                                         public void onFailure(Throwable caught) {
+                                            if (caught instanceof AuthenticationException) {
+                                                ClientController.sessionId = null;
+                                                History.newItem(Page.LOGIN.getLink());
+                                                return;
+                                            }
+
                                             callback.onFailure();
                                         }
                                     });
@@ -160,6 +170,7 @@ public class CollectionsModel {
                 try {
                     service.addEntriesToCollection(ClientController.sessionId, destinationFolderIds, ids, callback);
                 } catch (AuthenticationException e) {
+                    ClientController.sessionId = null;
                     History.newItem(Page.LOGIN.getLink());
                 }
             }
@@ -170,7 +181,7 @@ public class CollectionsModel {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void serverFailure() {
                 resultCallback.onFailure();
             }
         }.go(eventBus);

@@ -136,8 +136,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     }
 
                     @Override
-                    public void onFailure(Throwable t) {
-                        Window.alert("There was an error saving your work.\n\n" + t.getMessage());
+                    public void serverFailure() {
+                        Window.alert("There was an error saving your work");
                     }
                 }.go(eventBus);
             }
