@@ -73,34 +73,23 @@ public class EntryController {
 
     public Set<String> getMatchingAutoCompleteField(AutoCompleteField field, String token, int limit)
             throws ControllerException {
-
-        String a, b;
-
-        switch (field) {
-            case SELECTION_MARKERS:
-                a = "selectionMarker.name";
-                b = "SelectionMarker selectionMarker";
-                break;
-
-            case ORIGIN_OF_REPLICATION:
-                a = "plasmid.originOfReplication";
-                b = "Plasmid plasmid";
-                break;
-
-            case PROMOTERS:
-                a = "plasmid.promoters";
-                b = "Plasmid plasmid";
-                break;
-
-            default:
-            case PLASMID_NAME:
-//                "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name" +
-//                    ".name <> '' order by name.name asc");
-                return new HashSet<>();
-        }
-
         try {
-            return dao.getMatchingSelectionMarkers(a, b, token, limit);
+            switch (field) {
+                case SELECTION_MARKERS:
+                    return dao.getMatchingSelectionMarkers(token, limit);
+
+                case ORIGIN_OF_REPLICATION:
+                    return dao.getMatchingOriginOfReplication(token, limit);
+
+                case PROMOTERS:
+                    return dao.getMatchingPromoters(token, limit);
+
+                case PLASMID_NAME:
+                    return dao.getMatchingPlasmidNames(token, limit);
+
+                default:
+                    return new HashSet<>();
+            }
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
