@@ -10,7 +10,7 @@ public class BioSafetySheetCell extends MultiSuggestSheetCell {
 
     public BioSafetySheetCell() {
         super(false);
-        this.addOracleData(BioSafetyOption.getDisplayList());
+        this.setOracleData(BioSafetyOption.getDisplayList());
     }
 
     @Override

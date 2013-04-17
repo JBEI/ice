@@ -66,7 +66,7 @@ public class IceServletContextListener implements ServletContextListener {
         try {
             HibernateHelper.beginTransaction();
             PopulateInitialDatabase.initializeDatabase();
-            ApplicationController.upgradeDatabaseIfNecessary();
+            ApplicationController.initialize();
             HibernateHelper.commitTransaction();
 
             checkBlast();

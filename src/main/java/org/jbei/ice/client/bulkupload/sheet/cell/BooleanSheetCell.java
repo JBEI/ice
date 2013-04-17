@@ -19,7 +19,7 @@ public class BooleanSheetCell extends MultiSuggestSheetCell {
         data.add("True");
         data.add("False");
 
-        this.addOracleData(data);
+        this.setOracleData(data);
     }
 
     @Override

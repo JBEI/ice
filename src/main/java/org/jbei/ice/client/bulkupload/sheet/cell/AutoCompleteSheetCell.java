@@ -1,9 +1,9 @@
 package org.jbei.ice.client.bulkupload.sheet.cell;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
+import org.jbei.ice.shared.AutoCompleteField;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -12,34 +12,25 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
+ * Sheet cell with auto complete values populated from the server
+ *
  * @author Hector Plahar
  */
-public class MultiSuggestSheetCell extends SheetCell {
+public class AutoCompleteSheetCell extends SheetCell {
 
-    protected final MultiWordSuggestOracle oracle;
     protected final SuggestBox box;
-    protected final TextBoxBase textBox;
-    private final ArrayList<String> oracleData = new ArrayList<String>();
+    protected final MultipleTextBox textBox;
     private int currentRow;
-    private final boolean commaSeparatedAllowed;
 
-    public MultiSuggestSheetCell(boolean commaSeparatedAllowed) {
+    public AutoCompleteSheetCell(AutoCompleteField field) {
         super();
-
-        oracle = new MultiWordSuggestOracle();
-        this.commaSeparatedAllowed = commaSeparatedAllowed;
-        if (commaSeparatedAllowed)
-            textBox = new MultipleTextBox();
-        else
-            textBox = new TextBox();
+        AutoCompleteSuggestOracle oracle = new AutoCompleteSuggestOracle(field);
+        textBox = new MultipleTextBox();
         box = new SuggestBox(oracle, textBox);
         box.setStyleName("cell_input");
 
@@ -47,10 +38,7 @@ public class MultiSuggestSheetCell extends SheetCell {
             @Override
             public void onBlur(BlurEvent event) {
                 String s = setDataForRow(currentRow);
-                if (MultiSuggestSheetCell.this.commaSeparatedAllowed)
-                    ((MultipleTextBox) textBox).setBaseText(s);
-                else
-                    box.setText(s);
+                textBox.setBaseText(s);
             }
         });
 
@@ -73,33 +61,14 @@ public class MultiSuggestSheetCell extends SheetCell {
         });
     }
 
-    public MultiSuggestSheetCell(ArrayList<String> data, boolean commaSeparatedAllowed) {
-        this(commaSeparatedAllowed);
-        oracle.addAll(data);
-        oracleData.addAll(data);
-    }
-
     @Override
     public void setText(String text) {
-        if (commaSeparatedAllowed)
-            ((MultipleTextBox) textBox).setBaseText(text);
-        else
-            textBox.setText(text);
+        textBox.setBaseText(text);
     }
 
-    /**
-     * Sets data for row specified in the param
-     *
-     * @param row current row user is working on
-     * @return display for user entered value
-     */
     @Override
     public String setDataForRow(int row) {
-        String ret;
-        if (commaSeparatedAllowed)
-            ret = ((MultipleTextBox) textBox).getWholeText();
-        else
-            ret = textBox.getText();
+        String ret = textBox.getWholeText();
         SheetCellData data = new SheetCellData();
         data.setId(ret);
         data.setValue(ret);
@@ -114,25 +83,13 @@ public class MultiSuggestSheetCell extends SheetCell {
         currentRow = row;
     }
 
-    /**
-     * Adds the suggestions that will be presented to user to oracle
-     *
-     * @param data list of strings presented to user
-     */
-    public void setOracleData(ArrayList<String> data) {
-        oracle.clear();
-        oracle.addAll(data);
-        oracleData.clear();
-        oracleData.addAll(data);
-    }
-
-    public boolean hasMultiSuggestions() {
-        return true;
-    }
-
     @Override
     public Widget getWidget(int row, boolean isCurrentSelection, int tabIndex) {
         box.setTabIndex(tabIndex);
         return box;
+    }
+
+    public boolean hasMultiSuggestions() {
+        return true;
     }
 }

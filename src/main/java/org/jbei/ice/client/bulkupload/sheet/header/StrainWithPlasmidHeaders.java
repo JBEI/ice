@@ -6,11 +6,12 @@ import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.client.bulkupload.sheet.cell.AutoCompleteSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.BioSafetySheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.FileInputCell;
-import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.StatusSheetCell;
+import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 import org.jbei.ice.shared.dto.entry.StrainInfo;
@@ -34,7 +35,7 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(Header.STRAIN_ALIAS, preferences));
         headers.add(new CellColumnHeader(Header.STRAIN_LINKS, preferences));
         headers.add(new CellColumnHeader(Header.STRAIN_SELECTION_MARKERS, preferences, true,
-                                         new MultiSuggestSheetCell(true)));
+                                         new AutoCompleteSheetCell(AutoCompleteField.SELECTION_MARKERS)));
         headers.add(new CellColumnHeader(Header.STRAIN_PARENTAL_STRAIN, preferences));
         headers.add(new CellColumnHeader(Header.STRAIN_GEN_PHEN, preferences));
         headers.add(new CellColumnHeader(Header.STRAIN_KEYWORDS, preferences));
@@ -50,14 +51,14 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(Header.PLASMID_NAME, preferences, true, "e.g. pTSH117"));
         headers.add(new CellColumnHeader(Header.PLASMID_ALIAS, preferences));
         headers.add(new CellColumnHeader(Header.PLASMID_LINKS, preferences));
-        headers.add(new CellColumnHeader(Header.PLASMID_SELECTION_MARKERS, preferences, true, new MultiSuggestSheetCell(
-                true)));
+        headers.add(new CellColumnHeader(Header.PLASMID_SELECTION_MARKERS, preferences, true,
+                                         new AutoCompleteSheetCell(AutoCompleteField.SELECTION_MARKERS)));
         headers.add(new CellColumnHeader(Header.CIRCULAR, preferences, false, new BooleanSheetCell()));
         headers.add(new CellColumnHeader(Header.PLASMID_BACKBONE, preferences));
         headers.add(new CellColumnHeader(Header.PLASMID_PROMOTERS, preferences, false,
-                                         new MultiSuggestSheetCell(true)));
+                                         new AutoCompleteSheetCell(AutoCompleteField.PROMOTERS)));
         headers.add(new CellColumnHeader(Header.PLASMID_ORIGIN_OF_REPLICATION, preferences, false,
-                                         new MultiSuggestSheetCell(true)));
+                                         new AutoCompleteSheetCell(AutoCompleteField.ORIGIN_OF_REPLICATION)));
         headers.add(new CellColumnHeader(Header.PLASMID_KEYWORDS, preferences));
         headers.add(new CellColumnHeader(Header.PLASMID_SUMMARY, preferences, true));
         headers.add(new CellColumnHeader(Header.PLASMID_NOTES, preferences));

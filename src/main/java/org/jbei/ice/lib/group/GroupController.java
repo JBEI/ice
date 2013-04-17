@@ -225,7 +225,7 @@ public class GroupController {
         publicGroup = new Group();
         publicGroup.setLabel(PUBLIC_GROUP_NAME);
         publicGroup.setDescription(PUBLIC_GROUP_DESCRIPTION);
-        publicGroup.setType(GroupType.PUBLIC);
+        publicGroup.setType(GroupType.SYSTEM);
         publicGroup.setParent(null);
         publicGroup.setUuid(PUBLIC_GROUP_UUID);
         return save(publicGroup);

@@ -2,7 +2,6 @@ package org.jbei.ice.lib.utils;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
@@ -13,9 +12,6 @@ import org.jbei.ice.lib.group.GroupController;
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 public class PopulateInitialDatabase {
-
-    // This is a global "everyone" uuid
-    public static String PUBLIC_GROUP_UUID = "8746a64b-abd5-4838-a332-02c356bbeac0";
 
     /**
      * Populate an empty database with necessary objects and values.
@@ -29,12 +25,9 @@ public class PopulateInitialDatabase {
         GroupController groupController = ControllerFactory.getGroupController();
         Group group1;
         try {
-            group1 = groupController.getGroupByUUID(PUBLIC_GROUP_UUID);
+            group1 = groupController.getGroupByUUID(GroupController.PUBLIC_GROUP_UUID);
             if (group1 == null) {
-                // Since everyone group doesn't exist, assume database is new
-                // Put all other db initialization below.
                 groupController.createOrRetrievePublicGroup();
-
                 createSystemAccount();
                 createAdminAccount();
                 populateDefaultStorageLocationsAndSchemes();
@@ -67,8 +60,7 @@ public class PopulateInitialDatabase {
      */
     private static void createAdminAccount() throws UtilityException {
         try {
-            AccountController controller = ControllerFactory.getAccountController();
-            controller.createAdminAccount();
+            ControllerFactory.getAccountController().createAdminAccount();
         } catch (ControllerException e) {
             throw new UtilityException(e);
         }
@@ -80,9 +72,8 @@ public class PopulateInitialDatabase {
      * @throws UtilityException
      */
     private static void createSystemAccount() throws UtilityException {
-        AccountController controller = ControllerFactory.getAccountController();
         try {
-            controller.createSystemAccount();
+            ControllerFactory.getAccountController().createSystemAccount();
         } catch (ControllerException e) {
             throw new UtilityException(e);
         }

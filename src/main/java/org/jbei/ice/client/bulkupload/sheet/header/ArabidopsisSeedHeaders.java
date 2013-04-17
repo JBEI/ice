@@ -7,11 +7,12 @@ import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.client.bulkupload.sheet.cell.AutoCompleteSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.GenerationSheetCell;
-import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
+import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 
@@ -27,7 +28,7 @@ public class ArabidopsisSeedHeaders extends PartHeader {
     public ArabidopsisSeedHeaders(EntryInfoDelegate delegate, HashMap<String, String> preferences) {
         super(delegate, preferences);
         headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, preferences, false,
-                                         new MultiSuggestSheetCell(true)));
+                                         new AutoCompleteSheetCell(AutoCompleteField.SELECTION_MARKERS)));
         headers.add(new CellColumnHeader(Header.HOMOZYGOSITY, preferences));
         headers.add(new CellColumnHeader(Header.HARVEST_DATE, preferences, false, new DateInputCell()));
         headers.add(new CellColumnHeader(Header.ECOTYPE, preferences));

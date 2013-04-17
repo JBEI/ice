@@ -12,7 +12,7 @@ public class StatusSheetCell extends MultiSuggestSheetCell {
 
     public StatusSheetCell() {
         super(false);
-        this.addOracleData(StatusType.getDisplayList());
+        this.setOracleData(StatusType.getDisplayList());
     }
 
     @Override
