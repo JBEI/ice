@@ -29,6 +29,8 @@ public class PlasmidHeader extends PartHeader {
         headers.add(new CellColumnHeader(Header.PROMOTERS, preferences, false, new MultiSuggestSheetCell(true)));
         headers.add(new CellColumnHeader(Header.ORIGIN_OF_REPLICATION, preferences, false,
                                          new MultiSuggestSheetCell(true)));
+        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, preferences, false,
+                                         new MultiSuggestSheetCell(true)));
     }
 
     @Override

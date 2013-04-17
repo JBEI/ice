@@ -389,6 +389,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         Widget widget = sheetTable.getWidget(row, col);
         if (widget != null && widget instanceof CellWidget) {
             ((CellWidget) widget).showError(errMsg);
+        } else if (replaced != null && replaced.getIndex() == col && replaced.getRow() == row) {
+            replaced.showError(errMsg);
         }
     }
 

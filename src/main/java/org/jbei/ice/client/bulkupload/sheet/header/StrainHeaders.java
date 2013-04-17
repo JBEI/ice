@@ -22,6 +22,8 @@ public class StrainHeaders extends PartHeader {
         headers.add(new CellColumnHeader(Header.PARENTAL_STRAIN, preferences));
         headers.add(new CellColumnHeader(Header.GEN_PHEN, preferences));
         headers.add(new CellColumnHeader(Header.PLASMIDS, preferences, false, new MultiSuggestSheetCell(true)));
+        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, preferences, false,
+                                         new MultiSuggestSheetCell(true)));
     }
 
     @Override

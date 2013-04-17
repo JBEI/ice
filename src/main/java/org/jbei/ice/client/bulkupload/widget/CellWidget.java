@@ -109,6 +109,14 @@ public class CellWidget extends Composite {
         return this.tabIndex;
     }
 
+    public int getRow() {
+        return this.row;
+    }
+
+    public int getIndex() {
+        return this.index;
+    }
+
     public void addWidgetCallback(final CellWidgetCallback callback) {
         corner.addMouseDownHandler(new MouseDownHandler() {
             @Override

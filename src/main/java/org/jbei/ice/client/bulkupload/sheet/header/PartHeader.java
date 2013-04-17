@@ -8,7 +8,6 @@ import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.cell.BioSafetySheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.FileInputCell;
-import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.StatusSheetCell;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 
@@ -36,8 +35,6 @@ public class PartHeader extends BulkUploadHeaders {
                                          new FileInputCell(true, delegate, false)));
         headers.add(new CellColumnHeader(Header.ATT_FILENAME, preferences, false,
                                          new FileInputCell(false, delegate, false)));
-        headers.add(new CellColumnHeader(Header.SELECTION_MARKERS, preferences, false,
-                                         new MultiSuggestSheetCell(true)));
     }
 
     @Override

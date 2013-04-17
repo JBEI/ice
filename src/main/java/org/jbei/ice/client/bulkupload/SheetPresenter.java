@@ -232,6 +232,10 @@ public class SheetPresenter {
             return;
         }
 
+        // validate update values
+        if (!validateCell(inputRow, inputIndex))
+            return;
+
         // check particular row being updated (which narrows it down to a cell since we are looking at the column)
         SheetCellData data = header.getCell().getDataForRow(inputRow);
         String value = "";
@@ -272,7 +276,7 @@ public class SheetPresenter {
         update.setBulkUploadId(bulkUpload);
         update.setRow(inputRow);
 
-        // check locked rows
+        // check locked cols to set values for that particular cells in the row
         int i = -1;
         for (CellColumnHeader columnHeader : this.headers.getHeaders()) {
             i += 1;
@@ -442,6 +446,32 @@ public class SheetPresenter {
             return;
 
         view.removeCellForCurrentRow(row, fieldSize - 1, toRemove);
+    }
+
+    /**
+     * Validates a single cell in the sheet
+     *
+     * @param row cell row
+     * @param col cell col
+     * @return true if the contents of the cell are valid according to the dictates of the header,
+     *         false otherwise including when the cell cannot be located not found
+     */
+    public boolean validateCell(int row, int col) {
+        if (row < 0 || col < 0)
+            throw new IllegalArgumentException("Invalid row or column for cell (row: " + row + ", col: " + col + ")");
+        CellColumnHeader header = headers.getHeaders().get(col);
+        if (header == null)
+            return true;
+
+        SheetCell cell = header.getCell();
+        view.clearErrorCell(row, col);
+        String errMsg = cell.inputIsValid(row);
+        if (!errMsg.trim().isEmpty()) {
+            view.setErrorCell(row, col, errMsg);
+            return false;
+        }
+
+        return true;
     }
 
     /**

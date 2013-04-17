@@ -28,13 +28,14 @@ public class CreatorWidget implements IsWidget {
 
     public CreatorWidget(String creator, String creatorEmail) {
         Icon creatorIcon = new Icon(FAIconType.USER);
-        creatorIcon.setTitle("Click to set creator information");
         creatorIcon.addStyleName("display-inline");
         creatorIcon.removeStyleName("font-awesome");
 
-        HTMLPanel creatorPanel = new HTMLPanel("<span id=\"creator_icon\"></span> Creator");
+        HTMLPanel creatorPanel = new HTMLPanel("<span id=\"creator_icon\"></span> Creator <i class=\""
+                                                       + FAIconType.CARET_DOWN.getStyleName() + "\"></i>");
         creatorPanel.add(creatorIcon, "creator_icon");
         creatorPanel.setStyleName("display-inline");
+        creatorPanel.setTitle("Person who made this part");
 
         parent = new FocusPanel(creatorPanel);
         parent.setStyleName("bulk_upload_creator");

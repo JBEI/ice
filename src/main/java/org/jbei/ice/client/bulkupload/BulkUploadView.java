@@ -118,8 +118,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                         + "<span style=\"float: right;\">"
 //                        + "<span id=\"bulk_import_upload_csv\"></span>"
 //                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
-//                        + "<span id=\"bulk_import_permission_selection\"></span>"
-//                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
+                        + "<span id=\"bulk_import_permission_selection\"></span>"
+                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
                         + "<span id=\"creator\"></span>"
 //                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
 //                        + "<span id=\"sample_selection_widget\"></span>
@@ -131,7 +131,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         bulkImportHeader.add(uploadName, "upload_name");
         bulkImportHeader.add(updating, "updating_icon");
 //        bulkImportHeader.add(uploadCSV, "bulk_import_upload_csv");
-//        bulkImportHeader.add(selection.asWidget(), "bulk_import_permission_selection");
+        bulkImportHeader.add(selection.asWidget(), "bulk_import_permission_selection");
         bulkImportHeader.add(creator.asWidget(), "creator");
         initHandlers();
     }
