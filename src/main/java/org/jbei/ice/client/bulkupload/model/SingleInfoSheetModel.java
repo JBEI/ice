@@ -106,6 +106,7 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
                 analysisInfo.setFileId(datum.getId());
                 seq.add(analysisInfo);
                 info.setHasSequence(true);
+                info.setHasOriginalSequence(true);
                 break;
 
             case ATT_FILENAME:

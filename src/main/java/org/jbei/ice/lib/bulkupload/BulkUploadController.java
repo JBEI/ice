@@ -29,7 +29,6 @@ import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Emailer;
@@ -192,8 +191,10 @@ public class BulkUploadController {
         // convert
         for (Entry entry : contents) {
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
-            Sequence sequence = sequenceController.getByEntry(entry);
-            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, null, null, sequence != null);
+            boolean hasSequence = sequenceController.hasSequence(entry);
+            boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry);
+            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, null, null,
+                                                        hasSequence, hasOriginalSequence);
 
             // this conditional statement makes sure that plasmids are ignored if we are dealing
             // with strain with plasmid
@@ -204,9 +205,10 @@ public class BulkUploadController {
                     Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController, plasmids);
                     if (plasmid != null) {
                         attachments = attachmentController.getByEntry(account, plasmid);
-                        sequence = sequenceController.getByEntry(plasmid);
-                        EntryInfo plasmidInfo = ModelToInfoFactory.getInfo(account, plasmid,
-                                                                           attachments, null, null, sequence != null);
+                        hasSequence = sequenceController.hasSequence(plasmid);
+                        hasOriginalSequence = sequenceController.hasOriginalSequence(plasmid);
+                        EntryInfo plasmidInfo = ModelToInfoFactory.getInfo(account, plasmid, attachments, null, null,
+                                                                           hasSequence, hasOriginalSequence);
                         info.setInfo(plasmidInfo);
                     }
                 } else

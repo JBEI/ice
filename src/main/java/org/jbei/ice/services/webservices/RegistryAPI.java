@@ -200,6 +200,17 @@ public class RegistryAPI implements IRegistryAPI {
         }
     }
 
+    @Override
+    public boolean hasOriginalSequence(@WebParam(name = "recordId") String recordId) throws ServiceException {
+        try {
+            log("hasSequence " + recordId);
+            Entry entry = ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
+            return ControllerFactory.getSequenceController().hasOriginalSequence(entry);
+        } catch (ControllerException ce) {
+            throw new ServiceException(ce);
+        }
+    }
+
     /**
      * Retrieve {@link Entry} by its recordId.
      *

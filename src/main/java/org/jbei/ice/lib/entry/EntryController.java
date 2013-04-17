@@ -672,8 +672,10 @@ public class EntryController {
             sampleMap.put(sample, storageList);
         }
 
-        boolean hasSequence = (sequenceController.getByEntry(entry) != null);
-        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence);
+        boolean hasSequence = sequenceController.hasSequence(entry);
+        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry);
+        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence,
+                                                    hasOriginalSequence);
 
         // permissions
         info.setCanEdit(permissionsController.hasWritePermission(account, entry));

@@ -386,6 +386,21 @@ public class SequenceController {
         }
     }
 
+    /**
+     * Determines if the user uploaded a sequence file and associated it with an entry
+     *
+     * @param entry entry sequence file is associated with
+     * @return true if there is a sequence file that was originally uploaded by user, false otherwise
+     * @throws ControllerException
+     */
+    public boolean hasOriginalSequence(Entry entry) throws ControllerException {
+        try {
+            return dao.hasOriginalSequence(entry);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
     public List<Sequence> getAllSequences() throws ControllerException {
         try {
             return dao.getAllSequences();

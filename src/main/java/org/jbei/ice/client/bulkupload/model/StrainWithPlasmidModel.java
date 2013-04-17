@@ -129,6 +129,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 analysisInfo.setFileId(datum.getId());
                 seq.add(analysisInfo);
                 strain.setHasSequence(true);
+                strain.setHasOriginalSequence(true);
                 break;
 
             case STRAIN_ATT_FILENAME:
@@ -263,6 +264,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 analysisInfo.setFileId(datum.getId());
                 seq.add(analysisInfo);
                 info.setHasSequence(true);
+                info.setHasOriginalSequence(true);
                 break;
 
             case PLASMID_ATT_FILENAME:

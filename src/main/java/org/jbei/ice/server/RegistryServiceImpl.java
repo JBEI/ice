@@ -706,7 +706,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
                 entry = api.getPublicEntryByRecordId(recordId);
                 boolean hasSequence = api.hasSequence(entry.getRecordId());
-                return ModelToInfoFactory.getInfo(null, entry, null, null, null, hasSequence);
+                boolean hasOriginalSequence = api.hasOriginalSequence(entry.getRecordId());
+                return ModelToInfoFactory.getInfo(null, entry, null, null, null, hasSequence, hasOriginalSequence);
             }
 
             entry = ControllerFactory.getEntryController().getByRecordId(account, recordId);

@@ -190,6 +190,24 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         }
     }
 
+    public boolean hasOriginalSequence(Entry entry) throws DAOException {
+        Session session = currentSession();
+        try {
+
+            Number itemCount = (Number) session.createCriteria(Sequence.class)
+                                               .setProjection(Projections.countDistinct("id"))
+                                               .add(Restrictions.eq("entry", entry))
+                                               .add(Restrictions.conjunction().add(
+                                                       Restrictions.ne("sequenceUser", "")).add(
+                                                       Restrictions.isNotNull("sequenceUser")))
+                                               .uniqueResult();
+
+            return itemCount.intValue() > 0;
+        } catch (HibernateException e) {
+            throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
+        }
+    }
+
     /**
      * Retrieve all {@link Sequence} objects in the database.
      *

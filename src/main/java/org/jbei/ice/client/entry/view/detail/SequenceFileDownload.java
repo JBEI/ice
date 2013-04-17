@@ -1,6 +1,7 @@
 package org.jbei.ice.client.entry.view.detail;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.jbei.ice.client.common.widget.PopupHandler;
 
@@ -21,7 +22,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 class SequenceFileDownload implements IsWidget {
 
-    private final CellList<DownloadOption> options;
     private final SingleSelectionModel<DownloadOption> optionSelection;
     private final Label label;
 
@@ -42,13 +42,13 @@ class SequenceFileDownload implements IsWidget {
         Style cellListStyle();
     }
 
-    public SequenceFileDownload(final long entryId) {
+    public SequenceFileDownload(final long entryId, boolean hasOriginal) {
         SequenceFileDownloadResource.INSTANCE.cellListStyle().ensureInjected();
         label = new Label("Download");
         label.setStyleName(SequenceFileDownloadResource.INSTANCE.cellListStyle().downloadStyle());
 
         // renderer for options list
-        options = new CellList<DownloadOption>(new AbstractCell<DownloadOption>() {
+        CellList<DownloadOption> options = new CellList<DownloadOption>(new AbstractCell<DownloadOption>() {
 
             @Override
             public void render(Context context, DownloadOption value, SafeHtmlBuilder sb) {
@@ -56,7 +56,13 @@ class SequenceFileDownload implements IsWidget {
             }
         }, SequenceFileDownloadResource.INSTANCE);
 
-        options.setRowData(Arrays.asList(DownloadOption.values()));
+        List<DownloadOption> downloadOptionArrayList;
+        if (hasOriginal)
+            downloadOptionArrayList = Arrays.asList(DownloadOption.values());
+        else
+            downloadOptionArrayList = Arrays.asList(DownloadOption.FASTA, DownloadOption.GENBANK, DownloadOption.SBOL);
+
+        options.setRowData(downloadOptionArrayList);
 
         final PopupHandler popupHandler = new PopupHandler(options, label.getElement(), false);
 

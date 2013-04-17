@@ -43,6 +43,7 @@ public class UploadPasteSequenceHandler implements ClickHandler {
                 presenter.setHasSequence(result);
                 if (result) {
                     presenter.getEntry().setHasSequence(true);
+                    presenter.getEntry().setHasOriginalSequence(true);
                     presenter.updateSequenceView();
                 } else {
                     Window.alert("Could not save sequence");
