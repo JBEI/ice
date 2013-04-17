@@ -336,6 +336,10 @@ public class GroupController {
             if (group == null)
                 throw new ControllerException("Could not retrieve group with id " + groupId);
 
+            // public groups do not need to have members added
+            if (group.getUuid().equals(PUBLIC_GROUP_UUID))
+                return;
+
             Account account = accountController.getByEmail(email);
             if (account == null)
                 throw new ControllerException("Could not retrieve account " + email);
@@ -379,6 +383,9 @@ public class GroupController {
             Logger.error(errMsg);
             throw new ControllerException(errMsg);
         }
+
+        if (group.getUuid().equalsIgnoreCase(PUBLIC_GROUP_UUID))
+            return new ArrayList<>();
 
         // check permissions
         if (!account.getEmail().equalsIgnoreCase(group.getOwner().getEmail())) {
