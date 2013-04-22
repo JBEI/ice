@@ -13,7 +13,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
-import org.jbei.ice.lib.composers.formatters.SbolFormatter;
+import org.jbei.ice.lib.composers.formatters.SBOLFormatter;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Name;
@@ -240,7 +240,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
         String sequenceString;
         try {
-            sequenceString = sequenceController.compose(sequence, new SbolFormatter());
+            sequenceString = sequenceController.compose(sequence, new SBOLFormatter());
         } catch (ControllerException e) {
             Logger.error("Failed to generate sbol file for download!", e);
             return;

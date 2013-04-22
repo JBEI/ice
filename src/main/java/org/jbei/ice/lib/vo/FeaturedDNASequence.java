@@ -19,6 +19,8 @@ public class FeaturedDNASequence extends SimpleDNASequence {
     private String name = "";
     private boolean isCircular = true;
     private String description;
+    private String uri;
+    private String dcUri;
 
     public FeaturedDNASequence() {
         super();
@@ -87,5 +89,21 @@ public class FeaturedDNASequence extends SimpleDNASequence {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public String getDcUri() {
+        return dcUri;
+    }
+
+    public void setDcUri(String dcUri) {
+        this.dcUri = dcUri;
     }
 }

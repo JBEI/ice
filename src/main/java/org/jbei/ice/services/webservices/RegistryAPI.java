@@ -1907,7 +1907,7 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean transmitEntries(@WebParam(name = "entrySequenceMap") HashMap<Entry, String> entrySequenceMap)
             throws ServiceException {
         Logger.info("Registry API: transmit entries");
-        ConfigurationController configurationController = new ConfigurationController();
+        ConfigurationController configurationController = ControllerFactory.getConfigurationController();
         boolean isWebEnabled;
         try {
             String value = configurationController.getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);

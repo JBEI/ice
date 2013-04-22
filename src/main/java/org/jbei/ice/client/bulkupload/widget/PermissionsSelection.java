@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 
@@ -75,10 +76,14 @@ public class PermissionsSelection implements IsWidget {
         parent.setStyleName("bulk_upload_visibility");
         parent.addStyleName("opacity_hover");
 
+        model = new MultiSelectionModel<OptionSelect>();
+
         table = new CellTable<OptionSelect>(30, SelectionResource.INSTANCE);
         addSelectionColumn();
         addNameColumn();
         table.setEmptyTableWidget(new HTML("<i class=\"font-75em\">No groups available.</i>"));
+        table.setSelectionModel(model, DefaultSelectionEventManager.<OptionSelect>createCheckboxManager());
+
         table.addCellPreviewHandler(new CellPreviewEvent.Handler<OptionSelect>() {
 
             @Override
@@ -99,8 +104,7 @@ public class PermissionsSelection implements IsWidget {
         permissions = new HashSet<PermissionInfo>();
         dataProvider = new ListDataProvider<OptionSelect>();
         dataProvider.addDataDisplay(table);
-
-        model = new MultiSelectionModel<OptionSelect>();
+        dataProvider.getList().add(new OptionSelect(0, "Foo"));
 
         submitButton = new Button("Submit");
         submitButton.addKeyPressHandler(new EnterClickHandler(submitButton));

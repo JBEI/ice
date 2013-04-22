@@ -506,7 +506,7 @@ public class InfoToModelFactory {
     }
 
     private static Entry infoToStrainForField(Entry entry, String value, String field) {
-        if (!entry.getRecordType().equals(EntryType.STRAIN.toString()))
+        if (!entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString()))
             return entry;
 
         Strain strain = (Strain) entry;
@@ -530,7 +530,7 @@ public class InfoToModelFactory {
     }
 
     private static Entry infoToPlasmidForField(Entry entry, String value, String field) {
-        if (!entry.getRecordType().equals(EntryType.PLASMID.toString()))
+        if (!entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.toString()))
             return entry;
 
         Plasmid plasmid = (Plasmid) entry;
@@ -561,7 +561,7 @@ public class InfoToModelFactory {
     }
 
     private static Entry infoToSeedForField(Entry entry, String value, String field) {
-        if (!entry.getRecordType().equals(EntryType.ARABIDOPSIS.toString()))
+        if (!entry.getRecordType().equalsIgnoreCase(EntryType.ARABIDOPSIS.toString()))
             return entry;
 
         ArabidopsisSeed seed = new ArabidopsisSeed();

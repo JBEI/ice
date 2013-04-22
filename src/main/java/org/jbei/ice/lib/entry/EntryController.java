@@ -112,6 +112,9 @@ public class EntryController {
 
     public HashSet<Entry> createStrainWithPlasmid(Account account, Entry strain, Entry plasmid,
             ArrayList<PermissionInfo> permissions) throws ControllerException {
+        if (strain == null || plasmid == null)
+            throw new ControllerException("Cannot create null entries");
+
         HashSet<Entry> results = new HashSet<>();
         plasmid = createEntry(account, plasmid, permissions);
         results.add(plasmid);
@@ -254,6 +257,10 @@ public class EntryController {
 
         if (entry.getRecordId() == null) {
             entry.setRecordId(Utils.generateUUID());
+            entry.setVersionId(entry.getRecordId());
+        }
+
+        if (entry.getVersionId() == null) {
             entry.setVersionId(entry.getRecordId());
         }
 

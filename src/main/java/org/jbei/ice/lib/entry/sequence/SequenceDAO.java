@@ -67,6 +67,12 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
 
                 if (existingFeature == null) { // new feature -> save it
                     existingFeature = saveFeature(feature);
+                } else {
+                    if (!sameFeatureUri(existingFeature, feature)) {
+                        // same sequence feature but different uri
+                        // sequence hash fwa uniqueness causes problems when trying to save a new feature with same seq
+                        existingFeature.setUri(feature.getUri());
+                    }
                 }
 
                 sequenceFeature.setFeature(existingFeature);
@@ -76,6 +82,16 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         }
 
         return sequence;
+    }
+
+    private boolean sameFeatureUri(Feature f1, Feature f2) {
+        if (f1.getUri() == null && f2.getUri() == null)
+            return true;
+
+        if (f1.getUri() != null && !f1.getUri().equalsIgnoreCase(f2.getUri()))
+            return false;
+
+        return f2.getUri().equalsIgnoreCase(f1.getUri());
     }
 
     public Sequence updateSequence(Sequence sequence, Set<SequenceFeature> newFeatures) throws DAOException {
