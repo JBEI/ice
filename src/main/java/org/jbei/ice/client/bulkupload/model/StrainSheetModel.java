@@ -1,6 +1,6 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
@@ -10,7 +10,7 @@ public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
         if (datum == null)
             return strain;
 
-        Header header = datum.getTypeHeader();
+        EntryField header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null)
@@ -25,7 +25,7 @@ public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
                 strain.setHost(value);
                 break;
 
-            case GEN_PHEN:
+            case GENOTYPE_OR_PHENOTYPE:
                 strain.setGenotypePhenotype(value);
                 break;
 

@@ -21,6 +21,7 @@ import org.junit.Test;
  * @author Hector Plahar
  */
 public class EntryControllerTest {
+
     private EntryController controller;
 
     @Before
@@ -33,9 +34,13 @@ public class EntryControllerTest {
     protected Account createTestAccount() throws Exception {
         String email = "test@TESTER";
         AccountController accountController = new AccountController();
+        Account account = accountController.getByEmail(email);
+        if (account != null)
+            return account;
+
         String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
         Assert.assertNotNull(pass);
-        Account account = accountController.getByEmail(email);
+        account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
         return account;
     }
@@ -186,11 +191,6 @@ public class EntryControllerTest {
 
     @Test
     public void testGetEntriesByIdSet() throws Exception {
-
-    }
-
-    @Test
-    public void testSortList() throws Exception {
 
     }
 

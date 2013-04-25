@@ -36,7 +36,22 @@ public class PermissionsController {
         dao = new PermissionDAO();
     }
 
-    public void addPermission(Account requestingAccount, PermissionInfo info) throws ControllerException {
+    public Permission recordPermission(PermissionInfo info) throws ControllerException {
+        try {
+            Group group = groupController.getGroupById(info.getArticleId());
+            // add the permission if not
+            Permission permission = new Permission();
+            permission.setGroup(group);
+            permission.setCanRead(info.isCanRead());
+            permission.setCanWrite(info.isCanWrite());
+            return dao.save(permission);
+        } catch (DAOException e) {
+            Logger.error(e);
+            throw new ControllerException(e);
+        }
+    }
+
+    public Permission addPermission(Account requestingAccount, PermissionInfo info) throws ControllerException {
         Entry entry = null;
         Folder folder = null;
 
@@ -77,7 +92,7 @@ public class PermissionsController {
         // does the permissions already exists
         try {
             if (dao.hasPermission(entry, folder, account, group, info.isCanRead(), info.isCanWrite())) {
-                return;
+                return dao.retrievePermission(entry, folder, account, group, info.isCanRead(), info.isCanWrite());
             }
 
             // add the permission if not
@@ -90,7 +105,7 @@ public class PermissionsController {
             permission.setAccount(account);
             permission.setCanRead(info.isCanRead());
             permission.setCanWrite(info.isCanWrite());
-            dao.save(permission);
+            return dao.save(permission);
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);
@@ -101,7 +116,7 @@ public class PermissionsController {
         Entry entry = null;
         Folder folder = null;
 
-        EntryController entryController = new EntryController();
+        EntryController entryController = ControllerFactory.getEntryController();
 
         try {
             if (info.isEntry()) {

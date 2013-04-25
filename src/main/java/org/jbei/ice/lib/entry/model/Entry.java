@@ -210,8 +210,8 @@ public class Entry implements IModel {
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
     private final List<Parameter> parameters = new ArrayList<>();
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, mappedBy = "entry", orphanRemoval = true,
-               fetch = FetchType.EAGER)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "entry",
+               orphanRemoval = true, fetch = FetchType.EAGER)
     @IndexedEmbedded
     private final Set<Permission> permissions = new HashSet<>();
 

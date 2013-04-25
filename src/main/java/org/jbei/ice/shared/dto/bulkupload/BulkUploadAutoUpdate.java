@@ -12,7 +12,7 @@ import org.jbei.ice.shared.dto.entry.EntryType;
  */
 public class BulkUploadAutoUpdate implements IDTOModel {
 
-    private HashMap<String, String> keyValue;   // header being updated -> value for that row
+    private HashMap<EntryField, String> keyValue;   // header being updated -> value for that row
     private long entryId;
     private long bulkUploadId;
     private EntryType type;
@@ -21,10 +21,10 @@ public class BulkUploadAutoUpdate implements IDTOModel {
 
     // no arg constructor for serializations
     public BulkUploadAutoUpdate() {
-        keyValue = new HashMap<String, String>();
+        keyValue = new HashMap<EntryField, String>();
     }
 
-    public HashMap<String, String> getKeyValue() {
+    public HashMap<EntryField, String> getKeyValue() {
         return this.keyValue;
     }
 
@@ -48,7 +48,7 @@ public class BulkUploadAutoUpdate implements IDTOModel {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         int i = 0;
-        for (Map.Entry<String, String> set : keyValue.entrySet()) {
+        for (Map.Entry<EntryField, String> set : keyValue.entrySet()) {
             sb.append("AutoUpdate (entry:" + entryId + ", bulkupload:" + bulkUploadId + ", field:" + set.getKey()
                               + ", value:" + set.getValue() + ", row:" + row + ")");
             i += 1;

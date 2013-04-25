@@ -1,12 +1,13 @@
 package org.jbei.ice.client.bulkupload.widget;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Set;
 
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -15,11 +16,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusPanel;
@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
@@ -44,12 +44,12 @@ public class PermissionsSelection implements IsWidget {
 
     private final FocusPanel parent;
     private final CellTable<OptionSelect> table;
-    private final HashSet<PermissionInfo> permissions;
     private final MultiSelectionModel<OptionSelect> model;
     private final ListDataProvider<OptionSelect> dataProvider;
     private final Button submitButton;
-    private final Button clearButton;
+    private final Label clear;
     private final PopupHandler addToHandler;
+    private ServiceDelegate<Set<OptionSelect>> submitHandler;
 
     interface SelectionResource extends CellTable.Resources {
 
@@ -101,10 +101,8 @@ public class PermissionsSelection implements IsWidget {
             }
         });
 
-        permissions = new HashSet<PermissionInfo>();
         dataProvider = new ListDataProvider<OptionSelect>();
         dataProvider.addDataDisplay(table);
-        dataProvider.getList().add(new OptionSelect(0, "Foo"));
 
         submitButton = new Button("Submit");
         submitButton.addKeyPressHandler(new EnterClickHandler(submitButton));
@@ -112,24 +110,55 @@ public class PermissionsSelection implements IsWidget {
 
             @Override
             public void onClick(ClickEvent event) {
-//                dispatchSubmitEvent(); TODO
-                addToHandler.hidePopup();
-                model.clear();
+                if (submitHandler != null) {
+                    submitHandler.execute(model.getSelectedSet());
+                    addToHandler.hidePopup();
+                } else {
+                    Window.alert("There is no handler for this action");
+                }
             }
         });
 
-        clearButton = new Button("Clear");
-        clearButton.addKeyPressHandler(new EnterClickHandler(clearButton));
+        clear = new HTML("Clear");
+        clear.setStyleName("footer_feedback_widget");
+        clear.addStyleName("font-75em");
+        clear.addStyleName("display-inline");
+
+        clear.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                model.clear();
+            }
+        });
 
         final Widget popup = createPopupWidget();
         addToHandler = new PopupHandler(popup, parent.getElement(), false);
         parent.addClickHandler(addToHandler);
-        addToHandler.setCloseHandler(new CloseHandler<PopupPanel>() {
-            @Override
-            public void onClose(CloseEvent<PopupPanel> popupPanelCloseEvent) {
-                model.clear();
+    }
+
+    public void setData(ArrayList<OptionSelect> data) {
+        dataProvider.getList().clear();
+        dataProvider.getList().addAll(data);
+    }
+
+    /**
+     * Uses the id in option select to enable the check boxes for those that exist in the data provider
+     *
+     * @param data data that needs to be enabled/checked
+     */
+    public void setEnabled(ArrayList<OptionSelect> data) {
+        for (OptionSelect optionSelect : dataProvider.getList()) {
+            for (int i = 0; i < data.size(); i += 1) {
+                if (optionSelect.getId() == data.get(i).getId()) {
+                    model.setSelected(optionSelect, true);
+                    break;
+                }
             }
-        });
+        }
+    }
+
+    public void setPermissionUpdateDelegate(ServiceDelegate<Set<OptionSelect>> handler) {
+        this.submitHandler = handler;
     }
 
     /**
@@ -142,7 +171,7 @@ public class PermissionsSelection implements IsWidget {
         wrapper.getFlexCellFormatter().setColSpan(0, 0, 2);
 
         wrapper.setWidget(1, 0, submitButton);
-        wrapper.setWidget(1, 1, clearButton);
+        wrapper.setWidget(1, 1, clear);
         wrapper.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_RIGHT);
         wrapper.getFlexCellFormatter().setWidth(1, 1, "46px");
         return wrapper;
@@ -173,7 +202,7 @@ public class PermissionsSelection implements IsWidget {
 
             @Override
             public String getValue(OptionSelect object) {
-                return object.toString();
+                return object.getName();
             }
         };
         table.addColumn(name);

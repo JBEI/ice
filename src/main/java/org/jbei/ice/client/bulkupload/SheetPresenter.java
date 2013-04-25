@@ -9,7 +9,6 @@ import org.jbei.ice.client.bulkupload.model.ModelFactory;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.model.SheetModel;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
-import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.ImportTypeHeaders;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.bulkupload.sheet.header.BulkUploadHeaders;
@@ -20,6 +19,7 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
@@ -178,10 +178,9 @@ public class SheetPresenter {
         EntryInfo info = rowInfoMap.get(autoUpdate.getRow());
 
         // display all fields that were added
-        for (Map.Entry<String, String> set : autoUpdate.getKeyValue().entrySet()) {
-            String field = set.getKey();
+        for (Map.Entry<EntryField, String> set : autoUpdate.getKeyValue().entrySet()) {
+            EntryField header = set.getKey();
             String value = set.getValue();
-            Header header = Header.stringToHeader(field);
             SheetCellData data = new SheetCellData(header, "", value);
             info = getModelForCurrentType().setInfoField(data, info);
         }
@@ -270,7 +269,7 @@ public class SheetPresenter {
         // submit for auto update
         BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
         update.setEntryId(entryId);
-        update.getKeyValue().put(header.toString(), value);
+        update.getKeyValue().put(header.getHeaderType(), value);
         update.setType(entryType);
         long bulkUpload = currentInfo == null ? 0 : currentInfo.getId();
         update.setBulkUploadId(bulkUpload);
@@ -287,7 +286,7 @@ public class SheetPresenter {
             if (cellData != null)
                 continue;
 
-            update.getKeyValue().put(columnHeader.toString(), columnHeader.getDefaultValue());
+            update.getKeyValue().put(columnHeader.getHeaderType(), columnHeader.getDefaultValue());
 
             // update cell display
             view.setCellWidgetForCurrentRow(columnHeader.getDefaultValue(), inputRow, i, -1);

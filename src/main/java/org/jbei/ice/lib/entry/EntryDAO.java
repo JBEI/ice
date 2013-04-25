@@ -599,9 +599,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
             sources = new HashSet<>(entry.getEntryFundingSources());
         }
 
-        entry.setEntryFundingSources(null);
-        update(entry);
-
         if (sources != null) {
             for (EntryFundingSource entryFundingSource : sources) {
                 FundingSource newFundingSource = entryFundingSource.getFundingSource();
@@ -614,6 +611,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 currentSession().saveOrUpdate(entryFundingSource);
             }
         }
+
+        update(entry);
         return entry;
     }
 
@@ -621,7 +620,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
         HashSet<EntryFundingSource> sources = null;
         if (entry.getEntryFundingSources() != null) {
             sources = new HashSet<>(entry.getEntryFundingSources());
-            entry.setEntryFundingSources(null);
         }
 
         entry = save(entry);

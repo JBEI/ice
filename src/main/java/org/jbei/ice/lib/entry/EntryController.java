@@ -214,8 +214,12 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
+        // add read and write permissions for owner
         PermissionInfo info = new PermissionInfo(PermissionInfo.Article.ACCOUNT, account.getId(),
                                                  PermissionInfo.Type.WRITE_ENTRY, entry.getId(), account.getFullName());
+        permissionsController.addPermission(account, info);
+        info = new PermissionInfo(PermissionInfo.Article.ACCOUNT, account.getId(),
+                                  PermissionInfo.Type.READ_ENTRY, entry.getId(), account.getFullName());
         permissionsController.addPermission(account, info);
 
         if (permissions != null) {
@@ -692,7 +696,7 @@ public class EntryController {
             try {
                 ArrayList<PermissionInfo> permissions = permissionsController.retrieveSetEntryPermissions(account,
                                                                                                           entry);
-                info.getPermissions().addAll(permissions);
+                info.setPermissions(permissions);
             } catch (PermissionException e) {
                 Logger.error(e);
             }

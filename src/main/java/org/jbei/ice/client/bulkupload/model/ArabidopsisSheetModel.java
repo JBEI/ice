@@ -2,10 +2,10 @@ package org.jbei.ice.client.bulkupload.model;
 
 import java.util.Date;
 
-import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.dto.StorageInfo;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
 
 import com.google.gwt.core.client.GWT;
@@ -18,7 +18,7 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
         if (datum == null)
             return info;
 
-        Header header = datum.getTypeHeader();
+        EntryField header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null)

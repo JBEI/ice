@@ -1,10 +1,13 @@
-package org.jbei.ice.client.bulkupload.sheet;
+package org.jbei.ice.shared.dto.bulkupload;
 
-public enum Header {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public enum EntryField implements IsSerializable {
+
     PI("Principal Investigator", true),
     FUNDING_SOURCE("Funding Source", true),
     IP("Intellectual Property", false),
-    BIOSAFETY("BioSafety Level", true),
+    BIOSAFETY_LEVEL("BioSafety Level", true),
     NAME("Name", false),
     ALIAS("Alias", false),
     KEYWORDS("Keywords", true),
@@ -17,7 +20,7 @@ public enum Header {
     ATT_FILENAME("Attachment File", false),
     SELECTION_MARKERS("Selection Markers", true),
     PARENTAL_STRAIN("Parental Strain", false),
-    GEN_PHEN("Genotype or Phenotype", false),
+    GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false),
     PLASMIDS("Plasmids", false),
     CIRCULAR("Circular", true),
     BACKBONE("Backbone", false),
@@ -75,19 +78,21 @@ public enum Header {
     private String label;
     private boolean canLock;
 
-    Header(String label, boolean canLock) {
+    EntryField(String label, boolean canLock) {
         this.label = label;
         this.canLock = canLock;
     }
+
+    private EntryField() {}
 
     public boolean isCanLock() {
         return canLock;
     }
 
-    public static Header stringToHeader(String v) {
-        for (Header header : values()) {
-            if (header.toString().equalsIgnoreCase(v))
-                return header;
+    public static EntryField fromString(String label) {
+        for (EntryField field : EntryField.values()) {
+            if (field.label.equalsIgnoreCase(label))
+                return field;
         }
         return null;
     }

@@ -24,6 +24,7 @@ import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.ParameterType;
 import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
@@ -348,9 +349,9 @@ public class InfoToModelFactory {
      * @param field to set
      * @return updated entry
      */
-    public static Entry infoToEntryForField(Entry entry, String value, String field) {
+    public static Entry infoToEntryForField(Entry entry, String value, EntryField field) {
         switch (field) {
-            case "Principal Investigator": {
+            case PI: {
                 Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
                 EntryFundingSource entryFundingSource;
                 FundingSource fundingSource;
@@ -376,7 +377,7 @@ public class InfoToModelFactory {
                 break;
             }
 
-            case "Funding Source": {
+            case FUNDING_SOURCE: {
                 Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
                 EntryFundingSource entryFundingSource;
                 FundingSource fundingSource;
@@ -402,58 +403,58 @@ public class InfoToModelFactory {
                 break;
             }
 
-            case "Intellectual Property":
+            case IP:
                 entry.setIntellectualProperty(value);
                 break;
 
-            case "BioSafety Level":
+            case BIOSAFETY_LEVEL:
                 Integer level = BioSafetyOption.intValue(value);
                 entry.setBioSafetyLevel(level);
                 break;
 
-            case "Name":
-            case "Plasmid Name":
-            case "Strain Number":
+            case NAME:
+            case PLASMID_NAME:
+            case STRAIN_NAME:
                 HashSet<Name> names = new HashSet<>();
                 Name name = new Name(value, entry);
                 names.add(name);
                 entry.setNames(names);
                 break;
 
-            case "Alias":
-            case "Strain Alias":
-            case "Plasmid Alias":
+            case ALIAS:
+            case PLASMID_ALIAS:
+            case STRAIN_ALIAS:
                 entry.setAlias(value);
                 break;
 
-            case "Keywords":
-            case "Strain Keywords":
-            case "Plasmid Keywords":
+            case KEYWORDS:
+            case STRAIN_KEYWORDS:
+            case PLASMID_KEYWORDS:
                 entry.setKeywords(value);
                 break;
 
-            case "Summary":
-            case "Strain Summary":
-            case "Plasmid Summary":
+            case SUMMARY:
+            case STRAIN_SUMMARY:
+            case PLASMID_SUMMARY:
                 entry.setShortDescription(value);
                 break;
 
-            case "Notes":
-            case "Strain Notes":
-            case "Plasmid Notes":
+            case NOTES:
+            case STRAIN_NOTES:
+            case PLASMID_NOTES:
                 entry.setLongDescription(value);
                 entry.setLongDescriptionType("text");
                 break;
 
-            case "References":
-            case "Plasmid References":
-            case "Strain References":
+            case REFERENCES:
+            case PLASMID_REFERENCES:
+            case STRAIN_REFERENCES:
                 entry.setReferences(value);
                 break;
 
-            case "Links":
-            case "Plasmid Links":
-            case "Strain Links":
+            case LINKS:
+            case PLASMID_LINKS:
+            case STRAIN_LINKS:
                 HashSet<Link> links = new HashSet<>();
                 Link link = new Link();
                 link.setUrl(value);
@@ -462,65 +463,65 @@ public class InfoToModelFactory {
                 entry.setLinks(links);
                 break;
 
-            case "Status":
-            case "Plasmid Status":
+            case STATUS:
+            case PLASMID_STATUS:
                 entry.setStatus(value);
                 break;
 
-            case "Selection Markers":
-            case "Plasmid Selection Markers":
-            case "Strain Selection Markers":
+            case SELECTION_MARKERS:
+            case PLASMID_SELECTION_MARKERS:
+            case STRAIN_SELECTION_MARKERS:
                 HashSet<SelectionMarker> markers = new HashSet<>();
                 SelectionMarker marker = new SelectionMarker(value, entry);
                 markers.add(marker);
                 entry.setSelectionMarkers(markers);
                 break;
 
-            case "Parental Strain":
-            case "Genotype or Phenotype":
-            case "Plasmids":
+            case PARENTAL_STRAIN:
+            case GENOTYPE_OR_PHENOTYPE:
+            case PLASMIDS:
                 entry = infoToStrainForField(entry, value, field);
                 break;
 
-            case "Backbone":
-            case "Plasmid Backbone":
-            case "Promoters":
-            case "Plasmid Promoters":
-            case "Circular":
-            case "Origin of Replication":
-            case "Plasmid Origin of Replication":
+            case BACKBONE:
+            case PLASMID_BACKBONE:
+            case PROMOTERS:
+            case PLASMID_PROMOTERS:
+            case CIRCULAR:
+            case ORIGIN_OF_REPLICATION:
+            case PLASMID_ORIGIN_OF_REPLICATION:
                 entry = infoToPlasmidForField(entry, value, field);
                 break;
 
-            case "Homozygosity":
-            case "Ecotype":
-            case "Harvest Date":
-            case "Generation":
-            case "Sent to ABRC?":
-            case "Plant Type":
-            case "Parents":
+            case HOMOZYGOSITY:
+            case ECOTYPE:
+            case HARVEST_DATE:
+            case GENERATION:
+            case SENT_TO_ABRC:
+            case PLANT_TYPE:
+            case PARENTS:
                 entry = infoToSeedForField(entry, value, field);
                 break;
         }
         return entry;
     }
 
-    private static Entry infoToStrainForField(Entry entry, String value, String field) {
+    private static Entry infoToStrainForField(Entry entry, String value, EntryField field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString()))
             return entry;
 
         Strain strain = (Strain) entry;
 
         switch (field) {
-            case "Parental Strain":
+            case PARENTAL_STRAIN:
                 strain.setHost(value);
                 return strain;
 
-            case "Genotype or Phenotype":
+            case GENOTYPE_OR_PHENOTYPE:
                 strain.setGenotypePhenotype(value);
                 return strain;
 
-            case "Plasmids":
+            case PLASMIDS:
                 strain.setPlasmids(value);
                 return strain;
 
@@ -529,29 +530,29 @@ public class InfoToModelFactory {
         }
     }
 
-    private static Entry infoToPlasmidForField(Entry entry, String value, String field) {
+    private static Entry infoToPlasmidForField(Entry entry, String value, EntryField field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.toString()))
             return entry;
 
         Plasmid plasmid = (Plasmid) entry;
 
         switch (field) {
-            case "Backbone":
-            case "Plasmid Backbone":
+            case BACKBONE:
+            case PLASMID_BACKBONE:
                 plasmid.setBackbone(value);
                 return plasmid;
 
-            case "Promoters":
-            case "Plasmid Promoters":
+            case PROMOTERS:
+            case PLASMID_PROMOTERS:
                 plasmid.setPromoters(value);
                 return plasmid;
 
-            case "Circular":
-                plasmid.setCircular("yes".equalsIgnoreCase(value));
+            case CIRCULAR:
+                plasmid.setCircular("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
                 return plasmid;
 
-            case "Origin of Replication":
-            case "Plasmid Origin of Replication":
+            case ORIGIN_OF_REPLICATION:
+            case PLASMID_ORIGIN_OF_REPLICATION:
                 plasmid.setOriginOfReplication(value);
                 return plasmid;
 
@@ -560,22 +561,22 @@ public class InfoToModelFactory {
         }
     }
 
-    private static Entry infoToSeedForField(Entry entry, String value, String field) {
+    private static Entry infoToSeedForField(Entry entry, String value, EntryField field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.ARABIDOPSIS.toString()))
             return entry;
 
-        ArabidopsisSeed seed = new ArabidopsisSeed();
+        ArabidopsisSeed seed = (ArabidopsisSeed) entry;
 
         switch (field) {
-            case "Homozygosity":
+            case HOMOZYGOSITY:
                 seed.setHomozygosity(value);
                 return seed;
 
-            case "Ecotype":
+            case ECOTYPE:
                 seed.setEcotype(value);
                 return seed;
 
-            case "Harvest Date":
+            case HARVEST_DATE:
                 try {
                     Date date = SimpleDateFormat.getDateInstance().parse(value);
                     seed.setHarvestDate(date);
@@ -583,19 +584,19 @@ public class InfoToModelFactory {
                 }
                 return seed;
 
-            case "Generation":
+            case GENERATION:
                 seed.setGeneration(ArabidopsisSeed.Generation.valueOf(value));
                 return seed;
 
-            case "Sent to ABRC?":
-                seed.setSentToABRC("yes".equalsIgnoreCase(value));
+            case SENT_TO_ABRC:
+                seed.setSentToABRC("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
                 return seed;
 
-            case "Plant Type":
+            case PLANT_TYPE:
                 seed.setPlantType(ArabidopsisSeed.PlantType.valueOf(value));
                 return seed;
 
-            case "Parents":
+            case PARENTS:
                 seed.setParents(value);
                 return seed;
 

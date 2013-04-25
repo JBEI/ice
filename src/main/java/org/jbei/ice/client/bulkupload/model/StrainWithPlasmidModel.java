@@ -2,8 +2,8 @@ package org.jbei.ice.client.bulkupload.model;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.shared.BioSafetyOption;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
@@ -43,7 +43,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
         if (datum == null)
             return;
 
-        Header header = datum.getTypeHeader();
+        EntryField header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null)
@@ -61,7 +61,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 strain.setIntellectualProperty(value);
                 break;
 
-            case BIOSAFETY:
+            case BIOSAFETY_LEVEL:
                 Integer optionValue = BioSafetyOption.intValue(value);
                 strain.setBioSafetyLevel(optionValue);
                 break;
@@ -179,7 +179,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
         if (datum == null)
             return;
 
-        Header header = datum.getTypeHeader();
+        EntryField header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null)
@@ -197,7 +197,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 info.setIntellectualProperty(value);
                 break;
 
-            case BIOSAFETY:
+            case BIOSAFETY_LEVEL:
                 Integer optionValue = BioSafetyOption.intValue(value);
                 info.setBioSafetyLevel(optionValue);
                 break;

@@ -94,8 +94,11 @@ public class ArabidopsisSeed extends Entry {
     public ArabidopsisSeed() {
         super();
         setRecordType(EntryType.ARABIDOPSIS.getName());
-        setGeneration(ArabidopsisSeed.Generation.NULL);
-        setPlantType(ArabidopsisSeed.PlantType.NULL);
+        setGeneration(Generation.UNKNOWN);
+        setPlantType(PlantType.EMS);
+        setEcotype("");
+        setHomozygosity("");
+        setParents("");
     }
 
     // getters and setters

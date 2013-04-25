@@ -5,9 +5,9 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
-import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 /**
@@ -20,7 +20,7 @@ public abstract class SampleHeaders {
     public SampleHeaders(ArrayList<String> locationList, HashMap<String, String> preferences) {
         for (String location : locationList) {
             try {
-                Header header = Header.valueOf("SAMPLE_" + location.replaceAll(" ", "_").toUpperCase());
+                EntryField header = EntryField.valueOf("SAMPLE_" + location.replaceAll(" ", "_").toUpperCase());
                 headers.add(new CellColumnHeader(header, preferences));
             } catch (IllegalArgumentException ila) {
                 headers.clear();
@@ -41,9 +41,9 @@ public abstract class SampleHeaders {
         return this.headers.size();
     }
 
-    public abstract SheetCellData extractValue(Header headerType, EntryInfo info);
+    public abstract SheetCellData extractValue(EntryField headerType, EntryInfo info);
 
-    SheetCellData extractCommon(Header headerType, EntryInfo info) {
+    SheetCellData extractCommon(EntryField headerType, EntryInfo info) {
 
         if (!info.isHasSample())
             return null;

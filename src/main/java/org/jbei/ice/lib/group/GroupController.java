@@ -82,6 +82,30 @@ public class GroupController {
         }
     }
 
+    /**
+     * Retrieves groups for user; including private groups that the user created
+     *
+     * @param account account for user making request
+     * @return list of available groups retrieved
+     * @throws ControllerException on exception retrieving groups
+     */
+    public ArrayList<GroupInfo> retrieveUserGroups(Account account) throws ControllerException {
+        ArrayList<GroupInfo> groups = new ArrayList<>();
+        Set<Group> result = account.getGroups();
+        Group publicGroup = createOrRetrievePublicGroup();
+        for (Group group : result) {
+            if (group.getUuid().equalsIgnoreCase(PUBLIC_GROUP_UUID))
+                continue;
+
+            GroupInfo info = Group.toDTO(group);
+            info.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
+            groups.add(info);
+        }
+        groups.addAll(retrieveGroups(account, GroupType.PRIVATE));
+        groups.add(0, Group.toDTO(publicGroup));
+        return groups;
+    }
+
     public Set<String> retrieveAccountGroupUUIDs(Account account) throws ControllerException {
         Set<String> uuids = new HashSet<>();
         if (account != null) {

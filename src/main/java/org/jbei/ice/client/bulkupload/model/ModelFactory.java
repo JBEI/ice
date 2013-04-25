@@ -3,6 +3,11 @@ package org.jbei.ice.client.bulkupload.model;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 
+/**
+ * Factory for creating sheet models based on entry types
+ *
+ * @author Hector Plahar
+ */
 public class ModelFactory {
 
     public static SheetModel<? extends EntryInfo> getModelForType(EntryAddType type) {

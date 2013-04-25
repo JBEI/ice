@@ -2,15 +2,18 @@ package org.jbei.ice.client.bulkupload;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.client.bulkupload.widget.CreatorWidget;
 import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
 import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkupload.widget.SavedDraftsMenu;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
+import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
@@ -187,6 +190,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
+    public void setPermissionDelegate(ServiceDelegate<Set<OptionSelect>> handler) {
+        selection.setPermissionUpdateDelegate(handler);
+    }
+
+    @Override
     protected Widget createContents() {
         layout = new FlexTable();
         layout.setWidth("100%");
@@ -207,6 +215,16 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         layout.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
 
         return layout;
+    }
+
+    @Override
+    public void setPermissionGroups(ArrayList<OptionSelect> groups) {
+        selection.setData(groups);
+    }
+
+    @Override
+    public void setSelectedPermissionGroups(ArrayList<OptionSelect> groups) {
+        selection.setEnabled(groups);
     }
 
     @Override
