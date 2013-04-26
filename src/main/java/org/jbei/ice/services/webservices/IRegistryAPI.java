@@ -39,6 +39,8 @@ public interface IRegistryAPI {
 
     boolean hasSequence(@WebParam(name = "recordId") String recordId) throws ServiceException;
 
+    boolean hasOriginalSequence(@WebParam(name = "recordId") String recordId) throws ServiceException;
+
     Entry getByRecordId(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException;

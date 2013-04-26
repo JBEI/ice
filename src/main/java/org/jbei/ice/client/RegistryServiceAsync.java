@@ -198,6 +198,9 @@ public interface RegistryServiceAsync {
     void updateBulkUploadPreference(String sid, long bulkUploadId, EntryAddType addType, PreferenceInfo info,
             AsyncCallback<Long> callback) throws AuthenticationException;
 
+    void updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
+            ArrayList<PermissionInfo> permissions, AsyncCallback<Long> callback) throws AuthenticationException;
+
     void retrieveUserPreferences(String sid, ArrayList<PreferenceKey> keys,
             AsyncCallback<HashMap<PreferenceKey, String>> async) throws AuthenticationException;
 
@@ -221,4 +224,6 @@ public interface RegistryServiceAsync {
     void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites, AsyncCallback<Void> callback);
 
     void deleteSample(String sessionId, SampleInfo info, AsyncCallback<Boolean> async);
+
+    void retrieveUserGroups(String sessionId, AsyncCallback<ArrayList<GroupInfo>> async);
 }

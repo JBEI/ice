@@ -57,6 +57,12 @@ public class Sequence implements IModel {
     @Column(name = "rev_hash", length = 40)
     private String revHash;
 
+    @Column(name = "uri")
+    private String uri;
+
+    @Column(name = "component_uri")
+    private String componentUri;
+
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "entries_id", nullable = true, unique = true)
     @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
@@ -158,5 +164,24 @@ public class Sequence implements IModel {
 
     public void setSequenceFeatures(Set<SequenceFeature> features) {
         sequenceFeatures = features;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    /**
+     * @return uri for component that this sequence is a part of
+     */
+    public String getComponentUri() {
+        return componentUri;
+    }
+
+    public void setComponentUri(String componentUri) {
+        this.componentUri = componentUri;
     }
 }

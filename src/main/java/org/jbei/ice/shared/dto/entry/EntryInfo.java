@@ -48,8 +48,8 @@ public class EntryInfo implements IDTOModel {
     private boolean hasAttachment;
     private boolean hasSample;
     private boolean hasSequence;
-    private ArrayList<AttachmentInfo> attachments; // TODO : create another object that HAS A EntryInfo and contains
-    // these as well
+    private boolean hasOriginalSequence;
+    private ArrayList<AttachmentInfo> attachments;
     private ArrayList<SampleStorage> sampleStorage;
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
     private ArrayList<ParameterInfo> parameters;
@@ -403,6 +403,15 @@ public class EntryInfo implements IDTOModel {
     }
 
     public void setPermissions(ArrayList<PermissionInfo> permissions) {
-        this.permissions = permissions;
+        this.permissions.clear();
+        this.permissions.addAll(permissions);
+    }
+
+    public boolean isHasOriginalSequence() {
+        return hasOriginalSequence;
+    }
+
+    public void setHasOriginalSequence(boolean hasOriginalSequence) {
+        this.hasOriginalSequence = hasOriginalSequence;
     }
 }

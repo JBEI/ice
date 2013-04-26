@@ -1928,6 +1928,7 @@ td.datePickerMonth {
     font-size: 0.75em;
     font-weight: normal;
     display: inline;
+    outline: none;
 }
 
 .remove_filter {

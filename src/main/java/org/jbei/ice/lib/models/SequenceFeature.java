@@ -71,6 +71,9 @@ public class SequenceFeature implements IModel {
     @Column(name = "genbank_type", length = 127)
     private String genbankType;
 
+    @Column(name = "uri")
+    private String uri;
+
     @Column(name = "flag")
     @Enumerated(EnumType.STRING)
     private AnnotationType annotationType;
@@ -91,6 +94,14 @@ public class SequenceFeature implements IModel {
         this.name = name;
         this.genbankType = genbankType;
         this.annotationType = annotationType;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     /**

@@ -6,7 +6,13 @@ import java.util.Date;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
+/**
+ * Data transfer model for bulk upload
+ *
+ * @author Hector Plahar
+ */
 public class BulkUploadInfo implements IDTOModel {
 
     private long id;
@@ -18,10 +24,12 @@ public class BulkUploadInfo implements IDTOModel {
     private AccountInfo account;
     private ArrayList<EntryInfo> entryList;
     private ArrayList<PreferenceInfo> preferences;
+    private ArrayList<PermissionInfo> permissions;
 
     public BulkUploadInfo() {
         entryList = new ArrayList<EntryInfo>();
         preferences = new ArrayList<PreferenceInfo>();
+        permissions = new ArrayList<PermissionInfo>();
     }
 
     public long getId() {
@@ -86,5 +94,9 @@ public class BulkUploadInfo implements IDTOModel {
 
     public ArrayList<PreferenceInfo> getPreferences() {
         return preferences;
+    }
+
+    public ArrayList<PermissionInfo> getPermissions() {
+        return permissions;
     }
 }

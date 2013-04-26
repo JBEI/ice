@@ -125,11 +125,15 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
         }
 
         results.addAll(searchResults.getResults());
+        final Range range = this.dataTable.getVisibleRange();
+
         resultSize = (int) searchResults.getResultCount();
+        if (searchResults.getResults().size() < range.getLength() && searchResults.getResults().size() != resultSize) {
+            resultSize = searchResults.getResults().size();
+        }
         updateRowCount(resultSize, true);
 
         // retrieve the first page of results and updateRowData
-        final Range range = this.dataTable.getVisibleRange();
         final int rangeStart = 0;
         int rangeEnd = rangeStart + range.getLength();
         if (rangeEnd > resultSize)

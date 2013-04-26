@@ -231,6 +231,7 @@ public class SequenceController {
         if (sequence.getSequenceFeatures() != null && sequence.getSequenceFeatures().size() > 0) {
             for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
                 DNAFeature dnaFeature = new DNAFeature();
+                dnaFeature.setUri(sequenceFeature.getUri());
 
                 for (SequenceFeatureAttribute attribute : sequenceFeature.getSequenceFeatureAttributes()) {
                     String key = attribute.getKey();
@@ -264,6 +265,7 @@ public class SequenceController {
             circular = ((Plasmid) sequence.getEntry()).getCircular();
         FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence(
                 sequence.getSequence(), entry.getNamesAsString(), circular, features, "", "");
+        featuredDNASequence.setUri(sequence.getUri());
 
         return featuredDNASequence;
     }
@@ -289,9 +291,12 @@ public class SequenceController {
         }
 
         Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null);
+
         Set<SequenceFeature> sequenceFeatures = sequence.getSequenceFeatures();
         if (dnaSequence instanceof FeaturedDNASequence) {
             FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) dnaSequence;
+            sequence.setUri(featuredDNASequence.getUri());
+            sequence.setComponentUri(featuredDNASequence.getDcUri());
 
             if (featuredDNASequence.getFeatures() != null && !featuredDNASequence.getFeatures().isEmpty()) {
                 for (DNAFeature dnaFeature : featuredDNASequence.getFeatures()) {
@@ -344,17 +349,19 @@ public class SequenceController {
                     }
 
                     Feature feature = new Feature(dnaFeature.getName(), "", featureSequence, 0, dnaFeature.getType());
-                    feature.setUri(dnaFeature.getUri());
+                    if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
+                        feature.setUri(dnaFeature.getLocations().get(0).getUri());
 
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
                                                                           dnaFeature.getStrand(), dnaFeature.getName(),
-                                                                          dnaFeature.getType(),
-                                                                          annotationType);
+                                                                          dnaFeature.getType(), annotationType);
+                    sequenceFeature.setUri(dnaFeature.getUri());
 
-                    for (DNAFeatureLocation location1 : locations) {
-                        sequenceFeature.getAnnotationLocations().add(
-                                new AnnotationLocation(location1.getGenbankStart(), location1.getEnd(),
-                                                       sequenceFeature));
+                    for (DNAFeatureLocation location : locations) {
+                        int start = location.getGenbankStart();
+                        int end = location.getEnd();
+                        AnnotationLocation annotationLocation = new AnnotationLocation(start, end, sequenceFeature);
+                        sequenceFeature.getAnnotationLocations().add(annotationLocation);
                     }
 
                     ArrayList<SequenceFeatureAttribute> sequenceFeatureAttributes = new ArrayList<>();
@@ -381,6 +388,21 @@ public class SequenceController {
     public boolean hasSequence(Entry entry) throws ControllerException {
         try {
             return dao.hasSequence(entry);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    /**
+     * Determines if the user uploaded a sequence file and associated it with an entry
+     *
+     * @param entry entry sequence file is associated with
+     * @return true if there is a sequence file that was originally uploaded by user, false otherwise
+     * @throws ControllerException
+     */
+    public boolean hasOriginalSequence(Entry entry) throws ControllerException {
+        try {
+            return dao.hasOriginalSequence(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

@@ -1,5 +1,6 @@
 package org.jbei.ice.client.admin.setting;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.jbei.ice.client.ServiceDelegate;
@@ -17,6 +18,9 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
+ * Panel for displaying specific settings. New instances can be created
+ * for different types of configurations)
+ *
  * @author Hector Plahar
  */
 public class SettingPanel extends Composite {
@@ -25,6 +29,7 @@ public class SettingPanel extends Composite {
     protected final HashMap<String, String> settings;
     private int row;
     private final ServiceDelegate<RowData> serviceDelegate;
+    private final ArrayList<ConfigurationKey> keysList;
 
     public SettingPanel(HashMap<String, String> settings, String panelHeader,
             ServiceDelegate<RowData> delegate, ConfigurationKey... keys) {
@@ -34,6 +39,7 @@ public class SettingPanel extends Composite {
         table.setCellSpacing(0);
         initWidget(table);
         this.serviceDelegate = delegate;
+        keysList = new ArrayList<ConfigurationKey>();
 
         row = 0;
         HTMLPanel headerPanel = new HTMLPanel(
@@ -45,8 +51,10 @@ public class SettingPanel extends Composite {
         table.setWidget(row, 0, headerPanel);
         table.getFlexCellFormatter().setColSpan(row, 0, 3);
         this.settings = settings;
-        for (ConfigurationKey key : keys)
+        for (ConfigurationKey key : keys) {
             addSetting(key);
+            keysList.add(key);
+        }
     }
 
     protected void addSetting(final ConfigurationKey configurationKey) {
@@ -87,30 +95,47 @@ public class SettingPanel extends Composite {
         cancel.setStyleName("footer_feedback_widget");
         cancel.addStyleName("font-70em");
         cancel.addStyleName("display-inline");
-        cancel.addClickHandler(new ClickHandler() {
+
+        // cancel Handler
+        ClickHandler cancelHandler = createCancelHandler(defaultValue, editRow, edit);
+        cancel.addClickHandler(cancelHandler);
+
+        // save handler
+        ClickHandler saveHandler = getSaveHandler(configurationKey, editRow, box, edit);
+        save.addClickHandler(saveHandler);
+
+        return panel;
+    }
+
+    protected ClickHandler createCancelHandler(final String defaultValue, final int editRow, final Button edit) {
+        return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 table.setHTML(editRow, 1, defaultValue);
                 table.setWidget(editRow, 2, edit);
             }
-        });
+        };
+    }
 
-        save.addClickHandler(new ClickHandler() {
+    protected ClickHandler getSaveHandler(final ConfigurationKey key, final int editRow, final TextBox box,
+            final Button edit) {
+        return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 final RowData rowData = new RowData();
-                rowData.setKey(configurationKey);
+                rowData.setKey(key);
                 rowData.setRow(editRow);
                 rowData.setValue(box.getValue().trim());
                 serviceDelegate.execute(rowData);
                 table.setWidget(editRow, 2, edit);
             }
-        });
-
-        return panel;
+        };
     }
 
     public void updateConfigSetting(ConfigurationKey key, int row, String value) {
+        if (!keysList.contains(key))
+            return;
+
         table.setHTML(row, 1, value);
     }
 }

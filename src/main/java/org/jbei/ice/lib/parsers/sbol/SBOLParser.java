@@ -26,7 +26,7 @@ import org.sbolstandard.core.util.SBOLBaseVisitor;
  *
  * @author Hector Plahar, Timothy Ham
  */
-public class SbolParser extends AbstractParser {
+public class SBOLParser extends AbstractParser {
 
     private static final String SBOL_PARSER = "SBOL";
 
@@ -52,7 +52,7 @@ public class SbolParser extends AbstractParser {
                 rootObject.accept(visitor);
             }
 
-            return visitor.sequenceWithFeatures;
+            return visitor.featuredDNASequence;
         } catch (SBOLValidationException | IOException e) {
             throw new InvalidFormatParserException("Could not parse SBOL file!", e);
         }
@@ -60,21 +60,23 @@ public class SbolParser extends AbstractParser {
 
     private class Visitor extends SBOLBaseVisitor<RuntimeException> {
 
-        private FeaturedDNASequence sequenceWithFeatures;
+        private FeaturedDNASequence featuredDNASequence;
 
         public Visitor() {
-            sequenceWithFeatures = new FeaturedDNASequence();
+            featuredDNASequence = new FeaturedDNASequence();
         }
 
         @Override
         public void visit(DnaComponent component) {
-            sequenceWithFeatures.setName(component.getName());
-            sequenceWithFeatures.setIdentifier(component.getDisplayId());
-            sequenceWithFeatures.setIsCircular(false);
-            sequenceWithFeatures.setDescription(component.getDescription());
+            featuredDNASequence.setName(component.getName());
+            featuredDNASequence.setIdentifier(component.getDisplayId());
+            featuredDNASequence.setIsCircular(false);
+            featuredDNASequence.setDescription(component.getDescription());
+            featuredDNASequence.setDcUri(component.getURI().toString());
 
             if (component.getDnaSequence() != null) {
-                sequenceWithFeatures.setSequence(component.getDnaSequence().getNucleotides());
+                featuredDNASequence.setSequence(component.getDnaSequence().getNucleotides());
+                featuredDNASequence.setUri(component.getDnaSequence().getURI().toString());
             }
 
             java.util.Collection<SequenceAnnotation> annotations = component.getAnnotations();
@@ -88,25 +90,31 @@ public class SbolParser extends AbstractParser {
         @Override
         public void visit(SequenceAnnotation annotation) {
             DNAFeature feature = new DNAFeature();
+            DNAFeatureLocation location = new DNAFeatureLocation();
+
             feature.setStrand(annotation.getStrand() == StrandType.NEGATIVE ? -1 : 1);
+            feature.setUri(annotation.getURI().toString());
 
             DnaComponent subComponent = annotation.getSubComponent();
             if (subComponent != null && !subComponent.getTypes().isEmpty()) {
-                URI uri = (URI) subComponent.getTypes().toArray()[0];
-                if (uri != null) {
-                    String[] s = uri.getRawPath().split("SO_");
+                URI typesURI = (URI) subComponent.getTypes().toArray()[0];
+                if (typesURI != null) {
+                    String[] s = typesURI.getRawPath().split("SO_");
                     if (s != null && s.length == 2) {
                         feature.setType(IceSequenceOntology.getFeatureType("SO_" + s[1]));
                     }
                 }
-                feature.setName(subComponent.getDisplayId());
+                String name = subComponent.getName();
+                if (name == null || name.trim().isEmpty())
+                    name = subComponent.getDisplayId();
+                feature.setName(name);
+                location.setUri(subComponent.getURI().toString());
             }
 
-            DNAFeatureLocation location = new DNAFeatureLocation();
             location.setGenbankStart(annotation.getBioStart());
             location.setEnd(annotation.getBioEnd());
             feature.getLocations().add(location);
-            sequenceWithFeatures.getFeatures().add(feature);
+            featuredDNASequence.getFeatures().add(feature);
         }
     }
 

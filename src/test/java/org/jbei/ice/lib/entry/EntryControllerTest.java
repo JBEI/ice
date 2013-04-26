@@ -1,5 +1,8 @@
 package org.jbei.ice.lib.entry;
 
+import java.util.Set;
+
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
@@ -7,6 +10,7 @@ import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.shared.AutoCompleteField;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -17,6 +21,7 @@ import org.junit.Test;
  * @author Hector Plahar
  */
 public class EntryControllerTest {
+
     private EntryController controller;
 
     @Before
@@ -29,16 +34,54 @@ public class EntryControllerTest {
     protected Account createTestAccount() throws Exception {
         String email = "test@TESTER";
         AccountController accountController = new AccountController();
+        Account account = accountController.getByEmail(email);
+        if (account != null)
+            return account;
+
         String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
         Assert.assertNotNull(pass);
-        Account account = accountController.getByEmail(email);
+        account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
         return account;
     }
 
     @After
     public void tearDown() {
-        HibernateHelper.rollbackTransaction();
+        HibernateHelper.commitTransaction();
+    }
+
+    @Test
+    public void testGetMatchingAutoCompleteField() throws Exception {
+        for (AutoCompleteField field : AutoCompleteField.values()) {
+            Set<String> matches = controller.getMatchingAutoCompleteField(field, "TOKEN", 10);
+            Assert.assertNotNull(matches);
+        }
+    }
+
+    @Test
+    public void testGetAllEntryIDs() throws Exception {
+        Assert.assertNotNull(controller.getAllEntryIds());
+    }
+
+    @Test
+    public void testCreateStrainWithPlasmid() throws Exception {
+        Account account = createTestAccount();
+        try {
+            controller.createStrainWithPlasmid(account, null, null, null);
+        } catch (ControllerException ce) {
+        }
+
+        Strain strain = new Strain();
+        setDummyData(strain);
+    }
+
+    protected Entry setDummyData(Entry entry) {
+        assert (entry != null);
+        entry.setAlias("testEntryAlias");
+        entry.setBioSafetyLevel(new Integer(1));
+        entry.setCreator("tester");
+        entry.setIntellectualProperty("no intellectual property");
+        return entry;
     }
 
     @Test
@@ -113,11 +156,6 @@ public class EntryControllerTest {
     }
 
     @Test
-    public void testGetAllEntryIDs() throws Exception {
-
-    }
-
-    @Test
     public void testGetNumberOfVisibleEntries() throws Exception {
     }
 
@@ -153,11 +191,6 @@ public class EntryControllerTest {
 
     @Test
     public void testGetEntriesByIdSet() throws Exception {
-
-    }
-
-    @Test
-    public void testSortList() throws Exception {
 
     }
 

@@ -343,7 +343,7 @@ public class EntryPresenter extends AbstractPresenter {
             }
 
             @Override
-            public void onFailure(Throwable caught) {
+            public void serverFailure() {
                 FeedbackEvent event = new FeedbackEvent(true, "There was an error retrieving the entry");
                 eventBus.fireEvent(event);
                 display.showLoadingIndicator(true);
@@ -564,7 +564,7 @@ public class EntryPresenter extends AbstractPresenter {
                 }
 
                 @Override
-                public void onFailure(Throwable t) {
+                public void serverFailure() {
                     eventBus.fireEvent(new FeedbackEvent(true, "Error updating record"));
                 }
             }.go(eventBus);

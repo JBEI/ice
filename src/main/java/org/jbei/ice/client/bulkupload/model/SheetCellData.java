@@ -1,6 +1,6 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 
 // wrapper around entered data to enable sending more info 
 // from the sheet. e.g. file input has the uploaded id
@@ -8,11 +8,11 @@ import org.jbei.ice.client.bulkupload.sheet.Header;
 
 public class SheetCellData {
 
-    private Header type;
+    private EntryField type;
     private String id;     // used for file id
     private String value;
 
-    public SheetCellData(Header type, String id, String value) {
+    public SheetCellData(EntryField type, String id, String value) {
         this.type = type;
         this.id = id;
         this.value = value;
@@ -21,7 +21,7 @@ public class SheetCellData {
     public SheetCellData() {
     }
 
-    public Header getTypeHeader() {
+    public EntryField getTypeHeader() {
         return type;
     }
 
@@ -33,7 +33,7 @@ public class SheetCellData {
         return value;
     }
 
-    public void setType(Header type) {
+    public void setType(EntryField type) {
         this.type = type;
     }
 

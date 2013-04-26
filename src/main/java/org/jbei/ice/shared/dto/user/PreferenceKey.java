@@ -3,7 +3,7 @@ package org.jbei.ice.shared.dto.user;
 import org.jbei.ice.shared.dto.IDTOModel;
 
 /**
- * Preset key for user preferences. Those that map to {@link org.jbei.ice.client.bulkupload.sheet.Header}
+ * Preset key for user preferences. Those that map to {@link org.jbei.ice.shared.dto.bulkupload.EntryField}
  * should have the same toString().ignoreCase() value when the "_" is replaced with a key. e.g.
  * PRINCIPAL_INVESTIGATOR -> Principal Investigator.
  * <p/>

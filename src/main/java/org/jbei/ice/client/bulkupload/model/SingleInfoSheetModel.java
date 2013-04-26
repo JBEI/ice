@@ -2,10 +2,10 @@ package org.jbei.ice.client.bulkupload.model;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
@@ -25,7 +25,7 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
         if (info == null)
             info = createInfo();
 
-        Header header = datum.getTypeHeader();
+        EntryField header = datum.getTypeHeader();
         String value = datum.getValue();
 
         switch (header) {
@@ -41,7 +41,7 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
                 info.setIntellectualProperty(value);
                 break;
 
-            case BIOSAFETY:
+            case BIOSAFETY_LEVEL:
                 Integer optionValue = BioSafetyOption.intValue(value);
                 info.setBioSafetyLevel(optionValue);
                 break;
@@ -106,6 +106,7 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
                 analysisInfo.setFileId(datum.getId());
                 seq.add(analysisInfo);
                 info.setHasSequence(true);
+                info.setHasOriginalSequence(true);
                 break;
 
             case ATT_FILENAME:

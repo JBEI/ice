@@ -2,6 +2,7 @@ package org.jbei.ice.client.login;
 
 import org.jbei.ice.client.common.footer.Footer;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -48,6 +49,12 @@ public class LoginView extends Composite implements ILoginView {
         forgotPasswordPanel.setCancelHandler(cancelHandler);
         addKeyHandlerToClearErrorInput(loginInput);
         addKeyHandlerToClearErrorInput(passwordInput);
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                loginInput.setFocus(true);
+            }
+        });
     }
 
     private void initComponents() {

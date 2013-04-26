@@ -2,9 +2,12 @@ package org.jbei.ice.client.bulkupload;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 
 import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
+import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 
@@ -61,4 +64,10 @@ public interface IBulkUploadView {
     void setLastUpdated(Date date);
 
     void setLoading(boolean set);
+
+    void setPermissionGroups(ArrayList<OptionSelect> groups);
+
+    void setSelectedPermissionGroups(ArrayList<OptionSelect> groups);
+
+    void setPermissionDelegate(ServiceDelegate<Set<OptionSelect>> handler);
 }

@@ -5,8 +5,9 @@ import java.util.HashMap;
 import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
-import org.jbei.ice.client.bulkupload.sheet.Header;
-import org.jbei.ice.client.bulkupload.sheet.cell.MultiSuggestSheetCell;
+import org.jbei.ice.client.bulkupload.sheet.cell.AutoCompleteSheetCell;
+import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.StrainInfo;
 
@@ -19,13 +20,16 @@ public class StrainHeaders extends PartHeader {
         super(delegate, preferences);
 
         // strain specific headers
-        headers.add(new CellColumnHeader(Header.PARENTAL_STRAIN, preferences));
-        headers.add(new CellColumnHeader(Header.GEN_PHEN, preferences));
-        headers.add(new CellColumnHeader(Header.PLASMIDS, preferences, false, new MultiSuggestSheetCell(true)));
+        headers.add(new CellColumnHeader(EntryField.PARENTAL_STRAIN, preferences));
+        headers.add(new CellColumnHeader(EntryField.GENOTYPE_OR_PHENOTYPE, preferences));
+        headers.add(new CellColumnHeader(EntryField.PLASMIDS, preferences, false, new AutoCompleteSheetCell(
+                AutoCompleteField.PLASMID_NAME)));
+        headers.add(new CellColumnHeader(EntryField.SELECTION_MARKERS, preferences, true,
+                                         new AutoCompleteSheetCell(AutoCompleteField.SELECTION_MARKERS)));
     }
 
     @Override
-    public SheetCellData extractValue(Header header, EntryInfo info) {
+    public SheetCellData extractValue(EntryField header, EntryInfo info) {
         SheetCellData data = extractCommon(header, info);
         if (data != null)
             return data;
@@ -37,7 +41,7 @@ public class StrainHeaders extends PartHeader {
                 value = strain.getHost();
                 break;
 
-            case GEN_PHEN:
+            case GENOTYPE_OR_PHENOTYPE:
                 value = strain.getGenotypePhenotype();
                 break;
 

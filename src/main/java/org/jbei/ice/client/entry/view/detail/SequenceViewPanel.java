@@ -40,7 +40,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         layout.setWidth("100%");
         initWidget(layout);
 
-        sequenceDownload = new SequenceFileDownload(info.getId());
+        sequenceDownload = new SequenceFileDownload(info.getId(), info.isHasOriginalSequence());
         sequenceDownload.asWidget().addStyleName("display-inline");
 
         sequenceUpload = new SequenceFileUpload(info.getId());
@@ -140,6 +140,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     @Override
     public void setHasSequence(boolean hasSequence) {
         this.info.setHasSequence(hasSequence);
+        this.info.setHasOriginalSequence(hasSequence);
     }
 
     @Override

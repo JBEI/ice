@@ -67,6 +67,12 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
 
                 if (existingFeature == null) { // new feature -> save it
                     existingFeature = saveFeature(feature);
+                } else {
+                    if (!sameFeatureUri(existingFeature, feature)) {
+                        // same sequence feature but different uri
+                        // sequence hash fwa uniqueness causes problems when trying to save a new feature with same seq
+                        existingFeature.setUri(feature.getUri());
+                    }
                 }
 
                 sequenceFeature.setFeature(existingFeature);
@@ -76,6 +82,16 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         }
 
         return sequence;
+    }
+
+    private boolean sameFeatureUri(Feature f1, Feature f2) {
+        if (f1.getUri() == null && f2.getUri() == null)
+            return true;
+
+        if (f1.getUri() != null && !f1.getUri().equalsIgnoreCase(f2.getUri()))
+            return false;
+
+        return f2.getUri().equalsIgnoreCase(f1.getUri());
     }
 
     public Sequence updateSequence(Sequence sequence, Set<SequenceFeature> newFeatures) throws DAOException {
@@ -183,6 +199,24 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             Number itemCount = (Number) session.createCriteria(Sequence.class)
                                                .setProjection(Projections.countDistinct("id"))
                                                .add(Restrictions.eq("entry", entry)).uniqueResult();
+
+            return itemCount.intValue() > 0;
+        } catch (HibernateException e) {
+            throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
+        }
+    }
+
+    public boolean hasOriginalSequence(Entry entry) throws DAOException {
+        Session session = currentSession();
+        try {
+
+            Number itemCount = (Number) session.createCriteria(Sequence.class)
+                                               .setProjection(Projections.countDistinct("id"))
+                                               .add(Restrictions.eq("entry", entry))
+                                               .add(Restrictions.conjunction().add(
+                                                       Restrictions.ne("sequenceUser", "")).add(
+                                                       Restrictions.isNotNull("sequenceUser")))
+                                               .uniqueResult();
 
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {

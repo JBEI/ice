@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.sheet.cell.InputSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 
 /**
  * Header for each sheet header
@@ -12,14 +13,14 @@ import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
  */
 public class CellColumnHeader {
 
-    private final Header headerType;
+    private final EntryField headerType;
     private final String name;
     private final SheetCell cell;
     private final String description;
     private String defaultValue;
     private boolean locked;
 
-    public CellColumnHeader(Header headerType, HashMap<String, String> preferences,
+    public CellColumnHeader(EntryField headerType, HashMap<String, String> preferences,
             boolean required, SheetCell cell, String description) {
         this.headerType = headerType;
         this.cell = cell;
@@ -34,23 +35,25 @@ public class CellColumnHeader {
         }
     }
 
-    public CellColumnHeader(Header headerType, HashMap<String, String> preferences, boolean required, SheetCell cell) {
+    public CellColumnHeader(EntryField headerType, HashMap<String, String> preferences, boolean required,
+            SheetCell cell) {
         this(headerType, preferences, required, cell, null);
     }
 
-    public CellColumnHeader(Header type, HashMap<String, String> preferences, boolean required, String description) {
+    public CellColumnHeader(EntryField type, HashMap<String, String> preferences, boolean required,
+            String description) {
         this(type, preferences, required, new InputSheetCell(), description);
     }
 
-    public CellColumnHeader(Header type, HashMap<String, String> preferences, SheetCell cell) {
+    public CellColumnHeader(EntryField type, HashMap<String, String> preferences, SheetCell cell) {
         this(type, preferences, false, cell, null);
     }
 
-    public CellColumnHeader(Header type, HashMap<String, String> preferences, boolean required) {
+    public CellColumnHeader(EntryField type, HashMap<String, String> preferences, boolean required) {
         this(type, preferences, required, new InputSheetCell(), null);
     }
 
-    public CellColumnHeader(Header type, HashMap<String, String> preferences) {
+    public CellColumnHeader(EntryField type, HashMap<String, String> preferences) {
         this(type, preferences, false, new InputSheetCell(), null);
     }
 
@@ -71,7 +74,7 @@ public class CellColumnHeader {
         return this.name;
     }
 
-    public Header getHeaderType() {
+    public EntryField getHeaderType() {
         return headerType;
     }
 

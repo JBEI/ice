@@ -10,7 +10,7 @@ public class PlantTypeSheetCell extends MultiSuggestSheetCell {
 
     public PlantTypeSheetCell() {
         super(false);
-        this.addOracleData(ArabidopsisSeedInfo.PlantType.getDisplayList());
+        this.setOracleData(ArabidopsisSeedInfo.PlantType.getDisplayList());
     }
 
     @Override

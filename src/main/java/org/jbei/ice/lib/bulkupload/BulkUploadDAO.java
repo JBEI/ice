@@ -32,8 +32,26 @@ class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         ArrayList<BulkUpload> result;
 
         try {
-            Query query = session.createQuery("from " + BulkUpload.class.getName() + " where account = :account");
+            Query query = session.createQuery("from " + BulkUpload.class.getName() + " where account = :account AND "
+                                                      + "status != :status");
             query.setParameter("account", account);
+            query.setParameter("status", BulkUploadStatus.PENDING_APPROVAL);
+            result = new ArrayList<BulkUpload>(query.list());
+            return result;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public ArrayList<BulkUpload> retrieveByStatus(BulkUploadStatus status) throws DAOException {
+        Session session = currentSession();
+        ArrayList<BulkUpload> result;
+
+        try {
+            Query query = session.createQuery("from " + BulkUpload.class.getName() + " where status = :status");
+            query.setParameter("status", status);
             result = new ArrayList<BulkUpload>(query.list());
             return result;
         } catch (HibernateException he) {
