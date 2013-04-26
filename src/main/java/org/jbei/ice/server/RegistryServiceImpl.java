@@ -93,7 +93,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public String getConfigurationSetting(String name) {
-        ConfigurationController controller = new ConfigurationController();
+        ConfigurationController controller = ControllerFactory.getConfigurationController();
         String value = null;
         try {
             value = controller.getPropertyValue(name);
@@ -108,7 +108,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account account = retrieveAccountForSid(sid);
             if (account.getType() != AccountType.ADMIN)
                 return false;
-            ConfigurationController controller = new ConfigurationController();
+            ConfigurationController controller = ControllerFactory.getConfigurationController();
             controller.setPropertyValue(key, value);
             return true;
         } catch (ControllerException | AuthenticationException e) {
@@ -118,7 +118,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean setPreferenceSetting(String sid, PreferenceKey key, String value) throws AuthenticationException {
-        PreferencesController controller = new PreferencesController();
+        PreferencesController controller = ControllerFactory.getPreferencesController();
         Account account = retrieveAccountForSid(sid);
         try {
             return controller.saveSetting(account, key, value);
@@ -160,6 +160,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         try {
             return controller.updatePreference(account, bulkUploadId, addType, info);
+        } catch (ControllerException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public Long updateBulkUploadPermissions(String sid, long id, EntryAddType type,
+            ArrayList<PermissionInfo> permissions) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        Logger.info(account.getEmail() + ": updating permissions for bulk upload " + id);
+        try {
+            return ControllerFactory.getBulkUploadController().updatePermissions(account, id, type, permissions);
         } catch (ControllerException e) {
             return null;
         }
@@ -706,7 +718,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
                 entry = api.getPublicEntryByRecordId(recordId);
                 boolean hasSequence = api.hasSequence(entry.getRecordId());
-                return ModelToInfoFactory.getInfo(null, entry, null, null, null, hasSequence);
+                boolean hasOriginalSequence = api.hasOriginalSequence(entry.getRecordId());
+                return ModelToInfoFactory.getInfo(null, entry, null, null, null, hasSequence, hasOriginalSequence);
             }
 
             entry = ControllerFactory.getEntryController().getByRecordId(account, recordId);
@@ -1182,6 +1195,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<AccountInfo> result = controller.retrieveGroupMembers(info.getUuid());
             return result;
         } catch (ControllerException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public ArrayList<GroupInfo> retrieveUserGroups(String sessionId) throws AuthenticationException {
+        try {
+            Account account = retrieveAccountForSid(sessionId);
+            Logger.info(account.getEmail() + ": retrieving user groups");
+            return ControllerFactory.getGroupController().retrieveUserGroups(account);
+        } catch (ControllerException ce) {
             return null;
         }
     }

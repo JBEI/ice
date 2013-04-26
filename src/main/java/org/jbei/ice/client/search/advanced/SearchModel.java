@@ -42,7 +42,8 @@ public class SearchModel {
                 callback.onSuccess(result);
             }
 
-            public void onFailure(Throwable caught) {
+            @Override
+            public void serverFailure() {
                 callback.onFailure();
             }
         }.go(eventBus);

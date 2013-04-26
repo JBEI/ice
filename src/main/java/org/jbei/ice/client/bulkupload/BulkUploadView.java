@@ -2,15 +2,18 @@ package org.jbei.ice.client.bulkupload;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.client.bulkupload.widget.CreatorWidget;
 import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
 import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkupload.widget.SavedDraftsMenu;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
+import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
@@ -118,8 +121,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                         + "<span style=\"float: right;\">"
 //                        + "<span id=\"bulk_import_upload_csv\"></span>"
 //                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
-//                        + "<span id=\"bulk_import_permission_selection\"></span>"
-//                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
+                        + "<span id=\"bulk_import_permission_selection\"></span>"
+                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
                         + "<span id=\"creator\"></span>"
 //                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
 //                        + "<span id=\"sample_selection_widget\"></span>
@@ -131,7 +134,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         bulkImportHeader.add(uploadName, "upload_name");
         bulkImportHeader.add(updating, "updating_icon");
 //        bulkImportHeader.add(uploadCSV, "bulk_import_upload_csv");
-//        bulkImportHeader.add(selection.asWidget(), "bulk_import_permission_selection");
+        bulkImportHeader.add(selection.asWidget(), "bulk_import_permission_selection");
         bulkImportHeader.add(creator.asWidget(), "creator");
         initHandlers();
     }
@@ -187,6 +190,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
+    public void setPermissionDelegate(ServiceDelegate<Set<OptionSelect>> handler) {
+        selection.setPermissionUpdateDelegate(handler);
+    }
+
+    @Override
     protected Widget createContents() {
         layout = new FlexTable();
         layout.setWidth("100%");
@@ -207,6 +215,16 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         layout.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
 
         return layout;
+    }
+
+    @Override
+    public void setPermissionGroups(ArrayList<OptionSelect> groups) {
+        selection.setData(groups);
+    }
+
+    @Override
+    public void setSelectedPermissionGroups(ArrayList<OptionSelect> groups) {
+        selection.setEnabled(groups);
     }
 
     @Override

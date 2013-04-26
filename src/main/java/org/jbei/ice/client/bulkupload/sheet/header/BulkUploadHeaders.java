@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
-import org.jbei.ice.client.bulkupload.sheet.Header;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.shared.BioSafetyOption;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
@@ -46,7 +46,7 @@ public abstract class BulkUploadHeaders {
      * @param info
      * @return extracted value or null if none is found
      */
-    public SheetCellData extractCommon(Header header, EntryInfo info) {
+    public SheetCellData extractCommon(EntryField header, EntryInfo info) {
         String value = null;
         String id = null;
 
@@ -63,7 +63,7 @@ public abstract class BulkUploadHeaders {
                 value = info.getIntellectualProperty();
                 break;
 
-            case BIOSAFETY:
+            case BIOSAFETY_LEVEL:
                 BioSafetyOption option = BioSafetyOption.enumValue(info.getBioSafetyLevel());
                 if (option != null)
                     value = option.toString();
@@ -183,5 +183,5 @@ public abstract class BulkUploadHeaders {
         return data;
     }
 
-    public abstract SheetCellData extractValue(Header header, EntryInfo info);
+    public abstract SheetCellData extractValue(EntryField header, EntryInfo info);
 }

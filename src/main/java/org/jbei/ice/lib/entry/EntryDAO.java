@@ -64,17 +64,45 @@ public class EntryDAO extends HibernateRepository<Entry> {
         return new LinkedList<Long>(c.list());
     }
 
-    @SuppressWarnings("unchecked")
-    public Set<String> getMatchingSelectionMarkers(String a, String b, String token, int limit) throws DAOException {
-        Session session = currentSession();
+    public Set<String> getMatchingSelectionMarkers(String token, int limit) throws DAOException {
+        return getMatchingField("selectionMarker.name", "SelectionMarker selectionMarker", token, limit);
+    }
 
+    public Set<String> getMatchingOriginOfReplication(String token, int limit) throws DAOException {
+        return getMatchingField("plasmid.originOfReplication", "Plasmid plasmid", token, limit);
+    }
+
+    public Set<String> getMatchingPromoters(String token, int limit) throws DAOException {
+        return getMatchingField("plasmid.promoters", "Plasmid plasmid", token, limit);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Set<String> getMatchingField(String field, String object, String token, int limit) throws DAOException {
+        Session session = currentSession();
         try {
             token = token.toUpperCase();
-            String queryString = "select distinct " + a + " from " + b + " where "
-                    + " UPPER(" + a + ") like '%" + token + "%'";
+            String queryString = "select distinct " + field + " from " + object + " where "
+                    + " UPPER(" + field + ") like '%" + token + "%'";
             Query query = session.createQuery(queryString);
             if (limit > 0)
                 query.setMaxResults(limit);
+            HashSet<String> results = new HashSet<String>(query.list());
+            return results;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Set<String> getMatchingPlasmidNames(String token, int limit) throws DAOException {
+        try {
+            String qString = "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where " +
+                    "name.name like '%" + token + "%' order by name.name asc";
+            Query query = currentSession().createQuery(qString);
+            if (limit > 0)
+                query.setMaxResults(limit);
+
             HashSet<String> results = new HashSet<String>(query.list());
             return results;
         } catch (HibernateException he) {
@@ -571,9 +599,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
             sources = new HashSet<>(entry.getEntryFundingSources());
         }
 
-        entry.setEntryFundingSources(null);
-        update(entry);
-
         if (sources != null) {
             for (EntryFundingSource entryFundingSource : sources) {
                 FundingSource newFundingSource = entryFundingSource.getFundingSource();
@@ -586,6 +611,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 currentSession().saveOrUpdate(entryFundingSource);
             }
         }
+
+        update(entry);
         return entry;
     }
 
@@ -593,7 +620,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
         HashSet<EntryFundingSource> sources = null;
         if (entry.getEntryFundingSources() != null) {
             sources = new HashSet<>(entry.getEntryFundingSources());
-            entry.setEntryFundingSources(null);
         }
 
         entry = save(entry);

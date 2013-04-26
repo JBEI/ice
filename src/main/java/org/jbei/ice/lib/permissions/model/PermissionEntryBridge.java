@@ -18,6 +18,9 @@ public class PermissionEntryBridge implements FieldBridge {
             return;
 
         Permission permission = (Permission) value;
+        if (permission.getEntry() == null && permission.getFolder() == null)
+            return;
+
         String fieldName = null;
         if (permission.isCanRead() || permission.isCanWrite()) {
             fieldName = "canRead";

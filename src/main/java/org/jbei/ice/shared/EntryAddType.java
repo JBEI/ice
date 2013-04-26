@@ -15,8 +15,7 @@ public enum EntryAddType implements IsSerializable {
         this.display = display;
     }
 
-    private EntryAddType() {
-    }
+    private EntryAddType() {}
 
     // TODO :
     public static EntryAddType stringToType(String str) {

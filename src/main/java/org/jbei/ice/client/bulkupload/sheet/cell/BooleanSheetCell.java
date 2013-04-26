@@ -18,8 +18,7 @@ public class BooleanSheetCell extends MultiSuggestSheetCell {
         data.add("No");
         data.add("True");
         data.add("False");
-
-        this.addOracleData(data);
+        this.setOracleData(data);
     }
 
     @Override
@@ -29,7 +28,9 @@ public class BooleanSheetCell extends MultiSuggestSheetCell {
             return errMsg;
 
         SheetCellData data = getDataForRow(row);
-        boolean valid = "Yes".equalsIgnoreCase(data.getValue()) ||
+        // allowing null here since this super.inputIsValid() will return an error if this field is required
+        boolean valid = (data == null) ||
+                "Yes".equalsIgnoreCase(data.getValue()) ||
                 "No".equalsIgnoreCase(data.getValue()) ||
                 "True".equalsIgnoreCase(data.getValue()) ||
                 "False".equalsIgnoreCase(data.getValue());

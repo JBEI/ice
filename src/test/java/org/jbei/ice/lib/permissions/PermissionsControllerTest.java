@@ -3,7 +3,6 @@ package org.jbei.ice.lib.permissions;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.entry.model.Strain;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -47,11 +46,6 @@ public class PermissionsControllerTest {
         Assert.assertNotNull(account);
         Account otherAccount = accountController.getByEmail(email2);
         Assert.assertNotNull(otherAccount);
-
-        // create entry
-        Strain strain = new Strain();
-        Assert.assertFalse(controller.hasReadPermission(otherAccount, strain));
-        // add read account permission
     }
 
     @Test

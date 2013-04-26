@@ -15,6 +15,7 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.ClassBridge;
@@ -111,5 +112,34 @@ public class Permission implements IModel {
 
     public void setFolder(Folder folder) {
         this.folder = folder;
+    }
+
+    public static PermissionInfo toDTO(Permission permission) {
+        if (permission == null)
+            return null;
+
+        PermissionInfo info = new PermissionInfo();
+        if (permission.getGroup() != null) {
+            info.setArticle(PermissionInfo.Article.GROUP);
+            info.setArticleId(permission.getGroup().getId());
+            info.setDisplay(permission.getGroup().getLabel());
+        } else {
+            info.setArticle(PermissionInfo.Article.ACCOUNT);
+            info.setArticleId(permission.getAccount().getId());
+            info.setDisplay(permission.getAccount().getFullName());
+        }
+
+        PermissionInfo.Type type = null;
+        long id = 0;
+        if (permission.entry != null) {
+            type = permission.isCanWrite() ? PermissionInfo.Type.WRITE_ENTRY : PermissionInfo.Type.READ_ENTRY;
+            id = permission.getEntry().getId();
+        } else if (permission.getFolder() != null) {
+            type = permission.isCanWrite() ? PermissionInfo.Type.WRITE_FOLDER : PermissionInfo.Type.READ_FOLDER;
+            id = permission.getFolder().getId();
+        }
+        info.setType(type);
+        info.setTypeId(id);
+        return info;
     }
 }

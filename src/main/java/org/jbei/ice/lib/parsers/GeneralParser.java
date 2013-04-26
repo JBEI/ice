@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import org.jbei.ice.lib.parsers.fasta.FastaParser;
 import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
-import org.jbei.ice.lib.parsers.sbol.SbolParser;
+import org.jbei.ice.lib.parsers.sbol.SBOLParser;
 import org.jbei.ice.lib.vo.IDNASequence;
 
 /**
@@ -84,7 +84,7 @@ public class GeneralParser {
     private void registerParsers() {
         parsers.add(new IceGenbankParser());
         parsers.add(new FastaParser());
-        parsers.add(new SbolParser());
+        parsers.add(new SBOLParser());
         parsers.add(new PlainParser());
     }
 }

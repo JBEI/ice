@@ -6,12 +6,11 @@ public class PermissionInfo implements IsSerializable {
 
     private Type type;
     private Article article;
-    private long typeId;
-    private long articleId;
+    private long typeId;      // id for type of permission (entry or folder)
+    private long articleId;   // id for article being acted on (group or account)
     private String display;   // account or group name
 
-    public PermissionInfo() {
-    }
+    public PermissionInfo() {}
 
     public PermissionInfo(Article article, long articleId, Type type, long typeId, String display) {
         this.article = article;
@@ -87,7 +86,8 @@ public class PermissionInfo implements IsSerializable {
 
     @Override
     public String toString() {
-        return type.name() + " (" + typeId + ") for " + article.name() + "(" + articleId + ")";
+        String typeName = type == null ? "" : type.name();
+        return typeName + " (" + typeId + ") for " + article.name() + "(" + articleId + ")";
     }
 
     public boolean equals(PermissionInfo info) {

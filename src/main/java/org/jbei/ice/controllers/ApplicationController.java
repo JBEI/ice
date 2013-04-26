@@ -4,8 +4,6 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.shared.dto.ConfigurationKey;
@@ -29,15 +27,17 @@ public class ApplicationController {
     }
 
     public static void initializeHibernateSearch() {
-        SearchController controller = ControllerFactory.getSearchController();
         try {
-            controller.initHibernateSearch();
+            ControllerFactory.getSearchController().initHibernateSearch();
         } catch (ControllerException ce) {
             Logger.error(ce);
         }
     }
 
-    public static void upgradeDatabaseIfNecessary() {
+    /**
+     * Responsible for initializing the system
+     */
+    public static void initialize() {
         ConfigurationController controller = ControllerFactory.getConfigurationController();
 
         try {
@@ -54,13 +54,13 @@ public class ApplicationController {
             } else {
                 // check if previous supported versions
                 boolean previousVersionSupported = isPreviousVersionSupported(dbVersion);
-                if (!previousVersionSupported) //TODO : fatal db cannot be upgraded
-                    return;
+                if (!previousVersionSupported)
+                    throw new RuntimeException("Upgrade from " + dbVersion + " is not supported");
 
-                // upgrade the db and save new version
-                upgradePermissions();
+                // version is supported, perform the required upgrades
+                ControllerFactory.getPermissionController().upgradePermissions();
                 initializeHibernateSearch();
-                upgradeConfiguration();
+                ControllerFactory.getConfigurationController().upgradeConfiguration();
                 controller.updateDatabaseVersion(RELEASE_DATABASE_SCHEMA_VERSION);
                 Logger.info("Application upgraded from " + dbVersion + " to " + RELEASE_DATABASE_SCHEMA_VERSION);
             }
@@ -78,22 +78,11 @@ public class ApplicationController {
         }
     }
 
-    public static void upgradePermissions() throws ControllerException {
-        // convert all read/write user/group to permission
-        PermissionsController controller = ControllerFactory.getPermissionController();
-        controller.upgradePermissions();
-    }
-
     private static boolean isPreviousVersionSupported(String version) {
         for (String prevVersion : SUPPORTED_PREVIOUS_DB_VERSIONS) {
             if (prevVersion.equalsIgnoreCase(version))
                 return true;
         }
         return false;
-    }
-
-    // upgrade to system settings
-    private static void upgradeConfiguration() throws ControllerException {
-        ControllerFactory.getConfigurationController().upgradeConfiguration();
     }
 }

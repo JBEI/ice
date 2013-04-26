@@ -55,7 +55,8 @@ import org.jbei.ice.shared.dto.entry.StrainInfo;
 public class ModelToInfoFactory {
 
     public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
-            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences, boolean hasSequence) {
+            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences, boolean hasSequence,
+            boolean hasOriginalSequence) {
         EntryInfo info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
@@ -92,7 +93,7 @@ public class ModelToInfoFactory {
         info.setHasAttachment(!attachmentInfos.isEmpty());
 
         // get samples
-        ArrayList<SampleStorage> samplesList = new ArrayList<SampleStorage>();
+        ArrayList<SampleStorage> samplesList = new ArrayList<>();
         if (samples != null) {
             for (Sample sample : samples.keySet()) {
                 SampleInfo key = getSampleInfo(sample);
@@ -116,12 +117,13 @@ public class ModelToInfoFactory {
 
         // has sequence (different from trace sequence above)
         info.setHasSequence(hasSequence);
+        info.setHasOriginalSequence(hasOriginalSequence);
 
         return info;
     }
 
     private static LinkedList<StorageInfo> getStorageListInfo(LinkedList<Storage> storageList) {
-        LinkedList<StorageInfo> info = new LinkedList<StorageInfo>();
+        LinkedList<StorageInfo> info = new LinkedList<>();
 
         if (storageList == null)
             return info;
@@ -134,7 +136,7 @@ public class ModelToInfoFactory {
     }
 
     private static ArrayList<AttachmentInfo> getAttachments(List<Attachment> attachments) {
-        ArrayList<AttachmentInfo> infos = new ArrayList<AttachmentInfo>();
+        ArrayList<AttachmentInfo> infos = new ArrayList<>();
         if (attachments == null)
             return infos;
 
@@ -181,7 +183,7 @@ public class ModelToInfoFactory {
     }
 
     public static ArrayList<SequenceAnalysisInfo> getSequenceAnalysis(List<TraceSequence> sequences) {
-        ArrayList<SequenceAnalysisInfo> infos = new ArrayList<SequenceAnalysisInfo>();
+        ArrayList<SequenceAnalysisInfo> infos = new ArrayList<>();
         if (sequences == null)
             return infos;
 
@@ -327,7 +329,7 @@ public class ModelToInfoFactory {
         }
 
         info.setLinks(entry.getLinksAsString());
-        ArrayList<ParameterInfo> params = new ArrayList<ParameterInfo>();
+        ArrayList<ParameterInfo> params = new ArrayList<>();
 
         if (entry.getParameters() != null) {
             for (Parameter parameter : entry.getParameters()) {
@@ -485,6 +487,7 @@ public class ModelToInfoFactory {
         try {
             SequenceController sequenceController = ControllerFactory.getSequenceController();
             view.setHasSequence(sequenceController.hasSequence(entry));
+            view.setHasOriginalSequence(sequenceController.hasOriginalSequence(entry));
         } catch (ControllerException e) {
             Logger.error(e);
         }

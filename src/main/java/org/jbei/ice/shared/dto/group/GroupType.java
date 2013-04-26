@@ -6,5 +6,5 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author Hector Plahar
  */
 public enum GroupType implements IsSerializable {
-    PUBLIC, PRIVATE;
+    SYSTEM, PUBLIC, PRIVATE;
 }

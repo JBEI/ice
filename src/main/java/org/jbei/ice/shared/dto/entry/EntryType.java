@@ -13,8 +13,7 @@ public enum EntryType implements IsSerializable {
     private String display;
     public static final long serialVersionUID = 1l;
 
-    EntryType() {
-    }
+    EntryType() {}
 
     EntryType(String display, String name) {
         this.display = display;

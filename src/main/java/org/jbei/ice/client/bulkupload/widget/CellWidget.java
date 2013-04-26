@@ -68,7 +68,7 @@ public class CellWidget extends Composite {
             @Override
             public void onFocus(FocusEvent event) {
                 widget.setStyleName("cell_focus");
-                corner.setVisible(false); // tODO change to true
+                corner.setVisible(false); // TODO change to true to enable corner
             }
         });
 
@@ -107,6 +107,14 @@ public class CellWidget extends Composite {
 
     public int getTabIndex() {
         return this.tabIndex;
+    }
+
+    public int getRow() {
+        return this.row;
+    }
+
+    public int getIndex() {
+        return this.index;
     }
 
     public void addWidgetCallback(final CellWidgetCallback callback) {

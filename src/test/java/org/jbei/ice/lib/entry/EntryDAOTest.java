@@ -42,7 +42,6 @@ public class EntryDAOTest {
         entry.setRecordType(EntryType.PLASMID.getName());
         entry.setVersionId(entry.getRecordId());
         entry = dao.save(entry);
-        System.out.println(entry.getId());
         Entry retrieved = dao.get(entry.getId());
         Assert.assertNotNull(retrieved);
 
@@ -51,7 +50,6 @@ public class EntryDAOTest {
         entry2.setRecordType(EntryType.STRAIN.getName());
         entry2.setVersionId(entry.getRecordId());
         entry2 = dao.save(entry2);
-        System.out.println(entry2.getId());
     }
 
     @Test

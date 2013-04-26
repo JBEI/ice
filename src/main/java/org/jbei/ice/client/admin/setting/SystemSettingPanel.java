@@ -41,22 +41,11 @@ public class SystemSettingPanel extends Composite implements IAdminPanel {
         layout.getFlexCellFormatter().setColSpan(row, 0, 3);
         row += 1;
 
-//        // sample settings
-//        layout.setWidget(row, 0, createSampleSettingsPanel(settings));
-//        layout.getFlexCellFormatter().setStyleName(row, 0, "pad_top");
-//        layout.getFlexCellFormatter().setColSpan(row, 0, 3);
-//        row += 1;
-
         // search settings
         layout.setWidget(row, 0, createSearchSettingsPanel(settings));
         layout.getFlexCellFormatter().setStyleName(row, 0, "pad_top");
         layout.getFlexCellFormatter().setColSpan(row, 0, 3);
         row += 1;
-
-//        layout.setWidget(row, 0, createLDAPSettingsPanel(settings));
-//        layout.getFlexCellFormatter().setStyleName(row, 0, "pad_top");
-//        layout.getFlexCellFormatter().setColSpan(row, 0, 3);
-//        row += 1;
     }
 
     private Widget createGeneralSettingPanel(HashMap<String, String> settings) {
@@ -73,8 +62,6 @@ public class SystemSettingPanel extends Composite implements IAdminPanel {
                                 ConfigurationKey.NEW_REGISTRATION_ALLOWED,
                                 ConfigurationKey.ATTACHMENTS_DIRECTORY,
                                 ConfigurationKey.TRACE_FILES_DIRECTORY,
-//                                ConfigurationKey.DATA_DIRECTORY,
-//                                ConfigurationKey.SECRET_KEY,
                                 ConfigurationKey.TEMPORARY_DIRECTORY,
                                 ConfigurationKey.DATABASE_SCHEMA_VERSION);
     }
@@ -87,26 +74,6 @@ public class SystemSettingPanel extends Composite implements IAdminPanel {
                                 ConfigurationKey.SEND_EMAIL_ON_ERRORS,
                                 ConfigurationKey.ADMIN_EMAIL);
     }
-
-//    private Widget createSampleSettingsPanel(HashMap<String, String> settings) {
-//        return new SettingPanel(settings, "Sample Settings", serviceDelegate,
-//                                ConfigurationKey.PART_STORAGE_DEFAULT,
-//                                ConfigurationKey.PART_STORAGE_ROOT,
-//                                ConfigurationKey.STRAIN_STORAGE_DEFAULT,
-//                                ConfigurationKey.STRAIN_STORAGE_ROOT,
-//                                ConfigurationKey.ARABIDOPSIS_STORAGE_DEFAULT,
-//                                ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT,
-//                                ConfigurationKey.PLASMID_STORAGE_DEFAULT,
-//                                ConfigurationKey.PLASMID_STORAGE_ROOT);
-//    }
-
-//    private Widget createLDAPSettingsPanel(HashMap<String, String> settings) {
-//        return new SettingPanel(settings, "Authentication Settings", serviceDelegate,
-//                                ConfigurationKey.LDAP_AUTHENTICATION_URL,
-//                                ConfigurationKey.LDAP_QUERY,
-//                                ConfigurationKey.AUTHENTICATION_BACKEND,
-//                                ConfigurationKey.LDAP_SEARCH_URL);
-//    }
 
     private Widget createSearchSettingsPanel(HashMap<String, String> settings) {
         return new SettingPanel(settings, "Search Settings", serviceDelegate,

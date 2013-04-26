@@ -56,6 +56,7 @@ public class DeleteSequenceData {
         public void onSuccess(Boolean t) {
             if (t.booleanValue()) {
                 sequencePanelPresenter.getEntry().setHasSequence(false);
+                sequencePanelPresenter.getEntry().setHasOriginalSequence(false);
                 sequencePanelPresenter.updateSequenceView();
             } else {
                 Window.alert("There was a problem deleting the sequence");

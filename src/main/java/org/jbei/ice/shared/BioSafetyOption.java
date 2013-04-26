@@ -6,7 +6,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum BioSafetyOption implements IsSerializable {
 
-    LEVEL_ONE("Level 1", "1"), LEVEL_TWO("Level 2", "2");
+    LEVEL_ONE("Level 1", "1"),
+    LEVEL_TWO("Level 2", "2");
 
     private String displayName;
     private String value;
@@ -29,6 +30,14 @@ public enum BioSafetyOption implements IsSerializable {
 
     public String getValue() {
         return this.value;
+    }
+
+    public static boolean isValidOption(Integer integer) {
+        for (BioSafetyOption option : BioSafetyOption.values()) {
+            if (integer == intValue(option.toString()))
+                return true;
+        }
+        return false;
     }
 
     public static BioSafetyOption enumValue(Integer i) {

@@ -82,6 +82,30 @@ public class GroupController {
         }
     }
 
+    /**
+     * Retrieves groups for user; including private groups that the user created
+     *
+     * @param account account for user making request
+     * @return list of available groups retrieved
+     * @throws ControllerException on exception retrieving groups
+     */
+    public ArrayList<GroupInfo> retrieveUserGroups(Account account) throws ControllerException {
+        ArrayList<GroupInfo> groups = new ArrayList<>();
+        Set<Group> result = account.getGroups();
+        Group publicGroup = createOrRetrievePublicGroup();
+        for (Group group : result) {
+            if (group.getUuid().equalsIgnoreCase(PUBLIC_GROUP_UUID))
+                continue;
+
+            GroupInfo info = Group.toDTO(group);
+            info.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
+            groups.add(info);
+        }
+        groups.addAll(retrieveGroups(account, GroupType.PRIVATE));
+        groups.add(0, Group.toDTO(publicGroup));
+        return groups;
+    }
+
     public Set<String> retrieveAccountGroupUUIDs(Account account) throws ControllerException {
         Set<String> uuids = new HashSet<>();
         if (account != null) {
@@ -225,7 +249,7 @@ public class GroupController {
         publicGroup = new Group();
         publicGroup.setLabel(PUBLIC_GROUP_NAME);
         publicGroup.setDescription(PUBLIC_GROUP_DESCRIPTION);
-        publicGroup.setType(GroupType.PUBLIC);
+        publicGroup.setType(GroupType.SYSTEM);
         publicGroup.setParent(null);
         publicGroup.setUuid(PUBLIC_GROUP_UUID);
         return save(publicGroup);
@@ -336,6 +360,10 @@ public class GroupController {
             if (group == null)
                 throw new ControllerException("Could not retrieve group with id " + groupId);
 
+            // public groups do not need to have members added
+            if (group.getUuid().equals(PUBLIC_GROUP_UUID))
+                return;
+
             Account account = accountController.getByEmail(email);
             if (account == null)
                 throw new ControllerException("Could not retrieve account " + email);
@@ -379,6 +407,9 @@ public class GroupController {
             Logger.error(errMsg);
             throw new ControllerException(errMsg);
         }
+
+        if (group.getUuid().equalsIgnoreCase(PUBLIC_GROUP_UUID))
+            return new ArrayList<>();
 
         // check permissions
         if (!account.getEmail().equalsIgnoreCase(group.getOwner().getEmail())) {

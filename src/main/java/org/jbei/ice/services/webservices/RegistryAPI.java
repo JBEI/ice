@@ -200,6 +200,17 @@ public class RegistryAPI implements IRegistryAPI {
         }
     }
 
+    @Override
+    public boolean hasOriginalSequence(@WebParam(name = "recordId") String recordId) throws ServiceException {
+        try {
+            log("hasSequence " + recordId);
+            Entry entry = ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
+            return ControllerFactory.getSequenceController().hasOriginalSequence(entry);
+        } catch (ControllerException ce) {
+            throw new ServiceException(ce);
+        }
+    }
+
     /**
      * Retrieve {@link Entry} by its recordId.
      *
@@ -1896,7 +1907,7 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean transmitEntries(@WebParam(name = "entrySequenceMap") HashMap<Entry, String> entrySequenceMap)
             throws ServiceException {
         Logger.info("Registry API: transmit entries");
-        ConfigurationController configurationController = new ConfigurationController();
+        ConfigurationController configurationController = ControllerFactory.getConfigurationController();
         boolean isWebEnabled;
         try {
             String value = configurationController.getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);

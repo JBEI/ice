@@ -16,6 +16,7 @@ public class SequenceFileUploadHandler implements OnFinishUploaderHandler {
     @Override
     public void onFinish(IUploader uploader) {
         presenter.getEntry().setHasSequence(true);
+        presenter.getEntry().setHasOriginalSequence(true);
         presenter.updateSequenceView();
     }
 }

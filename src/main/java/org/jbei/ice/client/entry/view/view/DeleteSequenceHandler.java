@@ -59,7 +59,7 @@ public class DeleteSequenceHandler implements ClickHandler {
             }
 
             @Override
-            public void onFailure(Throwable caught) {
+            public void serverFailure() {
                 if (callback != null)
                     callback.onFailure();
             }

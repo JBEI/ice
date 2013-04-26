@@ -1,6 +1,6 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.client.bulkupload.sheet.Header;
+import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 
 public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
@@ -9,7 +9,7 @@ public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
         if (datum == null)
             return info;
 
-        Header header = datum.getTypeHeader();
+        EntryField header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null)

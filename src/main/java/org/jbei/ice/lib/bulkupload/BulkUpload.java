@@ -10,8 +10,9 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 
 /**
@@ -23,6 +24,7 @@ import org.jbei.ice.shared.dto.BulkUploadInfo;
 
 @Entity
 @Table(name = "bulk_upload")
+
 @SequenceGenerator(name = "sequence", sequenceName = "bulk_upload_id_seq", allocationSize = 1)
 public class BulkUpload implements IModel {
 
@@ -40,10 +42,6 @@ public class BulkUpload implements IModel {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "group_id", nullable = true)
-    private Group readGroup;
-
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_time", nullable = false)
     private Date creationTime;
@@ -51,6 +49,10 @@ public class BulkUpload implements IModel {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update_time", nullable = false)
     private Date lastUpdateTime;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "status")
+    private BulkUploadStatus status;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "bulk_upload_entry",
@@ -63,6 +65,13 @@ public class BulkUpload implements IModel {
                joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
                inverseJoinColumns = {@JoinColumn(name = "preference_id", nullable = false)})
     private Set<Preference> preferences = new HashSet<>();
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
+    @JoinTable(name = "bulk_upload_permissions",
+               joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
+               inverseJoinColumns = {@JoinColumn(name = "permission_id", nullable = false)})
+    private Set<Permission> permissions = new HashSet<>();
+
 
     public BulkUpload() {}
 
@@ -120,14 +129,6 @@ public class BulkUpload implements IModel {
         this.importType = importType;
     }
 
-    public Group getReadGroup() {
-        return readGroup;
-    }
-
-    public void setReadGroup(Group readGroup) {
-        this.readGroup = readGroup;
-    }
-
     public Set<Preference> getPreferences() {
         return preferences;
     }
@@ -139,9 +140,33 @@ public class BulkUpload implements IModel {
         BulkUploadInfo bulkUploadInfo = new BulkUploadInfo();
         bulkUploadInfo.setCreated(draft.getCreationTime());
         bulkUploadInfo.setId(draft.getId());
+        bulkUploadInfo.setLastUpdate(draft.getLastUpdateTime());
+
+        // draft account
         Account draftAccount = draft.getAccount();
-        bulkUploadInfo.setName(draftAccount.getFullName());
+        bulkUploadInfo.setName(draft.getName());
+        AccountInfo accountInfo = new AccountInfo();
+        accountInfo.setEmail(draftAccount.getEmail());
+        accountInfo.setFirstName(draftAccount.getFirstName());
+        accountInfo.setLastName(draftAccount.getLastName());
+        bulkUploadInfo.setAccount(accountInfo);
+
         bulkUploadInfo.setType(EntryAddType.stringToType(draft.getImportType()));
+        for (Permission permission : draft.getPermissions()) {
+            bulkUploadInfo.getPermissions().add(Permission.toDTO(permission));
+        }
         return bulkUploadInfo;
+    }
+
+    public BulkUploadStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BulkUploadStatus status) {
+        this.status = status;
+    }
+
+    public Set<Permission> getPermissions() {
+        return permissions;
     }
 }

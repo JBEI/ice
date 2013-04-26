@@ -73,34 +73,23 @@ public class EntryController {
 
     public Set<String> getMatchingAutoCompleteField(AutoCompleteField field, String token, int limit)
             throws ControllerException {
-
-        String a, b;
-
-        switch (field) {
-            case SELECTION_MARKERS:
-                a = "selectionMarker.name";
-                b = "SelectionMarker selectionMarker";
-                break;
-
-            case ORIGIN_OF_REPLICATION:
-                a = "plasmid.originOfReplication";
-                b = "Plasmid plasmid";
-                break;
-
-            case PROMOTERS:
-                a = "plasmid.promoters";
-                b = "Plasmid plasmid";
-                break;
-
-            default:
-            case PLASMID_NAME:
-//                "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name" +
-//                    ".name <> '' order by name.name asc");
-                return new HashSet<>();
-        }
-
         try {
-            return dao.getMatchingSelectionMarkers(a, b, token, limit);
+            switch (field) {
+                case SELECTION_MARKERS:
+                    return dao.getMatchingSelectionMarkers(token, limit);
+
+                case ORIGIN_OF_REPLICATION:
+                    return dao.getMatchingOriginOfReplication(token, limit);
+
+                case PROMOTERS:
+                    return dao.getMatchingPromoters(token, limit);
+
+                case PLASMID_NAME:
+                    return dao.getMatchingPlasmidNames(token, limit);
+
+                default:
+                    return new HashSet<>();
+            }
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
@@ -123,6 +112,9 @@ public class EntryController {
 
     public HashSet<Entry> createStrainWithPlasmid(Account account, Entry strain, Entry plasmid,
             ArrayList<PermissionInfo> permissions) throws ControllerException {
+        if (strain == null || plasmid == null)
+            throw new ControllerException("Cannot create null entries");
+
         HashSet<Entry> results = new HashSet<>();
         plasmid = createEntry(account, plasmid, permissions);
         results.add(plasmid);
@@ -222,8 +214,12 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
+        // add read and write permissions for owner
         PermissionInfo info = new PermissionInfo(PermissionInfo.Article.ACCOUNT, account.getId(),
                                                  PermissionInfo.Type.WRITE_ENTRY, entry.getId(), account.getFullName());
+        permissionsController.addPermission(account, info);
+        info = new PermissionInfo(PermissionInfo.Article.ACCOUNT, account.getId(),
+                                  PermissionInfo.Type.READ_ENTRY, entry.getId(), account.getFullName());
         permissionsController.addPermission(account, info);
 
         if (permissions != null) {
@@ -265,6 +261,10 @@ public class EntryController {
 
         if (entry.getRecordId() == null) {
             entry.setRecordId(Utils.generateUUID());
+            entry.setVersionId(entry.getRecordId());
+        }
+
+        if (entry.getVersionId() == null) {
             entry.setVersionId(entry.getRecordId());
         }
 
@@ -683,8 +683,10 @@ public class EntryController {
             sampleMap.put(sample, storageList);
         }
 
-        boolean hasSequence = (sequenceController.getByEntry(entry) != null);
-        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence);
+        boolean hasSequence = sequenceController.hasSequence(entry);
+        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry);
+        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence,
+                                                    hasOriginalSequence);
 
         // permissions
         info.setCanEdit(permissionsController.hasWritePermission(account, entry));
@@ -694,7 +696,7 @@ public class EntryController {
             try {
                 ArrayList<PermissionInfo> permissions = permissionsController.retrieveSetEntryPermissions(account,
                                                                                                           entry);
-                info.getPermissions().addAll(permissions);
+                info.setPermissions(permissions);
             } catch (PermissionException e) {
                 Logger.error(e);
             }

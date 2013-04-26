@@ -194,4 +194,9 @@ public interface RegistryService extends RemoteService {
     void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites);
 
     boolean deleteSample(String sessionId, SampleInfo info) throws AuthenticationException;
+
+    ArrayList<GroupInfo> retrieveUserGroups(String sessionId) throws AuthenticationException;
+
+    Long updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
+            ArrayList<PermissionInfo> permissions) throws AuthenticationException;
 }

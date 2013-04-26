@@ -17,6 +17,7 @@ public class DNAFeatureLocation implements Serializable {
     private int end;
     private boolean singleResidue;
     private boolean inBetween;
+    private String uri;
 
     public DNAFeatureLocation() {
         super();
@@ -43,20 +44,19 @@ public class DNAFeatureLocation implements Serializable {
         this.end = end;
     }
 
-    public boolean isSingleResidue() {
-        return singleResidue;
-    }
-
     public void setSingleResidue(boolean singleResidue) {
         this.singleResidue = singleResidue;
-    }
-
-    public boolean isInBetween() {
-        return inBetween;
     }
 
     public void setInBetween(boolean inBetween) {
         this.inBetween = inBetween;
     }
 
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 }
