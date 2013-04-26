@@ -457,7 +457,7 @@ public class InfoToModelFactory {
             case STRAIN_LINKS:
                 HashSet<Link> links = new HashSet<>();
                 Link link = new Link();
-                link.setUrl(value);
+                link.setLink(value);
                 link.setEntry(entry);
                 links.add(link);
                 entry.setLinks(links);

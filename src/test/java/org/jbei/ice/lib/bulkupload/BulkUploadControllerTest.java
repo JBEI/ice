@@ -97,19 +97,35 @@ public class BulkUploadControllerTest {
     }
 
     @Test
-    public void testRetrieveById() throws Exception {
-    }
+    public void testRetrieveById() throws Exception { }
 
     @Test
-    public void testRetrieveByUser() throws Exception {
-    }
+    public void testRetrieveByUser() throws Exception { }
 
     @Test
-    public void testDeleteDraftById() throws Exception {
-    }
+    public void testDeleteDraftById() throws Exception { }
 
     @Test
     public void testAutoUpdateBulkUpload() throws Exception {
+        EntryAddType type = EntryAddType.STRAIN_WITH_PLASMID;
+        Account account = createTestAccount("testAutoUpdateBulkUpload", false);
+        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate();
+        autoUpdate.setType(EntryType.STRAIN);
+        autoUpdate.getKeyValue().put(EntryField.LINKS, "google");
+
+        // first auto update. expect it to create a new bulk upload and entry
+        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, type);
+        Assert.assertNotNull(autoUpdate);
+        long entryId = autoUpdate.getEntryId();
+        long bulkId = autoUpdate.getBulkUploadId();
+        Assert.assertTrue(entryId > 0);
+        Assert.assertTrue(bulkId > 0);
+
+        EntryController entryController = new EntryController();
+        Entry entry = entryController.get(account, entryId);
+        Assert.assertNotNull(entry);
+        Assert.assertNotNull(entry.getLinks());
+        Assert.assertEquals(1, entry.getLinks().size());
     }
 
     @Test

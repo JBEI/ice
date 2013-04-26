@@ -39,11 +39,14 @@ public class InputSheetCell extends SheetCell {
             @Override
             public void onKeyDown(KeyDownEvent event) {
                 int code = event.getNativeKeyCode();
-                if (KeyCodes.KEY_TAB != code && KeyCodes.KEY_ENTER != code && !event.isDownArrow()
-                        && !event.isDownArrow() && !event.isRightArrow() && !event.isLeftArrow())
-                    return;
 
-                input.setFocus(false);
+                if (event.isLeftArrow() || event.isRightArrow() ||
+                        KeyCodes.KEY_BACKSPACE == code || KeyCodes.KEY_DELETE == code) {
+                    return;
+                }
+
+                String s = setDataForRow(currentRow);
+                input.setText(s);
             }
         });
     }

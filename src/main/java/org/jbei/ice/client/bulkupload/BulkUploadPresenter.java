@@ -385,6 +385,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
+            currentInput.getSheet().closeOpenCells();
+
             boolean isValid = currentInput.getSheet().validate();
             if (!isValid) {
                 view.showFeedback("Please correct validation errors", true);

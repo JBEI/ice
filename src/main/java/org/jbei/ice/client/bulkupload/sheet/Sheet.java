@@ -402,6 +402,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
         widget.getElement().scrollIntoView();
     }
 
+    public void closeOpenCells() {
+        if (!cellHasFocus)
+            return;
+
+        presenter.autoUpdate(currentIndex, currentRow);
+        cellHasFocus = false;
+    }
+
     /**
      * Replaces the cell with an input widget that is determined by the type of header
      */
@@ -488,7 +496,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
                 // this relies on the fact that on blur, individual sheet cells (or the header responsible for them)
                 // set the data so the assumption is that at this point, if there is data, it is already set
-                // and so just retrieved here and displayed in the sheet. Not very intuitive...see InputSheetCell::28
+                // and so just retrieved here and displayed in the sheet.
                 SheetCellData data = prevSelection.getDataForRow(currentRow);
                 if (data == null)
                     replaced.setValue("");
@@ -515,7 +523,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     Widget widget = prevSelection.getWidget(currentRow, false, tabIndex);
                     sheetTable.setWidget(currentRow, currentIndex, widget);
                 } else {
-
                     Widget cellWidget = sheetTable.getWidget(currentRow, currentIndex);
                     if (cellWidget instanceof CellWidget)
                         ((CellWidget) cellWidget).setFocus(false);
