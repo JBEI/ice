@@ -74,18 +74,26 @@ public class BulkUploadControllerTest {
 
         // check that the bulk upload has been created
         BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
-        Assert.assertNotNull(info);
+        Assert.assertNotNull("Null bulk upload", info);
 
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
+        Assert.assertTrue("Submitting draft", controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
 
         // entries associated with bulk upload must be pending
         info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 10);
         Assert.assertNotNull(info);
-        Assert.assertTrue(info.getEntryList().size() == 1);
+        Assert.assertTrue("Invalid entry count", info.getEntryList().size() == 1);
         Assert.assertTrue(info.getEntryList().get(0).getVisibility() == Visibility.PENDING);
 
         ArrayList<BulkUploadInfo> pending = controller.retrievePendingImports(account);
-        Assert.assertTrue(pending != null && pending.size() == 1);
+        Assert.assertNotNull("Null pending import", pending);
+        boolean b = false;
+        for (BulkUploadInfo uploadInfo : pending) {
+            if (uploadInfo.getAccount().getEmail().equals(account.getEmail())) {
+                b = true;
+                break;
+            }
+        }
+        Assert.assertTrue(b);
     }
 
     @Test

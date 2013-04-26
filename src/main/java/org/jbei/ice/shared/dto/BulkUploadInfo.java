@@ -24,7 +24,7 @@ public class BulkUploadInfo implements IDTOModel {
     private AccountInfo account;
     private ArrayList<EntryInfo> entryList;
     private ArrayList<PreferenceInfo> preferences;
-    private final ArrayList<PermissionInfo> permissions;
+    private ArrayList<PermissionInfo> permissions;
 
     public BulkUploadInfo() {
         entryList = new ArrayList<EntryInfo>();
