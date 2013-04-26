@@ -102,18 +102,11 @@ public class SBOLFormatter extends AbstractFormatter {
             } else
                 annotation.setURI(URI.create(uri));
 
+            AnnotationLocation location = null;
             if (feature.getAnnotationLocations() != null && !feature.getAnnotationLocations().isEmpty()) {
-                AnnotationLocation location = (AnnotationLocation) feature.getAnnotationLocations().toArray()[0];
-                if (location.getGenbankStart() == location.getEnd()) // TODO: how to handle locations like this
-                    return;
+                location = (AnnotationLocation) feature.getAnnotationLocations().toArray()[0];
 
-                if (location.getGenbankStart() > location.getEnd())
-                    return;
-
-                if (location.getGenbankStart() > location.getEnd()) {
-                    annotation.setBioStart(location.getEnd());
-                    annotation.setBioEnd(location.getGenbankStart());
-                } else {
+                if (location.getGenbankStart() <= location.getEnd()) {
                     annotation.setBioStart(location.getGenbankStart());
                     annotation.setBioEnd(location.getEnd());
                 }
@@ -136,6 +129,19 @@ public class SBOLFormatter extends AbstractFormatter {
             subComponent.setName(feature.getName());
             subComponent.addType(IceSequenceOntology.getURI(feature.getGenbankType()));
             annotation.setSubComponent(subComponent);
+
+            // add a dna sequence for cases where the feature wraps around the origin
+            if (location != null && location.getGenbankStart() > location.getEnd()) {
+                DnaSequence subComponentSequence = SBOLFactory.createDnaSequence();
+                String sequence = location.getSequenceFeature().getSequence().getSequence();
+                StringBuilder builder = new StringBuilder();
+                builder.append(sequence.substring(location.getGenbankStart() - 1, sequence.length()));
+                builder.append(sequence.substring(0, location.getEnd()));
+                subComponentSequence.setNucleotides(builder.toString());
+                subComponentSequence.setURI(URI.create(uriString + "/ds#" + UUID.randomUUID().toString()));
+                subComponent.setDnaSequence(subComponentSequence);
+            }
+
             dnaComponent.addAnnotation(annotation);
         }
     }
