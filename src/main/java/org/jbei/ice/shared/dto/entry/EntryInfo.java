@@ -13,8 +13,6 @@ import org.jbei.ice.shared.dto.permission.PermissionInfo;
 @XmlRootElement
 public class EntryInfo implements IDTOModel {
 
-    private static final long serialVersionUID = 1l;
-
     private long id;
     private String recordId;
     private String versionId;
@@ -59,8 +57,7 @@ public class EntryInfo implements IDTOModel {
 
     private EntryInfo info; // typically used with strain with plasmid
 
-    public EntryInfo() {
-    }
+    public EntryInfo() {}
 
     public EntryInfo(EntryType type) {
         this.type = type;

@@ -21,11 +21,11 @@ import org.jbei.ice.client.profile.message.UserMessagesPresenter;
 import org.jbei.ice.client.profile.preferences.UserPreferencesPresenter;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.MessageInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
+import org.jbei.ice.shared.dto.message.MessageList;
 import org.jbei.ice.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -180,15 +180,15 @@ public class ProfilePresenter extends AbstractPresenter {
     }
 
     private void retrieveMessages() {
-        new IceAsyncCallback<ArrayList<MessageInfo>>() {
+        new IceAsyncCallback<MessageList>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<MessageInfo>> callback) throws AuthenticationException {
-                service.retrieveMessages(ClientController.sessionId, 0, 20, callback);
+            protected void callService(AsyncCallback<MessageList> callback) throws AuthenticationException {
+                service.retrieveMessages(ClientController.sessionId, 0, 50, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<MessageInfo> result) {
+            public void onSuccess(MessageList result) {
                 if (result == null || currentOption != UserOption.MESSAGES)
                     return;
 

@@ -1,15 +1,16 @@
 package org.jbei.ice.shared.dto;
 
+import java.util.ArrayList;
 import java.util.Date;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.shared.dto.group.GroupInfo;
 
 /**
  * DTO for message object
  *
  * @author Hector Plahar
  */
-public class MessageInfo implements IsSerializable {
+public class MessageInfo implements IDTOModel {
 
     private long id;
     private Date sent;
@@ -17,8 +18,12 @@ public class MessageInfo implements IsSerializable {
     private String message;
     private String title;
     private boolean read;
+    private ArrayList<GroupInfo> groups;
+    private ArrayList<AccountInfo> accounts;
 
     public MessageInfo() {
+        groups = new ArrayList<GroupInfo>();
+        accounts = new ArrayList<AccountInfo>();
     }
 
     public void setId(long id) {
@@ -67,5 +72,13 @@ public class MessageInfo implements IsSerializable {
 
     public void setRead(boolean read) {
         this.read = read;
+    }
+
+    public ArrayList<GroupInfo> getGroups() {
+        return groups;
+    }
+
+    public ArrayList<AccountInfo> getAccounts() {
+        return accounts;
     }
 }

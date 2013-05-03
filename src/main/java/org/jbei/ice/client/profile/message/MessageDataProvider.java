@@ -1,6 +1,5 @@
 package org.jbei.ice.client.profile.message;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.jbei.ice.client.ClientController;
@@ -8,6 +7,7 @@ import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.shared.dto.message.MessageList;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -24,8 +24,7 @@ public class MessageDataProvider extends AsyncDataProvider<MessageInfo> {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     protected LinkedList<MessageInfo> cachedEntries;
-    private int resultSize;
-    private ArrayList<MessageInfo> messages;
+    private MessageList messages;
 
     public MessageDataProvider(MessageDataTable table, RegistryServiceAsync service, HandlerManager bus) {
         this.table = table;
@@ -37,13 +36,13 @@ public class MessageDataProvider extends AsyncDataProvider<MessageInfo> {
 
     @Override
     protected void onRangeChanged(HasData<MessageInfo> display) {
-        if (resultSize == 0)   // display changed its range of interest but no data
+        if (messages == null || messages.getTotalSize() == 0)   // display changed its range of interest but no data
             return;
 
         // values of range to display from view
         final Range range = display.getVisibleRange();
         final int rangeStart = range.getStart();
-        final int rangeEnd = (rangeStart + range.getLength()) > resultSize ? resultSize
+        final int rangeEnd = (rangeStart + range.getLength()) > messages.getTotalSize() ? messages.getTotalSize()
                 : (rangeStart + range.getLength());
 
         // sort did not change
@@ -60,15 +59,15 @@ public class MessageDataProvider extends AsyncDataProvider<MessageInfo> {
     }
 
     protected void fetchEntryData(final int start, final int factor, final boolean reset) {
-        new IceAsyncCallback<ArrayList<MessageInfo>>() {
+        new IceAsyncCallback<MessageList>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<MessageInfo>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<MessageList> callback) throws AuthenticationException {
                 service.retrieveMessages(ClientController.sessionId, start, factor, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<MessageInfo> result) {
+            public void onSuccess(MessageList result) {
                 messages = result;
                 if (result == null) {
                     return;
@@ -77,14 +76,14 @@ public class MessageDataProvider extends AsyncDataProvider<MessageInfo> {
                 if (reset)
                     setMessages(result);
                 else {
-                    cachedEntries.addAll(result);
+                    cachedEntries.addAll(result.getList());
 //                    pager.setLoading(true);  //todo
                 }
             }
         }.go(eventBus);
     }
 
-    public void setMessages(ArrayList<MessageInfo> messages) {
+    public void setMessages(MessageList messages) {
         reset();
         this.messages = messages;
         if (messages == null) {
@@ -92,16 +91,15 @@ public class MessageDataProvider extends AsyncDataProvider<MessageInfo> {
             return;
         }
 
-        cachedEntries.addAll(messages);
-        resultSize = messages.size();
-        updateRowCount(resultSize, true);
+        cachedEntries.addAll(messages.getList());
+        updateRowCount(messages.getTotalSize(), true);
 
         // retrieve the first page of results and updateRowData
         final Range range = this.table.getVisibleRange();
         final int rangeStart = 0;
         int rangeEnd = rangeStart + range.getLength();
-        if (rangeEnd > resultSize)
-            rangeEnd = resultSize;
+        if (rangeEnd > messages.getTotalSize())
+            rangeEnd = messages.getTotalSize();
 
         updateRowData(rangeStart, cachedEntries.subList(rangeStart, rangeEnd));
         table.setPageStart(0);

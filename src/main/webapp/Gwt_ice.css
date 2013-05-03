@@ -26,6 +26,10 @@ body {
     top: -2px;
 }
 
+.font-14em {
+    font-size: 1.4em;
+}
+
 .font-11em {
     font-size: 1.1em;
 }
@@ -2168,4 +2172,10 @@ td.selected i.font-awesome {
     padding: 8px;
     background-color: #f1f1f1;
     font-weight: bold;
+}
+
+.profile_message_detail_header {
+    border-bottom: 1px solid #CCC;
+    font-size: 1.4em;
+    padding-bottom: 4px;
 }

@@ -12,11 +12,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class UserPanel extends Composite implements IAdminPanel {
 
-    private ScrollPanel panel;
     private final UserTable table;
 
     public UserPanel() {
-        panel = new ScrollPanel();
+        ScrollPanel panel = new ScrollPanel();
         initWidget(panel);
 
         table = new UserTable();

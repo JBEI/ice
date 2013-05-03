@@ -12,7 +12,6 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountResults;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.MessageInfo;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
@@ -23,6 +22,7 @@ import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
+import org.jbei.ice.shared.dto.message.MessageList;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 import org.jbei.ice.shared.dto.search.SearchResults;
@@ -206,7 +206,7 @@ public interface RegistryServiceAsync {
 
     void isWebOfRegistriesEnabled(AsyncCallback<Boolean> async);
 
-    void retrieveMessages(String sessionId, int start, int count, AsyncCallback<ArrayList<MessageInfo>> callback)
+    void retrieveMessages(String sessionId, int start, int count, AsyncCallback<MessageList> callback)
             throws AuthenticationException;
 
     void setBulkUploadDraftName(String sessionId, long id, String draftName, AsyncCallback<Boolean> callback)
