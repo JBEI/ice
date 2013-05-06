@@ -1,16 +1,23 @@
 package org.jbei.ice.lib.entry;
 
+import java.util.ArrayList;
 import java.util.Set;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.server.InfoToModelFactory;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -31,17 +38,22 @@ public class EntryControllerTest {
         controller = new EntryController();
     }
 
-    protected Account createTestAccount() throws Exception {
-        String email = "test@TESTER";
+    protected Account createTestAccount(String testName, boolean admin) throws Exception {
+        String email = testName + "@TESTER";
         AccountController accountController = new AccountController();
         Account account = accountController.getByEmail(email);
         if (account != null)
-            return account;
+            throw new Exception("duplicate account");
 
         String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
         Assert.assertNotNull(pass);
         account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
+
+        if (admin) {
+            account.setType(AccountType.ADMIN);
+            accountController.save(account);
+        }
         return account;
     }
 
@@ -65,7 +77,7 @@ public class EntryControllerTest {
 
     @Test
     public void testCreateStrainWithPlasmid() throws Exception {
-        Account account = createTestAccount();
+        Account account = createTestAccount("testCreateStrainWithPlasmid", false);
         try {
             controller.createStrainWithPlasmid(account, null, null, null);
         } catch (ControllerException ce) {
@@ -86,7 +98,7 @@ public class EntryControllerTest {
 
     @Test
     public void testCreateEntry() throws Exception {
-        Account account = createTestAccount();
+        Account account = createTestAccount("testCreateEntry", false);
         Entry strain = new Strain();
         strain = controller.createEntry(account, strain, null);
         Assert.assertNotNull(strain);
@@ -95,7 +107,7 @@ public class EntryControllerTest {
 
     @Test
     public void testGet() throws Exception {
-        Account account = createTestAccount();
+        Account account = createTestAccount("testGet", false);
         Entry plasmid = new Plasmid();
         plasmid = controller.createEntry(account, plasmid, null);
         Entry ret = controller.get(account, plasmid.getId());
@@ -104,7 +116,7 @@ public class EntryControllerTest {
 
     @Test
     public void testGetByRecordId() throws Exception {
-        Account account = createTestAccount();
+        Account account = createTestAccount("testGetByRecordId", false);
         ArabidopsisSeed seed = new ArabidopsisSeed();
         seed.setEcotype("ecotype");
         seed.setGeneration(ArabidopsisSeed.Generation.M0);
@@ -128,6 +140,53 @@ public class EntryControllerTest {
 
     @Test
     public void testUpdate() throws Exception {
+        Account creator = createTestAccount("testUpdate1", false);
+        Account account = createTestAccount("testUpdate2", false);
+
+        // create entry
+        PlasmidInfo info = new PlasmidInfo();
+        info.setType(EntryType.PLASMID);
+        info.setBioSafetyLevel(1);
+        info.setCreatorEmail(creator.getEmail());
+        info.setCreator(creator.getFullName());
+        info.setOriginOfReplication("kanamycin");
+        info.setCircular(false);
+        info.setOwnerEmail(info.getCreatorEmail());
+        info.setOwner(info.getCreator());
+        info.setShortDescription("testing");
+        info.setStatus("Complete");
+        info.setName("pSTC100");
+
+        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(info);
+        Assert.assertNotNull(plasmid);
+
+        // add Write permission for account
+        ArrayList<PermissionInfo> permissions = new ArrayList<>();
+        PermissionInfo permissionInfo = new PermissionInfo();
+        permissionInfo.setArticle(PermissionInfo.Article.ACCOUNT);
+        permissionInfo.setType(PermissionInfo.Type.WRITE_ENTRY);
+        permissionInfo.setArticleId(account.getId());
+        permissions.add(permissionInfo);
+        plasmid = (Plasmid) controller.createEntry(creator, plasmid, permissions);
+        Assert.assertNotNull(plasmid);
+        Assert.assertTrue(plasmid.getId() > 0);
+
+        // expect three permissions, read for owner, write for owner and write for account
+        Assert.assertEquals("Unexpected number of permissions", 3, plasmid.getPermissions().size());
+
+
+        // update with account
+        info.setCircular(true);
+        info.setRecordId(plasmid.getRecordId());
+        Entry existing = controller.getByRecordId(account, info.getRecordId());
+        ArrayList<PermissionInfo> p = ControllerFactory.getPermissionController()
+                                                       .retrieveSetEntryPermissions(account, plasmid);
+        info.setPermissions(p);
+
+        Entry entry = InfoToModelFactory.infoToEntry(info, existing);
+
+        Entry updated = controller.update(account, entry, info.getPermissions());
+        Assert.assertNotNull(updated);
     }
 
     @Test

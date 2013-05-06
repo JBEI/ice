@@ -528,8 +528,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails deleteFolder(String sessionId, long folderId)
-            throws AuthenticationException {
+    public FolderDetails deleteFolder(String sessionId, long folderId) throws AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": deleting folder " + folderId);

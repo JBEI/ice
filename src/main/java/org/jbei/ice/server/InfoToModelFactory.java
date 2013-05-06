@@ -163,7 +163,10 @@ public class InfoToModelFactory {
         entry.setLongDescription(info.getLongDescription());
         entry.setLongDescriptionType(info.getLongDescriptionType() != null ? info.getLongDescriptionType() : "text");
         entry.setIntellectualProperty(info.getIntellectualProperty());
-        entry.setVersionId(info.getVersionId());
+        if (entry.getVersionId() == null || entry.getVersionId().trim().isEmpty()) {
+            entry.setVersionId(info.getVersionId());
+        }
+
         Set<Link> links = getLinks(info.getLinks(), entry);
         entry.setLinks(links);
 
