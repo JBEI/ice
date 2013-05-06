@@ -551,13 +551,13 @@ public class EntryController {
             entry.setModificationTime(Calendar.getInstance().getTime());
             savedEntry = dao.updateEntry(entry);
 
-            if (permissions != null && !permissions.isEmpty()) {
-                permissionsController.clearPermissions(account, entry);
-                for (PermissionInfo permissionInfo : permissions) {
-                    permissionInfo.setTypeId(entry.getId());
-                    permissionsController.addPermission(account, permissionInfo);
-                }
-            }
+//            if (permissions != null && !permissions.isEmpty()) {
+//                permissionsController.clearPermissions(account, entry);
+//                for (PermissionInfo permissionInfo : permissions) {
+//                    permissionInfo.setTypeId(entry.getId());
+//                    permissionsController.addPermission(account, permissionInfo);
+//                }
+//            }
 
             if (scheduleRebuild) {
                 ApplicationController.scheduleBlastIndexRebuildTask(true);
