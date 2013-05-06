@@ -158,7 +158,7 @@ public class StrainForm extends EntryForm<StrainInfo> {
     @Override
     public FocusWidget validateForm() {
         FocusWidget widget = super.validateForm();
-        if (markers.getValueBox().getText().isEmpty()) {
+        if (markers.getValueBox().getText().trim().isEmpty()) {
             markers.setStyleName("input_box_error");
             if (widget == null)
                 widget = markers.getValueBox();

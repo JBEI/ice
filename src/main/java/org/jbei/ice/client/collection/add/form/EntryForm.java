@@ -411,7 +411,7 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         FocusWidget invalid = null;
 
         // name
-        if (name.getText().isEmpty()) {
+        if (name.getText().trim().isEmpty()) {
             name.setStyleName("input_box_error");
             invalid = name;
         } else {
@@ -419,7 +419,7 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         }
 
         // creator
-        if (creator.getText().isEmpty()) {
+        if (creator.getText().trim().isEmpty()) {
             creator.setStyleName("input_box_error");
             if (invalid == null)
                 invalid = creator;
@@ -428,7 +428,7 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         }
 
         // principal investigator
-        if (principalInvestigator.getText().isEmpty()) {
+        if (principalInvestigator.getText().trim().isEmpty()) {
             principalInvestigator.setStyleName("input_box_error");
             if (invalid == null)
                 invalid = principalInvestigator;
@@ -437,7 +437,7 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         }
 
         // summary
-        if (summary.getText().isEmpty()) {
+        if (summary.getText().trim().isEmpty()) {
             summary.setStyleName("input_box_error");
             if (invalid == null)
                 invalid = summary;
@@ -453,7 +453,7 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
             String name = parameter.getName();
             String value = parameter.getValue();
 
-            if (name.isEmpty() && !value.isEmpty()) {
+            if (name.trim().isEmpty() && !value.isEmpty()) {
                 parameter.getNameBox().setStyleName("input_box_error");
                 if (invalid == null)
                     invalid = parameter.getNameBox();
@@ -461,7 +461,7 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
                 parameter.getNameBox().setStyleName("input_box");
             }
 
-            if (value.isEmpty() && !name.isEmpty()) {
+            if (value.trim().isEmpty() && !name.isEmpty()) {
                 parameter.getValueBox().setStyleName("input_box_error");
                 if (invalid == null)
                     invalid = parameter.getValueBox();
