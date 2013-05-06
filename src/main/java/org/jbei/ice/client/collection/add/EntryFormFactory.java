@@ -26,6 +26,7 @@ public class EntryFormFactory {
         switch (type) {
             case PLASMID:
                 PlasmidInfo plasmidInfo = new PlasmidInfo();
+                plasmidInfo.setCircular(true);
                 plasmidInfo.setCreator(creatorName);
                 plasmidInfo.setCreatorEmail(creatorEmail);
                 return new PlasmidForm(plasmidInfo);
