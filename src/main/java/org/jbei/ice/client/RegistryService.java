@@ -176,9 +176,6 @@ public interface RegistryService extends RemoteService {
 
     boolean setBulkUploadDraftName(String sid, long id, String draftName) throws AuthenticationException;
 
-    ArrayList<PermissionInfo> retrieveFolderPermissions(String sessionId, ArrayList<Long> userFolderIds)
-            throws AuthenticationException;
-
     GroupInfo updateGroup(String sessionId, GroupInfo info) throws AuthenticationException;
 
     GroupInfo deleteGroup(String sessionId, GroupInfo info) throws AuthenticationException;
@@ -199,4 +196,8 @@ public interface RegistryService extends RemoteService {
 
     Long updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
             ArrayList<PermissionInfo> permissions) throws AuthenticationException;
+
+    boolean promoteCollection(String sessionId, long id) throws AuthenticationException;
+
+    boolean demoteCollection(String sessionId, long id) throws AuthenticationException;
 }

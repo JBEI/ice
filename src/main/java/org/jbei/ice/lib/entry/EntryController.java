@@ -214,12 +214,9 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        // add read and write permissions for owner
+        // add write permissions for owner
         PermissionInfo info = new PermissionInfo(PermissionInfo.Article.ACCOUNT, account.getId(),
                                                  PermissionInfo.Type.WRITE_ENTRY, entry.getId(), account.getFullName());
-        permissionsController.addPermission(account, info);
-        info = new PermissionInfo(PermissionInfo.Article.ACCOUNT, account.getId(),
-                                  PermissionInfo.Type.READ_ENTRY, entry.getId(), account.getFullName());
         permissionsController.addPermission(account, info);
 
         if (permissions != null) {

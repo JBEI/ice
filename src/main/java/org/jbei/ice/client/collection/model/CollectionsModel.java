@@ -12,7 +12,6 @@ import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
@@ -230,26 +229,6 @@ public class CollectionsModel {
 
             @Override
             public void onSuccess(HashMap<String, String> result) {
-                callback.onSuccess(result);
-            }
-        }.go(eventBus);
-    }
-
-    public void retrieveFolderPermissions(final ArrayList<Long> userFolderIds,
-            final Callback<ArrayList<PermissionInfo>> callback) {
-        if (userFolderIds == null || userFolderIds.isEmpty())
-            return;
-
-        new IceAsyncCallback<ArrayList<PermissionInfo>>() {
-
-            @Override
-            protected void callService(AsyncCallback<ArrayList<PermissionInfo>> callback)
-                    throws AuthenticationException {
-                service.retrieveFolderPermissions(ClientController.sessionId, userFolderIds, callback);
-            }
-
-            @Override
-            public void onSuccess(ArrayList<PermissionInfo> result) {
                 callback.onSuccess(result);
             }
         }.go(eventBus);

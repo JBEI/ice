@@ -12,6 +12,7 @@ import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.FolderEntryDataProvider;
 import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.ShareCollectionData;
@@ -49,7 +50,6 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -64,10 +64,6 @@ public class CollectionsPresenter extends AbstractPresenter {
 
     private FolderEntryDataProvider folderDataProvider;
     private final CollectionDataTable collectionsDataTable;
-
-    // data providers for the sub menu
-    private final ListDataProvider<FolderDetails> userListProvider;
-    private final ListDataProvider<FolderDetails> systemListProvider;
 
     // selection menu
     private final CollectionsModel model;
@@ -130,8 +126,6 @@ public class CollectionsPresenter extends AbstractPresenter {
             }
         };
 
-        this.userListProvider = new ListDataProvider<FolderDetails>(new FolderDetailsKeyProvider());
-        this.systemListProvider = new ListDataProvider<FolderDetails>(new FolderDetailsKeyProvider());
         this.folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, model.getService());
 
         // selection models used for menus
@@ -259,6 +253,49 @@ public class CollectionsPresenter extends AbstractPresenter {
                 public void onFailure() {}
             });
         }
+
+        setPromotionDelegate();
+        setDemotionDelegate();
+    }
+
+    private void setPromotionDelegate() {
+        display.setPromotionDelegate(new ServiceDelegate<MenuItem>() {
+            @Override
+            public void execute(final MenuItem menuItem) {
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        service.promoteCollection(ClientController.sessionId, menuItem.getId(), callback);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        History.newItem(Page.COLLECTIONS.getLink());
+                    }
+                }.go(eventBus);
+            }
+        });
+    }
+
+    private void setDemotionDelegate() {
+        display.setDemotionDelegate(new ServiceDelegate<MenuItem>() {
+            @Override
+            public void execute(final MenuItem menuItem) {
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        service.demoteCollection(ClientController.sessionId, menuItem.getId(), callback);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        History.newItem(Page.COLLECTIONS.getLink());
+                    }
+                }.go(eventBus);
+            }
+        });
     }
 
     private void initCollectionTableSelectionHandler() {
@@ -452,8 +489,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 }
 
                 display.updateSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
-                MenuItem resultItem = new MenuItem(folder.getId(), folder.getName(), folder
-                        .getCount(), folder.isSystemFolder(), false);
+                MenuItem resultItem = new MenuItem(folder.getId(), folder.getName(), folder.getCount());
                 display.setMenuItem(resultItem, deleteHandler);
             }
 
@@ -472,10 +508,8 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onSuccess(FolderDetails folder) {
-                userListProvider.getList().add(folder);
                 display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
-                MenuItem newItem = new MenuItem(folder.getId(), folder.getName(), folder.getCount(),
-                                                folder.isSystemFolder(), false);
+                MenuItem newItem = new MenuItem(folder.getId(), folder.getName(), folder.getCount());
 
                 if (!folder.isSystemFolder())
                     display.addMenuItem(newItem, deleteHandler);
@@ -551,6 +585,11 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onSuccess(FolderDetails folder) {
+                if (folder == null) {
+                    History.newItem(Page.COLLECTIONS.getLink() + ";id=0");
+                    return;
+                }
+
                 collectionsDataTable.clearSelection();
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folder.getId(), false);
                 display.setCurrentMenuSelection(folder.getId());
@@ -580,75 +619,50 @@ public class CollectionsPresenter extends AbstractPresenter {
         @Override
         public void onSuccess(ArrayList<FolderDetails> folders) {
             ArrayList<MenuItem> userMenuItems = new ArrayList<MenuItem>();
-            ArrayList<FolderDetails> userFolders = new ArrayList<FolderDetails>();
-
             ArrayList<MenuItem> systemMenuItems = new ArrayList<MenuItem>();
-            ArrayList<FolderDetails> systemFolder = new ArrayList<FolderDetails>();
-
             ArrayList<MenuItem> sharedMenuItems = new ArrayList<MenuItem>();
-            ArrayList<FolderDetails> sharedFolders = new ArrayList<FolderDetails>();
-
-            ArrayList<Long> userFolderIds = new ArrayList<Long>();
 
             for (FolderDetails folder : folders) {
-                MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder.getCount(),
-                                             folder.isSystemFolder(), false);
+                MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder.getCount());
+                item.setShareType(folder.getShareType());
 
                 switch (folder.getShareType()) {
                     case PUBLIC:
                         systemMenuItems.add(item);
-                        systemFolder.add(folder);
+                        if (ClientController.account.isAdmin())
+                            item.setPermissions(folder.getPermissions());
                         break;
 
                     case PRIVATE:
+                        item.setPermissions(folder.getPermissions());
                         userMenuItems.add(item);
-                        userFolders.add(folder);
-                        userFolderIds.add(folder.getId());
                         display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                         break;
 
                     case SHARED:
+                        item.setOwner(folder.getOwner());
                         sharedMenuItems.add(item);
-                        sharedFolders.add(folder);
                         break;
                 }
             }
 
             // my entries
-            MenuItem item = new MenuItem(0, "My Entries", ClientController.account.getUserEntryCount(), true, false);
+            MenuItem item = new MenuItem(0, "My Entries", ClientController.account.getUserEntryCount());
             userMenuItems.add(0, item);
             MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
-                                                   ClientController.account.getVisibleEntryCount(), true, false);
+                                                   ClientController.account.getVisibleEntryCount());
             systemMenuItems.add(0, allEntriesItem);
             display.setSystemCollectionMenuItems(systemMenuItems);
             DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService(), model.getEventBus(), display);
             display.setUserCollectionMenuItems(userMenuItems, deleteHandler);
             display.setSharedCollectionsMenuItems(sharedMenuItems);
 
-            userListProvider.getList().addAll(userFolders);
-            systemListProvider.getList().addAll(systemFolder);
             if (currentFolder != null)
                 display.setCurrentMenuSelection(currentFolder.getId());
-
-            // retrieve user folder permissions
-            model.retrieveFolderPermissions(userFolderIds, new FolderPermissionRetrieveHandler());
         }
 
         @Override
-        public void onFailure() {
-        }
-    }
-
-    private class FolderPermissionRetrieveHandler extends Callback<ArrayList<PermissionInfo>> {
-
-        @Override
-        public void onSuccess(ArrayList<PermissionInfo> permissionInfos) {
-            display.setUserFolderPermissions(permissionInfos);
-        }
-
-        @Override
-        public void onFailure() {
-        }
+        public void onFailure() {}
     }
 
     //inner classes
@@ -706,8 +720,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                         @Override
                         public void onSuccess(FolderDetails result) {
                             ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                            MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result.getCount(),
-                                                               result.isSystemFolder(), false);
+                            MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result.getCount()
+                            );
                             items.add(updateItem);
                             display.updateMenuItemCounts(items);
 
@@ -753,22 +767,20 @@ public class CollectionsPresenter extends AbstractPresenter {
                     model.getEventBus().fireEvent(event);
 
                     for (FolderDetails detail : result) {
-                        MenuItem item = new MenuItem(detail.getId(), detail.getName(), detail.getCount(),
-                                                     detail.isSystemFolder(), false);
+                        MenuItem item = new MenuItem(detail.getId(), detail.getName(), detail.getCount());
                         menuItems.add(item);
                     }
 
                     if (currentFolder.getId() == 0) {
                         ClientController.account.setUserEntryCount(ClientController.account.getUserEntryCount() - 1);
                         MenuItem myItems = new MenuItem(0, "My Entries",
-                                                        ClientController.account.getUserEntryCount(), true, false);
+                                                        ClientController.account.getUserEntryCount());
                         menuItems.add(myItems);
                     }
 
                     ClientController.account.setVisibleEntryCount(ClientController.account.getVisibleEntryCount() - 1);
                     MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
-                                                           ClientController.account.getVisibleEntryCount(), true,
-                                                           false);
+                                                           ClientController.account.getVisibleEntryCount());
                     menuItems.add(allEntriesItem);
 
                     display.updateMenuItemCounts(menuItems);

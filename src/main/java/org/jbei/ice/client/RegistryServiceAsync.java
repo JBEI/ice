@@ -212,9 +212,6 @@ public interface RegistryServiceAsync {
     void setBulkUploadDraftName(String sessionId, long id, String draftName, AsyncCallback<Boolean> callback)
             throws AuthenticationException;
 
-    void retrieveFolderPermissions(String sessionId, ArrayList<Long> userFolderIds,
-            AsyncCallback<ArrayList<PermissionInfo>> callback) throws AuthenticationException;
-
     void updateGroup(String sessionId, GroupInfo info, AsyncCallback<GroupInfo> async);
 
     void deleteGroup(String sessionId, GroupInfo info, AsyncCallback<GroupInfo> asyncCallback);
@@ -226,4 +223,8 @@ public interface RegistryServiceAsync {
     void deleteSample(String sessionId, SampleInfo info, AsyncCallback<Boolean> async);
 
     void retrieveUserGroups(String sessionId, AsyncCallback<ArrayList<GroupInfo>> async);
+
+    void promoteCollection(String sessionId, long id, AsyncCallback<Boolean> async);
+
+    void demoteCollection(String sessionId, long id, AsyncCallback<Boolean> async);
 }

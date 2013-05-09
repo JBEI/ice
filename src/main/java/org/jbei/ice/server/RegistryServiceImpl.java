@@ -513,6 +513,28 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public boolean promoteCollection(String sessionId, long id) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        Logger.info(account.getEmail() + ": promoting collection " + id);
+        try {
+            return ControllerFactory.getFolderController().promoteFolder(account, id);
+        } catch (ControllerException ce) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean demoteCollection(String sessionId, long id) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        Logger.info(account.getEmail() + ": promoting collection " + id);
+        try {
+            return ControllerFactory.getFolderController().demoteFolder(account, id);
+        } catch (ControllerException ce) {
+            return false;
+        }
+    }
+
+    @Override
     public FolderDetails retrieveEntriesForFolder(String sessionId, long folderId, ColumnField sort, boolean asc,
             int start, int limit) throws AuthenticationException {
         try {
@@ -1135,31 +1157,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
             return false;
         }
-    }
-
-    @Override
-    public ArrayList<PermissionInfo> retrieveFolderPermissions(String sessionId, ArrayList<Long> userFolderIds)
-            throws AuthenticationException {
-        Account account = retrieveAccountForSid(sessionId);
-        FolderController folderController = ControllerFactory.getFolderController();
-        PermissionsController permissionsController = ControllerFactory.getPermissionController();
-        ArrayList<PermissionInfo> results = new ArrayList<>();
-
-        for (Long id : userFolderIds) {
-            if (id == null)
-                continue;
-
-            try {
-                Folder folder = folderController.getFolderById(id.longValue());
-                ArrayList<PermissionInfo> infos = permissionsController.retrieveSetFolderPermission(account, folder);
-                results.addAll(infos);
-            } catch (ControllerException e) {
-                Logger.error(e);
-                continue;
-            }
-        }
-
-        return results;
     }
 
     @Override
