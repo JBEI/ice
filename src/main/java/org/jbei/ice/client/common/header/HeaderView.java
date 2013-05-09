@@ -128,7 +128,7 @@ public class HeaderView extends Composite {
 
         // user
         loggedInContentsPanel.setHTML(0, 0, "<a href=\"#" + Page.PROFILE.getLink() + ";id=" + info.getId()
-                + "\">" + info.getEmail() + "</a>");
+                + ";s=profile\">" + info.getEmail() + "</a>");
 
         // messages
         loggedInContentsPanel.setHTML(0, 1, "");
