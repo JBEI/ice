@@ -66,8 +66,7 @@ public abstract class MoveToHandler implements SubmitHandler {
                         String name = "";
 
                         for (FolderDetails result : results) {
-                            items.add(new MenuItem(result.getId(), result.getName(), result.getCount(),
-                                                   result.isSystemFolder(), false));
+                            items.add(new MenuItem(result.getId(), result.getName(), result.getCount()));
                             if (result.getId() != getSource()) {
                                 size += 1;
                                 name = result.getName();

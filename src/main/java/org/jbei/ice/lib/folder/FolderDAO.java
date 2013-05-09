@@ -11,6 +11,7 @@ import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.folder.FolderStatus;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -136,7 +137,6 @@ class FolderDAO extends HibernateRepository<Folder> {
      */
     @SuppressWarnings("unchecked")
     public List<Folder> getFoldersByOwner(Account account) throws DAOException {
-
         ArrayList<Folder> folders;
         Session session = currentSession();
         try {
@@ -145,6 +145,22 @@ class FolderDAO extends HibernateRepository<Folder> {
             Query query = session.createQuery(queryString);
 
             query.setParameter("ownerEmail", account.getEmail());
+            folders = new ArrayList<Folder>(query.list());
+        } catch (HibernateException e) {
+            throw new DAOException("Failed to retrieve folders!", e);
+        }
+
+        return folders;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Folder> getFoldersByStatus(FolderStatus status) throws DAOException {
+        ArrayList<Folder> folders;
+        Session session = currentSession();
+        try {
+            String queryString = "from " + Folder.class.getName() + " WHERE status = :status";
+            Query query = session.createQuery(queryString);
+            query.setParameter("status", status);
             folders = new ArrayList<Folder>(query.list());
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve folders!", e);

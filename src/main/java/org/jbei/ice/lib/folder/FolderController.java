@@ -2,6 +2,7 @@ package org.jbei.ice.lib.folder;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -9,6 +10,7 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -18,6 +20,8 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.folder.FolderShareType;
+import org.jbei.ice.shared.dto.folder.FolderStatus;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 /**
  * @author Hector Plahar
@@ -26,12 +30,10 @@ public class FolderController {
 
     private final FolderDAO dao;
     private final AccountController accountController;
-//    private final PermissionsController permissionsController;
 
     public FolderController() {
         dao = new FolderDAO();
         accountController = ControllerFactory.getAccountController();
-//        permissionsController = ControllerFactory.getPermissionController();
     }
 
     public Folder removeFolderContents(Account account, long folderId, ArrayList<Long> entryIds)
@@ -46,7 +48,8 @@ public class FolderController {
             throw new ControllerException(e);
         }
 
-        boolean isSystemFolder = folder.getOwnerEmail().equals(systemAccount.getEmail());
+        boolean isSystemFolder = (folder.getOwnerEmail().equals(systemAccount.getEmail())
+                || folder.getStatus() == FolderStatus.PINNED);
 
         if (isSystemFolder && !isAdministrator) {
             throw new ControllerException("Cannot modify non user folder " + folder.getName());
@@ -65,6 +68,18 @@ public class FolderController {
             return dao.getFoldersByOwner(userAccount);
         } catch (DAOException e) {
             throw new ControllerException(e);
+        }
+    }
+
+    protected List<Folder> getSystemFolders() throws ControllerException {
+        Set<Folder> folders = new HashSet<>();
+        try {
+            folders.addAll(dao.getFoldersByStatus(FolderStatus.PINNED));
+            Account system = ControllerFactory.getAccountController().getSystemAccount();
+            folders.addAll(dao.getFoldersByOwner(system));
+            return new ArrayList<>(folders);
+        } catch (DAOException de) {
+            throw new ControllerException(de);
         }
     }
 
@@ -163,12 +178,10 @@ public class FolderController {
     }
 
     public ArrayList<FolderDetails> retrieveFoldersForUser(Account account) throws ControllerException {
-        AccountController controller = ControllerFactory.getAccountController();
         ArrayList<FolderDetails> results = new ArrayList<>();
 
         // publicly visible collections are owned by the system
-        Account system = controller.getSystemAccount();
-        List<Folder> folders = getFoldersByOwner(system);
+        List<Folder> folders = getSystemFolders();
         for (Folder folder : folders) {
             long id = folder.getId();
             FolderDetails details = new FolderDetails(id, folder.getName(), true);
@@ -176,6 +189,11 @@ public class FolderController {
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
             details.setShareType(FolderShareType.PUBLIC);
+            if (account.getType() == AccountType.ADMIN) {
+                ArrayList<PermissionInfo> infos = ControllerFactory.getPermissionController().
+                        retrieveSetFolderPermission(account, folder);
+                details.setPermissions(infos);
+            }
             results.add(details);
         }
 
@@ -189,6 +207,9 @@ public class FolderController {
                 details.setCount(folderSize);
                 details.setShareType(FolderShareType.PRIVATE);
                 details.setDescription(folder.getDescription());
+                ArrayList<PermissionInfo> infos = ControllerFactory.getPermissionController().
+                        retrieveSetFolderPermission(account, folder);
+                details.setPermissions(infos);
                 results.add(details);
             }
         }
@@ -197,16 +218,88 @@ public class FolderController {
         Set<Folder> sharedFolders = ControllerFactory.getPermissionController().retrievePermissionFolders(account);
         if (sharedFolders != null) {
             for (Folder folder : sharedFolders) {
+                if (userFolders != null && userFolders.contains(folder))
+                    continue;
+
                 long id = folder.getId();
-                FolderDetails details = new FolderDetails(id, folder.getName(), true);
+                boolean isSystemFolder = (account.getType() != AccountType.ADMIN);
+                FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
                 details.setShareType(FolderShareType.SHARED);
                 long folderSize = getFolderSize(id);
                 details.setCount(folderSize);
                 details.setDescription(folder.getDescription());
+                Account owner = accountController.getByEmail(folder.getOwnerEmail());
+                if (owner != null) {
+                    details.setOwner(Account.toDTO(owner));
+                }
                 results.add(details);
             }
         }
 
         return results;
+    }
+
+    /**
+     * "Promote"s a collection into a system collection. This allows it to be categorised under "Collections"
+     * This action is restricted to administrators
+     *
+     * @param account requesting account
+     * @param id      collection id
+     * @return true if promotion is successful false otherwise
+     * @throws ControllerException
+     */
+    public boolean promoteFolder(Account account, long id) throws ControllerException {
+        if (account.getType() != AccountType.ADMIN)
+            throw new ControllerException(account.getEmail() + " does not have sufficient access privs for action");
+
+        try {
+            Folder folder = dao.get(id);
+            if (folder.getOwnerEmail().equalsIgnoreCase(AccountController.SYSTEM_ACCOUNT_EMAIL)
+                    || folder.getStatus() == FolderStatus.PINNED)
+                return true;
+
+            folder.setStatus(FolderStatus.PINNED);
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
+            dao.update(folder);
+
+            // remove account permissions for this administrator
+            PermissionInfo info = new PermissionInfo();
+            info.setType(PermissionInfo.Type.READ_FOLDER);
+            info.setArticle(PermissionInfo.Article.ACCOUNT);
+            info.setArticleId(account.getId());
+            info.setTypeId(id);
+            ControllerFactory.getPermissionController().removePermission(account, info);
+            return true;
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    /**
+     * Opposite of FolderController#demoteFolder(org.jbei.ice.lib.account.model.Account, long)
+     * Removes the folder from the system collections menu
+     *
+     * @param account requesting account. should have administrator privileges
+     * @param id      collection identifier
+     * @return true on successful remote, false otherwise
+     * @throws ControllerException
+     */
+    public boolean demoteFolder(Account account, long id) throws ControllerException {
+        if (account.getType() != AccountType.ADMIN)
+            throw new ControllerException(account.getEmail() + " does not have sufficient access privs for action");
+
+        try {
+            Folder folder = dao.get(id);
+            if (!folder.getOwnerEmail().equalsIgnoreCase(AccountController.SYSTEM_ACCOUNT_EMAIL)
+                    && folder.getStatus() != FolderStatus.PINNED)
+                return true;
+
+            folder.setStatus(FolderStatus.UNPINNED);
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
+            dao.update(folder);
+            return true;
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
     }
 }

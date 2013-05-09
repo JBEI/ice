@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
@@ -14,7 +15,6 @@ import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.folder.FolderShareType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -32,8 +32,6 @@ public interface ICollectionView {
     void setSystemCollectionMenuItems(ArrayList<MenuItem> items);
 
     void setUserCollectionMenuItems(ArrayList<MenuItem> items, IDeleteMenuHandler handler);
-
-    void setUserFolderPermissions(ArrayList<PermissionInfo> list);
 
     boolean getQuickEditVisibility();
 
@@ -115,4 +113,8 @@ public interface ICollectionView {
     void setTransferOptions(ArrayList<OptionSelect> options);
 
     ArrayList<OptionSelect> getSelectedTransfers();
+
+    void setPromotionDelegate(ServiceDelegate<MenuItem> delegate);
+
+    void setDemotionDelegate(ServiceDelegate<MenuItem> delegate);
 }

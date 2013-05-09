@@ -48,7 +48,6 @@ public class TipViewContentFactory {
                                                 }
                                             });
         } catch (AuthenticationException e) {
-            GWT.log(e.getMessage());
             History.newItem(Page.LOGIN.getLink());
         }
     }

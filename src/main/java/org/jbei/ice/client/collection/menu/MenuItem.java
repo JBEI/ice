@@ -1,22 +1,26 @@
 package org.jbei.ice.client.collection.menu;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.folder.FolderShareType;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 public class MenuItem extends OptionSelect {
 
     private long count;
-    private final boolean isSystem;
-    private boolean shared;
+    private ArrayList<PermissionInfo> permissions;
+    private AccountInfo owner;
+    private FolderShareType shareType;
 
-    public MenuItem(long id, String name, long count, boolean isSystem, boolean shared) {
+    public MenuItem(long id, String name, long count) {
         super(id, name);
         this.count = count;
-        this.isSystem = isSystem;
-        this.shared = shared;
     }
 
-    public boolean isSystem() {
-        return this.isSystem;
+    public boolean hasSubMenu() {
+        return getId() > 0;
     }
 
     public long getCount() {
@@ -27,11 +31,27 @@ public class MenuItem extends OptionSelect {
         this.count = count;
     }
 
-    public boolean isShared() {
-        return shared;
+    public void setPermissions(ArrayList<PermissionInfo> permissions) {
+        this.permissions = permissions;
     }
 
-    public void setShared(boolean shared) {
-        this.shared = shared;
+    public ArrayList<PermissionInfo> getPermissions() {
+        return permissions;
+    }
+
+    public AccountInfo getOwner() {
+        return owner;
+    }
+
+    public void setOwner(AccountInfo owner) {
+        this.owner = owner;
+    }
+
+    public FolderShareType getShareType() {
+        return shareType;
+    }
+
+    public void setShareType(FolderShareType shareType) {
+        this.shareType = shareType;
     }
 }

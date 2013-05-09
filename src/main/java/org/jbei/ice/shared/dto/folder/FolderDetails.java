@@ -1,8 +1,11 @@
 package org.jbei.ice.shared.dto.folder;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
+import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -21,9 +24,10 @@ public class FolderDetails implements IsSerializable {
     private String description;
     private LinkedList<EntryInfo> entries = new LinkedList<EntryInfo>();
     private FolderShareType shareType;
+    private AccountInfo owner;    // owner or person sharing this folder
+    private ArrayList<PermissionInfo> permissions;
 
-    public FolderDetails() {
-    }
+    public FolderDetails() {}
 
     public FolderDetails(long id, String name, boolean systemFolder) {
         this.id = id;
@@ -81,5 +85,21 @@ public class FolderDetails implements IsSerializable {
 
     public void setShareType(FolderShareType shareType) {
         this.shareType = shareType;
+    }
+
+    public AccountInfo getOwner() {
+        return owner;
+    }
+
+    public void setOwner(AccountInfo owner) {
+        this.owner = owner;
+    }
+
+    public ArrayList<PermissionInfo> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(ArrayList<PermissionInfo> permissions) {
+        this.permissions = permissions;
     }
 }
