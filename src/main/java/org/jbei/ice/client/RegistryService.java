@@ -107,7 +107,7 @@ public interface RegistryService extends RemoteService {
 
     AccountInfo retrieveAccount(String email);
 
-    AccountInfo createNewAccount(AccountInfo info, String url);
+    String createNewAccount(AccountInfo info, boolean sendEmail);
 
     AccountInfo updateAccount(String sid, String email, AccountInfo info) throws AuthenticationException;
 

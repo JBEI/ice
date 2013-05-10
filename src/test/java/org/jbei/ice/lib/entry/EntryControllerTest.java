@@ -15,6 +15,7 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.server.InfoToModelFactory;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
@@ -45,7 +46,11 @@ public class EntryControllerTest {
         if (account != null)
             throw new Exception("duplicate account");
 
-        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
+        AccountInfo info = new AccountInfo();
+        info.setFirstName("");
+        info.setLastName("TEST");
+        info.setEmail(email);
+        String pass = accountController.createNewAccount(info, false);
         Assert.assertNotNull(pass);
         account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
@@ -171,8 +176,8 @@ public class EntryControllerTest {
         Assert.assertNotNull(plasmid);
         Assert.assertTrue(plasmid.getId() > 0);
 
-        // expect three permissions, read for owner, write for owner and write for account
-        Assert.assertEquals("Unexpected number of permissions", 3, plasmid.getPermissions().size());
+        // expect two permissions, write for owner and write for account
+        Assert.assertEquals("Unexpected number of permissions", 2, plasmid.getPermissions().size());
 
 
         // update with account

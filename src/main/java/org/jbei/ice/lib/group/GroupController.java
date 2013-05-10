@@ -9,7 +9,6 @@ import java.util.Set;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.AccountUtils;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.DAOException;
@@ -337,7 +336,7 @@ public class GroupController {
             ArrayList<AccountInfo> result = new ArrayList<>();
             Group group = dao.get(uuid);
             for (Account account : group.getMembers()) {
-                AccountInfo accountInfo = AccountUtils.accountToInfo(account);
+                AccountInfo accountInfo = Account.toDTO(account);
                 result.add(accountInfo);
             }
             return result;

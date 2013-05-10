@@ -120,7 +120,7 @@ public interface RegistryServiceAsync {
 
     void retrieveAccount(String email, AsyncCallback<AccountInfo> callback);
 
-    void createNewAccount(AccountInfo info, String url, AsyncCallback<AccountInfo> callback);
+    void createNewAccount(AccountInfo info, boolean sendEmail, AsyncCallback<String> callback);
 
     void updateAccount(String sid, String email, AccountInfo info,
             AsyncCallback<AccountInfo> callback) throws AuthenticationException;

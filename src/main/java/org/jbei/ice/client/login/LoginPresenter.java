@@ -177,15 +177,16 @@ public class LoginPresenter extends AbstractPresenter {
      */
     private void saveNewAccount(RegistrationDetails details) {
         AccountInfo info = new AccountInfo();
+// TODO : user ID
+
         info.setEmail(details.getEmail());
         info.setDescription(details.getAbout());
         info.setFirstName(details.getFirstName());
         info.setLastName(details.getLastName());
         info.setInitials(details.getInitials());
         info.setInstitution(details.getInstitution());
-        String url = GWT.getHostPageBaseURL() + "#" + Page.PROFILE.getLink();
 
-        service.createNewAccount(info, url, new AsyncCallback<AccountInfo>() {
+        service.createNewAccount(info, true, new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -195,7 +196,7 @@ public class LoginPresenter extends AbstractPresenter {
             }
 
             @Override
-            public void onSuccess(AccountInfo result) {
+            public void onSuccess(String result) {
                 Window.alert("Registration successful. \n\nPlease check your email for\n your login credentials");
                 display.switchToLoginMode();
             }
@@ -266,20 +267,21 @@ public class LoginPresenter extends AbstractPresenter {
     private class RegisterHandler implements ClickHandler {
         @Override
         public void onClick(ClickEvent event) {
-            display.switchToRegisterMode(new ClickHandler() {
+            display.switchToRegisterMode(new CreateAccountHandler(), new CancelCreateAccountHandler());
+        }
+    }
 
-                                             @Override
-                                             public void onClick(ClickEvent event) {
-                                                 createNewAccount(display.getRegistrationDetails());
-                                             }
-                                         }, new ClickHandler() {
+    private class CreateAccountHandler implements ClickHandler {
+        @Override
+        public void onClick(ClickEvent event) {
+            createNewAccount(display.getRegistrationDetails());
+        }
+    }
 
-                                             @Override
-                                             public void onClick(ClickEvent event) {
-                                                 display.switchToLoginMode();
-                                             }
-                                         }
-                                        );
+    private class CancelCreateAccountHandler implements ClickHandler {
+        @Override
+        public void onClick(ClickEvent event) {
+            display.switchToLoginMode();
         }
     }
 

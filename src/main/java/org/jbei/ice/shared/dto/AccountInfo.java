@@ -21,6 +21,9 @@ public class AccountInfo implements IsSerializable {
     private int newMessageCount;
 
     public AccountInfo() {
+        institution = "";
+        description = "";
+        initials = "";
     }
 
     public String getEmail() {

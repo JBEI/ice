@@ -3,6 +3,7 @@ package org.jbei.ice.lib.permissions;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.shared.dto.AccountInfo;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -39,9 +40,18 @@ public class PermissionsControllerTest {
         String email2 = "testAddPermissionOther@TESTER.org";
 
         AccountController accountController = new AccountController();
-        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
+        AccountInfo info = new AccountInfo();
+        info.setFirstName("");
+        info.setLastName("TEST");
+        info.setEmail(email);
+        String pass = accountController.createNewAccount(info, false);
         Assert.assertNotNull(pass);
-        accountController.createNewAccount("", "TEST", "T", email2, null, "");
+
+        AccountInfo info2 = new AccountInfo();
+        info2.setFirstName("");
+        info2.setLastName("TEST");
+        info2.setEmail(email2);
+        accountController.createNewAccount(info2, false);
         Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
         Account otherAccount = accountController.getByEmail(email2);

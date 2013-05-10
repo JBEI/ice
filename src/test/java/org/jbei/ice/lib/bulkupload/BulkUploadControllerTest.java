@@ -14,6 +14,7 @@ import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.StatusType;
+import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
@@ -364,7 +365,12 @@ public class BulkUploadControllerTest {
         if (account != null)
             throw new Exception("duplicate account");
 
-        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
+        AccountInfo accountInfo = new AccountInfo();
+        accountInfo.setFirstName("");
+        accountInfo.setLastName("TEST");
+        accountInfo.setEmail(email);
+        String pass = accountController.createNewAccount(accountInfo, false);
+
         Assert.assertNotNull(pass);
         account = accountController.getByEmail(email);
         Assert.assertNotNull(account);

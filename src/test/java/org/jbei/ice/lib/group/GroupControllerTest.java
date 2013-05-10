@@ -4,6 +4,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
 
@@ -86,7 +87,11 @@ public class GroupControllerTest {
         Assert.assertNotNull(info);
         Assert.assertTrue(info.getMembers().size() == 0);
         AccountController accountController = new AccountController();
-        accountController.createNewAccount("Test", "Tester", "TT", "test@tester", "LBL", "test account");
+        AccountInfo accountInfo = new AccountInfo();
+        accountInfo.setFirstName("");
+        accountInfo.setLastName("TEST");
+        accountInfo.setEmail("test@tester");
+        accountController.createNewAccount(accountInfo, false);
         controller.addMemberToGroup(info.getId(), "test@tester");
         Assert.assertTrue(controller.getGroupById(info.getId()).getMembers().size() == 1);
     }
@@ -102,7 +107,11 @@ public class GroupControllerTest {
         if (account != null)
             throw new Exception("duplicate account");
 
-        String pass = accountController.createNewAccount("", "TEST", "T", email, null, "");
+        AccountInfo accountInfo = new AccountInfo();
+        accountInfo.setFirstName("");
+        accountInfo.setLastName("TEST");
+        accountInfo.setEmail(email);
+        String pass = accountController.createNewAccount(accountInfo, false);
         Assert.assertNotNull(pass);
         account = accountController.getByEmail(email);
         Assert.assertNotNull(account);

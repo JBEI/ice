@@ -101,7 +101,7 @@ public class RegistrationPanel extends Composite implements IRegistrationPanelVi
         email = createStandardTextBox("205px");
         institution = createStandardTextBox("205px");
         aboutYourself = createTextArea("205px", "60px");
-        alreadyRegistered = new Label("Aready registered");
+        alreadyRegistered = new Label("Already registered");
         emailPanel = new HTMLPanel("<span id=\"email_input_box\"></span> <span id=\"email_error_msg\"></span>");
     }
 

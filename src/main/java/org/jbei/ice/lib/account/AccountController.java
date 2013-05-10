@@ -23,6 +23,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.session.PersistentSessionDataWrapper;
 import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountResults;
@@ -113,47 +114,39 @@ public class AccountController {
 
     /**
      * Creates a new account using the parameters passed. A random password is initially generated ,
-     * encrypted and
-     * assigned to the account
+     * encrypted and assigned to the account
      *
-     * @param firstName   account first name
-     * @param lastName    account last name
-     * @param initials    account initials
-     * @param email       unique identifier for account
-     * @param institution account institution affiliation
-     * @param description account description
+     * @param info      contains information needed to create account
+     * @param sendEmail whether to send account information (including password by email)
      * @return generated password
      * @throws ControllerException in the event email is already assigned to another user or is empty
      */
-    public String createNewAccount(String firstName, String lastName, String initials,
-            String email, String institution, String description) throws ControllerException {
+    public String createNewAccount(AccountInfo info, boolean sendEmail) throws ControllerException {
+        String email = info.getEmail().trim();
         if (email == null || email.isEmpty()) {
-            throw new ControllerException("Cannot create account with null email");
+            throw new ControllerException("Cannot create account without user id");
         }
 
         if (getByEmail(email) != null) {
-            throw new ControllerException("Account with email \"" + email + "\" already exists");
+            throw new ControllerException("Account with id \"" + email + "\" already exists");
         }
 
-        if (initials == null) {
-            initials = "";
-        }
-        if (institution == null) {
-            institution = "";
-        }
-        if (description == null) {
-            description = "";
-        }
-
+        // generate salt and encrypt password before storing
         String salt = Utils.generateSaltForUserAccount();
         String newPassword = Utils.generateUUID().substring(24);
-        String encryptedPassword = AccountUtils.encryptPassword(newPassword, salt);
-        Account account = new Account(firstName, lastName, initials, email, encryptedPassword,
-                                      institution, description);
-        account.setIp("");
-        account.setIsSubscribed(1);
+        String encryptedPassword;
+        try {
+            encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
+        } catch (UtilityException e) {
+            Logger.error(e);
+            throw new ControllerException(e);
+        }
+
+        Account account = AccountUtils.fromDTO(info);
+        account.setPassword(encryptedPassword);
         account.setSalt(salt);
         account.setCreationTime(Calendar.getInstance().getTime());
+
         try {
             List<Group> autoJoin = ControllerFactory.getGroupController().getAutoJoinGroups();
             if (autoJoin != null && !autoJoin.isEmpty())
@@ -164,6 +157,42 @@ public class AccountController {
         }
 
         save(account);
+
+        if (!sendEmail)
+            return newPassword;
+
+        String subject = "Account created successfully";
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("Dear " + info.getEmail() + ", ")
+                     .append("\n\nThank you for creating a ")
+                     .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
+                     .append(" account. \nBy accessing ")
+                     .append("this site with the password provided at the bottom ")
+                     .append("you agree to the following terms:\n\n");
+
+        String terms = "Biological Parts IP Disclaimer: \n\n"
+                + "The JBEI Registry of Biological Parts Software is licensed under a standard BSD\n"
+                + "license. Permission or license to use the biological parts registered in\n"
+                + "the JBEI Registry of Biological Parts is not included in the BSD license\n"
+                + "to use the JBEI Registry Software. Berkeley Lab and JBEI make no representation\n"
+                + "that the use of the biological parts registered in the JBEI Registry of\n"
+                + "Biological Parts will not infringe any patent or other proprietary right.";
+
+        stringBuilder.append(terms);
+        stringBuilder.append("\n\nYour new password is: ")
+                     .append(newPassword)
+                     .append("\nYour login id is: ")
+                     .append(info.getEmail());
+
+        String server = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+        if (server != null && !server.isEmpty()) {
+            stringBuilder.append("Use it to login at ")
+                         .append(server)
+                         .append(". ");
+        }
+        stringBuilder.append("\nPlease remember to change your password by going to your profile page.\n\n");
+        Emailer.send(info.getEmail(), subject, stringBuilder.toString());
         return newPassword;
     }
 
@@ -193,9 +222,9 @@ public class AccountController {
     }
 
     /**
-     * Retrieve {@link Account} by email.
+     * Retrieve {@link Account} by user id.
      *
-     * @param email of the account
+     * @param email unique identifier for account, typically email
      * @return {@link Account}
      * @throws ControllerException
      */
@@ -269,10 +298,21 @@ public class AccountController {
             throw new ControllerException("Failed to verify password for null Account!");
         }
 
-        Boolean result = false;
+        Boolean result;
 
-        if (account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()))) {
-            result = true;
+        try {
+            result = account.getPassword().equals(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
+
+            // update encryption if needed
+            if (!result) {
+                result = account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()));
+                if (result) {
+                    account.setPassword(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
+                    save(account);
+                }
+            }
+        } catch (UtilityException e) {
+            throw new ControllerException(e);
         }
 
         return result;
@@ -386,7 +426,7 @@ public class AccountController {
             return null;
 
         Account account = sessionData.getAccount();
-        AccountInfo info = AccountUtils.accountToInfo(account);
+        AccountInfo info = Account.toDTO(account);
         if (info == null)
             return info;
 
