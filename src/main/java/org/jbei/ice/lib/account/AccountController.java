@@ -14,7 +14,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.authentication.IAuthentication;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
-import org.jbei.ice.lib.authentication.LocalBackend;
+import org.jbei.ice.lib.authentication.UserIdAuthentication;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.Group;
@@ -331,7 +331,7 @@ public class AccountController {
         SessionData result = null;
         Account account;
         try {
-            IAuthentication authentication = new LocalBackend();
+            IAuthentication authentication = new UserIdAuthentication();
             account = authentication.authenticate(login, password);
         } catch (AuthenticationException e2) {
             throw new ControllerException(e2);

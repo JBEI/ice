@@ -1,14 +1,25 @@
 package org.jbei.ice.client.profile.message;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.client.common.header.HeaderView;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.PanelPresenter;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
 import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.message.MessageList;
 
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * @author Hector Plahar
@@ -23,6 +34,27 @@ public class UserMessagesPresenter extends PanelPresenter {
         panel = new UserMessagesPanel(new ClickDelegate());
         messageDataProvider = new MessageDataProvider(panel.getDataTable(), service, eventBus);
         panel.setSendMessageDelegate(new SendMessageDelegate());
+        retrievePrivateGroups();
+    }
+
+    protected void retrievePrivateGroups() {
+        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+                service.retrieveGroups(ClientController.sessionId, GroupType.PRIVATE, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<GroupInfo> result) {
+                List<OptionSelect> options = new ArrayList<OptionSelect>();
+                for (GroupInfo info : result) {
+                    OptionSelect option = new OptionSelect(info.getId(), info.getLabel());
+                    options.add(option);
+                }
+                panel.setPrivateGroupOptions(options);
+            }
+        }.go(eventBus);
     }
 
     @Override
@@ -32,14 +64,27 @@ public class UserMessagesPresenter extends PanelPresenter {
 
     public void setMessages(MessageList list) {
         messageDataProvider.setMessages(list);
+        panel.setPagerVisibility(!list.getList().isEmpty());
     }
 
     private class ClickDelegate implements Delegate<MessageInfo> {
 
         @Override
-        public void execute(MessageInfo object) {
-            // TODO : send message to server to mark as read
-            object.setRead(true);
+        public void execute(final MessageInfo object) {
+            if (!object.isRead()) {
+                new IceAsyncCallback<Integer>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Integer> callback) throws AuthenticationException {
+                        service.markMessageRead(ClientController.sessionId, object.getId(), callback);
+                    }
+
+                    @Override
+                    public void onSuccess(Integer result) {
+                        HeaderView.getInstance().setNewMessages(result.intValue());
+                    }
+                }.go(eventBus);
+            }
             panel.showMessageDetails(object);
             panel.refresh();
         }
@@ -48,9 +93,20 @@ public class UserMessagesPresenter extends PanelPresenter {
     private class SendMessageDelegate implements ServiceDelegate<MessageInfo> {
 
         @Override
-        public void execute(MessageInfo messageInfo) {
-            // TODO : send message to user/group (server.sendMessage
-            //To change body of implemented methods use File | Settings | File Templates.
+        public void execute(final MessageInfo messageInfo) {
+
+            new IceAsyncCallback<Boolean>() {
+
+                @Override
+                protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                    service.sendMessage(ClientController.sessionId, messageInfo, callback);
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    panel.refresh();
+                }
+            }.go(eventBus);
         }
     }
 }

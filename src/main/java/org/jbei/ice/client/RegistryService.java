@@ -12,6 +12,7 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountResults;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.shared.dto.MessageInfo;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
@@ -174,6 +175,8 @@ public interface RegistryService extends RemoteService {
 
     MessageList retrieveMessages(String sessionId, int start, int count) throws AuthenticationException;
 
+    int markMessageRead(String sessionId, long id) throws AuthenticationException;
+
     boolean setBulkUploadDraftName(String sid, long id, String draftName) throws AuthenticationException;
 
     GroupInfo updateGroup(String sessionId, GroupInfo info) throws AuthenticationException;
@@ -200,4 +203,6 @@ public interface RegistryService extends RemoteService {
     boolean promoteCollection(String sessionId, long id) throws AuthenticationException;
 
     boolean demoteCollection(String sessionId, long id) throws AuthenticationException;
+
+    Boolean sendMessage(String sid, MessageInfo info) throws AuthenticationException;
 }

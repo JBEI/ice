@@ -1,7 +1,10 @@
 package org.jbei.ice.client.profile.message;
 
+import java.util.List;
+
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
@@ -30,6 +33,7 @@ public class UserMessagesPanel extends Composite implements IUserProfilePanel {
     private MessageDetailView detailView;
     private Button createMessage;
     private final CreateMessagePanel createMessagePanel;
+    private final SimplePager pager;
 
     public UserMessagesPanel(Delegate<MessageInfo> delegate) {
         layout = new FlexTable();
@@ -37,7 +41,7 @@ public class UserMessagesPanel extends Composite implements IUserProfilePanel {
         this.table = new MessageDataTable(delegate);
         layout.setWidth("100%");
         layout.setWidget(0, 0, table);
-        SimplePager pager = new SimplePager();
+        pager = new SimplePager();
         layout.setWidget(1, 0, pager);
         layout.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
         pager.setDisplay(table);
@@ -58,15 +62,23 @@ public class UserMessagesPanel extends Composite implements IUserProfilePanel {
         addCreateMessageHandler();
     }
 
+    public void setPagerVisibility(boolean visible) {
+        pager.setVisible(visible);
+    }
+
     public void setSendMessageDelegate(ServiceDelegate<MessageInfo> delegate) {
         createMessagePanel.setSendMessageDelegate(delegate);
+    }
+
+    public void setPrivateGroupOptions(List<OptionSelect> list) {
+        createMessagePanel.setToDropDownOptions(list);
     }
 
     protected void addCreateMessageHandler() {
         createMessage.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                createMessagePanel.showDialog();
+                createMessagePanel.showDialog(true);
             }
         });
     }
@@ -95,6 +107,10 @@ public class UserMessagesPanel extends Composite implements IUserProfilePanel {
 
     public void refresh() {
         table.redraw();
+    }
+
+    public void closeDialog() {
+        createMessagePanel.showDialog(false);
     }
 
     /**

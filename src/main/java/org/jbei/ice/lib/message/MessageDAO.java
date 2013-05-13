@@ -37,7 +37,7 @@ public class MessageDAO extends HibernateRepository<Message> {
         try {
             Session session = currentSession();
 
-            String sql = "select count(id) from message m where m.id in "
+            String sql = "select count(id) from message m where m.is_read=false AND (m.id in "
                     + "(select message_id from message_destination_accounts where account_id = "
                     + account.getId() + ")";
 
@@ -55,6 +55,7 @@ public class MessageDAO extends HibernateRepository<Message> {
 
                 sql += (conjunction + "))");
             }
+            sql += ")";
             Query query = session.createSQLQuery(sql);
             Number number = (Number) query.uniqueResult();
             return number.intValue();
@@ -95,6 +96,9 @@ public class MessageDAO extends HibernateRepository<Message> {
                 Number number = (Number) object;
                 set.add(number.longValue());
             }
+
+            if (set.isEmpty())
+                return new HashSet<>();
 
             Criteria criteria = session.createCriteria(Message.class).add(Restrictions.in("id", set));
             criteria.addOrder(Order.desc("dateSent"));

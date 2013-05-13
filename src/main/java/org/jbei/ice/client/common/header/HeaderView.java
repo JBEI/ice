@@ -146,9 +146,11 @@ public class HeaderView extends Composite {
         return loggedInContentsPanel;
     }
 
-    private void setNewMessages(int newMessageCount) {
-        if (newMessageCount <= 0)
+    public void setNewMessages(int newMessageCount) {
+        if (newMessageCount <= 0) {
+            loggedInContentsPanel.setHTML(0, 1, "");
             return;
+        }
 
         final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #EEE\">|</span>&nbsp;&nbsp;"
                                                  + "<span class=\"badge\">" + newMessageCount + "</span>");
@@ -196,4 +198,5 @@ public class HeaderView extends Composite {
         createLoggedInContents(account);
         setNewMessages(account.getNewMessageCount());
     }
+
 }

@@ -12,6 +12,7 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountResults;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.shared.dto.MessageInfo;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
@@ -227,4 +228,8 @@ public interface RegistryServiceAsync {
     void promoteCollection(String sessionId, long id, AsyncCallback<Boolean> async);
 
     void demoteCollection(String sessionId, long id, AsyncCallback<Boolean> async);
+
+    void sendMessage(String sid, MessageInfo info, AsyncCallback<Boolean> async);
+
+    void markMessageRead(String sessionId, long id, AsyncCallback<Integer> async);
 }

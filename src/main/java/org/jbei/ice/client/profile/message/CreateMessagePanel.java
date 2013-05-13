@@ -9,6 +9,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.shared.dto.group.GroupInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -40,7 +41,6 @@ public class CreateMessagePanel extends Composite {
     private Label cancel;
     private RecipientWidget recipientWidget;
     private ServiceDelegate<MessageInfo> sendMessageDelegate;
-
 
     public CreateMessagePanel() {
         FlexTable layout = new FlexTable();
@@ -88,6 +88,19 @@ public class CreateMessagePanel extends Composite {
                     accountInfo.setEmail(email);
                     info.getAccounts().add(accountInfo);
                 }
+
+                // set groups
+                if (recipientWidget.getSelected() != null) {
+                    for (OptionSelect select : recipientWidget.getSelected()) {
+                        GroupInfo groupInfo = new GroupInfo();
+                        groupInfo.setId(select.getId());
+                        info.getGroups().add(groupInfo);
+                    }
+                }
+
+                info.setMessage(messageArea.getText().trim());
+                info.setTitle(subjectBox.getText().trim());
+
                 sendMessageDelegate.execute(info);
                 dialogBox.hide();
             }
@@ -131,6 +144,10 @@ public class CreateMessagePanel extends Composite {
         messageArea.setWidth("100%");
     }
 
+    public void setToDropDownOptions(List<OptionSelect> options) {
+        recipientWidget.setOptions(options);
+    }
+
     protected boolean validates() {
         boolean isValid = true;
 
@@ -158,12 +175,11 @@ public class CreateMessagePanel extends Composite {
         return htmlPanel;
     }
 
-    public void showDialog() {
-        dialogBox.center();
-    }
-
-    public String getSubject() {
-        return subjectBox.getText();
+    public void showDialog(boolean show) {
+        if (show)
+            dialogBox.center();
+        else
+            dialogBox.hide();
     }
 
     public void setSendMessageDelegate(ServiceDelegate<MessageInfo> sendMessageDelegate) {

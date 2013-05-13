@@ -62,6 +62,7 @@ import org.jbei.ice.shared.dto.AccountResults;
 import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.shared.dto.MessageInfo;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
@@ -1126,14 +1127,24 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public MessageList retrieveMessages(String sessionId, int start, int count)
-            throws AuthenticationException {
+    public MessageList retrieveMessages(String sessionId, int start, int count) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
         MessageController controller = ControllerFactory.getMessageController();
         try {
             return controller.retrieveMessages(account, account, start, count);
         } catch (ControllerException e) {
             return null;
+        }
+    }
+
+    @Override
+    public int markMessageRead(String sessionId, long id) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        MessageController controller = ControllerFactory.getMessageController();
+        try {
+            return controller.markMessageAsRead(account, id);
+        } catch (ControllerException ce) {
+            return -1;
         }
     }
 
@@ -1754,5 +1765,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.warn(e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public Boolean sendMessage(String sid, MessageInfo info) throws AuthenticationException {
+        try {
+            Account account = retrieveAccountForSid(sid);
+            Logger.info(account.getEmail() + ": sending message");
+            ControllerFactory.getMessageController().sendMessage(account, info);
+            return true;
+        } catch (ControllerException ce) {
+            return false;
+        }
     }
 }
