@@ -8,6 +8,7 @@ import javax.persistence.*;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.AccountType;
 
 import org.hibernate.annotations.Type;
 

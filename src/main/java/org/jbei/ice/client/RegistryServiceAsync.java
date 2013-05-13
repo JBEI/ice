@@ -23,6 +23,7 @@ import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
+import org.jbei.ice.shared.dto.message.MessageList;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 import org.jbei.ice.shared.dto.search.SearchResults;
@@ -206,7 +207,7 @@ public interface RegistryServiceAsync {
 
     void isWebOfRegistriesEnabled(AsyncCallback<Boolean> async);
 
-    void retrieveMessages(String sessionId, int start, int count, AsyncCallback<ArrayList<MessageInfo>> callback)
+    void retrieveMessages(String sessionId, int start, int count, AsyncCallback<MessageList> callback)
             throws AuthenticationException;
 
     void setBulkUploadDraftName(String sessionId, long id, String draftName, AsyncCallback<Boolean> callback)
@@ -227,4 +228,8 @@ public interface RegistryServiceAsync {
     void promoteCollection(String sessionId, long id, AsyncCallback<Boolean> async);
 
     void demoteCollection(String sessionId, long id, AsyncCallback<Boolean> async);
+
+    void sendMessage(String sid, MessageInfo info, AsyncCallback<Boolean> async);
+
+    void markMessageRead(String sessionId, long id, AsyncCallback<Integer> async);
 }

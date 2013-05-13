@@ -18,7 +18,6 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.config.ConfigurationController;
@@ -60,6 +59,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountResults;
+import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.MessageInfo;
@@ -76,6 +76,7 @@ import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
+import org.jbei.ice.shared.dto.message.MessageList;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
 import org.jbei.ice.shared.dto.search.SearchQuery;
@@ -304,7 +305,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             // get new message count
             MessageController messageController = new MessageController();
-            int count = messageController.getNewMessageCount(account, account.getEmail());
+            int count = messageController.getNewMessageCount(account);
             info.setNewMessageCount(count);
             return info;
         } catch (ControllerException e) {
@@ -317,20 +318,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public AccountResults retrieveAllUserAccounts(String sid, int start, int limit) throws AuthenticationException {
-        AccountController controller = ControllerFactory.getAccountController();
-
         try {
             Account account = retrieveAccountForSid(sid);
-            boolean isModerator = controller.isAdministrator(account);
-            if (!isModerator) {
-                Logger.warn(account.getEmail()
-                                    + " attempting to retrieve all user accounts without moderation privileges");
-                return null;
-            }
-
-            Logger.info(account.getEmail() + ": retrieving all user accounts [" + start + " - " + start + limit + "]");
-            return controller.retrieveAccounts(account, start, limit);
-
+            Logger.info(account.getEmail() + ": retrieving all accounts [" + start + " - " + limit + "]");
+            return ControllerFactory.getAccountController().retrieveAccounts(account, start, limit);
         } catch (ControllerException e) {
             Logger.error(e);
         }
@@ -441,7 +432,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
                 // get new message count
                 MessageController messageController = new MessageController();
-                int count = messageController.getNewMessageCount(account, account.getEmail());
+                int count = messageController.getNewMessageCount(account);
                 info.setNewMessageCount(count);
 
                 return info;
@@ -1090,7 +1081,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean isWebOfRegistriesEnabled() {
-        ConfigurationController configurationController = new ConfigurationController();
+        ConfigurationController configurationController = ControllerFactory.getConfigurationController();
         try {
             String value = configurationController.getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
             return value.equalsIgnoreCase("yes");
@@ -1100,14 +1091,24 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<MessageInfo> retrieveMessages(String sessionId, int start, int count)
-            throws AuthenticationException {
+    public MessageList retrieveMessages(String sessionId, int start, int count) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        MessageController controller = new MessageController();
+        MessageController controller = ControllerFactory.getMessageController();
         try {
             return controller.retrieveMessages(account, account, start, count);
         } catch (ControllerException e) {
             return null;
+        }
+    }
+
+    @Override
+    public int markMessageRead(String sessionId, long id) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        MessageController controller = ControllerFactory.getMessageController();
+        try {
+            return controller.markMessageAsRead(account, id);
+        } catch (ControllerException ce) {
+            return -1;
         }
     }
 
@@ -1728,5 +1729,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.warn(e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public Boolean sendMessage(String sid, MessageInfo info) throws AuthenticationException {
+        try {
+            Account account = retrieveAccountForSid(sid);
+            Logger.info(account.getEmail() + ": sending message");
+            ControllerFactory.getMessageController().sendMessage(account, info);
+            return true;
+        } catch (ControllerException ce) {
+            return false;
+        }
     }
 }

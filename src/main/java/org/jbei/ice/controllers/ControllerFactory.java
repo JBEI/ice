@@ -12,6 +12,7 @@ import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.message.MessageController;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.SearchController;
 
@@ -36,6 +37,7 @@ public class ControllerFactory {
     private static ConfigurationController configurationController;
     private static PreferencesController preferencesController;
     private static SearchController searchController;
+    private static MessageController messageController;
 
     public static PermissionsController getPermissionController() {
         if (permissionsController == null)
@@ -122,4 +124,9 @@ public class ControllerFactory {
         return searchController;
     }
 
+    public static MessageController getMessageController() {
+        if (messageController == null)
+            messageController = new MessageController();
+        return messageController;
+    }
 }

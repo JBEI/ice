@@ -21,6 +21,11 @@ import gwtupload.client.IUploader.OnStartUploaderHandler;
 import gwtupload.client.IUploader.UploadedInfo;
 import gwtupload.client.SingleUploader;
 
+/**
+ * Widget for uploading a sequence file. It is intended to be displayed as a dialog
+ *
+ * @author Hector Plahar
+ */
 public class UploadSequenceFileWidget extends Composite {
 
     private DialogBox box;

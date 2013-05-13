@@ -23,6 +23,7 @@ import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
+import org.jbei.ice.shared.dto.message.MessageList;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 import org.jbei.ice.shared.dto.search.SearchResults;
@@ -172,7 +173,9 @@ public interface RegistryService extends RemoteService {
 
     boolean isWebOfRegistriesEnabled();
 
-    ArrayList<MessageInfo> retrieveMessages(String sessionId, int start, int count) throws AuthenticationException;
+    MessageList retrieveMessages(String sessionId, int start, int count) throws AuthenticationException;
+
+    int markMessageRead(String sessionId, long id) throws AuthenticationException;
 
     boolean setBulkUploadDraftName(String sid, long id, String draftName) throws AuthenticationException;
 
@@ -200,4 +203,6 @@ public interface RegistryService extends RemoteService {
     boolean promoteCollection(String sessionId, long id) throws AuthenticationException;
 
     boolean demoteCollection(String sessionId, long id) throws AuthenticationException;
+
+    Boolean sendMessage(String sid, MessageInfo info) throws AuthenticationException;
 }

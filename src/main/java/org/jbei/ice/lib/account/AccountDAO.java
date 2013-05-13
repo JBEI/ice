@@ -9,6 +9,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.models.SessionData;
+import org.jbei.ice.shared.dto.AccountType;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -16,6 +17,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * DAO to manipulate {@link Account} objects in the database.
@@ -107,13 +109,19 @@ class AccountDAO extends HibernateRepository<Account> {
     public LinkedList<Account> retrieveAccounts(int start, int limit) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Account.class).setFirstResult(start).setMaxResults(limit);
+        criteria.add(Restrictions.ne("type", AccountType.SYSTEM));
         criteria.addOrder(Order.asc("email"));
         List list = criteria.list();
         return new LinkedList<Account>(list);
     }
 
-    public int retrieveAllAccountCount() throws DAOException {
+    /**
+     * @return number of non system accounts
+     * @throws DAOException
+     */
+    public int retrieveAllNonSystemAccountCount() throws DAOException {
         Number number = (Number) currentSession().createCriteria(Account.class)
+                .add(Restrictions.ne("type", AccountType.SYSTEM))
                 .setProjection(Projections.rowCount()).uniqueResult();
         return number.intValue();
     }

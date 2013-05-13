@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -15,6 +14,7 @@ import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;

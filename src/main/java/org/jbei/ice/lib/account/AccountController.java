@@ -12,10 +12,9 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.authentication.IAuthentication;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
-import org.jbei.ice.lib.authentication.LocalBackend;
+import org.jbei.ice.lib.authentication.UserIdAuthentication;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.Group;
@@ -27,6 +26,7 @@ import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountResults;
+import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
@@ -371,7 +371,7 @@ public class AccountController {
         SessionData result = null;
         Account account;
         try {
-            IAuthentication authentication = new LocalBackend();
+            IAuthentication authentication = new UserIdAuthentication();
             account = authentication.authenticate(login, password);
         } catch (AuthenticationException e2) {
             throw new ControllerException(e2);
@@ -531,18 +531,15 @@ public class AccountController {
         }
     }
 
-    public Account getAccountByAuthToken(String sessionKey) throws ControllerException {
-        try {
-            return dao.getAccountByAuthToken(sessionKey);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
     public AccountResults retrieveAccounts(Account account, int start, int limit) throws ControllerException {
+        if (!isAdministrator(account)) {
+            Logger.warn(account.getEmail() + " attempting to retrieve all user accounts without admin privileges");
+            return null;
+        }
+
         try {
             AccountResults results = new AccountResults();
-            EntryController entryController = new EntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             LinkedList<Account> accounts = dao.retrieveAccounts(start, limit);
 
             ArrayList<AccountInfo> infos = new ArrayList<>();
@@ -562,11 +559,12 @@ public class AccountController {
                 info.setFirstName(userAccount.getFirstName());
                 info.setLastName(userAccount.getLastName());
                 info.setLastLogin(userAccount.getLastLoginTime());
-                info.setId(account.getId());
+                info.setId(userAccount.getId());
+                info.setAccountType(userAccount.getType());
                 infos.add(info);
             }
             results.getResults().addAll(infos);
-            int count = dao.retrieveAllAccountCount();
+            int count = dao.retrieveAllNonSystemAccountCount();
             results.setResultCount(count);
             return results;
 
@@ -593,6 +591,7 @@ public class AccountController {
         systemAccount.setCreationTime(currentTime);
         systemAccount.setModificationTime(currentTime);
         systemAccount.setLastLoginTime(currentTime);
+        systemAccount.setType(AccountType.SYSTEM);
         save(systemAccount);
     }
 

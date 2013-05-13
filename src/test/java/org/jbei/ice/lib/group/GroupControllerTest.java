@@ -2,9 +2,9 @@ package org.jbei.ice.lib.group;
 
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
 

@@ -29,6 +29,8 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
 
     public ProfilePanel() {
         table = new FlexTable();
+        table.setCellPadding(0);
+        table.setCellSpacing(0);
         table.setWidth("100%");
         initWidget(table);
 
@@ -40,12 +42,12 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
                         + "Change Password");
         changePasswordButton.setVisible(false);
 
-        String html = "<span id=\"send_message_btn\"></span>"
+        String html = "<br><span id=\"send_message_btn\"></span>"
                 + " <span id=\"edit_profile_btn\"></span>"
                 + " <span id=\"change_password_btn\"></span>";
 
         HTMLPanel panel = new HTMLPanel(html);
-//        panel.add(sendMessage, "send_message_btn");
+        panel.add(sendMessage, "send_message_btn");
         panel.add(editProfile, "edit_profile_btn");
         panel.add(changePasswordButton, "change_password_btn");
 

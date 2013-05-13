@@ -19,6 +19,7 @@ public class AccountInfo implements IsSerializable {
     private long visibleEntryCount;
     private boolean isAdmin;
     private int newMessageCount;
+    private AccountType accountType;
 
     public AccountInfo() {
         institution = "";
@@ -132,5 +133,13 @@ public class AccountInfo implements IsSerializable {
 
     public void setNewMessageCount(int newMessageCount) {
         this.newMessageCount = newMessageCount;
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(AccountType accountType) {
+        this.accountType = accountType;
     }
 }
