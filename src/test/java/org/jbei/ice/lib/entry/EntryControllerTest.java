@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.entry;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.controllers.ControllerFactory;
@@ -18,6 +19,7 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
@@ -86,19 +88,30 @@ public class EntryControllerTest {
         try {
             controller.createStrainWithPlasmid(account, null, null, null);
         } catch (ControllerException ce) {
+            // expecting ce
         }
 
-        Strain strain = new Strain();
-        setDummyData(strain);
-    }
+        StrainInfo strainInfo = new StrainInfo();
+        strainInfo.setAlias("testStrainAlias");
+        strainInfo.setBioSafetyLevel(new Integer(1));
+        strainInfo.setGenotypePhenotype("genPhenTest");
+        strainInfo.setHost("testHost");
+        strainInfo.setName("sTrain");
+        Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
+        Assert.assertNotNull(strain);
 
-    protected Entry setDummyData(Entry entry) {
-        assert (entry != null);
-        entry.setAlias("testEntryAlias");
-        entry.setBioSafetyLevel(new Integer(1));
-        entry.setCreator("tester");
-        entry.setIntellectualProperty("no intellectual property");
-        return entry;
+        PlasmidInfo plasmidInfo = new PlasmidInfo();
+        plasmidInfo.setName("pLasmid");
+        plasmidInfo.setCircular(true);
+        plasmidInfo.setOriginOfReplication("repOrigin");
+        plasmidInfo.setPromoters("None");
+        plasmidInfo.setBackbone("backbone");
+        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
+        Assert.assertNotNull(plasmid);
+
+        HashSet<Entry> results = controller.createStrainWithPlasmid(account, strain, plasmid, null);
+        Assert.assertNotNull(results);
+        Assert.assertEquals("Strain with plasmid creation returned wrong entry count", 2, results.size());
     }
 
     @Test
@@ -141,6 +154,27 @@ public class EntryControllerTest {
 
     @Test
     public void testGetByPartNumber() throws Exception {
+        Account creator = createTestAccount("testGetByPartNumber", false);
+
+        PlasmidInfo info = new PlasmidInfo();
+        info.setType(EntryType.PLASMID);
+        info.setBioSafetyLevel(1);
+        info.setOriginOfReplication("kanamycin");
+        info.setCircular(false);
+        info.setOwnerEmail(info.getCreatorEmail());
+        info.setOwner(info.getCreator());
+        info.setShortDescription("testing");
+        info.setStatus("Complete");
+        info.setName("pSTC100");
+
+        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        plasmid = controller.createEntry(creator, plasmid);
+        String partNumber = plasmid.getOnePartNumber().getPartNumber();
+        Entry result = controller.getByPartNumber(creator, partNumber);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(EntryType.PLASMID.toString().toLowerCase(), result.getRecordType().toLowerCase());
+        result = controller.getByPartNumber(creator, "fake");
+        Assert.assertNull(result);
     }
 
     @Test
@@ -196,17 +230,28 @@ public class EntryControllerTest {
 
     @Test
     public void testGetByName() throws Exception {
+        Account creator = createTestAccount("testGetByName", false);
 
-    }
+        PlasmidInfo info = new PlasmidInfo();
+        info.setType(EntryType.PLASMID);
+        info.setBioSafetyLevel(1);
+        info.setOriginOfReplication("kanamycin");
+        info.setCircular(false);
+        info.setOwnerEmail(info.getCreatorEmail());
+        info.setOwner(info.getCreator());
+        info.setShortDescription("testing");
+        info.setStatus("Complete");
+        info.setName("pSTC1000");
 
-    @Test
-    public void testHasReadPermission() throws Exception {
-
-    }
-
-    @Test
-    public void testHasWritePermission() throws Exception {
-
+        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        plasmid = controller.createEntry(creator, plasmid);
+        String name = plasmid.getOneName().getName();
+        Entry result = controller.getByName(creator, name);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(EntryType.PLASMID.toString().toLowerCase(), result.getRecordType().toLowerCase());
+        String partNumber = plasmid.getOnePartNumber().getPartNumber();
+        result = controller.getByName(creator, partNumber);
+        Assert.assertNull(result);
     }
 
     @Test
@@ -229,13 +274,7 @@ public class EntryControllerTest {
     }
 
     @Test
-    public void testSave() throws Exception {
-
-    }
-
-    @Test
     public void testDelete() throws Exception {
-
     }
 
     @Test

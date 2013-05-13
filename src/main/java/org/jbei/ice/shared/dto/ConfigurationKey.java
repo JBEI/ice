@@ -37,7 +37,7 @@ public enum ConfigurationKey implements IsSerializable {
     PART_NUMBER_PREFIX("TEST", "", true),
     PART_NUMBER_DIGITAL_SUFFIX("000001", "", true),
     PART_NUMBER_DELIMITER("_", "", true),
-    WIKILINK_PREFIX("", "Wikilink Prefix", true),
+    WIKILINK_PREFIX("jbei", "Wikilink Prefix", true),
     BLAST_BLASTALL("blast-2.2.26/bin/blastall", "", true),
     BLAST_BL2SEQ("blast-2.2.26/bin/bl2seq", "", true),
     BLAST_FORMATDB("blast-2.2.26/bin/formatdb", "", true),

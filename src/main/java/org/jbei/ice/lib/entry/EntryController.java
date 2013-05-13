@@ -143,6 +143,10 @@ public class EntryController {
         }
     }
 
+    public Entry createEntry(Account account, Entry entry) throws ControllerException {
+        return createEntry(account, entry, null);
+    }
+
     /**
      * Create an entry in the database.
      * <p/>
@@ -587,7 +591,7 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public void delete(Account account, Entry entry, boolean scheduleIndexRebuild)
+    private void delete(Account account, Entry entry, boolean scheduleIndexRebuild)
             throws ControllerException, PermissionException {
         if (entry == null) {
             throw new ControllerException("Failed to save null entry");
