@@ -28,7 +28,6 @@ import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
 import org.jbei.ice.client.entry.view.view.PermissionsPresenter;
-import org.jbei.ice.client.entry.view.view.SequenceFileUploadHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -49,6 +48,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import gwtupload.client.IUploader;
 
 /**
  * Presenter for entry view
@@ -362,8 +362,15 @@ public class EntryPresenter extends AbstractPresenter {
                                                                                     eventBus, sequencePresenter);
                 sequencePresenter.addSequencePasteHandler(handler);
 
-                SequenceFileUploadHandler uploadHandler = new SequenceFileUploadHandler(sequencePresenter);
-                sequencePresenter.addSequenceFileUploadHandler(uploadHandler);
+//                SequenceFileUploadHandler uploadHandler = new SequenceFileUploadHandler(sequencePresenter, service,
+//                                                                                        eventBus);
+                sequencePresenter.addSequenceFileUploadHandler(new IUploader.OnFinishUploaderHandler() {
+
+                    @Override
+                    public void onFinish(IUploader uploader) {
+                        retrieveEntryDetails();
+                    }
+                });
                 Menu menu = display.getMenu().getCurrentSelection();
 
                 // menu views

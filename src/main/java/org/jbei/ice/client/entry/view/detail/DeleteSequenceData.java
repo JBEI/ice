@@ -15,8 +15,7 @@ public class DeleteSequenceData {
     private final SequenceViewPanelPresenter sequencePanelPresenter;
     private final Label label;
 
-    public DeleteSequenceData(SequenceViewPanelPresenter presenter,
-            DeleteSequenceHandler deleteHandler) {
+    public DeleteSequenceData(SequenceViewPanelPresenter presenter, DeleteSequenceHandler deleteHandler) {
         this.sequencePanelPresenter = presenter;
         label = new Label("Delete");
         label.setStyleName("open_sequence_sub_link");
@@ -24,9 +23,8 @@ public class DeleteSequenceData {
     }
 
     public Widget getLabelWidget() {
-        HTMLPanel panel = new HTMLPanel(
-                "<span id=\"delete_sequence_data_label\"></span><span style=\"color: #262626; font-size: 0.75em;\">| " +
-                        "</span>");
+        HTMLPanel panel = new HTMLPanel("<span id=\"delete_sequence_data_label\"></span>"
+                                                + "<span style=\"color: #262626; font-size: 0.75em;\">| </span>");
         panel.setStyleName("display-inline");
         panel.add(label, "delete_sequence_data_label");
         return panel;
@@ -43,8 +41,7 @@ public class DeleteSequenceData {
 
         @Override
         public void onClick(ClickEvent event) {
-            if (Window
-                    .confirm("Confirm sequence deletion.\nPlease note that this action cannot be undone.")) {
+            if (Window.confirm("Confirm sequence deletion.\nPlease note that this action cannot be undone.")) {
                 deleteHandler.onClick(event);
             }
         }

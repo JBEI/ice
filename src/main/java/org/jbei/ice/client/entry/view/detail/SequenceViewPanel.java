@@ -114,6 +114,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             layout.setWidget(3, 0, flash);
             layout.getFlexCellFormatter().setHeight(3, 0, "600px");
         } else {
+            layout.getFlexCellFormatter().setVisible(2, 0, false);
             layout.setHTML(3, 0, "<span class=\"font-80em\"><i>No sequence provided</i></span>");
             layout.getFlexCellFormatter().setHeight(3, 0, "20px");
         }

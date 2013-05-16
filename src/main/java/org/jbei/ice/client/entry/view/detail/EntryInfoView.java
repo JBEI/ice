@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
 /**
  * Base view for the different types of entries
@@ -161,56 +160,11 @@ public abstract class EntryInfoView<T extends EntryInfo> extends Composite {
         currentRow += 1;
     }
 
-    protected void showSamples() {
-        FlexTable sampleLayout = new FlexTable();
-        sampleLayout.setCellPadding(0);
-        sampleLayout.setCellSpacing(0);
-        sampleLayout.setWidth("100%");
-
-        int row = 0;
-        sampleLayout.setWidget(row, 0, new Label("Samples"));
-        sampleLayout.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
-        sampleLayout.getFlexCellFormatter().setColSpan(row, 0, 6);
-
-        row += 1;
-        sampleLayout.setWidget(row, 0, new Label(""));
-        sampleLayout.getFlexCellFormatter().setHeight(row, 0, "10px");
-        sampleLayout.getFlexCellFormatter().setColSpan(row, 0, 6);
-
-        // TODO : sample display
-        if (info.getParameters() != null) {
-            int col = 6;
-            for (ParameterInfo paramInfo : info.getParameters()) {
-
-                if (col > 5) {
-                    col = 0;
-                    row += 1;
-                }
-
-                sampleLayout.setWidget(row, col, new HTML("<b>" + paramInfo.getName() + "</b>"));
-                sampleLayout.getFlexCellFormatter().setWidth(row, col, "50px");
-                col += 1;
-                sampleLayout.setWidget(row, col, new Label(paramInfo.getValue()));
-                sampleLayout.getFlexCellFormatter().setWidth(row, col, "220px");
-                col += 1;
-            }
-        }
-
-        table.setWidget(currentRow, 0, sampleLayout);
-
-        table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
-        currentRow += 1;
-    }
-
     public void createSequenceView() {
         sequencePanel = new SequenceViewPanel(this.info);
         table.setWidget(currentRow, 0, sequencePanel);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
         currentRow += 1;
-    }
-
-    public void addSequenceFileUploadFinishHandler(OnFinishUploaderHandler handler) {
-        sequencePanel.setFinishHandler(handler);
     }
 
     protected void createNotesView() {
