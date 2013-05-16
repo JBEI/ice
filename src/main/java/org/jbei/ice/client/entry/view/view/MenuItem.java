@@ -26,7 +26,7 @@ public class MenuItem {
 
         GENERAL("General Information"),
         SEQ_ANALYSIS("Sequence Analysis"),
-        //        COMMENTS("Comments"),
+        COMMENTS("Comments"),
         //        AUDIT_LOG("Audit Log"),
         SAMPLES("Samples");
 

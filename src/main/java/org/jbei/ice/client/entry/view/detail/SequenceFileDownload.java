@@ -60,7 +60,7 @@ class SequenceFileDownload implements IsWidget {
         if (hasOriginal)
             downloadOptionArrayList = Arrays.asList(DownloadOption.values());
         else
-            downloadOptionArrayList = Arrays.asList(DownloadOption.FASTA, DownloadOption.GENBANK, DownloadOption.SBOL);
+            downloadOptionArrayList = Arrays.asList(DownloadOption.sansOriginal());
 
         options.setRowData(downloadOptionArrayList);
 
@@ -96,8 +96,12 @@ class SequenceFileDownload implements IsWidget {
 
     // download options for sequence files
     public enum DownloadOption {
-        ORIGINAL("Original", "original"), GENBANK("GenBank", "genbank"), FASTA("FASTA", "fasta"), SBOL(
-                "SBOL", "sbol");
+        ORIGINAL("Original", "original"),
+        GENBANK("GenBank", "genbank"),
+        FASTA("FASTA", "fasta"),
+        SBOL("SBOL", "sbol"),
+        SBOL_VISUAL("SBOL Visual", "sbolv"),
+        PIGEON_SCRIPT("Pigeon Script", "sbolps");
 
         private String display;
         private String type;
@@ -105,6 +109,11 @@ class SequenceFileDownload implements IsWidget {
         private DownloadOption(String display, String type) {
             this.display = display;
             this.type = type;
+        }
+
+        public static DownloadOption[] sansOriginal() {
+            List<DownloadOption> list = Arrays.asList(GENBANK, FASTA, SBOL, SBOL_VISUAL, PIGEON_SCRIPT);
+            return (DownloadOption[]) list.toArray();
         }
 
         public String toString() {

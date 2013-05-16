@@ -232,4 +232,6 @@ public interface RegistryServiceAsync {
     void sendMessage(String sid, MessageInfo info, AsyncCallback<Boolean> async);
 
     void markMessageRead(String sessionId, long id, AsyncCallback<Integer> async);
+
+    void rebuildSearchIndex(String sessionId, AsyncCallback<Boolean> callback);
 }

@@ -8,6 +8,7 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.dto.IDTOModel;
 import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.comment.UserComment;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 @XmlRootElement
@@ -54,6 +55,8 @@ public class EntryInfo implements IDTOModel {
     private boolean canEdit; // whether current user that requested this entry info has write privs
     private Visibility visible;
     private ArrayList<PermissionInfo> permissions;
+    private ArrayList<UserComment> comments;
+    private String sbolVisualURL;
 
     private EntryInfo info; // typically used with strain with plasmid
 
@@ -63,6 +66,7 @@ public class EntryInfo implements IDTOModel {
         this.type = type;
         sampleStorage = new ArrayList<SampleStorage>();
         permissions = new ArrayList<PermissionInfo>();
+        comments = new ArrayList<UserComment>();
     }
 
     public String getRecordId() {
@@ -410,5 +414,17 @@ public class EntryInfo implements IDTOModel {
 
     public void setHasOriginalSequence(boolean hasOriginalSequence) {
         this.hasOriginalSequence = hasOriginalSequence;
+    }
+
+    public ArrayList<UserComment> getComments() {
+        return comments;
+    }
+
+    public String getSbolVisualURL() {
+        return sbolVisualURL;
+    }
+
+    public void setSbolVisualURL(String sbolVisualURL) {
+        this.sbolVisualURL = sbolVisualURL;
     }
 }

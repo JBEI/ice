@@ -8,6 +8,7 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.group.GroupPresenter;
+import org.jbei.ice.client.admin.search.AdminSearchPresenter;
 import org.jbei.ice.client.admin.setting.SystemSettingPresenter;
 import org.jbei.ice.client.admin.user.UserPresenter;
 import org.jbei.ice.client.admin.web.WebOfRegistriesPresenter;
@@ -33,6 +34,7 @@ public class AdminPresenter extends AbstractPresenter {
     private GroupPresenter groupPresenter;
     private UserPresenter userPresenter;
     private SystemSettingPresenter systemSettingPresenter;
+    private AdminSearchPresenter searchPresenter;
     private WebOfRegistriesPresenter webPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view, String optionStr) {
@@ -83,6 +85,12 @@ public class AdminPresenter extends AbstractPresenter {
                 if (userPresenter == null)
                     userPresenter = new UserPresenter(service, eventBus);
                 retrieveUsers();
+                break;
+
+            case SEARCH:
+                if (searchPresenter == null)
+                    searchPresenter = new AdminSearchPresenter(service, eventBus);
+                view.show(currentOption, searchPresenter.getView().asWidget());
                 break;
 
 //            case TRANSFER:

@@ -25,6 +25,7 @@ import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
 import org.jbei.ice.client.entry.view.view.EntryView;
 import org.jbei.ice.client.entry.view.view.IEntryView;
+import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
 import org.jbei.ice.client.entry.view.view.PermissionsPresenter;
 import org.jbei.ice.client.entry.view.view.SequenceFileUploadHandler;
@@ -282,7 +283,6 @@ public class EntryPresenter extends AbstractPresenter {
                     return;
                 }
 
-                //To change body of implemented methods use File | Settings | File Templates.
                 new IceAsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
 
                     @Override
@@ -339,6 +339,12 @@ public class EntryPresenter extends AbstractPresenter {
                 SequenceFileUploadHandler uploadHandler = new SequenceFileUploadHandler(sequencePresenter);
                 sequencePresenter.addSequenceFileUploadHandler(uploadHandler);
                 Menu menu = display.getMenu().getCurrentSelection();
+
+                // menu views
+                display.getMenu().updateMenuCount(MenuItem.Menu.SEQ_ANALYSIS, result.getSequenceAnalysis().size());
+                display.getMenu().updateMenuCount(MenuItem.Menu.SAMPLES, result.getSampleStorage().size());
+                display.getMenu().updateMenuCount(Menu.COMMENTS, result.getComments().size());
+
                 handleMenuSelection(menu);
             }
 
@@ -398,6 +404,10 @@ public class EntryPresenter extends AbstractPresenter {
 
             case SEQ_ANALYSIS:
                 display.showSequenceView(currentInfo);
+                break;
+
+            case COMMENTS:
+                display.showCommentView(currentInfo.getComments());
                 break;
 
             case SAMPLES:

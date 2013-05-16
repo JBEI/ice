@@ -17,9 +17,11 @@ import org.jbei.ice.client.entry.view.detail.SequenceViewPanel;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.view.panel.EntryCommentPanel;
 import org.jbei.ice.client.entry.view.panel.EntrySamplePanel;
 import org.jbei.ice.client.entry.view.panel.EntrySequenceAnalysisPanel;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.comment.UserComment;
 import org.jbei.ice.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
@@ -35,6 +37,11 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 
+/**
+ * Main view panel for showing details about a single entry
+ *
+ * @author Hector Plahar
+ */
 public class EntryView extends Composite implements IEntryView {
 
     private FlexTable mainContent;
@@ -46,9 +53,6 @@ public class EntryView extends Composite implements IEntryView {
     // edit / delete widget
     private EntryActionWidget entryAction;
 
-    // samples
-//    private CreateSampleForm sampleForm;
-
     // permissions
     private final PermissionsWidget permissions;
 
@@ -58,6 +62,7 @@ public class EntryView extends Composite implements IEntryView {
     // navigation buttons for context navigation.
     private final PagerWidget contextPager;
     private final EntrySamplePanel samplePanel;
+    private final EntryCommentPanel commentPanel;
     private final EntrySequenceAnalysisPanel sequencePanel;
     private DeleteSequenceHandler deleteSequenceHandler;
     private final EntryLoadingWidget loadingWidget;
@@ -93,6 +98,9 @@ public class EntryView extends Composite implements IEntryView {
 
         // general panel
         initGeneralPanel();
+
+        // comment panel
+        commentPanel = new EntryCommentPanel();
 
         // audit trail
 //        initAuditTrailPanel();
@@ -296,10 +304,6 @@ public class EntryView extends Composite implements IEntryView {
         attachmentMenu.setMenuItems(items, info.getId());
         attachmentMenu.setCanEdit(info.isCanEdit());
 
-        // menu views
-        getMenu().updateMenuCount(MenuItem.Menu.SEQ_ANALYSIS, info.getSequenceAnalysis().size());
-        getMenu().updateMenuCount(MenuItem.Menu.SAMPLES, info.getSampleStorage().size());
-
         samplePanel.setData(info.getSampleStorage(), handler);
         sequencePanel.setSequenceData(info.getSequenceAnalysis(), info);
         return sequenceViewPanel.getPresenter();
@@ -328,6 +332,12 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public void showSampleView() {
         mainContent.setWidget(1, 0, samplePanel);
+    }
+
+    @Override
+    public void showCommentView(ArrayList<UserComment> comments) {
+        commentPanel.setData(comments);
+        mainContent.setWidget(1, 0, commentPanel);
     }
 
     @Override

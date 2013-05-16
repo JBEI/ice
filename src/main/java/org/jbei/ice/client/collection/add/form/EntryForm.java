@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.client.entry.view.detail.SequenceViewPanel;
 import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOption;
@@ -351,16 +350,6 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         parametersPanel = new ParametersPanel(parameters, 2);
 
         return parameters;
-    }
-
-    protected Widget createSequenceWidget() {
-        FlexTable table = new FlexTable();
-        table.setCellPadding(0);
-        table.setCellSpacing(3);
-        table.setWidth("100%");
-        SequenceViewPanel sequencePanel = new SequenceViewPanel(entryInfo);
-        table.setWidget(0, 0, sequencePanel);
-        return table;
     }
 
     protected TextBox createStandardTextBox(String width) {

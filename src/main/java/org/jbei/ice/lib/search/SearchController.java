@@ -20,6 +20,7 @@ import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.search.BlastQuery;
 import org.jbei.ice.shared.dto.search.SearchQuery;
@@ -111,8 +112,27 @@ public class SearchController {
             return searchResults;
         }
 
+        return null;
+
         // advanced search filters only (e.g. has attachment etc)
-        return HibernateSearch.getInstance().executeSearchNoTerms(account, query, projectName, projectURI);
+        // TODO
+//        return HibernateSearch.getInstance().executeSearchNoTerms(account, query, projectName, projectURI);
+    }
+
+    public boolean rebuildIndexes(Account account) {
+        Logger.info(account.getEmail() + ": rebuilding search indexes");
+        if (account.getType() != AccountType.ADMIN) {
+            Logger.warn(account.getEmail() + " does not have privileges to complete action");
+            return false;
+        }
+
+        try {
+            dao.reIndexInbackground();
+            return true;
+        } catch (DAOException e) {
+            Logger.error(e);
+            return false;
+        }
     }
 
     protected LinkedList<SearchResultInfo> runBlast(Account account, BlastQuery blastQuery,

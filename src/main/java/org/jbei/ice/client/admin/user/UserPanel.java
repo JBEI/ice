@@ -33,6 +33,7 @@ public class UserPanel extends Composite implements IAdminPanel {
 
         VerticalPanel vPanel = new VerticalPanel();
         vPanel.setWidth("100%");
+        vPanel.add(new HTML("&nbsp;"));
         vPanel.add(createAccount);
         vPanel.add(new HTML("&nbsp;"));
         vPanel.add(table);

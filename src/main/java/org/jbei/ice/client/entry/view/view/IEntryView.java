@@ -10,6 +10,7 @@ import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.comment.UserComment;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 
@@ -34,6 +35,8 @@ public interface IEntryView {
     void addGeneralEditButtonHandler(ClickHandler clickHandler);
 
     void showSampleView();
+
+    void showCommentView(ArrayList<UserComment> comments);
 
     SampleStorage getSampleAddFormValues();
 

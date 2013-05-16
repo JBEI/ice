@@ -155,6 +155,8 @@ public enum FAIconType {
     PUSHPIN("icon-pushpin"),
     QRCODE("icon-qrcode"),
     QUESTION_SIGN("icon-question-sign"),
+    QUOTE_LEFT("icon-quote-left"),
+    QUOTE_RIGHT("icon-quote-right"),
     RANDOM("icon-random"),
     REFRESH("icon-refresh"),
     REMOVE("icon-remove"),

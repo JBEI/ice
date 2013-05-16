@@ -3,6 +3,9 @@ package org.jbei.ice.lib.parsers.sbol;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.jbei.ice.lib.composers.formatters.IceSequenceOntology;
 import org.jbei.ice.lib.parsers.AbstractParser;
@@ -79,8 +82,18 @@ public class SBOLParser extends AbstractParser {
                 featuredDNASequence.setUri(component.getDnaSequence().getURI().toString());
             }
 
-            java.util.Collection<SequenceAnnotation> annotations = component.getAnnotations();
+            List<SequenceAnnotation> annotations = component.getAnnotations();
             if (!annotations.isEmpty()) {
+
+                Collections.sort(annotations, new Comparator<SequenceAnnotation>() {
+                    @Override
+                    public int compare(SequenceAnnotation o1, SequenceAnnotation o2) {
+                        if (o1.getBioStart() == o2.getBioStart())
+                            return o1.getBioEnd().compareTo(o2.getBioEnd());
+                        return o1.getBioStart().compareTo(o2.getBioStart());
+                    }
+                });
+
                 for (SequenceAnnotation sequenceAnnotation : annotations) {
                     visit(sequenceAnnotation);
                 }

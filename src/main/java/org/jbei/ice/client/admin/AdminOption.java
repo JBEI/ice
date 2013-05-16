@@ -10,7 +10,8 @@ public enum AdminOption {
     SETTINGS(FAIconType.COGS, "System Settings", "settings"),
     WEB(FAIconType.GLOBE, "Web of Registries", "Web of registries settings"),
     USERS(FAIconType.USER, "Manage Users", "users"),
-    GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members");
+    GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members"),
+    SEARCH(FAIconType.SEARCH, "Manage Search", "Rebuild the search indices and change search settings");
 //    TRANSFER(FAIconType.INBOX, "Transfer Entries", "transfer entries between ICE instances");
 
     private final String display;

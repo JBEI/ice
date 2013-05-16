@@ -1742,4 +1742,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return false;
         }
     }
+
+    @Override
+    public Boolean rebuildSearchIndex(String sid) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        return ControllerFactory.getSearchController().rebuildIndexes(account);
+    }
 }

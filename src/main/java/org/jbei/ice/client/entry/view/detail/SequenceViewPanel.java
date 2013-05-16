@@ -12,8 +12,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
@@ -31,6 +34,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     private HTMLPanel headerPanel;
     private final SequenceViewPanelPresenter presenter;
     private DeleteSequenceHandler deleteHandler;
+    private final ScrollPanel panel;
 
     public SequenceViewPanel(EntryInfo info) {
         this.info = info;
@@ -52,7 +56,25 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         layout.setWidget(1, 0, new Label(""));
         layout.getFlexCellFormatter().setHeight(1, 0, "10px");
         layout.getFlexCellFormatter().setColSpan(1, 0, 6);
+
+        // sbol visual
+        String imgUrl = "";
+        if (info.isHasSequence() && info.getSbolVisualURL() != null) {
+            imgUrl = "<img height=\"100px\" src=\"" + info.getSbolVisualURL() + "\" /><br>";
+        }
+
+        panel = new ScrollPanel();
+        VerticalPanel verticalPanel = new VerticalPanel();
+        verticalPanel.setWidth("100%");
+        HTML html = new HTML(imgUrl);
+
+        verticalPanel.add(html);
+        panel.add(verticalPanel);
+        layout.setWidget(2, 0, panel);
+        layout.getFlexCellFormatter().setColSpan(2, 0, 6);
+
         updateSequenceContents();
+        html.setWidth(layout.getOffsetWidth() + "px");
         this.presenter = new SequenceViewPanelPresenter(this);
     }
 
@@ -88,11 +110,13 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             param.setSessiondId(ClientController.sessionId);
             param.setSwfPath("vv/VectorViewer.swf");
             param.setMovieName("VectorViewer.swf");
-            layout.setWidget(2, 0, new Flash(param));
-            layout.getFlexCellFormatter().setHeight(2, 0, "600px");
+            Flash flash = new Flash(param);
+            GWT.log(flash.asWidget().getOffsetWidth() + "px");
+            layout.setWidget(3, 0, flash);
+            layout.getFlexCellFormatter().setHeight(3, 0, "600px");
         } else {
-            layout.setHTML(2, 0, "<span class=\"font-80em\"><i>No sequence provided</i></span>");
-            layout.getFlexCellFormatter().setHeight(2, 0, "20px");
+            layout.setHTML(3, 0, "<span class=\"font-80em\"><i>No sequence provided</i></span>");
+            layout.getFlexCellFormatter().setHeight(3, 0, "20px");
         }
     }
 
@@ -100,10 +124,12 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         headerPanel = new HTMLPanel(
                 "<span style=\"color: #233559; "
                         + "font-weight: bold; font-style: italic; font-size: 0.80em;\">"
-                        + "SEQUENCE</span><div style=\"float: right\"><span id=\"delete_sequence_link\"></span><span " +
-                        "id=\"sequence_link\"></span>"
+                        + "SEQUENCE</span><div style=\"float: right\"><span id=\"delete_sequence_link\"></span>"
+                        + "<span id=\"sequence_link\"></span>"
                         + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
-                        + " <span id=\"sequence_options\"></span></div>");
+                        + " <span id=\"sequence_options\"></span>"
+                        + " <span style=\"color: #262626; font-size: 0.75em;\">|</span>"
+                        + " <span id=\"sbol_visual\"></span></div>");
 
         headerPanel.setStyleName("entry_sequence_sub_header");
         updateSequenceHeaders();
@@ -123,6 +149,22 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             headerPanel.add(sequenceDownload.asWidget(), "sequence_options");
             if (deleteHandler != null)
                 showSequenceDeleteLink(deleteHandler);
+            // sbol visual
+            final Label sbVisual = new Label("Hide SBOL Visual");
+            sbVisual.setStyleName("open_sequence_sub_link");
+            sbVisual.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (layout.getFlexCellFormatter().isVisible(2, 0)) {
+                        sbVisual.setText("Show SBOL Visual");
+                        layout.getFlexCellFormatter().setVisible(2, 0, false);
+                    } else {
+                        sbVisual.setText("Hide SBOL Visual");
+                        layout.getFlexCellFormatter().setVisible(2, 0, true);
+                    }
+                }
+            });
+            headerPanel.add(sbVisual, "sbol_visual");
         } else {
             Label label = new Label("Create New");
             label.addClickHandler(new SequenceHeaderHandler());

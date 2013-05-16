@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.entry;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -32,7 +34,9 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Comment;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -54,6 +58,7 @@ import org.jbei.ice.shared.dto.permission.PermissionInfo;
 public class EntryController {
 
     private EntryDAO dao;
+    private CommentDAO commentDAO;
     private PermissionsController permissionsController;
     private AccountController accountController;
     private AttachmentController attachmentController;
@@ -63,6 +68,7 @@ public class EntryController {
 
     public EntryController() {
         dao = new EntryDAO();
+        commentDAO = new CommentDAO();
         permissionsController = ControllerFactory.getPermissionController();
         accountController = ControllerFactory.getAccountController();
         attachmentController = ControllerFactory.getAttachmentController();
@@ -689,6 +695,12 @@ public class EntryController {
         EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence,
                                                     hasOriginalSequence);
 
+        // comments
+        ArrayList<Comment> comments = commentDAO.retrieveComments(entry);
+        for (Comment comment : comments) {
+            info.getComments().add(Comment.toDTO(comment));
+        }
+
         // permissions
         info.setCanEdit(permissionsController.hasWritePermission(account, entry));
 
@@ -702,6 +714,15 @@ public class EntryController {
                 Logger.error(e);
             }
         }
+
+        if (hasSequence) {
+            Sequence sequence = sequenceController.getByEntry(entry);
+            URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
+            if (uri != null) {
+                info.setSbolVisualURL(uri.toString());
+            }
+        }
+
         return info;
     }
 }

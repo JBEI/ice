@@ -7,6 +7,7 @@ import javax.persistence.*;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.shared.dto.comment.UserComment;
 
 import org.hibernate.annotations.Type;
 
@@ -94,4 +95,14 @@ public class Comment implements IModel {
         this.creationTime = creationTime;
     }
 
+    public static UserComment toDTO(Comment comment) {
+        if (comment == null)
+            return null;
+
+        UserComment userComment = new UserComment();
+        userComment.setCommentDate(comment.getCreationTime());
+        userComment.setMessage(comment.getBody());
+        userComment.setUser(Account.toDTO(comment.getAccount()));
+        return userComment;
+    }
 }

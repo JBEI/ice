@@ -205,4 +205,6 @@ public interface RegistryService extends RemoteService {
     boolean demoteCollection(String sessionId, long id) throws AuthenticationException;
 
     Boolean sendMessage(String sid, MessageInfo info) throws AuthenticationException;
+
+    Boolean rebuildSearchIndex(String sessionId) throws AuthenticationException;
 }

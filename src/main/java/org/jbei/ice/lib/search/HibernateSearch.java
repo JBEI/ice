@@ -23,6 +23,7 @@ import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.search.filter.SearchFieldFactory;
 import org.jbei.ice.server.ModelToInfoFactory;
+import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.Visibility;
@@ -36,6 +37,7 @@ import org.jbei.ice.shared.dto.search.SearchResults;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.hibernate.Session;
@@ -44,7 +46,6 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hibernate.search.query.dsl.TermContext;
-import org.hibernate.search.query.dsl.TermMatchingContext;
 
 /**
  * Apache Lucene full text library functionality in Hibernate
@@ -69,6 +70,50 @@ public class HibernateSearch {
         return SingletonHolder.INSTANCE;
     }
 
+    protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, ArrayList<EntryType> entryTypes,
+            BooleanQuery booleanQuery, String term, BioSafetyOption option) {
+        term = cleanQuery(term);
+        for (EntryType type : entryTypes) {
+            Class<?> clazz = SearchFieldFactory.entryClass(type);
+
+            QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
+            if (term != null && !term.isEmpty()) {
+                HashSet<String> commonFields = SearchFieldFactory.getCommonFields();
+                commonFields.addAll(SearchFieldFactory.entryFields(type));
+                for (String field : commonFields) {
+                    // TODO ignoreFieldBridges only for enums only (e.g. plantType, generation) etc
+                    Query fieldQuery = qb.keyword().fuzzy()/*.withThreshold(0.8f)*/
+                            .onField(field).ignoreFieldBridge().matching(term).createQuery();
+                    booleanQuery.add(fieldQuery, BooleanClause.Occur.SHOULD);
+                }
+            }
+
+            // pending visibility
+            Query visibilityQuery = qb.keyword().onField("visibility")
+                                      .matching(Visibility.PENDING.getValue()).createQuery();
+            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
+
+            // draft visibility
+            Query visibilityDraftQuery = qb.keyword().onField("visibility")
+                                           .matching(Visibility.DRAFT.getValue()).createQuery();
+            booleanQuery.add(visibilityDraftQuery, BooleanClause.Occur.MUST_NOT);
+
+            // exclude deleted
+            Query deletedQuery = qb.keyword().onField("ownerEmail").matching("system").createQuery();
+            booleanQuery.add(deletedQuery, BooleanClause.Occur.MUST_NOT);
+
+            // biosafety
+            if (option != null) {
+                TermContext levelContext = qb.keyword();
+                org.apache.lucene.search.Query biosafetyQuery =
+                        levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
+                                    .matching(option.getValue()).createQuery();
+                booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
+            }
+        }
+        return booleanQuery;
+    }
+
     public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery,
             String projectName, String projectURL) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
@@ -81,53 +126,14 @@ public class HibernateSearch {
         int resultCount;
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         BooleanQuery booleanQuery = new BooleanQuery();
+        // get classes for search
         Class<?>[] classes = new Class<?>[EntryType.values().length];
-        String[] fields;
-
         for (int i = 0; i < entryTypes.size(); i += 1) {
-            EntryType type = entryTypes.get(i);
-            Class<?> clazz = SearchFieldFactory.entryClass(type);
-            fields = SearchFieldFactory.entryFields(type);
-            classes[i] = clazz;
-
-            QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
-            TermContext termContext = qb.keyword();
-
-            TermMatchingContext matchingContext = termContext.wildcard().onField(fields[0]).ignoreFieldBridge();
-            for (int j = 1; j < fields.length; j += 1) {
-                matchingContext = matchingContext.andField(fields[j])
-                                                 .ignoreFieldBridge();//TODO : ignoreFieldBridges for enum only
-//                        matchingContext = matchingContext.andField(fields[j]).boostedTo(user_boost)
-// .ignoreFieldBridge();
-            }
-            org.apache.lucene.search.Query query = matchingContext.matching("*").createQuery();
-            booleanQuery.add(query, BooleanClause.Occur.MUST);
-
-            // pending visibility
-            org.apache.lucene.search.Query visibilityQuery = qb.keyword()
-                                                               .onField("visibility")
-                                                               .ignoreFieldBridge()
-                                                               .matching(Visibility.PENDING.getValue())
-                                                               .createQuery();
-            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
-
-            // draft visibility
-            org.apache.lucene.search.Query visibilityDraftQuery = qb.keyword()
-                                                                    .onField("visibility")
-                                                                    .ignoreFieldBridge()
-                                                                    .matching(Visibility.DRAFT.getValue())
-                                                                    .createQuery();
-            booleanQuery.add(visibilityDraftQuery, BooleanClause.Occur.MUST_NOT);
-
-            // biosafety
-            if (searchQuery.getBioSafetyOption() != null) {
-                TermContext levelContext = qb.keyword();
-                org.apache.lucene.search.Query biosafetyQuery =
-                        levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
-                                    .matching(searchQuery.getBioSafetyOption().getValue()).createQuery();
-                booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
-            }
+            classes[i] = SearchFieldFactory.entryClass(entryTypes.get(i));
         }
+
+        booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, null,
+                                              searchQuery.getBioSafetyOption());
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
@@ -144,7 +150,8 @@ public class HibernateSearch {
         // end get max score
 
         // get sorting values
-        Sort sort = getSort(searchQuery.getParameters().isSortAscending(), searchQuery.getParameters().getSortField());
+        Sort sort = getSort(searchQuery.getParameters().isSortAscending(), searchQuery.getParameters().getSortField
+                ());
         fullTextQuery.setSort(sort);
 
         // projection (specified properties must be stored in the index @Field(store=Store.YES))
@@ -159,7 +166,7 @@ public class HibernateSearch {
         // check if there is also a blast search
         HashMap<String, SearchResultInfo> blastInfo;
         try {
-            blastInfo = chechEnableBlast(account, fullTextQuery, searchQuery);
+            blastInfo = checkEnableBlast(account, fullTextQuery, searchQuery);
         } catch (BlastException e) {
             Logger.error(e);
             return null;
@@ -199,7 +206,6 @@ public class HibernateSearch {
         SearchResults results = new SearchResults();
         results.setResultCount(resultCount);
         results.setResults(searchResultInfos);
-        Logger.debug("Found " + resultCount + " for " + fullTextQuery.getQueryString());
         String email = "Anon";
         if (account != null)
             email = account.getEmail();
@@ -219,70 +225,20 @@ public class HibernateSearch {
         int resultCount;
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         BooleanQuery booleanQuery = new BooleanQuery();
+
+        // get classes for search
         Class<?>[] classes = new Class<?>[EntryType.values().length];
-        String[] fields;
+        for (int i = 0; i < entryTypes.size(); i += 1) {
+            classes[i] = SearchFieldFactory.entryClass(entryTypes.get(i));
+        }
 
         while (terms.hasNext()) {
             String term = terms.next();
             if (StandardAnalyzer.STOP_WORDS_SET.contains(term))
                 continue;
 
-            term = cleanQuery(term);
-
-            for (int i = 0; i < entryTypes.size(); i += 1) {
-                EntryType type = entryTypes.get(i);
-                fields = SearchFieldFactory.entryFields(type);
-                Class<?> clazz = SearchFieldFactory.entryClass(type);
-                classes[i] = clazz;
-
-                QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
-                TermContext termContext = qb.keyword();
-                org.apache.lucene.search.Query query;
-                if (term.contains("*") || term.contains("?")) {
-                    TermMatchingContext matchingContext = termContext.wildcard().onField(fields[0]).ignoreFieldBridge();
-                    for (int j = 1; j < fields.length; j += 1) {
-                        matchingContext = matchingContext.andField(fields[j])
-                                                         .ignoreFieldBridge();//TODO : ignoreFieldBridges for enum only
-//                        matchingContext = matchingContext.andField(fields[j]).boostedTo(user_boost)
-// .ignoreFieldBridge();
-                    }
-                    query = matchingContext.matching(term).createQuery();
-                } else {
-                    query = termContext
-                            .fuzzy()
-                            .withThreshold(0.8f)
-                            .onFields(fields)
-                            .ignoreFieldBridge()
-                            .matching(term)
-                            .createQuery();
-                }
-                booleanQuery.add(query, BooleanClause.Occur.MUST);
-
-                // pending visibility
-                org.apache.lucene.search.Query visibilityQuery = qb.keyword()
-                                                                   .onField("visibility")
-                                                                   .ignoreFieldBridge()
-                                                                   .matching(Visibility.PENDING.getValue())
-                                                                   .createQuery();
-                booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
-
-                // draft visibility
-                org.apache.lucene.search.Query visibilityDraftQuery = qb.keyword()
-                                                                        .onField("visibility")
-                                                                        .ignoreFieldBridge()
-                                                                        .matching(Visibility.DRAFT.getValue())
-                                                                        .createQuery();
-                booleanQuery.add(visibilityDraftQuery, BooleanClause.Occur.MUST_NOT);
-
-                // biosafety
-                if (searchQuery.getBioSafetyOption() != null) {
-                    TermContext levelContext = qb.keyword();
-                    org.apache.lucene.search.Query biosafetyQuery =
-                            levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
-                                        .matching(searchQuery.getBioSafetyOption().getValue()).createQuery();
-                    booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
-                }
-            }
+            booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, term,
+                                                  searchQuery.getBioSafetyOption());
         }
 
         if (booleanQuery.getClauses().length == 0)
@@ -292,7 +248,7 @@ public class HibernateSearch {
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
 
         // get max score
-        fullTextQuery.setFirstResult(0); //start from the startth element
+        fullTextQuery.setFirstResult(0); //start from the "start"th element
         fullTextQuery.setMaxResults(1);  //return count elements
         fullTextQuery.setProjection(FullTextQuery.SCORE);
         List result = fullTextQuery.list();
@@ -318,7 +274,7 @@ public class HibernateSearch {
         // check if there is also a blast search
         HashMap<String, SearchResultInfo> blastInfo;
         try {
-            blastInfo = chechEnableBlast(account, fullTextQuery, searchQuery);
+            blastInfo = checkEnableBlast(account, fullTextQuery, searchQuery);
         } catch (BlastException e) {
             Logger.error(e);
             return null;
@@ -332,7 +288,6 @@ public class HibernateSearch {
 
         // execute search
         result = fullTextQuery.list();
-        Logger.debug("Found " + resultCount + " for " + fullTextQuery.getQueryString());
         Logger.info("Obtained " + resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
 
         LinkedList<SearchResultInfo> searchResultInfos = new LinkedList<SearchResultInfo>();
@@ -398,7 +353,7 @@ public class HibernateSearch {
                      .setParameter("groupUUids", groupUUIDs);
     }
 
-    protected HashMap<String, SearchResultInfo> chechEnableBlast(Account account,
+    protected HashMap<String, SearchResultInfo> checkEnableBlast(Account account,
             org.hibernate.search.FullTextQuery fullTextQuery, SearchQuery query) throws BlastException {
         if (!query.hasBlastQuery())
             return null;
