@@ -45,6 +45,7 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
     public static String sessionId;
     public static AccountInfo account;
     public static final String URL_SEPARATOR = ";";
+    public static String pageViewAttempt;   // page user attempted to view but was sent to the login page
 
     public ClientController(RegistryServiceAsync service, HandlerManager eventBus) {
         super(service, eventBus);
@@ -139,6 +140,7 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
 
         if (ClientController.sessionId == null) {
             if (page != Page.LOGIN) {
+                pageViewAttempt = token;
                 page = Page.LOGIN;
             }
         } else {
@@ -255,10 +257,12 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                         ClientController.sessionId = null;
                         ClientController.account = null;
                         Cookies.removeCookie(COOKIE_NAME);
-                        if (Page.LOGIN.getToken().equals(History.getToken()))
-                            History.fireCurrentHistoryState();
-                        else
-                            History.newItem(Page.LOGIN.getLink());
+//                        if (Page.LOGIN.getToken().equals(History.getToken()))
+//                            History.fireCurrentHistoryState();
+//                        else
+//                            History.newItem(Page.LOGIN.getLink());
+
+                        new LoginPresenter(service, eventBus, new LoginView()).go(container);
                     }
                 }
 
@@ -273,10 +277,11 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                 }
             });
         } else {
-            if (Page.LOGIN.getLink().equals(History.getToken()))
-                History.fireCurrentHistoryState();
-            else
-                History.newItem(Page.LOGIN.getLink());
+//            if (Page.LOGIN.getLink().equals(History.getToken()))
+//                History.fireCurrentHistoryState();
+//            else
+//                History.newItem(Page.LOGIN.getLink());
+            new LoginPresenter(service, eventBus, new LoginView()).go(container);
         }
     }
 

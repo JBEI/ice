@@ -103,7 +103,6 @@ public class LoginPresenter extends AbstractPresenter {
 
             @Override
             public void onSuccess(AccountInfo result) {
-
                 if (result == null) {
                     display.setLoginPassError("Invalid username and/or password!");
                     enableInputFields();
