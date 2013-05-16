@@ -34,7 +34,6 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     private HTMLPanel headerPanel;
     private final SequenceViewPanelPresenter presenter;
     private DeleteSequenceHandler deleteHandler;
-    private final ScrollPanel panel;
 
     public SequenceViewPanel(EntryInfo info) {
         this.info = info;
@@ -63,7 +62,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             imgUrl = "<img height=\"100px\" src=\"" + info.getSbolVisualURL() + "\" /><br>";
         }
 
-        panel = new ScrollPanel();
+        ScrollPanel panel = new ScrollPanel();
         VerticalPanel verticalPanel = new VerticalPanel();
         verticalPanel.setWidth("100%");
         HTML html = new HTML(imgUrl);
@@ -121,16 +120,19 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     }
 
     private Widget createSequenceHeader() {
-        headerPanel = new HTMLPanel(
-                "<span style=\"color: #233559; "
-                        + "font-weight: bold; font-style: italic; font-size: 0.80em;\">"
-                        + "SEQUENCE</span><div style=\"float: right\"><span id=\"delete_sequence_link\"></span>"
-                        + "<span id=\"sequence_link\"></span>"
-                        + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
-                        + " <span id=\"sequence_options\"></span>"
-                        + " <span style=\"color: #262626; font-size: 0.75em;\">|</span>"
-                        + " <span id=\"sbol_visual\"></span></div>");
+        String html = "<span style=\"color: #233559; "
+                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">"
+                + "SEQUENCE</span><div style=\"float: right\"><span id=\"delete_sequence_link\"></span>"
+                + "<span id=\"sequence_link\"></span>"
+                + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
+                + " <span id=\"sequence_options\"></span>";
 
+        if (info.isHasSequence()) {
+            html += " <span style=\"color: #262626; font-size: 0.75em;\">|</span>"
+                    + " <span id=\"sbol_visual\"></span></div>";
+        }
+
+        headerPanel = new HTMLPanel(html);
         headerPanel.setStyleName("entry_sequence_sub_header");
         updateSequenceHeaders();
         return headerPanel;
@@ -150,16 +152,16 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             if (deleteHandler != null)
                 showSequenceDeleteLink(deleteHandler);
             // sbol visual
-            final Label sbVisual = new Label("Hide SBOL Visual");
+            final Label sbVisual = new Label("Hide Pigeon Image");
             sbVisual.setStyleName("open_sequence_sub_link");
             sbVisual.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     if (layout.getFlexCellFormatter().isVisible(2, 0)) {
-                        sbVisual.setText("Show SBOL Visual");
+                        sbVisual.setText("Show Pigeon Image");
                         layout.getFlexCellFormatter().setVisible(2, 0, false);
                     } else {
-                        sbVisual.setText("Hide SBOL Visual");
+                        sbVisual.setText("Hide Pigeon Image");
                         layout.getFlexCellFormatter().setVisible(2, 0, true);
                     }
                 }

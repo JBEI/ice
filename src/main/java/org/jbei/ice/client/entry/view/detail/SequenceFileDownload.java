@@ -100,8 +100,8 @@ class SequenceFileDownload implements IsWidget {
         GENBANK("GenBank", "genbank"),
         FASTA("FASTA", "fasta"),
         SBOL("SBOL", "sbol"),
-        SBOL_VISUAL("SBOL Visual", "sbolv"),
-        PIGEON_SCRIPT("Pigeon Script", "sbolps");
+        PIGEON_IMAGE("Pigeon Image", "pigeonI"),
+        PIGEON_SCRIPT("Pigeon Script", "pigeonS");
 
         private String display;
         private String type;
@@ -112,7 +112,7 @@ class SequenceFileDownload implements IsWidget {
         }
 
         public static DownloadOption[] sansOriginal() {
-            List<DownloadOption> list = Arrays.asList(GENBANK, FASTA, SBOL, SBOL_VISUAL, PIGEON_SCRIPT);
+            List<DownloadOption> list = Arrays.asList(GENBANK, FASTA, SBOL, PIGEON_IMAGE, PIGEON_SCRIPT);
             return (DownloadOption[]) list.toArray();
         }
 

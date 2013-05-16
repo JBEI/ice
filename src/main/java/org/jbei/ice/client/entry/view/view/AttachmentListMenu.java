@@ -366,7 +366,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         }
 
         if (layout.getRowCount() == 2) {
-            layout.setHTML(2, 0, "No attachments available");
+            layout.setHTML(2, 0, "<i>No attachments available</i>");
             layout.getCellFormatter().setStyleName(2, 0, "font-75em");
             layout.getCellFormatter().addStyleName(2, 0, "pad-6");
         }

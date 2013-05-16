@@ -67,7 +67,7 @@ public class PigeonSBOLv {
         map.put("SO_0000253", "s,2");
         map.put("SO_0000274", "s,2");
         map.put("SO_0000286", "s,2");
-        map.put("SO_0000296", "s,2");
+        map.put("SO_0000296", "z,13");
         map.put("SO_0000297", "s,2");
         map.put("SO_0000298", "s,2");
         map.put("SO_0000305", "s,2");
@@ -88,6 +88,7 @@ public class PigeonSBOLv {
         map.put("SO_0000553", "s,2");
         map.put("SO_0000555", "s,2");
         map.put("SO_0000557", "s,2");
+        map.put("SO_0000627", "|,2");
         map.put("SO_0000657", "s,2");
         map.put("SO_0000704", "s,2");
         map.put("SO_0000723", "s,2");
@@ -99,6 +100,7 @@ public class PigeonSBOLv {
         map.put("SO_0001054", "s,2");
         map.put("SO_0001060", "s,2");
         map.put("SO_0001645", "s,2");
+        map.put("SO_0001687", "x,2");
         map.put("SO_0001833", "s,2");
         map.put("SO_0001834", "s,2");
         map.put("SO_0001835", "s,2");
@@ -133,35 +135,6 @@ public class PigeonSBOLv {
         return sb.toString();
     }
 
-//    private class PigeonVisitor {
-//
-//        public void visit(Sequence sequence) {
-//            Set<SequenceFeature> features = sequence.getSequenceFeatures();
-//            if (features != null) {
-//                for (SequenceFeature feature : features)
-//                    visit(feature);
-//            }
-//        }
-//
-//        public void visit(SequenceFeature feature) {
-//            AnnotationLocation location = null;
-//            if (feature.getAnnotationLocations() != null && !feature.getAnnotationLocations().isEmpty()) {
-//                location = (AnnotationLocation) feature.getAnnotationLocations().toArray()[0];
-//
-//                if (location.getGenbankStart() <= location.getEnd()) {
-//                }
-//            }
-//
-//            // add a dna sequence for cases where the feature wraps around the origin
-//            if (location != null && location.getGenbankStart() > location.getEnd()) {
-//                String sequence = location.getSequenceFeature().getSequence().getSequence();
-//                StringBuilder builder = new StringBuilder();
-//                builder.append(sequence.substring(location.getGenbankStart() - 1, sequence.length()));
-//                builder.append(sequence.substring(0, location.getEnd()));
-//            }
-//        }
-//    }
-
     private static String toPigeon(DnaComponent component, StrandType strandType) {
         if (component == null)
             return "";
@@ -178,7 +151,8 @@ public class PigeonSBOLv {
             if (pigeonTypeAndColor != null && !pigeonTypeAndColor.isEmpty()) {
                 String[] split = pigeonTypeAndColor.split(",");
                 String pigeonType;
-                if (strandType != null && strandType == StrandType.NEGATIVE && !split[0].equalsIgnoreCase("s"))
+                if (strandType != null && strandType == StrandType.NEGATIVE && !split[0].equalsIgnoreCase("s")
+                        && !split[0].equalsIgnoreCase("x") && !split[0].equalsIgnoreCase("z"))
                     pigeonType = "<" + split[0];
                 else
                     pigeonType = split[0];

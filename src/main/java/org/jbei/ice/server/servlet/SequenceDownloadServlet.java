@@ -87,9 +87,9 @@ public class SequenceDownloadServlet extends HttpServlet {
             getFasta(response, entry);
         else if ("sbol".equals(type))
             getSBOL(response, entry);
-        else if ("sbolv".equalsIgnoreCase(type))
+        else if ("pigeonI".equalsIgnoreCase(type))
             getSBOLv(response, entry);
-        else if ("sbolps".equalsIgnoreCase(type))
+        else if ("pigeonS".equalsIgnoreCase(type))
             getPigeonScript(response, entry);
         else
             Logger.error("Unrecognized sequence download type " + type);

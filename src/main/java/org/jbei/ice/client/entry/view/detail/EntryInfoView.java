@@ -214,7 +214,6 @@ public abstract class EntryInfoView<T extends EntryInfo> extends Composite {
     }
 
     protected void createNotesView() {
-
         FlexTable notes = new FlexTable();
         notes.setCellPadding(0);
         notes.setCellSpacing(0);
