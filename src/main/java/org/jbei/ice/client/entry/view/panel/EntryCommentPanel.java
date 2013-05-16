@@ -7,6 +7,7 @@ import java.util.Comparator;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.dto.comment.UserComment;
 
@@ -18,6 +19,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 
 /**
@@ -55,6 +57,10 @@ public class EntryCommentPanel extends Composite {
 
         setCancelHandler();
         setSubmitHandler();
+    }
+
+    public void setSampleOptions(ArrayList<SampleStorage> sampleOptions) {
+        commentArea.setSampleOptions(sampleOptions);
     }
 
     protected void setCancelHandler() {
@@ -144,6 +150,7 @@ public class EntryCommentPanel extends Composite {
         private final TextArea area;
         private Button submit;
         private HTML cancel;
+        private ListBox sampleOptions;
 
         public AddCommentPanel() {
             area = new TextArea();
@@ -156,14 +163,36 @@ public class EntryCommentPanel extends Composite {
             cancel.setStyleName("footer_feedback_widget");
             cancel.addStyleName("font-70em");
             cancel.addStyleName("display-inline");
+            sampleOptions = new ListBox();
+            sampleOptions.addItem("None");
+            sampleOptions.addItem("All");
+            sampleOptions.setStyleName("pull_down");
 
-            String html = "<span id=\"enter_comment_area\"></span>"
-                    + "<div><span id=\"comment_submit_widget\"></span><span id=\"comment_submit_cancel\"></span></div>";
+            FlexTable flexTable = new FlexTable();
+            flexTable.setWidget(0, 0, area);
+
+            String html = "<b class=\"font-75em\" style=\"vertical-align: top\">Affected Samples</b><br>"
+                    + "<span  id=\"sample_selection\"></span>";
             HTMLPanel panel = new HTMLPanel(html);
-            panel.add(area, "enter_comment_area");
-            panel.add(submit, "comment_submit_widget");
-            panel.add(cancel, "comment_submit_cancel");
-            initWidget(panel);
+            flexTable.setWidget(0, 1, panel);
+            flexTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
+            panel.add(sampleOptions, "sample_selection");
+
+            flexTable.setWidget(1, 0, submit);
+            flexTable.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_RIGHT);
+            flexTable.setWidget(1, 1, cancel);
+            initWidget(flexTable);
+        }
+
+        public void setSampleOptions(ArrayList<SampleStorage> samples) {
+            if (samples == null || samples.isEmpty()) {
+                sampleOptions.setEnabled(false);
+                return;
+            }
+
+            for (SampleStorage storage : samples) {
+                sampleOptions.addItem(storage.getSample().getLabel());
+            }
         }
 
         public boolean validate() {
@@ -178,6 +207,8 @@ public class EntryCommentPanel extends Composite {
 
         public void reset() {
             area.setText("");
+            area.setStyleName("input_box");
+            sampleOptions.setSelectedIndex(0);
         }
 
         public void setSubmitHandler(final ClickHandler handler) {
@@ -186,6 +217,7 @@ public class EntryCommentPanel extends Composite {
                 public void onClick(ClickEvent event) {
                     if (validate()) {
                         handler.onClick(event);
+                        reset();
                     }
                 }
             });
@@ -196,7 +228,26 @@ public class EntryCommentPanel extends Composite {
         }
 
         public UserComment getUserComment() {
-            return new UserComment(area.getText().trim());
+            String selected = sampleOptions.getItemText(sampleOptions.getSelectedIndex());
+            if ("None".equalsIgnoreCase(selected)) {
+                return new UserComment(area.getText().trim());
+            }
+
+            if ("All".equalsIgnoreCase(selected)) {
+                String txt = "";
+                for (int i = 0; i < sampleOptions.getItemCount() - 1; i += 1) {
+                    String text = sampleOptions.getItemText(i);
+                    if ("None".equals(text) || "All".equals(text))
+                        continue;
+
+                    txt += (text + ",");
+                }
+                txt += sampleOptions.getItemText(sampleOptions.getItemCount() - 1);
+                return new UserComment("<b>Affected Samples: </b>" + txt + "<br>" + area.getText().trim());
+            }
+
+            String txt = sampleOptions.getItemText(sampleOptions.getSelectedIndex());
+            return new UserComment("<b>Affected Sample: </b>" + txt + "<br>" + area.getText().trim());
         }
     }
 }

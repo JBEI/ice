@@ -10,6 +10,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.view.IEntryView;
+import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -127,8 +128,7 @@ public class EntryModel {
                     display.setSampleFormVisibility(false);
                     currentInfo.getSampleStorage().add(result);
                     display.setSampleData(currentInfo.getSampleStorage(), createDeleteSampleHandler());
-                    // TODO : update counts and show the loading indicator when the sample is being created
-                    // TODO : on click.
+                    display.getMenu().incrementMenuCount(MenuItem.Menu.SAMPLES);
                 }
             }.go(eventBus);
         }

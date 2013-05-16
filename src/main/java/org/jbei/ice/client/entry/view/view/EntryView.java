@@ -306,6 +306,7 @@ public class EntryView extends Composite implements IEntryView {
 
         samplePanel.setData(info.getSampleStorage(), handler);
         sequencePanel.setSequenceData(info.getSequenceAnalysis(), info);
+        commentPanel.setSampleOptions(info.getSampleStorage());
         return sequenceViewPanel.getPresenter();
     }
 
