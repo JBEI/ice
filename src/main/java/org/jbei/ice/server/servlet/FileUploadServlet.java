@@ -164,7 +164,7 @@ public class FileUploadServlet extends UploadAction {
             Entry entry = null;
             try {
                 entry = entryController.get(account, Long.decode(entryId));
-            } catch (NumberFormatException | ControllerException | PermissionException e) {
+            } catch (NumberFormatException | ControllerException e) {
                 Logger.error(e);
             }
             if (entry == null)
@@ -234,7 +234,7 @@ public class FileUploadServlet extends UploadAction {
         Entry entry = null;
         try {
             entry = controller.get(account, Long.decode(entryId));
-        } catch (NumberFormatException | ControllerException | PermissionException e) {
+        } catch (NumberFormatException | ControllerException e) {
             Logger.error(e);
         }
 
@@ -289,7 +289,7 @@ public class FileUploadServlet extends UploadAction {
                 dnaSequence = sequenceAnalysisController.parse(byteHolder.getBytes());
                 if (dnaSequence == null || dnaSequence.getSequence() == null) {
                     String errMsg = ("Could not parse \"" + currentFileName
-                            + "\". Only Fasta, GenBank & ABI files are supported.");
+                            + "\". Only Fasta, GenBank, SBOL & ABI files are supported.");
                     Logger.error(errMsg);
                     return errMsg;
                 }
@@ -303,19 +303,18 @@ public class FileUploadServlet extends UploadAction {
             return "";
         } catch (ControllerException e) {
             String errMsg = ("Could not parse \"" + currentFileName
-                    + "\". Only Fasta, GenBank & ABI files are supported.");
+                    + "\". Only Fasta, GenBank, SBOL & ABI files are supported.");
             Logger.error(errMsg);
             return errMsg;
         }
     }
 
-    // TODO : check for path information in filename. safari includes it
     private String uploadAttachment(Account account, File file, String entryId, String desc, String filename) {
         EntryController controller = ControllerFactory.getEntryController();
         Entry entry = null;
         try {
             entry = controller.get(account, Long.decode(entryId));
-        } catch (NumberFormatException | ControllerException | PermissionException e) {
+        } catch (NumberFormatException | ControllerException e) {
             Logger.error(e);
         }
 

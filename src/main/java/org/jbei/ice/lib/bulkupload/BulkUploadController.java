@@ -483,12 +483,7 @@ public class BulkUploadController {
         Entry entry; // for strain with plasmid this is the strain
         Entry otherEntry = null;  // for strain with plasmid this is the entry
 
-        try {
-            entry = entryController.get(account, autoUpdate.getEntryId());
-        } catch (PermissionException e) {
-            Logger.warn(e.getMessage());
-            throw new ControllerException(e);
-        }
+        entry = entryController.get(account, autoUpdate.getEntryId());
 
         // if entry is null, create entry
         if (entry == null) {
@@ -577,8 +572,8 @@ public class BulkUploadController {
             }
 
             if (otherEntry != null)
-                entryController.update(account, otherEntry, null);
-            entryController.update(account, entry, null);
+                entryController.update(account, otherEntry);
+            entryController.update(account, entry);
         } catch (PermissionException e) {
             throw new ControllerException(e);
         }
@@ -636,7 +631,7 @@ public class BulkUploadController {
                 // convert entries to pending
                 for (Entry entry : draft.getContents()) {
                     entry.setVisibility(Visibility.PENDING.getValue());
-                    entryController.update(account, entry, null);
+                    entryController.update(account, entry);
                 }
 
                 String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
@@ -715,7 +710,7 @@ public class BulkUploadController {
                 Permission entryPermission = ControllerFactory.getPermissionController().addPermission(account, info);
                 entry.getPermissions().add(entryPermission);
             }
-            entryController.update(account, entry, null);
+            entryController.update(account, entry);
         }
 
         // when done approving, delete the bulk upload record but not the entries associated with it.

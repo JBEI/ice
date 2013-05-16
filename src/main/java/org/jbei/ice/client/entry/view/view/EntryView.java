@@ -309,6 +309,12 @@ public class EntryView extends Composite implements IEntryView {
         return sequenceViewPanel.getPresenter();
     }
 
+
+    @Override
+    public void addSubmitCommentDelegate(ServiceDelegate<UserComment> delegate) {
+        commentPanel.setCommentSubmitDelegate(delegate);
+    }
+
     @Override
     public void addSampleButtonHandler(ClickHandler handler) {
         samplePanel.setAddSampleHandler(handler);
@@ -338,6 +344,12 @@ public class EntryView extends Composite implements IEntryView {
     public void showCommentView(ArrayList<UserComment> comments) {
         commentPanel.setData(comments);
         mainContent.setWidget(1, 0, commentPanel);
+    }
+
+    @Override
+    public void addComment(UserComment comment) {
+        commentPanel.addComment(comment);
+        menu.incrementMenuCount(MenuItem.Menu.COMMENTS);
     }
 
     @Override

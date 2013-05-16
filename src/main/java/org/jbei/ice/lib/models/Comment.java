@@ -45,8 +45,7 @@ public class Comment implements IModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
 
-    public Comment() {
-    }
+    public Comment() {}
 
     public Comment(Entry entry, Account account, String body) {
         setEntry(entry);
@@ -57,10 +56,6 @@ public class Comment implements IModel {
 
     public long getId() {
         return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public Account getAccount() {
@@ -103,6 +98,7 @@ public class Comment implements IModel {
         userComment.setCommentDate(comment.getCreationTime());
         userComment.setMessage(comment.getBody());
         userComment.setUser(Account.toDTO(comment.getAccount()));
+        userComment.setEntryId(comment.getEntry().getId());
         return userComment;
     }
 }

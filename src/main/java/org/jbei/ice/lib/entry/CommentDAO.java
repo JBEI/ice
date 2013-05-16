@@ -23,6 +23,7 @@ public class CommentDAO extends HibernateRepository<Comment> {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Comment.class.getName());
         criteria.add(Restrictions.eq("entry", entry));
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         List list = criteria.list();
         return new ArrayList<Comment>(list);
     }

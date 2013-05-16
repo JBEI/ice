@@ -34,6 +34,7 @@ import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.comment.UserComment;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
@@ -130,6 +131,31 @@ public class EntryPresenter extends AbstractPresenter {
         DeleteSequenceHandler deleteHandler = new DeleteSequenceHandler(service, eventBus);
         display.setDeleteSequenceHandler(deleteHandler);
         display.setSequenceDeleteHandler(new DeleteSequenceTraceHandler());
+        setCommentSubmitDelegate();
+    }
+
+    /**
+     * Sets delegate used by EntryCommentPanel to submit user comments for current entry
+     */
+    public void setCommentSubmitDelegate() {
+        display.addSubmitCommentDelegate(new ServiceDelegate<UserComment>() {
+            @Override
+            public void execute(final UserComment comment) {
+                new IceAsyncCallback<UserComment>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<UserComment> callback) throws AuthenticationException {
+                        comment.setEntryId(currentInfo.getId());
+                        service.sendComment(ClientController.sessionId, comment, callback);
+                    }
+
+                    @Override
+                    public void onSuccess(UserComment result) {
+                        display.addComment(result);
+                    }
+                }.go(eventBus);
+            }
+        });
     }
 
     public void setCurrentContext(EntryContext context) {

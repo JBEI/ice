@@ -437,9 +437,6 @@ public class EntryUtil {
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
-        } catch (PermissionException e) {
-            Logger.warn(e.getMessage());
-            return null;
         }
 
         return resultStrains;

@@ -17,6 +17,7 @@ import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.shared.dto.comment.UserComment;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
@@ -207,4 +208,6 @@ public interface RegistryService extends RemoteService {
     Boolean sendMessage(String sid, MessageInfo info) throws AuthenticationException;
 
     Boolean rebuildSearchIndex(String sessionId) throws AuthenticationException;
+
+    UserComment sendComment(String sid, UserComment comment) throws AuthenticationException;
 }

@@ -57,23 +57,18 @@ public class PermissionsController {
 
         EntryController entryController = ControllerFactory.getEntryController();
 
-        try {
-            if (info.isEntry()) {
-                entry = entryController.get(requestingAccount, info.getTypeId());
-                if (entry == null)
-                    throw new ControllerException("Cannot find entry " + info.getTypeId());
+        if (info.isEntry()) {
+            entry = entryController.get(requestingAccount, info.getTypeId());
+            if (entry == null)
+                throw new ControllerException("Cannot find entry " + info.getTypeId());
 
-                // can user modify permissions for entry
-                if (!hasWritePermission(requestingAccount, entry))
-                    throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + info.toString());
-            } else if (info.isFolder()) {
-                folder = folderController.getFolderById(info.getTypeId());
-                if (!hasWritePermission(requestingAccount, folder))
-                    throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + info.toString());
-            }
-        } catch (PermissionException pe) {
-            Logger.error(pe);
-            throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + info.toString());
+            // can user modify permissions for entry
+            if (!hasWritePermission(requestingAccount, entry))
+                throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + info.toString());
+        } else if (info.isFolder()) {
+            folder = folderController.getFolderById(info.getTypeId());
+            if (!hasWritePermission(requestingAccount, folder))
+                throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + info.toString());
         }
 
         // account or group
@@ -118,23 +113,18 @@ public class PermissionsController {
 
         EntryController entryController = ControllerFactory.getEntryController();
 
-        try {
-            if (info.isEntry()) {
-                entry = entryController.get(requestingAccount, info.getTypeId());
-                if (entry == null)
-                    throw new ControllerException("Cannot find entry " + info.getTypeId());
+        if (info.isEntry()) {
+            entry = entryController.get(requestingAccount, info.getTypeId());
+            if (entry == null)
+                throw new ControllerException("Cannot find entry " + info.getTypeId());
 
-                // can user modify permissions for entry
-                if (!hasWritePermission(requestingAccount, entry))
-                    throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + info.toString());
-            } else if (info.isFolder()) {
-                folder = folderController.getFolderById(info.getTypeId());
-                if (!hasWritePermission(requestingAccount, folder))
-                    throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + info.toString());
-            }
-        } catch (PermissionException pe) {
-            Logger.error(pe);
-            throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + info.toString());
+            // can user modify permissions for entry
+            if (!hasWritePermission(requestingAccount, entry))
+                throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + info.toString());
+        } else if (info.isFolder()) {
+            folder = folderController.getFolderById(info.getTypeId());
+            if (!hasWritePermission(requestingAccount, folder))
+                throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + info.toString());
         }
 
         // account or group

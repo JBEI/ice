@@ -17,7 +17,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.IceXlsSerializer;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
 import org.jbei.ice.lib.utils.UtilityException;
@@ -82,7 +81,7 @@ public class EntryExportServlet extends HttpServlet {
             } catch (NumberFormatException nfe) {
                 Logger.error("Could not convert string id to long : " + idStr);
                 continue;
-            } catch (ControllerException | PermissionException e) {
+            } catch (ControllerException e) {
                 Logger.error(e);
                 continue;
             }

@@ -46,6 +46,7 @@ import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.shared.dto.comment.UserComment;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
@@ -340,9 +341,8 @@ public class EntryController {
      * @param id      unique local identifier for entry
      * @return entry retrieved from the database.
      * @throws ControllerException
-     * @throws PermissionException
      */
-    public Entry get(Account account, long id) throws ControllerException, PermissionException {
+    public Entry get(Account account, long id) throws ControllerException {
         Entry entry;
 
         try {
@@ -352,7 +352,7 @@ public class EntryController {
         }
 
         if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
-            throw new PermissionException(account.getEmail() + ": No read permission for entry " + id);
+            throw new ControllerException(account.getEmail() + ": No read permission for entry " + id);
         }
 
         return entry;
@@ -541,7 +541,7 @@ public class EntryController {
         }
     }
 
-    public Entry update(Account account, Entry entry, ArrayList<PermissionInfo> permissions)
+    public Entry update(Account account, Entry entry)
             throws ControllerException, PermissionException {
         if (entry == null) {
             throw new ControllerException("Failed to update null entry!");
@@ -557,14 +557,6 @@ public class EntryController {
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
             savedEntry = dao.updateEntry(entry);
-
-//            if (permissions != null && !permissions.isEmpty()) {
-//                permissionsController.clearPermissions(account, entry);
-//                for (PermissionInfo permissionInfo : permissions) {
-//                    permissionInfo.setTypeId(entry.getId());
-//                    permissionsController.addPermission(account, permissionInfo);
-//                }
-//            }
 
             if (scheduleRebuild) {
                 ApplicationController.scheduleBlastIndexRebuildTask(true);
@@ -668,6 +660,17 @@ public class EntryController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public UserComment addCommentToEntry(Account account, UserComment userComment) throws ControllerException {
+        Entry entry = get(account, userComment.getEntryId());
+        Comment comment = new Comment(entry, account, userComment.getMessage());
+        try {
+            comment = commentDAO.save(comment);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+        return Comment.toDTO(comment);
     }
 
     public EntryInfo retrieveEntryDetails(Account account, Entry entry) throws ControllerException {

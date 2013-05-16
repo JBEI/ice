@@ -91,4 +91,8 @@ public interface IEntryView {
     void showEntryDetailView();
 
     ArrayList<AttachmentItem> getAttachmentItems();
+
+    void addSubmitCommentDelegate(ServiceDelegate<UserComment> delegate);
+
+    void addComment(UserComment comment);
 }

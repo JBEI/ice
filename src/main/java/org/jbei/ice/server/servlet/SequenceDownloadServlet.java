@@ -25,7 +25,6 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.permissions.PermissionException;
 
 import org.apache.commons.io.IOUtils;
 
@@ -69,9 +68,6 @@ public class SequenceDownloadServlet extends HttpServlet {
             entry = entryController.get(account, Long.parseLong(entryId));
         } catch (NumberFormatException | ControllerException e) {
             Logger.error(e);
-            return;
-        } catch (PermissionException e) {
-            Logger.warn(e.getMessage());
             return;
         }
 

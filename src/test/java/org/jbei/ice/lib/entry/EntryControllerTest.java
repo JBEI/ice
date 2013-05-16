@@ -17,6 +17,8 @@ import org.jbei.ice.server.InfoToModelFactory;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountType;
+import org.jbei.ice.shared.dto.comment.UserComment;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 import org.jbei.ice.shared.dto.entry.StrainInfo;
@@ -224,7 +226,7 @@ public class EntryControllerTest {
 
         Entry entry = InfoToModelFactory.infoToEntry(info, existing);
 
-        Entry updated = controller.update(account, entry, info.getPermissions());
+        Entry updated = controller.update(account, entry);
         Assert.assertNotNull(updated);
     }
 
@@ -252,6 +254,33 @@ public class EntryControllerTest {
         String partNumber = plasmid.getOnePartNumber().getPartNumber();
         result = controller.getByName(creator, partNumber);
         Assert.assertNull(result);
+    }
+
+    @Test
+    public void testAddComment() throws Exception {
+        Account creator = createTestAccount("testAddComment", false);
+
+        PlasmidInfo info = new PlasmidInfo();
+        info.setType(EntryType.PLASMID);
+        info.setBioSafetyLevel(1);
+        info.setOriginOfReplication("kanamycin");
+        info.setCircular(false);
+        info.setOwnerEmail(info.getCreatorEmail());
+        info.setOwner(info.getCreator());
+        info.setShortDescription("testing");
+        info.setStatus("Complete");
+        info.setName("pSTC1000");
+
+        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        plasmid = controller.createEntry(creator, plasmid);
+        Assert.assertNotNull(plasmid);
+        UserComment comment = new UserComment("This is a test");
+        comment.setEntryId(plasmid.getId());
+        comment = controller.addCommentToEntry(creator, comment);
+        Assert.assertNotNull(comment);
+        EntryInfo entryInfo = controller.retrieveEntryDetails(creator, plasmid);
+        Assert.assertNotNull(entryInfo);
+        Assert.assertEquals(1, entryInfo.getComments().size());
     }
 
     @Test

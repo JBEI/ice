@@ -12,7 +12,6 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 
@@ -83,9 +82,6 @@ public class SequenceUploadServlet extends UploadAction {
         } catch (ControllerException e1) {
             Logger.error(e1);
             return "Could not retrieve entry with id " + entryId;
-        } catch (PermissionException e1) {
-            Logger.error(e1);
-            return "User does not have permissions to modify entry with id " + entryId;
         }
 
         if ("file".equalsIgnoreCase(type)) {

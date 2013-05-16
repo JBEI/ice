@@ -98,6 +98,24 @@ public class EntryViewMenu extends Composite implements HasClickHandlers {
         return addDomHandler(handler, ClickEvent.getType());
     }
 
+    /**
+     * Increments specified menu's count by 1
+     *
+     * @param menu menu whose count is to be incremented
+     */
+    public void incrementMenuCount(Menu menu) {
+        if (menu == Menu.GENERAL)
+            return;
+
+        MenuItem item = itemHashMap.get(menu.ordinal());
+        if (item == null)
+            return;
+        item.setCount(item.getCount() + 1);
+        String html = menu.toString() + "<span style=\"float: right; color: #999;\">" + formatNumber(item.getCount())
+                + "</span>";
+        table.setHTML(menu.ordinal(), 0, html);
+    }
+
     public void updateMenuCount(Menu menu, int count) {
         if (menu == Menu.GENERAL)
             return;

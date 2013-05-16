@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.dto.comment.UserComment;
@@ -28,6 +29,7 @@ public class EntryCommentPanel extends Composite {
 
     private final FlexTable table;
     private AddCommentPanel commentArea;
+    private ServiceDelegate<UserComment> delegate;
 
     public EntryCommentPanel() {
         table = new FlexTable();
@@ -52,6 +54,7 @@ public class EntryCommentPanel extends Composite {
         table.setHTML(3, 0, "<i class=\"font-75em pad-8\">No comments available</i>");
 
         setCancelHandler();
+        setSubmitHandler();
     }
 
     protected void setCancelHandler() {
@@ -64,12 +67,19 @@ public class EntryCommentPanel extends Composite {
         });
     }
 
-    public void setCommentSubmitHandler(ClickHandler handler) {
-        commentArea.setSubmitHandler(handler);
+    protected void setSubmitHandler() {
+        commentArea.setSubmitHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (delegate == null)
+                    return;
+                delegate.execute(commentArea.getUserComment());
+            }
+        });
     }
 
-    public String getComment() {
-        return commentArea.getCommentString();
+    public void setCommentSubmitDelegate(ServiceDelegate<UserComment> delegate) {
+        this.delegate = delegate;
     }
 
     public void setData(ArrayList<UserComment> data) {
@@ -85,18 +95,18 @@ public class EntryCommentPanel extends Composite {
         for (UserComment comment : data) {
             // display comment
             FlexTable commentTable = new FlexTable();
-            commentTable.setHTML(0, 0, "Submitted by <a href=\"#" + Page.PROFILE.getLink() + ";id="
+            commentTable.setHTML(0, 0, "<br>Submitted by <a href=\"#" + Page.PROFILE.getLink() + ";id="
                     + comment.getUser().getId() + ";s=profile"
                     + "\">" + comment.getUser().getFullName() + "</a> on "
                     + DateUtilities.formatDate(comment.getCommentDate()) + ": ");
             commentTable.getFlexCellFormatter().setStyleName(0, 0, "font-75em");
             commentTable.getFlexCellFormatter().setColSpan(0, 0, 3);
 
-            commentTable.setHTML(1, 0, "<i style=\"font-size: 2em; color: #dedede\" class=\""
+            commentTable.setHTML(1, 0, "<i style=\"font-size: 1em; color: #eee\" class=\""
                     + FAIconType.QUOTE_LEFT.getStyleName() + "\"></i>");
-            commentTable.setHTML(2, 1, comment.getMessage());
-            commentTable.getFlexCellFormatter().setWidth(1, 1, "300px");
-            commentTable.setHTML(3, 2, "<i style=\"font-size: 2em; color: #dedede\" class=\""
+            commentTable.setHTML(2, 1, "<span style=\"padding: 2px\">" + comment.getMessage() + "</span>");
+            commentTable.getFlexCellFormatter().setWidth(1, 1, "350px");
+            commentTable.setHTML(3, 2, "<i style=\"font-size: 1em; color: #eee\" class=\""
                     + FAIconType.QUOTE_RIGHT.getStyleName() + "\"></i>");
             commentTable.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
 
@@ -107,20 +117,21 @@ public class EntryCommentPanel extends Composite {
     }
 
     public void addComment(UserComment comment) {
+        table.getFlexCellFormatter().setVisible(2, 0, false);
         int row = table.getRowCount() + 3;
         FlexTable commentTable = new FlexTable();
-        commentTable.setHTML(0, 0, "Submitted by <a href=\"#" + Page.PROFILE.getLink() + ";id="
+        commentTable.setHTML(0, 0, "<br>Submitted by <a href=\"#" + Page.PROFILE.getLink() + ";id="
                 + comment.getUser().getId() + ";s=profile"
                 + "\">" + comment.getUser().getFullName() + "</a> on "
                 + DateUtilities.formatDate(comment.getCommentDate()) + ": ");
         commentTable.getFlexCellFormatter().setStyleName(0, 0, "font-75em");
         commentTable.getFlexCellFormatter().setColSpan(0, 0, 3);
 
-        commentTable.setHTML(1, 0, "<i style=\"font-size: 2em; color: #dedede\" class=\""
+        commentTable.setHTML(1, 0, "<i style=\"font-size: 1em; color: #eee\" class=\""
                 + FAIconType.QUOTE_LEFT.getStyleName() + "\"></i>");
-        commentTable.setHTML(2, 1, comment.getMessage());
-        commentTable.getFlexCellFormatter().setWidth(1, 1, "300px");
-        commentTable.setHTML(3, 2, "<i style=\"font-size: 2em; color: #dedede\" class=\""
+        commentTable.setHTML(2, 1, "<span style=\"padding: 2px\">" + comment.getMessage() + "</span>");
+        commentTable.getFlexCellFormatter().setWidth(1, 1, "350px");
+        commentTable.setHTML(3, 2, "<i style=\"font-size: 1em; color: #eee\" class=\""
                 + FAIconType.QUOTE_RIGHT.getStyleName() + "\"></i>");
         commentTable.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
 
@@ -184,8 +195,8 @@ public class EntryCommentPanel extends Composite {
             cancel.addClickHandler(handler);
         }
 
-        public String getCommentString() {
-            return area.getText().trim();
+        public UserComment getUserComment() {
+            return new UserComment(area.getText().trim());
         }
     }
 }

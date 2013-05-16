@@ -492,7 +492,7 @@ public class RegistryAPI implements IRegistryAPI {
         try {
             EntryController entryController = ControllerFactory.getEntryController();
 
-            savedEntry = entryController.update(account, updateEntry(account, plasmid), null);
+            savedEntry = entryController.update(account, updateEntry(account, plasmid));
 
             log("User '" + account.getEmail() + "' update plasmid: '" + savedEntry.getRecordId()
                         + "', " + savedEntry.getId());
@@ -531,7 +531,7 @@ public class RegistryAPI implements IRegistryAPI {
 
         try {
             EntryController entryController = ControllerFactory.getEntryController();
-            savedEntry = entryController.update(account, updateEntry(account, strain), null);
+            savedEntry = entryController.update(account, updateEntry(account, strain));
             log("User '" + account.getEmail() + "' update strain: '" + savedEntry.getRecordId()
                         + "', " + savedEntry.getId());
         } catch (ControllerException e) {
@@ -568,7 +568,7 @@ public class RegistryAPI implements IRegistryAPI {
 
         try {
             EntryController entryController = ControllerFactory.getEntryController();
-            savedEntry = entryController.update(account, updateEntry(account, part), null);
+            savedEntry = entryController.update(account, updateEntry(account, part));
 
             log("User '" + account.getEmail() + "' update part: '" + savedEntry.getRecordId()
                         + "', " + savedEntry.getId());

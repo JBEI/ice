@@ -17,6 +17,7 @@ import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.shared.dto.comment.UserComment;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
@@ -234,4 +235,6 @@ public interface RegistryServiceAsync {
     void markMessageRead(String sessionId, long id, AsyncCallback<Integer> async);
 
     void rebuildSearchIndex(String sessionId, AsyncCallback<Boolean> callback);
+
+    void sendComment(String sid, UserComment comment, AsyncCallback<UserComment> callback);
 }

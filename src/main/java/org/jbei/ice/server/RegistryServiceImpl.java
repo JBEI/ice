@@ -69,6 +69,7 @@ import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.autocomplete.AutoCompleteSuggestion;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.shared.dto.comment.UserComment;
 import org.jbei.ice.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
@@ -208,8 +209,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         sequenceString = sequence.getSequence();
                 }
                 entrySeq.put(entry, sequenceString);
-            } catch (ControllerException | PermissionException e) {
-                Logger.warn(e.getMessage());
+            } catch (ControllerException e) {
+                Logger.error(e);
                 continue;
             }
         }
@@ -641,8 +642,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         } catch (ControllerException | DAOException e) {
             Logger.error(e);
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
         }
 
         return null;
@@ -911,15 +910,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Entry entry = null;
             EntryController entryController = ControllerFactory.getEntryController();
 
-            try {
-                entry = entryController.get(account, entryId);
-                if (entry == null) {
-                    Logger.info("Could not retrieve entry with id " + entryId);
-                    return false;
-                }
-            } catch (PermissionException e) {
-                Logger.warn(account.getEmail() + " attempting to retrieve entry " + entryId
-                                    + " but does not have permissions");
+            entry = entryController.get(account, entryId);
+            if (entry == null) {
+                Logger.info("Could not retrieve entry with id " + entryId);
+                return false;
             }
 
             SequenceController sequenceController = ControllerFactory.getSequenceController();
@@ -1348,9 +1342,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
-        } catch (PermissionException e) {
-            Logger.warn(e.getMessage());
-            return null;
         }
 
         SampleInfo sampleInfo = sampleStorage.getSample();
@@ -1428,7 +1419,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Entry existing = controller.getByRecordId(account, info.getRecordId());
 
             Entry entry = InfoToModelFactory.infoToEntry(info, existing);
-            controller.update(account, entry, info.getPermissions());
+            controller.update(account, entry);
             return true;
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1617,9 +1608,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         } catch (ControllerException e) {
             Logger.error(e);
             return false;
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
-            return false;
         }
 
         SequenceController sequenceController = ControllerFactory.getSequenceController();
@@ -1747,5 +1735,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public Boolean rebuildSearchIndex(String sid) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         return ControllerFactory.getSearchController().rebuildIndexes(account);
+    }
+
+    @Override
+    public UserComment sendComment(String sid, UserComment comment) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        Logger.info(account.getEmail() + ": adding comment to entry " + comment.getEntryId());
+        try {
+            return ControllerFactory.getEntryController().addCommentToEntry(account, comment);
+        } catch (ControllerException e) {
+            return null;
+        }
     }
 }
