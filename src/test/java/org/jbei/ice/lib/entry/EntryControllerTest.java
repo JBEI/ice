@@ -269,7 +269,7 @@ public class EntryControllerTest {
         info.setOwner(info.getCreator());
         info.setShortDescription("testing");
         info.setStatus("Complete");
-        info.setName("pSTC1000");
+        info.setName("pSTC1005");
 
         Entry plasmid = InfoToModelFactory.infoToEntry(info);
         plasmid = controller.createEntry(creator, plasmid);
