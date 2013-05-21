@@ -1,6 +1,8 @@
 package org.jbei.ice.client.bulkupload;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,6 +82,12 @@ public class SheetPresenter {
 
         this.currentInfo = info;
         if (info != null && info.getEntryList() != null) {
+            Collections.sort(info.getEntryList(), new Comparator<EntryInfo>() {
+                @Override
+                public int compare(EntryInfo o1, EntryInfo o2) {
+                    return o1.getCreationTime().compareTo(o2.getCreationTime());
+                }
+            });
             for (int i = 0; i < info.getEntryList().size(); i += 1) {
                 rowInfoMap.put(i, info.getEntryList().get(i));
             }
