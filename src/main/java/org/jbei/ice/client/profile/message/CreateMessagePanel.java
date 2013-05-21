@@ -41,9 +41,10 @@ public class CreateMessagePanel extends Composite {
     private Label cancel;
     private RecipientWidget recipientWidget;
     private ServiceDelegate<MessageInfo> sendMessageDelegate;
+    private final FlexTable layout;
 
     public CreateMessagePanel() {
-        FlexTable layout = new FlexTable();
+        layout = new FlexTable();
         initWidget(layout);
         initComponents();
 
@@ -105,6 +106,13 @@ public class CreateMessagePanel extends Composite {
                 dialogBox.hide();
             }
         });
+    }
+
+    public void setTo(String email) {
+        toBox.setText(email);
+        toBox.setEnabled(false);
+        layout.getFlexCellFormatter().setVisible(0, 0, false);
+        layout.getFlexCellFormatter().setVisible(0, 1, false);
     }
 
     protected void initComponents() {

@@ -1,11 +1,15 @@
 package org.jbei.ice.client.profile.widget;
 
 import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.client.profile.ChangePasswordPanel;
+import org.jbei.ice.client.profile.message.CreateMessagePanel;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.MessageInfo;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
@@ -26,6 +30,8 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
     private HandlerRegistration changeRegistration;
     private EditProfilePanel editProfilePanel;
     private ChangePasswordPanel changePasswordPanel;
+    private AccountInfo accountInfo;
+    private ServiceDelegate<MessageInfo> delegate;
 
     public ProfilePanel() {
         table = new FlexTable();
@@ -34,12 +40,11 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
         table.setWidth("100%");
         initWidget(table);
 
-        sendMessage = new Button("<i class=\"blue " + FAIconType.ENVELOPE.getStyleName() + "\"></i> " + "Send Message");
-        editProfile = new Button("<i class=\"blue " + FAIconType.EDIT.getStyleName() + "\"></i> " + "Edit Profile");
+        sendMessage = new Button("<i class=\"blue " + FAIconType.ENVELOPE.getStyleName() + "\"></i> Send Message");
+        editProfile = new Button("<i class=\"blue " + FAIconType.EDIT.getStyleName() + "\"></i> Edit Profile");
         editProfile.setVisible(false);
         changePasswordButton = new Button(
-                "<i style=\"color: #007dbc\" class=\"" + FAIconType.KEY.getStyleName() + "\"></i> "
-                        + "Change Password");
+                "<i style=\"color: #007dbc\" class=\"" + FAIconType.KEY.getStyleName() + "\"></i> Change Password");
         changePasswordButton.setVisible(false);
 
         String html = "<br><span id=\"send_message_btn\"></span>"
@@ -53,9 +58,31 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
 
         table.setWidget(0, 0, panel);
         table.setHTML(1, 0, "&nbsp;");
+        setSendMessageHandler();
+    }
+
+    public void setSendMessageDelegate(ServiceDelegate<MessageInfo> delegate) {
+        this.delegate = delegate;
+    }
+
+    protected void setSendMessageHandler() {
+        sendMessage.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (delegate == null)
+                    return;
+
+                CreateMessagePanel panel = new CreateMessagePanel();
+                if (accountInfo != null)
+                    panel.setTo(accountInfo.getEmail());
+                panel.setSendMessageDelegate(delegate);
+                panel.showDialog(true);
+            }
+        });
     }
 
     public void setAccountInfo(AccountInfo info) {
+        this.accountInfo = info;
         table.setHTML(1, 0, "<br><span style=\"padding: 10px 0 0 3px; font-size: 0.90em; color: #444\"> "
                 + info.getDescription() + "</span>");
         sendMessage.setVisible(!info.getEmail().equalsIgnoreCase(ClientController.account.getEmail()));

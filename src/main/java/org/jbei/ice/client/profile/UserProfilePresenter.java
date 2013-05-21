@@ -4,12 +4,14 @@ import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
 import org.jbei.ice.client.profile.widget.ProfilePanel;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.shared.dto.MessageInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -29,6 +31,7 @@ public class UserProfilePresenter extends PanelPresenter {
     public UserProfilePresenter(final RegistryServiceAsync service, HandlerManager eventBus, String uid) {
         super(service, eventBus);
         panel = new ProfilePanel();
+        panel.setSendMessageDelegate(new SendMessageDelegate());
         userId = uid;
     }
 
@@ -170,6 +173,24 @@ public class UserProfilePresenter extends PanelPresenter {
                     if (callback != null)
                         callback.onSuccess(result);
                 }
+            }.go(eventBus);
+        }
+    }
+
+    private class SendMessageDelegate implements ServiceDelegate<MessageInfo> {
+
+        @Override
+        public void execute(final MessageInfo messageInfo) {
+
+            new IceAsyncCallback<Boolean>() {
+
+                @Override
+                protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                    service.sendMessage(ClientController.sessionId, messageInfo, callback);
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {}
             }.go(eventBus);
         }
     }

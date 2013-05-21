@@ -109,10 +109,6 @@ public class UserMessagesPanel extends Composite implements IUserProfilePanel {
         table.redraw();
     }
 
-    public void closeDialog() {
-        createMessagePanel.showDialog(false);
-    }
-
     /**
      * Shows a detail view of a particular message
      */
