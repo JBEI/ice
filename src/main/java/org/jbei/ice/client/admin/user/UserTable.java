@@ -56,7 +56,7 @@ public class UserTable extends CellTable<AccountInfo> {
     }
 
     private void createColumns() {
-        createSelectionColumn();
+//        createSelectionColumn();
         createFirstNameColumn();
         createLastNameColumn();
         createEmailColumn();
