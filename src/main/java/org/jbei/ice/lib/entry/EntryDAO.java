@@ -321,7 +321,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                                       .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
                                       .add(Restrictions.isNull("visibility")));
 
-        entryCriteria.setProjection(Projections.rowCount());
+        entryCriteria.setProjection(Projections.countDistinct("id"));
         Number rowCount = (Number) entryCriteria.uniqueResult();
         return rowCount.longValue();
     }

@@ -13,6 +13,7 @@ import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.server.InfoToModelFactory;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.AccountInfo;
@@ -22,6 +23,8 @@ import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
@@ -295,6 +298,47 @@ public class EntryControllerTest {
 
     @Test
     public void testGetNumberOfVisibleEntries() throws Exception {
+        Account account1 = createTestAccount("testGetNumberOfVisibleEntries1", false);
+        PlasmidInfo info = new PlasmidInfo();
+        info.setType(EntryType.PLASMID);
+        info.setBioSafetyLevel(1);
+        info.setOriginOfReplication("kanamycin");
+        info.setCircular(false);
+        info.setOwnerEmail(info.getCreatorEmail());
+        info.setOwner(info.getCreator());
+        info.setShortDescription("testing");
+        info.setStatus("Complete");
+        info.setName("pSTC1005123q");
+        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        plasmid = controller.createEntry(account1, plasmid);
+        Assert.assertNotNull(plasmid);
+        long count = controller.getNumberOfVisibleEntries(account1);
+        Assert.assertEquals(1, count);
+
+        // add account 1 to group
+        GroupController groupController = ControllerFactory.getGroupController();
+        GroupInfo newGroup = new GroupInfo();
+        newGroup.setLabel("test Group");
+        newGroup.setDescription("test Group");
+        newGroup.setType(GroupType.PRIVATE);
+        newGroup = groupController.createGroup(account1, newGroup);
+        Assert.assertNotNull(newGroup);
+        Assert.assertTrue(newGroup.getId() > 0);
+        ArrayList<AccountInfo> members = new ArrayList<>();
+        members.add(Account.toDTO(account1));
+        Assert.assertNotNull(groupController.setGroupMembers(account1, newGroup, members));
+        PermissionInfo permission = new PermissionInfo();
+        permission.setArticle(PermissionInfo.Article.GROUP);
+        permission.setArticleId(newGroup.getId());
+        permission.setType(PermissionInfo.Type.READ_ENTRY);
+        permission.setTypeId(plasmid.getId());
+        ControllerFactory.getPermissionController().addPermission(account1, permission);
+
+        count = controller.getNumberOfVisibleEntries(account1);
+        Assert.assertEquals(1, count);
+
+        Account account2 = createTestAccount("testGetNumberOfVisibleEntries2", false);
+        Assert.assertEquals(0, controller.getNumberOfVisibleEntries(account2));
     }
 
     @Test
