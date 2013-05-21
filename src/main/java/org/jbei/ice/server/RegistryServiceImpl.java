@@ -305,7 +305,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             info.setUserEntryCount(ownerEntryCount);
 
             // get new message count
-            MessageController messageController = new MessageController();
+            MessageController messageController = ControllerFactory.getMessageController();
             int count = messageController.getNewMessageCount(account);
             info.setNewMessageCount(count);
             return info;
@@ -432,7 +432,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 info.setVisibleEntryCount(visibleEntryCount);
 
                 // get new message count
-                MessageController messageController = new MessageController();
+                MessageController messageController = ControllerFactory.getMessageController();
                 int count = messageController.getNewMessageCount(account);
                 info.setNewMessageCount(count);
 
@@ -471,7 +471,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public boolean promoteCollection(String sessionId, long id) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        Logger.info(account.getEmail() + ": promoting collection " + id);
+        Logger.info(account.getEmail() + ": promoting collection with id " + id);
         try {
             return ControllerFactory.getFolderController().promoteFolder(account, id);
         } catch (ControllerException ce) {
@@ -482,7 +482,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public boolean demoteCollection(String sessionId, long id) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        Logger.info(account.getEmail() + ": promoting collection " + id);
+        Logger.info(account.getEmail() + ": demoting collection with id " + id);
         try {
             return ControllerFactory.getFolderController().demoteFolder(account, id);
         } catch (ControllerException ce) {
@@ -656,7 +656,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entry == null)
                 return null;
 
-            SequenceAnalysisController controller = new SequenceAnalysisController();
+            SequenceAnalysisController controller = ControllerFactory.getSequenceAnalysisController();
             for (String id : fileId) {
                 TraceSequence sequence = controller.getTraceSequenceByFileId(id);
                 if (sequence == null) {
@@ -743,7 +743,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public SearchResults performSearch(String sid, SearchQuery query, boolean isWeb) throws AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sid);
-            SearchController search = new SearchController();
+            SearchController search = ControllerFactory.getSearchController();
             SearchResults searchResults = search.runSearch(account, query, isWeb);
             if (searchResults == null)
                 return null;
@@ -907,7 +907,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public boolean removeSequence(String sid, long entryId) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            Entry entry = null;
+            Entry entry;
             EntryController entryController = ControllerFactory.getEntryController();
 
             entry = entryController.get(account, entryId);
@@ -1043,7 +1043,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + " retrieving system settings");
-            ConfigurationController configurationController = new ConfigurationController();
+            ConfigurationController configurationController = ControllerFactory.getConfigurationController();
             HashMap<String, String> settings = configurationController.retrieveSystemSettings();
             return settings;
         } catch (ControllerException e) {
@@ -1060,7 +1060,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + " retrieving web of registry system settings");
-            ConfigurationController configurationController = new ConfigurationController();
+            ConfigurationController configurationController = ControllerFactory.getConfigurationController();
             HashMap<String, String> settings = new HashMap<>();
 
             String v = configurationController.getPropertyValue(ConfigurationKey.WEB_PARTNERS);
