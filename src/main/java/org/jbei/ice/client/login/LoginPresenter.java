@@ -176,8 +176,6 @@ public class LoginPresenter extends AbstractPresenter {
      */
     private void saveNewAccount(RegistrationDetails details) {
         AccountInfo info = new AccountInfo();
-// TODO : user ID
-
         info.setEmail(details.getEmail());
         info.setDescription(details.getAbout());
         info.setFirstName(details.getFirstName());

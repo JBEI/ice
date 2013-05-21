@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.group;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -348,28 +347,6 @@ public class GroupController {
     public long retrieveGroupMemberCount(String uuid) throws ControllerException {
         try {
             return dao.getMemberCount(uuid);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public void addMemberToGroup(long groupId, String email) throws ControllerException {
-        try {
-            Group group = dao.get(groupId);
-            if (group == null)
-                throw new ControllerException("Could not retrieve group with id " + groupId);
-
-            // public groups do not need to have members added
-            if (group.getUuid().equals(PUBLIC_GROUP_UUID))
-                return;
-
-            Account account = accountController.getByEmail(email);
-            if (account == null)
-                throw new ControllerException("Could not retrieve account " + email);
-
-            group.getMembers().add(account);
-            group.setModificationTime(new Date(System.currentTimeMillis()));
-            dao.update(group);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
