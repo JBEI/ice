@@ -566,7 +566,7 @@ public class CollectionMenu extends Composite {
                 groupString += (groupCount != 1 ? "s" : "");
                 html += "Shared with ";
                 if (userCount > 0 && groupCount > 0)
-                    html += (userString + "/" + groupString + " </span>");
+                    html += (userString + " & " + groupString + " </span>");
                 else if (userCount > 0)
                     html += (userString + " </span>");
                 else if (groupCount > 0)
