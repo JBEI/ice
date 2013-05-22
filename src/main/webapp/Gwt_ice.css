@@ -240,7 +240,7 @@ body {
     color: #999;
 }
 
-.delete_icon, .edit_icon, .add_icon {
+.delete_icon, .edit_icon, .add_icon, .flag_icon {
     display: inline;
     opacity: 0.3;
     cursor: pointer;
@@ -258,6 +258,11 @@ body {
 
 .add_icon:hover {
     color: green;
+    opacity: 1;
+}
+
+.flag_icon:hover {
+    color: #ff4500;
     opacity: 1;
 }
 

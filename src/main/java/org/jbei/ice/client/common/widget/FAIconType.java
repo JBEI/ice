@@ -84,6 +84,8 @@ public enum FAIconType {
     FILTER("icon-filter"),
     FIRE("icon-fire"),
     FLAG("icon-flag"),
+    FLAG_ALT("icon-flag-alt"),
+    FLAG_CHECKERED("icon-flag-checkered"),
     FOLDER_CLOSE("icon-folder-close"),
     FOLDER_CLOSE_ALT("icon-folder-close-alt"),
     FOLDER_OPEN("icon-folder-open"),
