@@ -257,11 +257,6 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                         ClientController.sessionId = null;
                         ClientController.account = null;
                         Cookies.removeCookie(COOKIE_NAME);
-//                        if (Page.LOGIN.getToken().equals(History.getToken()))
-//                            History.fireCurrentHistoryState();
-//                        else
-//                            History.newItem(Page.LOGIN.getLink());
-
                         new LoginPresenter(service, eventBus, new LoginView()).go(container);
                     }
                 }
@@ -277,10 +272,6 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                 }
             });
         } else {
-//            if (Page.LOGIN.getLink().equals(History.getToken()))
-//                History.fireCurrentHistoryState();
-//            else
-//                History.newItem(Page.LOGIN.getLink());
             new LoginPresenter(service, eventBus, new LoginView()).go(container);
         }
     }

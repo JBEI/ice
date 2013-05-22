@@ -32,20 +32,24 @@ public class EntryCommentPanel extends Composite {
     private final FlexTable table;
     private AddCommentPanel commentArea;
     private ServiceDelegate<UserComment> delegate;
+    private boolean hasData;
+    private Button addCommentButton;
 
     public EntryCommentPanel() {
         table = new FlexTable();
         initWidget(table);
         table.setWidth("100%");
 
-        Button addCommentButton = new Button(
-                "<i class=\"" + FAIconType.COMMENT_ALT.getStyleName() + "\"></i> Add Comment");
+        addCommentButton = new Button("<i class=\"" + FAIconType.COMMENT_ALT.getStyleName() + "\"></i> Add Comment");
         commentArea = new AddCommentPanel();
 
         addCommentButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 table.getFlexCellFormatter().setVisible(2, 0, true);
+                if (!hasData) {
+                    table.getFlexCellFormatter().setVisible(3, 0, false);
+                }
             }
         });
 
@@ -60,6 +64,15 @@ public class EntryCommentPanel extends Composite {
     }
 
     public void setSampleOptions(ArrayList<SampleStorage> sampleOptions) {
+        hasData = sampleOptions != null && !sampleOptions.isEmpty();
+        if (!hasData) {
+            table.clear();
+            table.setWidget(0, 0, addCommentButton);
+            table.setHTML(1, 0, "");
+            table.setWidget(2, 0, commentArea);
+            table.getFlexCellFormatter().setVisible(2, 0, false);
+            table.setHTML(3, 0, "<i class=\"font-75em pad-8\">No comments available</i>");
+        }
         commentArea.setSampleOptions(sampleOptions);
     }
 
@@ -69,6 +82,9 @@ public class EntryCommentPanel extends Composite {
             public void onClick(ClickEvent event) {
                 commentArea.reset();
                 table.getFlexCellFormatter().setVisible(2, 0, false);
+                if (!hasData) {
+                    table.getFlexCellFormatter().setVisible(3, 0, true);
+                }
             }
         });
     }
@@ -124,7 +140,7 @@ public class EntryCommentPanel extends Composite {
 
     public void addComment(UserComment comment) {
         table.getFlexCellFormatter().setVisible(2, 0, false);
-        int row = table.getRowCount() + 3;
+        int row = table.getRowCount() + 2;
         FlexTable commentTable = new FlexTable();
         commentTable.setHTML(0, 0, "<br>Submitted by <a href=\"#" + Page.PROFILE.getLink() + ";id="
                 + comment.getUser().getId() + ";s=profile"
@@ -185,6 +201,11 @@ public class EntryCommentPanel extends Composite {
         }
 
         public void setSampleOptions(ArrayList<SampleStorage> samples) {
+            sampleOptions.clear();
+            sampleOptions.addItem("None");
+            sampleOptions.addItem("All");
+            reset();
+
             if (samples == null || samples.isEmpty()) {
                 sampleOptions.setEnabled(false);
                 return;
@@ -193,6 +214,8 @@ public class EntryCommentPanel extends Composite {
             for (SampleStorage storage : samples) {
                 sampleOptions.addItem(storage.getSample().getLabel());
             }
+            sampleOptions.setEnabled(true);
+            hasData = true;
         }
 
         public boolean validate() {
@@ -243,11 +266,11 @@ public class EntryCommentPanel extends Composite {
                     txt += (text + ",");
                 }
                 txt += sampleOptions.getItemText(sampleOptions.getItemCount() - 1);
-                return new UserComment("<b>Affected Samples: </b>" + txt + "<br>" + area.getText().trim());
+                return new UserComment("<b>Affected Samples: </b>" + txt + "<br><br>" + area.getText().trim());
             }
 
             String txt = sampleOptions.getItemText(sampleOptions.getSelectedIndex());
-            return new UserComment("<b>Affected Sample: </b>" + txt + "<br>" + area.getText().trim());
+            return new UserComment("<b>Affected Sample: </b>" + txt + "<br><br>" + area.getText().trim());
         }
     }
 }
