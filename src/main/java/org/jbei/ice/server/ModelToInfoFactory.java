@@ -246,7 +246,8 @@ public class ModelToInfoFactory {
         info.setEcotype(seed.getEcotype());
         info.setParents(seed.getParents());
         info.setHarvestDate(seed.getHarvestDate());
-        info.setSentToAbrc(seed.isSentToABRC());
+        boolean isSent = seed.isSentToABRC() == null || !seed.isSentToABRC() ? false : true;
+        info.setSentToAbrc(isSent);
 
         return info;
     }
