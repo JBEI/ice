@@ -347,12 +347,13 @@ public class InfoToModelFactory {
     /**
      * Updates the entry based on the field that is specified. Mainly created for use by the bulk import auto update
      *
-     * @param entry entry to be updated
-     * @param value value to be set
-     * @param field to set
-     * @return updated entry
+     * @param entry   entry to be updated
+     * @param plasmid should be set if updating strain with plasmid
+     * @param value   value to be set
+     * @param field   to set
+     * @return updated entry array containing both entry and plasmid. if plasmid is null only entry is returned
      */
-    public static Entry infoToEntryForField(Entry entry, String value, EntryField field) {
+    public static Entry[] infoToEntryForField(Entry entry, Entry plasmid, String value, EntryField field) {
         switch (field) {
             case PI: {
                 Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
@@ -377,6 +378,10 @@ public class InfoToModelFactory {
 
                 entry.setEntryFundingSources(fundingSources);
                 entryFundingSource.setEntry(entry);
+                if (plasmid != null) {
+                    plasmid.setEntryFundingSources(fundingSources);
+                    entryFundingSource.setEntry(plasmid);
+                }
                 break;
             }
 
@@ -403,20 +408,28 @@ public class InfoToModelFactory {
 
                 entry.setEntryFundingSources(fundingSources);
                 entryFundingSource.setEntry(entry);
+                if (plasmid != null) {
+                    plasmid.setEntryFundingSources(fundingSources);
+                    entryFundingSource.setEntry(plasmid);
+                }
                 break;
             }
 
             case IP:
                 entry.setIntellectualProperty(value);
+                if (plasmid != null)
+                    plasmid.setIntellectualProperty(value);
                 break;
 
             case BIOSAFETY_LEVEL:
                 Integer level = BioSafetyOption.intValue(value);
                 entry.setBioSafetyLevel(level);
+                if (plasmid != null) {
+                    plasmid.setBioSafetyLevel(level);
+                }
                 break;
 
             case NAME:
-            case PLASMID_NAME:
             case STRAIN_NAME:
                 HashSet<Name> names = new HashSet<>();
                 Name name = new Name(value, entry);
@@ -424,39 +437,61 @@ public class InfoToModelFactory {
                 entry.setNames(names);
                 break;
 
+            case PLASMID_NAME:
+                names = new HashSet<>();
+                name = new Name(value, plasmid);
+                names.add(name);
+                plasmid.setNames(names);
+                break;
+
             case ALIAS:
-            case PLASMID_ALIAS:
             case STRAIN_ALIAS:
                 entry.setAlias(value);
                 break;
 
+            case PLASMID_ALIAS:
+                plasmid.setAlias(value);
+                break;
+
             case KEYWORDS:
             case STRAIN_KEYWORDS:
-            case PLASMID_KEYWORDS:
                 entry.setKeywords(value);
+                break;
+
+            case PLASMID_KEYWORDS:
+                plasmid.setKeywords(value);
                 break;
 
             case SUMMARY:
             case STRAIN_SUMMARY:
-            case PLASMID_SUMMARY:
                 entry.setShortDescription(value);
+                break;
+
+            case PLASMID_SUMMARY:
+                plasmid.setShortDescription(value);
                 break;
 
             case NOTES:
             case STRAIN_NOTES:
-            case PLASMID_NOTES:
                 entry.setLongDescription(value);
                 entry.setLongDescriptionType("text");
                 break;
 
+            case PLASMID_NOTES:
+                plasmid.setLongDescription(value);
+                plasmid.setLongDescriptionType("text");
+                break;
+
             case REFERENCES:
-            case PLASMID_REFERENCES:
             case STRAIN_REFERENCES:
                 entry.setReferences(value);
                 break;
 
+            case PLASMID_REFERENCES:
+                plasmid.setReferences(value);
+                break;
+
             case LINKS:
-            case PLASMID_LINKS:
             case STRAIN_LINKS:
                 HashSet<Link> links = new HashSet<>();
                 Link link = new Link();
@@ -466,18 +501,36 @@ public class InfoToModelFactory {
                 entry.setLinks(links);
                 break;
 
+            case PLASMID_LINKS:
+                links = new HashSet<>();
+                link = new Link();
+                link.setLink(value);
+                link.setEntry(plasmid);
+                links.add(link);
+                plasmid.setLinks(links);
+                break;
+
             case STATUS:
-            case PLASMID_STATUS:
                 entry.setStatus(value);
                 break;
 
+            case PLASMID_STATUS:
+                plasmid.setStatus(value);
+                break;
+
             case SELECTION_MARKERS:
-            case PLASMID_SELECTION_MARKERS:
             case STRAIN_SELECTION_MARKERS:
                 HashSet<SelectionMarker> markers = new HashSet<>();
                 SelectionMarker marker = new SelectionMarker(value, entry);
                 markers.add(marker);
                 entry.setSelectionMarkers(markers);
+                break;
+
+            case PLASMID_SELECTION_MARKERS:
+                markers = new HashSet<>();
+                marker = new SelectionMarker(value, plasmid);
+                markers.add(marker);
+                plasmid.setSelectionMarkers(markers);
                 break;
 
             case PARENTAL_STRAIN:
@@ -506,7 +559,10 @@ public class InfoToModelFactory {
                 entry = infoToSeedForField(entry, value, field);
                 break;
         }
-        return entry;
+        if (plasmid == null)
+            return new Entry[]{entry};
+
+        return new Entry[]{entry, plasmid};
     }
 
     private static Entry infoToStrainForField(Entry entry, String value, EntryField field) {

@@ -565,15 +565,16 @@ public class BulkUploadController {
                 String value = set.getValue();
                 EntryField field = set.getKey();
 
-                if (otherEntry != null) {
-                    otherEntry = InfoToModelFactory.infoToEntryForField(otherEntry, value, field);
+                Entry[] ret = InfoToModelFactory.infoToEntryForField(entry, otherEntry, value, field);
+                entry = ret[0];
+                if (entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
+                    entry.setVisibility(Visibility.DRAFT.getValue());
+
+                if (ret.length == 2) {
+                    otherEntry = ret[1];
                     if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
                         otherEntry.setVisibility(Visibility.DRAFT.getValue());
                 }
-
-                entry = InfoToModelFactory.infoToEntryForField(entry, value, field);
-                if (entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
-                    entry.setVisibility(Visibility.DRAFT.getValue());
             }
 
             if (otherEntry != null)

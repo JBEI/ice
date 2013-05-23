@@ -143,7 +143,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public BulkUploadAutoUpdate autoUpdateBulkUpload(String sid, BulkUploadAutoUpdate wrapper, EntryAddType addType)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        Logger.info(account.getEmail() + " " + wrapper.toString());
+        Logger.info(account.getEmail() + ": " + wrapper.toString());
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         try {
             return controller.autoUpdateBulkUpload(account, wrapper, addType);

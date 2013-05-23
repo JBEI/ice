@@ -410,11 +410,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     @Override
     public void setUpdatingVisibility(boolean visible) {
         if (visible) {
-            updating.setHTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
+            updating.setHTML("&nbsp;<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
                                      + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
         } else {
             updating.setHTML(
-                    "<span style=\"font-size: 11px; font-weight: normal; vertical-align: middle; color: #999\">"
+                    "&nbsp;<span style=\"font-size: 11px; font-weight: normal; vertical-align: middle; color: #999\">"
                             + "Updated: " + lastUpdated + "</span>");
         }
         updating.setVisible(true);

@@ -258,15 +258,13 @@ public class SheetPresenter {
             boolean isPlasmid = StrainWithPlasmidHeaders.isPlasmidHeader(header.getHeaderType());
 
             if (isPlasmid) {
-                // if updating plasmid portion of strain with one plasmid
                 entryType = EntryType.PLASMID;
-                if (rowInfo != null && rowInfo.getInfo() != null)
-                    entryId = rowInfo.getInfo().getId();
             } else {
                 entryType = EntryType.STRAIN;
-                if (rowInfo != null) {
-                    entryId = rowInfo.getId();
-                }
+            }
+
+            if (rowInfo != null) {
+                entryId = rowInfo.getId();
             }
         } else {
             entryType = EntryAddType.addTypeToType(type);
