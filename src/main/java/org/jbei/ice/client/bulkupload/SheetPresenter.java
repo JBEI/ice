@@ -493,6 +493,8 @@ public class SheetPresenter {
 
             int col = 0;
             for (CellColumnHeader header : headers.getHeaders()) {
+                if (header.isLocked())
+                    continue;
                 SheetCell cell = header.getCell();
                 view.clearErrorCell(row, col);
                 atLeastOneCellHasRowData = (cell.getDataForRow(row) != null);
