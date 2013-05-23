@@ -505,6 +505,9 @@ public class BulkUploadController {
                 case ARABIDOPSIS:
                     entry = new ArabidopsisSeed();
                     break;
+
+                default:
+                    throw new ControllerException("Don't know what to do with entry type");
             }
 
             entry.setOwner(account.getFullName());
@@ -515,37 +518,34 @@ public class BulkUploadController {
 
             // creates strain/plasmid at the same time for strain with plasmid
             if (addType == EntryAddType.STRAIN_WITH_PLASMID) {
-                switch (autoUpdate.getType()) {
-                    case STRAIN:
-                        // created strain, now create plasmid
-                        otherEntry = new Plasmid();
-                        otherEntry.setOwner(account.getFullName());
-                        otherEntry.setOwnerEmail(account.getEmail());
-                        otherEntry.setCreator(account.getFullName());
-                        otherEntry.setCreatorEmail(account.getEmail());
-                        otherEntry.setVisibility(Visibility.DRAFT.getValue());
-                        entryController.createEntry(account, otherEntry, null);
-                        // link the plasmid to strain (strain gets updated later on)
-                        String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX)
-                                + ":" + otherEntry.getOnePartNumber().getPartNumber() + "|"
-                                + otherEntry.getOnePartNumber().getPartNumber() + "]]";
-                        ((Strain) entry).setPlasmids(plasmidPartNumberString);
-                        break;
-
-                    case PLASMID:
-                        // created plasmid, now create strain and link
-                        plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX)
-                                + ":" + entry.getOnePartNumber().getPartNumber() + "|"
-                                + entry.getOnePartNumber().getPartNumber() + "]]";
-                        otherEntry = entry;
-                        entry = new Strain();
-                        entry.setOwner(account.getFullName());
-                        entry.setOwnerEmail(account.getEmail());
-                        entry.setCreator(account.getFullName());
-                        entry.setCreatorEmail(account.getEmail());
-                        ((Strain) entry).setPlasmids(plasmidPartNumberString);
-                        entry.setVisibility(Visibility.DRAFT.getValue());
-                        entryController.createEntry(account, entry, null);
+                if (autoUpdate.getType() == EntryType.STRAIN) {
+                    // created strain, now create plasmid
+                    otherEntry = new Plasmid();
+                    otherEntry.setOwner(account.getFullName());
+                    otherEntry.setOwnerEmail(account.getEmail());
+                    otherEntry.setCreator(account.getFullName());
+                    otherEntry.setCreatorEmail(account.getEmail());
+                    otherEntry.setVisibility(Visibility.DRAFT.getValue());
+                    entryController.createEntry(account, otherEntry, null);
+                    // link the plasmid to strain (strain gets updated later on)
+                    String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX)
+                            + ":" + otherEntry.getOnePartNumber().getPartNumber() + "|"
+                            + otherEntry.getOnePartNumber().getPartNumber() + "]]";
+                    ((Strain) entry).setPlasmids(plasmidPartNumberString);
+                } else {
+                    // created plasmid, now create strain and link
+                    String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX)
+                            + ":" + entry.getOnePartNumber().getPartNumber() + "|"
+                            + entry.getOnePartNumber().getPartNumber() + "]]";
+                    otherEntry = entry;
+                    entry = new Strain();
+                    entry.setOwner(account.getFullName());
+                    entry.setOwnerEmail(account.getEmail());
+                    entry.setCreator(account.getFullName());
+                    entry.setCreatorEmail(account.getEmail());
+                    ((Strain) entry).setPlasmids(plasmidPartNumberString);
+                    entry.setVisibility(Visibility.DRAFT.getValue());
+                    entryController.createEntry(account, entry, null);
                 }
             }
 
