@@ -457,7 +457,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
                 @Override
                 public void onSuccess(Boolean result) {
-                    view.setDraftName(name);
+                    view.setDraftName(currentInput.getId(), name);
                     currentInput.setName(name);
                 }
             }.go(eventBus);

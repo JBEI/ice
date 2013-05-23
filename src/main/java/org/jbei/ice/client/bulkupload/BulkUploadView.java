@@ -401,7 +401,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setDraftName(String name) {
+    public void setDraftName(long id, String name) {
         uploadName.setHTML(name);
         uploadName.setVisible(true);
         draftInput.setVisible(false);

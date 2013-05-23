@@ -729,7 +729,7 @@ public class BulkUploadController {
         }
     }
 
-    public void renameDraft(Account account, long id, String draftName) throws ControllerException {
+    public boolean renameDraft(Account account, long id, String draftName) throws ControllerException {
         BulkUpload upload;
 
         try {
@@ -738,12 +738,12 @@ public class BulkUploadController {
             throw new ControllerException(e);
         }
 
-        if (upload.getAccount().equals(account) && account.getType() != AccountType.ADMIN)
+        if (!upload.getAccount().equals(account) && account.getType() != AccountType.ADMIN)
             throw new ControllerException("No permissions to rename");
 
         upload.setName(draftName);
         try {
-            dao.update(upload);
+            return dao.update(upload) != null;
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
