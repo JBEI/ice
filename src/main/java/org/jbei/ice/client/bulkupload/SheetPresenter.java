@@ -26,7 +26,6 @@ import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -131,6 +130,35 @@ public class SheetPresenter {
                     return info.getInfo();
                 return info;
             }
+
+            @Override
+            public void callBackForLockedColumns(int row, long bulkUploadId, long entryId, EntryType entryType) {
+                BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
+                update.setEntryId(entryId);
+                update.setType(entryType);
+                update.setBulkUploadId(bulkUploadId);
+                update.setRow(row);
+
+                // check locked cols to set values for that particular cells in the row
+                int i = -1;
+                for (CellColumnHeader columnHeader : headers.getHeaders()) {
+                    i += 1;
+                    if (!columnHeader.isLocked())
+                        continue;
+
+                    SheetCellData cellData = columnHeader.getCell().getDataForRow(row);
+                    if (cellData != null)
+                        continue;
+
+                    update.getKeyValue().put(columnHeader.getHeaderType(), columnHeader.getDefaultValue());
+
+                    // update cell display
+                    view.setCellWidgetForCurrentRow(columnHeader.getDefaultValue(), row, i, -1);
+                }
+
+                // successful execution calls setUpdateEntry(autoUpdate) above
+                autoUpdateDelegate.execute(update);
+            }
         };
     }
 
@@ -234,13 +262,8 @@ public class SheetPresenter {
         CellColumnHeader header = getHeaderForIndex(inputIndex);
 
         // do not auto update locked headers since that is done when another cell in the same row is updated
-        if (header.isLocked()) {
-            GWT.log("skipping update of locked cell (" + inputRow + ", " + inputIndex + ")");
-            return;
-        }
-
         // validate update values
-        if (!validateCell(inputRow, inputIndex))
+        if (header.isLocked() || !validateCell(inputRow, inputIndex))
             return;
 
         // check particular row being updated (which narrows it down to a cell since we are looking at the column)
@@ -305,82 +328,6 @@ public class SheetPresenter {
     public ServiceDelegate<PreferenceInfo> getPreferenceDelegate() {
         return this.serviceDelegate;
     }
-
-//    public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner, String creator,
-// String creatorEmail) {
-//        int rowCount = rowBitSet.size();
-//        SheetModel<? extends EntryInfo> model = getModelForCurrentType();
-//        if (model == null)
-//            return null;
-//
-//        ArrayList<EntryInfo> infoList = new ArrayList<EntryInfo>();
-//
-//        // for each row
-//        for (int i = 0; i < rowCount; i += 1) {
-//            // does it have new data (both new records and existing)
-//            boolean rowHasNewData = rowBitSet.get(i).hasSetBit();
-//            if (!rowHasNewData)
-//                continue;
-//
-//            // is row associated with a saved entry?
-//            EntryInfo existing;
-//            if (currentInfo != null && currentInfo.getEntryList().size() > i)
-//                existing = currentInfo.getEntryList().get(i);
-//            else
-//                existing = model.createInfo();
-//
-//            // go through headers (column) for data
-//            ArrayList<Integer> dataRows = rowBitSet.get(i).getSetBits();
-//            for (Integer dataRow : dataRows) {
-//                CellColumnHeader header = getHeaderForIndex(dataRow);
-//                SheetCellData data = header.getCell().getDataForRow(i);
-//                if (data == null) {
-//                    // clear the data associated with header
-//                    data = new SheetCellData(header.getHeaderType(), "", "");
-//                    model.setInfoField(data, existing);
-//                    continue;
-//                }
-//                data.setType(header.getHeaderType());
-//                existing = model.setInfoField(data, existing);
-//            }
-//
-//            if (existing != null) {
-//                if (ownerEmail != null && owner != null) {
-//                    existing.setOwnerEmail(ownerEmail);
-//                    existing.setOwner(owner);
-//
-//                    if (existing.getInfo() != null) {
-//                        existing.getInfo().setOwnerEmail(ownerEmail);
-//                        existing.getInfo().setOwner(owner);
-//                    }
-//                }
-//
-//                // set creator information
-//                existing.setCreator(creator);
-//                existing.setCreatorEmail(creatorEmail);
-//                if (existing.getInfo() != null) {
-//                    existing.getInfo().setCreator(creator);
-//                    existing.getInfo().setCreatorEmail(creatorEmail);
-//                }
-//
-//                // set sample location
-//                if (existing.isHasSample()) {
-//                    SampleStorage sampleStorage = existing.getOneSampleStorage();
-//                    sampleStorage.getSample().setLocationId(currentSampleLocationId);
-//                    sampleStorage.getSample().setDepositor(owner);
-//                }
-//
-//                infoList.add(existing);
-//            }
-//        }
-//
-//        if (currentInfo != null) {
-//            currentInfo.getEntryList().clear();
-//            currentInfo.getEntryList().addAll(infoList);
-//        }
-//        return infoList;
-//    }
-//
 
     /**
      * @return size of the field, which also equates to

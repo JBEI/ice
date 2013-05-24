@@ -3,8 +3,6 @@ package org.jbei.ice.lib.bulkupload;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,7 +24,6 @@ import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.Group;
@@ -43,7 +40,6 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.shared.dto.bulkupload.EntryField;
@@ -66,7 +62,6 @@ public class BulkUploadController {
     private AttachmentController attachmentController;
     private SequenceController sequenceController;
     private SampleController sampleController;
-    private StorageController storageController;
     private PreferencesController preferencesController;
 
     /**
@@ -79,7 +74,6 @@ public class BulkUploadController {
         attachmentController = ControllerFactory.getAttachmentController();
         sequenceController = ControllerFactory.getSequenceController();
         sampleController = ControllerFactory.getSampleController();
-        storageController = ControllerFactory.getStorageController();
         preferencesController = ControllerFactory.getPreferencesController();
     }
 
@@ -405,59 +399,60 @@ public class BulkUploadController {
         return draftInfo;
     }
 
-    protected void saveSamples(Account account, SampleStorage sampleStorage, Entry entry) throws ControllerException {
-        if (sampleStorage == null || sampleStorage.getSample() == null)
-            return;
-
-        // check is there is an existing sample(s) and delete
-        ArrayList<Sample> samples = sampleController.getSamples(entry);
-        try {
-            if (samples != null) {
-                for (Sample sample : samples)
-                    sampleController.deleteSample(account, sample);   // TODO : does this delete locations (storage)
-            }
-        } catch (PermissionException pe) {
-            Logger.error(pe);
-            return;
-        }
-
-        // create new samples
-        SampleInfo sampleInfo = sampleStorage.getSample();
-        LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
-        Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(), sampleInfo.getNotes());
-        sample.setEntry(entry);
-
-        if (locations == null || locations.isEmpty()) {
-            throw new ControllerException("Attempting to create sample without a location");
-        }
-
-        try {
-            Storage scheme = storageController.get(Long.parseLong(sampleInfo.getLocationId()), false);
-            // create sample and location
-            List<Storage> schemes = scheme.getSchemes();
-            if (schemes.size() != locations.size())
-                throw new ControllerException("Locations and schemes do not match up");
-
-            String[] labels = new String[locations.size()];
-            for (StorageInfo storageInfo : locations) {
-                int i = 0;
-                for (Storage storage : schemes) {
-                    if (storageInfo.getType().equalsIgnoreCase(storage.getStorageType().name())) {
-                        labels[i] = storageInfo.getDisplay();
-                        break;
-                    }
-                    i += 1;
-                }
-            }
-
-            Storage storage = storageController.getLocation(scheme, labels);
-            storage = storageController.update(storage);
-            sample.setStorage(storage);
-            sampleController.saveSample(account, sample);
-        } catch (NumberFormatException | PermissionException e) {
-            Logger.error(e);
-        }
-    }
+//    protected void saveSamples(Account account, SampleStorage sampleStorage, Entry entry) throws ControllerException {
+//        if (sampleStorage == null || sampleStorage.getSample() == null)
+//            return;
+//
+//        // check is there is an existing sample(s) and delete
+//        ArrayList<Sample> samples = sampleController.getSamples(entry);
+//        try {
+//            if (samples != null) {
+//                for (Sample sample : samples)
+//                    sampleController.deleteSample(account, sample);   // TODO : does this delete locations (storage)
+//            }
+//        } catch (PermissionException pe) {
+//            Logger.error(pe);
+//            return;
+//        }
+//
+//        // create new samples
+//        SampleInfo sampleInfo = sampleStorage.getSample();
+//        LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
+//        Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(),
+// sampleInfo.getNotes());
+//        sample.setEntry(entry);
+//
+//        if (locations == null || locations.isEmpty()) {
+//            throw new ControllerException("Attempting to create sample without a location");
+//        }
+//
+//        try {
+//            Storage scheme = storageController.get(Long.parseLong(sampleInfo.getLocationId()), false);
+//            // create sample and location
+//            List<Storage> schemes = scheme.getSchemes();
+//            if (schemes.size() != locations.size())
+//                throw new ControllerException("Locations and schemes do not match up");
+//
+//            String[] labels = new String[locations.size()];
+//            for (StorageInfo storageInfo : locations) {
+//                int i = 0;
+//                for (Storage storage : schemes) {
+//                    if (storageInfo.getType().equalsIgnoreCase(storage.getStorageType().name())) {
+//                        labels[i] = storageInfo.getDisplay();
+//                        break;
+//                    }
+//                    i += 1;
+//                }
+//            }
+//
+//            Storage storage = storageController.getLocation(scheme, labels);
+//            storage = storageController.update(storage);
+//            sample.setStorage(storage);
+//            sampleController.saveSample(account, sample);
+//        } catch (NumberFormatException | PermissionException e) {
+//            Logger.error(e);
+//        }
+//    }
 
     public BulkUploadAutoUpdate autoUpdateBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
             EntryAddType addType) throws ControllerException {
@@ -567,18 +562,21 @@ public class BulkUploadController {
 
                 Entry[] ret = InfoToModelFactory.infoToEntryForField(entry, otherEntry, value, field);
                 entry = ret[0];
-                if (entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
-                    entry.setVisibility(Visibility.DRAFT.getValue());
 
                 if (ret.length == 2) {
                     otherEntry = ret[1];
-                    if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
-                        otherEntry.setVisibility(Visibility.DRAFT.getValue());
                 }
             }
 
-            if (otherEntry != null)
+            if (otherEntry != null) {
+                if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
+                    otherEntry.setVisibility(Visibility.DRAFT.getValue());
+
                 entryController.update(account, otherEntry, null);
+            }
+
+            if (entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
+                entry.setVisibility(Visibility.DRAFT.getValue());
             entryController.update(account, entry, null);
         } catch (PermissionException e) {
             throw new ControllerException(e);

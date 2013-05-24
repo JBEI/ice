@@ -127,6 +127,21 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(entry);
         Assert.assertNotNull(entry.getLinks());
         Assert.assertEquals(1, entry.getLinks().size());
+
+        autoUpdate = new BulkUploadAutoUpdate();
+        autoUpdate.setType(EntryType.PLASMID);
+
+        // auto update: expect plasmid and bulk upload with no fields set
+        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, type);
+        Assert.assertNotNull(autoUpdate);
+        entryId = autoUpdate.getEntryId();
+        bulkId = autoUpdate.getBulkUploadId();
+
+        Assert.assertTrue(entryId > 0);
+        Assert.assertTrue(bulkId > 0);
+
+        entry = entryController.get(account, entryId);
+        Assert.assertNotNull(entry);
     }
 
     @Test

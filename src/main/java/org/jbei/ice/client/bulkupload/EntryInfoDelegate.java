@@ -1,6 +1,7 @@
 package org.jbei.ice.client.bulkupload;
 
 import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 /**
  * Delegate for retrieving entry info associated with a row
@@ -15,4 +16,6 @@ public interface EntryInfoDelegate {
      * @return retrieved entryInfo
      */
     EntryInfo getInfoForRow(int row, boolean isStrainWithPlasmidPlasmid);
+
+    void callBackForLockedColumns(int row, long bulkUploadId, long entryId, EntryType type);
 }
