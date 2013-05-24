@@ -9,18 +9,24 @@ import java.util.Set;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Name;
+import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.FundingSource;
+import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -551,8 +557,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Criteria criteria = session.createCriteria(Entry.class)
                                        .add(Restrictions.eq("ownerEmail", ownerEmail));
             criteria.add(Restrictions.disjunction()
-                                     .add(Restrictions.eq("visibility", new Integer(Visibility.OK.getValue())))
-                                     .add(Restrictions.eq("visibility", new Integer(Visibility.PENDING.getValue())))
+                                     .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                                     .add(Restrictions.eq("visibility", Visibility.PENDING.getValue()))
                                      .add(Restrictions.isNull("visibility")));
             criteria.setProjection(Projections.rowCount());
             Number rowCount = (Number) criteria.uniqueResult();
@@ -638,5 +644,51 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
 
         return entry;
+    }
+
+    // experimental. do not use
+    public void fullDelete(Entry entry) throws DAOException {
+        // delete from sub class (plasmid, strain, seed)
+        Class<? extends Entry> clazz;
+
+        if (entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.toString())) {
+            clazz = Plasmid.class;
+        } else if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())) {
+            clazz = Strain.class;
+        } else if (entry.getRecordType().equalsIgnoreCase(EntryType.PART.toString())) {
+            clazz = Part.class;
+        } else if (entry.getRecordType().equalsIgnoreCase(EntryType.ARABIDOPSIS.toString())) {
+            clazz = ArabidopsisSeed.class;
+        } else
+            throw new DAOException("Unrecognized entry type");
+        String hql = "delete from " + clazz.getName() + " where entries_id=:entry";
+        currentSession().createQuery(hql).setParameter("entry", entry.getId()).executeUpdate();
+
+        // delete from links
+        hql = "delete from " + Link.class.getName() + " where entry=:entry";
+        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
+
+        // delete from names
+        hql = "delete from " + Name.class.getName() + " where entry=:entry";
+        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
+
+        // delete from selection markers
+        hql = "delete from " + SelectionMarker.class.getName() + " where entry=:entry";
+        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
+
+        // delete from funding source
+        hql = "delete from " + EntryFundingSource.class.getName() + " where entry=:entry";
+        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
+
+        // delete from part_number
+        hql = "delete from " + PartNumber.class.getName() + " where entry=:entry";
+        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
+
+        //delete from permission
+        hql = "delete from " + Permission.class.getName() + " where entry=:entry";
+        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
+
+        // finally delete actual entry
+        delete(entry);
     }
 }

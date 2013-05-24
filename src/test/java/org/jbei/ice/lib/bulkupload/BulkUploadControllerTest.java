@@ -3,6 +3,7 @@ package org.jbei.ice.lib.bulkupload;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountType;
@@ -126,6 +127,21 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(entry);
         Assert.assertNotNull(entry.getLinks());
         Assert.assertEquals(1, entry.getLinks().size());
+
+        autoUpdate = new BulkUploadAutoUpdate();
+        autoUpdate.setType(EntryType.PLASMID);
+
+        // auto update: expect plasmid and bulk upload with no fields set
+        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, type);
+        Assert.assertNotNull(autoUpdate);
+        entryId = autoUpdate.getEntryId();
+        bulkId = autoUpdate.getBulkUploadId();
+
+        Assert.assertTrue(entryId > 0);
+        Assert.assertTrue(bulkId > 0);
+
+        entry = entryController.get(account, entryId);
+        Assert.assertNotNull(entry);
     }
 
     @Test
@@ -223,6 +239,26 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testRenameDraft() throws Exception {
+        Account account = createTestAccount("testRenameDraft", false);
+        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate();
+        autoUpdate.setType(EntryType.STRAIN);
+        autoUpdate.setRow(0);
+        autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
+        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
+        autoUpdate.getKeyValue().put(EntryField.PI, "test");
+        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "selection");
+        autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
+        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
+        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        Assert.assertNotNull(autoUpdate);
+        Assert.assertTrue(autoUpdate.getEntryId() > 0);
+        Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
+        long id = autoUpdate.getBulkUploadId();
+        ControllerFactory.getAccountController().createSystemAccount();
+        controller.renameDraft(account, id, "My draft");
+        BulkUploadInfo info = controller.retrieveById(account, id, 0, 1000);
+        Assert.assertNotNull(info);
+        Assert.assertTrue(info.getName().equals("My draft"));
     }
 
     @Test

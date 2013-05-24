@@ -201,7 +201,7 @@ public class EntryController {
             entry.setStatus("");
 
         if (entry.getBioSafetyLevel() == null)
-            entry.setBioSafetyLevel(new Integer(0));
+            entry.setBioSafetyLevel(0);
 
         if (entry.getLongDescriptionType() == null)
             entry.setLongDescriptionType("text");
@@ -301,7 +301,7 @@ public class EntryController {
             entry.setStatus("");
 
         if (entry.getBioSafetyLevel() == null)
-            entry.setBioSafetyLevel(new Integer(0));
+            entry.setBioSafetyLevel(0);
 
         if (entry.getLongDescriptionType() == null)
             entry.setLongDescriptionType("text");
@@ -577,9 +577,33 @@ public class EntryController {
      * @throws PermissionException
      */
     public void delete(Account account, Entry entry) throws ControllerException, PermissionException {
-        // TODO : check status and if draft, actually delete. not just mark for delete
         boolean schedule = sequenceController.hasSequence(entry);
+//        if (entry.getVisibility() == Visibility.DRAFT.getValue())   TODO
+//            fullDelete(entry, schedule);
+//        else
         delete(account, entry, schedule);
+    }
+
+    /**
+     * Experimental. Do not use
+     * Performs a full deletion of the entry, not just marking it as deleted.
+     *
+     * @param entry Entry to be deleted
+     * @throws ControllerException
+     */
+    protected void fullDelete(Entry entry, boolean schedule) throws ControllerException {
+        if (entry == null)
+            return;
+
+        try {
+            dao.fullDelete(entry);
+            if (schedule) {
+                ApplicationController.scheduleBlastIndexRebuildTask(true);
+            }
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+
     }
 
     /**

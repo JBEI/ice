@@ -9,8 +9,10 @@ import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.cell.AutoCompleteSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 
 /**
@@ -19,7 +21,7 @@ import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 public class PlasmidHeader extends PartHeader {
 
     public PlasmidHeader(EntryInfoDelegate delegate, HashMap<String, String> preferences) {
-        super(delegate, preferences);
+        super(delegate, preferences, EntryType.PLASMID, EntryAddType.PLASMID);
 
         // plasmid specific headers
         ArrayList<String> data = new ArrayList<String>();

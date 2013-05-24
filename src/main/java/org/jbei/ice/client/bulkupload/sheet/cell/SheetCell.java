@@ -79,7 +79,6 @@ public abstract class SheetCell {
             rowValues.put(inputRow, data);
         }
 
-        GWT.log("Setting data for row " + inputRow + " value = " + value);
         data.setValue(value);
         data.setId(id);
     }

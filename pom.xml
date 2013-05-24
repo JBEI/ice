@@ -4,7 +4,7 @@
     <groupId>org.jbei</groupId>
     <artifactId>gd-ice</artifactId>
     <packaging>war</packaging>
-    <version>3.3.4-SNAPSHOT</version>
+    <version>3.3.5-SNAPSHOT</version>
     <name>gd-ice</name>
     <description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
     <issueManagement>

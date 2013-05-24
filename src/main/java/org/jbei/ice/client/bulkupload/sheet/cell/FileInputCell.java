@@ -6,6 +6,8 @@ import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellUploader;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
+import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
@@ -28,15 +30,17 @@ public class FileInputCell extends SheetCell {
     private final HashMap<Integer, CellWidget> widgetHashMap;
     private final boolean sequenceUpload;
     private final EntryInfoDelegate delegate;
-    private final boolean isStrainWithPlasmidPlasmid;
+    private final EntryType entryType;
+    private final EntryAddType addType;
 
-    public FileInputCell(boolean sequenceUpload, EntryInfoDelegate delegate, boolean isStrainWithPlasmidPlasmid) {
+    public FileInputCell(boolean sequenceUpload, EntryInfoDelegate delegate, EntryAddType addType, EntryType type) {
         super();
         rowUploaderMap = new HashMap<Integer, CellUploader>();
         widgetHashMap = new HashMap<Integer, CellWidget>();
         this.sequenceUpload = sequenceUpload;
         this.delegate = delegate;
-        this.isStrainWithPlasmidPlasmid = isStrainWithPlasmidPlasmid;
+        this.addType = addType;
+        this.entryType = type;
     }
 
     @Override
@@ -64,7 +68,7 @@ public class FileInputCell extends SheetCell {
         // typically called when user wants to edit cell (e.g. by starting to type)
         CellUploader cellUploader = rowUploaderMap.get(row);
         if (cellUploader == null) {
-            cellUploader = new CellUploader(sequenceUpload, row, delegate, isStrainWithPlasmidPlasmid);
+            cellUploader = new CellUploader(sequenceUpload, row, delegate, addType, entryType);
             FileFinishHandler handler = new FileFinishHandler(cellUploader, row);
             cellUploader.addOnFinishUploadHandler(handler);
             rowUploaderMap.put(row, cellUploader);
@@ -84,7 +88,7 @@ public class FileInputCell extends SheetCell {
         CellUploader cellUploader = rowUploaderMap.get(row);
 
         if (cellUploader == null) {
-            cellUploader = new CellUploader(sequenceUpload, row, delegate, isStrainWithPlasmidPlasmid);
+            cellUploader = new CellUploader(sequenceUpload, row, delegate, addType, entryType);
 
             final SheetCellData datum = getDataForRow(row);
             if (datum != null) {
@@ -182,16 +186,31 @@ public class FileInputCell extends SheetCell {
         public void onFinish(IUploader uploader) {
             if (uploader.getStatus() == IUploadStatus.Status.SUCCESS) {
                 IUploader.UploadedInfo info = uploader.getServerInfo();
-                String fileId = info.message;
-                if (fileId.isEmpty()) {
+                String message = info.message;
+                if (message == null || message.isEmpty() || message.startsWith("Error")) {
                     Window.alert("Could not save file");
                     return;
                 }
 
-                String[] split = fileId.split("\t");
-                if (split.length == 2 && split[0].charAt(0) == 'F') {
-                    Window.alert(split[1]);
-                    return;
+                String fileId = null;
+                if (cellUploader.getCurrentId() == 0) {
+                    try {
+                        String[] split = message.split(",");
+                        if (split.length < 2) {
+                            Window.alert("Problem uploading file");
+                            return;
+                        }
+
+                        long bulkUploadId = Long.decode(split[0]);
+                        long entryId = Long.decode(split[1]);
+                        fileId = split[2];
+                        delegate.callBackForLockedColumns(row, bulkUploadId, entryId, entryType);
+                    } catch (NumberFormatException nfe) {
+                        if (message.startsWith("Error"))
+                            Window.alert(message);
+                    }
+                } else {
+                    fileId = message;
                 }
 
                 SheetCellData datum = new SheetCellData();
