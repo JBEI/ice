@@ -23,13 +23,15 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import gwtupload.server.UploadAction;
 import gwtupload.server.exceptions.UploadActionException;
@@ -83,6 +85,8 @@ public class FileUploadServlet extends UploadAction {
         String entryId = request.getParameter("eid");
         String sid = request.getParameter("sid");
         String isSequenceStr = request.getParameter("is_sequence");
+        String entryType = request.getParameter("entry_type");
+        String entryAddType = request.getParameter("entry_add_type");
 
         Account account;
 
@@ -142,8 +146,11 @@ public class FileUploadServlet extends UploadAction {
                 case BULK_UPLOAD_FILE_TYPE:
                 case BULK_CSV_UPLOAD:
                     Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
-                    result = uploadBulkCSVFile(account, file, entryId, saveName, isSequence);
+                    result = uploadBulkCSVFile(account, file, entryId, saveName, isSequence, entryType, entryAddType);
                     break;
+
+                default:
+                    return "Error";
             }
             break;
         }
@@ -152,10 +159,12 @@ public class FileUploadServlet extends UploadAction {
         return result;
     }
 
-    public String uploadBulkCSVFile(Account account, File file, String entryId, String saveName, boolean isSequence) {
+    public String uploadBulkCSVFile(Account account, File file, String entryId, String saveName, boolean isSequence,
+            String entryType, String entryAddType) {
         try {
-            if (entryId == null || "0".equals(entryId.trim())) // TODO : create new file Id and return it
-                return uploadFileToTemp(file, saveName, isSequence);
+            if (entryId == null || "0".equals(entryId.trim())) {
+                return uploadToNewEntry(account, file, saveName, isSequence, entryType, entryAddType);
+            }
 
             // associate with entry
             EntryController entryController = ControllerFactory.getEntryController();
@@ -168,7 +177,7 @@ public class FileUploadServlet extends UploadAction {
                 Logger.error(e);
             }
             if (entry == null)
-                return uploadFileToTemp(file, saveName, isSequence);
+                return uploadToNewEntry(account, file, saveName, isSequence, entryType, entryAddType);
 
             if (isSequence) {
                 String sequenceString = FileUtils.readFileToString(file);
@@ -176,30 +185,28 @@ public class FileUploadServlet extends UploadAction {
                 return saveName;
             } else {
                 FileInputStream inputStream = new FileInputStream(file);
-                if (entry != null) {
-                    try {
-                        ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
-                        if (attachments != null && !attachments.isEmpty()) {
-                            for (Attachment attachment : attachments) {
-                                try {
-                                    attachmentController.delete(account, attachment);
-                                } catch (PermissionException e) {
-                                    continue;
-                                }
+                try {
+                    ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
+                    if (attachments != null && !attachments.isEmpty()) {
+                        for (Attachment attachment : attachments) {
+                            try {
+                                attachmentController.delete(account, attachment);
+                            } catch (PermissionException e) {
+                                continue;
                             }
                         }
-
-                        Attachment attachment = new Attachment();
-                        attachment.setEntry(entry);
-                        attachment.setDescription("");
-                        attachment.setFileName(saveName);
-                        Attachment saved = attachmentController.save(account, attachment, inputStream);
-                        if (saved != null)
-                            return saved.getFileId();
-                        return "";
-                    } catch (ControllerException e) {
-                        Logger.error(e);
                     }
+
+                    Attachment attachment = new Attachment();
+                    attachment.setEntry(entry);
+                    attachment.setDescription("");
+                    attachment.setFileName(saveName);
+                    Attachment saved = attachmentController.save(account, attachment, inputStream);
+                    if (saved != null)
+                        return saved.getFileId();
+                    return "";
+                } catch (ControllerException e) {
+                    Logger.error(e);
                 }
                 return "";
             }
@@ -209,22 +216,55 @@ public class FileUploadServlet extends UploadAction {
         }
     }
 
-    public String uploadFileToTemp(File file, String saveName, boolean isSequence) {
-        if (isSequence) {
-            try {
-                String sequenceString = FileUtils.readFileToString(file);
-                if (SequenceController.parse(sequenceString) == null)
-                    return "F\tCould not parse the sequence file";
-            } catch (IOException e) {
-                Logger.error(e);
-                return "F\tError uploading file.";
-            }
-        }
+    public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, String entryType,
+            String entryAddType) {
+        EntryType type = EntryType.valueOf(entryType);
+        EntryAddType addType = EntryAddType.valueOf(entryAddType);
 
-        String fileId = Utils.generateUUID();
-        if (file.renameTo(new File(file.getParentFile() + File.separator + fileId)))
-            return fileId;
-        return saveName;
+        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
+        update.setType(type);
+        try {
+            update = ControllerFactory.getBulkUploadController().autoUpdateBulkUpload(account, update, addType);
+            Entry entry = ControllerFactory.getEntryController().get(account, update.getEntryId());
+
+            if (isSequence) {
+                String sequenceString = FileUtils.readFileToString(file);
+                ControllerFactory.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
+                return Long.toString(update.getBulkUploadId()) + ","
+                        + Long.toString(update.getEntryId()) + "," + saveName;
+            }
+
+            // if attachment
+            AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+            FileInputStream inputStream = new FileInputStream(file);
+            ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
+            if (attachments != null && !attachments.isEmpty()) {
+                for (Attachment attachment : attachments) {
+                    try {
+                        attachmentController.delete(account, attachment);
+                    } catch (PermissionException e) {
+                        continue;
+                    }
+                }
+            }
+
+            Attachment attachment = new Attachment();
+            attachment.setEntry(entry);
+            attachment.setDescription("");
+            attachment.setFileName(saveName);
+            Attachment saved = attachmentController.save(account, attachment, inputStream);
+            if (saved != null) {
+                return Long.toString(update.getBulkUploadId()) + "," + Long.toString(update.getEntryId())
+                        + ", " + saved.getFileId();
+            }
+            return "Error: Could not upload attachment";
+        } catch (ControllerException | PermissionException e) {
+            Logger.error(e);
+            return "Error " + e.getMessage();
+        } catch (IOException e) {
+            Logger.error(e);
+            return "Error " + e.getMessage();
+        }
     }
 
     // TODO : this needs to go to manager/controller
@@ -248,8 +288,7 @@ public class FileUploadServlet extends UploadAction {
         FileInputStream inputStream = new FileInputStream(file);
 
         if (uploadFileName.toLowerCase().endsWith(".zip")) {
-            try {
-                ZipInputStream zis = new ZipInputStream(inputStream);
+            try (ZipInputStream zis = new ZipInputStream(inputStream)) {
                 ZipEntry zipEntry;
                 while (true) {
                     zipEntry = zis.getNextEntry();
@@ -357,8 +396,9 @@ public class FileUploadServlet extends UploadAction {
         File f = receivedFiles.get(fieldName);
         if (f != null) {
             response.setContentType(receivedContentTypes.get(fieldName));
-            FileInputStream is = new FileInputStream(f);
-            copyFromInputStreamToOutputStream(is, response.getOutputStream());
+            try (FileInputStream is = new FileInputStream(f)) {
+                copyFromInputStreamToOutputStream(is, response.getOutputStream());
+            }
         } else {
             renderXmlResponse(request, response, XML_ERROR_ITEM_NOT_FOUND);
         }
@@ -372,8 +412,8 @@ public class FileUploadServlet extends UploadAction {
         File file = receivedFiles.get(fieldName);
         receivedFiles.remove(fieldName);
         receivedContentTypes.remove(fieldName);
-        if (file != null) {
-            file.delete();
+        if (file != null && file.delete()) {
+            Logger.warn("Could not delete file " + file.getAbsolutePath());
         }
     }
 }

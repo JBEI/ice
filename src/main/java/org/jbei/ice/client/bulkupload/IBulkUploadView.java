@@ -57,7 +57,7 @@ public interface IBulkUploadView {
 
     void updateBulkUploadDraftInfo(BulkUploadInfo result);
 
-    void setDraftName(String name);
+    void setDraftName(long id, String name);
 
     void setDraftNameSetHandler(Delegate<String> handler);
 

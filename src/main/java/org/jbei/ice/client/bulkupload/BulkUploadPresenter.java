@@ -175,6 +175,9 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     @Override
                     public void onSuccess(BulkUploadAutoUpdate result) {
                         BulkUploadInfo info = currentInput.getSheet().setUpdatedEntry(result);
+                        if (info.getType() == null) {
+                            info.setType(currentInput.getImportType());
+                        }
                         currentInput.setId(result.getBulkUploadId());
                         view.updateBulkUploadDraftInfo(info);
                         view.setLastUpdated(result.getLastUpdate());
@@ -457,7 +460,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
                 @Override
                 public void onSuccess(Boolean result) {
-                    view.setDraftName(name);
+                    view.setDraftName(currentInput.getId(), name);
                     currentInput.setName(name);
                 }
             }.go(eventBus);
@@ -496,9 +499,9 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     sheet.setAutoUpdateDelegate(autoUpdateDelegate);
                     currentInput = new NewBulkInput(info.getType(), sheet);
                     currentInput.setId(info.getId());
-                    if (firstEntry != null) {
-                        model.retrieveStorageSchemes(info.getType(), currentInput, firstEntry.getOneSampleStorage());
-                    }
+//                    if (firstEntry != null) {
+//                        model.retrieveStorageSchemes(info.getType(), currentInput, firstEntry.getOneSampleStorage());
+//                    }
 
                     // bulk upload permissions
                     ArrayList<OptionSelect> groups = new ArrayList<OptionSelect>();

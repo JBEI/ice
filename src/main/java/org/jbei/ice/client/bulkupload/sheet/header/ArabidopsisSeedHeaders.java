@@ -12,9 +12,11 @@ import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.GenerationSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 
@@ -26,7 +28,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 public class ArabidopsisSeedHeaders extends PartHeader {
 
     public ArabidopsisSeedHeaders(EntryInfoDelegate delegate, HashMap<String, String> preferences) {
-        super(delegate, preferences);
+        super(delegate, preferences, EntryType.ARABIDOPSIS, EntryAddType.ARABIDOPSIS);
         headers.add(new CellColumnHeader(EntryField.SELECTION_MARKERS, preferences, false,
                                          new AutoCompleteSheetCell(AutoCompleteField.SELECTION_MARKERS)));
         headers.add(new CellColumnHeader(EntryField.HOMOZYGOSITY, preferences));

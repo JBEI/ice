@@ -3,7 +3,9 @@ package org.jbei.ice.client.bulkupload.sheet;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.DomEvent;
@@ -27,9 +29,10 @@ public class CellUploader implements IsWidget {
     private HTML fileUploadImg;
     private HorizontalPanel panel;
     private HandlerRegistration finishUploadRegistration;
+    private long currentId;
 
     public CellUploader(final boolean sequenceUpload, final int row, final EntryInfoDelegate delegate,
-            final Boolean isStrainWithPlasmidPlasmid) {
+            final EntryAddType addType, final EntryType type) {
         fileUploadImg = new HTML("<i class=\"" + FAIconType.UPLOAD.getStyleName() + "\"></i>");
         fileUploadImg.addStyleName("cursor_pointer");
         fileUploadImg.addStyleName("opacity_hover");
@@ -50,11 +53,14 @@ public class CellUploader implements IsWidget {
 
             @Override
             public void onStart(IUploader uploader) {
+                boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID)
+                        && (type == EntryType.PLASMID);
                 EntryInfo info = delegate.getInfoForRow(row, isStrainWithPlasmidPlasmid);
-                long id = info == null ? 0 : info.getId();
+                currentId = info == null ? 0 : info.getId();
                 uploader.setServletPath("servlet.gupld?type=bulk_file_upload&is_sequence="
                                                 + Boolean.toString(sequenceUpload)
-                                                + "&sid=" + ClientController.sessionId + "&eid=" + id);
+                                                + "&sid=" + ClientController.sessionId + "&eid=" + currentId
+                                                + "&entry_type=" + type.name() + "&entry_add_type=" + addType.name());
             }
         });
 
@@ -70,6 +76,10 @@ public class CellUploader implements IsWidget {
 
     public IUploadStatus.Status getStatus() {
         return uploader.getStatus();
+    }
+
+    public long getCurrentId() {
+        return this.currentId;
     }
 
     public void submitClick() {

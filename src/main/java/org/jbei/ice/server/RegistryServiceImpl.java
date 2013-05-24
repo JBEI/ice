@@ -145,7 +145,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public BulkUploadAutoUpdate autoUpdateBulkUpload(String sid, BulkUploadAutoUpdate wrapper, EntryAddType addType)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        Logger.info(account.getEmail() + " " + wrapper.toString());
+        Logger.info(account.getEmail() + ": " + wrapper.toString());
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         try {
             return controller.autoUpdateBulkUpload(account, wrapper, addType);
@@ -1110,8 +1110,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public boolean setBulkUploadDraftName(String sessionId, long id, String draftName) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
         try {
-            ControllerFactory.getBulkUploadController().renameDraft(account, id, draftName);
-            return true;
+            Logger.info(account.getEmail() + ": renaming bulk import \"" + id + "\" to " + draftName);
+            return ControllerFactory.getBulkUploadController().renameDraft(account, id, draftName);
         } catch (ControllerException e) {
             Logger.error(e);
             return false;

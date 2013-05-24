@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.sheet.header.*;
 import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.entry.EntryType;
 
 /**
  * utility class for returning the headers for specific import type
@@ -24,7 +25,7 @@ public class ImportTypeHeaders {
                 return new PlasmidHeader(delegate, preferences);
 
             case PART:
-                return new PartHeader(delegate, preferences);
+                return new PartHeader(delegate, preferences, EntryType.PART, EntryAddType.PART);
 
             case ARABIDOPSIS:
                 return new ArabidopsisSeedHeaders(delegate, preferences);

@@ -7,8 +7,10 @@ import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.cell.AutoCompleteSheetCell;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.StrainInfo;
 
 /**
@@ -17,7 +19,7 @@ import org.jbei.ice.shared.dto.entry.StrainInfo;
 public class StrainHeaders extends PartHeader {
 
     public StrainHeaders(EntryInfoDelegate delegate, HashMap<String, String> preferences) {
-        super(delegate, preferences);
+        super(delegate, preferences, EntryType.STRAIN, EntryAddType.STRAIN);
 
         // strain specific headers
         headers.add(new CellColumnHeader(EntryField.PARENTAL_STRAIN, preferences));

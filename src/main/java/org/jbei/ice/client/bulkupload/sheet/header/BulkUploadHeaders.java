@@ -70,47 +70,38 @@ public abstract class BulkUploadHeaders {
                 break;
 
             case NAME:
-            case STRAIN_NAME:
                 value = info.getName();
                 break;
 
             case ALIAS:
-            case STRAIN_ALIAS:
                 value = info.getAlias();
                 break;
 
             case KEYWORDS:
-            case STRAIN_KEYWORDS:
                 value = info.getKeywords();
                 break;
 
             case SUMMARY:
-            case STRAIN_SUMMARY:
                 value = info.getShortDescription();
                 break;
 
             case NOTES:
-            case STRAIN_NOTES:
                 value = info.getLongDescription();
                 break;
 
             case REFERENCES:
-            case STRAIN_REFERENCES:
                 value = info.getReferences();
                 break;
 
             case LINKS:
-            case STRAIN_LINKS:
                 value = info.getLinks();
                 break;
 
             case STATUS:
-            case STRAIN_STATUS:
                 value = info.getStatus();
                 break;
 
             case SELECTION_MARKERS:
-            case STRAIN_SELECTION_MARKERS:
                 value = info.getSelectionMarkers();
                 break;
 

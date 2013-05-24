@@ -11,8 +11,10 @@ import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.FileInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.StatusSheetCell;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 import org.jbei.ice.shared.dto.entry.StrainInfo;
 
@@ -43,9 +45,11 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(EntryField.STRAIN_NOTES, preferences));
         headers.add(new CellColumnHeader(EntryField.STRAIN_REFERENCES, preferences));
         headers.add(new CellColumnHeader(EntryField.STRAIN_SEQ_FILENAME, preferences, false,
-                                         new FileInputCell(true, delegate, false)));
+                                         new FileInputCell(true, delegate, EntryAddType.STRAIN_WITH_PLASMID,
+                                                           EntryType.STRAIN)));
         headers.add(new CellColumnHeader(EntryField.STRAIN_ATT_FILENAME, preferences, false,
-                                         new FileInputCell(false, delegate, false)));
+                                         new FileInputCell(false, delegate, EntryAddType.STRAIN_WITH_PLASMID,
+                                                           EntryType.STRAIN)));
 
         // plasmid information
         headers.add(new CellColumnHeader(EntryField.PLASMID_NAME, preferences, true, "e.g. pTSH117"));
@@ -64,9 +68,11 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(EntryField.PLASMID_NOTES, preferences));
         headers.add(new CellColumnHeader(EntryField.PLASMID_REFERENCES, preferences));
         headers.add(new CellColumnHeader(EntryField.PLASMID_SEQ_FILENAME, preferences, false,
-                                         new FileInputCell(true, delegate, true)));
+                                         new FileInputCell(true, delegate, EntryAddType.STRAIN_WITH_PLASMID,
+                                                           EntryType.PLASMID)));
         headers.add(new CellColumnHeader(EntryField.PLASMID_ATT_FILENAME, preferences, false,
-                                         new FileInputCell(false, delegate, true)));
+                                         new FileInputCell(false, delegate, EntryAddType.STRAIN_WITH_PLASMID,
+                                                           EntryType.PLASMID)));
     }
 
     public static boolean isPlasmidHeader(EntryField header) {
@@ -92,7 +98,6 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         if (data != null)
             return data;
 
-
         data = extractCommon(header, info.getInfo());
         if (data != null)
             return data;
@@ -102,6 +107,42 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
 
         String value = null;
         switch (header) {
+            case STRAIN_KEYWORDS:
+                value = strain.getKeywords();
+                break;
+
+            case STRAIN_SUMMARY:
+                value = strain.getShortDescription();
+                break;
+
+            case STRAIN_NOTES:
+                value = strain.getLongDescription();
+                break;
+
+            case STRAIN_REFERENCES:
+                value = strain.getReferences();
+                break;
+
+            case STRAIN_LINKS:
+                value = strain.getLinks();
+                break;
+
+            case STRAIN_STATUS:
+                value = strain.getStatus();
+                break;
+
+            case STRAIN_SELECTION_MARKERS:
+                value = strain.getSelectionMarkers();
+                break;
+
+            case STRAIN_NAME:
+                value = strain.getName();
+                break;
+
+            case STRAIN_ALIAS:
+                value = strain.getAlias();
+                break;
+
             case STRAIN_PARENTAL_STRAIN:
                 value = strain.getHost();
                 break;
