@@ -83,6 +83,7 @@ public class FileUploadServlet extends UploadAction {
         String desc = request.getParameter("desc");
         String type = request.getParameter("type");
         String entryId = request.getParameter("eid");
+        String bulkUploadId = request.getParameter("bid");
         String sid = request.getParameter("sid");
         String isSequenceStr = request.getParameter("is_sequence");
         String entryType = request.getParameter("entry_type");
@@ -144,9 +145,13 @@ public class FileUploadServlet extends UploadAction {
                     break;
 
                 case BULK_UPLOAD_FILE_TYPE:
-                case BULK_CSV_UPLOAD:
                     Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
-                    result = uploadBulkCSVFile(account, file, entryId, saveName, isSequence, entryType, entryAddType);
+                    result = uploadBulkUploadFile(account, file, bulkUploadId, entryId, saveName, isSequence, entryType,
+                                                  entryAddType);
+                    break;
+
+                case BULK_CSV_UPLOAD:
+                    // TODO
                     break;
 
                 default:
@@ -159,11 +164,19 @@ public class FileUploadServlet extends UploadAction {
         return result;
     }
 
-    public String uploadBulkCSVFile(Account account, File file, String entryId, String saveName, boolean isSequence,
-            String entryType, String entryAddType) {
+    public String uploadBulkUploadFile(Account account, File file, String bulkUploadIdStr, String entryId,
+            String saveName, boolean isSequence, String entryType, String entryAddType) {
+        long bulkUploadId;
+        try {
+            bulkUploadId = Long.decode(bulkUploadIdStr);
+        } catch (NumberFormatException e) {
+            Logger.error(e);
+            bulkUploadId = 0;
+        }
+
         try {
             if (entryId == null || "0".equals(entryId.trim())) {
-                return uploadToNewEntry(account, file, saveName, isSequence, entryType, entryAddType);
+                return uploadToNewEntry(account, file, saveName, isSequence, entryType, entryAddType, bulkUploadId);
             }
 
             // associate with entry
@@ -171,13 +184,14 @@ public class FileUploadServlet extends UploadAction {
             AttachmentController attachmentController = ControllerFactory.getAttachmentController();
 
             Entry entry = null;
+
             try {
                 entry = entryController.get(account, Long.decode(entryId));
             } catch (NumberFormatException | ControllerException | PermissionException e) {
                 Logger.error(e);
             }
             if (entry == null)
-                return uploadToNewEntry(account, file, saveName, isSequence, entryType, entryAddType);
+                return uploadToNewEntry(account, file, saveName, isSequence, entryType, entryAddType, bulkUploadId);
 
             if (isSequence) {
                 String sequenceString = FileUtils.readFileToString(file);
@@ -217,11 +231,12 @@ public class FileUploadServlet extends UploadAction {
     }
 
     public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, String entryType,
-            String entryAddType) {
+            String entryAddType, long bid) {
         EntryType type = EntryType.valueOf(entryType);
         EntryAddType addType = EntryAddType.valueOf(entryAddType);
 
         BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
+        update.setBulkUploadId(bid);
         update.setType(type);
         try {
             update = ControllerFactory.getBulkUploadController().autoUpdateBulkUpload(account, update, addType);
@@ -258,10 +273,7 @@ public class FileUploadServlet extends UploadAction {
                         + ", " + saved.getFileId();
             }
             return "Error: Could not upload attachment";
-        } catch (ControllerException | PermissionException e) {
-            Logger.error(e);
-            return "Error " + e.getMessage();
-        } catch (IOException e) {
+        } catch (ControllerException | PermissionException | IOException e) {
             Logger.error(e);
             return "Error " + e.getMessage();
         }

@@ -18,4 +18,6 @@ public interface EntryInfoDelegate {
     EntryInfo getInfoForRow(int row, boolean isStrainWithPlasmidPlasmid);
 
     void callBackForLockedColumns(int row, long bulkUploadId, long entryId, EntryType type);
+
+    long getBulkUploadId();
 }

@@ -159,6 +159,13 @@ public class SheetPresenter {
                 // successful execution calls setUpdateEntry(autoUpdate) above
                 autoUpdateDelegate.execute(update);
             }
+
+            @Override
+            public long getBulkUploadId() {
+                if (currentInfo == null)
+                    return 0;
+                return currentInfo.getId();
+            }
         };
     }
 
@@ -435,13 +442,10 @@ public class SheetPresenter {
 
         // for each row
         for (int row = 0; row < view.getSheetRowCount(); row += 1) {
-
             boolean atLeastOneCellHasRowData = false;
 
             int col = 0;
             for (CellColumnHeader header : headers.getHeaders()) {
-                if (header.isLocked())
-                    continue;
                 SheetCell cell = header.getCell();
                 view.clearErrorCell(row, col);
                 atLeastOneCellHasRowData = (cell.getDataForRow(row) != null);
@@ -456,6 +460,10 @@ public class SheetPresenter {
             // for each header (col)
             col = 0;
             for (CellColumnHeader header : headers.getHeaders()) {
+                if (header.isLocked()) {
+                    col += 1;
+                    continue;
+                }
                 SheetCell cell = header.getCell();
                 String errMsg = cell.inputIsValid(row);
                 if (errMsg.isEmpty()) {
