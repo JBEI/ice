@@ -475,8 +475,8 @@ public class BulkUploadController {
             throw new ControllerException(de);
         }
 
-        Entry entry; // for strain with plasmid this is the strain
-        Entry otherEntry = null;  // for strain with plasmid this is the entry
+        Entry entry;              // for strain with plasmid this is the strain
+        Entry otherEntry = null;  // for strain with plasmid this is the plasmid
 
         entry = entryController.get(account, autoUpdate.getEntryId());
 

@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.IDTOModel;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Folder Transfer Object
@@ -15,7 +14,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author Hector Plahar
  */
 
-public class FolderDetails implements IsSerializable {
+public class FolderDetails implements IDTOModel {
 
     private long id;
     private String folderName;

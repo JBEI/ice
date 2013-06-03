@@ -26,7 +26,7 @@ public class UserPanel extends Composite implements IAdminPanel {
         ScrollPanel panel = new ScrollPanel();
         initWidget(panel);
 
-        createAccount = new Button("<i class=\"blue " + FAIconType.USER.getStyleName() + "\"></i> " + "Create Account");
+        createAccount = new Button("<i class=\"blue " + FAIconType.USER.getStyleName() + "\"></i> Create Account");
 
         table = new UserTable();
         table.setWidth("100%");

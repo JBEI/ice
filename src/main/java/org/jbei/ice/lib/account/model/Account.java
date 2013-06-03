@@ -236,7 +236,7 @@ public class Account implements IModel {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj.getClass() != Account.class)
+        if (obj == null || obj.getClass() != Account.class)
             return false;
 
         Account account = (Account) obj;

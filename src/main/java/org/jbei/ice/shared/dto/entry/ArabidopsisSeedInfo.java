@@ -3,13 +3,15 @@ package org.jbei.ice.shared.dto.entry;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.jbei.ice.shared.dto.IDTOModel;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ArabidopsisSeedInfo extends EntryInfo {
 
     private static final long serialVersionUID = 1L;
 
-    public enum Generation implements IsSerializable {
+    public enum Generation implements IDTOModel {
         UNKNOWN, M0, M1, M2, T0, T1, T2, T3, T4, T5;
 
         public static ArrayList<String> getDisplayList() {

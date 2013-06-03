@@ -1,8 +1,8 @@
 package org.jbei.ice.shared.dto.entry;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.shared.dto.IDTOModel;
 
-public class AttachmentInfo implements IsSerializable {
+public class AttachmentInfo implements IDTOModel {
 
     private long id;
     private String filename;

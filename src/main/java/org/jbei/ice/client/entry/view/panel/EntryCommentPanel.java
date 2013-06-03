@@ -64,15 +64,6 @@ public class EntryCommentPanel extends Composite {
     }
 
     public void setSampleOptions(ArrayList<SampleStorage> sampleOptions) {
-        hasData = sampleOptions != null && !sampleOptions.isEmpty();
-        if (!hasData) {
-            table.clear();
-            table.setWidget(0, 0, addCommentButton);
-            table.setHTML(1, 0, "");
-            table.setWidget(2, 0, commentArea);
-            table.getFlexCellFormatter().setVisible(2, 0, false);
-            table.setHTML(3, 0, "<i class=\"font-75em pad-8\">No comments available</i>");
-        }
         commentArea.setSampleOptions(sampleOptions);
     }
 
@@ -105,6 +96,17 @@ public class EntryCommentPanel extends Composite {
     }
 
     public void setData(ArrayList<UserComment> data) {
+        hasData = data != null && !data.isEmpty();
+        if (!hasData) {
+            table.clear();
+            table.setWidget(0, 0, addCommentButton);
+            table.setHTML(1, 0, "");
+            table.setWidget(2, 0, commentArea);
+            table.getFlexCellFormatter().setVisible(2, 0, false);
+            table.setHTML(3, 0, "<i class=\"font-75em pad-8\">No comments available</i>");
+            return;
+        }
+
         Collections.sort(data, new Comparator<UserComment>() {
             @Override
             public int compare(UserComment o1, UserComment o2) {

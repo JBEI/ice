@@ -455,7 +455,7 @@ public class EntryController {
 
     public FolderDetails retrieveVisibleEntries(Account account, ColumnField field, boolean asc, int start, int limit)
             throws ControllerException {
-        LinkedList<Entry> results;
+        Set<Entry> results;
         FolderDetails details = new FolderDetails();
         try {
             if (accountController.isAdministrator(account)) {
@@ -467,9 +467,9 @@ public class EntryController {
                 GroupController controller = ControllerFactory.getGroupController();
                 Group everybodyGroup = controller.createOrRetrievePublicGroup();
                 accountGroups.add(everybodyGroup);
-
                 results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit);
             }
+
             for (Entry entry : results) {
                 EntryInfo info = ModelToInfoFactory.createTableViewData(entry, false);
                 details.getEntries().add(info);

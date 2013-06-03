@@ -3,10 +3,9 @@ package org.jbei.ice.shared.dto.entry;
 import java.util.Date;
 
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.IDTOModel;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class SequenceAnalysisInfo implements IsSerializable {
+public class SequenceAnalysisInfo implements IDTOModel {
 
     private String name;
     private AccountInfo depositor;

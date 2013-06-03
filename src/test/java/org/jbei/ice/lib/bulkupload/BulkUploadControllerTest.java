@@ -123,6 +123,10 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(entryId > 0);
         Assert.assertTrue(bulkId > 0);
 
+        ControllerFactory.getAccountController().createSystemAccount();
+
+        BulkUploadInfo bulkUploadInfo = controller.retrieveById(account, bulkId, 0, 1000);
+
         EntryController entryController = new EntryController();
         Entry entry = entryController.get(account, entryId);
         Assert.assertNotNull(entry);

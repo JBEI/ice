@@ -11,6 +11,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.GroupController;
@@ -23,6 +24,7 @@ import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
@@ -292,11 +294,6 @@ public class EntryControllerTest {
     }
 
     @Test
-    public void testGetAllVisibleEntryIDs() throws Exception {
-
-    }
-
-    @Test
     public void testGetNumberOfVisibleEntries() throws Exception {
         Account account1 = createTestAccount("testGetNumberOfVisibleEntries1", false);
         PlasmidInfo info = new PlasmidInfo();
@@ -339,6 +336,44 @@ public class EntryControllerTest {
 
         Account account2 = createTestAccount("testGetNumberOfVisibleEntries2", false);
         Assert.assertEquals(0, controller.getNumberOfVisibleEntries(account2));
+    }
+
+    @Test
+    public void retrieveVisibleEntries() throws Exception {
+        // test retrieving a lot with the same timestamp to the second
+        Account account = createTestAccount("testGetNumberOfVisibleEntries", false);
+        GroupInfo info = new GroupInfo();
+        info.setLabel("test");
+        info.setDescription("test");
+        info.setType(GroupType.PRIVATE);
+        info.getMembers().add(Account.toDTO(account));
+        info = ControllerFactory.getGroupController().createGroup(account, info);
+        Assert.assertNotNull(info);
+
+        for (int i = 0; i < 50; i += 1) {
+            Entry entry = new Part();
+            entry.setStatus("Complete");
+            entry.setShortDescription("test");
+            entry.setBioSafetyLevel(1);
+            Assert.assertNotNull(controller.createEntry(account, entry));
+
+            if (i % 2 == 0) {
+                PermissionInfo permissionInfo = new PermissionInfo();
+                permissionInfo.setArticle(PermissionInfo.Article.GROUP);
+                permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
+                permissionInfo.setTypeId(entry.getId());
+                permissionInfo.setArticleId(info.getId());
+                ControllerFactory.getPermissionController().addPermission(account, permissionInfo);
+            }
+        }
+
+        // bonus retrieve count
+        long count = controller.getNumberOfVisibleEntries(account);
+        Assert.assertEquals(50, count);
+
+        FolderDetails details = controller.retrieveVisibleEntries(account, null, false, 0, 50);
+        Assert.assertNotNull(details);
+        Assert.assertEquals("Wrong number of entries returned for visible count", 50, details.getEntries().size());
     }
 
     @Test

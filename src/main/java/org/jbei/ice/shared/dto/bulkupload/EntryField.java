@@ -1,8 +1,8 @@
 package org.jbei.ice.shared.dto.bulkupload;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.shared.dto.IDTOModel;
 
-public enum EntryField implements IsSerializable {
+public enum EntryField implements IDTOModel {
 
     PI("Principal Investigator", true),
     FUNDING_SOURCE("Funding Source", true),

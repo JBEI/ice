@@ -2,8 +2,11 @@ package org.jbei.ice.lib.entry;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.lib.account.model.Account;
@@ -260,11 +263,10 @@ public class EntryDAO extends HibernateRepository<Entry> {
      */
 
     @SuppressWarnings({"unchecked"})
-    public LinkedList<Entry> retrieveVisibleEntries(Account account, Set<Group> groups,
+    public Set<Entry> retrieveVisibleEntries(Account account, Set<Group> groups,
             ColumnField sortField, boolean asc, int start, int count) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Permission.class);
-        criteria.setProjection(Projections.property("entry"));
 
         // expect everyone to at least belong to the everyone group so groups should never be empty
         Junction disjunction = Restrictions.disjunction().add(Restrictions.in("group", groups));
@@ -277,10 +279,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
                                  .add(Restrictions.eq("canWrite", true))
                                  .add(Restrictions.eq("canRead", true)));
 
-        Criteria entryC = criteria.createCriteria("entry");
+        Criteria entryC = criteria.createCriteria("entry", "entry");
+//        criteria.createAlias("entry", "entry");
         entryC.add(Restrictions.disjunction()
                                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
                                .add(Restrictions.isNull("visibility")));
+        entryC.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
 
         // sort
         if (sortField == null)
@@ -298,15 +302,27 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
             case CREATED:
             default:
-                fieldName = "creationTime";
+                fieldName = "id";
                 break;
         }
 
         entryC.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
         entryC.setFirstResult(start);
         entryC.setMaxResults(count);
-        entryC.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        return new LinkedList<Entry>(entryC.list());
+
+        List permissions = criteria.list();
+        Iterator iter = permissions.iterator();
+        Set<Entry> result = new LinkedHashSet<>();
+        while (iter.hasNext()) {
+            Map map = (Map) iter.next();
+            Permission permission = (Permission) map.get(Criteria.ROOT_ALIAS);
+            Entry entry = (Entry) map.get("entry");
+            result.add(entry);
+        }
+
+        return result;
+
+//        return new LinkedHashSet<Entry>(entryC.list());
     }
 
     public long visibleEntryCount(Account account, Set<Group> groups) throws DAOException {
@@ -512,7 +528,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     @SuppressWarnings("unchecked")
-    public LinkedList<Entry> retrieveAllEntries(ColumnField sort, boolean asc, int start, int limit)
+    public Set<Entry> retrieveAllEntries(ColumnField sort, boolean asc, int start, int limit)
             throws DAOException {
         try {
             if (sort == null)
@@ -543,7 +559,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             query.setMaxResults(limit);
             query.setFirstResult(start);
             List list = query.list();
-            return new LinkedList<Entry>(list);
+            return new LinkedHashSet<Entry>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

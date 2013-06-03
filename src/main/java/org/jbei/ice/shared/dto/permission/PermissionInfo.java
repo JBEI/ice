@@ -1,8 +1,8 @@
 package org.jbei.ice.shared.dto.permission;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.shared.dto.IDTOModel;
 
-public class PermissionInfo implements IsSerializable {
+public class PermissionInfo implements IDTOModel {
 
     private Type type;
     private Article article;
@@ -76,11 +76,11 @@ public class PermissionInfo implements IsSerializable {
         return type == Type.READ_FOLDER || type == Type.WRITE_FOLDER;
     }
 
-    public enum Type implements IsSerializable {
+    public enum Type implements IDTOModel {
         READ_ENTRY, WRITE_ENTRY, READ_FOLDER, WRITE_FOLDER;
     }
 
-    public enum Article implements IsSerializable {
+    public enum Article implements IDTOModel {
         ACCOUNT, GROUP;
     }
 

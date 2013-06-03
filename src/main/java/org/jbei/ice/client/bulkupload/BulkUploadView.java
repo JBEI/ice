@@ -12,6 +12,7 @@ import org.jbei.ice.client.bulkupload.widget.CreatorWidget;
 import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
 import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkupload.widget.SavedDraftsMenu;
+import org.jbei.ice.client.bulkupload.widget.UploadCSV;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.AbstractLayout;
@@ -60,7 +61,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private HTML reset;
     private SaveDraftInput draftInput;
     private PermissionsSelection selection;
-    //    private UploadCSV uploadCSV;
+    private UploadCSV uploadCSV;
     private HTML updating;
     private HTML uploadName;
     private String lastUpdated;
@@ -104,7 +105,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         updating.addStyleName("relative_top_3");
         updating.setVisible(false);
         selection = new PermissionsSelection();
-//        uploadCSV = new UploadCSV();
+        uploadCSV = new UploadCSV();
         creator = new CreatorWidget(ClientController.account.getFullName(), ClientController.account.getEmail());
 
         uploadName = new HTML();
@@ -116,11 +117,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 "<span id=\"bulk_import_display_type\"></span>"
                         + "<span style=\"vertical-align: middle; float:left\" id=\"upload_name\"></span>"
                         + "<span style=\"vertical-align: middle; float:left\" id=\"draft_name\"></span>"
-                        + "&nbsp;&nbsp;<span style=\"vertical-align: middle; float:left\" " +
-                        "id=\"updating_icon\"></span></span>"
+                        + "&nbsp;&nbsp;<span style=\"vertical-align: middle; float:left\" "
+                        + "id=\"updating_icon\"></span></span>"
                         + "<span style=\"float: right;\">"
-//                        + "<span id=\"bulk_import_upload_csv\"></span>"
-//                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
+                        + "<span id=\"bulk_import_upload_csv\"></span>"
+                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
                         + "<span id=\"bulk_import_permission_selection\"></span>"
                         + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
                         + "<span id=\"creator\"></span>"
@@ -133,7 +134,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         bulkImportHeader.add(draftInput, "draft_name");
         bulkImportHeader.add(uploadName, "upload_name");
         bulkImportHeader.add(updating, "updating_icon");
-//        bulkImportHeader.add(uploadCSV, "bulk_import_upload_csv");
+        bulkImportHeader.add(uploadCSV, "bulk_import_upload_csv");
         bulkImportHeader.add(selection.asWidget(), "bulk_import_permission_selection");
         bulkImportHeader.add(creator.asWidget(), "creator");
         initHandlers();
@@ -339,6 +340,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         panel.setCellSpacing(0);
         panel.setWidth("100%");
         sheet = bulkImport;
+        uploadCSV.setType(sheet.getImportType());
         feedback.setVisible(false);
         panel.setWidget(0, 0, feedback);
         Widget widget;

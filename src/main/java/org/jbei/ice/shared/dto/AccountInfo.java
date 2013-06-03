@@ -2,9 +2,7 @@ package org.jbei.ice.shared.dto;
 
 import java.util.Date;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class AccountInfo implements IsSerializable {
+public class AccountInfo implements IDTOModel {
 
     private long id;
     private String sessionId;

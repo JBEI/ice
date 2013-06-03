@@ -1,8 +1,8 @@
 package org.jbei.ice.shared.dto.entry;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.shared.dto.IDTOModel;
 
-public abstract class HasEntryInfo implements IsSerializable {
+public abstract class HasEntryInfo implements IDTOModel {
 
     private EntryInfo entryInfo;
 

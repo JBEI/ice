@@ -258,7 +258,7 @@ public class FileUploadServlet extends UploadAction {
                         + ", " + saved.getFileId();
             }
             return "Error: Could not upload attachment";
-        } catch (ControllerException | PermissionException e) {
+        } catch (ControllerException e) {
             Logger.error(e);
             return "Error " + e.getMessage();
         } catch (IOException e) {

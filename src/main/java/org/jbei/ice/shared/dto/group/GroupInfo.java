@@ -3,8 +3,7 @@ package org.jbei.ice.shared.dto.group;
 import java.util.ArrayList;
 
 import org.jbei.ice.shared.dto.AccountInfo;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.shared.dto.IDTOModel;
 
 /**
  * DTO for groups
@@ -12,7 +11,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author Hector Plahar
  */
 
-public class GroupInfo implements IsSerializable {
+public class GroupInfo implements IDTOModel {
 
     private long id;
     private String uuid;

@@ -1,10 +1,10 @@
 package org.jbei.ice.shared.dto.folder;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.shared.dto.IDTOModel;
 
 /**
  * @author Hector Plahar
  */
-public enum FolderShareType implements IsSerializable {
+public enum FolderShareType implements IDTOModel {
     PUBLIC, PRIVATE, SHARED;
 }
