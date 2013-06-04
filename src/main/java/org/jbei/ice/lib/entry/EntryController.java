@@ -239,15 +239,15 @@ public class EntryController {
 
         // retrieve all public groups that this user is a part of an assign read permissions to those groups
         // for this entry
-        for (Group group : ControllerFactory.getGroupController().getAllPublicGroupsForAccount(account)) {
-            PermissionInfo permissionInfo = new PermissionInfo();
-            permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
-            permissionInfo.setTypeId(entry.getId());
-            permissionInfo.setArticle(PermissionInfo.Article.GROUP);
-            permissionInfo.setArticleId(group.getId());
-            permissionInfo.setDisplay(group.getLabel());
-            permissionsController.addPermission(account, permissionInfo);
-        }
+//        for (Group group : ControllerFactory.getGroupController().getAllPublicGroupsForAccount(account)) {
+//            PermissionInfo permissionInfo = new PermissionInfo();
+//            permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
+//            permissionInfo.setTypeId(entry.getId());
+//            permissionInfo.setArticle(PermissionInfo.Article.GROUP);
+//            permissionInfo.setArticleId(group.getId());
+//            permissionInfo.setDisplay(group.getLabel());
+//            permissionsController.addPermission(account, permissionInfo);
+//        }
 
         if (sequenceController.hasSequence(entry)) {
             ApplicationController.scheduleBlastIndexRebuildTask(true);

@@ -163,7 +163,7 @@ public class Group implements IModel {
         if (parent != null) {
             info.setParentId(parent.getId());
         }
-
+        info.setType(group.getType());
         return info;
     }
 }
