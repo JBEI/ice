@@ -57,7 +57,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>();
     private ServiceDelegate<BulkUploadAutoUpdate> autoUpdateDelegate;
     private ServiceDelegate<PreferenceInfo> updatePreferenceDelegate;
-    private ServiceDelegate<Set<OptionSelect>> updatePermissionDelegate;
+    private ServiceDelegate<Set<GroupInfo>> updatePermissionDelegate;
 
     public BulkUploadPresenter(RegistryServiceAsync service, HandlerManager eventBus, final IBulkUploadView display) {
         super(service, eventBus);
@@ -99,15 +99,15 @@ public class BulkUploadPresenter extends AbstractPresenter {
      * Initializes delegate for updating bulk upload permissions
      */
     protected void createPermissionDelegate() {
-        updatePermissionDelegate = new ServiceDelegate<Set<OptionSelect>>() {
+        updatePermissionDelegate = new ServiceDelegate<Set<GroupInfo>>() {
             @Override
-            public void execute(final Set<OptionSelect> selected) {
+            public void execute(final Set<GroupInfo> selected) {
                 new IceAsyncCallback<Long>() {
 
                     @Override
                     protected void callService(AsyncCallback<Long> callback) throws AuthenticationException {
                         ArrayList<PermissionInfo> infos = new ArrayList<PermissionInfo>();
-                        for (OptionSelect select : selected) {
+                        for (GroupInfo select : selected) {
                             if (select.getId() == 0) {
                                 continue;
                             }
@@ -364,13 +364,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
             @Override
             public void onSuccess(ArrayList<GroupInfo> result) {
-                ArrayList<OptionSelect> groups = new ArrayList<OptionSelect>();
-                if (result != null) {
-                    for (GroupInfo info : result) {
-                        groups.add(new OptionSelect(info.getId(), info.getLabel()));
-                    }
-                }
-                view.setPermissionGroups(groups);
+                view.setPermissionGroups(result);
             }
         }.go(eventBus);
     }

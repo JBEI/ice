@@ -8,6 +8,8 @@ import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
+import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.shared.dto.group.GroupType;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -43,13 +45,13 @@ import com.google.gwt.view.client.MultiSelectionModel;
 public class PermissionsSelection implements IsWidget {
 
     private final FocusPanel parent;
-    private final CellTable<OptionSelect> table;
-    private final MultiSelectionModel<OptionSelect> model;
-    private final ListDataProvider<OptionSelect> dataProvider;
+    private final CellTable<GroupInfo> table;
+    private final MultiSelectionModel<GroupInfo> model;
+    private final ListDataProvider<GroupInfo> dataProvider;
     private final Button submitButton;
     private final Label clear;
     private final PopupHandler addToHandler;
-    private ServiceDelegate<Set<OptionSelect>> submitHandler;
+    private ServiceDelegate<Set<GroupInfo>> submitHandler;
 
     interface SelectionResource extends CellTable.Resources {
 
@@ -76,23 +78,23 @@ public class PermissionsSelection implements IsWidget {
         parent.setStyleName("bulk_upload_visibility");
         parent.addStyleName("opacity_hover");
 
-        model = new MultiSelectionModel<OptionSelect>();
+        model = new MultiSelectionModel<GroupInfo>();
 
-        table = new CellTable<OptionSelect>(30, SelectionResource.INSTANCE);
+        table = new CellTable<GroupInfo>(30, SelectionResource.INSTANCE);
         addSelectionColumn();
         addNameColumn();
         table.setEmptyTableWidget(new HTML("<i class=\"font-75em\">No groups available.</i>"));
-        table.setSelectionModel(model, DefaultSelectionEventManager.<OptionSelect>createCheckboxManager());
+        table.setSelectionModel(model, DefaultSelectionEventManager.<GroupInfo>createCheckboxManager());
 
-        table.addCellPreviewHandler(new CellPreviewEvent.Handler<OptionSelect>() {
+        table.addCellPreviewHandler(new CellPreviewEvent.Handler<GroupInfo>() {
 
             @Override
-            public void onCellPreview(CellPreviewEvent<OptionSelect> event) {
+            public void onCellPreview(CellPreviewEvent<GroupInfo> event) {
                 boolean clicked = "click".equals(event.getNativeEvent().getType());
                 if (!clicked || event.getColumn() == 0)
                     return;
 
-                OptionSelect selected = event.getValue();
+                GroupInfo selected = event.getValue();
                 boolean select = model.isSelected(selected);
                 model.setSelected(selected, !select);
                 // we can either trigger a submit when user clicks a single cell
@@ -101,7 +103,7 @@ public class PermissionsSelection implements IsWidget {
             }
         });
 
-        dataProvider = new ListDataProvider<OptionSelect>();
+        dataProvider = new ListDataProvider<GroupInfo>();
         dataProvider.addDataDisplay(table);
 
         submitButton = new Button("Submit");
@@ -136,9 +138,18 @@ public class PermissionsSelection implements IsWidget {
         parent.addClickHandler(addToHandler);
     }
 
-    public void setData(ArrayList<OptionSelect> data) {
+    public void setData(ArrayList<GroupInfo> data) {
         dataProvider.getList().clear();
         dataProvider.getList().addAll(data);
+
+        for (GroupInfo datum : data) {
+            // excluding everyone group which may be set to public
+            if (datum.getType() != GroupType.PUBLIC
+                    || datum.getUuid().equalsIgnoreCase("8746a64b-abd5-4838-a332-02c356bbeac0"))
+                continue;
+
+            model.setSelected(datum, true);
+        }
     }
 
     /**
@@ -147,7 +158,7 @@ public class PermissionsSelection implements IsWidget {
      * @param data data that needs to be enabled/checked
      */
     public void setEnabled(ArrayList<OptionSelect> data) {
-        for (OptionSelect optionSelect : dataProvider.getList()) {
+        for (GroupInfo optionSelect : dataProvider.getList()) {
             for (int i = 0; i < data.size(); i += 1) {
                 if (optionSelect.getId() == data.get(i).getId()) {
                     model.setSelected(optionSelect, true);
@@ -157,7 +168,7 @@ public class PermissionsSelection implements IsWidget {
         }
     }
 
-    public void setPermissionUpdateDelegate(ServiceDelegate<Set<OptionSelect>> handler) {
+    public void setPermissionUpdateDelegate(ServiceDelegate<Set<GroupInfo>> handler) {
         this.submitHandler = handler;
     }
 
@@ -185,10 +196,10 @@ public class PermissionsSelection implements IsWidget {
     protected void addSelectionColumn() {
         final CheckboxCell columnCell = new CheckboxCell(true, false);
 
-        Column<OptionSelect, Boolean> selectionCol = new Column<OptionSelect, Boolean>(columnCell) {
+        Column<GroupInfo, Boolean> selectionCol = new Column<GroupInfo, Boolean>(columnCell) {
 
             @Override
-            public Boolean getValue(OptionSelect object) {
+            public Boolean getValue(GroupInfo object) {
                 return model.isSelected(object);
             }
         };
@@ -198,11 +209,11 @@ public class PermissionsSelection implements IsWidget {
     }
 
     protected void addNameColumn() {
-        TextColumn<OptionSelect> name = new TextColumn<OptionSelect>() {
+        TextColumn<GroupInfo> name = new TextColumn<GroupInfo>() {
 
             @Override
-            public String getValue(OptionSelect object) {
-                return object.getName();
+            public String getValue(GroupInfo object) {
+                return object.getLabel();
             }
         };
         table.addColumn(name);
