@@ -18,10 +18,12 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.bulkupload.BulkUploadUtil;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -40,10 +42,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.IOUtils;
 
 /**
- * GWTUpload servlet that handles file uploads. If an upload type (e.g. sequence or attachment)
- * is associated with an entry if the entry id (EID) passed is valid. If no valid EID is provided
- * then the file is simply uploaded and the file id (essentially a unique identifier based on type)
- * is returned
+ * GWTUpload servlet that handles file uploads.
  *
  * @author Hector Plahar
  */
@@ -174,9 +173,12 @@ public class FileUploadServlet extends UploadAction {
             bulkUploadId = 0;
         }
 
+        EntryType type = EntryType.valueOf(entryType);
+        EntryAddType addType = EntryAddType.valueOf(entryAddType);
+
         try {
             if (entryId == null || "0".equals(entryId.trim())) {
-                return uploadToNewEntry(account, file, saveName, isSequence, entryType, entryAddType, bulkUploadId);
+                return uploadToNewEntry(account, file, saveName, isSequence, type, addType, bulkUploadId);
             }
 
             // associate with entry
@@ -186,12 +188,20 @@ public class FileUploadServlet extends UploadAction {
             Entry entry = null;
 
             try {
+                boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
+                        && type == EntryType.PLASMID);
                 entry = entryController.get(account, Long.decode(entryId));
+                if (isStrainWithPlasmidPlasmid) {
+                    String plasmid = ((Strain) entry).getPlasmids();
+                    entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account,
+                                                                         ControllerFactory.getEntryController(),
+                                                                         plasmid);
+                }
             } catch (NumberFormatException | ControllerException | PermissionException e) {
                 Logger.error(e);
             }
             if (entry == null)
-                return uploadToNewEntry(account, file, saveName, isSequence, entryType, entryAddType, bulkUploadId);
+                return uploadToNewEntry(account, file, saveName, isSequence, type, addType, bulkUploadId);
 
             if (isSequence) {
                 String sequenceString = FileUtils.readFileToString(file);
@@ -230,17 +240,21 @@ public class FileUploadServlet extends UploadAction {
         }
     }
 
-    public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, String entryType,
-            String entryAddType, long bid) {
-        EntryType type = EntryType.valueOf(entryType);
-        EntryAddType addType = EntryAddType.valueOf(entryAddType);
-
+    public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, EntryType type,
+            EntryAddType addType, long bid) {
         BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
         update.setBulkUploadId(bid);
         update.setType(type);
         try {
             update = ControllerFactory.getBulkUploadController().autoUpdateBulkUpload(account, update, addType);
+            boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
+                    && type == EntryType.PLASMID);
             Entry entry = ControllerFactory.getEntryController().get(account, update.getEntryId());
+            if (isStrainWithPlasmidPlasmid) {
+                String plasmid = ((Strain) entry).getPlasmids();
+                entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account, ControllerFactory.getEntryController(),
+                                                                     plasmid);
+            }
 
             if (isSequence) {
                 String sequenceString = FileUtils.readFileToString(file);

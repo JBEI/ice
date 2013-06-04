@@ -4,7 +4,6 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 
 import com.google.gwt.dom.client.Document;
@@ -50,9 +49,7 @@ public class CellUploader implements IsWidget {
         };
 
         uploader.setAutoSubmit(true);
-        boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID)
-                && (type == EntryType.PLASMID);
-        IUploader.OnStartUploaderHandler handler = createStartUpHandler(row, isStrainWithPlasmidPlasmid, delegate,
+        IUploader.OnStartUploaderHandler handler = createStartUpHandler(row, delegate,
                                                                         sequenceUpload, type.name(), addType.name());
         if (startUpRegistration != null)
             startUpRegistration.removeHandler();
@@ -68,17 +65,14 @@ public class CellUploader implements IsWidget {
         });
     }
 
-    protected IUploader.OnStartUploaderHandler createStartUpHandler(final int row, final boolean
-            isStrainWithPlasmidPlasmid,
-            final EntryInfoDelegate delegate, final boolean sequenceUpload, final String typeName,
-            final String addTypeName) {
+    protected IUploader.OnStartUploaderHandler createStartUpHandler(final int row, final EntryInfoDelegate delegate,
+            final boolean sequenceUpload, final String typeName, final String addTypeName) {
         return new IUploader.OnStartUploaderHandler() {
 
             @Override
             public void onStart(IUploader uploader) {
-                EntryInfo info = delegate.getInfoForRow(row, isStrainWithPlasmidPlasmid);
+                currentId = delegate.getEntryIdForRow(row);
                 long bid = delegate.getBulkUploadId();
-                currentId = info == null ? 0 : info.getId();
                 uploader.setServletPath("servlet.gupld?type=bulk_file_upload&is_sequence="
                                                 + Boolean.toString(sequenceUpload)
                                                 + "&sid=" + ClientController.sessionId + "&eid=" + currentId

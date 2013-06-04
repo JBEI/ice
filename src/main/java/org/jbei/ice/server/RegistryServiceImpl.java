@@ -156,7 +156,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public Long updateBulkUploadPreference(String sid, long bulkUploadId, EntryAddType addType, PreferenceInfo info)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        Logger.info(account.getEmail() + ": " + info.toString() + " for bulk upload " + bulkUploadId);
+        Logger.info(account.getEmail() + ": Preference " + info.toString() + " for bulk upload " + bulkUploadId);
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         try {
             return controller.updatePreference(account, bulkUploadId, addType, info);

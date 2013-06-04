@@ -27,7 +27,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
         setPlasmidInfo(plasmid, datum);
         setStrainInfo((StrainInfo) strain, datum);
 
-        strain.setInfo(plasmid);
+//        strain.setInfo(plasmid);
         return (StrainInfo) strain;
     }
 

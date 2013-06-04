@@ -124,11 +124,11 @@ public class SheetPresenter {
         return new EntryInfoDelegate() {
 
             @Override
-            public EntryInfo getInfoForRow(int row, boolean isStrainWithPlasmidPlasmid) {
+            public long getEntryIdForRow(int row) {
                 EntryInfo info = rowInfoMap.get(row);
-                if (isStrainWithPlasmidPlasmid && info != null)
-                    return info.getInfo();
-                return info;
+                if (info == null)
+                    return 0;
+                return info.getId();
             }
 
             @Override
