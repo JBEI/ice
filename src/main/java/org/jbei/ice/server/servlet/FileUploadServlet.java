@@ -18,10 +18,12 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.bulkupload.BulkUploadUtil;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -83,6 +85,7 @@ public class FileUploadServlet extends UploadAction {
         String desc = request.getParameter("desc");
         String type = request.getParameter("type");
         String entryId = request.getParameter("eid");
+        String bulkUploadId = request.getParameter("bid");
         String sid = request.getParameter("sid");
         String isSequenceStr = request.getParameter("is_sequence");
         String entryType = request.getParameter("entry_type");
@@ -144,9 +147,13 @@ public class FileUploadServlet extends UploadAction {
                     break;
 
                 case BULK_UPLOAD_FILE_TYPE:
-                case BULK_CSV_UPLOAD:
                     Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
-                    result = uploadBulkCSVFile(account, file, entryId, saveName, isSequence, entryType, entryAddType);
+                    result = uploadBulkUploadFile(account, file, bulkUploadId, entryId, saveName, isSequence, entryType,
+                                                  entryAddType);
+                    break;
+
+                case BULK_CSV_UPLOAD:
+                    // TODO
                     break;
 
                 default:
@@ -159,11 +166,22 @@ public class FileUploadServlet extends UploadAction {
         return result;
     }
 
-    public String uploadBulkCSVFile(Account account, File file, String entryId, String saveName, boolean isSequence,
-            String entryType, String entryAddType) {
+    public String uploadBulkUploadFile(Account account, File file, String bulkUploadIdStr, String entryId,
+            String saveName, boolean isSequence, String entryType, String entryAddType) {
+        long bulkUploadId;
+        try {
+            bulkUploadId = Long.decode(bulkUploadIdStr);
+        } catch (NumberFormatException e) {
+            Logger.error(e);
+            bulkUploadId = 0;
+        }
+
+        EntryType type = EntryType.valueOf(entryType);
+        EntryAddType addType = EntryAddType.valueOf(entryAddType);
+
         try {
             if (entryId == null || "0".equals(entryId.trim())) {
-                return uploadToNewEntry(account, file, saveName, isSequence, entryType, entryAddType);
+                return uploadToNewEntry(account, file, saveName, isSequence, type, addType, bulkUploadId);
             }
 
             // associate with entry
@@ -171,13 +189,22 @@ public class FileUploadServlet extends UploadAction {
             AttachmentController attachmentController = ControllerFactory.getAttachmentController();
 
             Entry entry = null;
+
             try {
+                boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
+                        && type == EntryType.PLASMID);
                 entry = entryController.get(account, Long.decode(entryId));
+                if (isStrainWithPlasmidPlasmid) {
+                    String plasmid = ((Strain) entry).getPlasmids();
+                    entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account,
+                                                                         ControllerFactory.getEntryController(),
+                                                                         plasmid);
+                }
             } catch (NumberFormatException | ControllerException e) {
                 Logger.error(e);
             }
             if (entry == null)
-                return uploadToNewEntry(account, file, saveName, isSequence, entryType, entryAddType);
+                return uploadToNewEntry(account, file, saveName, isSequence, type, addType, bulkUploadId);
 
             if (isSequence) {
                 String sequenceString = FileUtils.readFileToString(file);
@@ -216,16 +243,21 @@ public class FileUploadServlet extends UploadAction {
         }
     }
 
-    public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, String entryType,
-            String entryAddType) {
-        EntryType type = EntryType.valueOf(entryType);
-        EntryAddType addType = EntryAddType.valueOf(entryAddType);
-
+    public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, EntryType type,
+            EntryAddType addType, long bid) {
         BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
+        update.setBulkUploadId(bid);
         update.setType(type);
         try {
             update = ControllerFactory.getBulkUploadController().autoUpdateBulkUpload(account, update, addType);
+            boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
+                    && type == EntryType.PLASMID);
             Entry entry = ControllerFactory.getEntryController().get(account, update.getEntryId());
+            if (isStrainWithPlasmidPlasmid) {
+                String plasmid = ((Strain) entry).getPlasmids();
+                entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account, ControllerFactory.getEntryController(),
+                                                                     plasmid);
+            }
 
             if (isSequence) {
                 String sequenceString = FileUtils.readFileToString(file);
@@ -258,10 +290,7 @@ public class FileUploadServlet extends UploadAction {
                         + ", " + saved.getFileId();
             }
             return "Error: Could not upload attachment";
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return "Error " + e.getMessage();
-        } catch (IOException e) {
+        } catch (ControllerException | IOException e) {
             Logger.error(e);
             return "Error " + e.getMessage();
         }
@@ -328,7 +357,7 @@ public class FileUploadServlet extends UploadAction {
                 dnaSequence = sequenceAnalysisController.parse(byteHolder.getBytes());
                 if (dnaSequence == null || dnaSequence.getSequence() == null) {
                     String errMsg = ("Could not parse \"" + currentFileName
-                            + "\". Only Fasta, GenBank, SBOL & ABI files are supported.");
+                            + "\". Only Fasta, GenBank & ABI files are supported.");
                     Logger.error(errMsg);
                     return errMsg;
                 }
@@ -342,12 +371,13 @@ public class FileUploadServlet extends UploadAction {
             return "";
         } catch (ControllerException e) {
             String errMsg = ("Could not parse \"" + currentFileName
-                    + "\". Only Fasta, GenBank, SBOL & ABI files are supported.");
+                    + "\". Only Fasta, GenBank & ABI files are supported.");
             Logger.error(errMsg);
             return errMsg;
         }
     }
 
+    // TODO : check for path information in filename. safari includes it
     private String uploadAttachment(Account account, File file, String entryId, String desc, String filename) {
         EntryController controller = ControllerFactory.getEntryController();
         Entry entry = null;

@@ -4,7 +4,6 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 
 import com.google.gwt.dom.client.Document;
@@ -30,6 +29,7 @@ public class CellUploader implements IsWidget {
     private HorizontalPanel panel;
     private HandlerRegistration finishUploadRegistration;
     private long currentId;
+    private HandlerRegistration startUpRegistration;
 
     public CellUploader(final boolean sequenceUpload, final int row, final EntryInfoDelegate delegate,
             final EntryAddType addType, final EntryType type) {
@@ -49,20 +49,11 @@ public class CellUploader implements IsWidget {
         };
 
         uploader.setAutoSubmit(true);
-        uploader.addOnStartUploadHandler(new IUploader.OnStartUploaderHandler() {
-
-            @Override
-            public void onStart(IUploader uploader) {
-                boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID)
-                        && (type == EntryType.PLASMID);
-                EntryInfo info = delegate.getInfoForRow(row, isStrainWithPlasmidPlasmid);
-                currentId = info == null ? 0 : info.getId();
-                uploader.setServletPath("servlet.gupld?type=bulk_file_upload&is_sequence="
-                                                + Boolean.toString(sequenceUpload)
-                                                + "&sid=" + ClientController.sessionId + "&eid=" + currentId
-                                                + "&entry_type=" + type.name() + "&entry_add_type=" + addType.name());
-            }
-        });
+        IUploader.OnStartUploaderHandler handler = createStartUpHandler(row, delegate,
+                                                                        sequenceUpload, type.name(), addType.name());
+        if (startUpRegistration != null)
+            startUpRegistration.removeHandler();
+        startUpRegistration = uploader.addOnStartUploadHandler(handler);
 
         uploader.addOnCancelUploadHandler(new IUploader.OnCancelUploaderHandler() {
 
@@ -72,6 +63,23 @@ public class CellUploader implements IsWidget {
                 uploader.reset();
             }
         });
+    }
+
+    protected IUploader.OnStartUploaderHandler createStartUpHandler(final int row, final EntryInfoDelegate delegate,
+            final boolean sequenceUpload, final String typeName, final String addTypeName) {
+        return new IUploader.OnStartUploaderHandler() {
+
+            @Override
+            public void onStart(IUploader uploader) {
+                currentId = delegate.getEntryIdForRow(row);
+                long bid = delegate.getBulkUploadId();
+                uploader.setServletPath("servlet.gupld?type=bulk_file_upload&is_sequence="
+                                                + Boolean.toString(sequenceUpload)
+                                                + "&sid=" + ClientController.sessionId + "&eid=" + currentId
+                                                + "&bid=" + bid + "&entry_type=" + typeName
+                                                + "&entry_add_type=" + addTypeName);
+            }
+        };
     }
 
     public IUploadStatus.Status getStatus() {

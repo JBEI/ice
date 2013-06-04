@@ -1,6 +1,5 @@
 package org.jbei.ice.client.bulkupload;
 
-import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 
 /**
@@ -11,11 +10,12 @@ import org.jbei.ice.shared.dto.entry.EntryType;
 public interface EntryInfoDelegate {
 
     /**
-     * @param row                        the row that is currently being worked on (and needs saving)
-     * @param isStrainWithPlasmidPlasmid whether to retrieve the plasmid portion of a "strainWithPlasmid" add type
-     * @return retrieved entryInfo
+     * @param row the row that is currently being worked on (and needs saving)
+     * @return retrieved id for info on that row or 0
      */
-    EntryInfo getInfoForRow(int row, boolean isStrainWithPlasmidPlasmid);
+    long getEntryIdForRow(int row);
 
     void callBackForLockedColumns(int row, long bulkUploadId, long entryId, EntryType type);
+
+    long getBulkUploadId();
 }
