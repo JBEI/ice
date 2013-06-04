@@ -280,7 +280,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
                                  .add(Restrictions.eq("canRead", true)));
 
         Criteria entryC = criteria.createCriteria("entry", "entry");
-//        criteria.createAlias("entry", "entry");
         entryC.add(Restrictions.disjunction()
                                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
                                .add(Restrictions.isNull("visibility")));
@@ -307,22 +306,28 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
 
         entryC.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
-        entryC.setFirstResult(start);
-        entryC.setMaxResults(count);
+        Set<Long> set = new HashSet<>();
 
         List permissions = criteria.list();
         Iterator iter = permissions.iterator();
         Set<Entry> result = new LinkedHashSet<>();
         while (iter.hasNext()) {
             Map map = (Map) iter.next();
-            Permission permission = (Permission) map.get(Criteria.ROOT_ALIAS);
             Entry entry = (Entry) map.get("entry");
+
+            if (set.contains(entry.getId()))
+                continue;
+
+            set.add(entry.getId());
+            if (set.size() <= start)
+                continue;
+
             result.add(entry);
+            if (result.size() == count)
+                break;
         }
 
         return result;
-
-//        return new LinkedHashSet<Entry>(entryC.list());
     }
 
     public long visibleEntryCount(Account account, Set<Group> groups) throws DAOException {

@@ -340,7 +340,6 @@ public class EntryControllerTest {
 
     @Test
     public void retrieveVisibleEntries() throws Exception {
-        // test retrieving a lot with the same timestamp to the second
         Account account = createTestAccount("testGetNumberOfVisibleEntries", false);
         GroupInfo info = new GroupInfo();
         info.setLabel("test");
@@ -350,6 +349,8 @@ public class EntryControllerTest {
         info = ControllerFactory.getGroupController().createGroup(account, info);
         Assert.assertNotNull(info);
 
+        // when user belongs to a group with permissions for entry account already has
+        // access then the bug manifests
         for (int i = 0; i < 50; i += 1) {
             Entry entry = new Part();
             entry.setStatus("Complete");
