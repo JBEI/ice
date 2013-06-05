@@ -564,10 +564,14 @@ public class BulkUploadController {
             throw new PermissionException("User " + account.getEmail()
                                                   + " does not have permission to update draft " + draftId);
 
-        if (!BulkUploadUtil.validate(draft)) {
-            Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
-            return false;
-        }
+        // TODO : temporarily disabling server side validation
+//        if (!BulkUploadUtil.validate(draft)) {
+//            Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
+//            return false;
+//        }
+
+        boolean isStrainWithPlasmid = EntryAddType.STRAIN_WITH_PLASMID.getDisplay().equalsIgnoreCase(
+                draft.getImportType());
 
         draft.setStatus(BulkUploadStatus.PENDING_APPROVAL);
         draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
@@ -576,11 +580,18 @@ public class BulkUploadController {
         try {
             boolean success = dao.update(draft) != null;
             if (success) {
-
                 // convert entries to pending
                 for (Entry entry : draft.getContents()) {
                     entry.setVisibility(Visibility.PENDING.getValue());
                     entryController.update(account, entry, null);
+
+                    if (isStrainWithPlasmid && entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getName())) {
+                        String plasmids = ((Strain) entry).getPlasmids();
+                        Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController,
+                                                                                     plasmids);
+                        plasmid.setVisibility(Visibility.PENDING.getValue());
+                        entryController.update(account, plasmid, null);
+                    }
                 }
 
                 String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
