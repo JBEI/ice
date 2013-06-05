@@ -84,7 +84,7 @@ public class StrainForm extends EntryForm<StrainInfo> {
 
         // host strain
         row += 1;
-        setLabel(false, "Host Strain", general, row, 0);
+        setLabel(false, "Parent Strain", general, row, 0);
         general.setWidget(row, 1, host);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 

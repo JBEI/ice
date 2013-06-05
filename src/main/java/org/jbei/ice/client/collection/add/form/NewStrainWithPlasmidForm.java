@@ -374,7 +374,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
         // host strain
         row += 1;
-        setLabel(false, "Host Strain", general, row, 0);
+        setLabel(false, "Parent Strain", general, row, 0);
         host = createStandardTextBox("300px");
         general.setWidget(row, 1, host);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
