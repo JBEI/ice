@@ -512,6 +512,8 @@ public class InfoToModelFactory {
 
             case STATUS:
                 entry.setStatus(value);
+                if (plasmid != null)
+                    plasmid.setStatus(value);
                 break;
 
             case PLASMID_STATUS:
