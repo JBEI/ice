@@ -420,10 +420,9 @@ public class BulkUploadController {
             throw new ControllerException(de);
         }
 
-        Entry entry;              // for strain with plasmid this is the strain
-        Entry otherEntry = null;  // for strain with plasmid this is the plasmid
-
-        entry = entryController.get(account, autoUpdate.getEntryId());
+        Entry entry = entryController.get(account,
+                                          autoUpdate.getEntryId()); // for strain with plasmid this is the strain
+        Entry otherEntry = null;  // for strain with plasmid this is the entry
 
         // if entry is null, create entry
         if (entry == null) {
@@ -564,6 +563,9 @@ public class BulkUploadController {
             return false;
         }
 
+        boolean isStrainWithPlasmid = EntryAddType.STRAIN_WITH_PLASMID.getDisplay().equalsIgnoreCase(
+                draft.getImportType());
+
         draft.setStatus(BulkUploadStatus.PENDING_APPROVAL);
         draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
         draft.setName(account.getEmail());
@@ -571,11 +573,18 @@ public class BulkUploadController {
         try {
             boolean success = dao.update(draft) != null;
             if (success) {
-
                 // convert entries to pending
                 for (Entry entry : draft.getContents()) {
                     entry.setVisibility(Visibility.PENDING.getValue());
                     entryController.update(account, entry);
+
+                    if (isStrainWithPlasmid && entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getName())) {
+                        String plasmids = ((Strain) entry).getPlasmids();
+                        Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController,
+                                                                                     plasmids);
+                        plasmid.setVisibility(Visibility.PENDING.getValue());
+                        entryController.update(account, plasmid);
+                    }
                 }
 
                 String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
