@@ -65,7 +65,7 @@ public class ProfilePresenter extends AbstractPresenter {
         if ((ClientController.account.getId() + "").equals(this.userId))
             availableOptions = UserOption.values();
         else
-            availableOptions = new UserOption[]{UserOption.PROFILE, UserOption.ENTRIES};
+            availableOptions = new UserOption[]{UserOption.PROFILE};
 
         display.setMenuOptions(availableOptions);
         UserOption option = UserOption.urlToOption(selection);
@@ -173,9 +173,9 @@ public class ProfilePresenter extends AbstractPresenter {
                 retrieveMessages();
                 break;
 
-            case ENTRIES:
-                retrieveUserEntries();
-                break;
+//            case ENTRIES:
+//                retrieveUserEntries();
+//                break;
         }
     }
 

@@ -15,52 +15,6 @@
         <name>Joint BioEnergy Institute</name>
         <url>http://code.google.com/p/gd-ice/</url>
     </organization>
-    <developers>
-        <developer>
-            <id>tsham</id>
-            <name>Timothy Ham</name>
-            <email>tsham@lbl.gov</email>
-            <roles>
-                <role>Architect</role>
-                <role>Developer</role>
-            </roles>
-            <organization>jbei.org</organization>
-            <timezone>-5</timezone>
-        </developer>
-        <developer>
-            <id>zdmytriv</id>
-            <name>Zinovii Dmytriv</name>
-            <email>zdymtriv@lbl.gov</email>
-            <roles>
-                <role>Architect</role>
-                <role>Developer</role>
-            </roles>
-            <organization>jbei.org</organization>
-            <timezone>-5</timezone>
-        </developer>
-        <developer>
-            <id>haplahar</id>
-            <name>Hector Plahar</name>
-            <email>haplahar@lbl.gov</email>
-            <roles>
-                <role>Architect</role>
-                <role>Developer</role>
-            </roles>
-            <organization>jbei.org</organization>
-            <timezone>-5</timezone>
-        </developer>
-    </developers>
-    <contributors>
-        <contributor>
-            <name>Joanna Chen</name>
-            <email>joannachen@lbl.gov</email>
-            <roles>
-                <role>Developer</role>
-            </roles>
-            <organization>jbei.org</organization>
-            <timezone>-5</timezone>
-        </contributor>
-    </contributors>
     <mailingLists>
         <mailingList>
             <name>gd-ice mailing list</name>
@@ -72,7 +26,6 @@
         <developerConnection>scm:git:https://code.google.com/p/gd-ice/</developerConnection>
         <url>http://code.google.com/p/gd-ice/source/checkout</url>
     </scm>
-
     <licenses>
         <license>
             <name>The new BSD License</name>
@@ -191,11 +144,6 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jbei.ice</groupId>
-            <artifactId>backport-util-concurrent</artifactId>
-            <version>SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jbei.ice</groupId>

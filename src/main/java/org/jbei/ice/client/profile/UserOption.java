@@ -12,8 +12,8 @@ public enum UserOption {
     PROFILE(FAIconType.USER, "Profile"),
     PREFERENCES(FAIconType.COG, "Preferences"),
     GROUPS(FAIconType.GROUP, "Private Groups"),
-    MESSAGES(FAIconType.ENVELOPE_ALT, "Messages"),
-    ENTRIES(FAIconType.ALIGN_JUSTIFY, "Entries");
+    MESSAGES(FAIconType.ENVELOPE_ALT, "Messages");
+//    ENTRIES(FAIconType.ALIGN_JUSTIFY, "Entries");
 
     private final String display;
     private final FAIconType icon;

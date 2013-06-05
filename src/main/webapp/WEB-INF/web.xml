@@ -16,17 +16,6 @@
     <display-name>ice</display-name>
 
     <filter>
-        <filter-name>UrlRewriteFilter</filter-name>
-        <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>UrlRewriteFilter</filter-name>
-        <url-pattern>/entry/view/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>
-
-    <filter>
         <filter-name>IceFilter</filter-name>
         <filter-class>org.jbei.ice.server.servlet.filter.IceFilter</filter-class>
     </filter>

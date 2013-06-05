@@ -21,8 +21,6 @@ these great software and for making them available as open source.
 * opencvs: Apache License Version 2.0
 * Postgresql: Postgres License
 * Simple Logging Facade for Java (SLF4J): MIT License
-* UrlRewriteFilter: New BSD License
-
 
 The following software libraries are used in the VectorEditor Flex
 application within the JBEIR software.  
