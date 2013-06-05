@@ -564,14 +564,27 @@ public class BulkUploadController {
             throw new PermissionException("User " + account.getEmail()
                                                   + " does not have permission to update draft " + draftId);
 
-        // TODO : temporarily disabling server side validation
-//        if (!BulkUploadUtil.validate(draft)) {
-//            Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
-//            return false;
-//        }
-
         boolean isStrainWithPlasmid = EntryAddType.STRAIN_WITH_PLASMID.getDisplay().equalsIgnoreCase(
                 draft.getImportType());
+
+        // get the preferences for fields that are not set
+        for (Preference preference : draft.getPreferences()) {
+            for (Entry entry : draft.getContents()) {
+                Entry plasmid = null;
+                if (isStrainWithPlasmid && entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getName())) {
+                    String plasmids = ((Strain) entry).getPlasmids();
+                    plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController,
+                                                                           plasmids);
+                }
+                InfoToModelFactory.infoToEntryForField(entry, plasmid, preference.getValue(), EntryField.valueOf(
+                        preference.getKey()));
+            }
+        }
+
+        if (!BulkUploadUtil.validate(draft)) {
+            Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
+            return false;
+        }
 
         draft.setStatus(BulkUploadStatus.PENDING_APPROVAL);
         draft.setLastUpdateTime(new Date(System.currentTimeMillis()));

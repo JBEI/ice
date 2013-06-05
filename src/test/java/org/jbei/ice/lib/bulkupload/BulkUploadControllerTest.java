@@ -19,6 +19,7 @@ import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.group.GroupInfo;
@@ -174,7 +175,15 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
         autoUpdate.getKeyValue().put(EntryField.PI, "test");
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "select");
-        autoUpdate.getKeyValue().put(EntryField.STATUS, "Complete");
+
+        // use preference for the status
+        PreferenceInfo preference = new PreferenceInfo();
+        preference.setAdd(true);
+        preference.setKey(EntryField.STATUS.toString());
+        preference.setValue("Complete");
+
+        long id = controller.updatePreference(account, autoUpdate.getBulkUploadId(), EntryAddType.STRAIN, preference);
+        Assert.assertEquals(autoUpdate.getBulkUploadId(), id);
 
         // validation should fail because of this
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, "BLS1");
@@ -197,6 +206,9 @@ public class BulkUploadControllerTest {
         Assert.assertEquals(entryInfo.getName(), "JBEI-0001");
         Assert.assertEquals(entryInfo.getShortDescription(), "this is a test");
         Assert.assertEquals(entryInfo.getPrincipalInvestigator(), "test");
+        Assert.assertEquals(entryInfo.getSelectionMarkers(), "select");
+        Assert.assertEquals(entryInfo.getBioSafetyLevel(), new Integer(BioSafetyOption.LEVEL_TWO.getValue()));
+        Assert.assertEquals(entryInfo.getStatus(), "Complete");
     }
 
     @Test
