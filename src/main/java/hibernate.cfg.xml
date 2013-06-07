@@ -8,7 +8,7 @@
     <session-factory>
 
         <!-- Database connection settings -->
-        <property name="hibernate.connection.url">jdbc:hsqldb:file:ice_db</property>
+        <property name="hibernate.connection.url">jdbc:hsqldb:file:data/hsqldb</property>
         <property name="hibernate.connection.driver_class">org.hsqldb.jdbc.JDBCDriver</property>
         <property name="hibernate.connection.username">sa</property>
         <property name="hibernate.connection.password">password</property>
@@ -51,7 +51,7 @@
         <property name="hibernate.search.default.directory_provider">
             org.hibernate.search.store.impl.FSDirectoryProvider
         </property>
-        <property name="hibernate.search.default.indexBase">regdb_index</property>
+        <property name="hibernate.search.default.indexBase">data/index</property>
 
         <!-- mapping files -->
         <mapping class="org.jbei.ice.lib.entry.model.Entry"/>

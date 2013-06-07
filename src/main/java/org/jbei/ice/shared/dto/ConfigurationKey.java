@@ -18,7 +18,7 @@ public enum ConfigurationKey implements IsSerializable {
     ARABIDOPSIS_STORAGE_DEFAULT("", "", true),
 
     DATABASE_SCHEMA_VERSION("", "", false),
-    TEMPORARY_DIRECTORY("", "temp directory", true),
+    TEMPORARY_DIRECTORY("/tmp", "temp directory", true),
     DATA_DIRECTORY("data", "data directory", true),
     ATTACHMENTS_DIRECTORY("data/attachments", "attachment directory", true),
     TRACE_FILES_DIRECTORY("data/traces", "sequence trace file directory", true),
@@ -41,7 +41,7 @@ public enum ConfigurationKey implements IsSerializable {
     BLAST_BLASTALL("blast-2.2.26/bin/blastall", "", true),
     BLAST_BL2SEQ("blast-2.2.26/bin/bl2seq", "", true),
     BLAST_FORMATDB("blast-2.2.26/bin/formatdb", "", true),
-    BLAST_DATABASE_NAME("jbeiblast", "", true),
+    BLAST_DATABASE_NAME("data/jbeiblast", "", true),
 
     NEW_REGISTRATION_ALLOWED("NO", "Allow user registration", true),
     PASSWORD_CHANGE_ALLOWED("YES", "allow password change", true),
@@ -53,7 +53,8 @@ public enum ConfigurationKey implements IsSerializable {
     private String defaultValue;
     private boolean editable;
 
-    ConfigurationKey() {}
+    ConfigurationKey() {
+    }
 
     ConfigurationKey(String defaultValue, String display, boolean isEditable) {
         this.displayName = display;
