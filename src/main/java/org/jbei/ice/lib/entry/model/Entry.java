@@ -214,8 +214,8 @@ public class Entry implements IModel {
 
     public Entry() {
         setStatus("Complete");
-        setLongDescriptionType("text");
-        setBioSafetyLevel(new Integer(1));
+        longDescriptionType = "text";
+        setBioSafetyLevel(Integer.valueOf(1));
     }
 
     @XmlTransient
@@ -471,14 +471,6 @@ public class Entry implements IModel {
 
     public void setLongDescription(String longDescription) {
         this.longDescription = longDescription;
-    }
-
-    public String getLongDescriptionType() {
-        return longDescriptionType;
-    }
-
-    public void setLongDescriptionType(String longDescriptionType) {
-        this.longDescriptionType = longDescriptionType;
     }
 
     public String getReferences() {

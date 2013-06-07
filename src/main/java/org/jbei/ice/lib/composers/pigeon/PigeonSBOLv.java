@@ -1,15 +1,5 @@
 package org.jbei.ice.lib.composers.pigeon;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-
-import org.jbei.ice.lib.composers.formatters.SBOLVisitor;
-import org.jbei.ice.lib.models.Sequence;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -17,9 +7,18 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.jbei.ice.lib.composers.formatters.SBOLVisitor;
+import org.jbei.ice.lib.models.Sequence;
 import org.sbolstandard.core.DnaComponent;
 import org.sbolstandard.core.SequenceAnnotation;
 import org.sbolstandard.core.StrandType;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Sends post request to pigeon to generate SBOLv
@@ -194,6 +193,8 @@ public class PigeonSBOLv {
             httpPost.setURI(new URI(PIGEON_URL2));
             HttpResponse response = httpClient.execute(httpPost);
             pigeonResponseString = EntityUtils.toString(response.getEntity());
+        } catch (RuntimeException re) {
+            throw re;
         } catch (Exception ce) {
             return null;
         } finally {

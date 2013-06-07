@@ -1,11 +1,5 @@
 package org.jbei.ice.lib.folder;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -22,6 +16,8 @@ import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.folder.FolderShareType;
 import org.jbei.ice.shared.dto.folder.FolderStatus;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
+
+import java.util.*;
 
 /**
  * @author Hector Plahar
@@ -100,7 +96,7 @@ public class FolderController {
     }
 
     public FolderDetails retrieveFolderContents(long folderId, ColumnField sort, boolean asc,
-            int start, int limit) throws ControllerException {
+                                                int start, int limit) throws ControllerException {
         try {
             Folder folder = getFolderById(folderId);
             if (folder == null)
@@ -218,7 +214,7 @@ public class FolderController {
         Set<Folder> sharedFolders = ControllerFactory.getPermissionController().retrievePermissionFolders(account);
         if (sharedFolders != null) {
             for (Folder folder : sharedFolders) {
-                if (userFolders != null && userFolders.contains(folder))
+                if (userFolders.contains(folder))
                     continue;
 
                 long id = folder.getId();

@@ -373,7 +373,6 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
 
         this.entryInfo.setShortDescription(summary.getText());
         this.entryInfo.setLongDescription(this.notesText.getText());
-        this.entryInfo.setLongDescriptionType("text");
 
         entryInfo.setName(name.getText());
         entryInfo.setAlias(this.alias.getText());

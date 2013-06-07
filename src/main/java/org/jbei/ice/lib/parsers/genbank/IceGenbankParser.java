@@ -11,8 +11,6 @@ import org.jbei.ice.lib.vo.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -605,15 +603,15 @@ public class IceGenbankParser extends AbstractParser {
             result.setCircular(false);
         }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
-        String dateString = locusChunks[locusChunks.length - 1].trim();
-        try {
-            result.setDate(simpleDateFormat.parse(dateString));
-        } catch (ParseException e1) {
-            getErrors().add("Invalid date format: " + dateString + ". Setting today's date.");
-            hasErrors = true;
-            result.setDate(new Date());
-        }
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+//        String dateString = locusChunks[locusChunks.length - 1].trim();
+//        try {
+//            result.setDate(simpleDateFormat.parse(dateString));
+//        } catch (ParseException e1) {
+//            getErrors().add("Invalid date format: " + dateString + ". Setting today's date.");
+//            hasErrors = true;
+//            result.setDate(new Date());
+//        }
 
         if (Arrays.asList(locusChunks).indexOf("bp") == 3) {
             result.setLocusName(locusChunks[1]);

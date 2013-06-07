@@ -198,9 +198,6 @@ public class EntryController {
         if (entry.getBioSafetyLevel() == null)
             entry.setBioSafetyLevel(0);
 
-        if (entry.getLongDescriptionType() == null)
-            entry.setLongDescriptionType("text");
-
         entry.setModificationTime(entry.getCreationTime());
 
         try {
@@ -294,9 +291,6 @@ public class EntryController {
 
         if (entry.getBioSafetyLevel() == null)
             entry.setBioSafetyLevel(0);
-
-        if (entry.getLongDescriptionType() == null)
-            entry.setLongDescriptionType("text");
 
         try {
             entry = dao.saveEntry(entry);

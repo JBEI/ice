@@ -1,7 +1,8 @@
 package org.jbei.ice.client.collection.add.form;
 
-import java.util.HashMap;
-
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
@@ -14,9 +15,7 @@ import org.jbei.ice.shared.dto.entry.PlasmidInfo;
 import org.jbei.ice.shared.dto.entry.StrainInfo;
 import org.jbei.ice.shared.dto.user.PreferenceKey;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
+import java.util.HashMap;
 
 public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSubmit {
 
@@ -38,7 +37,6 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private TextArea strainSummary;
     private TextArea strainReferences;
     private TextArea strainIp;
-    private ListBox strainNotesMarkupOptions;
     private TextArea strainNotesArea;
 
     // plasmid fields
@@ -54,7 +52,6 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private TextArea plasmidSummary;
     private TextArea plasmidReferences;
     private TextArea plasmidIp;
-    private ListBox plasmidNotesMarkupOptions;
     private TextArea plasmidNotesArea;
 
     // submit cancel buttons
@@ -317,22 +314,12 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         notes.getFlexCellFormatter().setHeight(1, 0, "10px");
         notes.getFlexCellFormatter().setColSpan(1, 0, 2);
 
-        notes.setWidget(2, 0, new HTML("<span class=\"font-85em\">Markup Type</span>"));
-        notes.getFlexCellFormatter().setStyleName(2, 0, "entry_add_sub_label");
-        plasmidNotesMarkupOptions = new ListBox();
-        plasmidNotesMarkupOptions.setVisibleItemCount(1);
-        plasmidNotesMarkupOptions.addItem("Text");
-        //        plasmidNotesMarkupOptions.addItem("Wiki");
-        //        plasmidNotesMarkupOptions.addItem("Confluence");
-        plasmidNotesMarkupOptions.setStyleName("pull_down");
-        notes.setWidget(2, 1, plasmidNotesMarkupOptions);
-
         // input
-        notes.setWidget(3, 0, new Label(""));
-        notes.getFlexCellFormatter().setWidth(3, 0, "170px");
+        notes.setWidget(2, 0, new Label(""));
+        notes.getFlexCellFormatter().setWidth(2, 0, "170px");
 
         plasmidNotesArea = createTextArea("640px", "200px");
-        notes.setWidget(3, 1, plasmidNotesArea);
+        notes.setWidget(2, 1, plasmidNotesArea);
 
         return notes;
     }
@@ -447,22 +434,12 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         notes.getFlexCellFormatter().setHeight(1, 0, "10px");
         notes.getFlexCellFormatter().setColSpan(1, 0, 2);
 
-        notes.setWidget(2, 0, new HTML("<span class=\"font-85em\">Markup Type</span>"));
-        notes.getFlexCellFormatter().setStyleName(2, 0, "entry_add_sub_label");
-        strainNotesMarkupOptions = new ListBox();
-        strainNotesMarkupOptions.setVisibleItemCount(1);
-        strainNotesMarkupOptions.addItem("Text");
-        //        strainNotesMarkupOptions.addItem("Wiki");
-        //        strainNotesMarkupOptions.addItem("Confluence");
-        strainNotesMarkupOptions.setStyleName("pull_down");
-        notes.setWidget(2, 1, strainNotesMarkupOptions);
-
         // input
-        notes.setWidget(3, 0, new Label(""));
-        notes.getFlexCellFormatter().setWidth(3, 0, "170px");
+        notes.setWidget(2, 0, new Label(""));
+        notes.getFlexCellFormatter().setWidth(2, 0, "170px");
 
         strainNotesArea = createTextArea("640px", "200px");
-        notes.setWidget(3, 1, strainNotesArea);
+        notes.setWidget(2, 1, strainNotesArea);
 
         return notes;
     }
@@ -639,8 +616,6 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         strain.setReferences(strainReferences.getText());
         strain.setIntellectualProperty(strainIp.getText());
         strain.setLongDescription(this.strainNotesArea.getText());
-        String longDescType = strainNotesMarkupOptions.getItemText(strainNotesMarkupOptions.getSelectedIndex());
-        strain.setLongDescriptionType(longDescType);
 
         // plasmid fields
         plasmid.setName(plasmidName.getText());
@@ -657,8 +632,6 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         plasmid.setReferences(plasmidReferences.getText());
         plasmid.setIntellectualProperty(plasmidIp.getText());
         plasmid.setLongDescription(this.plasmidNotesArea.getText());
-        longDescType = plasmidNotesMarkupOptions.getItemText(plasmidNotesMarkupOptions.getSelectedIndex());
-        plasmid.setLongDescriptionType(longDescType);
         strain.setInfo(plasmid);
     }
 

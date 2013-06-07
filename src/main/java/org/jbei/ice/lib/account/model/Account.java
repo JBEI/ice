@@ -1,16 +1,15 @@
 package org.jbei.ice.lib.account.model;
 
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import javax.persistence.*;
-
+import org.hibernate.annotations.Type;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountType;
 
-import org.hibernate.annotations.Type;
+import javax.persistence.*;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Store the account information for a single user.
@@ -83,8 +82,8 @@ public class Account implements IModel {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"),
-               inverseJoinColumns = @JoinColumn(name = "group_id"))
-    private Set<Group> groups = new LinkedHashSet<Group>();
+            inverseJoinColumns = @JoinColumn(name = "group_id"))
+    private Set<Group> groups = new LinkedHashSet<>();
 
     /**
      * Constructor.
@@ -105,7 +104,7 @@ public class Account implements IModel {
      * @param description
      */
     public Account(String firstName, String lastName, String initials, String email,
-            String password, String institution, String description) {
+                   String password, String institution, String description) {
         super();
 
         this.firstName = firstName;
@@ -241,6 +240,11 @@ public class Account implements IModel {
 
         Account account = (Account) obj;
         return account.getId() == this.getId() && account.getEmail().equals(this.getEmail());
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.valueOf(this.id).intValue();
     }
 
     public AccountType getType() {

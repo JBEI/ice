@@ -1,8 +1,5 @@
 package org.jbei.ice.lib.session;
 
-import java.util.Calendar;
-import java.util.HashMap;
-
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -10,6 +7,9 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.ConfigurationKey;
+
+import java.util.Calendar;
+import java.util.HashMap;
 
 /**
  * Cache {@link SessionData} information in a memory cache, as well as in the database. Hide this
@@ -198,15 +198,6 @@ public class PersistentSessionDataWrapper {
      */
     private long getCacheExpirationTime() {
         return Calendar.getInstance().getTimeInMillis() + CACHE_TIMEOUT;
-    }
-
-    /**
-     * Set the time stamp cache.
-     *
-     * @param timeStamp
-     */
-    public void setTimeStampCache(HashMap<String, Long> timeStamp) {
-        PersistentSessionDataWrapper.timeStampCache = timeStamp;
     }
 
     /**

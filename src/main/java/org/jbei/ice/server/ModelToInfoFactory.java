@@ -281,7 +281,6 @@ public class ModelToInfoFactory {
         info.setBioSafetyLevel(entry.getBioSafetyLevel());
 
         info.setLongDescription(entry.getLongDescription());
-        info.setLongDescriptionType(entry.getLongDescriptionType());
         info.setIntellectualProperty(entry.getIntellectualProperty());
         info.setSelectionMarkers(entry.getSelectionMarkersAsString());
 
@@ -308,7 +307,7 @@ public class ModelToInfoFactory {
         // get visibility
         info.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 
-        String parsed = EntryUtil.getParsedNotes(entry.getLongDescriptionType());
+        String parsed = EntryUtil.getParsedNotes(entry.getLongDescription());
         info.setLongDescription(entry.getLongDescription());
         info.setParsedDescription(parsed);
         if (account != null) {
@@ -338,7 +337,7 @@ public class ModelToInfoFactory {
     }
 
     public static EntryInfo getSummaryInfo(Entry entry) {
-        EntryInfo info = null;
+        EntryInfo info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
 
         switch (type) {

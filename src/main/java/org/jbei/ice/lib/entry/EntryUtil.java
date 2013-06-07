@@ -203,8 +203,6 @@ public class EntryUtil {
      * @return Html &lt;a&gt; link.
      */
     private static String wikiLinkifyText(Account account, String text) {
-        String newText;
-
         try {
             EntryController entryController = ControllerFactory.getEntryController();
             String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
@@ -253,18 +251,16 @@ public class EntryUtil {
                 }
             }
 
-            newText = new String(text);
             for (int i = jbeiLinks.size() - 1; i > -1; i = i - 1) {
-                String before = newText.substring(0, starts.get(i));
-                String after = newText.substring(ends.get(i));
-                newText = before + makeEntryLink(account, jbeiLinks.get(i)) + after;
+                String before = text.substring(0, starts.get(i));
+                String after = text.substring(ends.get(i));
+                text = before + makeEntryLink(account, jbeiLinks.get(i)) + after;
             }
         } catch (Exception e) {
             Logger.error(e);
-            return text;
         }
 
-        return newText;
+        return text;
     }
 
     public static String getParsedNotes(String s) {

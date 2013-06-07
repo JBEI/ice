@@ -200,6 +200,7 @@ public class EntryActionWidget extends Composite {
         pipe1.setVisible(visible);
         delete.setVisible(visible);
         pipe2.setVisible(visible);
+        flag.setVisible(visible);
     }
 
     public void setHasSample(boolean hasSample) {

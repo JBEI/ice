@@ -54,7 +54,7 @@ public class SBOLParser extends AbstractParser {
         }
     }
 
-    private class Visitor extends SBOLBaseVisitor<RuntimeException> {
+    private static class Visitor extends SBOLBaseVisitor<RuntimeException> {
 
         private FeaturedDNASequence featuredDNASequence;
 

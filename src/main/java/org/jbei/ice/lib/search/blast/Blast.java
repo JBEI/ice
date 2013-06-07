@@ -1,32 +1,10 @@
 package org.jbei.ice.lib.search.blast;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
-import java.nio.charset.Charset;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
+import org.apache.commons.io.IOUtils;
+import org.biojava.bio.seq.DNATools;
+import org.biojava.bio.seq.RNATools;
+import org.biojava.bio.symbol.IllegalSymbolException;
+import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -46,11 +24,16 @@ import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.search.BlastProgram;
 import org.jbei.ice.shared.dto.search.SearchResultInfo;
 
-import org.apache.commons.io.IOUtils;
-import org.biojava.bio.seq.DNATools;
-import org.biojava.bio.seq.RNATools;
-import org.biojava.bio.symbol.IllegalSymbolException;
-import org.biojava.bio.symbol.SymbolList;
+import java.io.*;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
+import java.nio.charset.Charset;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Manage blast functions.
@@ -237,7 +220,7 @@ public class Blast {
             Path queryFilePath = Files.write(Files.createTempFile("query-", ".seq"), query.getBytes());
             Path subjectFilePath = Files.write(Files.createTempFile("subject-", ".seq"), subject.getBytes());
             String commandString = String.format(BL2SEQ_COMMAND_PATTERN, BL2SEQ,
-                                                 queryFilePath.toString(), subjectFilePath.toString());
+                    queryFilePath.toString(), subjectFilePath.toString());
             Logger.info("Bl2seq query: " + commandString);
             result = runSimpleExternalProgram(commandString);
             Files.deleteIfExists(subjectFilePath);
@@ -280,7 +263,7 @@ public class Blast {
      * @throws BlastException
      */
     private static void formatBlastDb(File fastaFileDir, String fastaFileName, String logFileName,
-            String databaseName) throws BlastException {
+                                      String databaseName) throws BlastException {
         ArrayList<String> commands = new ArrayList<>();
         String path = Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_FORMATDB)).toFile().getAbsolutePath();
         commands.add(path);
@@ -469,12 +452,12 @@ public class Blast {
             Files.createDirectory(newFastaFileDirPath);
             Path fastaFilePath = Paths.get(newFastaFileDirPath.toString(), BIG_FASTA_FILE);
             try (BufferedWriter write = Files.newBufferedWriter(fastaFilePath, Charset.defaultCharset(),
-                                                                StandardOpenOption.CREATE_NEW)) {
+                    StandardOpenOption.CREATE_NEW)) {
                 writeBigFastaFile(write);
             }
 
             Blast.formatBlastDb(newFastaFileDirPath.toFile(), fastaFilePath.getFileName().toString(),
-                                "ice.log", "ice");
+                    "ice.log", "ice");
             renameBlastDb(newFastaFileDirPath.toFile(), BLAST_DATABASE_DIR);
         } catch (IOException ioe) {
             throw new BlastException(ioe);
@@ -493,11 +476,11 @@ public class Blast {
             Files.createDirectory(newFeatureFastaDirPath);
             Path fastaFilePath = Paths.get(newFeatureFastaDirPath.toString(), FEATURE_BLAST_FILE);
             try (BufferedWriter writer = Files.newBufferedWriter(fastaFilePath, Charset.defaultCharset(),
-                                                                 StandardOpenOption.CREATE_NEW)) {
+                    StandardOpenOption.CREATE_NEW)) {
                 writeFeatureFastaFile(writer);
             }
             Blast.formatBlastDb(newFeatureFastaDirPath.toFile(), fastaFilePath.getFileName().toString(),
-                                "ice_" + FEATURE_BLAST_FILE + ".log", "features");
+                    "ice_" + FEATURE_BLAST_FILE + ".log", "features");
             renameBlastDb(newFeatureFastaDirPath.toFile(), FEATURE_BLAST_DIRECTORY);
         } catch (IOException e) {
             throw new BlastException(e);
@@ -514,7 +497,7 @@ public class Blast {
         }
     }
 
-    public class DeleteDirVisitor extends SimpleFileVisitor<Path> {
+    public static class DeleteDirVisitor extends SimpleFileVisitor<Path> {
 
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -532,7 +515,7 @@ public class Blast {
         }
     }
 
-    public class CopyDirVisitor extends SimpleFileVisitor<Path> {
+    public static class CopyDirVisitor extends SimpleFileVisitor<Path> {
 
         private final Path source;
         private final Path dest;

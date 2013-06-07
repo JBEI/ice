@@ -1,14 +1,10 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.shared.dto.entry.*;
+
+import java.util.ArrayList;
 
 public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
@@ -88,7 +84,6 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
             case STRAIN_NOTES:
                 strain.setLongDescription(value);
-                strain.setLongDescriptionType("text");
                 break;
 
             case STRAIN_REFERENCES:
@@ -224,7 +219,6 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
             case PLASMID_NOTES:
                 info.setLongDescription(value);
-                info.setLongDescriptionType("text");
                 break;
 
             case PLASMID_REFERENCES:

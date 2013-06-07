@@ -77,7 +77,6 @@ public class IceXmlSerializer {
     private static final String INTELLECTUAL_PROPERTY = "intellectualProperty";
     private static final String BIO_SAFETY_LEVEL = "bioSafetyLevel";
     private static final String REFERENCES = "references";
-    private static final String LONG_DESCRIPTION_MARKUP_TYPE = "longDescriptionMarkupType";
     private static final String LONG_DESCRIPTION = "longDescription";
     private static final String SHORT_DESCRIPTION = "shortDescription";
     private static final String STATUS = "status";
@@ -230,8 +229,8 @@ public class IceXmlSerializer {
 
         entryRoot.add(new DefaultElement(LONG_DESCRIPTION, iceNamespace)
                 .addText(emptyStringify(entry.getLongDescription())));
-        entryRoot.add(new DefaultElement(LONG_DESCRIPTION_MARKUP_TYPE, iceNamespace).addText(
-                entry.getLongDescriptionType()));
+        entryRoot.add(new DefaultElement(SHORT_DESCRIPTION, iceNamespace).addText(
+                entry.getShortDescription()));
         entryRoot.add(new DefaultElement(REFERENCES, iceNamespace).addText(emptyStringify(entry.getReferences())));
         entryRoot.add(getEntryTypeSpecificFields(entry));
 

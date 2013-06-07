@@ -1,7 +1,5 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -9,6 +7,8 @@ import org.jbei.ice.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
+
+import java.util.ArrayList;
 
 /**
  * Extracts common elements of entries from sheet
@@ -64,7 +64,6 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
 
             case NOTES:
                 info.setLongDescription(value);
-                info.setLongDescriptionType("text");
                 break;
 
             case REFERENCES:

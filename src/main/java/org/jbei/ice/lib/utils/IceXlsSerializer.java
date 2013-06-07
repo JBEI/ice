@@ -1,11 +1,6 @@
 package org.jbei.ice.lib.utils;
 
-import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.entry.EntryUtil;
@@ -17,7 +12,11 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 
-import org.apache.commons.lang.StringUtils;
+import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Serializer for entry -> xls conversion
@@ -66,6 +65,9 @@ public class IceXlsSerializer {
                 headers.add("Plant Type");
                 headers.add("Sent to ABRC?");
                 break;
+
+            default:
+                return headers;
         }
         return headers;
     }

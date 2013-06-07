@@ -1,15 +1,15 @@
 package org.jbei.ice.shared.dto.entry;
 
-import java.util.ArrayList;
-import java.util.Date;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.dto.IDTOModel;
 import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.comment.UserComment;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.Date;
 
 @XmlRootElement
 public class EntryInfo implements IDTOModel {
@@ -32,7 +32,6 @@ public class EntryInfo implements IDTOModel {
     private String linkifiedShortDescription;
     private String longDescription;
     private String parsedDescription;
-    private String longDescriptionType;
     private String references;
     private Date creationTime;
     private Date modificationTime;
@@ -60,7 +59,8 @@ public class EntryInfo implements IDTOModel {
 
     private EntryInfo info; // typically used with strain with plasmid
 
-    public EntryInfo() {}
+    public EntryInfo() {
+    }
 
     public EntryInfo(EntryType type) {
         this.type = type;
@@ -163,14 +163,6 @@ public class EntryInfo implements IDTOModel {
 
     public void setLongDescription(String longDescription) {
         this.longDescription = longDescription;
-    }
-
-    public String getLongDescriptionType() {
-        return longDescriptionType;
-    }
-
-    public void setLongDescriptionType(String longDescriptionType) {
-        this.longDescriptionType = longDescriptionType;
     }
 
     public String getReferences() {

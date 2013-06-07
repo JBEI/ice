@@ -138,7 +138,6 @@ public class InfoToModelFactory {
         entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? Integer.valueOf(0) : info.getBioSafetyLevel());
         entry.setShortDescription(info.getShortDescription());
         entry.setLongDescription(info.getLongDescription());
-        entry.setLongDescriptionType(info.getLongDescriptionType() != null ? info.getLongDescriptionType() : "text");
         entry.setIntellectualProperty(info.getIntellectualProperty());
         if (entry.getVersionId() == null || entry.getVersionId().trim().isEmpty()) {
             entry.setVersionId(info.getVersionId());
@@ -451,12 +450,10 @@ public class InfoToModelFactory {
             case NOTES:
             case STRAIN_NOTES:
                 entry.setLongDescription(value);
-                entry.setLongDescriptionType("text");
                 break;
 
             case PLASMID_NOTES:
                 plasmid.setLongDescription(value);
-                plasmid.setLongDescriptionType("text");
                 break;
 
             case REFERENCES:
