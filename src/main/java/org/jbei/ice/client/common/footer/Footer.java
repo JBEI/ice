@@ -1,45 +1,16 @@
 package org.jbei.ice.client.common.footer;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.widget.PopupHandler;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
-
 public class Footer extends Composite {
-
-    interface Resources extends ClientBundle {
-        @Source("org/jbei/ice/client/resource/image/doe-bioenergy-research-cent.gif")
-        ImageResource doeLogo();
-
-        @Source("org/jbei/ice/client/resource/image/lbnl-logo.gif")
-        ImageResource lblLogo();
-
-        @Source("org/jbei/ice/client/resource/image/sandia-lab-logo.gif")
-        ImageResource sandiaLogo();
-
-        @Source("org/jbei/ice/client/resource/image/ucb-logo.gif")
-        ImageResource ucLogo();
-
-        @Source("org/jbei/ice/client/resource/image/ucdavis-logo.gif")
-        ImageResource davisLogo();
-
-        @Source("org/jbei/ice/client/resource/image/carnegie-insitution-logo.gif")
-        ImageResource carnegieLogo();
-
-        @Source("org/jbei/ice/client/resource/image/llnl-logo.gif")
-        ImageResource lnlLogo();
-
-        @Source("org/jbei/ice/client/resource/image/pnw.png")
-        ImageResource pnnlLogo();
-    }
 
     private final RegistryServiceAsync service = GWT.create(RegistryService.class);
 
@@ -68,15 +39,14 @@ public class Footer extends Composite {
 
         // create images
         HorizontalPanel panel = new HorizontalPanel();
-        Resources resources = GWT.create(Resources.class);
-        panel.add(new Image(resources.doeLogo()));
-        panel.add(new Image(resources.lblLogo()));
-        panel.add(new Image(resources.sandiaLogo()));
-        panel.add(new Image(resources.ucLogo()));
-        panel.add(new Image(resources.davisLogo()));
-        panel.add(new Image(resources.carnegieLogo()));
-        panel.add(new Image(resources.lnlLogo()));
-        panel.add(new Image(resources.pnnlLogo()));
+        panel.add(new Image("static/images/doe-bioenergy-research-cent.gif"));
+        panel.add(new Image("static/images/lbnl-logo.gif"));
+        panel.add(new Image("static/images/sandia-lab-logo.gif"));
+        panel.add(new Image("static/images/ucb-logo.gif"));
+        panel.add(new Image("static/images/ucdavis-logo.gif"));
+        panel.add(new Image("static/images/carnegie-insitution-logo.gif"));
+        panel.add(new Image("static/images/llnl-logo.gif"));
+        panel.add(new Image("static/images/pnw.png"));
 
         // add images to a table
         FlexTable contents = new FlexTable();
@@ -115,11 +85,11 @@ public class Footer extends Composite {
 
         HorizontalPanel line3 = new HorizontalPanel();
         Anchor featureReq = new Anchor("Feature Request",
-                                       "http://code.google.com/p/gd-ice/issues/entry?template=Suggest%20Feature");
+                "http://code.google.com/p/gd-ice/issues/entry?template=Suggest%20Feature");
         line3.add(featureReq);
         line3.add(new HTML("&nbsp; | &nbsp; "));
         Anchor bugReport = new Anchor("Report a Bug",
-                                      "http://code.google.com/p/gd-ice/issues/entry?template=Report%20Bug");
+                "http://code.google.com/p/gd-ice/issues/entry?template=Report%20Bug");
         line3.add(bugReport);
         line3.add(new HTML("&nbsp; | &nbsp; "));
         Label feedback = new Label("Feedback");
