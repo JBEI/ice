@@ -1,20 +1,14 @@
 package org.jbei.ice.client.collection.add.form;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.datepicker.client.DateBox;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.Generation;
 import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
-
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.datepicker.client.DateBox;
 
 public class ArabidopsisForm extends EntryForm<ArabidopsisSeedInfo> {
 
@@ -81,9 +75,9 @@ public class ArabidopsisForm extends EntryForm<ArabidopsisSeedInfo> {
         harvestDate.setWidth("205px");
         harvestDate.setFormat(new DateBox.DefaultFormat(dateFormat));
 
-        homozygosity = createStandardTextBox("300px");
-        ecoType = createStandardTextBox("300px");
-        parents = createStandardTextBox("300px");
+        homozygosity = createStandardTextBox("300px", 150);
+        ecoType = createStandardTextBox("300px", 150);
+        parents = createStandardTextBox("300px", 150);
         sentToAbrc = new CheckBox();
     }
 

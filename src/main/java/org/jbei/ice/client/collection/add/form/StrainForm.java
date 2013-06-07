@@ -1,14 +1,9 @@
 package org.jbei.ice.client.collection.add.form;
 
+import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.entry.StrainInfo;
-
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
 
 public class StrainForm extends EntryForm<StrainInfo> {
 
@@ -30,9 +25,9 @@ public class StrainForm extends EntryForm<StrainInfo> {
     protected void initComponents() {
         super.initComponents();
 
-        host = createStandardTextBox("300px");
+        host = createStandardTextBox("300px", 150);
         markers = createAutoCompleteForSelectionMarkers("300px");
-        genPhen = createStandardTextBox("300px");
+        genPhen = createStandardTextBox("300px", 150);
         plasmids = createAutoCompleteForPlasmidNames("300px");
     }
 

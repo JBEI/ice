@@ -110,8 +110,6 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
 
         layout.setWidget(0, 0, createGeneralWidget());
         layout.setWidget(1, 0, createParametersWidget());
-//        layout.setWidget(2, 0, createSampleWidget());
-//        layout.setWidget(2, 0, createSequenceWidget());
         layout.setWidget(2, 0, createNotesWidget());
         layout.setWidget(3, 0, createSubmitCancelButtons());
     }
@@ -123,19 +121,18 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         submit.setStyleName("btn_submit_entry_form");
         cancel = new Button("Cancel");
         cancel.setStyleName("btn_reset_entry_form");
-        creator = createStandardTextBox("205px");
-        creatorEmail = createStandardTextBox("205px");
-        name = createStandardTextBox("205px");
-        alias = createStandardTextBox("205px");
-        principalInvestigator = createStandardTextBox("205px");
+        creator = createStandardTextBox("205px", 125);
+        creatorEmail = createStandardTextBox("205px", 125);
+        name = createStandardTextBox("205px", 125);
+        alias = createStandardTextBox("205px", 125);
+        principalInvestigator = createStandardTextBox("205px", 125);
         summary = createTextArea("640px", "50px");
-//        sampleLocationScheme = new ArrayList<TextBox>();
 
-        fundingSource = createStandardTextBox("205px");
+        fundingSource = createStandardTextBox("205px", 250);
         status = new ListBox();
         bioSafety = new ListBox();
-        links = createStandardTextBox("300px");
-        keywords = createStandardTextBox("640px");
+        links = createStandardTextBox("300px", 500);
+        keywords = createStandardTextBox("640px", 125);
         references = createTextArea("640px", "50px");
         ip = createTextArea("640px", "50px");
         notesText = new TextArea();
@@ -236,8 +233,9 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         return parameters;
     }
 
-    protected TextBox createStandardTextBox(String width) {
+    protected TextBox createStandardTextBox(String width, int length) {
         final TextBox box = new TextBox();
+        box.setMaxLength(length);
         box.setStyleName("input_box");
         box.setWidth(width);
         return box;

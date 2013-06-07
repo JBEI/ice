@@ -1,15 +1,9 @@
 package org.jbei.ice.client.collection.add.form;
 
+import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
-
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Form for creating a new plasmid
@@ -36,7 +30,7 @@ public class PlasmidForm extends EntryForm<PlasmidInfo> {
     }
 
     protected void addField(FlexTable table, String label, int row, int col, TextBox box,
-            String help, boolean required) {
+                            String help, boolean required) {
         setLabel(required, label, table, row, col);
         if (help != null) {
             Widget widget = createTextBoxWithHelp(box, help);
@@ -53,7 +47,7 @@ public class PlasmidForm extends EntryForm<PlasmidInfo> {
         circular = new CheckBox();
         origin = createAutoCompleteForOriginOfReplication("300px");
         promoters = createAutoCompleteForPromoters("300px");
-        backbone = createStandardTextBox("300px");
+        backbone = createStandardTextBox("300px", 150);
     }
 
     protected Widget createGeneralWidget() {
