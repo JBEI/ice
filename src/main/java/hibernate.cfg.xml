@@ -74,8 +74,6 @@
         <mapping class="org.jbei.ice.lib.account.model.Account"/>
         <mapping class="org.jbei.ice.lib.entry.attachment.Attachment"/>
         <mapping class="org.jbei.ice.lib.entry.sample.model.Sample"/>
-        <mapping class="org.jbei.ice.lib.models.Label"/>
-        <mapping class="org.jbei.ice.lib.entry.model.EntryLabel"/>
         <mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
         <mapping class="org.jbei.ice.lib.group.Group"/>
         <mapping class="org.jbei.ice.lib.permissions.model.ReadUser"/>
