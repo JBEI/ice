@@ -1,19 +1,5 @@
 package org.jbei.ice.client.common;
 
-import java.util.Date;
-
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.Page;
-import org.jbei.ice.client.RegistryService;
-import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.PartInfo;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.History;
@@ -21,6 +7,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.*;
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.shared.dto.entry.*;
+
+import java.util.Date;
 
 /**
  * Factory for generating a widget that is used as a tooltip for entrys
@@ -34,19 +25,19 @@ public class TipViewContentFactory {
     public static void getContents(final EntryInfo entry, String url, final Callback<Widget> callback) {
         try {
             service.retrieveEntryTipDetails(ClientController.sessionId, entry.getRecordId(), url,
-                                            new AsyncCallback<EntryInfo>() {
+                    new AsyncCallback<EntryInfo>() {
 
-                                                @Override
-                                                public void onSuccess(EntryInfo result) {
-                                                    Widget contents = getContents(result);
-                                                    callback.onSuccess(contents);
-                                                }
+                        @Override
+                        public void onSuccess(EntryInfo result) {
+                            Widget contents = getContents(result);
+                            callback.onSuccess(contents);
+                        }
 
-                                                @Override
-                                                public void onFailure(Throwable caught) {
-                                                    callback.onFailure();
-                                                }
-                                            });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            callback.onFailure();
+                        }
+                    });
         } catch (AuthenticationException e) {
             History.newItem(Page.LOGIN.getLink());
         }
@@ -126,10 +117,9 @@ public class TipViewContentFactory {
         setLeftColumn(table, view);
 
         // second column
-        addField(table, 1, 2, "Package Format", view.getPackageFormat(), "135px", "230px");
         String fundingSource = view.getFundingSource() == null ? "" : view.getFundingSource();
-        addField(table, 2, 2, "Funding Source", fundingSource, "135px", "230px");
-        return 3;
+        addField(table, 1, 2, "Funding Source", fundingSource, "135px", "230px");
+        return 2;
     }
 
     private static int getSeedContent(FlexTable table, ArabidopsisSeedInfo view) {
@@ -149,7 +139,7 @@ public class TipViewContentFactory {
     }
 
     private static void addField(FlexTable table, int row, int col, String header,
-            String value, String headerWidth, String valueWidth) {
+                                 String value, String headerWidth, String valueWidth) {
         table.setHTML(row, col, "<b class=\"font-75em\" style=\"color: #222\">" + header + "</b>");
         table.getFlexCellFormatter().setWidth(row, col, headerWidth);
         table.getFlexCellFormatter().setVerticalAlignment(row, col, HasAlignment.ALIGN_TOP);

@@ -10,7 +10,6 @@ public class PartInfoView extends EntryInfoView<PartInfo> {
 
     @Override
     protected void addShortFieldValues() {
-        addShortField("Packaging Format", info.getPackageFormat());
     }
 
     @Override

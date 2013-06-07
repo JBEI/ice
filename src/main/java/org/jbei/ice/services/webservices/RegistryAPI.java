@@ -1,14 +1,5 @@
 package org.jbei.ice.services.webservices;
 
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import javax.jws.WebParam;
-import javax.jws.WebService;
-
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -18,14 +9,7 @@ import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
-import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Name;
-import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.model.*;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
@@ -50,6 +34,11 @@ import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 import org.jbei.ice.shared.dto.search.SearchResults;
 
+import javax.jws.WebParam;
+import javax.jws.WebService;
+import java.io.ByteArrayInputStream;
+import java.util.*;
+
 /**
  * SOAP API methods.
  *
@@ -69,7 +58,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public String login(@WebParam(name = "login") String login,
-            @WebParam(name = "password") String password) throws SessionException, ServiceException {
+                        @WebParam(name = "password") String password) throws SessionException, ServiceException {
         String sessionId;
 
         try {
@@ -149,7 +138,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public boolean isModerator(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "login") String login) throws SessionException, ServiceException {
+                               @WebParam(name = "login") String login) throws SessionException, ServiceException {
         Account account = validateAccount(sessionId);
         AccountController controller = ControllerFactory.getAccountController();
 
@@ -171,7 +160,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public Entry getEntryByName(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "name") String name) throws ServiceException {
+                                @WebParam(name = "name") String name) throws ServiceException {
         log(sessionId, "getEntryByName: " + name);
         try {
             Account account = validateAccount(sessionId);
@@ -223,7 +212,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public Entry getByRecordId(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+                               @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "getByRecordId: " + entryId);
         Account account = validateAccount(sessionId);
@@ -265,7 +254,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public Entry getByPartNumber(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "partNumber") String partNumber) throws SessionException,
+                                 @WebParam(name = "partNumber") String partNumber) throws SessionException,
             ServiceException, ServicePermissionException {
         log(sessionId, "getByPartNumber: " + partNumber);
         Entry entry;
@@ -300,7 +289,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public boolean hasReadPermissions(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+                                      @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "hasReadPermission: " + entryId);
         boolean result;
@@ -333,7 +322,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public boolean hasWritePermissions(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
+                                       @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
         log(sessionId, "hasWritePermissions: " + entryId);
         boolean result;
         Account account = validateAccount(sessionId);
@@ -365,7 +354,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public Plasmid createPlasmid(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException {
+                                 @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException {
         log(sessionId, "createPlasmid");
         Entry newEntry;
         Account account = validateAccount(sessionId);
@@ -374,7 +363,7 @@ public class RegistryAPI implements IRegistryAPI {
             Entry remoteEntry = createEntry(plasmid);
             newEntry = entryController.createEntry(account, remoteEntry, null);
             log("User '" + account.getEmail() + "' created plasmid: '" + plasmid.getRecordId()
-                        + "', " + plasmid.getId());
+                    + "', " + plasmid.getId());
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -397,7 +386,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public Strain createStrain(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException {
+                               @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException {
         log(sessionId, "createStrain");
         Entry newEntry;
         Account account = validateAccount(sessionId);
@@ -429,7 +418,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public Part createPart(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "part") Part part) throws SessionException, ServiceException {
+                           @WebParam(name = "part") Part part) throws SessionException, ServiceException {
         log(sessionId, "createPart");
         Entry newEntry;
         Account account = validateAccount(sessionId);
@@ -483,7 +472,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public Plasmid updatePlasmid(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException,
+                                 @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "updatePlasmid");
         Entry savedEntry;
@@ -495,7 +484,7 @@ public class RegistryAPI implements IRegistryAPI {
             savedEntry = entryController.update(account, updateEntry(account, plasmid));
 
             log("User '" + account.getEmail() + "' update plasmid: '" + savedEntry.getRecordId()
-                        + "', " + savedEntry.getId());
+                    + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -523,7 +512,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public Strain updateStrain(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException,
+                               @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "updateStrain");
         Entry savedEntry;
@@ -533,7 +522,7 @@ public class RegistryAPI implements IRegistryAPI {
             EntryController entryController = ControllerFactory.getEntryController();
             savedEntry = entryController.update(account, updateEntry(account, strain));
             log("User '" + account.getEmail() + "' update strain: '" + savedEntry.getRecordId()
-                        + "', " + savedEntry.getId());
+                    + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -560,7 +549,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public Part updatePart(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "part") Part part) throws SessionException, ServiceException,
+                           @WebParam(name = "part") Part part) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "updatePart");
         Entry savedEntry;
@@ -571,7 +560,7 @@ public class RegistryAPI implements IRegistryAPI {
             savedEntry = entryController.update(account, updateEntry(account, part));
 
             log("User '" + account.getEmail() + "' update part: '" + savedEntry.getRecordId()
-                        + "', " + savedEntry.getId());
+                    + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -812,8 +801,6 @@ public class RegistryAPI implements IRegistryAPI {
             ((Strain) currentEntry).setHost(((Strain) entry).getHost());
             ((Strain) currentEntry).setPlasmids(((Strain) entry).getPlasmids());
             ((Strain) currentEntry).setGenotypePhenotype(((Strain) entry).getGenotypePhenotype());
-        } else if (entry instanceof Part) {
-            ((Part) currentEntry).setPackageFormat(((Part) entry).getPackageFormat());
         }
 
         // Validate and set name
@@ -906,7 +893,7 @@ public class RegistryAPI implements IRegistryAPI {
 
                 if (entryFundingSource.getFundingSource().getPrincipalInvestigator() == null
                         || entryFundingSource.getFundingSource().getPrincipalInvestigator()
-                                             .isEmpty()) {
+                        .isEmpty()) {
                     throw new ServiceException("PrincipalInvestigator can't be null or empty!");
                 }
 
@@ -915,13 +902,13 @@ public class RegistryAPI implements IRegistryAPI {
                         .getEntryFundingSources()) {
 
                     if (currentEntryEntryFundingSource.getFundingSource().getFundingSource()
-                                                      .equals(entryFundingSource.getFundingSource().getFundingSource())
+                            .equals(entryFundingSource.getFundingSource().getFundingSource())
                             && currentEntryEntryFundingSource
                             .getFundingSource()
                             .getPrincipalInvestigator()
                             .equals(
                                     entryFundingSource.getFundingSource()
-                                                      .getPrincipalInvestigator())) {
+                                            .getPrincipalInvestigator())) {
                         existEntryFundingSource = true;
 
                         break;
@@ -953,7 +940,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public void removeEntry(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+                            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "removeEntry: " + entryId);
         Account account = validateAccount(sessionId);
@@ -988,7 +975,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public FeaturedDNASequence getSequence(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+                                           @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "getSequence: " + entryId);
         Account account = validateAccount(sessionId);
@@ -1037,7 +1024,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public String getOriginalGenBankSequence(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+                                             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "getOriginalGenbankSequence: " + entryId);
         String genbankSequence = "";
@@ -1054,7 +1041,7 @@ public class RegistryAPI implements IRegistryAPI {
             }
 
             log("User '" + account.getEmail() + "' pulled original genbank sequence: '" + entryId
-                        + "'");
+                    + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
@@ -1082,7 +1069,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public String getGenBankSequence(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+                                     @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "getGenBankSequence: " + entryId);
         String genbankSequence = "";
@@ -1128,7 +1115,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public String getFastaSequence(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+                                   @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "getFastaSequence: " + entryId);
         String fastaSequence = "";
@@ -1171,8 +1158,8 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public FeaturedDNASequence createSequence(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId,
-            @WebParam(name = "sequence") FeaturedDNASequence featuredDNASequence)
+                                              @WebParam(name = "entryId") String entryId,
+                                              @WebParam(name = "sequence") FeaturedDNASequence featuredDNASequence)
             throws SessionException, ServiceException, ServicePermissionException {
         log(sessionId, "createSequence: " + entryId);
         Entry entry;
@@ -1233,7 +1220,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public void removeSequence(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+                               @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "removeSequence: " + entryId);
         Account account = validateAccount(sessionId);
@@ -1284,7 +1271,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public FeaturedDNASequence uploadSequence(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId, @WebParam(name = "sequence") String sequence)
+                                              @WebParam(name = "entryId") String entryId, @WebParam(name = "sequence") String sequence)
             throws SessionException, ServiceException, ServicePermissionException {
         log(sessionId, "uploadSequence: " + entryId);
         Account account = validateAccount(sessionId);
@@ -1294,7 +1281,7 @@ public class RegistryAPI implements IRegistryAPI {
 
         if (dnaSequence == null) {
             throw new ServiceException("Couldn't parse sequence file! Supported formats: "
-                                               + GeneralParser.getInstance().availableParsersToString());
+                    + GeneralParser.getInstance().availableParsersToString());
         }
 
         Entry entry;
@@ -1349,7 +1336,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public ArrayList<Sample> retrieveEntrySamples(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+                                                  @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "retrieveEntrySamples: " + entryId);
         Account account = validateAccount(sessionId);
@@ -1399,7 +1386,7 @@ public class RegistryAPI implements IRegistryAPI {
 
     @Override
     public Strain retrieveStrainForSampleBarcode(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException {
+                                                 @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException {
         log(sessionId, "retrieveEntryForSampleBarcode: " + barcode);
         SampleController sampleController = ControllerFactory.getSampleController();
         StorageController storageController = ControllerFactory.getStorageController();
@@ -1439,7 +1426,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public String samplePlate(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "samples") Sample[] samples) throws SessionException, ServiceException {
+                              @WebParam(name = "samples") Sample[] samples) throws SessionException, ServiceException {
         log(sessionId, "samplePlate");
         StorageController storageController = ControllerFactory.getStorageController();
         HashMap<String, Integer> plateIndex = new HashMap<String, Integer>();
@@ -1453,7 +1440,7 @@ public class RegistryAPI implements IRegistryAPI {
         } catch (ControllerException e) {
             Logger.error(e.getMessage());
             throw new ServiceException("Error retrieving storage location for tube "
-                                               + tube.getIndex());
+                    + tube.getIndex());
         }
         if (tube == null) {
             throw new ServiceException("Error retrieving storage location for tube");
@@ -1523,9 +1510,9 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public void createStrainSample(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "recordId") String recordId, @WebParam(name = "rack") String rack,
-            @WebParam(name = "location") String location,
-            @WebParam(name = "barcode") String barcode, @WebParam(name = "label") String label)
+                                   @WebParam(name = "recordId") String recordId, @WebParam(name = "rack") String rack,
+                                   @WebParam(name = "location") String location,
+                                   @WebParam(name = "barcode") String barcode, @WebParam(name = "label") String label)
             throws ServiceException, PermissionException, SessionException {
         log(sessionId, "createStrainsample: " + recordId + "," + location + "," + barcode);
         Account account;
@@ -1662,7 +1649,7 @@ public class RegistryAPI implements IRegistryAPI {
                     } else {
                         // same plate but different well                        
                         Storage well = storageController.retrieveStorageBy("Well", location,
-                                                                           StorageType.WELL, recordedPlate.getId());
+                                StorageType.WELL, recordedPlate.getId());
                         if (well == null) {
                             throw new ServiceException(
                                     "Could not retrieve new location for storage");
@@ -1673,7 +1660,7 @@ public class RegistryAPI implements IRegistryAPI {
                 } else {
                     // different plate (update using the passed parameter)
                     Storage newPlate = storageController.retrieveStorageBy("Plate", plateId,
-                                                                           StorageType.PLATE96, parentScheme.getId());
+                            StorageType.PLATE96, parentScheme.getId());
                     if (sameWell) {
                         // update plate only
                         recordedWell.setParent(newPlate);
@@ -1682,7 +1669,7 @@ public class RegistryAPI implements IRegistryAPI {
                     } else {
                         // update plate and well
                         Storage well = storageController.retrieveStorageBy("Well", location,
-                                                                           StorageType.WELL, newPlate.getId());
+                                StorageType.WELL, newPlate.getId());
                         recordedTube.setParent(well);
                         storageController.update(recordedTube);
                     }
@@ -1775,9 +1762,9 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public String uploadTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "recordId") String recordId,
-            @WebParam(name = "fileName") String fileName,
-            @WebParam(name = "base64FileData") String base64FileData) throws ServiceException,
+                                          @WebParam(name = "recordId") String recordId,
+                                          @WebParam(name = "fileName") String fileName,
+                                          @WebParam(name = "base64FileData") String base64FileData) throws ServiceException,
             SessionException {
         log(sessionId, "uploadTraceSequenceFile: " + recordId + "," + fileName);
 
@@ -1840,7 +1827,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public SequenceTraceFile getTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
+                                                  @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
         log(sessionId, "getTraceSequenceFile: " + fileId);
         SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
         SequenceTraceFile traceFile;
@@ -1869,7 +1856,7 @@ public class RegistryAPI implements IRegistryAPI {
      */
     @Override
     public void deleteTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
+                                        @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
         log(sessionId, "deleteTraceSequenceFile: " + fileId);
         Account account = validateAccount(sessionId);
         SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();

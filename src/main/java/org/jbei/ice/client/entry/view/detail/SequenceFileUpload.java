@@ -1,12 +1,5 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import java.util.Arrays;
-
-import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.client.entry.view.detail.SequenceFileDownload.SequenceFileDownloadResource;
-import org.jbei.ice.client.entry.view.detail.SequenceFileUploadPresenter.IView;
-import org.jbei.ice.client.entry.view.detail.SequenceFileUploadPresenter.UploadOption;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -20,6 +13,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
+import org.jbei.ice.client.common.widget.PopupHandler;
+import org.jbei.ice.client.entry.view.detail.SequenceFileDownload.SequenceFileDownloadResource;
+import org.jbei.ice.client.entry.view.detail.SequenceFileUploadPresenter.IView;
+import org.jbei.ice.client.entry.view.detail.SequenceFileUploadPresenter.UploadOption;
+
+import java.util.Arrays;
 
 /**
  * UI widget that allows users to upload sequence information
@@ -46,7 +45,6 @@ class SequenceFileUpload implements IsWidget, IView {
         Style cellListStyle();
     }
 
-    private final CellList<UploadOption> options;
     private final SingleSelectionModel<UploadOption> optionSelection;
     private final Label label;
     private final PasteSequenceWidget pasteSequenceWidget;
@@ -60,7 +58,7 @@ class SequenceFileUpload implements IsWidget, IView {
         label.setStyleName(SequenceFileUploadResource.INSTANCE.cellListStyle().downloadStyle());
 
         // renderer for options list
-        options = new CellList<UploadOption>(new AbstractCell<UploadOption>() {
+        CellList<UploadOption> options = new CellList<UploadOption>(new AbstractCell<UploadOption>() {
 
             @Override
             public void render(Context context, UploadOption value, SafeHtmlBuilder sb) {

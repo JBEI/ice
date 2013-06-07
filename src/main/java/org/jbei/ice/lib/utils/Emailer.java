@@ -1,16 +1,16 @@
 package org.jbei.ice.lib.utils;
 
-import java.util.Date;
-import java.util.Properties;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.shared.dto.ConfigurationKey;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import java.util.Date;
+import java.util.Properties;
 
 /**
  * Utility methods for email.
@@ -28,7 +28,7 @@ public class Emailer {
      * @param subject       Text of subject.
      * @param body          Text of body.
      */
-    public static void send(String receiverEmail, String ccEmail, String subject, String body) {
+    public static boolean send(String receiverEmail, String ccEmail, String subject, String body) {
         Properties props = new Properties();
         props.put("mail.smtp.host", Utils.getConfigValue(ConfigurationKey.SMTP_HOST));
         // props.put("mail.debug", "true");
@@ -47,10 +47,12 @@ public class Emailer {
             msg.setText(body);
 
             Transport.send(msg);
+            return true;
         } catch (MessagingException e) {
             Logger.error("Failed to send email message to " + receiverEmail + "!", e);
             Logger.error("Error message: " + e.getMessage(), e);
             Logger.error("Stacktrace: " + e.getStackTrace(), e);
+            return false;
         }
     }
 
@@ -61,8 +63,8 @@ public class Emailer {
      * @param subject       Subject text.
      * @param body          Body text.
      */
-    public static void send(String receiverEmail, String subject, String body) {
-        send(receiverEmail, Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL), subject, body);
+    public static boolean send(String receiverEmail, String subject, String body) {
+        return send(receiverEmail, Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL), subject, body);
     }
 
     /**

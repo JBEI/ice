@@ -1,11 +1,5 @@
 package org.jbei.ice.server;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -14,37 +8,19 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
-import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Parameter;
-import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.model.*;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.ParameterInfo;
-import org.jbei.ice.shared.dto.ParameterType;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
-import org.jbei.ice.shared.dto.Visibility;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.*;
+import org.jbei.ice.shared.dto.entry.*;
 import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.Generation;
 import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
-import org.jbei.ice.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.entry.PartInfo;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
+
+import java.util.*;
 
 /**
  * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.shared.dto.entry.EntryInfo} data
@@ -55,8 +31,8 @@ import org.jbei.ice.shared.dto.entry.StrainInfo;
 public class ModelToInfoFactory {
 
     public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
-            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences, boolean hasSequence,
-            boolean hasOriginalSequence) {
+                                    Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences, boolean hasSequence,
+                                    boolean hasOriginalSequence) {
         EntryInfo info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
@@ -213,17 +189,7 @@ public class ModelToInfoFactory {
 
     private static PartInfo partInfo(Account account, Entry entry) {
         PartInfo info = new PartInfo();
-        info = (PartInfo) getCommon(account, info, entry);
-
-        // part specific
-        Part part = (Part) entry;
-        String packageFormat = null;
-        if (part.getPackageFormat() != null) {
-            packageFormat = part.getPackageFormat().toString();
-        }
-
-        info.setPackageFormat(JbeiConstants.getPackageFormat(packageFormat));
-        return info;
+        return (PartInfo) getCommon(account, info, entry);
     }
 
     private static ArabidopsisSeedInfo seedInfo(Account account, Entry entry) {
@@ -281,7 +247,7 @@ public class ModelToInfoFactory {
         if (strains != null) {
             for (Strain strain : strains) {
                 info.getStrains()
-                    .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
+                        .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
             }
         }
 
@@ -536,11 +502,7 @@ public class ModelToInfoFactory {
 
             case PART: {
                 PartInfo view = new PartInfo();
-
                 getTipViewCommon(view, entry);
-
-                Part part = (Part) entry;
-                view.setPackageFormat(part.getPackageFormat().toString());
                 return view;
             }
 

@@ -1,9 +1,8 @@
 package org.jbei.ice.client.collection.add.form;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
@@ -15,9 +14,9 @@ import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.user.PreferenceKey;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Parent class for forms used to create single entries
@@ -49,13 +48,6 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
 
     private HandlerRegistration submitRegistration;
     private HandlerRegistration cancelRegistration;
-//    private FlexTable sample;
-
-    // sample
-//    private TextBox sampleName;
-//    private TextArea sampleNotes;
-//    private ListBox sampleLocation;
-//    private ArrayList<TextBox> sampleLocationScheme;
 
     public EntryForm(T entryInfo) {
         layout = new FlexTable();
@@ -226,114 +218,6 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         return layout;
     }
 
-//    @Override
-//    public void setSampleLocation(final SampleLocation sampleLocation) {
-//        // location
-//        sample.setWidget(4, 0, new HTML("<span class=\"font-80em\">Location</span>"));
-//        sample.getFlexCellFormatter().setStyleName(4, 0, "entry_add_sub_label");
-//
-//        this.sampleLocation = new ListBox();
-//        this.sampleLocation.setStyleName("pull_down");
-//        this.sampleLocation.setVisibleItemCount(1);
-//
-//        for (SampleInfo location : sampleLocation.getLocations()) {
-//            this.sampleLocation.addItem(location.getLocation(), location.getLocationId());
-//        }
-//
-//        sample.setWidget(4, 1, this.sampleLocation);
-//
-//        String value = this.sampleLocation.getValue(0);
-//        ArrayList<String> list = sampleLocation.getListForLocation(value);
-//        if (list == null) {
-//            sampleLocationScheme.clear();
-//            return;
-//        }
-//
-//        int row = 4;
-//
-//        for (final String item : list) {
-//            row += 1;
-//            sample.setWidget(row, 0, new HTML("&nbsp;"));
-//            sample.getFlexCellFormatter().setWidth(row, 0, "170px");
-//            final TextBox shelf = new TextBox();
-//            shelf.setStyleName("input_box");
-//            shelf.getElement().setAttribute("placeholder", item);
-//
-//            sample.setWidget(row, 1, shelf);
-//            sampleLocationScheme.add(shelf);
-//        }
-//
-//        this.sampleLocation.addChangeHandler(new ChangeHandler() {
-//
-//            @Override
-//            public void onChange(ChangeEvent event) {
-//                int index = EntryForm.this.sampleLocation.getSelectedIndex();
-//                String value = EntryForm.this.sampleLocation.getValue(index);
-//                ArrayList<String> list = sampleLocation.getListForLocation(value);
-//                if (list == null) {
-//                    sampleLocationScheme.clear();
-//                    return;
-//                }
-//
-//                int row = 4;
-//
-//                // clear any remaining left over rows
-//                sampleLocationScheme.clear();
-//                int rowCount = sample.getRowCount() - 1;
-//                while (rowCount > row) {
-//                    sample.removeRow(rowCount);
-//                    rowCount -= 1;
-//                }
-//
-//                for (final String item : list) {
-//                    row += 1;
-//                    sample.setWidget(row, 0, new HTML("&nbsp;"));
-//                    sample.getFlexCellFormatter().setWidth(row, 0, "170px");
-//                    final TextBox shelf = new TextBox();
-//                    shelf.setStyleName("input_box");
-//                    shelf.getElement().setAttribute("placeholder", item);
-//                    sample.setWidget(row, 1, shelf);
-//                    sampleLocationScheme.add(shelf);
-//                }
-//            }
-//        });
-//    }
-
-//    protected Widget createSampleWidget() {
-//        int row = 0;
-//        sample = new FlexTable();
-//        sample.setCellPadding(0);
-//        sample.setCellSpacing(3);
-//        sample.setWidth("100%");
-//
-//        sample.setWidget(row, 0, new Label("Sample"));
-//        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
-//        sample.getFlexCellFormatter().setColSpan(row, 0, 2);
-//
-//        row += 1;
-//        sample.setWidget(row, 0, new Label(""));
-//        sample.getFlexCellFormatter().setHeight(row, 0, "10px");
-//        sample.getFlexCellFormatter().setColSpan(row, 0, 2);
-//
-//        // name
-//        row += 1;
-//        sample.setWidget(row, 0, new HTML("<span class=\"font-80em\">Name</span>"));
-//        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
-//        sampleName = createStandardTextBox("204px");
-//        sample.setWidget(row, 1, sampleName);
-//
-//        // notes
-//        row += 1;
-//        sample.setWidget(row, 0, new HTML("<span class=\"font-80em\">Notes</span>"));
-//        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
-//        sample.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-//        sampleNotes = new TextArea();
-//        sampleNotes.setStyleName("entry_add_sample_notes_input");
-//        sample.setWidget(row, 1, sampleNotes);
-//
-//        return sample;
-//    }
-
     protected Widget createParametersWidget() {
         FlexTable parameters = new FlexTable();
         parameters.setCellPadding(0);
@@ -459,32 +343,6 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
             }
         }
 
-//        samples
-//        boolean userEnteredSampleName = !sampleName.getText().trim().isEmpty();
-//        sampleName.setStyleName("input_box");
-//
-//        if (sampleLocationScheme != null) {
-//            for (TextBox scheme : sampleLocationScheme) {
-//                scheme.setStyleName("input_box");
-//
-//                if (userEnteredSampleName) {
-//                    // if there is a name, all schemes must be filled
-//                    if (scheme.getText().trim().isEmpty()) {
-//                        scheme.setStyleName("input_box_error");
-//                        if (invalid == null)
-//                            invalid = scheme;
-//                    }
-//                } else {
-//                    // there is no name all schemes must be empty
-//                    if (!scheme.getText().trim().isEmpty()) {
-//                        sampleName.setStyleName("input_box_error");
-//                        if (invalid == null)
-//                            invalid = sampleName;
-//                    }
-//                }
-//            }
-//        }
-
         return invalid;
     }
 
@@ -514,8 +372,6 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
             }
         }
         this.entryInfo.setParameters(parameters);
-
-//        populateSamples();
 
         this.entryInfo.setShortDescription(summary.getText());
         this.entryInfo.setLongDescription(this.notesText.getText());
@@ -551,31 +407,6 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
                 principalInvestigator.setText(preferences.get(PreferenceKey.PRINCIPAL_INVESTIGATOR));
         }
     }
-
-//    protected void populateSamples() {
-//        if (sampleName.getText().isEmpty())
-//            return;
-//
-//        SampleInfo info = new SampleInfo();
-//        info.setLabel(sampleName.getText());
-//        info.setNotes(sampleNotes.getText());
-//
-//        String location = sampleLocation.getValue(sampleLocation.getSelectedIndex());
-//        info.setLocationId(location);
-//
-//        LinkedList<StorageInfo> storageInfos = new LinkedList<StorageInfo>();
-//
-//        for (TextBox scheme : sampleLocationScheme) {
-//            StorageInfo storageInfo = new StorageInfo();
-//            String schemeText = scheme.getText();
-//
-//            storageInfo.setDisplay(schemeText);
-//            storageInfos.add(storageInfo);
-//        }
-//
-//        SampleStorage storage = new SampleStorage(info, storageInfos);
-//        this.entryInfo.getSampleStorage().add(storage);
-//    }
 
     @Override
     public EntryInfo getEntry() {

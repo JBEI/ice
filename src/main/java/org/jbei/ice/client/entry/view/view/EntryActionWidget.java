@@ -1,12 +1,25 @@
 package org.jbei.ice.client.entry.view.view;
 
-import org.jbei.ice.client.common.widget.FAIconType;
-
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
+import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.common.widget.Dialog;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.PopupHandler;
+import org.jbei.ice.client.entry.view.model.FlagEntry;
+
+import java.util.Arrays;
 
 /**
  * Edit / Delete widget for entries
@@ -23,6 +36,17 @@ public class EntryActionWidget extends Composite {
     private HandlerRegistration deleteRegistration;
     private HandlerRegistration editRegistration;
     private FlexTable layout;
+    private CellList<FlagEntry.FlagOption> options;
+    private SingleSelectionModel<FlagEntry.FlagOption> optionSelection;
+    private Delegate<FlagEntry> delegate;
+
+    interface EntryActionResource extends CellList.Resources {
+
+        static EntryActionResource INSTANCE = GWT.create(EntryActionResource.class);
+
+        @Source("org/jbei/ice/client/resource/css/EntryActionWidget.css")
+        CellList.Style cellListStyle();
+    }
 
     public EntryActionWidget() {
         initComponents();
@@ -33,6 +57,8 @@ public class EntryActionWidget extends Composite {
         layout.setWidget(0, 3, pipe2);
         layout.setWidget(0, 4, flag);
         initWidget(layout);
+
+        addFlagClickHandler();
     }
 
     private void initComponents() {
@@ -53,9 +79,71 @@ public class EntryActionWidget extends Composite {
         delete.setTitle("Delete");
         pipe2 = new HTML("<span style=\"color: #ccc\">&nbsp;|&nbsp;</span>");
         flag = new HTML("<i class=\"" + FAIconType.FLAG_CHECKERED.getStyleName()
-                                + "\"></i> <span class=\"font-80em\">Flag</span> <i class=\"font-70em "
-                                + FAIconType.CARET_DOWN.getStyleName() + "\"></i>");
+                + "\"></i> <span class=\"font-80em\">Flag</span> <i class=\"font-70em "
+                + FAIconType.CARET_DOWN.getStyleName() + "\"></i>");
         flag.setStyleName("flag_icon");
+    }
+
+    protected void addFlagClickHandler() {
+        // renderer for options list
+        options = new CellList<FlagEntry.FlagOption>(new AbstractCell<FlagEntry.FlagOption>() {
+
+            @Override
+            public void render(Context context, FlagEntry.FlagOption value, SafeHtmlBuilder sb) {
+                sb.appendHtmlConstant("<span>" + value.toString() + "</span>");
+            }
+        }, EntryActionResource.INSTANCE);
+
+        final PopupHandler popupHandler = new PopupHandler(options, flag.getElement(), false);
+        flag.addClickHandler(popupHandler);
+        optionSelection = new SingleSelectionModel<FlagEntry.FlagOption>();
+        optionSelection.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                FlagEntry.FlagOption selected = optionSelection.getSelectedObject();
+                if (selected == null)
+                    return;
+                popupHandler.hidePopup();
+                optionSelection.setSelected(selected, false);
+                if (delegate == null)
+                    return;
+
+                if (selected == FlagEntry.FlagOption.ALERT) {
+                    TextArea area = new TextArea();
+                    area.setStyleName("input_box");
+                    area.getElement().setAttribute("placeHolder", "Enter Problem Description");
+                    area.setCharacterWidth(70);
+                    area.setVisibleLines(4);
+                    Dialog dialog = new Dialog(area);
+                    dialog.showDialog(true);
+                    dialog.setSubmitHandler(createDialogSubmitHandler(area, selected, dialog));
+                } else
+                    delegate.execute(new FlagEntry(selected, ""));
+            }
+        });
+
+        options.setSelectionModel(optionSelection);
+    }
+
+    private ClickHandler createDialogSubmitHandler(final TextArea area, final FlagEntry.FlagOption selected,
+                                                   final Dialog dialog) {
+        return new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                String msg = area.getText().trim();
+                if (msg.isEmpty()) {
+                    area.setStyleName("input_box_error");
+                    area.setFocus(true);
+                    return;
+                }
+
+                area.setStyleName("input_box");
+                delegate.execute(new FlagEntry(selected, msg));
+                dialog.showDialog(false);
+            }
+        };
     }
 
     public void addDeleteEntryHandler(ClickHandler handler) {
@@ -71,11 +159,22 @@ public class EntryActionWidget extends Composite {
         editRegistration = edit.addClickHandler(handler);
     }
 
+    public void setFlagDelegate(Delegate<FlagEntry> delegate) {
+        this.delegate = delegate;
+    }
+
     @Override
     public void setVisible(boolean visible) {
         edit.setVisible(visible);
         pipe1.setVisible(visible);
         delete.setVisible(visible);
         pipe2.setVisible(visible);
+    }
+
+    public void setHasSample(boolean hasSample) {
+        if (hasSample)
+            options.setRowData(Arrays.asList(FlagEntry.FlagOption.values()));
+        else
+            options.setRowData(Arrays.asList(FlagEntry.FlagOption.ALERT));
     }
 }

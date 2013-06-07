@@ -1,43 +1,5 @@
 package org.jbei.ice.client.entry.view;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Set;
-
-import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.Delegate;
-import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.Page;
-import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.client.collection.add.EntryAddPresenter;
-import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
-import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
-import org.jbei.ice.client.collection.presenter.CollectionsPresenter.DeleteEntryHandler;
-import org.jbei.ice.client.collection.presenter.EntryContext;
-import org.jbei.ice.client.common.IHasNavigableData;
-import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
-import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
-import org.jbei.ice.client.entry.view.handler.ReadBoxSelectionHandler;
-import org.jbei.ice.client.entry.view.handler.UploadPasteSequenceHandler;
-import org.jbei.ice.client.entry.view.view.AttachmentItem;
-import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
-import org.jbei.ice.client.entry.view.view.EntryView;
-import org.jbei.ice.client.entry.view.view.IEntryView;
-import org.jbei.ice.client.entry.view.view.MenuItem;
-import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
-import org.jbei.ice.client.entry.view.view.PermissionsPresenter;
-import org.jbei.ice.client.event.FeedbackEvent;
-import org.jbei.ice.client.event.ShowEntryListEvent;
-import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.comment.UserComment;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -49,6 +11,33 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import gwtupload.client.IUploader;
+import org.jbei.ice.client.*;
+import org.jbei.ice.client.collection.add.EntryAddPresenter;
+import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
+import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
+import org.jbei.ice.client.collection.presenter.CollectionsPresenter.DeleteEntryHandler;
+import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.common.IHasNavigableData;
+import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
+import org.jbei.ice.client.entry.view.handler.ReadBoxSelectionHandler;
+import org.jbei.ice.client.entry.view.handler.UploadPasteSequenceHandler;
+import org.jbei.ice.client.entry.view.model.FlagEntry;
+import org.jbei.ice.client.entry.view.view.*;
+import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
+import org.jbei.ice.client.event.FeedbackEvent;
+import org.jbei.ice.client.event.ShowEntryListEvent;
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.comment.UserComment;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Set;
 
 /**
  * Presenter for entry view
@@ -65,7 +54,7 @@ public class EntryPresenter extends AbstractPresenter {
     private IEntryFormSubmit formSubmit;
 
     public EntryPresenter(final RegistryServiceAsync service, CollectionsPresenter collectionsPresenter,
-            final HandlerManager eventBus, EntryContext context) {
+                          final HandlerManager eventBus, EntryContext context) {
         super(service, eventBus);
         this.display = new EntryView(retrieveEntryTraceSequenceDetailsDelegate());
         this.currentContext = context;
@@ -132,6 +121,7 @@ public class EntryPresenter extends AbstractPresenter {
         display.setDeleteSequenceHandler(deleteHandler);
         display.setSequenceDeleteHandler(new DeleteSequenceTraceHandler());
         setCommentSubmitDelegate();
+        setFlagDelegate();
     }
 
     /**
@@ -173,7 +163,7 @@ public class EntryPresenter extends AbstractPresenter {
         this.formSubmit = newForm;
         display.showNewForm(newForm);
         display.setEntryHeader(newForm.getHeaderDisplay(), "", ClientController.account.getFullName(),
-                               ClientController.account.getEmail(), (new Date(System.currentTimeMillis())));
+                ClientController.account.getEmail(), (new Date(System.currentTimeMillis())));
         display.getPermissionsWidget().setCanEdit(true);
         currentInfo = newForm.getEntry();
     }
@@ -227,7 +217,7 @@ public class EntryPresenter extends AbstractPresenter {
             public void onClick(ClickEvent event) {
                 IHasNavigableData nav = currentContext.getNav();
                 EntryInfo currentInfo = nav.getCachedData(EntryPresenter.this.currentInfo.getId(),
-                                                          EntryPresenter.this.currentInfo.getRecordId());
+                        EntryPresenter.this.currentInfo.getRecordId());
                 int idx = nav.indexOfCached(currentInfo);
 
                 if (idx == -1) {
@@ -298,6 +288,46 @@ public class EntryPresenter extends AbstractPresenter {
         });
     }
 
+    private void setFlagDelegate() {
+        Delegate<FlagEntry> delegate = new Delegate<FlagEntry>() {
+            @Override
+            public void execute(final FlagEntry flagOption) {
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        switch (flagOption.getFlagOption()) {
+                            case ALERT:
+                                service.alertToEntryProblem(ClientController.sessionId, currentInfo.getId(),
+                                        flagOption.getMessage(), callback);
+                                break;
+
+                            case REQUEST_SAMPLE:
+                                service.requestSample(ClientController.sessionId, currentInfo.getId(), callback);
+                                break;
+
+                            default:
+                                eventBus.fireEvent(new FeedbackEvent(true, "Invalid selection!"));
+                                return;
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        String msg;
+                        if (result)
+                            msg = "Notification sent successfully";
+                        else
+                            msg = "Your notification could not be sent!";
+                        eventBus.fireEvent(new FeedbackEvent(!result, msg));
+                    }
+                }.go(eventBus);
+            }
+        };
+
+        display.addFlagDelegate(delegate);
+    }
+
     private Delegate<Long> retrieveEntryTraceSequenceDetailsDelegate() {
         return new Delegate<Long>() {
             @Override
@@ -338,7 +368,7 @@ public class EntryPresenter extends AbstractPresenter {
             @Override
             protected void callService(AsyncCallback<EntryInfo> callback) throws AuthenticationException {
                 service.retrieveEntryDetails(ClientController.sessionId, currentContext.getId(),
-                                             currentContext.getRecordId(), currentContext.getPartnerUrl(), callback);
+                        currentContext.getRecordId(), currentContext.getPartnerUrl(), callback);
             }
 
             @Override
@@ -359,7 +389,7 @@ public class EntryPresenter extends AbstractPresenter {
                 SequenceViewPanelPresenter sequencePresenter = display.setEntryInfoForView(currentInfo, delegate);
                 display.getPermissionsWidget().setPermissionData(result.getPermissions(), new DeletePermission());
                 UploadPasteSequenceHandler handler = new UploadPasteSequenceHandler(service,
-                                                                                    eventBus, sequencePresenter);
+                        eventBus, sequencePresenter);
                 sequencePresenter.addSequencePasteHandler(handler);
 
 //                SequenceFileUploadHandler uploadHandler = new SequenceFileUploadHandler(sequencePresenter, service,

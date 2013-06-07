@@ -1,20 +1,15 @@
 package org.jbei.ice.client;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountResults;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.MessageInfo;
-import org.jbei.ice.shared.dto.NewsItem;
-import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.*;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.shared.dto.comment.UserComment;
@@ -30,10 +25,8 @@ import org.jbei.ice.shared.dto.search.SearchQuery;
 import org.jbei.ice.shared.dto.search.SearchResults;
 import org.jbei.ice.shared.dto.user.PreferenceKey;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.SuggestOracle.Request;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * The client side stub for the RPC service.
@@ -50,25 +43,25 @@ public interface RegistryService extends RemoteService {
     ArrayList<FolderDetails> retrieveCollections(String sessionId) throws AuthenticationException;
 
     FolderDetails retrieveEntriesForFolder(String sessionId, long folderId, ColumnField sort, boolean asc,
-            int start, int limit) throws AuthenticationException;
+                                           int start, int limit) throws AuthenticationException;
 
     FolderDetails retrieveUserEntries(String sid, String userId, ColumnField sort, boolean asc,
-            int start, int limit) throws AuthenticationException;
+                                      int start, int limit) throws AuthenticationException;
 
     EntryInfo retrieveEntryDetails(String sid, long id, String recordId, String url) throws AuthenticationException;
 
     FolderDetails createUserCollection(String sid, String name, String description,
-            ArrayList<Long> contents) throws AuthenticationException;
+                                       ArrayList<Long> contents) throws AuthenticationException;
 
     ArrayList<FolderDetails> moveToUserCollection(String sid, long source, ArrayList<Long> destination,
-            ArrayList<Long> entryIds) throws AuthenticationException;
+                                                  ArrayList<Long> entryIds) throws AuthenticationException;
 
     AccountInfo retrieveProfileInfo(String sid, String userId) throws AuthenticationException;
 
     Long createEntry(String sid, EntryInfo info) throws AuthenticationException;
 
     ArrayList<FolderDetails> addEntriesToCollection(String sid, ArrayList<Long> destination,
-            ArrayList<Long> entryIds) throws AuthenticationException;
+                                                    ArrayList<Long> entryIds) throws AuthenticationException;
 
     HashMap<SampleInfo, ArrayList<String>> retrieveStorageSchemes(String sessionId, EntryType type)
             throws AuthenticationException;
@@ -157,7 +150,7 @@ public interface RegistryService extends RemoteService {
     boolean revertedSubmittedBulkUpload(String sid, long uploadId) throws AuthenticationException;
 
     FolderDetails retrieveAllVisibleEntrys(String sid, FolderDetails details, ColumnField field, boolean asc,
-            int start, int limit) throws AuthenticationException;
+                                           int start, int limit) throws AuthenticationException;
 
     ArrayList<AccountInfo> retrieveAvailableAccounts(String sessionId) throws AuthenticationException;
 
@@ -199,7 +192,7 @@ public interface RegistryService extends RemoteService {
     ArrayList<GroupInfo> retrieveUserGroups(String sessionId) throws AuthenticationException;
 
     Long updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
-            ArrayList<PermissionInfo> permissions) throws AuthenticationException;
+                                     ArrayList<PermissionInfo> permissions) throws AuthenticationException;
 
     boolean promoteCollection(String sessionId, long id) throws AuthenticationException;
 
@@ -210,4 +203,8 @@ public interface RegistryService extends RemoteService {
     Boolean rebuildSearchIndex(String sessionId) throws AuthenticationException;
 
     UserComment sendComment(String sid, UserComment comment) throws AuthenticationException;
+
+    boolean requestSample(String sid, long entryID) throws AuthenticationException;
+
+    boolean alertToEntryProblem(String sid, long entryID, String details) throws AuthenticationException;
 }

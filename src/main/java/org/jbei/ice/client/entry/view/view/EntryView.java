@@ -1,9 +1,10 @@
 package org.jbei.ice.client.entry.view.view;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.MultiSelectionModel;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
@@ -16,6 +17,7 @@ import org.jbei.ice.client.entry.view.detail.EntryInfoView;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanel;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
+import org.jbei.ice.client.entry.view.model.FlagEntry;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.panel.EntryCommentPanel;
 import org.jbei.ice.client.entry.view.panel.EntrySamplePanel;
@@ -27,15 +29,9 @@ import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.MultiSelectionModel;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Main view panel for showing details about a single entry
@@ -276,6 +272,7 @@ public class EntryView extends Composite implements IEntryView {
         deleteSequenceHandler.setEntryId(info.getId());
         currentView.getSequencePanel().setDeleteHandler(deleteSequenceHandler);
         entryAction.setVisible(showEdit);
+        entryAction.setHasSample(info.isHasSample());
 
         mainContent.setWidget(1, 0, currentView);
         SequenceViewPanel sequenceViewPanel = currentView.getSequencePanel();
@@ -314,6 +311,11 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public void addSubmitCommentDelegate(ServiceDelegate<UserComment> delegate) {
         commentPanel.setCommentSubmitDelegate(delegate);
+    }
+
+    @Override
+    public void addFlagDelegate(Delegate<FlagEntry> delegate) {
+        entryAction.setFlagDelegate(delegate);
     }
 
     @Override
