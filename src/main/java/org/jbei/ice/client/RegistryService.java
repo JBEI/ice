@@ -206,7 +206,7 @@ public interface RegistryService extends RemoteService {
 
     UserComment sendComment(String sid, UserComment comment) throws AuthenticationException;
 
-    boolean requestSample(String sid, long entryID) throws AuthenticationException;
+    boolean requestSample(String sid, long entryID, String details) throws AuthenticationException;
 
     boolean alertToEntryProblem(String sid, long entryID, String details) throws AuthenticationException;
 }

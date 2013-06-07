@@ -303,7 +303,8 @@ public class EntryPresenter extends AbstractPresenter {
                                 break;
 
                             case REQUEST_SAMPLE:
-                                service.requestSample(ClientController.sessionId, currentInfo.getId(), callback);
+                                service.requestSample(ClientController.sessionId, currentInfo.getId(),
+                                        flagOption.getMessage(), callback);
                                 break;
 
                             default:

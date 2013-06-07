@@ -1747,16 +1747,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean requestSample(String sid, long entryID) throws AuthenticationException {
+    public boolean requestSample(String sid, long entryID, String details) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        Logger.info(account.getEmail() + ": requesting sample for entry " + entryID);
-        return ControllerFactory.getEntryController().requestSample(account, entryID);
+        Logger.info(account.getEmail() + ": requesting sample for entry " + entryID + " with options " + details);
+        return ControllerFactory.getEntryController().requestSample(account, entryID, details);
     }
 
     @Override
     public boolean alertToEntryProblem(String sid, long entryID, String details) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        Logger.info(account.getEmail() + ": sending alert for entry " + entryID);
+        Logger.info(account.getEmail() + ": sending alert for entry " + entryID + " with details " + details);
         return ControllerFactory.getEntryController().sendProblemNotification(account, entryID, details);
     }
 }

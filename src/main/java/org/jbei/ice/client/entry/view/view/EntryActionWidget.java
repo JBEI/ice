@@ -7,10 +7,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import org.jbei.ice.client.Delegate;
@@ -22,7 +19,7 @@ import org.jbei.ice.client.entry.view.model.FlagEntry;
 import java.util.Arrays;
 
 /**
- * Edit / Delete widget for entries
+ * Edit / Delete / Flag widget for entries
  *
  * @author Hector Plahar
  */
@@ -109,25 +106,59 @@ public class EntryActionWidget extends Composite {
                 if (delegate == null)
                     return;
 
-                if (selected == FlagEntry.FlagOption.ALERT) {
-                    TextArea area = new TextArea();
-                    area.setStyleName("input_box");
-                    area.getElement().setAttribute("placeHolder", "Enter Problem Description");
-                    area.setCharacterWidth(70);
-                    area.setVisibleLines(4);
-                    Dialog dialog = new Dialog(area);
-                    dialog.showDialog(true);
-                    dialog.setSubmitHandler(createDialogSubmitHandler(area, selected, dialog));
-                } else
-                    delegate.execute(new FlagEntry(selected, ""));
+                switch (selected) {
+                    case ALERT:
+                        TextArea area = new TextArea();
+                        area.setStyleName("input_box");
+                        area.getElement().setAttribute("placeHolder", "Enter Problem Description");
+                        area.setCharacterWidth(70);
+                        area.setVisibleLines(4);
+                        Dialog dialog = new Dialog(area);
+                        dialog.showDialog(true);
+                        dialog.setSubmitHandler(createDialogSubmitHandler(area, dialog));
+                        break;
+
+                    case REQUEST_SAMPLE:
+                        VerticalPanel panel = new VerticalPanel();
+                        panel.setStyleName("font-80em");
+                        panel.setWidth("350px");
+                        RadioButton culture = new RadioButton("sample", "Liquid Culture");
+                        culture.setValue(true);
+                        RadioButton streak = new RadioButton("sample", "Streak on Agar Plate");
+                        panel.add(culture);
+                        panel.add(streak);
+
+                        dialog = new Dialog(panel, "400px", "Request Sample in the form of:");
+                        dialog.showDialog(true);
+                        dialog.setSubmitHandler(createDialogSampleSubmitHandler(culture, dialog));
+                        break;
+
+                    default:
+                        delegate.execute(new FlagEntry(selected, ""));
+                }
             }
         });
 
         options.setSelectionModel(optionSelection);
     }
 
-    private ClickHandler createDialogSubmitHandler(final TextArea area, final FlagEntry.FlagOption selected,
-                                                   final Dialog dialog) {
+    private ClickHandler createDialogSampleSubmitHandler(final RadioButton culture, final Dialog dialog) {
+        return new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                String msg = "Streak on Agar Plate";
+                if (culture.getValue().booleanValue()) {
+                    msg = "Liquid Culture";
+                }
+                delegate.execute(new FlagEntry(FlagEntry.FlagOption.REQUEST_SAMPLE, msg));
+                dialog.showDialog(false);
+            }
+        };
+    }
+
+
+    private ClickHandler createDialogSubmitHandler(final TextArea area, final Dialog dialog) {
         return new ClickHandler() {
 
             @Override
@@ -140,7 +171,7 @@ public class EntryActionWidget extends Composite {
                 }
 
                 area.setStyleName("input_box");
-                delegate.execute(new FlagEntry(selected, msg));
+                delegate.execute(new FlagEntry(FlagEntry.FlagOption.ALERT, msg));
                 dialog.showDialog(false);
             }
         };

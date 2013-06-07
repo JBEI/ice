@@ -737,7 +737,7 @@ public class EntryController {
         return info;
     }
 
-    public boolean requestSample(Account account, long entryID) {
+    public boolean requestSample(Account account, long entryID, String form) {
         try {
             Entry entry = dao.get(entryID);
             String email = ControllerFactory.getConfigurationController().
@@ -755,7 +755,8 @@ public class EntryController {
                     .append(entry.getOnePartNumber().getPartNumber())
                     .append(" on site ")
                     .append(site)
-                    .append("\n\n");
+                    .append(". \n\nThe requested form is ")
+                    .append(form);
             return Emailer.send(email, ("Sample request for " + entry.getOnePartNumber().getPartNumber()),
                     body.toString());
         } catch (DAOException | ControllerException e) {
