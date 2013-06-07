@@ -1,11 +1,10 @@
 package org.jbei.ice.client.event;
 
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
-
-import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
 
 /**
  * Event used to signal entry detail view of a specific entry id is desired
@@ -18,7 +17,7 @@ public class EntryViewEvent extends GwtEvent<EntryViewEventHandler> {
         void onEntryView(EntryViewEvent event);
     }
 
-    public static Type<EntryViewEventHandler> TYPE = new Type<EntryViewEventHandler>();
+    public static final Type<EntryViewEventHandler> TYPE = new Type<EntryViewEventHandler>();
     private EntryContext context;
 
     public EntryViewEvent(long id, String recordId, EntryContext.Type mode) {

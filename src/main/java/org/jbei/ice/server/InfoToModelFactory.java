@@ -135,7 +135,7 @@ public class InfoToModelFactory {
 
         entry.setStatus(info.getStatus() == null ? "" : info.getStatus());
         entry.setAlias(info.getAlias());
-        entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? new Integer(0) : info.getBioSafetyLevel());
+        entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? Integer.valueOf(0) : info.getBioSafetyLevel());
         entry.setShortDescription(info.getShortDescription());
         entry.setLongDescription(info.getLongDescription());
         entry.setLongDescriptionType(info.getLongDescriptionType() != null ? info.getLongDescriptionType() : "text");
@@ -536,6 +536,8 @@ public class InfoToModelFactory {
             case PLANT_TYPE:
             case PARENTS:
                 entry = infoToSeedForField(entry, value, field);
+                break;
+            default:
                 break;
         }
         if (plasmid == null)

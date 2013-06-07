@@ -1,12 +1,5 @@
 package org.jbei.ice.lib.parsers.sbol;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import org.jbei.ice.lib.composers.formatters.IceSequenceOntology;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -14,15 +7,15 @@ import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
-
-import org.sbolstandard.core.DnaComponent;
-import org.sbolstandard.core.SBOLDocument;
-import org.sbolstandard.core.SBOLFactory;
-import org.sbolstandard.core.SBOLRootObject;
-import org.sbolstandard.core.SBOLValidationException;
-import org.sbolstandard.core.SequenceAnnotation;
-import org.sbolstandard.core.StrandType;
+import org.sbolstandard.core.*;
 import org.sbolstandard.core.util.SBOLBaseVisitor;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Parse SBOL (v 1.1) files that are imported by the user
@@ -88,7 +81,7 @@ public class SBOLParser extends AbstractParser {
                 Collections.sort(annotations, new Comparator<SequenceAnnotation>() {
                     @Override
                     public int compare(SequenceAnnotation o1, SequenceAnnotation o2) {
-                        if (o1.getBioStart() == o2.getBioStart())
+                        if (o1.getBioStart().intValue() == o2.getBioStart().intValue())
                             return o1.getBioEnd().compareTo(o2.getBioEnd());
                         return o1.getBioStart().compareTo(o2.getBioStart());
                     }

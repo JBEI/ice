@@ -1,17 +1,12 @@
 package org.jbei.ice.client.common.table;
 
-import org.jbei.ice.client.common.widget.FAIconType;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.cellview.client.AbstractPager;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.HasRows;
+import org.jbei.ice.client.common.widget.FAIconType;
 
 /**
  * Pager for the Entry Table
@@ -76,49 +71,49 @@ public class EntryTablePager extends AbstractPager {
     private final NavLink btn50Count;
     private final NavLink btn100Count;
 
-    public final static int JUMP_PAGE_COUNT = 3;
+    public static final int JUMP_PAGE_COUNT = 3;
     private int start;
 
     public EntryTablePager() {
         label = new Label();
         first = new NavLink("<i class=\"" + FAIconType.FAST_BACKWARD.getStyleName() + "\"></i>",
-                            new ClickHandler() {
+                new ClickHandler() {
 
-                                @Override
-                                public void onClick(ClickEvent event) {
-                                    EntryTablePager.super.firstPage();
-                                }
-                            });
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        EntryTablePager.super.firstPage();
+                    }
+                });
 
         last = new NavLink("<i class=\"" + FAIconType.FAST_FORWARD.getStyleName() + "\"></i>",
-                           new ClickHandler() {
+                new ClickHandler() {
 
-                               @Override
-                               public void onClick(ClickEvent event) {
-                                   EntryTablePager.super.lastPage();
-                               }
-                           });
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        EntryTablePager.super.lastPage();
+                    }
+                });
         last.setVisible(false);
 
         next = new NavLink("<i class=\"" + FAIconType.STEP_FORWARD.getStyleName() + "\"></i>",
-                           new ClickHandler() {
+                new ClickHandler() {
 
-                               @Override
-                               public void onClick(ClickEvent event) {
-                                   int indx = EntryTablePager.super.getPage() + 1;
-                                   EntryTablePager.super.setPage(indx);
-                               }
-                           });
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        int indx = EntryTablePager.super.getPage() + 1;
+                        EntryTablePager.super.setPage(indx);
+                    }
+                });
 
         prev = new NavLink("<i class=\"" + FAIconType.STEP_BACKWARD.getStyleName() + "\"></i>",
-                           new ClickHandler() {
+                new ClickHandler() {
 
-                               @Override
-                               public void onClick(ClickEvent event) {
-                                   int indx = EntryTablePager.super.getPage() - 1;
-                                   EntryTablePager.super.setPage(indx);
-                               }
-                           });
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        int indx = EntryTablePager.super.getPage() - 1;
+                        EntryTablePager.super.setPage(indx);
+                    }
+                });
 
         // result count
         btn15Count = new NavLink("15", new VisibleRangeChanger(15));

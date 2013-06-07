@@ -1,5 +1,9 @@
 package org.jbei.ice.client.common.header;
 
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.HeaderMenu;
@@ -8,29 +12,13 @@ import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Widget;
-
 public class HeaderView extends Composite {
 
     private SearchCompositeBox searchInput;
     private Button searchBtn;
     private final AdvancedSearchWidget widgetAdvanced;
     private final FlexTable loggedInContentsPanel;
-    private final static HeaderView INSTANCE = new HeaderView();
+    private static final HeaderView INSTANCE = new HeaderView();
     private final HeaderMenu headerMenu;
 
     public static HeaderView getInstance() {
@@ -153,7 +141,7 @@ public class HeaderView extends Composite {
         }
 
         final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #EEE\">|</span>&nbsp;&nbsp;"
-                                                 + "<span class=\"badge\">" + newMessageCount + "</span>");
+                + "<span class=\"badge\">" + newMessageCount + "</span>");
         String title = "You have " + newMessageCount + " new message";
         title += newMessageCount != 1 ? "s" : "";
         emailBadge.setTitle(title);

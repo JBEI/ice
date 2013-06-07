@@ -13,7 +13,6 @@ public class FileUploadStatus extends BaseUploadStatus {
     @Override
     public void setFileName(String name) {
         if (name.length() > 25) {
-            name.lastIndexOf('.');
             name = name.substring(0, 22) + "...";
         }
         fileNameLabel.setText(name);

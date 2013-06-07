@@ -94,12 +94,11 @@ public class IceXmlSerializer {
     private static final String RECORD_TYPE = "recordType";
     private static final String RECORD_ID = "recordId";
     private static final String INDEX = "index";
-    private static final String SEQ = "seq";
 
-    public static Namespace iceNamespace = new Namespace("ice", "http://jbei.org/ice");
-    public static Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-    public static Namespace expNamespace = new Namespace(EXP, "http://jbei.org/exp");
-    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    public static final Namespace iceNamespace = new Namespace("ice", "http://jbei.org/ice");
+    public static final Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    public static final Namespace expNamespace = new Namespace(EXP, "http://jbei.org/exp");
+    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     /**
      * Generate ice-xml from given List of {@link Entry}s.

@@ -1,16 +1,6 @@
 package org.jbei.ice.server.servlet;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.apache.commons.io.IOUtils;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -21,7 +11,12 @@ import org.jbei.ice.lib.utils.IceXlsSerializer;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
 import org.jbei.ice.lib.utils.UtilityException;
 
-import org.apache.commons.io.IOUtils;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.*;
 
 public class EntryExportServlet extends HttpServlet {
 
@@ -41,7 +36,7 @@ public class EntryExportServlet extends HttpServlet {
             url = url.substring(0, url.indexOf(path));
             response.sendRedirect(url);
             Logger.info(EntryExportServlet.class.getSimpleName()
-                                + ": authentication failed. Redirecting user to " + url);
+                    + ": authentication failed. Redirecting user to " + url);
             return;
         }
 
@@ -51,7 +46,7 @@ public class EntryExportServlet extends HttpServlet {
         String type = request.getParameter("type");
         String commaSeparated = request.getParameter("entries");
         Logger.info(EntryExportServlet.class.getSimpleName() + ": user = " + account.getEmail()
-                            + ", type = " + type + ", entries = " + commaSeparated);
+                + ", type = " + type + ", entries = " + commaSeparated);
 
         Set<String> typeSet = new HashSet<>();
         List<Entry> entries = retrieveEntries(account, commaSeparated, typeSet);
@@ -64,6 +59,7 @@ public class EntryExportServlet extends HttpServlet {
                 break;
 
             case "excel":
+            default:
                 exportExcel(entries, typeSet, response);
                 break;
         }

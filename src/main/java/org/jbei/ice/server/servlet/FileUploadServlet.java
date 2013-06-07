@@ -1,19 +1,10 @@
 package org.jbei.ice.server.servlet;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import gwtupload.server.UploadAction;
+import gwtupload.server.exceptions.UploadActionException;
+import gwtupload.shared.UConsts;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.IOUtils;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -35,11 +26,15 @@ import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.shared.dto.entry.EntryType;
 
-import gwtupload.server.UploadAction;
-import gwtupload.server.exceptions.UploadActionException;
-import gwtupload.shared.UConsts;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.IOUtils;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * GWTUpload servlet that handles file uploads. If an upload type (e.g. sequence or attachment)
@@ -149,7 +144,7 @@ public class FileUploadServlet extends UploadAction {
                 case BULK_UPLOAD_FILE_TYPE:
                     Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
                     result = uploadBulkUploadFile(account, file, bulkUploadId, entryId, saveName, isSequence, entryType,
-                                                  entryAddType);
+                            entryAddType);
                     break;
 
                 case BULK_CSV_UPLOAD:
@@ -167,7 +162,7 @@ public class FileUploadServlet extends UploadAction {
     }
 
     public String uploadBulkUploadFile(Account account, File file, String bulkUploadIdStr, String entryId,
-            String saveName, boolean isSequence, String entryType, String entryAddType) {
+                                       String saveName, boolean isSequence, String entryType, String entryAddType) {
         long bulkUploadId;
         try {
             bulkUploadId = Long.decode(bulkUploadIdStr);
@@ -197,8 +192,8 @@ public class FileUploadServlet extends UploadAction {
                 if (isStrainWithPlasmidPlasmid) {
                     String plasmid = ((Strain) entry).getPlasmids();
                     entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account,
-                                                                         ControllerFactory.getEntryController(),
-                                                                         plasmid);
+                            ControllerFactory.getEntryController(),
+                            plasmid);
                 }
             } catch (NumberFormatException | ControllerException e) {
                 Logger.error(e);
@@ -211,8 +206,7 @@ public class FileUploadServlet extends UploadAction {
                 ControllerFactory.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
                 return saveName;
             } else {
-                FileInputStream inputStream = new FileInputStream(file);
-                try {
+                try (FileInputStream inputStream = new FileInputStream(file)) {
                     ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
                     if (attachments != null && !attachments.isEmpty()) {
                         for (Attachment attachment : attachments) {
@@ -244,7 +238,7 @@ public class FileUploadServlet extends UploadAction {
     }
 
     public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, EntryType type,
-            EntryAddType addType, long bid) {
+                                   EntryAddType addType, long bid) {
         BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
         update.setBulkUploadId(bid);
         update.setType(type);
@@ -256,7 +250,7 @@ public class FileUploadServlet extends UploadAction {
             if (isStrainWithPlasmidPlasmid) {
                 String plasmid = ((Strain) entry).getPlasmids();
                 entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account, ControllerFactory.getEntryController(),
-                                                                     plasmid);
+                        plasmid);
             }
 
             if (isSequence) {
@@ -363,9 +357,9 @@ public class FileUploadServlet extends UploadAction {
                 }
 
                 sequenceAnalysisController.uploadTraceSequence(entry, byteHolder.getName(),
-                                                               account.getEmail(),
-                                                               dnaSequence.getSequence().toLowerCase(),
-                                                               new ByteArrayInputStream(byteHolder.getBytes()));
+                        account.getEmail(),
+                        dnaSequence.getSequence().toLowerCase(),
+                        new ByteArrayInputStream(byteHolder.getBytes()));
             }
             sequenceAnalysisController.rebuildAllAlignments(entry);
             return "";
@@ -387,8 +381,7 @@ public class FileUploadServlet extends UploadAction {
             Logger.error(e);
         }
 
-        try {
-            FileInputStream inputStream = new FileInputStream(file);
+        try (FileInputStream inputStream = new FileInputStream(file)) {
             if (entry != null) {
                 try {
                     Attachment attachment = new Attachment();

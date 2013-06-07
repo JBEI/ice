@@ -1,15 +1,14 @@
 package org.jbei.ice.client.event;
 
+import com.google.gwt.event.shared.GwtEvent;
+import org.jbei.ice.shared.AutoCompleteField;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.jbei.ice.shared.AutoCompleteField;
-
-import com.google.gwt.event.shared.GwtEvent;
-
 public class AutoCompleteDataEvent extends GwtEvent<AutoCompleteDataEventHandler> {
 
-    public static Type<AutoCompleteDataEventHandler> TYPE = new Type<AutoCompleteDataEventHandler>();
+    public static final Type<AutoCompleteDataEventHandler> TYPE = new Type<AutoCompleteDataEventHandler>();
     private final HashMap<AutoCompleteField, ArrayList<String>> data;
 
     public AutoCompleteDataEvent(HashMap<AutoCompleteField, ArrayList<String>> data) {

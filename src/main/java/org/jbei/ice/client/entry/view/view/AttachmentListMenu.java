@@ -1,20 +1,6 @@
 package org.jbei.ice.client.entry.view.view;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
-import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
-import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
-
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasMouseOutHandlers;
-import com.google.gwt.event.dom.client.HasMouseOverHandlers;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
@@ -22,12 +8,15 @@ import gwtupload.client.BaseUploadStatus;
 import gwtupload.client.IFileInput.FileInputType;
 import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
-import gwtupload.client.IUploader.OnCancelUploaderHandler;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-import gwtupload.client.IUploader.OnStartUploaderHandler;
-import gwtupload.client.IUploader.OnStatusChangedHandler;
-import gwtupload.client.IUploader.UploadedInfo;
+import gwtupload.client.IUploader.*;
 import gwtupload.client.SingleUploader;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.Icon;
+import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
+import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
+
+import java.util.ArrayList;
 
 /**
  * Widget that displays list of entry attachments in the entry detail view. Allows user to download and also upload an
@@ -55,7 +44,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         layout.addStyleName("entry_attribute");
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(new HTML("<i class=\"" + FAIconType.PAPER_CLIP.getStyleName()
-                                   + " font-80em\"></i> &nbsp;Attachments"));
+                + " font-80em\"></i> &nbsp;Attachments"));
 
         quickAdd = new Icon(FAIconType.PLUS_SIGN);
         quickAdd.addStyleName("edit_icon");
@@ -169,7 +158,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         vPanel.setWidth("180px");
 
         SingleUploader uploader = new SingleUploader(FileInputType.BROWSER_INPUT,
-                                                     new AttachmentUploadStatus(), saveAttachment) {
+                new AttachmentUploadStatus(), saveAttachment) {
             @Override
             public Panel getUploaderPanel() {
                 return vPanel;
@@ -191,7 +180,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             public void onStart(IUploader uploader) {
                 String attDesc = attachmentDescription.getText().trim();
                 uploader.setServletPath("servlet.gupld?desc=" + attDesc + "&eid="
-                                                + entryId + "&type=attachment&sid=" + ClientController.sessionId);
+                        + entryId + "&type=attachment&sid=" + ClientController.sessionId);
                 attachmentDescription.setVisible(false);
             }
         });
@@ -342,7 +331,6 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         @Override
         public void setFileName(String name) {
             if (name.length() > 25) {
-                name.lastIndexOf('.');
                 name = name.substring(0, 22) + "...";
             }
             fileNameLabel.setText(name);

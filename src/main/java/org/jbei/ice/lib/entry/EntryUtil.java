@@ -1,29 +1,19 @@
 package org.jbei.ice.lib.entry;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.common.base.Joiner;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
-import org.jbei.ice.lib.entry.model.PartNumber;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.model.*;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 
-import com.google.common.base.Joiner;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utility class for operating on entries
@@ -187,7 +177,7 @@ public class EntryUtil {
         Matcher secureUrlMatcher = secureUrlPattern.matcher(text);
         while (secureUrlMatcher.find()) {
             urls.add(new UrlLinkText(secureUrlMatcher.group(0).trim(), secureUrlMatcher.start(),
-                                     secureUrlMatcher.end()));
+                    secureUrlMatcher.end()));
         }
         Collections.sort(urls, urlComparator);
         String newText = text;
@@ -426,10 +416,10 @@ public class EntryUtil {
                                 }
                             }
                         }
-
                     } else {
-                        if (plasmid.getPartNumbers().contains(strainPlasmid)) {
-                            resultStrains.add(strain);
+                        for (PartNumber number : plasmid.getPartNumbers()) {
+                            if (strainPlasmid.equals(number.getPartNumber()))
+                                resultStrains.add(strain);
                         }
                     }
                 }

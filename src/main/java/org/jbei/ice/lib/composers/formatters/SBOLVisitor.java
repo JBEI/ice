@@ -1,24 +1,15 @@
 package org.jbei.ice.lib.composers.formatters;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.sbolstandard.core.*;
 
-import org.sbolstandard.core.DnaComponent;
-import org.sbolstandard.core.DnaSequence;
-import org.sbolstandard.core.SBOLFactory;
-import org.sbolstandard.core.SequenceAnnotation;
-import org.sbolstandard.core.StrandType;
+import java.net.URI;
+import java.util.*;
 
 /**
  * @author Hector Plahar
@@ -70,7 +61,7 @@ public class SBOLVisitor {
         Collections.sort(features, new Comparator<SequenceFeature>() {
             @Override
             public int compare(SequenceFeature o1, SequenceFeature o2) {
-                if (o1.getUniqueGenbankStart() == o2.getUniqueGenbankStart())
+                if (o1.getUniqueGenbankStart().intValue() == o2.getUniqueGenbankStart().intValue())
                     return o1.getUniqueEnd().compareTo(o2.getUniqueEnd());
                 return o1.getUniqueGenbankStart().compareTo(o2.getUniqueGenbankStart());
             }

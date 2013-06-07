@@ -1,13 +1,5 @@
 package org.jbei.ice.client.common.table.cell;
 
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
-import org.jbei.ice.client.collection.presenter.EntryContext;
-import org.jbei.ice.client.common.TipViewContentFactory;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.HasEntryInfo;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -19,6 +11,13 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
+import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.common.TipViewContentFactory;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.HasEntryInfo;
 
 /**
  * @author Hector Plahar
@@ -26,7 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> implements IHasEntryHandlers {
 
-    protected static PopupPanel popup = new PopupPanel(true);
+    protected static final PopupPanel popup = new PopupPanel(true);
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
     private static final String MOUSEOUT_EVENT_NAME = "mouseout";
     private static final String MOUSE_CLICK = "click";
@@ -50,7 +49,7 @@ public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> 
 
     @Override
     public void onBrowserEvent(Context context, Element parent, T value, NativeEvent event,
-            ValueUpdater<T> valueUpdater) {
+                               ValueUpdater<T> valueUpdater) {
 
         super.onBrowserEvent(context, parent, value, event, valueUpdater);
         final String eventType = event.getType();

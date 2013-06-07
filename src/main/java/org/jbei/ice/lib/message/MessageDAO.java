@@ -1,21 +1,20 @@
 package org.jbei.ice.lib.message;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
-import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.logging.Logger;
-
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.logging.Logger;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Hibernate DAO for {@link Message}
@@ -29,34 +28,30 @@ public class MessageDAO extends HibernateRepository<Message> {
         return super.get(Message.class, id);
     }
 
-    public Message saveMessage(Message message) throws DAOException {
-        return super.save(message);
-    }
-
     public int retrieveNewMessageCount(Account account) throws DAOException {
         try {
             Session session = currentSession();
-
-            String sql = "select count(id) from message m where m.is_read=false AND (m.id in "
-                    + "(select message_id from message_destination_accounts where account_id = "
-                    + account.getId() + ")";
+            StringBuilder builder = new StringBuilder();
+            builder.append("select count(id) from message m where m.is_read=false AND (m.id in ")
+                    .append("(select message_id from message_destination_accounts where account_id = ")
+                    .append(account.getId())
+                    .append(")");
 
             if (!account.getGroups().isEmpty()) {
-                String conjunction = " OR m.id in (select message_id from message_destination_groups where group_id in"
-                        + " (";
+                builder.append(" OR m.id in (select message_id from message_destination_groups where group_id in (");
 
                 int size = account.getGroups().size();
                 int i = 0;
                 for (Group group : account.getGroups()) {
-                    conjunction += group.getId();
+                    builder.append(group.getId());
                     if (i < size - 1)
-                        conjunction += ", ";
+                        builder.append(", ");
                 }
 
-                sql += (conjunction + "))");
+                builder.append("))");
             }
-            sql += ")";
-            Query query = session.createSQLQuery(sql);
+            builder.append(")");
+            Query query = session.createSQLQuery(builder.toString());
             Number number = (Number) query.uniqueResult();
             return number.intValue();
         } catch (HibernateException he) {
@@ -68,26 +63,27 @@ public class MessageDAO extends HibernateRepository<Message> {
     public Set<Message> retrieveMessages(Account account, int start, int count) throws DAOException {
         try {
             Session session = currentSession();
-            String sql = "select id from message m where m.id in "
-                    + "(select message_id from message_destination_accounts where account_id = "
-                    + account.getId() + ")";
+            StringBuilder builder = new StringBuilder();
+            builder.append("select id from message m where m.id in ")
+                    .append("(select message_id from message_destination_accounts where account_id = ")
+                    .append(account.getId())
+                    .append(")");
 
             if (!account.getGroups().isEmpty()) {
-                String conjuction = " OR m.id in (select message_id from message_destination_groups where group_id in"
-                        + " (";
+                builder.append(" OR m.id in (select message_id from message_destination_groups where group_id in (");
 
                 int size = account.getGroups().size();
                 int i = 0;
                 for (Group group : account.getGroups()) {
-                    conjuction += group.getId();
+                    builder.append(group.getId());
                     if (i < size - 1)
-                        conjuction += ", ";
+                        builder.append(", ");
                 }
 
-                sql += (conjuction + "))");
+                builder.append("))");
             }
 
-            Query query = session.createSQLQuery(sql);
+            Query query = session.createSQLQuery(builder.toString());
             query.setFirstResult(start);
             query.setMaxResults(count);
             List list = query.list();
@@ -113,26 +109,28 @@ public class MessageDAO extends HibernateRepository<Message> {
     public int retrieveMessageCount(Account account) throws DAOException {
         try {
             Session session = currentSession();
-            String sql = "select count(id) from message m where m.id in "
-                    + "(select message_id from message_destination_accounts where account_id = "
-                    + account.getId() + ")";
+            StringBuilder builder = new StringBuilder();
+            builder.append("select count(id) from message m where m.id in ")
+                    .append("(select message_id from message_destination_accounts where account_id = ")
+                    .append(account.getId())
+                    .append(")");
 
             if (!account.getGroups().isEmpty()) {
-                String conjuction = " OR m.id in (select message_id from message_destination_groups where group_id in"
-                        + " (";
+                builder.append(" OR m.id in (select message_id from message_destination_groups where group_id in")
+                        .append(" (");
 
                 int size = account.getGroups().size();
                 int i = 0;
                 for (Group group : account.getGroups()) {
-                    conjuction += group.getId();
+                    builder.append(group.getId());
                     if (i < size - 1)
-                        conjuction += ", ";
+                        builder.append(", ");
                 }
 
-                sql += (conjuction + "))");
+                builder.append("))");
             }
 
-            Query query = session.createSQLQuery(sql);
+            Query query = session.createSQLQuery(builder.toString());
             Number number = (Number) query.uniqueResult();
             return number.intValue();
         } catch (HibernateException he) {

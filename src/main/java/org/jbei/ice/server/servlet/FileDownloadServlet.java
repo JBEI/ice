@@ -1,15 +1,6 @@
 package org.jbei.ice.server.servlet;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.apache.commons.io.IOUtils;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -21,6 +12,14 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 /**
  * Servlet for serving the different kinds of files
  * available on gd-ice. Requires a valid session id as
@@ -31,17 +30,13 @@ import org.jbei.ice.lib.permissions.PermissionException;
 public class FileDownloadServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private static final int BYTES_DOWNLOAD = 1024;
     private static final String SEQUENCE_TYPE = "sequence";
     private static final String ATTACHMENT_TYPE = "attachment";
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": attempt to download file");
-
         String fileId = request.getParameter("id");
         String type = request.getParameter("type");
-        String name = request.getParameter("name");
         String sid = request.getParameter("sid");
 
         Account account;
@@ -65,19 +60,19 @@ public class FileDownloadServlet extends HttpServlet {
             url = url.substring(0, url.indexOf(path));
             response.sendRedirect(url);
             Logger.info(FileDownloadServlet.class.getSimpleName()
-                                + ": authenication failed. Redirecting user to " + url);
+                    + ": authentication failed. Redirecting user to " + url);
             return;
         }
 
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": user = " + account.getEmail()
-                            + ", file type = " + type + ", name = " + name + ", file id = " + fileId);
+                + ", file type = " + type + ", file id = " + fileId);
 
         File file = null;
 
         if (SEQUENCE_TYPE.equalsIgnoreCase(type))
-            file = getTraceSequenceFile(account, fileId);
+            file = getTraceSequenceFile(fileId, response);
         else if (ATTACHMENT_TYPE.equalsIgnoreCase(type))
-            file = getAttachmentFile(account, fileId);
+            file = getAttachmentFile(account, fileId, response);
 
         // check for null file
         if (file == null) {
@@ -87,24 +82,10 @@ public class FileDownloadServlet extends HttpServlet {
 
         response.setContentType("application/octet-stream");
         response.setContentLength((int) file.length());
-        if (name == null || name.isEmpty())
-            name = file.getName(); // TODO : the filename is also stored in the db
-        response.setHeader("Content-Disposition", "attachment;filename=" + name);
-
-        OutputStream os = response.getOutputStream();
-        DataInputStream is = new DataInputStream(new FileInputStream(file));
-
-        int read;
-        byte[] bytes = new byte[BYTES_DOWNLOAD];
-
-        while ((read = is.read(bytes)) != -1) {
-            os.write(bytes, 0, read);
-        }
-        os.flush();
-        os.close();
+        IOUtils.copy(new FileInputStream(file), response.getOutputStream());
     }
 
-    private File getTraceSequenceFile(Account account, String fileId) {
+    private File getTraceSequenceFile(String fileId, HttpServletResponse response) {
         SequenceAnalysisController controller = ControllerFactory.getSequenceAnalysisController();
 
         try {
@@ -112,6 +93,7 @@ public class FileDownloadServlet extends HttpServlet {
             if (sequence == null)
                 return null;
 
+            response.setHeader("Content-Disposition", "attachment;filename=" + sequence.getFilename());
             File file = controller.getFile(sequence);
             return file;
         } catch (ControllerException ce) {
@@ -121,13 +103,14 @@ public class FileDownloadServlet extends HttpServlet {
         }
     }
 
-    private File getAttachmentFile(Account account, String fileId) {
+    private File getAttachmentFile(Account account, String fileId, HttpServletResponse response) {
         AttachmentController controller = ControllerFactory.getAttachmentController();
         try {
             Attachment attachment = controller.getAttachmentByFileId(fileId);
             if (attachment == null)
                 return null;
 
+            response.setHeader("Content-Disposition", "attachment;filename=" + attachment.getFileName());
             return controller.getFile(account, attachment);
         } catch (ControllerException ce) {
             Logger.error("Error retrieving attachment file with id " + fileId + ". Details...");
@@ -135,7 +118,7 @@ public class FileDownloadServlet extends HttpServlet {
             return null;
         } catch (PermissionException e) {
             Logger.error("User " + account.getEmail()
-                                 + " does not have appropriate permissions to view file");
+                    + " does not have appropriate permissions to view file");
             Logger.error(e);
             return null;
         }

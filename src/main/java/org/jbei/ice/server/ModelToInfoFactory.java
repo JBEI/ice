@@ -60,9 +60,6 @@ public class ModelToInfoFactory {
                 return null;
         }
 
-        if (info == null)
-            return info;
-
         // get attachments
         ArrayList<AttachmentInfo> attachmentInfos = getAttachments(attachments);
         info.setAttachments(attachmentInfos);
@@ -71,16 +68,15 @@ public class ModelToInfoFactory {
         // get samples
         ArrayList<SampleStorage> samplesList = new ArrayList<>();
         if (samples != null) {
-            for (Sample sample : samples.keySet()) {
-                SampleInfo key = getSampleInfo(sample);
-                Storage storage = sample.getStorage();
+            for (Map.Entry<Sample, LinkedList<Storage>> sample : samples.entrySet()) {
+                SampleInfo key = getSampleInfo(sample.getKey());
+                Storage storage = sample.getKey().getStorage();
                 if (storage != null) {
                     key.setLocationId(String.valueOf(storage.getId()));
                     key.setLocation(storage.getIndex());
                 }
 
-                LinkedList<Storage> storageList = samples.get(sample);
-                SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(storageList));
+                SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(sample.getValue()));
                 samplesList.add(sampleStorage);
             }
         }
@@ -319,18 +315,21 @@ public class ModelToInfoFactory {
             String parsedShortDesc = EntryUtil.linkifyText(account, entry.getShortDescription());
             info.setLinkifiedShortDescription(parsedShortDesc);
 
-            String linkStr = "";
+            String links = "";
+            StringBuilder linkStr = new StringBuilder();
             if (entry.getLinks() != null) {
                 for (Link link : entry.getLinks()) {
-                    if (link.getLink() != null && !link.getLink().isEmpty())
-                        linkStr += (link.getLink() + ", ");
-                    else if (link.getUrl() != null && !link.getUrl().isEmpty())
-                        linkStr += (link.getUrl() + ", ");
+                    if (link.getLink() != null && !link.getLink().isEmpty()) {
+                        linkStr.append(link.getLink()).append(", ");
+                    } else if (link.getUrl() != null && !link.getUrl().isEmpty())
+                        linkStr.append(link.getUrl()).append(", ");
                 }
-                if (!linkStr.isEmpty())
-                    linkStr = linkStr.substring(0, linkStr.length() - 1);
+
+                links = linkStr.toString();
+                if (!links.isEmpty())
+                    links = links.substring(0, links.length() - 1);
             }
-            String parsedLinks = EntryUtil.linkifyText(account, linkStr);
+            String parsedLinks = EntryUtil.linkifyText(account, links);
             info.setLinkifiedLinks(parsedLinks);
             String parsedReferences = EntryUtil.linkifyText(account, entry.getReferences());
             info.setReferences(parsedReferences);
@@ -348,6 +347,7 @@ public class ModelToInfoFactory {
                 break;
 
             case PART:
+            default:
                 info = new PartInfo();
                 break;
 

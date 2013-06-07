@@ -1,9 +1,5 @@
 package org.jbei.ice.lib.entry.attachment;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
@@ -13,6 +9,10 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.ConfigurationKey;
+
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * ABI to manipulate {@link Attachment}s.
@@ -79,7 +79,7 @@ public class AttachmentController {
             throw new ControllerException("No permissions to save attachment!");
         }
 
-        if (attachment.getFileId() == null || attachment.getFileId() == "") {
+        if (attachment.getFileId() == null || attachment.getFileId().isEmpty()) {
             String fileId = Utils.generateUUID();
             attachment.setFileId(fileId);
         }
@@ -164,7 +164,7 @@ public class AttachmentController {
     public ArrayList<Attachment> getByEntry(Account account, Entry entry) throws ControllerException {
         if (!permissionsController.hasReadPermission(account, entry))
             throw new ControllerException(account.getEmail() + " does not have read permission for entry "
-                                                  + entry.getRecordId());
+                    + entry.getRecordId());
 
         try {
             return dao.getByEntry(entry);

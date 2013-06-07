@@ -16,7 +16,7 @@ import com.google.gwt.user.cellview.client.Header;
 
 public abstract class ImageColumn<T> extends Column<T, ImageResource> {
 
-    private final static Resources resources = GWT.create(Resources.class);
+    private static final Resources resources = GWT.create(Resources.class);
 
     /**
      * Supported image types for the column
@@ -79,7 +79,7 @@ public abstract class ImageColumn<T> extends Column<T, ImageResource> {
 
     protected static class ImageHeader extends Header<ImageResource> {
 
-        private final static ImageResourceCell cell = new ImageResourceCell();
+        private static final ImageResourceCell cell = new ImageResourceCell();
         private final ImageColumn.Type type;
 
         public ImageHeader(ImageColumn.Type type) {

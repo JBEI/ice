@@ -1,5 +1,14 @@
 package org.jbei.ice.client.bulkupload.sheet;
 
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.SheetPresenter;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
@@ -11,30 +20,6 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
 import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
-
-import com.google.gwt.core.shared.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.ScrollEvent;
-import com.google.gwt.event.dom.client.ScrollHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class Sheet extends Composite implements SheetPresenter.View {
 
@@ -63,7 +48,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private SampleSelectionWidget sampleSelectionWidget;
     private HandlerRegistration sampleSelectionRegistration;
 
-    public final static int ROW_COUNT = 35;
+    public static final int ROW_COUNT = 35;
     private int dragRow = -1;
     private int dragCol = -1;
     private boolean dragging;

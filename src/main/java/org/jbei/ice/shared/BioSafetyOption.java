@@ -1,8 +1,8 @@
 package org.jbei.ice.shared;
 
-import java.util.ArrayList;
-
 import com.google.gwt.user.client.rpc.IsSerializable;
+
+import java.util.ArrayList;
 
 public enum BioSafetyOption implements IsSerializable {
 
@@ -17,7 +17,8 @@ public enum BioSafetyOption implements IsSerializable {
         this.value = value;
     }
 
-    BioSafetyOption() {}
+    BioSafetyOption() {
+    }
 
     public String getDisplayName() {
         return this.displayName;
@@ -34,7 +35,7 @@ public enum BioSafetyOption implements IsSerializable {
 
     public static boolean isValidOption(Integer integer) {
         for (BioSafetyOption option : BioSafetyOption.values()) {
-            if (integer == intValue(option.toString()))
+            if (integer.intValue() == intValue(option.toString()).intValue())
                 return true;
         }
         return false;
@@ -42,7 +43,7 @@ public enum BioSafetyOption implements IsSerializable {
 
     public static BioSafetyOption enumValue(Integer i) {
         for (BioSafetyOption option : BioSafetyOption.values()) {
-            if (Integer.valueOf(option.value) == i)
+            if (Integer.valueOf(option.value).intValue() == i.intValue())
                 return option;
         }
         return null;

@@ -1,7 +1,11 @@
 package org.jbei.ice.client.admin.user;
 
-import java.util.LinkedList;
-
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -9,12 +13,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountResults;
 
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
+import java.util.LinkedList;
 
 /**
  * @author Hector Plahar
@@ -27,7 +26,6 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
     protected final UserTable table;
     protected ColumnField lastSortField;
     protected boolean lastSortAsc = false;
-    private AccountResults accountResults;
 
     public UserDataProvider(UserTable view, RegistryServiceAsync service) {
         this.table = view;
@@ -75,27 +73,26 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
     protected void fetchEntryData(ColumnField field, boolean ascending, int start, int factor, final boolean reset) {
         try {
             service.retrieveAllUserAccounts(ClientController.sessionId, start, factor,
-                                            new AsyncCallback<AccountResults>() {
-                                                @Override
-                                                public void onFailure(Throwable caught) {
-                                                    Window.alert(caught.getMessage());
-                                                }
+                    new AsyncCallback<AccountResults>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert(caught.getMessage());
+                        }
 
-                                                @Override
-                                                public void onSuccess(AccountResults result) {
-                                                    accountResults = result;
-                                                    if (result == null) {
-                                                        return;
-                                                    }
+                        @Override
+                        public void onSuccess(AccountResults result) {
+                            if (result == null) {
+                                return;
+                            }
 
-                                                    if (reset)
-                                                        setResultsData(result, false);
-                                                    else {
-                                                        cachedEntries.addAll(result.getResults());
+                            if (reset)
+                                setResultsData(result, false);
+                            else {
+                                cachedEntries.addAll(result.getResults());
 //                    pager.setLoading(true);  //todo
-                                                    }
-                                                }
-                                            });
+                            }
+                        }
+                    });
         } catch (AuthenticationException ar) {
 
         }
@@ -106,7 +103,6 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
             lastSortField = null;
 
         reset();
-        this.accountResults = results;
         if (results == null) {
             updateRowCount(0, true);
             return;
@@ -129,7 +125,6 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
 
     public void reset() {
         this.cachedEntries.clear();
-        accountResults = null;
         this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
 
 //        // reset sort
