@@ -1971,16 +1971,21 @@ td.datePickerMonth {
 
 .badge {
     font-size: 11px;
-    font-weight: bold;
+    font-weight: bolder;
     line-height: 14px;
     color: #ffffff;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     white-space: nowrap;
     vertical-align: baseline;
     background-color: #aa0000;
-    padding: 1px 5px 1px;
-    border-radius: 4px;
+    padding: 1px 6px;
+    border-radius: 15px;
     cursor: pointer;
+    border: 2px solid #ddddff;
+}
+
+.badge:hover {
+    /*color: #111;*/
+    border: 2px solid #F3F1D9;
 }
 
 .collection_options {
@@ -2184,3 +2189,56 @@ td.selected i.font-awesome {
     font-size: 1.4em;
     padding-bottom: 4px;
 }
+
+.gwt-SliderBar-shell {
+    height: 34pt;
+    width: 50%;
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-line {
+    border: 1px solid black;
+    background-color: white;
+    height: 4px;
+    width: 95%;
+    top: 22pt;
+    overflow: hidden;
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-line-disabled {
+    border: 1px solid gray;
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-knob {
+    top: 14pt;
+    width: 11px;
+    height: 21px;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-tick {
+    top: 16pt;
+    width: 1px;
+    height: 6pt;
+    background: black;
+    overflow: hidden;
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-tick-disabled {
+    background: gray;
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-label {
+    top: 2pt;
+    font-size: 8pt;
+    cursor: default;
+}
+
+.gwt-SliderBar-shell-focused {
+
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-line-sliding {
+    cursor: pointer;
+}
+

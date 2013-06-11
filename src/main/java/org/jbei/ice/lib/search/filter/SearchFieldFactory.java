@@ -1,13 +1,9 @@
 package org.jbei.ice.lib.search.filter;
 
-import java.util.HashSet;
-
-import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.model.*;
 import org.jbei.ice.shared.dto.entry.EntryType;
+
+import java.util.HashSet;
 
 /**
  * @author Hector Plahar
@@ -41,9 +37,7 @@ public class SearchFieldFactory {
         // strain fields
         strainFields.add("plasmids");
         strainFields.add("genotypePhenotype");
-        strainFields.add("entryFundingSources.fundingSource.fundingSource");
-        strainFields.add("selectionMarkers.name");
-        strainFields.add("entryFundingSources.fundingSource.principalInvestigator");
+        strainFields.add("host");
 
         // plasmid fields
         plasmidFields.add("backbone");

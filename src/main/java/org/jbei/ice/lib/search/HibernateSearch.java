@@ -60,7 +60,8 @@ public class HibernateSearch {
     }
 
     protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, ArrayList<EntryType> entryTypes,
-                                                  BooleanQuery booleanQuery, String term, BioSafetyOption option) {
+                                                  BooleanQuery booleanQuery, String term, BioSafetyOption option,
+                                                  HashMap<String, Float> userBoost) {
         term = cleanQuery(term);
         for (EntryType type : entryTypes) {
             Class<?> clazz = SearchFieldFactory.entryClass(type);
@@ -71,8 +72,11 @@ public class HibernateSearch {
                 commonFields.addAll(SearchFieldFactory.entryFields(type));
                 for (String field : commonFields) {
                     // TODO ignoreFieldBridges only for enums only (e.g. plantType, generation) etc
-                    Query fieldQuery = qb.keyword().fuzzy()/*.withThreshold(0.8f)*/
+                    Query fieldQuery = qb.keyword().fuzzy().withThreshold(0.8f)
                             .onField(field).ignoreFieldBridge().matching(term).createQuery();
+                    Float boost = userBoost.get(field);
+                    if (boost != null)
+                        fieldQuery.setBoost(boost.floatValue());
                     booleanQuery.add(fieldQuery, BooleanClause.Occur.SHOULD);
                 }
             }
@@ -104,7 +108,8 @@ public class HibernateSearch {
     }
 
     public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery,
-                                              String projectName, String projectURL) {
+                                              String projectName, String projectURL,
+                                              HashMap<String, Float> userBoost) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null) {
             entryTypes = new ArrayList<>();
@@ -122,7 +127,7 @@ public class HibernateSearch {
         }
 
         booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, null,
-                searchQuery.getBioSafetyOption());
+                searchQuery.getBioSafetyOption(), userBoost);
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
@@ -203,7 +208,7 @@ public class HibernateSearch {
     }
 
     public SearchResults executeSearch(Account account, Iterator<String> terms, SearchQuery searchQuery,
-                                       String projectName, String projectURL) {
+                                       String projectName, String projectURL, HashMap<String, Float> userBoost) {
         // types for which we are searching
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null) {
@@ -229,11 +234,12 @@ public class HibernateSearch {
                 continue;
 
             BioSafetyOption safetyOption = searchQuery.getBioSafetyOption();
-            booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, term, safetyOption);
+            booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, term,
+                    safetyOption, userBoost);
         }
 
         if (booleanQuery.getClauses().length == 0)
-            return executeSearchNoTerms(account, searchQuery, projectName, projectURL);
+            return executeSearchNoTerms(account, searchQuery, projectName, projectURL, userBoost);
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
@@ -279,7 +285,10 @@ public class HibernateSearch {
 
         // execute search
         result = fullTextQuery.list();
-        Logger.info("Obtained " + resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
+        String email = "Anon";
+        if (account != null)
+            email = account.getEmail();
+        Logger.info(email + ": obtained " + resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
 
         LinkedList<SearchResultInfo> searchResultInfos = new LinkedList<SearchResultInfo>();
         Iterator<Object[]> iterator = result.iterator();

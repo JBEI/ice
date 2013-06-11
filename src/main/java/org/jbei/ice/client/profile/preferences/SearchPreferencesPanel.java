@@ -5,22 +5,23 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.shared.dto.search.SearchBoostField;
 
 import java.util.HashMap;
 
 /**
+ * Panel for displaying and editting search preferences
+ *
  * @author Hector Plahar
  */
-public class PreferencesPanel extends Composite {
-
+public class SearchPreferencesPanel extends Composite {
     private final FlexTable table;
-    protected final HashMap<String, String> settings;
+    protected final HashMap<String, String> settings;  // search settings with values
     private int row;
     private final ServiceDelegate<RowData> serviceDelegate;
 
-    public PreferencesPanel(HashMap<String, String> settings, String panelHeader,
-                            ServiceDelegate<RowData> delegate, PreferenceKey... keys) {
+    public SearchPreferencesPanel(HashMap<String, String> settings, String panelHeader,
+                                  ServiceDelegate<RowData> delegate) {
         table = new FlexTable();
         table.setWidth("100%");
         table.setCellPadding(1);
@@ -38,20 +39,21 @@ public class PreferencesPanel extends Composite {
         table.setWidget(row, 0, headerPanel);
         table.getFlexCellFormatter().setColSpan(row, 0, 3);
         this.settings = settings;
-        for (PreferenceKey key : keys)
-            addSetting(key);
+
+        for (SearchBoostField field : SearchBoostField.values())
+            addSetting(field);
     }
 
-    protected void addSetting(final PreferenceKey key) {
+    protected void addSetting(final SearchBoostField boostField) {
         row += 1;
-        final String value = settings.remove(key.name());
-        table.setHTML(row, 0, key.toString());
+        final String value = settings.remove(boostField.name());
+
+        table.setHTML(row, 0, boostField.toString());
         table.getCellFormatter().setStyleName(row, 0, "setting_key");
         table.setHTML(row, 1, value);
         table.getCellFormatter().setStyleName(row, 1, "setting_value");
 
         final Button edit = new Button("<i class=\"" + FAIconType.EDIT.getStyleName() + "\"></i> Edit");
-        edit.setEnabled(key.isEditable());
         table.setWidget(row, 2, edit);
 
         final int editRow = row;
@@ -60,15 +62,16 @@ public class PreferencesPanel extends Composite {
             public void onClick(ClickEvent event) {
                 final TextBox box = new TextBox();
                 box.setStyleName("gray_border");
-                box.setText(value);
+                String display = value == null ? "1" : value;
+                box.setText(display);
                 table.setWidget(editRow, 1, box);
-                Widget save = createSaveButton(key, value, editRow, box, edit);
+                Widget save = createSaveButton(boostField, display, editRow, box, edit);
                 table.setWidget(editRow, 2, save);
             }
         });
     }
 
-    public Widget createSaveButton(final PreferenceKey key, final String defaultValue, final int editRow,
+    public Widget createSaveButton(final SearchBoostField field, final String defaultValue, final int editRow,
                                    final TextBox box, final Button edit) {
         Button save = new Button("Save");
         HTML cancel = new HTML("Cancel");
@@ -92,7 +95,7 @@ public class PreferencesPanel extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 final RowData rowData = new RowData();
-                rowData.setKey(key);
+                rowData.setField(field);
                 rowData.setRow(editRow);
                 rowData.setValue(box.getValue().trim());
                 serviceDelegate.execute(rowData);

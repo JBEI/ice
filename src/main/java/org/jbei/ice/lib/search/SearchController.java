@@ -1,13 +1,6 @@
 package org.jbei.ice.lib.search;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
-
+import com.google.common.base.Splitter;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
@@ -22,12 +15,11 @@ import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.search.BlastQuery;
-import org.jbei.ice.shared.dto.search.SearchQuery;
-import org.jbei.ice.shared.dto.search.SearchResultInfo;
-import org.jbei.ice.shared.dto.search.SearchResults;
+import org.jbei.ice.shared.dto.search.*;
 
-import com.google.common.base.Splitter;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+import java.util.*;
 
 /**
  * Controller for running searches on the ice platform
@@ -107,8 +99,20 @@ public class SearchController {
         Iterator<String> iterable;
         if (queryString != null && !queryString.isEmpty()) {
             iterable = Splitter.on(" ").omitEmptyStrings().split(queryString).iterator();
+            HashMap<String, String> results = ControllerFactory.getPreferencesController().
+                    retrieveUserPreferenceList(account, Arrays.asList(SearchBoostField.values()));
+            HashMap<String, Float> mapping = new HashMap<>();
+            for (Map.Entry<String, String> entry : results.entrySet()) {
+                try {
+                    String field = SearchBoostField.valueOf(entry.getKey()).getField();
+                    mapping.put(field, Float.valueOf(entry.getValue()));
+                } catch (NumberFormatException nfe) {
+                    Logger.error(nfe);
+                    continue;
+                }
+            }
             searchResults = HibernateSearch.getInstance().executeSearch(account, iterable, query, projectName,
-                                                                        projectURI);
+                    projectURI, mapping);
             return searchResults;
         }
 
@@ -136,7 +140,8 @@ public class SearchController {
     }
 
     protected LinkedList<SearchResultInfo> runBlast(Account account, BlastQuery blastQuery,
-            final SearchQuery.Parameters parameters) throws ProgramTookTooLongException, ControllerException {
+                                                    final SearchQuery.Parameters parameters)
+            throws ProgramTookTooLongException, ControllerException {
         String query = blastQuery.getSequence();
         if (query == null || query.isEmpty())
             return new LinkedList<>();
@@ -151,7 +156,7 @@ public class SearchController {
                 sort = parameters.getSortField();
 
             HashMap<String, SearchResultInfo> map = blast.query(account, blastQuery.getSequence(),
-                                                                blastQuery.getBlastProgram());
+                    blastQuery.getBlastProgram());
             LinkedList<SearchResultInfo> results = new LinkedList<>(map.values());
             Collections.sort(results, new Comparator<SearchResultInfo>() {
                 @Override

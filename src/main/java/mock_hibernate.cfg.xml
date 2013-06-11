@@ -82,5 +82,7 @@
         <mapping class="org.jbei.ice.lib.permissions.model.Permission"/>
         <mapping class="org.jbei.ice.lib.message.Message"/>
         <mapping class="org.jbei.ice.lib.account.model.Preference"/>
+        <mapping class="org.jbei.ice.lib.net.model.RemotePartner"/>
+
     </session-factory>
 </hibernate-configuration>

@@ -66,6 +66,7 @@ import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.message.MessageList;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
+import org.jbei.ice.shared.dto.search.SearchBoostField;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 import org.jbei.ice.shared.dto.search.SearchResults;
 import org.jbei.ice.shared.dto.user.PreferenceKey;
@@ -105,7 +106,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean setPreferenceSetting(String sid, PreferenceKey key, String value) throws AuthenticationException {
+    public boolean setPreferenceSetting(String sid, String key, String value) throws AuthenticationException {
         PreferencesController controller = ControllerFactory.getPreferencesController();
         Account account = retrieveAccountForSid(sid);
         try {
@@ -122,6 +123,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Account account = retrieveAccountForSid(sid);
         try {
             return controller.retrieveAccountPreferences(account, keys);
+        } catch (ControllerException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public HashMap<String, String> retrieveUserSearchPreferences(String sid) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            return ControllerFactory.getPreferencesController().retrieveUserPreferenceList(account,
+                    Arrays.asList(SearchBoostField.values()));
         } catch (ControllerException e) {
             return null;
         }

@@ -18,11 +18,10 @@ public enum PreferenceKey implements IDTOModel {
     PRINCIPAL_INVESTIGATOR(true),
     FUNDING_SOURCE(true);
 
-    //search settings
-
     private boolean editable;
 
-    PreferenceKey() {}
+    PreferenceKey() {
+    }
 
     PreferenceKey(boolean editable) {
         this.editable = editable;

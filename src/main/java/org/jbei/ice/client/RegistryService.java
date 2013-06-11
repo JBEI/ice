@@ -160,10 +160,12 @@ public interface RegistryService extends RemoteService {
 
     SearchResults performSearch(String sid, SearchQuery searchQuery, boolean isWeb) throws AuthenticationException;
 
-    boolean setPreferenceSetting(String sid, PreferenceKey key, String value) throws AuthenticationException;
+    boolean setPreferenceSetting(String sid, String key, String value) throws AuthenticationException;
 
     HashMap<PreferenceKey, String> retrieveUserPreferences(String sid, ArrayList<PreferenceKey> keys)
             throws AuthenticationException;
+
+    HashMap<String, String> retrieveUserSearchPreferences(String sid) throws AuthenticationException;
 
     boolean isWebOfRegistriesEnabled();
 

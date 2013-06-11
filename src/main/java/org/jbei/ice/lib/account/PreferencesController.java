@@ -1,13 +1,16 @@
 package org.jbei.ice.lib.account;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.shared.dto.search.SearchBoostField;
 import org.jbei.ice.shared.dto.user.PreferenceKey;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -51,8 +54,20 @@ public class PreferencesController {
         }
     }
 
+    public HashMap<String, String> retrieveUserPreferenceList(Account account, List<SearchBoostField> fields)
+            throws ControllerException {
+        try {
+            HashSet<String> values = new HashSet<>();
+            for (SearchBoostField field : fields)
+                values.add(field.name());
+            return dao.retrievePreferenceValues(account, values);
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+    }
+
     // really an update
-    public boolean saveSetting(Account account, PreferenceKey key, String value) throws ControllerException {
+    public boolean saveSetting(Account account, String key, String value) throws ControllerException {
         try {
             return dao.saveOrUpdatePreference(account, key, value) != null;
         } catch (DAOException e) {

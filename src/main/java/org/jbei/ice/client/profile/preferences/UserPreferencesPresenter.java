@@ -1,7 +1,7 @@
 package org.jbei.ice.client.profile.preferences;
 
-import java.util.HashMap;
-
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -10,8 +10,7 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.PanelPresenter;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
 
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.HashMap;
 
 /**
  * @author Hector Plahar
@@ -30,6 +29,10 @@ public class UserPreferencesPresenter extends PanelPresenter {
         panel.setData(settings);
     }
 
+    public void setSearchPreferences(HashMap<String, String> settings) {
+        panel.setSearchData(settings);
+    }
+
     public ServiceDelegate<RowData> getServiceDelegate() {
         return new ServiceDelegate<RowData>() {
             @Override
@@ -38,13 +41,13 @@ public class UserPreferencesPresenter extends PanelPresenter {
 
                     @Override
                     protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        service.setPreferenceSetting(ClientController.sessionId,
-                                                     rowData.getKey(), rowData.getValue(), callback);
+                        String key = rowData.getKey() == null ? rowData.getField().name() : rowData.getKey().name();
+                        service.setPreferenceSetting(ClientController.sessionId, key, rowData.getValue(), callback);
                     }
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        panel.setConfigValue(rowData.getKey(), rowData.getRow(), rowData.getValue());
+                        panel.setConfigValue(rowData.getSection(), rowData.getRow(), rowData.getValue());
                     }
                 }.go(eventBus);
             }

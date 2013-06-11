@@ -54,8 +54,8 @@ public interface RegistryServiceAsync {
     void retrieveUserSavedDrafts(String sid, AsyncCallback<ArrayList<BulkUploadInfo>> callback)
             throws AuthenticationException;
 
-    void retrieveDraftsPendingVerification(String sid,
-                                           AsyncCallback<ArrayList<BulkUploadInfo>> callback) throws AuthenticationException;
+    void retrieveDraftsPendingVerification(String sid, AsyncCallback<ArrayList<BulkUploadInfo>> callback)
+            throws AuthenticationException;
 
     void deleteSavedDraft(String sid, long draftId,
                           AsyncCallback<BulkUploadInfo> callback) throws AuthenticationException;
@@ -175,7 +175,7 @@ public interface RegistryServiceAsync {
 
     void setConfigurationSetting(String sid, ConfigurationKey key, String value, AsyncCallback<Boolean> async);
 
-    void setPreferenceSetting(String sid, PreferenceKey key, String value, AsyncCallback<Boolean> async)
+    void setPreferenceSetting(String sid, String key, String value, AsyncCallback<Boolean> async)
             throws AuthenticationException;
 
     void revertedSubmittedBulkUpload(String sid, long uploadId, AsyncCallback<Boolean> async);
@@ -194,10 +194,14 @@ public interface RegistryServiceAsync {
                                     AsyncCallback<Long> callback) throws AuthenticationException;
 
     void updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
-                                     ArrayList<PermissionInfo> permissions, AsyncCallback<Long> callback) throws AuthenticationException;
+                                     ArrayList<PermissionInfo> permissions, AsyncCallback<Long> callback)
+            throws AuthenticationException;
 
     void retrieveUserPreferences(String sid, ArrayList<PreferenceKey> keys,
                                  AsyncCallback<HashMap<PreferenceKey, String>> async) throws AuthenticationException;
+
+    void retrieveUserSearchPreferences(String sid, AsyncCallback<HashMap<String, String>> async)
+            throws AuthenticationException;
 
     void isWebOfRegistriesEnabled(AsyncCallback<Boolean> async);
 
