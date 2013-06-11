@@ -173,7 +173,7 @@ public class HibernateSearch {
         resultCount = fullTextQuery.getResultSize();
         result = fullTextQuery.list();
 
-        LinkedList<SearchResultInfo> searchResultInfos = new LinkedList<SearchResultInfo>();
+        LinkedList<SearchResultInfo> searchResultInfos = new LinkedList<>();
         Iterator<Object[]> iterator = result.iterator();
         while (iterator.hasNext()) {
             Object[] objects = iterator.next();
@@ -290,7 +290,7 @@ public class HibernateSearch {
             email = account.getEmail();
         Logger.info(email + ": obtained " + resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
 
-        LinkedList<SearchResultInfo> searchResultInfos = new LinkedList<SearchResultInfo>();
+        LinkedList<SearchResultInfo> searchResultInfos = new LinkedList<>();
         Iterator<Object[]> iterator = result.iterator();
         while (iterator.hasNext()) {
             Object[] objects = iterator.next();
@@ -359,8 +359,8 @@ public class HibernateSearch {
                 .setParameter("groupUUids", groupUUIDs);
     }
 
-    protected HashMap<String, SearchResultInfo> checkEnableBlast(Account account,
-                                                                 org.hibernate.search.FullTextQuery fullTextQuery, SearchQuery query) throws BlastException {
+    protected HashMap<String, SearchResultInfo> checkEnableBlast(Account account, FullTextQuery fullTextQuery,
+                                                                 SearchQuery query) throws BlastException {
         if (!query.hasBlastQuery())
             return null;
 
@@ -370,16 +370,15 @@ public class HibernateSearch {
 
         try {
             HashMap<String, SearchResultInfo> rids = blast.query(account, sequence, program);
-            fullTextQuery.enableFullTextFilter("blastFilter")
-                    .setParameter("recordIds", new HashSet<String>(rids.keySet()));
+            fullTextQuery.enableFullTextFilter("blastFilter").setParameter("recordIds", new HashSet<>(rids.keySet()));
             return rids;
         } catch (ProgramTookTooLongException e) {
             throw new BlastException(e);
         }
     }
 
-    protected org.hibernate.search.FullTextQuery checkEnableHasAttribute(Session session,
-                                                                         org.hibernate.search.FullTextQuery fullTextQuery, SearchQuery query) {
+    protected org.hibernate.search.FullTextQuery checkEnableHasAttribute(Session session, FullTextQuery fullTextQuery,
+                                                                         SearchQuery query) {
         HashSet<String> results = null;
         SearchQuery.Parameters parameters = query.getParameters();
         boolean hasSequence = parameters.getHasSequence() != null && parameters.getHasSequence();
@@ -456,6 +455,8 @@ public class HibernateSearch {
     }
 
     protected static String cleanQuery(String query) {
+        if (query == null)
+            return query;
         String cleanedQuery = query;
         cleanedQuery = cleanedQuery.replace(":", " ");
         cleanedQuery = cleanedQuery.replace(";", " ");

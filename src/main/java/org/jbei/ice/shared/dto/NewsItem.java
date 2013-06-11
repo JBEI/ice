@@ -2,9 +2,7 @@ package org.jbei.ice.shared.dto;
 
 import java.util.Date;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class NewsItem implements IsSerializable {
+public class NewsItem implements IDTOModel {
 
     private String id;
     private Date creationDate;

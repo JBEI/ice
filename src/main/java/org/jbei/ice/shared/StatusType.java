@@ -39,7 +39,7 @@ public enum StatusType {
     }
 
     public static ArrayList<String> getDisplayList() {
-        ArrayList<String> displayList = new ArrayList<String>();
+        ArrayList<String> displayList = new ArrayList<>();
         for (StatusType type : StatusType.values()) {
             displayList.add(type.toString());
         }

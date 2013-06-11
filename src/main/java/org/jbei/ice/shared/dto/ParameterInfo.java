@@ -1,8 +1,6 @@
 package org.jbei.ice.shared.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class ParameterInfo implements IsSerializable {
+public class ParameterInfo implements IDTOModel {
 
     private String name;
     private String value;

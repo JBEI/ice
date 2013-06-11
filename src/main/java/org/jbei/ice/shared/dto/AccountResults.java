@@ -2,14 +2,12 @@ package org.jbei.ice.shared.dto;
 
 import java.util.LinkedList;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 /**
  * Wrapper around a list of account infos
  *
  * @author Hector Plahar
  */
-public class AccountResults implements IsSerializable {
+public class AccountResults implements IDTOModel {
 
     private long resultCount;
     private LinkedList<AccountInfo> infos;

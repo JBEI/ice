@@ -1,13 +1,12 @@
 package org.jbei.ice.shared.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 /**
  * Set configuration types
  *
  * @author Hector Plahar
  */
-public enum ConfigurationKey implements IsSerializable {
+public enum ConfigurationKey implements IDTOModel {
+
     PLASMID_STORAGE_ROOT("", "", true),
     STRAIN_STORAGE_ROOT("", "", true),
     PART_STORAGE_ROOT("", "", true),

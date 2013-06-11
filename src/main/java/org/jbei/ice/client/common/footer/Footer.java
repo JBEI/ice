@@ -61,7 +61,6 @@ public class Footer extends Composite {
     }
 
     private Widget getLine() {
-
         HorizontalPanel panel = new HorizontalPanel();
         panel.setStyleName("footer_line");
         panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
@@ -70,7 +69,6 @@ public class Footer extends Composite {
     }
 
     private Widget getFooterText() {
-
         VerticalPanel panel = new VerticalPanel();
         panel.setStyleName("font-80em");
         panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);

@@ -1,8 +1,8 @@
 package org.jbei.ice.shared.dto.search;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.shared.dto.IDTOModel;
 
-public enum BlastProgram implements IsSerializable {
+public enum BlastProgram implements IDTOModel {
 
     BLAST_N("blastn", "Nucleotide Search (blastn)"),
     TBLAST_X("tblastx", "Nucleotide Translated Search (tblastx)");
