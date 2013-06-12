@@ -41,10 +41,7 @@ import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.folder.FolderShareType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class CollectionsPresenter extends AbstractPresenter {
 
@@ -614,6 +611,13 @@ public class CollectionsPresenter extends AbstractPresenter {
             ArrayList<MenuItem> userMenuItems = new ArrayList<MenuItem>();
             ArrayList<MenuItem> systemMenuItems = new ArrayList<MenuItem>();
             ArrayList<MenuItem> sharedMenuItems = new ArrayList<MenuItem>();
+
+            Collections.sort(folders, new Comparator<FolderDetails>() {
+                @Override
+                public int compare(FolderDetails o1, FolderDetails o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
 
             for (FolderDetails folder : folders) {
                 MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder.getCount());
