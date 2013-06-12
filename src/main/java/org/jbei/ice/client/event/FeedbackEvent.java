@@ -27,7 +27,7 @@ public class FeedbackEvent extends GwtEvent<IFeedbackEventHandler> {
     public String getMessage() {
         if (error)
             return "<i class=\"" + FAIconType.WARNING_SIGN.getStyleName() + "\"></i> " + msg;
-        return "<i class=\"" + FAIconType.OK_SIGN.getStyleName() + "\"></i> " + this.msg;
+        return "<i style=\"font-size:1.2em; color: green\" class=\"" + FAIconType.OK_SIGN.getStyleName() + "\"></i> " + this.msg;
     }
 
     @Override

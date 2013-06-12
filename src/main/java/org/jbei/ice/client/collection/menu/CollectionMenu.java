@@ -1,9 +1,14 @@
 package org.jbei.ice.client.collection.menu;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
@@ -12,24 +17,12 @@ import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.widget.ShareCollectionWidget;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.entry.view.handler.ReadBoxSelectionHandler;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
+import org.jbei.ice.shared.dto.folder.FolderType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Left bar menu for showing user collections. Also adds widgets such as
@@ -120,7 +113,7 @@ public class CollectionMenu extends Composite {
     public void setEmptyCollectionMessage(String msg) {
         int messageRow = hasQuickEdit ? 2 : 1;
         HTML html = new HTML("<span style=\"font-size: 0.70em; color: #666; padding: 4px; font-style:italic\">"
-                                     + msg + "</span>");
+                + msg + "</span>");
         layout.setWidget(messageRow, 0, html);
     }
 
@@ -447,7 +440,7 @@ public class CollectionMenu extends Composite {
             panel.add(busyIndicator, "busy_indicator_" + folderId);
 
             if (!item.hasSubMenu() || (item.getOwner() == null && (item.getPermissions() == null || item
-                    .getPermissions().isEmpty())) || item.getShareType() == FolderShareType.PUBLIC)
+                    .getPermissions().isEmpty())) || item.getType() == FolderType.PUBLIC)
                 panel.setStyleName("system_collection_user_menu_row");
             else
                 panel.setStyleName("user_collection_user_menu_row");

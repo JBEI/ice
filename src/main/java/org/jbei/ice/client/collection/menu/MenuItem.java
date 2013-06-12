@@ -1,18 +1,18 @@
 package org.jbei.ice.client.collection.menu;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
+import org.jbei.ice.shared.dto.folder.FolderType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
+
+import java.util.ArrayList;
 
 public class MenuItem extends OptionSelect {
 
     private long count;
     private ArrayList<PermissionInfo> permissions;
     private AccountInfo owner;
-    private FolderShareType shareType;
+    private FolderType type;
 
     public MenuItem(long id, String name, long count) {
         super(id, name);
@@ -47,11 +47,11 @@ public class MenuItem extends OptionSelect {
         this.owner = owner;
     }
 
-    public FolderShareType getShareType() {
-        return shareType;
+    public FolderType getType() {
+        return type;
     }
 
-    public void setShareType(FolderShareType shareType) {
-        this.shareType = shareType;
+    public void setType(FolderType type) {
+        this.type = type;
     }
 }

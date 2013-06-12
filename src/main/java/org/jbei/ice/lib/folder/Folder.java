@@ -4,7 +4,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.shared.dto.folder.FolderStatus;
+import org.jbei.ice.shared.dto.folder.FolderType;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -49,9 +49,9 @@ public class Folder implements IModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationTime;
 
-    @Column(name = "status")
+    @Column(name = "type")
     @Enumerated(value = EnumType.STRING)
-    private FolderStatus status;
+    private FolderType type;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
@@ -118,11 +118,11 @@ public class Folder implements IModel {
         this.modificationTime = modificationTime;
     }
 
-    public FolderStatus getStatus() {
-        return status;
+    public FolderType getType() {
+        return type;
     }
 
-    public void setStatus(FolderStatus status) {
-        this.status = status;
+    public void setType(FolderType type) {
+        this.type = type;
     }
 }

@@ -1,26 +1,17 @@
 package org.jbei.ice.lib.entry;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.criterion.Junction;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
-import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
-import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Name;
-import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.PartNumber;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.model.*;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.FundingSource;
@@ -31,14 +22,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.entry.EntryType;
 
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Junction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import java.util.*;
 
 /**
  * DAO to manipulate {@link Entry} objects in the database.
@@ -212,7 +196,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
         try {
             Query query = session.createQuery("from " + PartNumber.class.getName()
-                                                      + " where partNumber = :partNumber");
+                    + " where partNumber = :partNumber");
             query.setParameter("partNumber", partNumber);
             Object queryResult = query.uniqueResult();
 
@@ -264,7 +248,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
     @SuppressWarnings({"unchecked"})
     public Set<Entry> retrieveVisibleEntries(Account account, Set<Group> groups,
-            ColumnField sortField, boolean asc, int start, int count) throws DAOException {
+                                             ColumnField sortField, boolean asc, int start, int count) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Permission.class);
 
@@ -274,17 +258,17 @@ public class EntryDAO extends HibernateRepository<Entry> {
             disjunction.add(Restrictions.eq("account", account));
         }
 
+        criteria.add(Restrictions.isNotNull("entry"));
+
         criteria.add(disjunction);
         criteria.add(Restrictions.disjunction()
-                                 .add(Restrictions.eq("canWrite", true))
-                                 .add(Restrictions.eq("canRead", true)));
+                .add(Restrictions.eq("canWrite", true))
+                .add(Restrictions.eq("canRead", true)));
 
         Criteria entryC = criteria.createCriteria("entry", "entry");
         entryC.add(Restrictions.disjunction()
-                               .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                               .add(Restrictions.isNull("visibility")));
-        entryC.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
-
+                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                .add(Restrictions.isNull("visibility")));
         // sort
         if (sortField == null)
             sortField = ColumnField.CREATED;
@@ -307,14 +291,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
         entryC.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
         Set<Long> set = new HashSet<>();
+        entryC.setProjection(Projections.property("id"));
 
         List permissions = criteria.list();
         Iterator iter = permissions.iterator();
         Set<Entry> result = new LinkedHashSet<>();
         while (iter.hasNext()) {
-            Map map = (Map) iter.next();
-            Entry entry = (Entry) map.get("entry");
-
+            Number id = (Number) iter.next();
+            Entry entry = (Entry) session.get(Entry.class, id.longValue());
             if (set.contains(entry.getId()))
                 continue;
 
@@ -340,13 +324,13 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
         criteria.add(disjunction);
         criteria.add(Restrictions.disjunction()
-                                 .add(Restrictions.eq("canWrite", true))
-                                 .add(Restrictions.eq("canRead", true)));
+                .add(Restrictions.eq("canWrite", true))
+                .add(Restrictions.eq("canRead", true)));
 
         Criteria entryCriteria = criteria.createCriteria("entry");
         entryCriteria.add(Restrictions.disjunction()
-                                      .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                                      .add(Restrictions.isNull("visibility")));
+                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                .add(Restrictions.isNull("visibility")));
 
         entryCriteria.setProjection(Projections.countDistinct("id"));
         Number rowCount = (Number) entryCriteria.uniqueResult();
@@ -356,7 +340,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     // checks permission (does not include pending entries)
     @SuppressWarnings("unchecked")
     public List<Entry> retrieveUserEntries(Account requestor, String user, Set<Group> groups,
-            ColumnField sortField, boolean asc, int start, int limit) throws DAOException {
+                                           ColumnField sortField, boolean asc, int start, int limit) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Permission.class);
         criteria.setProjection(Projections.property("entry"));
@@ -367,13 +351,13 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
         criteria.add(disjunction);
         criteria.add(Restrictions.disjunction()
-                                 .add(Restrictions.eq("canWrite", true))
-                                 .add(Restrictions.eq("canRead", true)));
+                .add(Restrictions.eq("canWrite", true))
+                .add(Restrictions.eq("canRead", true)));
 
         Criteria entryCriteria = criteria.createCriteria("entry");
         entryCriteria.add(Restrictions.disjunction()
-                                      .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                                      .add(Restrictions.isNull("visibility")));
+                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                .add(Restrictions.isNull("visibility")));
         entryCriteria.add(Restrictions.eq("ownerEmail", user));
 
         // sort
@@ -411,8 +395,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Entry.class.getName());
         criteria.add(Restrictions.disjunction()
-                                 .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                                 .add(Restrictions.isNull("visibility")));
+                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                .add(Restrictions.isNull("visibility")));
         Long result = (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
         return result.longValue();
     }
@@ -576,11 +560,11 @@ public class EntryDAO extends HibernateRepository<Entry> {
         Session session = currentSession();
         try {
             Criteria criteria = session.createCriteria(Entry.class)
-                                       .add(Restrictions.eq("ownerEmail", ownerEmail));
+                    .add(Restrictions.eq("ownerEmail", ownerEmail));
             criteria.add(Restrictions.disjunction()
-                                     .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                                     .add(Restrictions.eq("visibility", Visibility.PENDING.getValue()))
-                                     .add(Restrictions.isNull("visibility")));
+                    .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                    .add(Restrictions.eq("visibility", Visibility.PENDING.getValue()))
+                    .add(Restrictions.isNull("visibility")));
             criteria.setProjection(Projections.rowCount());
             Number rowCount = (Number) criteria.uniqueResult();
             return rowCount.longValue();
@@ -603,13 +587,13 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
             criteria.add(disjunction);
             criteria.add(Restrictions.disjunction()
-                                     .add(Restrictions.eq("canWrite", true))
-                                     .add(Restrictions.eq("canRead", true)));
+                    .add(Restrictions.eq("canWrite", true))
+                    .add(Restrictions.eq("canRead", true)));
 
             Criteria entryCriteria = criteria.createCriteria("entry");
             entryCriteria.add(Restrictions.disjunction()
-                                          .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                                          .add(Restrictions.isNull("visibility")));
+                    .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                    .add(Restrictions.isNull("visibility")));
             entryCriteria.add(Restrictions.eq("ownerEmail", ownerEmail));
             criteria.setProjection(Projections.rowCount());
             Number rowCount = (Number) criteria.uniqueResult();

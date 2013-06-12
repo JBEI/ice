@@ -20,7 +20,7 @@ import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
+import org.jbei.ice.shared.dto.folder.FolderType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,8 +172,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void setSubMenuEnable(boolean enableAddTo, boolean enableRemove, boolean enableMoveTo) {
-        subMenu.setEnable(enableAddTo, enableRemove, enableMoveTo);
+    public void setCanMove(boolean enableMove) {
+        subMenu.setCanMove(enableMove);
     }
 
     @Override
@@ -269,7 +269,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public SingleSelectionModel<MenuItem> getMenuModel(FolderShareType type) {
+    public SingleSelectionModel<MenuItem> getMenuModel(FolderType type) {
         switch (type) {
             case PUBLIC:
                 return systemMenu.getSelectionModel();
@@ -291,6 +291,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         this.exportAs.enable(enable);
         if (transferMenu != null)
             this.transferMenu.setEnabled(enable);
+        this.subMenu.setCanAdd(enable);
     }
 
     @Override

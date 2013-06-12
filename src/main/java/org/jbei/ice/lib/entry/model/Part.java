@@ -18,7 +18,7 @@ public class Part extends Entry {
     private static final long serialVersionUID = 1L;
 
     public enum AssemblyStandard {
-        RAW;
+        RAW, BIOBRICKA, BIOBRICKB;
     }
 
     @Column(name = "package_format", nullable = false)

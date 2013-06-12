@@ -61,6 +61,7 @@ import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
+import org.jbei.ice.shared.dto.folder.FolderType;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.message.MessageList;
@@ -496,7 +497,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": retrieving entries for folder " + folderId + " from " + start
                     + " with size " + limit);
             FolderController folderController = ControllerFactory.getFolderController();
-            return folderController.retrieveFolderContents(folderId, sort, asc, start, limit);
+            return folderController.retrieveFolderContents(account, folderId, sort, asc, start, limit);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -508,29 +509,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Account account = this.retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": deleting folder " + folderId);
-            FolderController folderController = ControllerFactory.getFolderController();
-            Folder folder = folderController.getFolderById(folderId);
-            if (folder == null)
-                return null;
-
-            AccountController controller = ControllerFactory.getAccountController();
-            Account system = controller.getSystemAccount();
-            boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
-            if (isSystem) {
-                Logger.info("Cannot delete system folder");
-                return null;
-            }
-
-            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
-            long folderSize = folderController.getFolderSize(folderId);
-            details.setCount(folderSize);
-            details.setDescription(folder.getDescription());
-            folderController.delete(account, folder);
-            return details;
+            return ControllerFactory.getFolderController().delete(account, folderId);
         } catch (ControllerException e) {
             Logger.error(e);
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
         }
         return null;
     }
@@ -541,7 +522,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Account account = this.retrieveAccountForSid(sid);
             EntryController entryController = ControllerFactory.getEntryController();
-            FolderDetails details = new FolderDetails(0, "My Entries", true);
+            FolderDetails details = new FolderDetails(0, "My Entries");
+            details.setType(FolderType.SHARED);
             AccountController controller = ControllerFactory.getAccountController();
             Account user = controller.get(Long.decode(userId));
             Logger.info(account.getEmail() + ": retrieving user entries for " + user.getEmail());
@@ -764,7 +746,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Folder folder = folderController.createNewFolder(account.getEmail(), name, description);
 
-            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+            details.setType(folder.getType());
             details.setDescription(folder.getDescription());
 
             if (contents != null && !contents.isEmpty()) {
@@ -807,10 +790,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         for (long folderId : destination) {
             try {
                 Folder folder = folderController.addFolderContents(folderId, entrys);
-                FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
+                FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
                 long folderSize = folderController.getFolderSize(folder.getId());
                 details.setCount(folderSize + entryIds.size());
                 details.setDescription(folder.getDescription());
+                details.setType(folder.getType());
                 results.add(details);
             } catch (ControllerException ce) {
                 continue;
@@ -820,7 +804,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Folder sourceFolder = folderController.getFolderById(source);
             long folderSize = folderController.getFolderSize(source);
-            FolderDetails sourceDetails = new FolderDetails(sourceFolder.getId(), sourceFolder.getName(), false);
+            FolderDetails sourceDetails = new FolderDetails(sourceFolder.getId(), sourceFolder.getName());
+            sourceDetails.setType(sourceFolder.getType());
             sourceDetails.setCount(folderSize - entryIds.size());
             results.add(sourceDetails);
             return results;
@@ -841,7 +826,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (folder == null)
                 return null;
 
-            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+            details.setType(folder.getType());
             long folderSize = folderController.getFolderSize(source);
             details.setCount(folderSize - entryIds.size());
             details.setDescription(folder.getDescription());
@@ -867,7 +853,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             for (long folderId : destination) {
                 long size = folderController.getFolderSize(folderId);
                 Folder folder = folderController.addFolderContents(folderId, entrys);
-                FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
+                FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+                details.setType(folder.getType());
                 details.setCount(size + entryIds.size());
                 details.setDescription(folder.getDescription());
                 results.add(details);
@@ -1696,8 +1683,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 for (Folder folder : folders) {
                     try {
                         Folder returned = folderController.removeFolderContents(account, folder.getId(), entryIds);
-                        boolean isSystem = systemEmail.equals(returned.getOwnerEmail());
-                        FolderDetails details = new FolderDetails(returned.getId(), returned.getName(), isSystem);
+                        FolderDetails details = new FolderDetails(returned.getId(), returned.getName());
                         long size = folderController.getFolderSize(folder.getId());
                         details.setCount(size);
                         folderList.add(details);

@@ -1,12 +1,12 @@
 package org.jbei.ice.shared.dto.folder;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.IDTOModel;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Folder Transfer Object
@@ -19,19 +19,18 @@ public class FolderDetails implements IDTOModel {
     private long id;
     private String folderName;
     private long count = -1;
-    private boolean systemFolder;
     private String description;
     private LinkedList<EntryInfo> entries = new LinkedList<EntryInfo>();
-    private FolderShareType shareType;
+    private FolderType type;
     private AccountInfo owner;    // owner or person sharing this folder
     private ArrayList<PermissionInfo> permissions;
 
-    public FolderDetails() {}
+    public FolderDetails() {
+    }
 
-    public FolderDetails(long id, String name, boolean systemFolder) {
+    public FolderDetails(long id, String name) {
         this.id = id;
         this.folderName = name;
-        this.systemFolder = systemFolder;
     }
 
     public long getId() {
@@ -58,10 +57,6 @@ public class FolderDetails implements IDTOModel {
         this.count = count;
     }
 
-    public boolean isSystemFolder() {
-        return this.systemFolder;
-    }
-
     public String getDescription() {
         return this.description;
     }
@@ -78,12 +73,12 @@ public class FolderDetails implements IDTOModel {
         this.entries = entries;
     }
 
-    public FolderShareType getShareType() {
-        return shareType;
+    public FolderType getType() {
+        return type;
     }
 
-    public void setShareType(FolderShareType shareType) {
-        this.shareType = shareType;
+    public void setType(FolderType type) {
+        this.type = type;
     }
 
     public AccountInfo getOwner() {

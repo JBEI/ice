@@ -15,7 +15,6 @@ import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.model.Permission;
-import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import java.util.ArrayList;
@@ -436,16 +435,11 @@ public class PermissionsController {
     /**
      * Retrieves permissions that have been explicitly set for the folders
      *
-     * @param account user making the request. Should be an admin or the owner of the folder
-     * @param folder  folder whose permissions are being retrieved
+     * @param folder folder whose permissions are being retrieved
      * @return list of permissions that have been found for the specified folder
      */
-    public ArrayList<PermissionInfo> retrieveSetFolderPermission(Account account, Folder folder)
+    public ArrayList<PermissionInfo> retrieveSetFolderPermission(Folder folder)
             throws ControllerException {
-        if (!folder.getOwnerEmail().equals(account.getEmail()) && account.getType() != AccountType.ADMIN)
-            throw new ControllerException(account.getEmail() + ": does not have read permissions for folder \""
-                    + folder.getId() + "\"");
-
         ArrayList<PermissionInfo> permissionInfos = new ArrayList<>();
 
         try {

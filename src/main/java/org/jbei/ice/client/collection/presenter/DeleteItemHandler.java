@@ -1,13 +1,11 @@
 package org.jbei.ice.client.collection.presenter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.Page;
-import org.jbei.ice.client.RegistryServiceAsync;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.jbei.ice.client.*;
 import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
@@ -16,11 +14,8 @@ import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DeleteItemHandler implements IDeleteMenuHandler {
 
@@ -60,15 +55,14 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                 deleteCallback.onFailure();
             }
         });
-
     }
 
-    @Override
     /**
      * Handler for undoing a delete action
      */
+    @Override
     public ClickHandler getUndoHandler(final MenuItem item, final CollectionMenu menu,
-            final MenuHiderTimer timer) {
+                                       final MenuHiderTimer timer) {
         return new ClickHandler() {
 
             @Override
@@ -82,7 +76,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                     protected void callService(AsyncCallback<FolderDetails> callback) throws AuthenticationException {
                         try {
                             service.createUserCollection(ClientController.sessionId, item.getName(), "",
-                                                         folder.get(item.getId()), callback);
+                                    folder.get(item.getId()), callback);
                         } catch (AuthenticationException e) {
                             History.newItem(Page.LOGIN.getLink());
                         }

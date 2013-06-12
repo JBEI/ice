@@ -38,7 +38,7 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
+import org.jbei.ice.shared.dto.folder.FolderType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import java.util.*;
@@ -294,15 +294,22 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                boolean enable = (selectionModel.getSelectedSet().size() > 0);
-                display.enableExportAs(enable);
+                boolean hasSelection = (selectionModel.getSelectedSet().size() > 0);
+                display.enableExportAs(hasSelection);
 
-                // can user edit current folder?
-                if (!currentFolder.isSystemFolder()) {
-                    display.setSubMenuEnable(enable, enable, enable);
-                } else {
-                    display.setSubMenuEnable(enable, false, false);
+                boolean canRemove = currentFolder.getOwner().getEmail().equals(ClientController.account.getEmail());
+                if (!canRemove && currentFolder.getPermissions() != null) {
+                    for (PermissionInfo permissionInfo : currentFolder.getPermissions()) {
+                        // if you can see the folder then it has been shared with you so we only need to check access
+                        if (permissionInfo.isCanWrite()) {
+                            canRemove = true;
+                            break;
+                        }
+                    }
                 }
+
+                canRemove = (canRemove && hasSelection);
+                display.setCanMove(canRemove);
             }
         });
     }
@@ -365,13 +372,17 @@ public class CollectionsPresenter extends AbstractPresenter {
             History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getId(), false);
         display.enableExportAs(true);
         display.setMainContent(entryViewPresenter.getView().asWidget());
-        boolean enable;
-        if (currentFolder != null)
-            enable = !currentFolder.isSystemFolder();
-        else
-            enable = false;
+        boolean enable = false;
+        if (currentFolder != null) {
+            for (PermissionInfo permissionInfo : currentFolder.getPermissions()) {
+                if (permissionInfo.isCanWrite()) {
+                    enable = true;
+                    break;
+                }
+            }
+        }
 
-        display.setSubMenuEnable(true, enable, enable);
+        display.setCanMove(enable);
     }
 
     protected void search(ISearchView searchView) {
@@ -382,7 +393,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 @Override
                 public void onSelectionChange(SelectionChangeEvent event) {
                     boolean enable = (searchPresenter.getResultSelectedSet().size() > 0);
-                    display.setSubMenuEnable(enable, false, false);
+                    display.setCanMove(false);
                     if (ClientController.account.isAdmin())
                         display.enableExportAs(enable);
                 }
@@ -501,7 +512,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                 MenuItem newItem = new MenuItem(folder.getId(), folder.getName(), folder.getCount());
 
-                if (!folder.isSystemFolder())
+                if (folder.getType() == FolderType.PRIVATE)
                     display.addMenuItem(newItem, deleteHandler);
                 else
                     display.addMenuItem(newItem, null);
@@ -519,9 +530,9 @@ public class CollectionsPresenter extends AbstractPresenter {
      * by adding the selection change handlers
      */
     private void initMenus() {
-        final SingleSelectionModel<MenuItem> userModel = display.getMenuModel(FolderShareType.PRIVATE);
-        final SingleSelectionModel<MenuItem> systemModel = display.getMenuModel(FolderShareType.PUBLIC);
-        final SingleSelectionModel<MenuItem> sharedModel = display.getMenuModel(FolderShareType.SHARED);
+        final SingleSelectionModel<MenuItem> userModel = display.getMenuModel(FolderType.PRIVATE);
+        final SingleSelectionModel<MenuItem> systemModel = display.getMenuModel(FolderType.PUBLIC);
+        final SingleSelectionModel<MenuItem> sharedModel = display.getMenuModel(FolderType.SHARED);
 
         userModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
@@ -568,7 +579,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         folderDataProvider.updateRowCount(0, false);
         display.setDataView(collectionsDataTable);
         display.enableExportAs(false);
-        display.setSubMenuEnable(false, false, false);
+        display.setCanMove(false);
         int limit = collectionsDataTable.getVisibleRange().getLength();
 
         model.retrieveEntriesForFolder(id, new Callback<FolderDetails>() {
@@ -621,9 +632,9 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             for (FolderDetails folder : folders) {
                 MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder.getCount());
-                item.setShareType(folder.getShareType());
+                item.setType(folder.getType());
 
-                switch (folder.getShareType()) {
+                switch (folder.getType()) {
                     case PUBLIC:
                         systemMenuItems.add(item);
                         if (ClientController.account.isAdmin())
