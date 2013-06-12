@@ -31,8 +31,8 @@ import java.util.*;
 public class ModelToInfoFactory {
 
     public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
-                                    Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences, boolean hasSequence,
-                                    boolean hasOriginalSequence) {
+                                    Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences,
+                                    boolean hasSequence, boolean hasOriginalSequence) {
         EntryInfo info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)

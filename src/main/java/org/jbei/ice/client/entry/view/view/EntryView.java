@@ -272,7 +272,6 @@ public class EntryView extends Composite implements IEntryView {
         deleteSequenceHandler.setEntryId(info.getId());
         currentView.getSequencePanel().setDeleteHandler(deleteSequenceHandler);
         entryAction.setVisible(showEdit);
-        entryAction.setHasSample(info.isHasSample());
 
         mainContent.setWidget(1, 0, currentView);
         SequenceViewPanel sequenceViewPanel = currentView.getSequencePanel();
@@ -307,7 +306,6 @@ public class EntryView extends Composite implements IEntryView {
         return sequenceViewPanel.getPresenter();
     }
 
-
     @Override
     public void addSubmitCommentDelegate(ServiceDelegate<UserComment> delegate) {
         commentPanel.setCommentSubmitDelegate(delegate);
@@ -316,6 +314,7 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public void addFlagDelegate(Delegate<FlagEntry> delegate) {
         entryAction.setFlagDelegate(delegate);
+        samplePanel.setFlagDelegate(delegate);
     }
 
     @Override

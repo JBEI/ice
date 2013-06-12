@@ -745,10 +745,12 @@ public class EntryController {
             StringBuffer body = new StringBuffer();
             body.append("A sample request has been received from ")
                     .append(account.getFullName())
+                    .append(" (")
+                    .append("https://").append(site)
+                    .append("/#page=profile;id=").append(account.getId()).append(";s=profile)")
                     .append(" for entry ")
                     .append(entry.getOnePartNumber().getPartNumber())
-                    .append(" on site ")
-                    .append(site)
+                    .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
                     .append(". \n\nThe requested form is ")
                     .append(form);
             return Emailer.send(email, ("Sample request for " + entry.getOnePartNumber().getPartNumber()),
@@ -775,12 +777,10 @@ public class EntryController {
                     .append(account.getFullName())
                     .append(" for entry ")
                     .append(entry.getOnePartNumber().getPartNumber())
-                    .append(" on site ")
-                    .append(site)
+                    .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
                     .append("\n\nMessage:\n\n")
                     .append(msg)
                     .append("\n\n");
-
             return Emailer.send(email, ("Problem alert for " + entry.getOnePartNumber().getPartNumber()),
                     body.toString());
         } catch (DAOException | ControllerException e) {

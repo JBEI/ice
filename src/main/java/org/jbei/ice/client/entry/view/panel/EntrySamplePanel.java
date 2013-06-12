@@ -1,37 +1,42 @@
 package org.jbei.ice.client.entry.view.panel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.common.widget.Dialog;
 import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.entry.view.model.FlagEntry;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.panel.sample.Storage96WellPanel;
 import org.jbei.ice.client.entry.view.view.CreateSampleForm;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
+/**
+ * Panel for displaying sample information
+ *
+ * @author Hector Plahar
+ */
 public class EntrySamplePanel extends Composite {
 
     private final FlexTable table;
     private CreateSampleForm sampleForm;
-    private Button addSample;
+    private final Button addSample;
+    private final Button requestSample;
     private HandlerRegistration handlerRegistration;
+    private final HTMLPanel panel;
+    private Delegate<FlagEntry> delegate;
 
     public EntrySamplePanel() {
         table = new FlexTable();
@@ -39,10 +44,15 @@ public class EntrySamplePanel extends Composite {
         table.setWidth("100%");
 
         addSample = new Button("Add Sample");
+        requestSample = new Button("Request Sample");
+        panel = new HTMLPanel("<span id=\"add_sample\"></span>&nbsp;<span id=\"request_sample\"></span>");
+        panel.add(addSample, "add_sample");
+        panel.add(requestSample, "request_sample");
 
-        table.setWidget(0, 0, addSample);
+        table.setWidget(0, 0, panel);
         table.setHTML(1, 0, "");
         table.setHTML(2, 0, "<i class=\"font-75em pad-8\">No Samples Available</i>");
+        setAddRequestSampleHandler();
     }
 
     public void setAddSampleHandler(ClickHandler handler) {
@@ -51,9 +61,48 @@ public class EntrySamplePanel extends Composite {
         handlerRegistration = addSample.addClickHandler(handler);
     }
 
+    private void setAddRequestSampleHandler() {
+        requestSample.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                VerticalPanel panel = new VerticalPanel();
+                panel.setStyleName("font-80em");
+                panel.setWidth("350px");
+                RadioButton culture = new RadioButton("sample", "Liquid Culture");
+                culture.setValue(true);
+                RadioButton streak = new RadioButton("sample", "Streak on Agar Plate");
+                panel.add(culture);
+                panel.add(streak);
+
+                Dialog dialog = new Dialog(panel, "400px", "Request Sample in the form of:");
+                dialog.showDialog(true);
+                dialog.setSubmitHandler(createDialogSampleSubmitHandler(culture, dialog));
+            }
+        });
+    }
+
+    private ClickHandler createDialogSampleSubmitHandler(final RadioButton culture, final Dialog dialog) {
+        return new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                String msg = "Streak on Agar Plate";
+                if (culture.getValue().booleanValue()) {
+                    msg = "Liquid Culture";
+                }
+                delegate.execute(new FlagEntry(FlagEntry.FlagOption.REQUEST_SAMPLE, msg));
+                dialog.showDialog(false);
+            }
+        };
+    }
+
+    public void setFlagDelegate(Delegate<FlagEntry> delegate) {
+        this.delegate = delegate;
+    }
+
     public void reset() {
         table.removeAllRows();
-        table.setWidget(0, 0, addSample);
+        table.setWidget(0, 0, panel);
         table.setHTML(1, 0, "");
         table.setHTML(2, 0, "<i class=\"font-75em pad-8\">No Samples Available</i>");
     }
@@ -87,8 +136,9 @@ public class EntrySamplePanel extends Composite {
 
     public void setData(ArrayList<SampleStorage> data, ServiceDelegate<SampleInfo> deleteHandler) {
         table.removeAllRows();
-        table.setWidget(0, 0, addSample);
+        table.setWidget(0, 0, panel);
         table.setHTML(1, 0, "");
+        requestSample.setVisible(!data.isEmpty());
 
         Collections.sort(data, new Comparator<SampleStorage>() {
             @Override
@@ -118,30 +168,6 @@ public class EntrySamplePanel extends Composite {
             } else
                 col += 1;
         }
-    }
-
-    public boolean isShelf(List<StorageInfo> storageInfoList) {
-        for (StorageInfo info : storageInfoList) {
-            if (info.getType().equalsIgnoreCase("SHELF"))  //TODO : use enums
-                return true;
-        }
-        return false;
-    }
-
-    public boolean isFreezer(List<StorageInfo> storageInfoList) {
-        for (StorageInfo info : storageInfoList) {
-            if (info.getType().equalsIgnoreCase("FREEZER"))  // TODO : use enums
-                return true;
-        }
-        return false;
-    }
-
-    public boolean isPlate81(List<StorageInfo> storageInfoList) {
-        for (StorageInfo info : storageInfoList) {
-            if (info.getType().equalsIgnoreCase("PLATE81"))  // TODO : use enums
-                return true;
-        }
-        return false;
     }
 
     private boolean isPlate96(List<StorageInfo> storageInfoList) {

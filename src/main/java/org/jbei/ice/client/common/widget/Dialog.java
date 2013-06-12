@@ -47,10 +47,6 @@ public class Dialog {
         dialogBox.setWidget(createWrapperWidget(widget));
     }
 
-    public Dialog(Widget widget) {
-        this(widget, "500px", null);
-    }
-
     public void showDialog(boolean show) {
         if (show)
             dialogBox.center();
@@ -86,5 +82,4 @@ public class Dialog {
      */
     private class Caption extends HTML implements DialogBox.Caption {
     }
-
 }
