@@ -793,41 +793,20 @@ ul#indented li a:hover {
     z-index: 999;
 }
 
-.context-nav {
-    border: 1px solid #777;
-    padding: 2px 5px 2px 5px;
+.context_nav_pager {
     cursor: pointer;
-    font-size: 0.90em;
-    background-color: #f1f6fb;
+    font-size: 1.4em;
+    color: #666;
 }
 
-.nav_disabled {
-    padding: 2px 5px 2px 5px;
+.context_nav_pager:hover {
+    color: #0082c0;
+}
+
+.nav_disabled, .nav_disabled:hover {
     opacity: 0.4;
-    color: #999;
+    color: #AAA;
     cursor: default;
-    font-size: 0.90em;
-    border: 1px solid #777;
-}
-
-.nav-right {
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-}
-
-.nav-left {
-    border-top-left-radius: 2px;
-    border-bottom-left-radius: 2px;
-}
-
-.context-nav:hover {
-    border: 1px solid #00577f;
-    box-shadow: 1px 1px 2px #aaa;
-    color: #f5f5f5;
-    background-color: #0082c0;
-}
-
-.context-nav:active {
 }
 
 .collection_user_add_button {

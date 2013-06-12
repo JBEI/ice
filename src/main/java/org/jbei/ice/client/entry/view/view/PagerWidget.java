@@ -1,13 +1,12 @@
 package org.jbei.ice.client.entry.view.view;
 
-import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.Icon;
 
 /**
  * Widget for context navigation
@@ -26,22 +25,22 @@ public class PagerWidget extends Composite {
         goBack.setTitle("Back");
         goBack.addStyleName("entry_go_back");
 
-        leftBtn = new Icon(FAIconType.CHEVRON_LEFT);
+        leftBtn = new Icon(FAIconType.CHEVRON_SIGN_LEFT);
         leftBtn.removeStyleName("font-awesome");
-        leftBtn.addStyleName("nav-left");
+        leftBtn.addStyleName("context_nav_pager");
 
-        rightBtn = new Icon(FAIconType.CHEVRON_RIGHT);
+        rightBtn = new Icon(FAIconType.CHEVRON_SIGN_RIGHT);
         rightBtn.removeStyleName("font-awesome");
-        rightBtn.addStyleName("nav-right");
+        rightBtn.addStyleName("context_nav_pager");
 
         navText = new Label();
         navText.setStyleName("display-inline");
         navText.addStyleName("font-80em");
         navText.addStyleName("pad-6");
 
-        HTMLPanel panel = new HTMLPanel(
-                "<span id=\"leftBtn\"></span> <span id=\"navText\" class=\"font-bold\"></span><span " +
-                        "id=\"rightBtn\"></span>");
+        HTMLPanel panel = new HTMLPanel("<span id=\"leftBtn\"></span>"
+                + "<span id=\"navText\" style=\"position:relative; top: -3px\"></span>"
+                + "<span id=\"rightBtn\"></span>");
         initWidget(panel);
         panel.setStyleName("pad-6");
 
@@ -69,9 +68,7 @@ public class PagerWidget extends Composite {
     public void enablePrev(boolean enabled) {
         if (enabled) {
             leftBtn.removeStyleName("nav_disabled");
-            leftBtn.addStyleName("context-nav");
         } else {
-            leftBtn.removeStyleName("context-nav");
             leftBtn.addStyleName("nav_disabled");
         }
     }
@@ -79,9 +76,7 @@ public class PagerWidget extends Composite {
     public void enableNext(boolean enabled) {
         if (enabled) {
             rightBtn.removeStyleName("nav_disabled");
-            rightBtn.addStyleName("context-nav");
         } else {
-            rightBtn.removeStyleName("context-nav");
             rightBtn.addStyleName("nav_disabled");
         }
     }
