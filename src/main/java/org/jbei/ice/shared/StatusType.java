@@ -1,12 +1,17 @@
 package org.jbei.ice.shared;
 
+import org.jbei.ice.shared.dto.IDTOModel;
+
 import java.util.ArrayList;
 
-public enum StatusType {
+public enum StatusType implements IDTOModel {
 
     COMPLETE("Complete"), IN_PROGRESS("In Progress"), PLANNED("Planned");
 
     private String displayName;
+
+    private StatusType() {
+    }
 
     StatusType(String name) {
         this.displayName = name;
@@ -39,7 +44,7 @@ public enum StatusType {
     }
 
     public static ArrayList<String> getDisplayList() {
-        ArrayList<String> displayList = new ArrayList<>();
+        ArrayList<String> displayList = new ArrayList<String>();
         for (StatusType type : StatusType.values()) {
             displayList.add(type.toString());
         }

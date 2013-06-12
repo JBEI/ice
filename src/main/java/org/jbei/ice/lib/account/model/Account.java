@@ -221,10 +221,6 @@ public class Account implements IModel {
         return description;
     }
 
-    public void setGroups(Set<Group> groups) {
-        this.groups = groups;
-    }
-
     public Set<Group> getGroups() {
         return groups;
     }

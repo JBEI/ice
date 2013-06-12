@@ -72,7 +72,11 @@ public class FolderController {
         try {
             folders.addAll(dao.getFoldersByStatus(FolderStatus.PINNED));
             Account system = ControllerFactory.getAccountController().getSystemAccount();
-            folders.addAll(dao.getFoldersByOwner(system));
+            List<Folder> systemFolders = dao.getFoldersByOwner(system);
+            for (Folder folder : systemFolders) {
+                if (folder.getStatus() != FolderStatus.UNPINNED)
+                    folders.add(folder);
+            }
             return new ArrayList<>(folders);
         } catch (DAOException de) {
             throw new ControllerException(de);

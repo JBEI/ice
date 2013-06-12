@@ -1,16 +1,15 @@
 package org.jbei.ice.lib.folder;
 
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import javax.persistence.*;
-
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.shared.dto.folder.FolderStatus;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
+import javax.persistence.*;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Encapsulates the notion of a collection of {@link org.jbei.ice.lib.entry.model.Entry}s
@@ -51,15 +50,17 @@ public class Folder implements IModel {
     private Date modificationTime;
 
     @Column(name = "status")
+    @Enumerated(value = EnumType.STRING)
     private FolderStatus status;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
-               inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
+            inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
     @LazyCollection(LazyCollectionOption.EXTRA)
     private Set<Entry> contents = new LinkedHashSet<>();
 
-    public Folder() {}
+    public Folder() {
+    }
 
     public Folder(String name) {
         this.name = name;

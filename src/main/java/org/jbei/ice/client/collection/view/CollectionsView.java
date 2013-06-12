@@ -1,9 +1,12 @@
 package org.jbei.ice.client.collection.view;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SingleSelectionModel;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
@@ -19,13 +22,9 @@ import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.folder.FolderShareType;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SingleSelectionModel;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * View for the collections section
@@ -244,6 +243,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public void setPromotionDelegate(ServiceDelegate<MenuItem> delegate) {
         this.sharedCollections.setPromotionDelegate(delegate);
+        this.userMenu.setPromotionDelegate(delegate);
     }
 
     @Override

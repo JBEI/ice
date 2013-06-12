@@ -13,7 +13,7 @@ public enum HoverOption {
     DELETE(FAIconType.TRASH, "Delete"),
     SHARE(FAIconType.SHARE, "Share"),
     PIN(FAIconType.PUSHPIN, "Promote"),
-    UNPIN(FAIconType.REMOVE, "Remove");
+    UNPIN(FAIconType.REMOVE, "Demote");
 
     private final String display;
     private final FAIconType icon;
