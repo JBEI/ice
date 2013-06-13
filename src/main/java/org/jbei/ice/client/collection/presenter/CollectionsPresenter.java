@@ -297,7 +297,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                 boolean hasSelection = (selectionModel.getSelectedSet().size() > 0);
                 display.enableExportAs(hasSelection);
 
-                boolean canRemove = currentFolder.getOwner().getEmail().equals(ClientController.account.getEmail());
+                boolean canRemove = currentFolder.getOwner() != null
+                        && ClientController.account.getEmail().equals(currentFolder.getOwner().getEmail());
                 if (!canRemove && currentFolder.getPermissions() != null) {
                     for (PermissionInfo permissionInfo : currentFolder.getPermissions()) {
                         // if you can see the folder then it has been shared with you so we only need to check access
@@ -682,12 +683,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             switch (mode) {
                 case COLLECTION:
                 default:
-                    if (collectionsDataTable.getSelectionModel().isAllSelected()) {
-                        return null;
-//                        return folderDataProvider.getData();
-                    } else {
-                        return collectionsDataTable.getSelectedEntrySet();
-                    }
+                    return collectionsDataTable.getSelectedEntrySet();
 
                 case SEARCH:
                     return searchPresenter.getEntrySet();
