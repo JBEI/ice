@@ -446,6 +446,14 @@ public class CollectionsPresenter extends AbstractPresenter {
                 handle();
             }
         });
+
+        display.addQuickAddHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                saveCollection(display.getCollectionInputValue());
+                display.hideQuickAddInput();
+            }
+        });
     }
 
     private void initEntryViewHandler() {
@@ -486,7 +494,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             @Override
             public void onSuccess(FolderDetails folder) {
                 if (folder == null) {
-                    display.showFeedbackMessage("Error updating collection. Please try again", true);
+                    display.showFeedbackMessage("Error updating collection.", true);
                     return;
                 }
 

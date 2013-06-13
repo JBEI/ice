@@ -297,6 +297,10 @@ public class CollectionMenu extends Composite {
         });
     }
 
+    public void addQuickAddHandler(final ClickHandler handler) {
+        this.quickAddWidget.addQuickAddHandler(handler);
+    }
+
     // inner classes
     class DeleteCallBack extends Callback<MenuItem> {
 

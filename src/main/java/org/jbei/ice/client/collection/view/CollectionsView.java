@@ -216,6 +216,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
+    public void addQuickAddHandler(ClickHandler handler) {
+        this.userMenu.addQuickAddHandler(handler);
+    }
+
+    @Override
     public void updateMenuItemCounts(ArrayList<MenuItem> item) {
         this.userMenu.updateCounts(item);
     }

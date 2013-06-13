@@ -116,4 +116,6 @@ public interface ICollectionView {
     void setPromotionDelegate(ServiceDelegate<MenuItem> delegate);
 
     void setDemotionDelegate(ServiceDelegate<MenuItem> delegate);
+
+    void addQuickAddHandler(ClickHandler handler);
 }
