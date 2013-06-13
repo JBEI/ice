@@ -1,14 +1,13 @@
 package org.jbei.ice.client.collection.menu;
 
-import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.Icon;
 
 /**
  * @author Hector Plahar
@@ -26,11 +25,10 @@ public class MenuHeader extends Composite {
         headerLabel.setStyleName("display-inline");
         headerLabel.addStyleName("cursor_pointer");
         // quick collection add
-        quickAddIcon = new HTML("<i class=\"" + FAIconType.FOLDER_CLOSE_ALT.getStyleName()
-                                        + "\"></i><i style=\"vertical-align: text-bottom; font-size: 7px\" class=\""
-                                        + FAIconType.PLUS.getStyleName() + "\"></i>");
+        quickAddIcon = new HTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
         quickAddIcon.setVisible(addQuickEdit);
-        quickAddIcon.addStyleName("quick_add_icon");
+        quickAddIcon.addStyleName("edit_icon");
+        quickAddIcon.setTitle("Create a new collection");
 
         HTMLPanel menuHeaderPanel = new HTMLPanel(
                 "<span style=\"float: left; opacity: 0.65;\" "
