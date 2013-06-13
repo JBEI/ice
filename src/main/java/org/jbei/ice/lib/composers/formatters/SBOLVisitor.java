@@ -61,8 +61,15 @@ public class SBOLVisitor {
         Collections.sort(features, new Comparator<SequenceFeature>() {
             @Override
             public int compare(SequenceFeature o1, SequenceFeature o2) {
-                if (o1.getUniqueGenbankStart().intValue() == o2.getUniqueGenbankStart().intValue())
+                if (o1.getUniqueGenbankStart() == null || o2.getUniqueGenbankStart() == null)
+                    return 0;
+
+                if (o1.getUniqueGenbankStart().intValue() == o2.getUniqueGenbankStart().intValue()) {
+                    if (o1.getUniqueEnd() == null || o2.getUniqueEnd() == null)
+                        return 0;
+
                     return o1.getUniqueEnd().compareTo(o2.getUniqueEnd());
+                }
                 return o1.getUniqueGenbankStart().compareTo(o2.getUniqueGenbankStart());
             }
         });
