@@ -13,6 +13,7 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.entry.PartInfo;
 import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 import org.jbei.ice.shared.dto.search.SearchResults;
 import org.junit.After;
@@ -116,7 +117,7 @@ public class SearchControllerTest {
         Assert.assertNotNull(results);
         Assert.assertEquals(0, results.getResultCount());
 
-        Folder folder = ControllerFactory.getFolderController().createNewFolder(a1.getEmail(), "testFolder", "test");
+        FolderDetails folder = ControllerFactory.getFolderController().createNewFolder(a1, "testFolder", "test", null);
         Assert.assertNotNull(folder);
         ArrayList<Entry> list = new ArrayList<>();
         list.add(entry);

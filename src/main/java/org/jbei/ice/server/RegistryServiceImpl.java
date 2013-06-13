@@ -736,31 +736,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails createUserCollection(String sid, String name, String description,
-                                              ArrayList<Long> contents) throws AuthenticationException {
+    public FolderDetails createUserCollection(String sid, String name, String description, ArrayList<Long> contents)
+            throws AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sid);
-            EntryController entryController = ControllerFactory.getEntryController();
-            FolderController folderController = ControllerFactory.getFolderController();
             Logger.info(account.getEmail() + ": creating new folder with name " + name);
-
-            Folder folder = folderController.createNewFolder(account.getEmail(), name, description);
-
-            FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
-            details.setType(folder.getType());
-            details.setDescription(folder.getDescription());
-
-            if (contents != null && !contents.isEmpty()) {
-
-                ArrayList<Entry> entrys = new ArrayList<>(entryController.getEntriesByIdSet(account, contents));
-                folderController.addFolderContents(folder.getId(), entrys);
-//                details.setAccountInfo(contents);
-                details.setCount(contents.size());
-            } else {
-                details.setCount(0l);
-            }
-
-            return details;
+            return ControllerFactory.getFolderController().createNewFolder(account, name, description, contents);
         } catch (ControllerException e) {
             Logger.error(e.getMessage());
             return null;
@@ -769,7 +750,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public ArrayList<FolderDetails> moveToUserCollection(String sid, long source,
-                                                         ArrayList<Long> destination, ArrayList<Long> entryIds) throws AuthenticationException {
+                                                         ArrayList<Long> destination,
+                                                         ArrayList<Long> entryIds)
+            throws AuthenticationException {
         Account account = this.retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": moving entries to user collection.");
         EntryController entryController = ControllerFactory.getEntryController();

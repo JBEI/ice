@@ -1,7 +1,10 @@
 package org.jbei.ice.client.search.advanced;
 
-import java.util.ArrayList;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.header.HeaderView;
 import org.jbei.ice.client.common.widget.FAIconType;
@@ -12,15 +15,7 @@ import org.jbei.ice.shared.dto.search.BlastProgram;
 import org.jbei.ice.shared.dto.search.BlastQuery;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
 
 public class SearchView extends Composite implements ISearchView {
 
@@ -40,7 +35,7 @@ public class SearchView extends Composite implements ISearchView {
         local = new HTML("Local Results");
         local.setStyleName("web_results_header_selected");
         web = new HTML("<i class=\"" + FAIconType.GLOBE.getStyleName()
-                               + " opacity_hover\"></i> <a class=\"cell_mouseover\">Search Other Registries</a>");
+                + " opacity_hover\"></i> <a class=\"cell_mouseover\">Search Other Registries</a>");
         web.setStyleName("web_results_header");
 
         // table header
@@ -74,7 +69,7 @@ public class SearchView extends Composite implements ISearchView {
                 local.setHTML("Local Results");
                 web.setStyleName("web_results_header");
                 web.setHTML("<i class=\"" + FAIconType.GLOBE.getStyleName()
-                                    + " opacity_hover\"></i> <a class=\"cell_mouseover\">Search Other Registries</a>");
+                        + " opacity_hover\"></i> <a class=\"cell_mouseover\">Search Other Registries</a>");
                 handler.onClick(event);
             }
         });
@@ -87,11 +82,11 @@ public class SearchView extends Composite implements ISearchView {
             public void onClick(ClickEvent event) {
                 local.setStyleName("web_results_header");
                 local.setHTML("<i class=\"" + FAIconType.SEARCH.getStyleName()
-                                      + " opacity_hover\"></i> <a class=\"cell_mouseover\">Search Locally</a>");
+                        + " opacity_hover\"></i> <a class=\"cell_mouseover\">Search Locally</a>");
                 web.setStyleName("web_results_header_selected");
-                web.setHTML("<i class=\"" + FAIconType.GLOBE
-                                                      .getStyleName() + " opacity_hover\"></i>Results From Other " +
-                                    "Registries");
+                web.setHTML("<i class=\""
+                        + FAIconType.GLOBE.getStyleName()
+                        + " opacity_hover\"></i> Results From Other Registries");
                 handler.onClick(event);
             }
         });

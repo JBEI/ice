@@ -202,13 +202,27 @@ public class FolderController {
         }
     }
 
-    public Folder createNewFolder(String owner, String name, String description) throws ControllerException {
+    public FolderDetails createNewFolder(Account account, String name, String description, ArrayList<Long> contents)
+            throws ControllerException {
         Folder folder = new Folder(name);
-        folder.setOwnerEmail(owner);
+        folder.setOwnerEmail(account.getEmail());
         folder.setDescription(description);
+        folder.setType(FolderType.PRIVATE);
         folder.setCreationTime(new Date(System.currentTimeMillis()));
         try {
-            return dao.save(folder);
+            folder = dao.save(folder);
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+            if (contents != null && !contents.isEmpty()) {
+                ArrayList<Entry> entrys = new ArrayList<>(ControllerFactory.getEntryController().getEntriesByIdSet(account, contents));
+                dao.addFolderContents(folder, entrys);
+                details.setCount(contents.size());
+            } else {
+                details.setCount(0l);
+            }
+            details.setType(folder.getType());
+            details.setDescription(folder.getDescription());
+
+            return details;
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

@@ -473,6 +473,14 @@ public class Entry implements IModel {
         this.longDescription = longDescription;
     }
 
+    public String getLongDescriptionType() {
+        return longDescriptionType;
+    }
+
+    public void setLongDescriptionType(String longDescriptionType) {
+        this.longDescriptionType = longDescriptionType;
+    }
+
     public String getReferences() {
         return references;
     }

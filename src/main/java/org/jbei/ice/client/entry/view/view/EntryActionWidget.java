@@ -122,6 +122,6 @@ public class EntryActionWidget extends Composite {
         pipe1.setVisible(visible);
         delete.setVisible(visible);
         pipe2.setVisible(visible);
-        flag.setVisible(visible);
+//        flag.setVisible(visible);
     }
 }
