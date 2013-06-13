@@ -56,7 +56,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
     // submit cancel buttons
     private Button submit;
-    private Button cancel;
+    private HTML cancel;
 
     private final StrainInfo strain;
     private final PlasmidInfo plasmid;
@@ -82,8 +82,9 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     protected void initComponents() {
         submit = new Button("Submit");
         submit.setStyleName("btn_submit_entry_form");
-        cancel = new Button("Reset");
-        cancel.setStyleName("btn_reset_entry_form");
+        cancel = new HTML("Cancel");
+        cancel.setStyleName("footer_feedback_widget");
+        cancel.addStyleName("font-85em");
     }
 
     protected void initLayout() {
@@ -469,7 +470,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         layout.getCellFormatter().setWidth(0, 0, "160px");
 
         layout.setWidget(0, 1, submit);
-        layout.getFlexCellFormatter().setWidth(0, 1, "100px");
+        layout.getFlexCellFormatter().setWidth(0, 1, "85px");
         layout.setWidget(0, 2, cancel);
 
         return layout;

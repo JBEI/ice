@@ -26,7 +26,7 @@ import java.util.LinkedHashMap;
 public abstract class EntryForm<T extends EntryInfo> extends Composite implements IEntryFormSubmit {
 
     protected final FlexTable layout;
-    protected Button cancel;
+    protected HTML cancel;
     protected Button submit;
     protected TextBox creator;
     protected TextBox creatorEmail;
@@ -119,8 +119,9 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
     protected void initComponents() {
         submit = new Button("Submit");
         submit.setStyleName("btn_submit_entry_form");
-        cancel = new Button("Cancel");
-        cancel.setStyleName("btn_reset_entry_form");
+        cancel = new HTML("Cancel");
+        cancel.setStyleName("footer_feedback_widget");
+        cancel.addStyleName("font-85em");
         creator = createStandardTextBox("205px", 125);
         creatorEmail = createStandardTextBox("205px", 125);
         name = createStandardTextBox("205px", 125);
@@ -209,7 +210,7 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         layout.getCellFormatter().setWidth(0, 0, "160px");
 
         layout.setWidget(0, 1, submit);
-        layout.getFlexCellFormatter().setWidth(0, 1, "100px");
+        layout.getFlexCellFormatter().setWidth(0, 1, "85px");
         layout.setWidget(0, 2, cancel);
 
         return layout;
