@@ -724,7 +724,8 @@ public class EntryController {
             Sequence sequence = sequenceController.getByEntry(entry);
             long start = System.currentTimeMillis();
             URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
-            Logger.info("Pigeon " + (System.currentTimeMillis() - start) + "ms");
+            Logger.info(account.getEmail() + ": Pigeon took " + (System.currentTimeMillis() - start)
+                    + "ms for " + entry.getId());
             if (uri != null) {
                 info.setSbolVisualURL(uri.toString());
             }

@@ -64,12 +64,11 @@ public class Bl2SeqParser {
                     // get score
                     score = new Integer((scoreMatcher.group(1))).intValue();
 
-                    line = stringTokenizer.nextToken();
-                    line = stringTokenizer.nextToken();
+                    stringTokenizer.nextToken();
+                    line = stringTokenizer.nextToken();   // strand is second line after score
 
-                    // get orientation
-                    String orientationLetter = line.substring(17, 18);
-                    orientation = (orientationLetter.equals("P")) ? 0 : 1;
+                    // format is Strand=Plus/Plus
+                    orientation = line.indexOf("Plus", 0) == line.lastIndexOf("Plus") ? 0 : 1;
                     isFirstRun = false;
                     continue;
                 }
@@ -94,7 +93,7 @@ public class Bl2SeqParser {
                         ArrayList<String> subjectDataSequencePartial = parseSequenceLine(line);
 
                         subjectDataSequence.set(2,
-                                                subjectDataSequence.get(2).concat(subjectDataSequencePartial.get(2)));
+                                subjectDataSequence.get(2).concat(subjectDataSequencePartial.get(2)));
                         subjectDataSequence.set(1, subjectDataSequencePartial.get(1));
                     }
 
@@ -106,9 +105,9 @@ public class Bl2SeqParser {
                     if (queryDataSequence != null && score >= MIN_SCORE) {
                         Bl2SeqResult bl2seqResult = new Bl2SeqResult(score, new Integer(
                                 queryDataSequence.get(0)), new Integer(queryDataSequence.get(1)),
-                                                                     queryDataSequence.get(2), new Integer(
+                                queryDataSequence.get(2), new Integer(
                                 subjectDataSequence.get(0)), new Integer(subjectDataSequence.get(1)),
-                                                                     subjectDataSequence.get(2), orientation);
+                                subjectDataSequence.get(2), orientation);
 
                         results.add(bl2seqResult);
                     }

@@ -1,8 +1,9 @@
 package org.jbei.ice.client.admin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
@@ -17,10 +18,8 @@ import org.jbei.ice.shared.dto.AccountResults;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
 
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.SelectionChangeEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Presenter for the admin page
@@ -90,12 +89,8 @@ public class AdminPresenter extends AbstractPresenter {
             case SEARCH:
                 if (searchPresenter == null)
                     searchPresenter = new AdminSearchPresenter(service, eventBus);
-                view.show(currentOption, searchPresenter.getView().asWidget());
+                retrieveSearchSettings();
                 break;
-
-//            case TRANSFER:
-//                view.show(currentOption, new TransferEntryPanel());
-//                break;
         }
     }
 
@@ -135,6 +130,26 @@ public class AdminPresenter extends AbstractPresenter {
 
                 systemSettingPresenter.setData(settings);
                 view.show(currentOption, systemSettingPresenter.getView().asWidget());
+            }
+        }.go(eventBus);
+    }
+
+    // SEARCH
+    private void retrieveSearchSettings() {
+        new IceAsyncCallback<HashMap<String, String>>() {
+
+            @Override
+            protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
+                service.retrieveSystemSettings(ClientController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(HashMap<String, String> result) {
+                if (result == null || currentOption != AdminOption.SEARCH)
+                    return;
+
+                searchPresenter.setData(result);
+                view.show(currentOption, searchPresenter.getView().asWidget());
             }
         }.go(eventBus);
     }

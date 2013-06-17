@@ -17,8 +17,8 @@ import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqParser;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
+import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
@@ -308,10 +308,9 @@ public class SequenceAnalysisController {
             entrySequenceString += entrySequenceString;
         }
 
-        Blast blast = new Blast();
         String bl2seqOutput;
         try {
-            bl2seqOutput = blast.runBl2Seq(entrySequenceString, traceSequenceString);
+            bl2seqOutput = BlastPlus.runBlast2Seq(entrySequenceString, traceSequenceString);
         } catch (BlastException e) {
             throw new ControllerException(e);
         } catch (ProgramTookTooLongException e) {
@@ -340,10 +339,7 @@ public class SequenceAnalysisController {
 
                 if (maxBl2SeqResult != null) {
                     int strand = maxBl2SeqResult.getOrientation() == 0 ? 1 : -1;
-
-                    TraceSequenceAlignment traceSequenceAlignment = traceSequence
-                            .getTraceSequenceAlignment();
-
+                    TraceSequenceAlignment traceSequenceAlignment = traceSequence.getTraceSequenceAlignment();
                     int queryStart = maxBl2SeqResult.getQueryStart();
                     int queryEnd = maxBl2SeqResult.getQueryEnd();
                     int subjectStart = maxBl2SeqResult.getSubjectStart();

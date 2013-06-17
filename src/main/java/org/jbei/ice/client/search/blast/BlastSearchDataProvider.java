@@ -1,7 +1,6 @@
 package org.jbei.ice.client.search.blast;
 
-import java.util.LinkedList;
-
+import com.google.gwt.view.client.Range;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
@@ -10,7 +9,7 @@ import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.HasEntryInfo;
 import org.jbei.ice.shared.dto.search.SearchResultInfo;
 
-import com.google.gwt.view.client.Range;
+import java.util.LinkedList;
 
 public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<SearchResultInfo> {
 
@@ -44,8 +43,8 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
     public EntryInfo getCachedData(long entryId, String recordId) {
         for (HasEntryInfo result : results) {
             EntryInfo info = result.getEntryInfo();
-            if (recordId != null && info.getRecordId().equalsIgnoreCase(recordId))
-                return info;
+//            if (recordId != null && Long.toString(info.getId()).equalsIgnoreCase(recordId))
+//                return info;
 
             if (info.getId() == entryId)
                 return info;

@@ -17,9 +17,8 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
-import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
+import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.filter.SearchFieldFactory;
 import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.shared.BioSafetyOption;
@@ -28,7 +27,6 @@ import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.search.BlastProgram;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 import org.jbei.ice.shared.dto.search.SearchResultInfo;
 import org.jbei.ice.shared.dto.search.SearchResults;
@@ -108,8 +106,7 @@ public class HibernateSearch {
     }
 
     public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery,
-                                              String projectName, String projectURL,
-                                              HashMap<String, Float> userBoost) {
+                                              String projectName, String projectURL) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null) {
             entryTypes = new ArrayList<>();
@@ -121,16 +118,38 @@ public class HibernateSearch {
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         BooleanQuery booleanQuery = new BooleanQuery();
         // get classes for search
-        Class<?>[] classes = new Class<?>[EntryType.values().length];
-        for (int i = 0; i < entryTypes.size(); i += 1) {
-            classes[i] = SearchFieldFactory.entryClass(entryTypes.get(i));
+//        Class<?>[] classes = new Class<?>[EntryType.values().length];
+//        for (int i = 0; i < entryTypes.size(); i += 1) {
+//            classes[i] = SearchFieldFactory.entryClass(entryTypes.get(i));
+//        }
+
+        run(session, "entry.canRead", Sequence.class);
+
+        for (EntryType type : EntryType.values()) {
+            Class<?> clazz = SearchFieldFactory.entryClass(type);
+
+            QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
+
+            // pending visibility
+            Query visibilityQuery = qb.keyword().onField("visibility")
+                    .matching(Visibility.PENDING.getValue()).createQuery();
+            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
+
+            // draft visibility
+            Query visibilityDraftQuery = qb.keyword().onField("visibility")
+                    .matching(Visibility.DRAFT.getValue()).createQuery();
+            booleanQuery.add(visibilityDraftQuery, BooleanClause.Occur.MUST_NOT);
+
+            // exclude deleted
+            Query deletedQuery = qb.keyword().onField("ownerEmail").matching("system").createQuery();
+            booleanQuery.add(deletedQuery, BooleanClause.Occur.MUST_NOT);
         }
 
-        booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, null,
-                searchQuery.getBioSafetyOption(), userBoost);
+//        booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, null,
+//                searchQuery.getBioSafetyOption(), userBoost);
 
         // wrap Lucene query in a org.hibernate.Query
-        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
+        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery);
 
         // get max score
         fullTextQuery.setFirstResult(0); //start from the startth element
@@ -144,8 +163,7 @@ public class HibernateSearch {
         // end get max score
 
         // get sorting values
-        Sort sort = getSort(searchQuery.getParameters().isSortAscending(), searchQuery.getParameters().getSortField
-                ());
+        Sort sort = getSort(searchQuery.getParameters().isSortAscending(), searchQuery.getParameters().getSortField());
         fullTextQuery.setSort(sort);
 
         // projection (specified properties must be stored in the index @Field(store=Store.YES))
@@ -181,7 +199,7 @@ public class HibernateSearch {
             Entry entry = (Entry) objects[1];
             SearchResultInfo searchResult;
             if (blastInfo != null) {
-                searchResult = blastInfo.get(entry.getRecordId());
+                searchResult = blastInfo.get(Long.toString(entry.getId()));
                 if (searchResult == null) // this should not really happen since we already filter
                     continue;
             } else {
@@ -204,6 +222,97 @@ public class HibernateSearch {
         if (account != null)
             email = account.getEmail();
         Logger.info(email + ": obtained " + resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
+        return results;
+    }
+
+    public SearchResults runS(Account account, HashMap<String, SearchResultInfo> blastResults) {
+        Session session = HibernateHelper.getSessionFactory().getCurrentSession();
+        FullTextSession fullTextSession = Search.getFullTextSession(session);
+
+//        IndexReader reader = fullTextSession.getSearchFactory().getIndexReaderAccessor().open(Entry.class);
+//
+//        try {
+//            for (int i = 0; i < reader.maxDoc(); i++) {
+//                if (reader.isDeleted(i))
+//                    continue;
+//
+//                Document doc = reader.document(i);
+//                String docId = doc.get("canRead");
+//                if(docId != null)
+//                System.out.println(docId);
+//
+//                // do something with docId here...
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        Class<?>[] classes = new Class<?>[EntryType.values().length];
+        int i = 0;
+        for (EntryType type : EntryType.values()) {
+            classes[i] = SearchFieldFactory.entryClass(type);
+            i += 1;
+        }
+
+        BooleanQuery booleanQuery = new BooleanQuery();
+
+        for (EntryType type : EntryType.values()) {
+            QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(SearchFieldFactory.entryClass(type)).get();
+            org.apache.lucene.search.Query query = qb.keyword().onField("recordType").ignoreFieldBridge()
+                    .matching(type.getName().toLowerCase()).createQuery();
+
+            booleanQuery.add(query, BooleanClause.Occur.SHOULD);
+
+            // pending visibility
+            org.apache.lucene.search.Query visibilityQuery = qb.keyword()
+                    .onField("visibility")
+                    .ignoreFieldBridge()
+                    .matching(Visibility.PENDING.getValue())
+                    .createQuery();
+            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
+
+            // draft visibility
+            org.apache.lucene.search.Query visibilityDraftQuery = qb.keyword()
+                    .onField("visibility")
+                    .ignoreFieldBridge()
+                    .matching(Visibility.DRAFT.getValue())
+                    .createQuery();
+            booleanQuery.add(visibilityDraftQuery, BooleanClause.Occur.MUST_NOT);
+        }
+
+        // wrap Lucene query in a org.hibernate.Query
+        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
+
+        fullTextQuery.enableFullTextFilter("blastFilter").setParameter("recordIds", new HashSet<>(blastResults.keySet()));
+
+        Set<String> groupUUIDs = new HashSet<>();
+        try {
+            groupUUIDs = ControllerFactory.getGroupController().retrieveAccountGroupUUIDs(account);
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+
+        String email = account == null ? "" : account.getEmail();
+        fullTextQuery.enableFullTextFilter("security")
+                .setParameter("account", email)
+                .setParameter("groupUUids", groupUUIDs);
+
+        // execute search
+        List result = fullTextQuery.list();
+        LinkedList<SearchResultInfo> filtered = new LinkedList<>();
+
+        for (Object object : result) {
+            Entry entry = (Entry) object;
+            SearchResultInfo info = blastResults.get(entry.getId() + "");
+            if (info == null)
+                continue;
+            filtered.add(info);
+        }
+
+        System.out.println(result.size());
+        SearchResults results = new SearchResults();
+        results.setResultCount(filtered.size());
+        results.setResults(filtered);
         return results;
     }
 
@@ -239,7 +348,7 @@ public class HibernateSearch {
         }
 
         if (booleanQuery.getClauses().length == 0)
-            return executeSearchNoTerms(account, searchQuery, projectName, projectURL, userBoost);
+            return executeSearchNoTerms(account, searchQuery, projectName, projectURL);
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
@@ -298,7 +407,7 @@ public class HibernateSearch {
             Entry entry = (Entry) objects[1];
             SearchResultInfo searchResult;
             if (blastInfo != null) {
-                searchResult = blastInfo.get(entry.getRecordId());
+                searchResult = blastInfo.get(Long.toString(entry.getId()));
                 if (searchResult == null) // this should not really happen since we already filter
                     continue;
             } else {
@@ -364,17 +473,10 @@ public class HibernateSearch {
         if (!query.hasBlastQuery())
             return null;
 
-        Blast blast = new Blast();
-        String sequence = query.getBlastQuery().getSequence();
-        BlastProgram program = query.getBlastQuery().getBlastProgram();
-
-        try {
-            HashMap<String, SearchResultInfo> rids = blast.query(account, sequence, program);
-            fullTextQuery.enableFullTextFilter("blastFilter").setParameter("recordIds", new HashSet<>(rids.keySet()));
-            return rids;
-        } catch (ProgramTookTooLongException e) {
-            throw new BlastException(e);
-        }
+        BlastPlus blast = new BlastPlus();
+        HashMap<String, SearchResultInfo> rids = blast.runBlast(account, query.getBlastQuery());
+        fullTextQuery.enableFullTextFilter("blastFilter").setParameter("recordIds", new HashSet<>(rids.keySet()));
+        return rids;
     }
 
     protected org.hibernate.search.FullTextQuery checkEnableHasAttribute(Session session, FullTextQuery fullTextQuery,

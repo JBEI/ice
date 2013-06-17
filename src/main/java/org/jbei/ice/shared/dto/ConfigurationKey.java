@@ -21,7 +21,7 @@ public enum ConfigurationKey implements IDTOModel {
     DATA_DIRECTORY("data", "data directory", true),
     ATTACHMENTS_DIRECTORY("data/attachments", "attachment directory", true),
     TRACE_FILES_DIRECTORY("data/traces", "sequence trace file directory", true),
-    BLAST_DIRECTORY("blast", "blast directory", true),
+
     SITE_SECRET("Site Secret", "", false),
     // deprecated. use the user account salt instead.
     SECRET_KEY("o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+", "", false),
@@ -37,10 +37,9 @@ public enum ConfigurationKey implements IDTOModel {
     PART_NUMBER_DIGITAL_SUFFIX("000001", "", true),
     PART_NUMBER_DELIMITER("_", "", true),
     WIKILINK_PREFIX("jbei", "Wikilink Prefix", true),
-    BLAST_BLASTALL("blast-2.2.26/bin/blastall", "", true),
-    BLAST_BL2SEQ("blast-2.2.26/bin/bl2seq", "", true),
-    BLAST_FORMATDB("blast-2.2.26/bin/formatdb", "", true),
-    BLAST_DATABASE_NAME("data/jbeiblast", "", true),
+
+    BLAST_INSTALL_DIR("blast-2.2.26/bin", "Blast installation", true),
+    BLAST_DIR("data", "Blast database location", true),
 
     NEW_REGISTRATION_ALLOWED("NO", "Allow user registration", true),
     PASSWORD_CHANGE_ALLOWED("YES", "allow password change", true),

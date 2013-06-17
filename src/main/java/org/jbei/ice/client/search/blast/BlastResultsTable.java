@@ -1,7 +1,7 @@
 package org.jbei.ice.client.search.blast;
 
-import java.util.ArrayList;
-
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.dom.client.Style.Unit;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
@@ -12,9 +12,13 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.entry.HasEntryInfo;
 import org.jbei.ice.shared.dto.search.SearchResultInfo;
 
-import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.dom.client.Style.Unit;
+import java.util.ArrayList;
 
+/**
+ * Table for displaying blast results
+ *
+ * @author Hector Plahar
+ */
 public abstract class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
 
     private final EntryTablePager pager;
@@ -42,7 +46,7 @@ public abstract class BlastResultsTable extends HasEntryDataTable<SearchResultIn
     }
 
     protected DataTableColumn<SearchResultInfo, HasEntryInfo> addPartIdColumn(boolean sortable,
-            double width, Unit unit) {
+                                                                              double width, Unit unit) {
         HasEntryPartIDCell<HasEntryInfo> cell = new HasEntryPartIDCell<HasEntryInfo>(EntryContext.Type.SEARCH);
         cell.addEntryHandler(getHandler());
         DataTableColumn<SearchResultInfo, HasEntryInfo> partIdColumn = new HasEntryPartIdColumn<SearchResultInfo>(cell);

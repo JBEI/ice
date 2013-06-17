@@ -304,10 +304,11 @@ public class Entry implements IModel {
      */
     public PartNumber getOnePartNumber() {
         PartNumber result = null;
+        String partNumberPrefix = Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX);
+
         // prefer local part number prefix over other prefixes
         if (partNumbers.size() > 0) {
             for (PartNumber partNumber : partNumbers) {
-                String partNumberPrefix = Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX);
                 if (partNumber.getPartNumber().contains(partNumberPrefix)) {
                     result = partNumber;
                     break;

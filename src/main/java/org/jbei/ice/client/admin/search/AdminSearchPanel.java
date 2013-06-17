@@ -1,15 +1,16 @@
 package org.jbei.ice.client.admin.search;
 
-import org.jbei.ice.client.admin.IAdminPanel;
-import org.jbei.ice.client.common.widget.FAIconType;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.admin.IAdminPanel;
+import org.jbei.ice.client.admin.setting.SettingPanel;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * Admin panel for search management. Works with {@link AdminSearchPresenter}
@@ -18,14 +19,16 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class AdminSearchPanel extends Composite implements IAdminPanel {
 
-    private VerticalPanel vPanel;
+    private FlexTable layout;
     private Button reIndex;
 
     public AdminSearchPanel() {
         initComponents();
-        vPanel.add(new HTML("&nbsp;"));
-        vPanel.add(reIndex);
-        initWidget(vPanel);
+
+        layout.setHTML(0, 0, "&nbsp;");
+        layout.setWidget(1, 0, reIndex);
+
+        initWidget(layout);
     }
 
     public void setRebuildIndexesHandler(final ClickHandler handler) {
@@ -41,10 +44,25 @@ public class AdminSearchPanel extends Composite implements IAdminPanel {
         });
     }
 
+    public void setConfigValue(ConfigurationKey key, int row, String value) {
+        for (int i = 0; i < layout.getRowCount(); i += 1) {
+            Widget widget = layout.getWidget(i, 0);
+            if (!(widget instanceof SettingPanel))
+                continue;
+
+            SettingPanel panel = (SettingPanel) widget;
+            panel.updateConfigSetting(key, row, value);
+        }
+    }
+
     protected void initComponents() {
-        vPanel = new VerticalPanel();
-        vPanel.setWidth("100%");
+        layout = new FlexTable();
+        layout.setWidth("100%");
         reIndex = new Button("<i class=\"blue " + FAIconType.REFRESH.getStyleName() + "\"></i>&nbsp; Rebuild Indexes");
     }
 
+    public void setSearchSetting(SettingPanel settingPanel) {
+        layout.setWidget(2, 0, settingPanel);
+        layout.getFlexCellFormatter().setStyleName(2, 0, "pad_top");
+    }
 }

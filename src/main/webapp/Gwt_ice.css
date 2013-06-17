@@ -207,23 +207,6 @@ body {
     margin-left: 0;
 }
 
-.btn_reset_entry_form {
-    padding: 5px;
-    width: 80px;
-    border: 1px solid #bbb;
-    background-color: #f4e4e4;
-    color: #999;
-    font-weight: bold;
-    font-size: 0.80em;
-    cursor: pointer;
-}
-
-.btn_reset_entry_form:hover {
-    border: 1px solid #777;
-    color: #333;
-    box-shadow: 0 0 1px 0 #ddd;
-}
-
 .input_box_error {
     border: 1px solid #CC3333;
     background: #FCC;

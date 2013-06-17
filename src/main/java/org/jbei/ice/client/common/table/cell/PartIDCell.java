@@ -1,13 +1,5 @@
 package org.jbei.ice.client.common.table.cell;
 
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
-import org.jbei.ice.client.collection.presenter.EntryContext;
-import org.jbei.ice.client.common.TipViewContentFactory;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -19,6 +11,13 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
+import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.common.TipViewContentFactory;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
 
 /**
  * Cell for part Id column values. Renders a url
@@ -53,7 +52,7 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
 
     @Override
     public void onBrowserEvent(Context context, Element parent, T value, NativeEvent event,
-            ValueUpdater<T> valueUpdater) {
+                               ValueUpdater<T> valueUpdater) {
         super.onBrowserEvent(context, parent, value, event, valueUpdater);
         final String eventType = event.getType();
 
@@ -112,7 +111,6 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
         // TODO : set popup loading widget
 
         TipViewContentFactory.getContents(value, null, new Callback<Widget>() {
-
             @Override
             public void onSuccess(Widget contents) {
                 if (hidden)

@@ -19,9 +19,8 @@ public class RebuildBlastIndexTask extends Task {
     @Override
     public void execute() {
         Logger.info("Running blast rebuild task");
-        Blast blast = new Blast();
         try {
-            blast.rebuildDatabase(force);
+            BlastPlus.rebuildDatabase(force);
         } catch (BlastException e) {
             Logger.error(e);
         }

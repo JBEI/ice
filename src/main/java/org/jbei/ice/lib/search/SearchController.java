@@ -7,8 +7,8 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
+import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
@@ -80,16 +80,16 @@ public class SearchController {
 
         String queryString = query.getQueryString();
         // TODO : split on \" first for phrase query
-        SearchResults searchResults;
 
-        // blast query only
+//        blast query only
         if (query.hasBlastQuery() && (queryString == null || queryString.isEmpty())) {
+            BlastPlus blast = new BlastPlus();
             try {
-                searchResults = new SearchResults();
-                LinkedList<SearchResultInfo> infoList = runBlast(account, query.getBlastQuery(), query.getParameters());
-                searchResults.setResults(infoList);
-                return searchResults;
-            } catch (ProgramTookTooLongException e) {
+                HashMap<String, SearchResultInfo> results = blast.runBlast(account, query.getBlastQuery());
+                if (results.isEmpty())
+                    return new SearchResults();
+                return HibernateSearch.getInstance().runS(account, results);
+            } catch (BlastException e) {
                 throw new ControllerException(e);
             }
         }
@@ -111,12 +111,11 @@ public class SearchController {
                     continue;
                 }
             }
-            searchResults = HibernateSearch.getInstance().executeSearch(account, iterable, query, projectName,
-                    projectURI, mapping);
-            return searchResults;
+            return HibernateSearch.getInstance().executeSearch(account, iterable, query, projectName, projectURI,
+                    mapping);
+        } else {
+            return HibernateSearch.getInstance().executeSearchNoTerms(account, query, projectName, projectURI);
         }
-
-        return null;
 
         // advanced search filters only (e.g. has attachment etc)
         // TODO
@@ -146,7 +145,7 @@ public class SearchController {
         if (query == null || query.isEmpty())
             return new LinkedList<>();
 
-        Blast blast = new Blast();
+        BlastPlus blast = new BlastPlus();
 
         try {
             final ColumnField sort;
@@ -155,8 +154,10 @@ public class SearchController {
             else
                 sort = parameters.getSortField();
 
-            HashMap<String, SearchResultInfo> map = blast.query(account, blastQuery.getSequence(),
-                    blastQuery.getBlastProgram());
+            HashMap<String, SearchResultInfo> map = blast.runBlast(account, blastQuery);
+            if (map == null)
+                return null;
+
             LinkedList<SearchResultInfo> results = new LinkedList<>(map.values());
             Collections.sort(results, new Comparator<SearchResultInfo>() {
                 @Override
