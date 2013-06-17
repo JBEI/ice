@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.entry;
 
 import com.google.common.base.Joiner;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -69,7 +70,7 @@ public class EntryUtil {
             descriptiveLabel = iceLink.getDescriptiveLabel();
         }
 
-        result = "<a href=/entry/view/" + id + ">" + descriptiveLabel + "</a>";
+        result = "<a href=/#" + Page.PROFILE.getLink() + ";id=" + id + ">" + descriptiveLabel + "</a>";
         return result;
     }
 
