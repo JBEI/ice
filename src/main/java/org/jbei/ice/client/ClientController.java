@@ -1,8 +1,12 @@
 package org.jbei.ice.client;
 
-import java.util.Date;
-import java.util.HashMap;
-
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
 import org.jbei.ice.client.admin.AdminPresenter;
 import org.jbei.ice.client.admin.AdminView;
 import org.jbei.ice.client.bulkupload.BulkUploadPresenter;
@@ -23,14 +27,10 @@ import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.search.advanced.SearchView;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.search.SearchQuery;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
+import java.util.Date;
+import java.util.HashMap;
 
 public class ClientController extends AbstractPresenter implements ValueChangeHandler<String> {
 
@@ -39,13 +39,13 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
     private static final int DAY_TIMEOUT = (1000 * 60 * 60 * 24);
     private static final String COOKIE_NAME = "gd-ice"; //TODO: this is set in the backend. does anyone even change it?
     private static final String COOKIE_PATH = "/";
-    public static String blast;
 
     private HasWidgets container; // root panel
     public static String sessionId;
     public static AccountInfo account;
     public static final String URL_SEPARATOR = ";";
     public static String pageViewAttempt;   // page user attempted to view but was sent to the login page
+    private static SearchQuery lastQuery;
 
     public ClientController(RegistryServiceAsync service, HandlerManager eventBus) {
         super(service, eventBus);
@@ -77,6 +77,7 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                 account = event.getAccountInfo();
                 HeaderView.getInstance().setHeaderData(account);
                 HeaderView.getInstance().setHeader(Page.COLLECTIONS);
+                HeaderView.getInstance().setQueryDelegate(createServiceDelegate());
 
                 Date expires;
                 if (!event.isRememberUser())
@@ -94,6 +95,20 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
 
         // add log out handler
         this.eventBus.addHandler(LogoutEvent.TYPE, new AppLogoutHandler());
+    }
+
+    private ServiceDelegate<SearchQuery> createServiceDelegate() {
+        return new ServiceDelegate<SearchQuery>() {
+            @Override
+            public void execute(SearchQuery query) {
+                SearchView searchView = new SearchView();
+                CollectionsView collectionsView = new CollectionsView();
+                lastQuery = query;
+                CollectionsPresenter presenter = new CollectionsPresenter(service, eventBus, collectionsView,
+                        searchView, query);
+                presenter.go(container);
+            }
+        };
     }
 
     private void goToMainPage() {
@@ -192,9 +207,10 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                 break;
 
             case QUERY:
+                // this case occurs when the user clicks "back" so the composite search box should be filled
                 SearchView searchView = new SearchView();
                 collectionsView = new CollectionsView();
-                presenter = new CollectionsPresenter(this.service, this.eventBus, collectionsView, searchView);
+                presenter = new CollectionsPresenter(this.service, this.eventBus, collectionsView, searchView, lastQuery);
                 break;
 
             case LOGIN:
@@ -253,6 +269,7 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                         goToPage(token);
                         HeaderView.getInstance().setHeader(getPage(token));
                         HeaderView.getInstance().setHeaderData(account);
+                        HeaderView.getInstance().setQueryDelegate(createServiceDelegate());
                     } else {
                         ClientController.sessionId = null;
                         ClientController.account = null;

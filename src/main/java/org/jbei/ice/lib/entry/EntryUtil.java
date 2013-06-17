@@ -70,7 +70,7 @@ public class EntryUtil {
             descriptiveLabel = iceLink.getDescriptiveLabel();
         }
 
-        result = "<a href=/#" + Page.PROFILE.getLink() + ";id=" + id + ">" + descriptiveLabel + "</a>";
+        result = "<a href=/#" + Page.ENTRY_VIEW.getLink() + ";id=" + id + ">" + descriptiveLabel + "</a>";
         return result;
     }
 

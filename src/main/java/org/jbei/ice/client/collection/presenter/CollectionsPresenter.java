@@ -40,6 +40,7 @@ import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.folder.FolderType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.shared.dto.search.SearchQuery;
 
 import java.util.*;
 
@@ -67,9 +68,9 @@ public class CollectionsPresenter extends AbstractPresenter {
     private HandlerRegistration showEntryRegistration;
 
     public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, final ICollectionView display,
-                                ISearchView searchView) {
+                                ISearchView searchView, SearchQuery query) {
         this(service, eventBus, display);
-        search(searchView);
+        search(searchView, query);
     }
 
     // collections for entry view
@@ -386,7 +387,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.setCanMove(enable);
     }
 
-    protected void search(ISearchView searchView) {
+    protected void search(ISearchView searchView, SearchQuery query) {
         if (searchPresenter == null) {
             searchPresenter = new SearchPresenter(model.getService(), model.getEventBus(), searchView);
             searchPresenter.addTableSelectionModelChangeHandler(new Handler() {
@@ -401,12 +402,12 @@ public class CollectionsPresenter extends AbstractPresenter {
             });
         }
 
-        search();
+        search(query);
     }
 
-    public void search() {
+    public void search(SearchQuery query) {
         display.setMainContent(searchPresenter.getView().asWidget());
-        searchPresenter.search();
+        searchPresenter.search(query);
         mode = Mode.SEARCH;
     }
 

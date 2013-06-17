@@ -1,9 +1,14 @@
 package org.jbei.ice.client.search.advanced;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Set;
-
+import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.IceAsyncCallback;
@@ -16,23 +21,19 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.search.blast.BlastResultsList;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
+import org.jbei.ice.client.search.blast.Cell;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.entry.HasEntryInfo;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 import org.jbei.ice.shared.dto.search.SearchResultInfo;
 import org.jbei.ice.shared.dto.search.SearchResults;
 
-import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Presenter for searches
@@ -53,7 +54,9 @@ public class SearchPresenter extends AbstractPresenter {
     private final SearchResultsTable table;
     private final SearchResultsTable webResults;
     private final BlastResultsTable blastTable;
+    private final BlastResultsList blastList;
     private Mode mode;
+    private SearchQuery lastQuery;
 
     public SearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus, ISearchView view) {
         super(rpcService, eventBus);
@@ -91,6 +94,8 @@ public class SearchPresenter extends AbstractPresenter {
         dataProvider = new SearchDataProvider(table, rpcService, false);
         webDataProvider = new SearchDataProvider(webResults, rpcService, true);
         blastProvider = new BlastSearchDataProvider(blastTable, rpcService);
+        blastList = new BlastResultsList(new Cell());
+        blastProvider.addDataDisplay(blastList);
         model = new SearchModel(rpcService, eventBus);
         getWebOfRegistrySettings();
         addSearchHandlers();
@@ -100,7 +105,7 @@ public class SearchPresenter extends AbstractPresenter {
         display.setLocalSearchHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                search();
+                search(lastQuery);
             }
         });
 
@@ -141,16 +146,20 @@ public class SearchPresenter extends AbstractPresenter {
         return this.table.getSelectionModel().getSelectedSet();
     }
 
-    public void search() {
-        SearchQuery searchQuery = display.parseUrlForQuery();
-        searchQuery.getParameters().setRetrieveCount(30);
-        searchQuery.getParameters().setStart(0);
+    public void search(SearchQuery searchQuery) {
+        if (searchQuery == null)
+            return;
+
+        lastQuery = searchQuery;
+//         = display.parseUrlForQuery();
+//        searchQuery.getParameters().setRetrieveCount(30);
+//        searchQuery.getParameters().setStart(0);
         model.performSearch(searchQuery, false, new SearchCallback(false));
         if (searchQuery.hasBlastQuery()) {
             // show blast table loading
             searchQuery.getParameters().setSortField(ColumnField.BIT_SCORE);
             blastProvider.updateRowCount(0, false);
-            display.setBlastVisibility(blastTable, true);
+            display.setBlastVisibility(blastList, blastTable, true);
             blastTable.setVisibleRangeAndClearData(blastTable.getVisibleRange(), false);
         } else {
             // regular search
@@ -170,7 +179,7 @@ public class SearchPresenter extends AbstractPresenter {
         if (searchQuery.hasBlastQuery()) {
             // show blast table loading
             blastProvider.updateRowCount(0, false);
-            display.setBlastVisibility(blastTable, true);
+            display.setBlastVisibility(blastList, blastTable, true);
             blastTable.setVisibleRangeAndClearData(blastTable.getVisibleRange(), false);
         } else {
             // regular search
@@ -283,7 +292,7 @@ public class SearchPresenter extends AbstractPresenter {
 
         @Override
         protected DataTableColumn<SearchResultInfo, HasEntryInfo> addPartIdColumn(boolean sortable, double width,
-                com.google.gwt.dom.client.Style.Unit unit) {
+                                                                                  com.google.gwt.dom.client.Style.Unit unit) {
             HasEntryPartIDCell<HasEntryInfo> cell = new HasEntryPartIDCell<HasEntryInfo>(EntryContext.Type.SEARCH) {
                 @Override
                 protected String getURI(HasEntryInfo value) {
@@ -301,7 +310,7 @@ public class SearchPresenter extends AbstractPresenter {
 
         @Override
         protected DataTableColumn<SearchResultInfo, SafeHtml> addNameColumn(final double width,
-                com.google.gwt.dom.client.Style.Unit unit) {
+                                                                            com.google.gwt.dom.client.Style.Unit unit) {
 
             DataTableColumn<SearchResultInfo, SafeHtml> nameColumn =
                     new DataTableColumn<SearchResultInfo, SafeHtml>(new SafeHtmlCell(), ColumnField.NAME) {
@@ -314,11 +323,11 @@ public class SearchPresenter extends AbstractPresenter {
 
                             return SafeHtmlUtils
                                     .fromSafeConstant("<i style=\"width: "
-                                                              + width + "px; "
-                                                              + "white-space: nowrap; overflow: hidden; text-overflow: "
-                                                              + "ellipsis;\" title=\""
-                                                              + name.replaceAll("\"", "'") + "\">"
-                                                              + name + "</i>");
+                                            + width + "px; "
+                                            + "white-space: nowrap; overflow: hidden; text-overflow: "
+                                            + "ellipsis;\" title=\""
+                                            + name.replaceAll("\"", "'") + "\">"
+                                            + name + "</i>");
                         }
                     };
 

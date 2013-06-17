@@ -1,10 +1,9 @@
 package org.jbei.ice.client.search.advanced;
 
-import org.jbei.ice.client.search.blast.BlastResultsTable;
-import org.jbei.ice.shared.dto.search.SearchQuery;
-
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.search.blast.BlastResultsTable;
+import org.jbei.ice.shared.dto.search.SearchQuery;
 
 /**
  * Interface for advanced search view
@@ -17,7 +16,7 @@ public interface ISearchView {
 
     void setSearchVisibility(SearchResultsTable table, boolean visible);
 
-    void setBlastVisibility(BlastResultsTable table, boolean visible);
+    void setBlastVisibility(Widget w, BlastResultsTable table, boolean visible);
 
     SearchQuery parseUrlForQuery();
 

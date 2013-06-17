@@ -1,29 +1,19 @@
 package org.jbei.ice.client.common.header;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.Page;
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.search.BlastProgram;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.*;
+import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.shared.BioSafetyOption;
+import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.shared.dto.search.BlastProgram;
+import org.jbei.ice.shared.dto.search.BlastQuery;
+import org.jbei.ice.shared.dto.search.SearchQuery;
+
+import java.util.ArrayList;
 
 /**
  * Options widget for search
@@ -77,13 +67,13 @@ public class AdvancedSearchWidget extends Composite {
             blastProgram.addItem(program.getDetails(), program.name());
         }
         HTMLPanel folderOptionsPanel = new HTMLPanel("<div style=\"padding: 8px 8px 8px 5px; "
-                                                             + "border-bottom: 0.10em solid #f3f3f3;"
-                                                             + " padding-bottom: 15px\"><span class=\"font-80em\""
-                                                             + "style=\"letter-spacing:-1px; color:#555;\">"
-                                                             + "<b>BLAST</b></span> &nbsp; <span "
-                                                             + "id=\"advanced_folders\"></span><br>"
-                                                             + "<span id=\"blast_input\"></span>"
-                                                             + "</div>");
+                + "border-bottom: 0.10em solid #f3f3f3;"
+                + " padding-bottom: 15px\"><span class=\"font-80em\""
+                + "style=\"letter-spacing:-1px; color:#555;\">"
+                + "<b>BLAST</b></span> &nbsp; <span "
+                + "id=\"advanced_folders\"></span><br>"
+                + "<span id=\"blast_input\"></span>"
+                + "</div>");
         folderOptionsPanel.add(blastProgram, "advanced_folders");
         folderOptionsPanel.add(blastSequence, "blast_input");
 
@@ -104,12 +94,9 @@ public class AdvancedSearchWidget extends Composite {
         for (BioSafetyOption option : BioSafetyOption.values())
             bioSafetyOptions.addItem(option.getDisplayName(), option.getValue());
         HTMLPanel htmlPanel = new HTMLPanel("<div style=\"padding: 10px; border-bottom: 0.10em solid #f3f3f3;"
-                                                    + " padding-bottom: 15px\"><span class=\"font-80em\"" +
-                                                    "style=\"letter-spacing: -1px; margin-right: 20px; color:#555;" +
-                                                    "\"><b>"
-                                                    + "BIOSAFETY OPTION</b></span><span " +
-                                                    "id=\"advanced_biosafety\"></span>"
-                                                    + "</div>");
+                + " padding-bottom: 15px\"><span class=\"font-80em\""
+                + "style=\"letter-spacing: -1px; margin-right: 20px; color:#555;\">"
+                + "<b>BIOSAFETY OPTION</b></span><span id=\"advanced_biosafety\"></span></div>");
         htmlPanel.add(bioSafetyOptions, "advanced_biosafety");
 
         row += 1;
@@ -121,46 +108,39 @@ public class AdvancedSearchWidget extends Composite {
         addResetHandler();
     }
 
-    public void parseSearchOptions() {
-        String url = Page.QUERY.getLink() + ";";
-        url += URL.encodeQueryString(searchInput.getQueryString());
+    public void parseSearchOptions(ServiceDelegate<SearchQuery> delegate) {
+        SearchQuery query = new SearchQuery();
+        query.setQueryString(searchInput.getQueryString());
 
         //blast
-        ClientController.blast = blastSequence.getText().trim();
-        if (!ClientController.blast.isEmpty()) {
-            url += ("&" + BlastProgram.values()[blastProgram.getSelectedIndex()].getName());
+        String sequence = blastSequence.getText().trim();
+        if (!sequence.isEmpty()) {
+            BlastProgram program = BlastProgram.values()[blastProgram.getSelectedIndex()];
+            BlastQuery blastQuery = new BlastQuery(program, sequence);
+            query.setBlastQuery(blastQuery);
         }
 
         // search entry types
         EntryType[] types = getSearchEntryType();
         if (types != null && types.length != EntryType.values().length) {
-            url += "&type=";
+            ArrayList<EntryType> entryTypes = new ArrayList<EntryType>();
             for (EntryType type : types) {
-                url += (type.getName() + ",");
+                entryTypes.add(type);
             }
-            url = url.substring(0, url.length() - 1);
+            query.setEntryTypes(entryTypes);
         }
 
-        // check has attachment ext
-        String has = "";
-        if (entryWidget.isHasAttachmentChecked())
-            has += "&attachment";
-
-        if (entryWidget.isHasSampleChecked()) {
-            has += "&sample";
-        }
-
-        if (entryWidget.isHasSequenceChecked()) {
-            has += "&sequence";
-        }
-        url += has;
+        // check has attachment etc
+        query.getParameters().setHasAttachment(entryWidget.isHasAttachmentChecked());
+        query.getParameters().setHasSample(entryWidget.isHasSampleChecked());
+        query.getParameters().setHasSequence(entryWidget.isHasSequenceChecked());
 
         // biosafety level
         if (bioSafetyOptions.getSelectedIndex() != 0) {
-            url += ("&biosafety=" + bioSafetyOptions.getSelectedIndex());
+            query.setBioSafetyOption(BioSafetyOption.enumValue(bioSafetyOptions.getSelectedIndex()));
         }
 
-        History.newItem(url);
+        delegate.execute(query);
     }
 
     public void addSearchHandler(ClickHandler handler) {

@@ -6,13 +6,12 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.header.HeaderView;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.search.BlastProgram;
-import org.jbei.ice.shared.dto.search.BlastQuery;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 
 import java.util.ArrayList;
@@ -100,17 +99,20 @@ public class SearchView extends Composite implements ISearchView {
         if (visible) {
             layout.setWidget(1, 0, table);
             layout.setWidget(2, 0, table.getPager());
+            History.newItem(Page.QUERY.getLink(), false);
         }
     }
 
     @Override
-    public void setBlastVisibility(BlastResultsTable blastTable, boolean visible) {
+    public void setBlastVisibility(Widget w, BlastResultsTable blastTable, boolean visible) {
         blastTable.setVisible(visible);
         blastTable.getPager().setVisible(visible);
 
         if (visible) {
             layout.setWidget(1, 0, blastTable);
             layout.setWidget(2, 0, blastTable.getPager());
+            layout.setWidget(3, 0, w);
+            History.newItem(Page.QUERY.getLink(), false);
         }
     }
 
@@ -131,11 +133,11 @@ public class SearchView extends Composite implements ISearchView {
             String decoded = URL.decode(filters[i]);
 
             // check blast
-            BlastProgram blastProgram = BlastProgram.filterValueOf(decoded);
-            if (blastProgram != null) {
-                query.setBlastQuery(new BlastQuery(blastProgram, ClientController.blast));
-                continue;
-            }
+//            BlastProgram blastProgram = BlastProgram.filterValueOf(decoded);
+//            if (blastProgram != null) {
+//                query.setBlastQuery(new BlastQuery(blastProgram, ClientController.blast));
+//                continue;
+//            }
 
             // types (e.g. Strain / Plasmid only)
             if (decoded.startsWith("type")) {

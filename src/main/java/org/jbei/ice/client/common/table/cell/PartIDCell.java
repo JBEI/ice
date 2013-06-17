@@ -35,6 +35,7 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
     private HandlerManager handlerManager;
     private final EntryContext.Type mode;
     private boolean hidden = false;
+    private boolean handlingClick;
 
     public PartIDCell(EntryContext.Type mode) {
         super(MOUSEOVER_EVENT_NAME, MOUSEOUT_EVENT_NAME, MOUSE_CLICK);

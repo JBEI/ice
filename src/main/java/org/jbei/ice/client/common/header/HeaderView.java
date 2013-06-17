@@ -6,11 +6,13 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.search.SearchQuery;
 
 public class HeaderView extends Composite {
 
@@ -20,6 +22,7 @@ public class HeaderView extends Composite {
     private final FlexTable loggedInContentsPanel;
     private static final HeaderView INSTANCE = new HeaderView();
     private final HeaderMenu headerMenu;
+    private ServiceDelegate<SearchQuery> queryServiceDelegate;
 
     public static HeaderView getInstance() {
         return INSTANCE;
@@ -170,7 +173,7 @@ public class HeaderView extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 searchInput.advancedWidgetClosed();
-                widgetAdvanced.parseSearchOptions();
+                widgetAdvanced.parseSearchOptions(queryServiceDelegate);
             }
         };
 
@@ -187,4 +190,7 @@ public class HeaderView extends Composite {
         setNewMessages(account.getNewMessageCount());
     }
 
+    public void setQueryDelegate(ServiceDelegate<SearchQuery> queryDelegate) {
+        queryServiceDelegate = queryDelegate;
+    }
 }

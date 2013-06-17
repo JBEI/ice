@@ -1,12 +1,12 @@
 package org.jbei.ice.shared.dto.search;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.jbei.ice.shared.BioSafetyOption;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.IDTOModel;
 import org.jbei.ice.shared.dto.entry.EntryType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * @author Hector Plahar
@@ -67,10 +67,6 @@ public class SearchQuery implements IDTOModel {
 
     public Parameters getParameters() {
         return parameters;
-    }
-
-    public void setParameters(Parameters parameters) {
-        this.parameters = parameters;
     }
 
     public static class Parameters implements IDTOModel {
