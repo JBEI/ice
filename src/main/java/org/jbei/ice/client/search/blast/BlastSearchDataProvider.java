@@ -1,6 +1,7 @@
 package org.jbei.ice.client.search.blast;
 
-import com.google.gwt.view.client.Range;
+import java.util.LinkedList;
+
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
@@ -9,7 +10,7 @@ import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.HasEntryInfo;
 import org.jbei.ice.shared.dto.search.SearchResultInfo;
 
-import java.util.LinkedList;
+import com.google.gwt.view.client.Range;
 
 public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<SearchResultInfo> {
 
@@ -23,6 +24,15 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
             updateRowCount(0, true);
             return;
         }
+
+//        Collections.sort(data, new Comparator<SearchResultInfo>() {
+//            @Override
+//            public int compare(SearchResultInfo o1, SearchResultInfo o2) {
+//                Integer i1 = Integer.valueOf(o1.getAlignmentLength() / o1.getQueryLength() * 100);
+//                Integer i2 = Integer.valueOf(o2.getAlignmentLength() / o2.getQueryLength() * 100);
+//                return i1.compareTo(i2);
+//            }
+//        });
 
         results.addAll(data);
         resultSize = data.size();  // todo : need a blastResult object as a wrapper
@@ -43,8 +53,6 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
     public EntryInfo getCachedData(long entryId, String recordId) {
         for (HasEntryInfo result : results) {
             EntryInfo info = result.getEntryInfo();
-//            if (recordId != null && Long.toString(info.getId()).equalsIgnoreCase(recordId))
-//                return info;
 
             if (info.getId() == entryId)
                 return info;

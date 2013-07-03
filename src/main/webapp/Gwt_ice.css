@@ -895,10 +895,6 @@ ul#indented li a:hover {
     margin-top: 3px;
 }
 
-.collection_user_menu_row_selected .font-awesome {
-    color: #c1c1c1;
-}
-
 .entry_detail_view_row {
     border-right: 1px solid #F2F2F2;
     border-top: 1px solid #F2F2F2;
@@ -1574,13 +1570,8 @@ td.datePickerMonth {
     border: 1px solid #F1F1F1;
 }
 
-.bulk_import_sub_content {
-
-}
-
 /* MENU BAR*/
 .gwt-MenuBar {
-
 }
 
 .gwt-MenuBar-horizontal {
@@ -1951,7 +1942,7 @@ td.datePickerMonth {
 }
 
 .collection_options {
-    border: 1px solid #eee;
+    border: 1px solid #bbb;
     padding-right: 3px;
     padding-left: 3px;
 }

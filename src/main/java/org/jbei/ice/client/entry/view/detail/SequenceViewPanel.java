@@ -1,16 +1,24 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter.ISequenceView;
 import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
 /**
  * Widget that displays the sequence file on the general view
@@ -107,7 +115,8 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             layout.getFlexCellFormatter().setHeight(3, 0, "600px");
         } else {
             layout.getFlexCellFormatter().setVisible(2, 0, false);
-            layout.setHTML(3, 0, "<span class=\"font-80em\"><i>No sequence provided</i></span>");
+            String html = "<span class=\"font-80em\"><i style=\"color: #999\">No sequence data provided</i></span>";
+            layout.setHTML(3, 0, html);
             layout.getFlexCellFormatter().setHeight(3, 0, "20px");
         }
     }

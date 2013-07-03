@@ -1,16 +1,22 @@
 package org.jbei.ice.client.entry.view.view;
 
+import java.util.ArrayList;
+
+import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.common.widget.Dialog;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.entry.view.model.FlagEntry;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
-import org.jbei.ice.client.Delegate;
-import org.jbei.ice.client.common.widget.Dialog;
-import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.entry.view.model.FlagEntry;
 
 /**
  * Edit / Delete / Alert widget for entries
@@ -28,6 +34,9 @@ public class EntryActionWidget extends Composite {
     private HandlerRegistration editRegistration;
     private FlexTable layout;
     private Delegate<FlagEntry> delegate;
+    private FlexTable dialogLayout;
+    private ListBox sampleOptions;
+    private HTMLPanel samplePanel;
 
     public EntryActionWidget() {
         initComponents();
@@ -38,6 +47,10 @@ public class EntryActionWidget extends Composite {
         layout.setWidget(0, 3, pipe2);
         layout.setWidget(0, 4, flag);
         initWidget(layout);
+
+        sampleOptions = new ListBox();
+        sampleOptions.setStyleName("pull_down");
+        sampleOptions.setVisible(false);
 
         addFlagClickHandler();
     }
@@ -60,7 +73,7 @@ public class EntryActionWidget extends Composite {
         delete.setTitle("Delete");
         pipe2 = new HTML("<span style=\"color: #ccc\">&nbsp;|&nbsp;</span>");
         flag = new HTML("<i class=\"" + FAIconType.WARNING_SIGN.getStyleName()
-                + "\"></i> <span class=\"font-80em\">Alert</span>");
+                                + "\"></i> <span class=\"font-80em\">Alert</span>");
         flag.setStyleName("flag_icon");
     }
 
@@ -73,11 +86,40 @@ public class EntryActionWidget extends Composite {
                 area.getElement().setAttribute("placeHolder", "Enter Problem Description");
                 area.setCharacterWidth(70);
                 area.setVisibleLines(4);
-                Dialog dialog = new Dialog(area, "500px", "Entry Problem Alert");
+
+                String html = "<b class=\"font-75em\" style=\"vertical-align: top\">Affected Samples</b> &nbsp;"
+                        + "<span  id=\"sample_selection\"></span>";
+                samplePanel = new HTMLPanel(html);
+                samplePanel.add(sampleOptions, "sample_selection");
+
+                dialogLayout = new FlexTable();
+                dialogLayout.setWidth("100%");
+                dialogLayout.setWidget(0, 0, area);
+                dialogLayout.setWidget(1, 0, samplePanel);
+                samplePanel.setVisible(false);
+
+                Dialog dialog = new Dialog(dialogLayout, "500px", "Entry Problem Alert");
                 dialog.showDialog(true);
                 dialog.setSubmitHandler(createDialogSubmitHandler(area, dialog));
             }
         });
+    }
+
+    public void setSampleOptions(ArrayList<SampleStorage> samples) {
+        sampleOptions.clear();
+        sampleOptions.addItem("None");
+        sampleOptions.addItem("All");
+
+        if (samples == null || samples.isEmpty()) {
+            sampleOptions.setEnabled(false);
+            return;
+        }
+
+        for (SampleStorage storage : samples) {
+            sampleOptions.addItem(storage.getSample().getLabel());
+        }
+        sampleOptions.setVisible(true);
+        samplePanel.setVisible(true);
     }
 
     private ClickHandler createDialogSubmitHandler(final TextArea area, final Dialog dialog) {
@@ -93,10 +135,34 @@ public class EntryActionWidget extends Composite {
                 }
 
                 area.setStyleName("input_box");
+                msg = getUserInput(msg);
                 delegate.execute(new FlagEntry(FlagEntry.FlagOption.ALERT, msg));
                 dialog.showDialog(false);
             }
         };
+    }
+
+    private String getUserInput(String areaMessage) {
+        String selected = sampleOptions.getItemText(sampleOptions.getSelectedIndex());
+        if ("None".equalsIgnoreCase(selected)) {
+            return areaMessage;
+        }
+
+        if ("All".equalsIgnoreCase(selected)) {
+            String txt = "";
+            for (int i = 0; i < sampleOptions.getItemCount() - 1; i += 1) {
+                String text = sampleOptions.getItemText(i);
+                if ("None".equals(text) || "All".equals(text))
+                    continue;
+
+                txt += (text + ",");
+            }
+            txt += sampleOptions.getItemText(sampleOptions.getItemCount() - 1);
+            return "<b>Affected Samples: </b>" + txt + "<br><br>" + areaMessage;
+        }
+
+        String txt = sampleOptions.getItemText(sampleOptions.getSelectedIndex());
+        return "<b>Affected Sample: </b>" + txt + "<br><br>" + areaMessage;
     }
 
     public void addDeleteEntryHandler(ClickHandler handler) {
@@ -122,6 +188,6 @@ public class EntryActionWidget extends Composite {
         pipe1.setVisible(visible);
         delete.setVisible(visible);
         pipe2.setVisible(visible);
-//        flag.setVisible(visible);
+        flag.setVisible(visible);
     }
 }

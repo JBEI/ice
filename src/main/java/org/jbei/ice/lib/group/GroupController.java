@@ -263,12 +263,19 @@ public class GroupController {
     }
 
     /**
-     * retrieves all parent groups for any group in the set.
+     * retrieves all parent groups for any group in the set. if account is null, then the everyone group
+     * is returned
      *
      * @param account account whose groups are being retrieved
      * @return set of groups retrieved for account
      */
     public Set<Group> getAllGroups(Account account) throws ControllerException {
+        if (account == null) {
+            Set<Group> groups = new HashSet<>();
+            groups.add(createOrRetrievePublicGroup());
+            return groups;
+        }
+
         Set<Long> groupIds = getAllAccountGroups(account);
         try {
             return dao.getByIdList(groupIds);

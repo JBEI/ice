@@ -27,6 +27,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 
 /**
@@ -179,6 +180,34 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
         nameColumn.setSortable(false);
         this.setColumnWidth(nameColumn, width, unit);
         return nameColumn;
+    }
+
+    protected DataTableColumn<T, SafeHtml> addSummaryColumn() {
+        DataTableColumn<T, SafeHtml> summaryColumn = new DataTableColumn<T, SafeHtml>(
+                new SafeHtmlCell(), ColumnField.SUMMARY) {
+
+            @Override
+            public SafeHtml getValue(T object) {
+                String description = object.getEntryInfo().getShortDescription();
+                if (description == null)
+                    return SafeHtmlUtils.EMPTY_SAFE_HTML;
+
+                int size = (Window.getClientWidth() - 1000);
+                if (size <= 0)
+                    size = 300;
+
+                return SafeHtmlUtils
+                        .fromSafeConstant("<div style=\"width: "
+                                                  + size
+                                                  + "px; white-space: nowrap; overflow: hidden; text-overflow: " +
+                                                  "ellipsis;\" title=\""
+                                                  + description.replaceAll("\"", "'") + "\">"
+                                                  + description + "</div>");
+            }
+        };
+
+        this.addColumn(summaryColumn, "Summary");
+        return summaryColumn;
     }
 
     protected DataTableColumn<T, String> addCreatedColumn(boolean sortable) {

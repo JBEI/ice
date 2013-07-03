@@ -1,5 +1,16 @@
 package org.jbei.ice.lib.entry;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -9,7 +20,12 @@ import org.jbei.ice.lib.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Name;
+import org.jbei.ice.lib.entry.model.PartNumber;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.StorageDAO;
 import org.jbei.ice.lib.entry.sample.model.Sample;
@@ -18,7 +34,11 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.*;
+import org.jbei.ice.lib.models.Comment;
+import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.Emailer;
@@ -31,9 +51,6 @@ import org.jbei.ice.shared.dto.comment.UserComment;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.folder.FolderDetails;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
-
-import java.net.URI;
-import java.util.*;
 
 /**
  * ABI to manipulate {@link org.jbei.ice.lib.entry.model.Entry}s.
@@ -101,8 +118,16 @@ public class EntryController {
         }
     }
 
+    public String getEntrySummary(long id) throws ControllerException {
+        try {
+            return dao.getEntrySummary(id);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
     public HashSet<Entry> createStrainWithPlasmid(Account account, Entry strain, Entry plasmid,
-                                                  ArrayList<PermissionInfo> permissions) throws ControllerException {
+            ArrayList<PermissionInfo> permissions) throws ControllerException {
         if (strain == null || plasmid == null)
             throw new ControllerException("Cannot create null entries");
 
@@ -126,8 +151,8 @@ public class EntryController {
     private String getNextPartNumber() throws ControllerException {
         try {
             return dao.generateNextPartNumber(Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX),
-                    Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DELIMITER),
-                    Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX));
+                                              Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DELIMITER),
+                                              Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX));
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);
@@ -208,7 +233,7 @@ public class EntryController {
 
         // add write permissions for owner
         PermissionInfo info = new PermissionInfo(PermissionInfo.Article.ACCOUNT, account.getId(),
-                PermissionInfo.Type.WRITE_ENTRY, entry.getId(), account.getFullName());
+                                                 PermissionInfo.Type.WRITE_ENTRY, entry.getId(), account.getFullName());
         permissionsController.addPermission(account, info);
 
         if (permissions != null) {
@@ -419,7 +444,7 @@ public class EntryController {
     public Entry getByName(Account account, String name) throws ControllerException, PermissionException {
         Entry entry;
         try {
-            entry = dao.getByName(name);
+            entry = dao.getByUniqueName(name);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -487,7 +512,7 @@ public class EntryController {
     }
 
     public List<Entry> retrieveOwnerEntries(Account account, String ownerEmail,
-                                            ColumnField sort, boolean asc, int start, int limit) throws ControllerException {
+            ColumnField sort, boolean asc, int start, int limit) throws ControllerException {
         try {
             if (accountController.isAdministrator(account) || account.getEmail().equals(ownerEmail)) {
                 return dao.retrieveOwnerEntries(ownerEmail, sort, asc, start, limit);
@@ -698,7 +723,7 @@ public class EntryController {
         boolean hasSequence = sequenceController.hasSequence(entry);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry);
         EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence,
-                hasOriginalSequence);
+                                                    hasOriginalSequence);
 
         // comments
         ArrayList<Comment> comments = commentDAO.retrieveComments(entry);
@@ -713,7 +738,7 @@ public class EntryController {
         if (info.isCanEdit()) {
             try {
                 ArrayList<PermissionInfo> permissions = permissionsController.retrieveSetEntryPermissions(account,
-                        entry);
+                                                                                                          entry);
                 info.setPermissions(permissions);
             } catch (PermissionException e) {
                 Logger.error(e);
@@ -725,7 +750,7 @@ public class EntryController {
             long start = System.currentTimeMillis();
             URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
             Logger.info(account.getEmail() + ": Pigeon took " + (System.currentTimeMillis() - start)
-                    + "ms for " + entry.getId());
+                                + "ms for " + entry.getId());
             if (uri != null) {
                 info.setSbolVisualURL(uri.toString());
             }
@@ -747,48 +772,54 @@ public class EntryController {
             String site = ControllerFactory.getConfigurationController().getPropertyValue(ConfigurationKey.URI_PREFIX);
             StringBuffer body = new StringBuffer();
             body.append("A sample request has been received from ")
-                    .append(account.getFullName())
-                    .append(" (")
-                    .append("https://").append(site)
-                    .append("/#page=profile;id=").append(account.getId()).append(";s=profile)")
-                    .append(" for entry ")
-                    .append(entry.getOnePartNumber().getPartNumber())
-                    .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
-                    .append(". \n\nThe requested form is ")
-                    .append(form);
+                .append(account.getFullName())
+                .append(" (")
+                .append("https://").append(site)
+                .append("/#page=profile;id=").append(account.getId()).append(";s=profile)")
+                .append(" for entry ")
+                .append(entry.getOnePartNumber().getPartNumber())
+                .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
+                .append(". \n\nThe requested form is ")
+                .append(form);
             return Emailer.send(email, ("Sample request for " + entry.getOnePartNumber().getPartNumber()),
-                    body.toString());
+                                body.toString());
         } catch (DAOException | ControllerException e) {
             Logger.error(e);
             return false;
         }
     }
 
-    public boolean sendProblemNotification(Account account, long entryId, String msg) {
+    // also submits a comment
+    public UserComment sendProblemNotification(Account account, long entryId, String msg) {
         try {
             Entry entry = dao.get(entryId);
             String email = ControllerFactory.getConfigurationController().
                     getPropertyValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
             if (entry == null || email == null || email.isEmpty()) {
                 Logger.error("Entry could not be retrieve for id " + entryId + " or bulk uploader email is not set");
-                return false;
+                return null;
             }
 
             String site = ControllerFactory.getConfigurationController().getPropertyValue(ConfigurationKey.URI_PREFIX);
             StringBuffer body = new StringBuffer();
             body.append("A problem notification was sent by ")
-                    .append(account.getFullName())
-                    .append(" for entry ")
-                    .append(entry.getOnePartNumber().getPartNumber())
-                    .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
-                    .append("\n\nMessage:\n\n")
-                    .append(msg)
-                    .append("\n\n");
-            return Emailer.send(email, ("Problem alert for " + entry.getOnePartNumber().getPartNumber()),
-                    body.toString());
+                .append(account.getFullName())
+                .append(" for entry ")
+                .append(entry.getOnePartNumber().getPartNumber())
+                .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
+                .append("\n\nMessage:\n\n")
+                .append(msg)
+                .append("\n\n");
+            boolean success = Emailer.send(email, ("Problem alert for " + entry.getOnePartNumber().getPartNumber()),
+                                           body.toString());
+            if (success) {
+                Comment comment = new Comment(entry, account, msg);
+                comment = commentDAO.save(comment);
+                return Comment.toDTO(comment);
+            }
         } catch (DAOException | ControllerException e) {
             Logger.error(e);
-            return false;
         }
+        return null;
     }
 }

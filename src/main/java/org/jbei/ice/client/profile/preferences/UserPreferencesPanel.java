@@ -1,13 +1,14 @@
 package org.jbei.ice.client.profile.preferences;
 
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.HashMap;
+
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
 import org.jbei.ice.shared.dto.user.PreferenceKey;
 
-import java.util.HashMap;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Panel for user preference settings
@@ -32,6 +33,8 @@ public class UserPreferencesPanel extends Composite implements IUserProfilePanel
     }
 
     public void setSearchData(HashMap<String, String> settings) {
+        if (true)
+            return;
         // search settings
         layout.setWidget(1, 0, createSearchSettings(settings));
         layout.getFlexCellFormatter().setColSpan(1, 0, 3);
@@ -44,8 +47,8 @@ public class UserPreferencesPanel extends Composite implements IUserProfilePanel
 
     private Widget createGeneralSettingPanel(HashMap<String, String> settings) {
         return new PreferencesPanel(settings, "Create Entry Defaults", serviceDelegate,
-                PreferenceKey.PRINCIPAL_INVESTIGATOR,
-                PreferenceKey.FUNDING_SOURCE);
+                                    PreferenceKey.PRINCIPAL_INVESTIGATOR,
+                                    PreferenceKey.FUNDING_SOURCE);
     }
 
     private Widget createSearchSettings(HashMap<String, String> settings) {

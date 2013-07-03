@@ -1,5 +1,7 @@
 package org.jbei.ice.shared.dto.search;
 
+import java.util.LinkedList;
+
 import org.jbei.ice.shared.dto.entry.HasEntryInfo;
 
 /**
@@ -11,19 +13,40 @@ public class SearchResultInfo extends HasEntryInfo implements Comparable<SearchR
 
     public static final long serialVersionUID = 1l;
 
-    private float bitScore;
-    private float eValue;
-    private int alignmentLength;
-    private float percentId;
+    private String eValue;
+    private String alignment;
     private int queryLength;
+    private int alignmentLength;
+    private float bitScore;
+
+    private float percentId;
     private float relativeScore;
 
     private float score;
     private float maxScore;
     private String webPartnerName;
     private String webPartnerURL;
+    private LinkedList<String> matchDetails;
 
     public SearchResultInfo() {
+        matchDetails = new LinkedList<String>();
+        eValue = "0";
+    }
+
+    public float getRelativeScore() {
+        return relativeScore;
+    }
+
+    public void setRelativeScore(float relativeScore) {
+        this.relativeScore = relativeScore;
+    }
+
+    public float getPercentId() {
+        return percentId;
+    }
+
+    public void setPercentId(float percentId) {
+        this.percentId = percentId;
     }
 
     public float getScore() {
@@ -51,44 +74,12 @@ public class SearchResultInfo extends HasEntryInfo implements Comparable<SearchR
         this.maxScore = maxScore;
     }
 
-    public int getAlignmentLength() {
-        return alignmentLength;
-    }
-
-    public void setAlignmentLength(int alignmentLength) {
-        this.alignmentLength = alignmentLength;
-    }
-
-    public float getPercentId() {
-        return percentId;
-    }
-
-    public void setPercentId(float percentId) {
-        this.percentId = percentId;
-    }
-
-    public float getBitScore() {
-        return bitScore;
-    }
-
-    public void setBitScore(float bitScore) {
-        this.bitScore = bitScore;
-    }
-
-    public float geteValue() {
+    public String geteValue() {
         return eValue;
     }
 
-    public void seteValue(float eValue) {
+    public void seteValue(String eValue) {
         this.eValue = eValue;
-    }
-
-    public int getQueryLength() {
-        return queryLength;
-    }
-
-    public void setQueryLength(int queryLength) {
-        this.queryLength = queryLength;
     }
 
     public String getWebPartnerName() {
@@ -107,11 +98,39 @@ public class SearchResultInfo extends HasEntryInfo implements Comparable<SearchR
         this.webPartnerName = webPartnerName;
     }
 
-    public float getRelativeScore() {
-        return relativeScore;
+    public LinkedList<String> getMatchDetails() {
+        return matchDetails;
     }
 
-    public void setRelativeScore(float relativeScore) {
-        this.relativeScore = relativeScore;
+    public String getAlignment() {
+        return alignment;
+    }
+
+    public void setAlignment(String alignment) {
+        this.alignment = alignment;
+    }
+
+    public int getQueryLength() {
+        return queryLength;
+    }
+
+    public void setQueryLength(int queryLength) {
+        this.queryLength = queryLength;
+    }
+
+    public int getAlignmentLength() {
+        return alignmentLength;
+    }
+
+    public void setAlignmentLength(int alignmentLength) {
+        this.alignmentLength = alignmentLength;
+    }
+
+    public float getBitScore() {
+        return bitScore;
+    }
+
+    public void setBitScore(float bitScore) {
+        this.bitScore = bitScore;
     }
 }

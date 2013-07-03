@@ -1,6 +1,12 @@
 package org.jbei.ice.lib.search;
 
-import com.google.common.base.Splitter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
@@ -9,17 +15,16 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
-import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
-import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.AccountType;
 import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.search.*;
+import org.jbei.ice.shared.dto.search.SearchBoostField;
+import org.jbei.ice.shared.dto.search.SearchQuery;
+import org.jbei.ice.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.shared.dto.search.SearchResults;
 
-import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
-import java.util.*;
+import com.google.common.base.Splitter;
 
 /**
  * Controller for running searches on the ice platform
@@ -81,14 +86,13 @@ public class SearchController {
         String queryString = query.getQueryString();
         // TODO : split on \" first for phrase query
 
-//        blast query only
+        // blast query only
         if (query.hasBlastQuery() && (queryString == null || queryString.isEmpty())) {
-            BlastPlus blast = new BlastPlus();
             try {
-                HashMap<String, SearchResultInfo> results = blast.runBlast(account, query.getBlastQuery());
+                HashMap<String, SearchResultInfo> results = BlastPlus.runBlast(account, query.getBlastQuery());
                 if (results.isEmpty())
                     return new SearchResults();
-                return HibernateSearch.getInstance().runS(account, results);
+                return HibernateSearch.getInstance().runSearchFilter(account, results);
             } catch (BlastException e) {
                 throw new ControllerException(e);
             }
@@ -112,7 +116,7 @@ public class SearchController {
                 }
             }
             return HibernateSearch.getInstance().executeSearch(account, iterable, query, projectName, projectURI,
-                    mapping);
+                                                               mapping);
         } else {
             return HibernateSearch.getInstance().executeSearchNoTerms(account, query, projectName, projectURI);
         }
@@ -135,58 +139,6 @@ public class SearchController {
         } catch (DAOException e) {
             Logger.error(e);
             return false;
-        }
-    }
-
-    protected LinkedList<SearchResultInfo> runBlast(Account account, BlastQuery blastQuery,
-                                                    final SearchQuery.Parameters parameters)
-            throws ProgramTookTooLongException, ControllerException {
-        String query = blastQuery.getSequence();
-        if (query == null || query.isEmpty())
-            return new LinkedList<>();
-
-        BlastPlus blast = new BlastPlus();
-
-        try {
-            final ColumnField sort;
-            if (parameters.getSortField() == null || parameters.getSortField() == ColumnField.RELEVANCE)
-                sort = ColumnField.ALIGNED_BP;
-            else
-                sort = parameters.getSortField();
-
-            HashMap<String, SearchResultInfo> map = blast.runBlast(account, blastQuery);
-            if (map == null)
-                return null;
-
-            LinkedList<SearchResultInfo> results = new LinkedList<>(map.values());
-            Collections.sort(results, new Comparator<SearchResultInfo>() {
-                @Override
-                public int compare(SearchResultInfo o1, SearchResultInfo o2) {
-                    switch (sort) {
-                        case RELEVANCE:
-                        default:
-                            Float tmp = o1.getRelativeScore() - o2.getRelativeScore();
-                            return (tmp.intValue());
-
-                        case ALIGNED_BP:
-                            return (o1.getAlignmentLength() - o2.getAlignmentLength());
-
-                        case ALIGNED_IDENTITY:
-                            tmp = (o1.getPercentId() - o2.getPercentId());
-                            return tmp.intValue();
-
-                        case BIT_SCORE:
-                            tmp = o1.getBitScore() - o1.getBitScore();
-                            return tmp.intValue();
-                    }
-                }
-            });
-
-            Logger.info("Found " + results.size());
-            return results;
-        } catch (BlastException be) {
-            Logger.error(be);
-            throw new ControllerException(be);
         }
     }
 

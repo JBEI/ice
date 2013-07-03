@@ -39,13 +39,16 @@ public class Preference implements IModel {
     @Column(name = "preference_value")
     private String value;
 
+    // TODO : add boost
+
     public Preference(Account account, String key, String value) {
         this.account = account;
         this.key = key;
         this.value = value;
     }
 
-    public Preference() { }
+    public Preference() {
+    }
 
     public int getId() {
         return id;

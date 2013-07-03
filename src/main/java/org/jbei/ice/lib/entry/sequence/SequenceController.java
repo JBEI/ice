@@ -408,7 +408,11 @@ public class SequenceController {
         }
     }
 
-    public List<Sequence> getAllSequences() throws ControllerException {
+    /**
+     * @return sequences for entries which are not deleted, not pending and not drafts
+     * @throws ControllerException
+     */
+    public Set<Sequence> getAllSequences() throws ControllerException {
         try {
             return dao.getAllSequences();
         } catch (DAOException e) {

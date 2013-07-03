@@ -1,5 +1,9 @@
 package org.jbei.ice.lib.permissions;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Set;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -16,10 +20,6 @@ import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Set;
 
 public class PermissionsController {
 
@@ -152,7 +152,7 @@ public class PermissionsController {
     public int clearPermissions(Account account, Entry entry) throws ControllerException, PermissionException {
         if (!hasWritePermission(account, entry)) {
             throw new PermissionException(account.getEmail() + " doesn't have write permission for entry "
-                    + entry.getId());
+                                                  + entry.getId());
         }
 
         try {
@@ -165,7 +165,7 @@ public class PermissionsController {
     public int clearFolderPermissions(Account account, Folder folder) throws ControllerException, PermissionException {
         if (!hasWritePermission(account, folder)) {
             throw new PermissionException(account.getEmail() + " doesn't have write permissions for folder "
-                    + folder.getId());
+                                                  + folder.getId());
         }
         try {
             return dao.clearPermissions(folder);
@@ -177,7 +177,7 @@ public class PermissionsController {
     public int clearGroupPermissions(Account account, Group group) throws ControllerException, PermissionException {
         if (!group.getOwner().getEmail().equals(account.getEmail()) && !accountController.isAdministrator(account)) {
             throw new PermissionException(account.getEmail() + " does not have permission to delete group "
-                    + group.getId());
+                                                  + group.getId());
         }
 
         try {
@@ -273,7 +273,8 @@ public class PermissionsController {
     }
 
     /**
-     * Checks if an account has read permissions for an entry
+     * Checks if an account has read permissions for an entry. If no account is specified,
+     * the method checks for public access of entry
      *
      * @param account user account
      * @param entry   existing entry
@@ -283,20 +284,23 @@ public class PermissionsController {
      */
     public boolean hasReadPermission(Account account, Entry entry) throws ControllerException {
 
+        // get groups for account. if account is null, this will return everyone group
+        Set<Group> accountGroups = groupController.getAllGroups(account);
+
+        // check read permission through group membership
+        // ie. belongs to group that has read privileges for entry (or a group whose parent group does)
+        if (groupHasReadPermission(accountGroups, entry))
+            return true;
+
+        if (account == null)
+            return false;
+
         // check if account is a moderator account of is owner of the entry
         if (isOwnerOrAdministrator(account, entry))
             return true;
 
         // check explicit read permission
         if (accountHasReadPermission(account, entry))
-            return true;
-
-        // get groups for account
-        Set<Group> accountGroups = groupController.getAllGroups(account);
-
-        // check read permission through group membership
-        // ie. belongs to group that has read privileges for entry (or a group whose parent group does)
-        if (groupHasReadPermission(accountGroups, entry))
             return true;
 
         Set<Folder> entryFolders = entry.getFolders();
@@ -389,7 +393,7 @@ public class PermissionsController {
             throws ControllerException, PermissionException {
         if (!hasWritePermission(account, entry))
             throw new PermissionException(account.getEmail() + ": does not have read permissions for entry \""
-                    + entry.getRecordId() + "\"");
+                                                  + entry.getRecordId() + "\"");
 
         ArrayList<PermissionInfo> permissionInfos = new ArrayList<>();
 
@@ -398,32 +402,32 @@ public class PermissionsController {
             Set<Account> readAccounts = dao.retrieveAccountPermissions(entry, false, true);
             for (Account readAccount : readAccounts) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.Article.ACCOUNT, readAccount.getId(),
-                        PermissionInfo.Type.READ_ENTRY, entry.getId(),
-                        readAccount.getFullName()));
+                                                       PermissionInfo.Type.READ_ENTRY, entry.getId(),
+                                                       readAccount.getFullName()));
             }
 
             // write accounts
             Set<Account> writeAccounts = dao.retrieveAccountPermissions(entry, true, false);
             for (Account writeAccount : writeAccounts) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.Article.ACCOUNT, writeAccount.getId(),
-                        PermissionInfo.Type.WRITE_ENTRY, entry.getId(),
-                        writeAccount.getFullName()));
+                                                       PermissionInfo.Type.WRITE_ENTRY, entry.getId(),
+                                                       writeAccount.getFullName()));
             }
 
             // read groups
             Set<Group> readGroups = dao.retrieveGroupPermissions(entry, false, true);
             for (Group group : readGroups) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.Article.GROUP, group.getId(),
-                        PermissionInfo.Type.READ_ENTRY, entry.getId(),
-                        group.getLabel()));
+                                                       PermissionInfo.Type.READ_ENTRY, entry.getId(),
+                                                       group.getLabel()));
             }
 
             // write groups
             Set<Group> writeGroups = dao.retrieveGroupPermissions(entry, true, false);
             for (Group group : writeGroups) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.Article.GROUP, group.getId(),
-                        PermissionInfo.Type.WRITE_ENTRY, entry.getId(),
-                        group.getLabel()));
+                                                       PermissionInfo.Type.WRITE_ENTRY, entry.getId(),
+                                                       group.getLabel()));
             }
         } catch (DAOException de) {
             throw new ControllerException(de);
@@ -447,32 +451,32 @@ public class PermissionsController {
             Set<Account> readAccounts = dao.retrieveAccountPermissions(folder, false, true);
             for (Account readAccount : readAccounts) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.Article.ACCOUNT, readAccount.getId(),
-                        PermissionInfo.Type.READ_FOLDER, folder.getId(),
-                        readAccount.getFullName()));
+                                                       PermissionInfo.Type.READ_FOLDER, folder.getId(),
+                                                       readAccount.getFullName()));
             }
 
             // write accounts
             Set<Account> writeAccounts = dao.retrieveAccountPermissions(folder, true, false);
             for (Account writeAccount : writeAccounts) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.Article.ACCOUNT, writeAccount.getId(),
-                        PermissionInfo.Type.WRITE_FOLDER, folder.getId(),
-                        writeAccount.getFullName()));
+                                                       PermissionInfo.Type.WRITE_FOLDER, folder.getId(),
+                                                       writeAccount.getFullName()));
             }
 
             // read groups
             Set<Group> readGroups = dao.retrieveGroupPermissions(folder, false, true);
             for (Group group : readGroups) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.Article.GROUP, group.getId(),
-                        PermissionInfo.Type.READ_FOLDER, folder.getId(),
-                        group.getLabel()));
+                                                       PermissionInfo.Type.READ_FOLDER, folder.getId(),
+                                                       group.getLabel()));
             }
 
             // write groups
             Set<Group> writeGroups = dao.retrieveGroupPermissions(folder, true, false);
             for (Group group : writeGroups) {
                 permissionInfos.add(new PermissionInfo(PermissionInfo.Article.GROUP, group.getId(),
-                        PermissionInfo.Type.WRITE_FOLDER, folder.getId(),
-                        group.getLabel()));
+                                                       PermissionInfo.Type.WRITE_FOLDER, folder.getId(),
+                                                       group.getLabel()));
             }
         } catch (DAOException de) {
             throw new ControllerException(de);
@@ -514,8 +518,8 @@ public class PermissionsController {
 
                 // add write permissions for owner
                 PermissionInfo info = new PermissionInfo(PermissionInfo.Article.ACCOUNT, account.getId(),
-                        PermissionInfo.Type.WRITE_ENTRY,
-                        entry.getId(), account.getFullName());
+                                                         PermissionInfo.Type.WRITE_ENTRY,
+                                                         entry.getId(), account.getFullName());
                 addPermission(account, info);
             }
             Logger.info("Permissions upgrade complete");

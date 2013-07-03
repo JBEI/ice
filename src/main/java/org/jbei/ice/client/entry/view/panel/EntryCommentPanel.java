@@ -58,6 +58,7 @@ public class EntryCommentPanel extends Composite {
         table.setWidget(2, 0, commentArea);
         table.getFlexCellFormatter().setVisible(2, 0, false);
         table.setHTML(3, 0, "<i class=\"font-75em pad-8\">No comments available</i>");
+//        table.setVisible(false);
 
         setCancelHandler();
         setSubmitHandler();

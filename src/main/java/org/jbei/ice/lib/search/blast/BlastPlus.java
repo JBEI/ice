@@ -1,35 +1,58 @@
 package org.jbei.ice.lib.search.blast;
 
-import org.apache.commons.io.IOUtils;
-import org.biojava.bio.seq.DNATools;
-import org.biojava.bio.seq.RNATools;
-import org.biojava.bio.symbol.IllegalSymbolException;
-import org.biojava.bio.symbol.SymbolList;
-import org.jbei.ice.controllers.ApplicationController;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
+import java.nio.charset.Charset;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Set;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.model.PartNumber;
-import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.Visibility;
-import org.jbei.ice.shared.dto.entry.*;
+import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.shared.dto.entry.PartInfo;
+import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.shared.dto.entry.StrainInfo;
 import org.jbei.ice.shared.dto.search.BlastProgram;
 import org.jbei.ice.shared.dto.search.BlastQuery;
 import org.jbei.ice.shared.dto.search.SearchResultInfo;
 
-import java.io.*;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
-import java.nio.charset.Charset;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.biojava.bio.seq.DNATools;
+import org.biojava.bio.seq.RNATools;
+import org.biojava.bio.symbol.IllegalSymbolException;
+import org.biojava.bio.symbol.SymbolList;
 
 /**
  * Blast Search functionality for BLAST+
@@ -40,14 +63,15 @@ public class BlastPlus {
 
     private static final String BLAST_DB_FOLDER = "ice_blast";
     private static final String BLAST_DB_NAME = "ice";
+    private static final String DELIMITER = ",";
 
-    public HashMap<String, SearchResultInfo> runBlast(Account account, BlastQuery query) throws BlastException {
+    public static HashMap<String, SearchResultInfo> runBlast(Account account, BlastQuery query) throws BlastException {
         try {
             String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + query.getBlastProgram().getName();
             String blastDb = Utils.getConfigValue(ConfigurationKey.BLAST_DIR) + File.separator + BLAST_DB_FOLDER
                     + File.separator + BLAST_DB_NAME;
-            String blastCommand = (command + " -db " + blastDb + " -outfmt 10");
+            String blastCommand = (command + " -db " + blastDb);
             Logger.info("Blast: " + blastCommand);
             Process process = Runtime.getRuntime().exec(blastCommand);
             ProcessResultReader reader = new ProcessResultReader(process.getInputStream(), "STD_OUT");
@@ -68,7 +92,7 @@ public class BlastPlus {
 
                 case 1:
                     Logger.error(account.getEmail() + ": Error in query sequence(s) or BLAST options: "
-                            + error.toString());
+                                         + error.toString());
                     break;
 
                 case 2:
@@ -85,105 +109,133 @@ public class BlastPlus {
         }
     }
 
-    private HashMap<String, SearchResultInfo> processBlastOutput(String blastOutput, int queryLength) {
+    private static SearchResultInfo parseSequenceIdentifier(String line) {
+        long id;
+        EntryType recordType;
+        String name;
+        String partNumber;
+        SearchResultInfo info = null;
+
+        // new record
+        String[] idLineFields = line.substring(1).split(DELIMITER);
+        if (idLineFields.length == 4) {
+            id = Long.decode(idLineFields[0]);
+            recordType = EntryType.nameToType(idLineFields[1]);
+            name = idLineFields[2];
+            partNumber = idLineFields[3];
+
+            EntryInfo view;
+            switch (recordType) {
+                case PART:
+                default:
+                    view = new PartInfo();
+                    break;
+
+                case ARABIDOPSIS:
+                    view = new ArabidopsisSeedInfo();
+                    break;
+
+                case PLASMID:
+                    view = new PlasmidInfo();
+                    break;
+
+                case STRAIN:
+                    view = new StrainInfo();
+                    break;
+            }
+
+            view.setId(id);
+            view.setPartId(partNumber);
+            view.setName(name);
+
+            info = new SearchResultInfo();
+            info.setEntryInfo(view);
+
+            try {
+                String summary = ControllerFactory.getEntryController().getEntrySummary(info.getEntryInfo().getId());
+                info.getEntryInfo().setShortDescription(summary);
+            } catch (ControllerException e) {
+                Logger.error(e);
+            }
+//                searchResult.setAlignmentLength(alignmentLength);
+//                searchResult.setPercentId(percentId);
+        }
+        return info;
+    }
+
+    private static HashMap<String, SearchResultInfo> processBlastOutput(String blastOutput, int queryLength) {
         HashMap<String, SearchResultInfo> hashMap = new HashMap<>();
 
         ArrayList<String> lines = new ArrayList<>(Arrays.asList(blastOutput.split("\n")));
-        for (String line : lines) {
-            String[] columns = line.split(",");
-            if (columns.length == 12) {
-                String idLine = columns[1];
-                String[] idLineFields = idLine.split(":");
 
-                long id;
-                int sLength;
-                boolean circular = false;
-                EntryType recordType;
-                String name;
-                String partNumber;
+        for (int i = 0; i < lines.size(); i += 1) {
+            String line = lines.get(i);
 
-                if (idLineFields.length == 6) {
-                    idLine = idLineFields[0].trim();
-                    id = Long.decode(idLineFields[0]).longValue();
-                    recordType = EntryType.nameToType(idLineFields[2]);
-                    name = idLineFields[3];
-                    partNumber = idLineFields[4];
-                    if ("c".equals(idLineFields[1]))
-                        circular = true;
-                    sLength = Integer.parseInt(idLineFields[5]);
-                } else if (idLineFields.length <= 2) {
-                    Logger.info("Old Blast db format detected. Schedule rebuild");
-                    ApplicationController.scheduleBlastIndexRebuildTask(true);
-                    return null;
-                } else {
+            if (line.trim().isEmpty() || !line.startsWith(">"))
+                continue;
+
+
+            // process alignment details for above match
+            SearchResultInfo info = parseSequenceIdentifier(line.substring(1));
+            if (info == null)
+                continue;
+
+            info.setQueryLength(queryLength);
+            while (i < lines.size() - 1) {
+                i += 1;
+                line = lines.get(i);
+                if (line.startsWith("Length")) {
+                    int sequenceLength = Integer.valueOf(line.substring(7).trim());
+//                    System.out.println(info.getQueryLength() + ", " + sequenceLength / 2);
                     continue;
                 }
 
-                String recordId = idLine;
-                float percentId = Float.parseFloat(columns[2]);
-                int alignmentLength = Integer.parseInt(columns[3]);
-                int sStart = Integer.parseInt(columns[8]);
-                int sEnd = Integer.parseInt(columns[9]);
-                float eValue = Float.parseFloat(columns[10]);
-                float bitScore = Float.parseFloat(columns[11]);
-                float relativeScore = (percentId * alignmentLength * bitScore);
+                // next result encountered
+                if (line.startsWith(">")) {
+                    i -= 1;
+                    break;
+                }
 
-                if (sStart > sLength || sEnd > sLength) {
-                    if (circular) {
-                        if (sStart > sLength && sEnd > sLength) {
-                            // both start and end are longer than the length. Skip this
-                            continue;
-                        }
-                    } else {
-                        // skip this match.
-                        continue;
+                // bit score and evalue
+                // eg. Score = 3131 bits (1695),  Expect = 0.0
+                if (line.contains("Score")) {
+                    String[] split = line.split("=");
+                    String evalue = split[2].trim();
+                    info.seteValue(evalue);
+
+                    String scoreString = split[1].substring(1, split[1].indexOf(",")).split(" ")[0];
+                    if (NumberUtils.isNumber(scoreString)) {
+                        info.setScore(Float.valueOf(scoreString));
                     }
                 }
 
-                SearchResultInfo info = new SearchResultInfo();
-                info.setBitScore(bitScore);
-
-                EntryInfo view;
-                switch (recordType) {
-                    case ARABIDOPSIS:
-                        view = new ArabidopsisSeedInfo();
-                        break;
-
-                    case PART:
-                    default:
-                        view = new PartInfo();
-                        break;
-
-                    case PLASMID:
-                        view = new PlasmidInfo();
-                        break;
-
-                    case STRAIN:
-                        view = new StrainInfo();
-                        break;
+                // aligned bp and aligned identity %
+                // e.g. Identities = 1692/1692 (100%), Gaps = 0/1692 (0%)
+                if (line.contains("Identities")) {
+                    String[] split = line.split("=");
+                    String aligned = split[1].substring(1, split[1].indexOf(","));
+                    info.setAlignment(aligned);
+//                    if (!aligned.trim().isEmpty()) {
+//                        info.setAlignmentLength(Integer.valueOf(aligned).intValue());
+//                    }
                 }
 
-                view.setId(id);
-                view.setPartId(partNumber);
-                view.setName(name);
+                info.getMatchDetails().add(line);
 
-                info.setEntryInfo(view);
-                info.seteValue(eValue);
-                info.setAlignmentLength(alignmentLength);
-                info.setPercentId(percentId);
-                info.setQueryLength(queryLength);
-
-                SearchResultInfo currentResult = hashMap.get(recordId);
+                String idString = Long.toString(info.getEntryInfo().getId());
+                SearchResultInfo currentResult = hashMap.get(idString);
                 // if there is an existing record for same entry with a lower relative score then replace
                 if (currentResult == null)
-                    hashMap.put(recordId, info);
-                else {
-                    if (relativeScore > currentResult.getRelativeScore()) {
-                        hashMap.put(recordId, info);
-                    }
-                }
+                    hashMap.put(idString, info);
+//                else {
+//                    if (info.getScore() > currentResult.getRelativeScore()) {
+//                        hashMap.put(idString, info);
+//                    }
+//                }
             }
         }
+
+
         return hashMap;
     }
 
@@ -240,11 +292,11 @@ public class BlastPlus {
             String blastN = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + BlastProgram.BLAST_N.getName();
             command.append(blastN)
-                    .append(" -query ")
-                    .append(queryFilePath.toString())
-                    .append(" -subject ")
-                    .append(subjectFilePath.toString())
-                    .append(" -dust no");
+                   .append(" -query ")
+                   .append(queryFilePath.toString())
+                   .append(" -subject ")
+                   .append(subjectFilePath.toString())
+                   .append(" -dust no");
 
             Logger.info("Blast-2-seq query: " + command.toString());
             result = runSimpleExternalProgram(command.toString());
@@ -304,7 +356,7 @@ public class BlastPlus {
             Files.createDirectory(newFastaFileDirPath);
             Path fastaFilePath = Paths.get(newFastaFileDirPath.toString(), "bigfastafile");
             try (BufferedWriter write = Files.newBufferedWriter(fastaFilePath, Charset.defaultCharset(),
-                    StandardOpenOption.CREATE_NEW)) {
+                                                                StandardOpenOption.CREATE_NEW)) {
                 writeBigFastaFile(write);
             }
 
@@ -361,7 +413,8 @@ public class BlastPlus {
         }
     }
 
-    private static void renameBlastDb(File newBigFastaFileDir, String baseBlastDirName) throws IOException, BlastException {
+    private static void renameBlastDb(File newBigFastaFileDir, String baseBlastDirName)
+            throws IOException, BlastException {
         Path oldBlast = Paths.get(baseBlastDirName + ".old");
         deleteDirectoryIfExists(oldBlast);
 
@@ -381,25 +434,22 @@ public class BlastPlus {
      * @throws BlastException
      */
     private static void writeBigFastaFile(BufferedWriter writer) throws BlastException {
-        List<Sequence> sequencesList;
+        Set<Sequence> sequencesList;
         SequenceController sequenceController = ControllerFactory.getSequenceController();
         try {
-            sequencesList = sequenceController.getAllSequences(); //TODO potential performance impact
+            sequencesList = sequenceController.getAllSequences();
         } catch (ControllerException e) {
             throw new BlastException(e);
         }
         for (Sequence sequence : sequencesList) {
-            if (sequence.getEntry().getVisibility().intValue() != Visibility.OK.getValue())
-                continue;
-
             long id = sequence.getEntry().getId();
-            boolean circular = false;
-            if (sequence.getEntry() instanceof Plasmid) {
-                circular = ((Plasmid) sequence.getEntry()).getCircular();
-            }
+//            boolean circular = false;
+//            if (sequence.getEntry() instanceof Plasmid) {
+//                circular = ((Plasmid) sequence.getEntry()).getCircular();
+//            }
             String sequenceString = "";
             String temp = sequence.getSequence();
-            int sequenceLength = 0;
+//            int sequenceLength = 0;
             if (temp != null) {
                 SymbolList symL;
                 try {
@@ -416,21 +466,22 @@ public class BlastPlus {
                     }
                 }
 
-                sequenceLength = symL.seqString().length();
+//                sequenceLength = symL.seqString().length();
                 sequenceString = SequenceUtils.breakUpLines(symL.seqString() + symL.seqString());
             }
+
             if (sequenceString.length() > 0) {
                 try {
                     String idString = ">" + id;
-                    idString += ":" + (circular ? "c" : "l");
-                    idString += ":" + sequence.getEntry().getRecordType();
-                    String name = sequence.getEntry().getOneName() == null ? "None" : sequence.getEntry().getOneName().getName();
-                    idString += ":" + name;
+                    idString += DELIMITER + sequence.getEntry().getRecordType();
+                    String name = sequence.getEntry().getOneName() == null ? "None" : sequence.getEntry().getOneName()
+                                                                                              .getName();
+                    idString += DELIMITER + name;
                     Set<PartNumber> numbers = sequence.getEntry().getPartNumbers();
-                    PartNumber partNumber = numbers == null || numbers.isEmpty() ? null : (PartNumber) numbers.toArray()[0];
+                    PartNumber partNumber = numbers == null || numbers.isEmpty() ? null : (PartNumber) numbers
+                            .toArray()[0];
                     String pNumber = partNumber == null ? "None" : partNumber.getPartNumber();
-                    idString += ":" + pNumber;
-                    idString += ":" + sequenceLength;
+                    idString += DELIMITER + pNumber;
                     idString += "\n";
                     writer.write(idString);
                     writer.write(sequenceString + "\n");

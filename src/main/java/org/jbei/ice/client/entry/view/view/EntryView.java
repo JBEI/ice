@@ -1,10 +1,9 @@
 package org.jbei.ice.client.entry.view.view;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.MultiSelectionModel;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
@@ -29,9 +28,15 @@ import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.entry.EntryType;
 import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.MultiSelectionModel;
 
 /**
  * Main view panel for showing details about a single entry
@@ -303,6 +308,7 @@ public class EntryView extends Composite implements IEntryView {
         samplePanel.setData(info.getSampleStorage(), handler);
         sequencePanel.setSequenceData(info.getSequenceAnalysis(), info);
         commentPanel.setSampleOptions(info.getSampleStorage());
+        entryAction.setSampleOptions(info.getSampleStorage());
         return sequenceViewPanel.getPresenter();
     }
 

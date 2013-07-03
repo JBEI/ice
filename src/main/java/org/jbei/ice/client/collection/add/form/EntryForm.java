@@ -1,8 +1,9 @@
 package org.jbei.ice.client.collection.add.form;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
@@ -14,9 +15,9 @@ import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.user.PreferenceKey;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.*;
 
 /**
  * Parent class for forms used to create single entries
@@ -158,10 +159,8 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
     }
 
     protected Widget createTextBoxWithHelp(Widget box, String helpText) {
-        String html = "<span id=\"box_id\"></span><span class=\"help_text\">" + helpText + "</span>";
-        HTMLPanel panel = new HTMLPanel(html);
-        panel.addAndReplaceElement(box, "box_id");
-        return panel;
+        box.getElement().setAttribute("placeHolder", helpText);
+        return box;
     }
 
     protected void setLabel(boolean required, String label, FlexTable layout, int row, int col) {

@@ -1,13 +1,13 @@
 package org.jbei.ice.shared;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.shared.dto.IDTOModel;
 
 /**
  * Column fields for tables used on the ice platform UI
  *
  * @author Hector Plahar
  */
-public enum ColumnField implements IsSerializable {
+public enum ColumnField implements IDTOModel {
 
     SELECTION("Select"),
     TYPE("Type"),
@@ -29,7 +29,8 @@ public enum ColumnField implements IsSerializable {
     LOCATION("Location"),
     DESCRIPTION("Description"),
     COUNT("Member Count"),
-    RELEVANCE("Relevance");
+    RELEVANCE("Relevance"),
+    ALIGNMENT("Alignment");
 
     private String name;
 

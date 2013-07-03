@@ -3,6 +3,7 @@ package org.jbei.ice.client.collection.add.form;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.shared.dto.ParameterInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -95,6 +96,7 @@ public class ParametersPanel {
     }
 
     public class Parameter {
+
         private final TextBox name;
         private final TextBox value;
         private final Button plus;
@@ -121,10 +123,8 @@ public class ParametersPanel {
             table.getFlexCellFormatter().setWidth(row, 3, "140px");
 
             // plus, minus buttons for adding and removing rows. first row does not have the minus button
-            plus = new Button("+");
-            plus.setStyleName("pull_down");
-            minus = new Button("-");
-            minus.setStyleName("pull_down");
+            plus = new Button("<i class=\"" + FAIconType.PLUS.getStyleName() + "\"></i>");
+            minus = new Button("<i class=\"" + FAIconType.MINUS.getStyleName() + "\"></i>");
             table.setWidget(row, 4, plus);
             if (!firstRow) {
                 table.getFlexCellFormatter().setWidth(row, 4, "20px");

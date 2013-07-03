@@ -2,7 +2,7 @@ package org.jbei.ice.lib.entry.sequence;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +16,7 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
+import org.jbei.ice.shared.dto.Visibility;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -231,11 +232,18 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public List<Sequence> getAllSequences() throws DAOException {
+    public Set<Sequence> getAllSequences() throws DAOException {
         Session session = currentSession();
         try {
-            Criteria criteria = session.createCriteria(Sequence.class).setFirstResult(0);
-            return new LinkedList<Sequence>(criteria.list());
+            Criteria criteria = session.createCriteria(Sequence.class);
+
+            Criteria entryC = criteria.createCriteria("entry", "entry");
+            entryC.add(Restrictions.disjunction()
+                                   .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                                   .add(Restrictions.isNull("visibility"))
+                                   .add(Restrictions.ne("ownerEmail", "system")));
+
+            return new LinkedHashSet<Sequence>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
