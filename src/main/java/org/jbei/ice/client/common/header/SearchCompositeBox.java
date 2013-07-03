@@ -105,10 +105,6 @@ public class SearchCompositeBox extends Composite {
         return box.getText().trim();
     }
 
-    public void setSearch(String box) {
-        this.box.setText(box);
-    }
-
     public void advancedWidgetClosed() {
         open = false;
         pullDownIcon.setType(FAIconType.CARET_DOWN);

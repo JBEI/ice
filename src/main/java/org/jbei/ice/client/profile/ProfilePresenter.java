@@ -1,30 +1,28 @@
 package org.jbei.ice.client.profile;
 
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import org.jbei.ice.client.*;
-import org.jbei.ice.client.collection.FolderEntryDataProvider;
-import org.jbei.ice.client.collection.table.CollectionDataTable;
-import org.jbei.ice.client.common.table.EntryTablePager;
-import org.jbei.ice.client.common.table.column.DataTableColumn;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
+import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.group.UserGroupPresenter;
 import org.jbei.ice.client.profile.message.UserMessagesPresenter;
 import org.jbei.ice.client.profile.preferences.UserPreferencesPresenter;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
 import org.jbei.ice.shared.dto.group.GroupInfo;
 import org.jbei.ice.shared.dto.group.GroupType;
 import org.jbei.ice.shared.dto.message.MessageList;
 import org.jbei.ice.shared.dto.user.PreferenceKey;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * Presenter for the profile page
@@ -34,8 +32,7 @@ import java.util.HashMap;
 public class ProfilePresenter extends AbstractPresenter {
 
     private final IProfileView display;
-    private final FolderEntryDataProvider folderDataProvider;
-    private final CollectionDataTable collectionsDataTable;
+    //    private final CollectionDataTable collectionsDataTable;
     private final String userId;
     private UserProfilePresenter profilePresenter;
     private UserGroupPresenter groupPresenter;
@@ -46,7 +43,7 @@ public class ProfilePresenter extends AbstractPresenter {
     private final UserOption[] availableOptions;
 
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus, IProfileView display,
-                            final String userId, String selection) {
+            final String userId, String selection) {
         super(service, eventBus);
         this.userId = userId;
         this.display = display;
@@ -64,38 +61,29 @@ public class ProfilePresenter extends AbstractPresenter {
         display.setMenuSelection(option);
         currentOption = option;
 
-        this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
+//        this.collectionsDataTable = new CollectionDataTable(new EntryTablePager(), null);
 
-            @Override
-            protected EntryViewEventHandler getHandler() {
-                return new EntryViewEventHandler() {
-                    @Override
-                    public void onEntryView(EntryViewEvent event) {
-                        event.setNavigable(folderDataProvider);
-                        eventBus.fireEvent(event);
-                    }
-                };
-            }
+//        {
+//
+//            @Override
+//            protected ArrayList<DataTableColumn<EntryInfo, ?>> createColumns() {
+//                ArrayList<DataTableColumn<EntryInfo, ?>> columns = new ArrayList<DataTableColumn<EntryInfo, ?>>();
+//                columns.add(super.addTypeColumn(true, 60, com.google.gwt.dom.client.Style.Unit.PX));
+//                DataTableColumn<EntryInfo, EntryInfo> partIdCol = addPartIdColumn(false, 120,
+//                        com.google.gwt.dom.client.Style.Unit.PX);
+//                columns.add(partIdCol);
+//                columns.add(super.addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
+//                columns.add(super.addSummaryColumn());
+//                columns.add(super.addStatusColumn());
+//                super.addHasAttachmentColumn();
+//                super.addHasSampleColumn();
+//                super.addHasSequenceColumn();
+//                columns.add(super.addCreatedColumn());
+//                return columns;
+//            }
+//        };
 
-            @Override
-            protected ArrayList<DataTableColumn<EntryInfo, ?>> createColumns() {
-                ArrayList<DataTableColumn<EntryInfo, ?>> columns = new ArrayList<DataTableColumn<EntryInfo, ?>>();
-                columns.add(super.addTypeColumn(true, 60, com.google.gwt.dom.client.Style.Unit.PX));
-                DataTableColumn<EntryInfo, EntryInfo> partIdCol = addPartIdColumn(false, 120,
-                        com.google.gwt.dom.client.Style.Unit.PX);
-                columns.add(partIdCol);
-                columns.add(super.addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
-                columns.add(super.addSummaryColumn());
-                columns.add(super.addStatusColumn());
-                super.addHasAttachmentColumn();
-                super.addHasSampleColumn();
-                super.addHasSequenceColumn();
-                columns.add(super.addCreatedColumn());
-                return columns;
-            }
-        };
-
-        this.folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, service);
+//        this.folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, service);
         retrieveProfileInfo();
         handlerUserMenuSelection();
     }

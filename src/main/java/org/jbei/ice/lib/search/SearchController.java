@@ -57,20 +57,20 @@ public class SearchController {
                 Logger.warn("Encountered port with null name in service client");
                 continue;
             }
-            IRegistryAPI hw = service.getPort(name, IRegistryAPI.class);
-            Logger.info("Retrieved port for " + name.getNamespaceURI());
+
+            IRegistryAPI api = service.getPort(name, IRegistryAPI.class);
+            Logger.info("Retrieved API proxy for " + name.getNamespaceURI());
 
             try {
                 if (results == null)
-                    results = hw.runSearch(query);
+                    results = api.runSearch(query);
                 else {
-                    SearchResults tmpResults = hw.runSearch(query);
+                    SearchResults tmpResults = api.runSearch(query);
                     results.getResults().addAll(tmpResults.getResults());
                     results.setResultCount(results.getResultCount() + tmpResults.getResultCount());
                 }
             } catch (Exception e) {
                 Logger.error(e.getMessage());
-                continue;
             }
         }
 
@@ -101,6 +101,8 @@ public class SearchController {
         // text query (may also include blast)
         // no filter type indicates a term or phrase query
         Iterator<String> iterable;
+        HibernateSearch hibernateSearch = HibernateSearch.getInstance();
+
         if (queryString != null && !queryString.isEmpty()) {
             iterable = Splitter.on(" ").omitEmptyStrings().split(queryString).iterator();
             HashMap<String, String> results = ControllerFactory.getPreferencesController().
@@ -112,18 +114,12 @@ public class SearchController {
                     mapping.put(field, Float.valueOf(entry.getValue()));
                 } catch (NumberFormatException nfe) {
                     Logger.error(nfe);
-                    continue;
                 }
             }
-            return HibernateSearch.getInstance().executeSearch(account, iterable, query, projectName, projectURI,
-                                                               mapping);
+            return hibernateSearch.executeSearch(account, iterable, query, projectName, projectURI, mapping);
         } else {
-            return HibernateSearch.getInstance().executeSearchNoTerms(account, query, projectName, projectURI);
+            return hibernateSearch.executeSearchNoTerms(account, query, projectName, projectURI);
         }
-
-        // advanced search filters only (e.g. has attachment etc)
-        // TODO
-//        return HibernateSearch.getInstance().executeSearchNoTerms(account, query, projectName, projectURI);
     }
 
     public boolean rebuildIndexes(Account account) {

@@ -3,6 +3,7 @@ package org.jbei.ice.client.common.table;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.cell.EntrySelectionColumnHeaderCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
@@ -38,8 +39,8 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     private EntrySelectionModel<T> selectionModel;
 
-    public EntryDataTable() {
-        super();
+    public EntryDataTable(ServiceDelegate<T> delegate) {
+        super(delegate);
     }
 
     @Override

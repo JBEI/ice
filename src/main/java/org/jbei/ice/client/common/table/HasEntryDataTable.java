@@ -3,14 +3,11 @@ package org.jbei.ice.client.common.table;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.entry.IHasEntryId;
-import org.jbei.ice.client.common.table.cell.HasEntryPartIDCell;
 import org.jbei.ice.client.common.table.cell.HasEntrySelectionColumnHeaderCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
-import org.jbei.ice.client.common.table.column.HasEntryPartIdColumn;
 import org.jbei.ice.client.common.table.column.ImageColumn;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.entry.HasEntryInfo;
 
@@ -41,8 +38,8 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
     private HasEntrySelectionModel<T> selectionModel;
 
-    public HasEntryDataTable() {
-        super();
+    public HasEntryDataTable(ServiceDelegate<T> delegate) {
+        super(delegate);
     }
 
     @Override
@@ -66,6 +63,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
     protected DataTableColumn<T, Boolean> addSelectionColumn() {
         final CheckboxCell columnCell = new CheckboxCell(true, false) {
+
             @Override
             public void onBrowserEvent(Context context, Element parent, Boolean value,
                     NativeEvent event, ValueUpdater<Boolean> valueUpdater) {
@@ -83,15 +81,15 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
             }
         };
 
-        DataTableColumn<T, Boolean> selectionColumn =
-                new DataTableColumn<T, Boolean>(columnCell, ColumnField.SELECTION) {
+        DataTableColumn<T, Boolean> selectionColumn = new DataTableColumn<T, Boolean>(columnCell,
+                                                                                      ColumnField.SELECTION) {
 
-                    @Override
-                    public Boolean getValue(T object) {
-                        // returns column value from underlying data object (EntryDataView in this instance)
-                        return selectionModel.isSelected(object);
-                    }
-                };
+            @Override
+            public Boolean getValue(T object) {
+                // returns column value from underlying data object (EntryDataView in this instance)
+                return selectionModel.isSelected(object);
+            }
+        };
         selectionColumn.setSortable(false);
         SelectionColumnHeader header = new SelectionColumnHeader();
 
@@ -144,17 +142,15 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
         this.setColumnWidth(column, 30, Unit.PX);
     }
 
-    protected DataTableColumn<T, HasEntryInfo> addPartIdColumn(boolean sortable, double width, Unit unit) {
-        HasEntryPartIDCell<HasEntryInfo> cell = new HasEntryPartIDCell<HasEntryInfo>(EntryContext.Type.SEARCH);
-        cell.addEntryHandler(getHandler());
-        DataTableColumn<T, HasEntryInfo> partIdColumn = new HasEntryPartIdColumn<T>(cell);
-        this.setColumnWidth(partIdColumn, width, unit);
-        partIdColumn.setSortable(sortable);
-        this.addColumn(partIdColumn, "Part ID");
-        return partIdColumn;
-    }
-
-    protected abstract EntryViewEventHandler getHandler();
+//    protected DataTableColumn<T, HasEntryInfo> addPartIdColumn(ServiceDelegate<HasEntryInfo> delegate,
+// boolean sortable, double width, Unit unit) {
+//        HasEntryPartIDCell<HasEntryInfo> cell = new HasEntryPartIDCell<HasEntryInfo>(delegate);
+//        DataTableColumn<T, HasEntryInfo> partIdColumn = new HasEntryPartIdColumn<T>(cell);
+//        this.setColumnWidth(partIdColumn, width, unit);
+//        partIdColumn.setSortable(sortable);
+//        this.addColumn(partIdColumn, "Part ID");
+//        return partIdColumn;
+//    }
 
     protected DataTableColumn<T, SafeHtml> addNameColumn(final double width, Unit unit) {
 

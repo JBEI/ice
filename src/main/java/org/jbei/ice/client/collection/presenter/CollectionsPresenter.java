@@ -1,19 +1,20 @@
 package org.jbei.ice.client.collection.presenter;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SingleSelectionModel;
-import org.jbei.ice.client.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.FolderEntryDataProvider;
 import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.ShareCollectionData;
@@ -26,8 +27,6 @@ import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.EntrySelectionModel;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.entry.view.EntryPresenter;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.event.ShowEntryListEventHandler;
@@ -42,12 +41,24 @@ import org.jbei.ice.shared.dto.folder.FolderType;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 
-import java.util.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 public class CollectionsPresenter extends AbstractPresenter {
 
     private enum Mode {
-        SEARCH, COLLECTION, ENTRY;
+        SEARCH, COLLECTION, ENTRY
     }
 
     private ICollectionView display;
@@ -65,23 +76,22 @@ public class CollectionsPresenter extends AbstractPresenter {
     private final DeleteItemHandler deleteHandler;
     private HandlerRegistration selectionRegistration;
     private HandlerRegistration showListRegistration;
-    private HandlerRegistration showEntryRegistration;
 
     public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, final ICollectionView display,
-                                ISearchView searchView, SearchQuery query) {
+            ISearchView searchView, SearchQuery query) {
         this(service, eventBus, display);
         search(searchView, query);
     }
 
     // collections for entry view
     public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, final ICollectionView view,
-                                EntryContext event) {
+            EntryContext event) {
         this(service, eventBus, view);
         this.showEntryView(event);
     }
 
     public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, ICollectionView display,
-                                String param) {
+            String param) {
         // collection sub menu
         this(service, eventBus, display);
         long id = 0;
@@ -95,6 +105,28 @@ public class CollectionsPresenter extends AbstractPresenter {
         retrieveEntriesForFolder(id, null);
     }
 
+    private ServiceDelegate<EntryInfo> createDelegate() {
+        return new ServiceDelegate<EntryInfo>() {
+            @Override
+            public void execute(EntryInfo entryInfo) {
+                EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
+                context.setNav(folderDataProvider);
+                context.setId(entryInfo.getId());
+                context.setRecordId(entryInfo.getRecordId());
+                showEntryView(context);
+            }
+        };
+    }
+
+    private ServiceDelegate<EntryContext> createSearchDelegate() {
+        return new ServiceDelegate<EntryContext>() {
+            @Override
+            public void execute(EntryContext context) {
+                showEntryView(context);
+            }
+        };
+    }
+
     public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, final ICollectionView display) {
         super(service, eventBus);
         this.display = display;
@@ -102,19 +134,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         this.deleteHandler = new DeleteItemHandler(model.getService(), model.getEventBus(), display);
 
         // initialize all parameters
-        this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
-
-            @Override
-            protected EntryViewEventHandler getHandler() {
-                return new EntryViewEventHandler() {
-                    @Override
-                    public void onEntryView(EntryViewEvent event) {
-                        event.setNavigable(folderDataProvider);
-                        model.getEventBus().fireEvent(event);
-                    }
-                };
-            }
-        };
+        this.collectionsDataTable = new CollectionDataTable(new EntryTablePager(), createDelegate());
 
         this.folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, model.getService());
 
@@ -129,9 +149,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         // init text box
         initCreateCollectionHandlers();
 
-        // init entry handler
-        initEntryViewHandler();
-
         // create entry handler
         final SingleSelectionModel<EntryAddType> selectionModel = display.getAddEntrySelectionHandler();
         if (selectionRegistration != null)
@@ -143,7 +160,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             public void onSelectionChange(SelectionChangeEvent event) {
                 if (entryViewPresenter == null) {// TODO : when user navigates to another page and returns this is null
                     entryViewPresenter = new EntryPresenter(model.getService(), CollectionsPresenter.this,
-                            model.getEventBus(), null);
+                                                            model.getEventBus(), null);
                     entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
                 }
 
@@ -175,13 +192,13 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         // handler for showing feedback messages
         model.getEventBus().addHandler(FeedbackEvent.TYPE,
-                new FeedbackEvent.IFeedbackEventHandler() {
+                                       new FeedbackEvent.IFeedbackEventHandler() {
 
-                    @Override
-                    public void onFeedbackAvailable(FeedbackEvent event) {
-                        display.showFeedbackMessage(event.getMessage(), event.isError());
-                    }
-                });
+                                           @Override
+                                           public void onFeedbackAvailable(FeedbackEvent event) {
+                                               display.showFeedbackMessage(event.getMessage(), event.isError());
+                                           }
+                                       });
 
         // handler for "add to" sub menu
         AddToHandler addHandler = new AddToHandler(display, new HasEntry(), model, this.collectionsDataTable);
@@ -347,7 +364,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 }
 
                 for (long id : selected) {
-                    builder.append(id + ", ");
+                    builder.append(id).append(", ");
                 }
 
                 Window.Location.replace("/export?type=" + option.name() + "&entries=" + builder.toString());
@@ -361,7 +378,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     public void showEntryView(EntryContext event) {
         if (entryViewPresenter == null) {
             entryViewPresenter = new EntryPresenter(model.getService(), CollectionsPresenter.this,
-                    model.getEventBus(), event);
+                                                    model.getEventBus(), event);
             entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
         } else {
             entryViewPresenter.setCurrentContext(event);
@@ -389,7 +406,8 @@ public class CollectionsPresenter extends AbstractPresenter {
 
     protected void search(ISearchView searchView, SearchQuery query) {
         if (searchPresenter == null) {
-            searchPresenter = new SearchPresenter(model.getService(), model.getEventBus(), searchView);
+            searchPresenter = new SearchPresenter(model.getService(), model.getEventBus(), searchView,
+                                                  createSearchDelegate());
             searchPresenter.addTableSelectionModelChangeHandler(new Handler() {
 
                 @Override
@@ -455,22 +473,6 @@ public class CollectionsPresenter extends AbstractPresenter {
                 display.hideQuickAddInput();
             }
         });
-    }
-
-    private void initEntryViewHandler() {
-        if (showEntryRegistration != null)
-            showEntryRegistration.removeHandler();
-        showEntryRegistration = this.eventBus.addHandler(
-                EntryViewEvent.TYPE,
-                new EntryViewEvent.EntryViewEventHandler() {
-                    @Override
-                    public void onEntryView(EntryViewEvent event) {
-                        if (event == null || event.getContext() == null)
-                            return;
-
-                        showEntryView(event.getContext());
-                    }
-                });
     }
 
     private void handle() {
@@ -668,7 +670,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             MenuItem item = new MenuItem(0, "My Entries", ClientController.account.getUserEntryCount());
             userMenuItems.add(0, item);
             MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
-                    ClientController.account.getVisibleEntryCount());
+                                                   ClientController.account.getVisibleEntryCount());
             systemMenuItems.add(0, allEntriesItem);
             display.setSystemCollectionMenuItems(systemMenuItems);
             DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService(), model.getEventBus(), display);
@@ -789,13 +791,13 @@ public class CollectionsPresenter extends AbstractPresenter {
                     if (currentFolder.getId() == 0) {
                         ClientController.account.setUserEntryCount(ClientController.account.getUserEntryCount() - 1);
                         MenuItem myItems = new MenuItem(0, "My Entries",
-                                ClientController.account.getUserEntryCount());
+                                                        ClientController.account.getUserEntryCount());
                         menuItems.add(myItems);
                     }
 
                     ClientController.account.setVisibleEntryCount(ClientController.account.getVisibleEntryCount() - 1);
                     MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
-                            ClientController.account.getVisibleEntryCount());
+                                                           ClientController.account.getVisibleEntryCount());
                     menuItems.add(allEntriesItem);
 
                     display.updateMenuItemCounts(menuItems);

@@ -2,6 +2,7 @@ package org.jbei.ice.client.common.table;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.shared.ColumnField;
 
@@ -29,12 +30,12 @@ public abstract class DataTable<T> extends CellTable<T> {
         DataTableStyle cellTableStyle();
     }
 
-    public interface DataTableStyle extends Style {}
+    public interface DataTableStyle extends Style {
+    }
 
-    // TODO : this list is also maintained in the parent class look for a way to merge them
     private ArrayList<DataTableColumn<T, ?>> columns;
 
-    public DataTable() {
+    public DataTable(ServiceDelegate<T> serviceDelegate) {
         super(15, EntryResources.INSTANCE);
         init();
         setStyleName("data_table");
@@ -42,7 +43,7 @@ public abstract class DataTable<T> extends CellTable<T> {
         empty.setText("No data available");
         empty.setStyleName("no_data_style");
         this.setEmptyTableWidget(empty);
-        columns = createColumns();
+        columns = createColumns(serviceDelegate);
     }
 
     public ArrayList<DataTableColumn<T, ?>> getColumns() {
@@ -61,8 +62,9 @@ public abstract class DataTable<T> extends CellTable<T> {
     /**
      * Adds columns to the table
      */
-    protected abstract ArrayList<DataTableColumn<T, ?>> createColumns();
+    protected abstract ArrayList<DataTableColumn<T, ?>> createColumns(ServiceDelegate<T> serviceDelegate);
 
     // initialization that sub classes need to perform
-    protected void init() {}
+    protected void init() {
+    }
 }

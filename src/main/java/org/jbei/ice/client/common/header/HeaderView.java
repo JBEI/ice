@@ -1,9 +1,5 @@
 package org.jbei.ice.client.common.header;
 
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
@@ -14,6 +10,27 @@ import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.search.SearchQuery;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Widget;
+
+/**
+ * View widget for the page header. Shared across all instances of pages
+ *
+ * @author Hector Plahar
+ */
 public class HeaderView extends Composite {
 
     private SearchCompositeBox searchInput;
@@ -58,7 +75,7 @@ public class HeaderView extends Composite {
 
         // search Option
         widgetAdvanced = new AdvancedSearchWidget(searchInput);
-        widgetAdvanced.setWidth("394px");
+        widgetAdvanced.setWidth("395px");
         widgetAdvanced.setHeight("150px");
 
         createHandlers();
@@ -66,10 +83,6 @@ public class HeaderView extends Composite {
 
     public void resetSearchBox() {
         widgetAdvanced.reset();
-    }
-
-    public void setSearchBox(String box) {
-        searchInput.setSearch(box);
     }
 
     protected Widget createSearchPanel() {
@@ -144,7 +157,7 @@ public class HeaderView extends Composite {
         }
 
         final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #EEE\">|</span>&nbsp;&nbsp;"
-                + "<span class=\"badge\">" + newMessageCount + "</span>");
+                                                 + "<span class=\"badge\">" + newMessageCount + "</span>");
         String title = "You have " + newMessageCount + " new message";
         title += newMessageCount != 1 ? "s" : "";
         emailBadge.setTitle(title);

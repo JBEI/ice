@@ -2,12 +2,14 @@ package org.jbei.ice.client.search.advanced;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.cell.EntryOwnerCell;
+import org.jbei.ice.client.common.table.cell.HasEntryPartIDCell;
 import org.jbei.ice.client.common.table.cell.SearchRelevanceCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.client.common.table.column.HasEntryPartIdColumn;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.search.SearchResultInfo;
 
@@ -22,17 +24,19 @@ import com.google.gwt.user.client.Window;
  *
  * @author Hector Plahar
  */
-public abstract class SearchResultsTable extends HasEntryDataTable<SearchResultInfo> {
+public class SearchResultsTable extends HasEntryDataTable<SearchResultInfo> {
 
     private final EntryTablePager pager;
 
-    public SearchResultsTable() {
+    public SearchResultsTable(ServiceDelegate<SearchResultInfo> delegate) {
+        super(delegate);
         this.pager = new EntryTablePager();
         pager.setDisplay(this);
     }
 
     @Override
-    protected ArrayList<DataTableColumn<SearchResultInfo, ?>> createColumns() {
+    protected ArrayList<DataTableColumn<SearchResultInfo, ?>> createColumns(ServiceDelegate<SearchResultInfo>
+            delegate) {
 
         ArrayList<DataTableColumn<SearchResultInfo, ?>> columns = new ArrayList<DataTableColumn<SearchResultInfo, ?>>();
 
@@ -45,7 +49,7 @@ public abstract class SearchResultsTable extends HasEntryDataTable<SearchResultI
         columns.add(super.addTypeColumn(true));
 
         // part id column. tooltip shows more info about entry
-        columns.add(super.addPartIdColumn(false, 120, Unit.PX));
+        columns.add(addPartIdColumn(delegate, false, 120, Unit.PX));
 
         // name column
         columns.add(super.addNameColumn(120, Unit.PX));
@@ -58,6 +62,23 @@ public abstract class SearchResultsTable extends HasEntryDataTable<SearchResultI
         columns.add(super.addCreatedColumn(true));
 
         return columns;
+    }
+
+    protected DataTableColumn<SearchResultInfo, SearchResultInfo> addPartIdColumn(ServiceDelegate<SearchResultInfo>
+            delegate,
+            boolean sortable, double width, Unit unit) {
+        HasEntryPartIDCell<SearchResultInfo> cell = new HasEntryPartIDCell<SearchResultInfo>(delegate) {
+            @Override
+            protected String getURI(SearchResultInfo value) {
+                return value.getWebPartnerURL();
+            }
+        };
+        DataTableColumn<SearchResultInfo, SearchResultInfo> partIdColumn =
+                new HasEntryPartIdColumn<SearchResultInfo>(cell);
+        this.setColumnWidth(partIdColumn, width, unit);
+        partIdColumn.setSortable(sortable);
+        this.addColumn(partIdColumn, "Part ID");
+        return partIdColumn;
     }
 
     protected DataTableColumn<SearchResultInfo, SafeHtml> addSummaryColumn() {
@@ -152,9 +173,8 @@ public abstract class SearchResultsTable extends HasEntryDataTable<SearchResultI
                 else
                     color += "green";
 
-                String html = "<div style=\"opacity: 0.85; display: inline-block; width: " + r + "%;"
+                return "<div style=\"opacity: 0.85; display: inline-block; width: " + r + "%;"
                         + color + "\">&nbsp;</div>";
-                return html;
             }
         };
 
@@ -177,6 +197,4 @@ public abstract class SearchResultsTable extends HasEntryDataTable<SearchResultI
     public EntryTablePager getPager() {
         return this.pager;
     }
-
-    protected abstract EntryViewEventHandler getHandler();
 }

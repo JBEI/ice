@@ -1,42 +1,36 @@
 package org.jbei.ice.client.common.table.cell;
 
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.common.TipViewContentFactory;
+import org.jbei.ice.shared.dto.entry.HasEntryInfo;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
-import org.jbei.ice.client.collection.presenter.EntryContext;
-import org.jbei.ice.client.common.TipViewContentFactory;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.HasEntryInfo;
 
 /**
  * @author Hector Plahar
  */
 
-public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> implements IHasEntryHandlers {
+public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> {
 
     protected static final PopupPanel popup = new PopupPanel(true);
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
     private static final String MOUSEOUT_EVENT_NAME = "mouseout";
     private static final String MOUSE_CLICK = "click";
-    private HandlerManager handlerManager;
-    private final EntryContext.Type mode;
     protected boolean hidden = false;
+    private final ServiceDelegate<T> viewDelegate;
 
-    public HasEntryPartIDCell(EntryContext.Type mode) {
+    public HasEntryPartIDCell(ServiceDelegate<T> entryViewDelegate) {
         super(MOUSEOVER_EVENT_NAME, MOUSEOUT_EVENT_NAME, MOUSE_CLICK);
-        this.mode = mode;
         popup.setStyleName("add_to_popup");
+        viewDelegate = entryViewDelegate;
     }
 
     @Override
@@ -48,10 +42,8 @@ public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> 
     }
 
     @Override
-    public void onBrowserEvent(Context context, Element parent, T value, NativeEvent event,
-                               ValueUpdater<T> valueUpdater) {
-
-        super.onBrowserEvent(context, parent, value, event, valueUpdater);
+    public void onBrowserEvent(Context context, Element parent, T value, NativeEvent event, ValueUpdater<T> updater) {
+        super.onBrowserEvent(context, parent, value, event, updater);
         final String eventType = event.getType();
 
         if (MOUSEOVER_EVENT_NAME.equalsIgnoreCase(eventType)) {
@@ -71,25 +63,7 @@ public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> 
     protected void onMouseClick(T info) {
         hidden = true;
         popup.hide();
-        dispatchEntryViewEvent(info);
-    }
-
-    protected void dispatchEntryViewEvent(final T info) {
-        fireEvent(new GwtEvent<EntryViewEvent.EntryViewEventHandler>() {
-
-            @Override
-            public Type<EntryViewEvent.EntryViewEventHandler> getAssociatedType() {
-                return EntryViewEvent.getType();
-            }
-
-            @Override
-            protected void dispatch(EntryViewEvent.EntryViewEventHandler handler) {
-                EntryInfo entryInfo = info.getEntryInfo();
-                EntryViewEvent entryViewEvent = new EntryViewEvent(entryInfo.getId(), entryInfo.getRecordId(), mode);
-                entryViewEvent.getContext().setPartnerUrl(getURI(info));
-                handler.onEntryView(entryViewEvent);
-            }
-        });
+        viewDelegate.execute(info);
     }
 
     protected void onMouseOut() {
@@ -100,16 +74,14 @@ public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> 
     protected boolean withinBounds(NativeEvent event) {
         Element cellElement = event.getEventTarget().cast();
         Element element = cellElement.getFirstChildElement();
-        if (element == null)
-            return true;
-        return false;
+        return element == null;
     }
 
-    protected String getURI(HasEntryInfo value) {
+    protected String getURI(T value) {
         return null;
     }
 
-    protected void onMouseOver(NativeEvent event, HasEntryInfo value) {
+    protected void onMouseOver(NativeEvent event, T value) {
         hidden = false;
         final int x = event.getClientX() + 30 + Window.getScrollLeft();
         final int y = event.getClientY() + Window.getScrollTop();
@@ -142,18 +114,5 @@ public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> 
                 // doing nothing seems fine. no tooltip will be displayed
             }
         });
-    }
-
-    @Override
-    public HandlerRegistration addEntryHandler(EntryViewEvent.EntryViewEventHandler handler) {
-        if (handlerManager == null)
-            handlerManager = new HandlerManager(this);
-        return handlerManager.addHandler(EntryViewEvent.getType(), handler);
-    }
-
-    @Override
-    public void fireEvent(GwtEvent<?> event) {
-        if (handlerManager != null)
-            handlerManager.fireEvent(event);
     }
 }

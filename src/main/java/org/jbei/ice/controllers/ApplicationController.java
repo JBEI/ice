@@ -5,7 +5,6 @@ import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
-import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
@@ -15,8 +14,8 @@ import org.jbei.ice.shared.dto.ConfigurationKey;
  */
 public class ApplicationController {
 
-    public static final String RELEASE_DATABASE_SCHEMA_VERSION = "3.3.0";
-    public static final String[] SUPPORTED_PREVIOUS_DB_VERSIONS = {"3.1.0"};
+    public static final String RELEASE_DATABASE_SCHEMA_VERSION = "3.4";
+    public static final String[] SUPPORTED_PREVIOUS_DB_VERSIONS = {"3.1.0", "3.3.0"};
 
     /**
      * Schedule task to rebuild the blast index
@@ -57,24 +56,29 @@ public class ApplicationController {
                 if (!previousVersionSupported)
                     throw new RuntimeException("Upgrade from " + dbVersion + " is not supported");
 
-                // version is supported, perform the required upgrades
-                ControllerFactory.getPermissionController().upgradePermissions();
-                initializeHibernateSearch();
-                ControllerFactory.getConfigurationController().upgradeConfiguration();
+                // perform custom upgrade depending on version
+                upgradeDatabase(dbVersion);
+
                 controller.updateDatabaseVersion(RELEASE_DATABASE_SCHEMA_VERSION);
                 Logger.info("Application upgraded from " + dbVersion + " to " + RELEASE_DATABASE_SCHEMA_VERSION);
             }
-
-            String value = controller.getPropertyValue(ConfigurationKey.WEB_PARTNERS);
-            if (value == null)
-                return;
-            for (String split : value.split(";")) {
-                if (split.isEmpty())
-                    continue;
-                RegistryAPIServiceClient.getInstance().addPortName(split);
-            }
         } catch (ControllerException ce) {
             Logger.error(ce);
+        }
+    }
+
+    private static void upgradeDatabase(String versionToUprade) throws ControllerException {
+        switch (versionToUprade) {
+            // UPGRADE from 3.1.0 to 3.4
+            case "3.1.0":
+                ControllerFactory.getPermissionController().upgradePermissions();
+                initializeHibernateSearch();
+                ControllerFactory.getConfigurationController().upgradeConfiguration();
+                break;
+
+            case "3.3.0":
+                // nothing yet
+                break;
         }
     }
 
