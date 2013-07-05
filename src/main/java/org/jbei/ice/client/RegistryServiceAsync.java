@@ -29,6 +29,7 @@ import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -177,7 +178,7 @@ public interface RegistryServiceAsync {
 
     void retrieveSystemSettings(String sid, AsyncCallback<HashMap<String, String>> asyncCallback);
 
-    void retrieveWebOfRegistryPartners(String sid, AsyncCallback<HashMap<String, String>> asyncCallback)
+    void retrieveWebOfRegistryPartners(String sid, AsyncCallback<WebOfRegistries> asyncCallback)
             throws AuthenticationException;
 
     void setConfigurationSetting(String sid, ConfigurationKey key, String value, AsyncCallback<Boolean> async);

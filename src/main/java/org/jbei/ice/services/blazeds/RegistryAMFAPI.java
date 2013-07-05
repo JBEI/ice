@@ -138,7 +138,7 @@ public class RegistryAMFAPI extends BaseService {
         }
         // TODO : this is a bit of a hack. basically searching through all partners to see if they have this entry
         if (entry == null) {
-            Service service = RegistryAPIServiceClient.getInstance().getService();
+            Service service = RegistryAPIServiceClient.getService();
             Iterator<QName> ports = service.getPorts();
             while (ports.hasNext()) {
                 QName name = ports.next();

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module rename-to='gwt_ice'>
-  <!-- Inherit the core Web Toolkit stuff.                        -->
-  <inherits name='com.google.gwt.user.User'/>
-  <inherits name="gwtupload.GWTUpload"/>
+    <!-- Inherit the core Web Toolkit stuff.                        -->
+    <inherits name='com.google.gwt.user.User'/>
+    <inherits name="gwtupload.GWTUpload"/>
 
-  <!--  css for file upload -->  
-  <stylesheet src="Upload.css"/>
+    <!--  css for file upload -->
+    <stylesheet src="Upload.css"/>
 
-  <!-- Other module inherits                                      -->
+    <!-- Other module inherits                                      -->
 
-  <!-- Specify the app entry point class.                         -->
-  <entry-point class='org.jbei.ice.client.IceEntryPoint'/>
+    <!-- Specify the app entry point class.                         -->
+    <entry-point class='org.jbei.ice.client.IceEntryPoint'/>
 
-  <!-- Specify the paths for translatable code                    -->
-  <source path='client'/>
-  <source path='shared'/>
+    <!-- Specify the paths for translatable code                    -->
+    <source path='client'/>
+    <source path='lib/shared'/>
 
 </module>

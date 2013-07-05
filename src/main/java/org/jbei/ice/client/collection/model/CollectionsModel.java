@@ -1,7 +1,6 @@
 package org.jbei.ice.client.collection.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
@@ -12,6 +11,7 @@ import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
@@ -219,16 +219,16 @@ public class CollectionsModel {
         }.go(eventBus);
     }
 
-    public void retrieveWebOfRegistrySettings(final Callback<HashMap<String, String>> callback) {
-        new IceAsyncCallback<HashMap<String, String>>() {
+    public void retrieveWebOfRegistryPartners(final Callback<WebOfRegistries> callback) {
+        new IceAsyncCallback<WebOfRegistries>() {
 
             @Override
-            protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<WebOfRegistries> callback) throws AuthenticationException {
                 service.retrieveWebOfRegistryPartners(ClientController.sessionId, callback);
             }
 
             @Override
-            public void onSuccess(HashMap<String, String> result) {
+            public void onSuccess(WebOfRegistries result) {
                 callback.onSuccess(result);
             }
         }.go(eventBus);

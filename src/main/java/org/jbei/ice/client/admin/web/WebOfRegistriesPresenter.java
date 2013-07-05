@@ -1,7 +1,5 @@
 package org.jbei.ice.client.admin.web;
 
-import java.util.HashMap;
-
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -10,6 +8,7 @@ import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -30,7 +29,7 @@ public class WebOfRegistriesPresenter extends AdminPanelPresenter {
         panel.addJoinBoxHandler(new JoinBoxChangeHandler());
     }
 
-    public void setData(HashMap<String, String> settings) {
+    public void setData(WebOfRegistries settings) {
         panel.setData(settings);
     }
 

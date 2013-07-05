@@ -16,6 +16,7 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -156,19 +157,19 @@ public class AdminPresenter extends AbstractPresenter {
     }
 
     private void retrieveWebOfRegistriesSettings() {
-        new IceAsyncCallback<HashMap<String, String>>() {
+        new IceAsyncCallback<WebOfRegistries>() {
 
             @Override
-            protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<WebOfRegistries> callback) throws AuthenticationException {
                 service.retrieveWebOfRegistryPartners(ClientController.sessionId, callback);
             }
 
             @Override
-            public void onSuccess(HashMap<String, String> settings) {
-                if (settings == null || currentOption != AdminOption.WEB)
+            public void onSuccess(WebOfRegistries partners) {
+                if (partners == null || currentOption != AdminOption.WEB)
                     return;
 
-                webPresenter.setData(settings);
+                webPresenter.setData(partners);
                 view.show(currentOption, webPresenter.getView().asWidget());
             }
         }.go(eventBus);

@@ -7,10 +7,11 @@ import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.soap.SOAPBinding;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 /**
  * Service client for the Registry API. Used to communicate with other ICE Registry Instances
@@ -37,12 +38,13 @@ public class RegistryAPIServiceClient {
         Logger.info("Creating service client for " + SERVICE_NAME);
 
         try {
-            String values = new ConfigurationController().getPropertyValue(ConfigurationKey.WEB_PARTNERS);
-            if (values != null) {
-                for (String split : values.split(";"))
-                    addPortName(split.trim());
-            }
+            WebOfRegistries webOfRegistries = ControllerFactory.getWebController().getRegistryPartners();
+            if (webOfRegistries == null)
+                return;
 
+            for (RegistryPartner partner : webOfRegistries.getPartners()) {
+                addPortName(partner.getUrl().trim());
+            }
         } catch (ControllerException e) {
             Logger.warn(e.getMessage());
         }
@@ -81,7 +83,7 @@ public class RegistryAPIServiceClient {
         }
     }
 
-    public Service getService() {
-        return this.service;
+    public static Service getService() {
+        return service;
     }
 }

@@ -1,12 +1,12 @@
 package org.jbei.ice.client.admin.web;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -27,6 +27,7 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
 
     private ServiceDelegate<String> addPartnerDelegate;
     private HTMLPanel addPartnerPanel;
+    private PartnerTable partnerTable;
     private final FlexTable layout;
     private FlexTable partnerPanel;
     private ListBox joinBox;
@@ -34,7 +35,7 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
 
     public WebOfRegistriesPanel(ServiceDelegate<String> partnerDelegate) {
         layout = new FlexTable();
-        layout.setWidth("500px");
+        layout.setWidth("600px");
         layout.setCellPadding(1);
         layout.setCellSpacing(0);
         initWidget(layout);
@@ -53,18 +54,19 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         this.partnersList = new ArrayList<String>();
     }
 
-    public void setData(HashMap<String, String> settings) {
+    public void setData(WebOfRegistries settings) {
         layout.clear();
         layout.setHTML(0, 0, "Join web of registries");
         layout.getFlexCellFormatter().setWidth(0, 0, "180px");
         layout.setWidget(0, 1, joinBox);
-        String value = settings.get(ConfigurationKey.JOIN_WEB_OF_REGISTRIES.name());
-        partnerPanel = createRegistryPartnerPanel(settings);
-        if (value == null || value.equalsIgnoreCase("no")) {
+        partnerPanel = createRegistryPartnerPanel(settings.getPartners());
+        if (!settings.isWebEnabled()) {
             joinBox.setSelectedIndex(1);
-            partnerPanel.setVisible(false);
-        } else
+        } else {
             joinBox.setSelectedIndex(0);
+        }
+
+        partnerPanel.setVisible(settings.isWebEnabled());
 
         layout.getFlexCellFormatter().setStyleName(0, 0, "pad_top");
         layout.getFlexCellFormatter().setStyleName(0, 1, "pad_top");
@@ -94,17 +96,18 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         partnersList.add(partner);
     }
 
-    private FlexTable createRegistryPartnerPanel(HashMap<String, String> settings) {
+    private FlexTable createRegistryPartnerPanel(ArrayList<RegistryPartner> partners) {
         HTMLPanel headerPanel = new HTMLPanel(
                 "<span style=\"color: #233559; "
                         + "font-weight: bold; font-style: italic; font-size: 0.80em; text-transform: uppercase\">"
-                        + ConfigurationKey.WEB_PARTNERS.toString()
+                        + "Registry Partners"
                         + "</span><span style=\"margin-left: 20px\" id=\"add_partner\"></span>");
 
         headerPanel.setStyleName("entry_sequence_sub_header");
 
         addPartnerPanel = new HTMLPanel("<span id=\"add_partner_input\"></span><span id=\"add_partner_submit\"></span>"
                                                 + "<span id=\"add_partner_cancel\"></span>");
+        partnerTable = new PartnerTable();
         final TextBox addInput = new TextBox();
         addInput.getElement().setAttribute("placeholder", "e.g. public-registry.jbei.org");
         addInput.setStyleName("input_box");
@@ -152,27 +155,19 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
             }
         });
 
+
         FlexTable table = new FlexTable();
         table.setWidth("100%");
         table.setCellPadding(0);
         table.setCellSpacing(0);
         table.setWidget(0, 0, headerPanel);
         table.setWidget(1, 0, addPartnerPanel);
-        addPartnerPanel.setVisible(false);
+        table.setHTML(2, 0, "&nbsp;");
+        table.setWidget(3, 0, partnerTable);
 
-        // display partners
-        String partners = settings.remove(ConfigurationKey.WEB_PARTNERS.name());
-        if (partners == null || partners.isEmpty()) {
-            table.setHTML(2, 0, "<div style=\"font-size: 0.85em; margin-top: 8px;\">No partners added.</div>");
-        } else {
-            int row = 2;
-            for (String partner : partners.split(";")) {
-                table.setHTML(row, 0, "<span style=\"margin-left: 10px; padding: 3px;\" class=\"font-75em\">"
-                        + partner + "</span>");
-                partnersList.add(partner);
-                row += 1;
-            }
-        }
+        addPartnerPanel.setVisible(false);
+        partnerTable.setData(partners);
+
         return table;
     }
 }

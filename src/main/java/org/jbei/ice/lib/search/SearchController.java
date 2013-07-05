@@ -46,7 +46,7 @@ public class SearchController {
     }
 
     public SearchResults runWebSearch(SearchQuery query) {
-        Service service = RegistryAPIServiceClient.getInstance().getService();
+        Service service = RegistryAPIServiceClient.getService();
         Iterator<QName> ports = service.getPorts();
 
         SearchResults results = null;

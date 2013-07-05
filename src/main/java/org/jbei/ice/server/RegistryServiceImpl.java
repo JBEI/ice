@@ -80,6 +80,7 @@ import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -227,7 +228,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 entrySeq.put(entry, sequenceString);
             } catch (ControllerException e) {
                 Logger.error(e);
-                continue;
             }
         }
 
@@ -1028,21 +1028,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public HashMap<String, String> retrieveWebOfRegistryPartners(String sid) throws AuthenticationException {
+    public WebOfRegistries retrieveWebOfRegistryPartners(String sid) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             if (!ControllerFactory.getAccountController().isAdministrator(account))
                 return null;
 
             Logger.info(account.getEmail() + " retrieving web of registry system settings");
-            ConfigurationController configurationController = ControllerFactory.getConfigurationController();
-            HashMap<String, String> settings = new HashMap<>();
-
-//            String v = configurationController.getPropertyValue(ConfigurationKey.WEB_PARTNERS);
-//            settings.put(ConfigurationKey.WEB_PARTNERS.name(), v);
-//            v = configurationController.getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-//            settings.put(ConfigurationKey.JOIN_WEB_OF_REGISTRIES.name(), v);
-            return settings;
+            return ControllerFactory.getWebController().getRegistryPartners();
         } catch (ControllerException e) {
             return null;
         }

@@ -3,10 +3,9 @@ package org.jbei.ice.client.entry.view.model;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jbei.ice.lib.shared.dto.IDTOModel;
 import org.jbei.ice.lib.shared.dto.SampleInfo;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * A wrapper for sample info with a bunch of storage data
@@ -15,7 +14,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  *
  * @author Hector Plahar
  */
-public class SampleStorage implements IsSerializable {
+public class SampleStorage implements IDTOModel {
 
     private SampleInfo sample;
     private LinkedList<StorageInfo> storageList = new LinkedList<StorageInfo>();

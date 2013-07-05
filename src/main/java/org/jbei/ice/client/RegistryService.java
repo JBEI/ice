@@ -29,6 +29,7 @@ import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -161,7 +162,7 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<AccountInfo> retrieveAvailableAccounts(String sessionId) throws AuthenticationException;
 
-    HashMap<String, String> retrieveWebOfRegistryPartners(String sid) throws AuthenticationException;
+    WebOfRegistries retrieveWebOfRegistryPartners(String sid) throws AuthenticationException;
 
     boolean addWebPartner(String sessionId, String webPartner);
 

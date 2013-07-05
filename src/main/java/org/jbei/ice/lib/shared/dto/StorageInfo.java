@@ -2,9 +2,7 @@ package org.jbei.ice.lib.shared.dto;
 
 import java.util.ArrayList;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class StorageInfo implements IsSerializable {
+public class StorageInfo implements IDTOModel {
 
     private String display;
     private long id;

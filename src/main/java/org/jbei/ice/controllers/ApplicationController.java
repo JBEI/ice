@@ -67,8 +67,8 @@ public class ApplicationController {
         }
     }
 
-    private static void upgradeDatabase(String versionToUprade) throws ControllerException {
-        switch (versionToUprade) {
+    private static void upgradeDatabase(String versionToUpgrade) throws ControllerException {
+        switch (versionToUpgrade) {
             // UPGRADE from 3.1.0 to 3.4
             case "3.1.0":
                 ControllerFactory.getPermissionController().upgradePermissions();
@@ -79,6 +79,7 @@ public class ApplicationController {
             // upgrade from 3.3 to 3.4
             case "3.3.0":
                 // upgrade web of registries partners
+                ControllerFactory.getWebController().upgradeWebOfRegistries();
                 break;
         }
     }

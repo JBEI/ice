@@ -1,9 +1,11 @@
-package org.jbei.ice.lib.net.model;
+package org.jbei.ice.lib.net;
 
 import java.util.Date;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.RemoteActionStatus;
 
 /**
  * Stores information about partners that this registry is involved with in web of registries
@@ -38,6 +40,10 @@ public class RemotePartner implements IModel {
     @Column(name = "last_contact_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastContact;
+
+    public long getId() {
+        return id;
+    }
 
     public String getName() {
         return name;
@@ -77,5 +83,14 @@ public class RemotePartner implements IModel {
 
     public void setLastContact(Date lastContact) {
         this.lastContact = lastContact;
+    }
+
+    public static RegistryPartner toDTO(RemotePartner partner) {
+        RegistryPartner registryPartner = new RegistryPartner();
+        registryPartner.setId(partner.getId());
+        registryPartner.setName(partner.getName());
+        registryPartner.setUrl(partner.getUrl());
+        registryPartner.setStatus(partner.getActionStatus());
+        return registryPartner;
     }
 }

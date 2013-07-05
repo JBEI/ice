@@ -1,4 +1,6 @@
-package org.jbei.ice.lib.net.model;
+package org.jbei.ice.lib.shared.dto.web;
+
+import org.jbei.ice.lib.shared.dto.IDTOModel;
 
 /**
  * Action status for requests to partner with other sites in web of registries
@@ -6,7 +8,7 @@ package org.jbei.ice.lib.net.model;
  *
  * @author Hector Plahar
  */
-public enum RemoteActionStatus {
+public enum RemoteActionStatus implements IDTOModel {
 
     // request to partner has been sent
     SUBMITTED,
@@ -24,5 +26,8 @@ public enum RemoteActionStatus {
     APPROVED,
 
     // submitted request to partner was approved on "the other side"
-    SUBMIT_REQUEST_APPROVED
+    SUBMIT_REQUEST_APPROVED;
+
+    RemoteActionStatus() {
+    }
 }

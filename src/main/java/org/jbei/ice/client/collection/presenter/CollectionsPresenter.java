@@ -38,6 +38,8 @@ import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -240,30 +242,26 @@ public class CollectionsPresenter extends AbstractPresenter {
 
     private void setTransferWidgetOptions() {
         if (ClientController.account.isAdmin()) {
-//            model.retrieveWebOfRegistrySettings(new Callback<HashMap<String, String>>() {
-//
-//                @Override
-//                public void onSuccess(HashMap<String, String> result) {
-//                    String value = result.get(ConfigurationKey.WEB_PARTNERS.name());
-//                    if (value == null)
-//                        return;
-//
-//                    ArrayList<OptionSelect> values = new ArrayList<OptionSelect>();
-//                    for (String split : value.split(";")) {
-//                        if (split.isEmpty())
-//                            continue;
-//
-//                        OptionSelect select = new OptionSelect(0, split);
-//                        values.add(select);
-//                    }
-//                    display.setTransferOptions(values);
-//                    // check if it is web enabled and set transfer widget to visible
-//                }
-//
-//                @Override
-//                public void onFailure() {
-//                }
-//            });
+            model.retrieveWebOfRegistryPartners(new Callback<WebOfRegistries>() {
+
+                @Override
+                public void onSuccess(WebOfRegistries result) {
+                    if (result == null)
+                        return;
+
+                    ArrayList<OptionSelect> values = new ArrayList<OptionSelect>();
+                    for (RegistryPartner partner : result.getPartners()) {
+                        OptionSelect select = new OptionSelect(partner.getId(), partner.getUrl());
+                        values.add(select);
+                    }
+
+                    display.setTransferOptions(values);
+                }
+
+                @Override
+                public void onFailure() {
+                }
+            });
         }
     }
 

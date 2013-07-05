@@ -22,12 +22,4 @@ public class SelectGroupMemberTable extends GroupMemberTable {
     public void setData(ArrayList<AccountInfo> data) {
         dataProvider.setList(data);
     }
-
-//    @Override
-//    protected void createColumns() {
-//        createSelectionColumn();
-////        createIDColumn();
-//        createNameColumn();
-//        createEmailColumn();
-//    }
 }
