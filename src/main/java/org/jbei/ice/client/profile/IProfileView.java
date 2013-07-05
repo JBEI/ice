@@ -1,6 +1,6 @@
 package org.jbei.ice.client.profile;
 
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;

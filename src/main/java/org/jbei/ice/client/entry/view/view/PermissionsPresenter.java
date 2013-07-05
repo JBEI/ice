@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

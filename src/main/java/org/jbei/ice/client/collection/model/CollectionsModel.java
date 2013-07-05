@@ -1,16 +1,21 @@
 package org.jbei.ice.client.collection.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.jbei.ice.client.*;
-import org.jbei.ice.client.collection.view.OptionSelect;
-import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class CollectionsModel {
     private final RegistryServiceAsync service;
@@ -69,7 +74,7 @@ public class CollectionsModel {
             protected void callService(AsyncCallback<FolderDetails> folderDetailsAsyncCallback)
                     throws AuthenticationException {
                 service.createUserCollection(ClientController.sessionId, collectionName, "", null,
-                        folderDetailsAsyncCallback);
+                                             folderDetailsAsyncCallback);
             }
 
             @Override
@@ -110,52 +115,52 @@ public class CollectionsModel {
     public void retrieveAllVisibleEntries(final Callback<FolderDetails> callback, int start, int limit) {
         FolderDetails details = new FolderDetails(-1, "Available Entries");
         service.retrieveAllVisibleEntrys(ClientController.sessionId, details, ColumnField.CREATED, false, start,
-                limit,
-                new AsyncCallback<FolderDetails>() {
+                                         limit,
+                                         new AsyncCallback<FolderDetails>() {
 
-                    @Override
-                    public void onSuccess(FolderDetails result) {
-                        callback.onSuccess(result);
-                    }
+                                             @Override
+                                             public void onSuccess(FolderDetails result) {
+                                                 callback.onSuccess(result);
+                                             }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        if (caught instanceof AuthenticationException) {
-                            ClientController.sessionId = null;
-                            History.newItem(Page.LOGIN.getLink());
-                            return;
-                        }
+                                             @Override
+                                             public void onFailure(Throwable caught) {
+                                                 if (caught instanceof AuthenticationException) {
+                                                     ClientController.sessionId = null;
+                                                     History.newItem(Page.LOGIN.getLink());
+                                                     return;
+                                                 }
 
-                        callback.onFailure();
-                    }
-                });
+                                                 callback.onFailure();
+                                             }
+                                         });
     }
 
     public void retrieveEntriesForCurrentUser(final Callback<FolderDetails> callback, int start, int limit) {
         String id = Long.toString(ClientController.account.getId());
         service.retrieveUserEntries(ClientController.sessionId, id, ColumnField.CREATED, false, start, limit,
-                new AsyncCallback<FolderDetails>() {
+                                    new AsyncCallback<FolderDetails>() {
 
-                    @Override
-                    public void onSuccess(FolderDetails result) {
-                        callback.onSuccess(result);
-                    }
+                                        @Override
+                                        public void onSuccess(FolderDetails result) {
+                                            callback.onSuccess(result);
+                                        }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        if (caught instanceof AuthenticationException) {
-                            ClientController.sessionId = null;
-                            History.newItem(Page.LOGIN.getLink());
-                            return;
-                        }
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            if (caught instanceof AuthenticationException) {
+                                                ClientController.sessionId = null;
+                                                History.newItem(Page.LOGIN.getLink());
+                                                return;
+                                            }
 
-                        callback.onFailure();
-                    }
-                });
+                                            callback.onFailure();
+                                        }
+                                    });
     }
 
     public void addEntriesToFolder(final ArrayList<Long> destinationFolderIds, final ArrayList<Long> ids,
-                                   final Callback<ArrayList<FolderDetails>> resultCallback) {
+            final Callback<ArrayList<FolderDetails>> resultCallback) {
         new IceAsyncCallback<ArrayList<FolderDetails>>() {
 
             @Override
@@ -182,7 +187,7 @@ public class CollectionsModel {
     }
 
     public void moveEntriesToFolder(final long source, final ArrayList<Long> destinationFolderIds,
-                                    final ArrayList<Long> ids, final Callback<ArrayList<FolderDetails>> callback) {
+            final ArrayList<Long> ids, final Callback<ArrayList<FolderDetails>> callback) {
         new IceAsyncCallback<ArrayList<FolderDetails>>() {
 
             @Override
@@ -199,7 +204,7 @@ public class CollectionsModel {
     }
 
     public void removeEntriesFromFolder(final long source, final ArrayList<Long> ids,
-                                        final Callback<FolderDetails> callback) {
+            final Callback<FolderDetails> callback) {
         new IceAsyncCallback<FolderDetails>() {
 
             @Override
@@ -219,7 +224,7 @@ public class CollectionsModel {
 
             @Override
             protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
-                service.retrieveWebOfRegistrySettings(ClientController.sessionId, callback);
+                service.retrieveWebOfRegistryPartners(ClientController.sessionId, callback);
             }
 
             @Override

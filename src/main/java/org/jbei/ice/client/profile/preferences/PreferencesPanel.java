@@ -1,13 +1,20 @@
 package org.jbei.ice.client.profile.preferences;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.*;
+import java.util.HashMap;
+
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
-import java.util.HashMap;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Hector Plahar
@@ -20,7 +27,7 @@ public class PreferencesPanel extends Composite {
     private final ServiceDelegate<RowData> serviceDelegate;
 
     public PreferencesPanel(HashMap<String, String> settings, String panelHeader,
-                            ServiceDelegate<RowData> delegate, PreferenceKey... keys) {
+            ServiceDelegate<RowData> delegate, PreferenceKey... keys) {
         table = new FlexTable();
         table.setWidth("100%");
         table.setCellPadding(1);
@@ -69,7 +76,7 @@ public class PreferencesPanel extends Composite {
     }
 
     public Widget createSaveButton(final PreferenceKey key, final String defaultValue, final int editRow,
-                                   final TextBox box, final Button edit) {
+            final TextBox box, final Button edit) {
         Button save = new Button("Save");
         HTML cancel = new HTML("Cancel");
         HTMLPanel panel = new HTMLPanel("<span id=\"save_setting\"></span><span id=\"cancel_setting_save\"></span>");

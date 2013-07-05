@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.IAdminPanel;
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;

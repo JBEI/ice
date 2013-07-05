@@ -1,15 +1,16 @@
 package org.jbei.ice.lib.folder;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.shared.dto.folder.FolderType;
-
-import javax.persistence.*;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import javax.persistence.*;
+
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 /**
  * Encapsulates the notion of a collection of {@link org.jbei.ice.lib.entry.model.Entry}s
@@ -55,7 +56,7 @@ public class Folder implements IModel {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
+               inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
     @LazyCollection(LazyCollectionOption.EXTRA)
     private Set<Entry> contents = new LinkedHashSet<>();
 

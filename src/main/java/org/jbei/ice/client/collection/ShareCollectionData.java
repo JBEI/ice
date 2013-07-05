@@ -1,7 +1,7 @@
 package org.jbei.ice.client.collection;
 
 import org.jbei.ice.client.Callback;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
 /**
  * Used to transmit messages back and forth between the share collection widget

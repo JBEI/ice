@@ -1,14 +1,14 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
-
 import java.util.ArrayList;
+
+import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
 /**
  * Extracts common elements of entries from sheet

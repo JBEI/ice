@@ -1,9 +1,8 @@
 package org.jbei.ice.client.admin;
 
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.SelectionChangeEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
@@ -14,12 +13,14 @@ import org.jbei.ice.client.admin.setting.SystemSettingPresenter;
 import org.jbei.ice.client.admin.user.UserPresenter;
 import org.jbei.ice.client.admin.web.WebOfRegistriesPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.dto.AccountResults;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * Presenter for the admin page
@@ -159,7 +160,7 @@ public class AdminPresenter extends AbstractPresenter {
 
             @Override
             protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
-                service.retrieveWebOfRegistrySettings(ClientController.sessionId, callback);
+                service.retrieveWebOfRegistryPartners(ClientController.sessionId, callback);
             }
 
             @Override

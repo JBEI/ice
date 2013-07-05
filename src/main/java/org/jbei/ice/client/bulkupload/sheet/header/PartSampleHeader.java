@@ -3,8 +3,8 @@ package org.jbei.ice.client.bulkupload.sheet.header;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 
 /**
  * @author Hector Plahar

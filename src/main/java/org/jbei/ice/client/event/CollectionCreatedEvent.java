@@ -1,7 +1,8 @@
 package org.jbei.ice.client.event;
 
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+
 import com.google.gwt.event.shared.GwtEvent;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
 
 public class CollectionCreatedEvent extends GwtEvent<CollectionCreatedEventHandler> {
 

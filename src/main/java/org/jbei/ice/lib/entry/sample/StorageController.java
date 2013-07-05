@@ -1,5 +1,8 @@
 package org.jbei.ice.lib.entry.sample;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -8,12 +11,9 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.entry.EntryType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * ABI to manipulate {@link Storage}.
@@ -68,13 +68,13 @@ public class StorageController {
             return;
 
         Storage strainRoot = new Storage("Strain Storage Root", "Default Strain Storage Root",
-                StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
+                                         StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
         strainRoot = save(strainRoot);
         configurationController.setPropertyValue(ConfigurationKey.STRAIN_STORAGE_ROOT, strainRoot.getUuid());
 
         Storage defaultStrain = new Storage(DEFAULT_STRAIN_STORAGE_SCHEME_NAME,
-                DEFAULT_STRAIN_STORAGE_SCHEME_NAME, StorageType.SCHEME,
-                AccountController.SYSTEM_ACCOUNT_EMAIL, strainRoot);
+                                            DEFAULT_STRAIN_STORAGE_SCHEME_NAME, StorageType.SCHEME,
+                                            AccountController.SYSTEM_ACCOUNT_EMAIL, strainRoot);
         ArrayList<Storage> schemes = new ArrayList<>();
         schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
         schemes.add(new Storage("Box", "", StorageType.BOX_UNINDEXED, "", null));
@@ -90,13 +90,13 @@ public class StorageController {
             return;
 
         Storage root = new Storage("Plasmid Storage Root", "Default Plasmid Storage Root",
-                StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
+                                   StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
         root = save(root);
         configurationController.setPropertyValue(ConfigurationKey.PLASMID_STORAGE_ROOT, root.getUuid());
 
         Storage storage = new Storage(DEFAULT_PLASMID_STORAGE_SCHEME_NAME,
-                DEFAULT_PLASMID_STORAGE_SCHEME_NAME, StorageType.SCHEME,
-                AccountController.SYSTEM_ACCOUNT_EMAIL, root);
+                                      DEFAULT_PLASMID_STORAGE_SCHEME_NAME, StorageType.SCHEME,
+                                      AccountController.SYSTEM_ACCOUNT_EMAIL, root);
         ArrayList<Storage> schemes = new ArrayList<>();
         schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
         schemes.add(new Storage("Box", "", StorageType.BOX_UNINDEXED, "", null));
@@ -112,13 +112,13 @@ public class StorageController {
             return;
 
         Storage root = new Storage("Part Storage Root", "Default Part Storage Root",
-                StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
+                                   StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
         root = save(root);
         configurationController.setPropertyValue(ConfigurationKey.PART_STORAGE_ROOT, root.getUuid());
 
         Storage storage = new Storage(DEFAULT_PART_STORAGE_SCHEME_NAME,
-                DEFAULT_PART_STORAGE_SCHEME_NAME, StorageType.SCHEME,
-                AccountController.SYSTEM_ACCOUNT_EMAIL, root);
+                                      DEFAULT_PART_STORAGE_SCHEME_NAME, StorageType.SCHEME,
+                                      AccountController.SYSTEM_ACCOUNT_EMAIL, root);
         ArrayList<Storage> schemes = new ArrayList<>();
         schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
         schemes.add(new Storage("Box", "", StorageType.BOX_UNINDEXED, "", null));
@@ -134,13 +134,13 @@ public class StorageController {
             return;
 
         Storage root = new Storage("Part Storage Root", "Default Part Storage Root",
-                StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
+                                   StorageType.GENERIC, AccountController.SYSTEM_ACCOUNT_EMAIL, null);
         root = save(root);
         configurationController.setPropertyValue(ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT, root.getUuid());
 
         Storage storage = new Storage(DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME,
-                DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME, StorageType.SCHEME,
-                AccountController.SYSTEM_ACCOUNT_EMAIL, root);
+                                      DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME, StorageType.SCHEME,
+                                      AccountController.SYSTEM_ACCOUNT_EMAIL, root);
         ArrayList<Storage> schemes = new ArrayList<>();
         schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
         schemes.add(new Storage("Box", "", StorageType.BOX_INDEXED, "", null));

@@ -7,10 +7,10 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * Utility class for account management

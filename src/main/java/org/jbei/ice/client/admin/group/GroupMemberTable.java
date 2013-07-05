@@ -1,7 +1,7 @@
 package org.jbei.ice.client.admin.group;
 
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;

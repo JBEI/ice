@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;

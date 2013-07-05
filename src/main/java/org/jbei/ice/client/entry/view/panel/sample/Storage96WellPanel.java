@@ -3,7 +3,7 @@ package org.jbei.ice.client.entry.view.panel.sample;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.SampleInfo;
 
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;

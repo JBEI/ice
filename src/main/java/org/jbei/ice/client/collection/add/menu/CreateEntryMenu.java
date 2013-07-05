@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.lib.shared.EntryAddType;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;

@@ -3,7 +3,7 @@ package org.jbei.ice.client.bulkupload.widget;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.SampleInfo;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;

@@ -7,7 +7,7 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.event.LoginEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.Utils;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

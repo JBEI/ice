@@ -1,19 +1,28 @@
 package org.jbei.ice.client.common.header;
 
+import java.util.ArrayList;
+
+import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.search.BlastProgram;
+import org.jbei.ice.lib.shared.dto.search.BlastQuery;
+import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
-import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.search.BlastProgram;
-import org.jbei.ice.shared.dto.search.BlastQuery;
-import org.jbei.ice.shared.dto.search.SearchQuery;
-
-import java.util.ArrayList;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextArea;
 
 /**
  * Options widget for search
@@ -67,13 +76,13 @@ public class AdvancedSearchWidget extends Composite {
             blastProgram.addItem(program.getDetails(), program.name());
         }
         HTMLPanel folderOptionsPanel = new HTMLPanel("<div style=\"padding: 8px 8px 8px 5px; "
-                + "border-bottom: 0.10em solid #f3f3f3;"
-                + " padding-bottom: 15px\"><span class=\"font-80em\""
-                + "style=\"letter-spacing:-1px; color:#555;\">"
-                + "<b>BLAST</b></span> &nbsp; <span "
-                + "id=\"advanced_folders\"></span><br>"
-                + "<span id=\"blast_input\"></span>"
-                + "</div>");
+                                                             + "border-bottom: 0.10em solid #f3f3f3;"
+                                                             + " padding-bottom: 15px\"><span class=\"font-80em\""
+                                                             + "style=\"letter-spacing:-1px; color:#555;\">"
+                                                             + "<b>BLAST</b></span> &nbsp; <span "
+                                                             + "id=\"advanced_folders\"></span><br>"
+                                                             + "<span id=\"blast_input\"></span>"
+                                                             + "</div>");
         folderOptionsPanel.add(blastProgram, "advanced_folders");
         folderOptionsPanel.add(blastSequence, "blast_input");
 
@@ -94,9 +103,10 @@ public class AdvancedSearchWidget extends Composite {
         for (BioSafetyOption option : BioSafetyOption.values())
             bioSafetyOptions.addItem(option.getDisplayName(), option.getValue());
         HTMLPanel htmlPanel = new HTMLPanel("<div style=\"padding: 10px; border-bottom: 0.10em solid #f3f3f3;"
-                + " padding-bottom: 15px\"><span class=\"font-80em\""
-                + "style=\"letter-spacing: -1px; margin-right: 20px; color:#555;\">"
-                + "<b>BIOSAFETY OPTION</b></span><span id=\"advanced_biosafety\"></span></div>");
+                                                    + " padding-bottom: 15px\"><span class=\"font-80em\""
+                                                    + "style=\"letter-spacing: -1px; margin-right: 20px; color:#555;\">"
+                                                    + "<b>BIOSAFETY OPTION</b></span><span " +
+                                                    "id=\"advanced_biosafety\"></span></div>");
         htmlPanel.add(bioSafetyOptions, "advanced_biosafety");
 
         row += 1;

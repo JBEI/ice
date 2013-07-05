@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.net.model;
 
-import org.jbei.ice.lib.dao.IModel;
-
-import javax.persistence.*;
 import java.util.Date;
+import javax.persistence.*;
+
+import org.jbei.ice.lib.dao.IModel;
 
 /**
  * Stores information about partners that this registry is involved with in web of registries
@@ -29,7 +29,7 @@ public class RemotePartner implements IModel {
 
     @Column(name = "status")
     @Enumerated(value = EnumType.STRING)
-    private RemoteActionStatus approved;
+    private RemoteActionStatus actionStatus;
 
     @Column(name = "add_time")
     @Temporal(TemporalType.TIMESTAMP)
@@ -55,12 +55,12 @@ public class RemotePartner implements IModel {
         this.url = url;
     }
 
-    public RemoteActionStatus isApproved() {
-        return approved;
+    public RemoteActionStatus getActionStatus() {
+        return actionStatus;
     }
 
-    public void setApproved(RemoteActionStatus approved) {
-        this.approved = approved;
+    public void setActionStatus(RemoteActionStatus approved) {
+        this.actionStatus = approved;
     }
 
     public Date getAdded() {

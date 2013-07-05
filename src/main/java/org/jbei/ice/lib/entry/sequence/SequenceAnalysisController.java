@@ -1,5 +1,12 @@
 package org.jbei.ice.lib.entry.sequence;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
@@ -20,18 +27,11 @@ import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
 
 /**
  * ABI to manipulate DNA sequence trace analysis
@@ -69,7 +69,7 @@ public class SequenceAnalysisController {
      * @throws ControllerException
      */
     public TraceSequence importTraceSequence(Entry entry, String filename, String depositor, String sequence,
-                                             String uuid, Date date, InputStream inputStream) throws ControllerException {
+            String uuid, Date date, InputStream inputStream) throws ControllerException {
         if (entry == null) {
             throw new ControllerException("Failed to save trace sequence with null entry!");
         }
@@ -83,7 +83,7 @@ public class SequenceAnalysisController {
         }
 
         TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence,
-                date);
+                                                        date);
 
         try {
             return traceDao.create(traceSequenceFileDir, traceSequence, inputStream);
@@ -106,10 +106,10 @@ public class SequenceAnalysisController {
      * @throws ControllerException
      */
     public TraceSequence uploadTraceSequence(Entry entry, String filename, String depositor,
-                                             String sequence, InputStream inputStream) throws ControllerException {
+            String sequence, InputStream inputStream) throws ControllerException {
 
         return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(),
-                new Date(), inputStream);
+                                   new Date(), inputStream);
     }
 
     /**
@@ -167,9 +167,9 @@ public class SequenceAnalysisController {
                     if (traceSequence.getTraceSequenceAlignment() == null
                             || traceSequence.getTraceSequenceAlignment().getSequenceHash() == null
                             || traceSequence.getTraceSequenceAlignment().getSequenceHash()
-                            .isEmpty()
+                                            .isEmpty()
                             || !traceSequence.getTraceSequenceAlignment().getSequenceHash()
-                            .equals(sequence.getFwdHash())) {
+                                             .equals(sequence.getFwdHash())) {
                         buildOrRebuildAlignment(traceSequence, sequence);
 
                         wasUpdated = true;
@@ -365,13 +365,13 @@ public class SequenceAnalysisController {
 
                     if (traceSequenceAlignment == null) {
                         traceSequenceAlignment = new TraceSequenceAlignment(traceSequence,
-                                maxBl2SeqResult.getScore(), strand,
-                                queryStart, queryEnd,
-                                subjectStart, subjectEnd,
-                                maxBl2SeqResult.getQuerySequence(),
-                                maxBl2SeqResult.getSubjectSequence(),
-                                sequence.getFwdHash(),
-                                new Date());
+                                                                            maxBl2SeqResult.getScore(), strand,
+                                                                            queryStart, queryEnd,
+                                                                            subjectStart, subjectEnd,
+                                                                            maxBl2SeqResult.getQuerySequence(),
+                                                                            maxBl2SeqResult.getSubjectSequence(),
+                                                                            sequence.getFwdHash(),
+                                                                            new Date());
 
                         traceSequence.setTraceSequenceAlignment(traceSequenceAlignment);
                     } else {

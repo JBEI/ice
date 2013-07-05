@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -33,8 +33,6 @@ public class UserPreferencesPanel extends Composite implements IUserProfilePanel
     }
 
     public void setSearchData(HashMap<String, String> settings) {
-        if (true)
-            return;
         // search settings
         layout.setWidget(1, 0, createSearchSettings(settings));
         layout.getFlexCellFormatter().setColSpan(1, 0, 3);

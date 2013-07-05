@@ -1,10 +1,14 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.*;
-
 import java.util.ArrayList;
+
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
 
 public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 

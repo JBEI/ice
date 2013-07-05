@@ -1,5 +1,11 @@
 package org.jbei.ice.server;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -8,22 +14,39 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Parameter;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.shared.dto.*;
-import org.jbei.ice.shared.dto.entry.*;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.Generation;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
-
-import java.util.*;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.ParameterInfo;
+import org.jbei.ice.lib.shared.dto.ParameterType;
+import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.StorageInfo;
+import org.jbei.ice.lib.shared.dto.Visibility;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo.Generation;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
+import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartInfo;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
 
 /**
- * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.shared.dto.entry.EntryInfo} data
+ * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.lib.shared.dto.entry.EntryInfo}
+ * data
  * transfer objects
  *
  * @author Hector Plahar
@@ -31,8 +54,8 @@ import java.util.*;
 public class ModelToInfoFactory {
 
     public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
-                                    Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences,
-                                    boolean hasSequence, boolean hasOriginalSequence) {
+            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences,
+            boolean hasSequence, boolean hasOriginalSequence) {
         EntryInfo info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
@@ -243,7 +266,7 @@ public class ModelToInfoFactory {
         if (strains != null) {
             for (Strain strain : strains) {
                 info.getStrains()
-                        .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
+                    .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
             }
         }
 
@@ -254,7 +277,6 @@ public class ModelToInfoFactory {
         info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
         info.setPartId(EntryUtil.getPartNumbersAsString(entry));
-        info.setVersionId(entry.getVersionId());
         info.setName(entry.getNamesAsString());
         info.setOwner(entry.getOwner());
         info.setOwnerEmail(entry.getOwnerEmail());
@@ -307,9 +329,7 @@ public class ModelToInfoFactory {
         // get visibility
         info.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 
-        String parsed = EntryUtil.getParsedNotes(entry.getLongDescription());
         info.setLongDescription(entry.getLongDescription());
-        info.setParsedDescription(parsed);
         if (account != null) {
             String parsedShortDesc = EntryUtil.linkifyText(account, entry.getShortDescription());
             info.setLinkifiedShortDescription(parsedShortDesc);

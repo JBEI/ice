@@ -1,8 +1,8 @@
 package org.jbei.ice.client.entry.view.view;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.MultiSelectionModel;
+import java.util.ArrayList;
+import java.util.Date;
+
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
@@ -11,13 +11,14 @@ import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.model.FlagEntry;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.comment.UserComment;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.comment.UserComment;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
-import java.util.ArrayList;
-import java.util.Date;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.MultiSelectionModel;
 
 public interface IEntryView {
 

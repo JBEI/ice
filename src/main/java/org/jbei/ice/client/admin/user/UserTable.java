@@ -2,7 +2,7 @@ package org.jbei.ice.client.admin.user;
 
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.table.cell.UrlCell;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.EditTextCell;

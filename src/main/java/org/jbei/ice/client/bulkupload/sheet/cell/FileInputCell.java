@@ -6,8 +6,8 @@ import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellUploader;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
@@ -50,7 +50,8 @@ public class FileInputCell extends SheetCell {
     }
 
     @Override
-    public void setText(String text) {}
+    public void setText(String text) {
+    }
 
     /**
      * Sets data for row specified in the param, using the user entered value in the input widget

@@ -2,7 +2,7 @@ package org.jbei.ice.client.bulkupload.widget;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.lib.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

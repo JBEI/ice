@@ -1,6 +1,6 @@
 package org.jbei.ice.client.entry.view.view;
 
-import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.lib.shared.dto.Visibility;
 
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;

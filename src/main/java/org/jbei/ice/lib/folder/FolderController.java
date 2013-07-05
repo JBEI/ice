@@ -1,5 +1,11 @@
 package org.jbei.ice.lib.folder;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -9,15 +15,13 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.AccountType;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.server.ModelToInfoFactory;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.AccountType;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
-import org.jbei.ice.shared.dto.folder.FolderType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
-
-import java.util.*;
 
 /**
  * @author Hector Plahar
@@ -128,7 +132,7 @@ public class FolderController {
     }
 
     public FolderDetails retrieveFolderContents(Account account, long folderId, ColumnField sort, boolean asc,
-                                                int start, int limit) throws ControllerException {
+            int start, int limit) throws ControllerException {
         try {
             Folder folder = getFolderById(folderId);
             if (folder == null)
@@ -213,7 +217,8 @@ public class FolderController {
             folder = dao.save(folder);
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
             if (contents != null && !contents.isEmpty()) {
-                ArrayList<Entry> entrys = new ArrayList<>(ControllerFactory.getEntryController().getEntriesByIdSet(account, contents));
+                ArrayList<Entry> entrys = new ArrayList<>(ControllerFactory.getEntryController().getEntriesByIdSet(
+                        account, contents));
                 dao.addFolderContents(folder, entrys);
                 details.setCount(contents.size());
             } else {

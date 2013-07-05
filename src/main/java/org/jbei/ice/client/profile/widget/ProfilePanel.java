@@ -6,8 +6,8 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.client.profile.ChangePasswordPanel;
 import org.jbei.ice.client.profile.message.CreateMessagePanel;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.MessageInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

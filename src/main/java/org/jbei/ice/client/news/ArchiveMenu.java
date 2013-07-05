@@ -3,7 +3,7 @@ package org.jbei.ice.client.news;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.NewsItem;
+import org.jbei.ice.lib.shared.dto.NewsItem;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

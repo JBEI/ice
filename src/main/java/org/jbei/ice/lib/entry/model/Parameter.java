@@ -3,7 +3,7 @@ package org.jbei.ice.lib.entry.model;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.shared.dto.ParameterType;
+import org.jbei.ice.lib.shared.dto.ParameterType;
 
 import org.hibernate.search.annotations.ContainedIn;
 

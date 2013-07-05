@@ -1,14 +1,20 @@
 package org.jbei.ice.client.collection.add.form;
 
+import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo.Generation;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
+
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
-import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.Generation;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
 
 public class ArabidopsisForm extends EntryForm<ArabidopsisSeedInfo> {
 

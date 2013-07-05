@@ -11,8 +11,8 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.PanelPresenter;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -137,7 +137,8 @@ public class UserGroupPresenter extends PanelPresenter {
                     }
 
                     @Override
-                    public void onSuccess(GroupInfo result) {}
+                    public void onSuccess(GroupInfo result) {
+                    }
                 }.go(eventBus);
             }
         });

@@ -9,9 +9,9 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
 import org.jbei.ice.client.profile.widget.ProfilePanel;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.MessageInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -190,7 +190,8 @@ public class UserProfilePresenter extends PanelPresenter {
                 }
 
                 @Override
-                public void onSuccess(Boolean result) {}
+                public void onSuccess(Boolean result) {
+                }
             }.go(eventBus);
         }
     }

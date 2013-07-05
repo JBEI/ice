@@ -1,6 +1,6 @@
 package org.jbei.ice.client.bulkupload;
 
-import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 /**
  * Delegate for retrieving entry info associated with a row

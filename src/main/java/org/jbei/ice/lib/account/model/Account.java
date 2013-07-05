@@ -1,15 +1,16 @@
 package org.jbei.ice.lib.account.model;
 
-import org.hibernate.annotations.Type;
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountType;
-
-import javax.persistence.*;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import javax.persistence.*;
+
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.AccountType;
+
+import org.hibernate.annotations.Type;
 
 /**
  * Store the account information for a single user.
@@ -82,7 +83,7 @@ public class Account implements IModel {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"),
-            inverseJoinColumns = @JoinColumn(name = "group_id"))
+               inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups = new LinkedHashSet<>();
 
     /**
@@ -104,7 +105,7 @@ public class Account implements IModel {
      * @param description
      */
     public Account(String firstName, String lastName, String initials, String email,
-                   String password, String institution, String description) {
+            String password, String institution, String description) {
         super();
 
         this.firstName = firstName;

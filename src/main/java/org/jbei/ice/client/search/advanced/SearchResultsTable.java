@@ -10,8 +10,8 @@ import org.jbei.ice.client.common.table.cell.HasEntryPartIDCell;
 import org.jbei.ice.client.common.table.cell.SearchRelevanceCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.client.common.table.column.HasEntryPartIdColumn;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.Style.Unit;

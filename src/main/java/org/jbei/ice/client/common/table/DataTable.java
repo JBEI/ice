@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
-import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.lib.shared.ColumnField;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;

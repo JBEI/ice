@@ -2,7 +2,7 @@ package org.jbei.ice.client.profile;
 
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;

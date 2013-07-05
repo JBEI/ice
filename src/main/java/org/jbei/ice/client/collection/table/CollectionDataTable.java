@@ -8,7 +8,7 @@ import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.client.common.table.column.EntryPartIdColumn;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.dom.client.Style.Unit;
 

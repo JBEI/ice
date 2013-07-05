@@ -1,6 +1,6 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
 
 /**
  * View for displaying strain specific entries

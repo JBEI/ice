@@ -2,8 +2,8 @@ package org.jbei.ice.client.admin.group;
 
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.common.group.GroupPanel;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
 
 /**
  * Panel for managing groups. Also acts as the view

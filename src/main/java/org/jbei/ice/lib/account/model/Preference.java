@@ -11,7 +11,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 
 /**
  * Entity for storing user preferences

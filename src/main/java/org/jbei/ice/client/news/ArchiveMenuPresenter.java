@@ -1,6 +1,6 @@
 package org.jbei.ice.client.news;
 
-import org.jbei.ice.shared.dto.NewsItem;
+import org.jbei.ice.lib.shared.dto.NewsItem;
 
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SingleSelectionModel;

@@ -2,7 +2,7 @@ package org.jbei.ice.client.admin.group;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
 
 import com.google.gwt.view.client.ListDataProvider;
 

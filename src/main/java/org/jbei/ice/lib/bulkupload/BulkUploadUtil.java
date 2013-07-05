@@ -12,12 +12,12 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.StatusType;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.StatusType;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.entry.EntryType;
 
 /**
  * Utility class for Bulk Import

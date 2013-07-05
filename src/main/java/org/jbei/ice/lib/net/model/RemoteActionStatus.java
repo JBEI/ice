@@ -24,5 +24,5 @@ public enum RemoteActionStatus {
     APPROVED,
 
     // submitted request to partner was approved on "the other side"
-    SUBMIT_REQUEST_APPROVED;
+    SUBMIT_REQUEST_APPROVED
 }

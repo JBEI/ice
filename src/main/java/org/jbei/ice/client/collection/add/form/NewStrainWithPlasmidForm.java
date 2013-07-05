@@ -1,21 +1,22 @@
 package org.jbei.ice.client.collection.add.form;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
+import java.util.HashMap;
+
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.StatusType;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.AutoCompleteField;
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.StatusType;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
-import java.util.HashMap;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.*;
 
 public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSubmit {
 

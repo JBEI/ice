@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.SampleInfo;
 
 public class SampleLocation {
 

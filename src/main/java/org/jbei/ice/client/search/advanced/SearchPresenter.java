@@ -15,10 +15,10 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.search.SearchQuery;
-import org.jbei.ice.shared.dto.search.SearchResultInfo;
-import org.jbei.ice.shared.dto.search.SearchResults;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchResults;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.Style.Unit;

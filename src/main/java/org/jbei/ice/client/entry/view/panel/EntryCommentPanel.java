@@ -9,7 +9,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.comment.UserComment;
+import org.jbei.ice.lib.shared.dto.comment.UserComment;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

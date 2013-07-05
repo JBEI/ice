@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
+import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.StorageInfo;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;

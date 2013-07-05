@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.dto.ParameterInfo;
+import org.jbei.ice.lib.shared.dto.ParameterInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

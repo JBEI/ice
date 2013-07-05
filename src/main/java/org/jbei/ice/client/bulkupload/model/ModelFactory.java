@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 
 /**
  * Factory for creating sheet models based on entry types

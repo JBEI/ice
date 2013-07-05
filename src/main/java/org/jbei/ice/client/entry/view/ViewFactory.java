@@ -5,11 +5,11 @@ import org.jbei.ice.client.entry.view.detail.EntryInfoView;
 import org.jbei.ice.client.entry.view.detail.PartInfoView;
 import org.jbei.ice.client.entry.view.detail.PlasmidInfoView;
 import org.jbei.ice.client.entry.view.detail.StrainInfoView;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.PartInfo;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartInfo;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
 
 public class ViewFactory {
 

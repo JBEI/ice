@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
 
 public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
 

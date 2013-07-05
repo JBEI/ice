@@ -5,7 +5,7 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.entry.view.model.PermissionSuggestOracle;
 import org.jbei.ice.client.entry.view.view.PermissionsPresenter.IPermissionsView;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

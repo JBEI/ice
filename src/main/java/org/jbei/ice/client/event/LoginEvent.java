@@ -1,7 +1,8 @@
 package org.jbei.ice.client.event;
 
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+
 import com.google.gwt.event.shared.GwtEvent;
-import org.jbei.ice.shared.dto.AccountInfo;
 
 /**
  * Event that is dispatched when a user successfully logs in

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;

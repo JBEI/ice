@@ -1,11 +1,11 @@
 package org.jbei.ice.client.collection.menu;
 
-import org.jbei.ice.client.collection.view.OptionSelect;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.folder.FolderType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
-
 import java.util.ArrayList;
+
+import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
 public class MenuItem extends OptionSelect {
 

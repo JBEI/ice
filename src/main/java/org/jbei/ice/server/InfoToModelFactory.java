@@ -1,18 +1,34 @@
 package org.jbei.ice.server;
 
-import org.jbei.ice.lib.entry.model.*;
-import org.jbei.ice.lib.models.FundingSource;
-import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.dto.ParameterInfo;
-import org.jbei.ice.shared.dto.ParameterType;
-import org.jbei.ice.shared.dto.Visibility;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.*;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Name;
+import org.jbei.ice.lib.entry.model.Parameter;
+import org.jbei.ice.lib.entry.model.Part;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.models.FundingSource;
+import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.shared.dto.ParameterInfo;
+import org.jbei.ice.lib.shared.dto.ParameterType;
+import org.jbei.ice.lib.shared.dto.Visibility;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
 
 /**
  * Factory object for converting data transfer objects to model
@@ -139,9 +155,6 @@ public class InfoToModelFactory {
         entry.setShortDescription(info.getShortDescription());
         entry.setLongDescription(info.getLongDescription());
         entry.setIntellectualProperty(info.getIntellectualProperty());
-        if (entry.getVersionId() == null || entry.getVersionId().trim().isEmpty()) {
-            entry.setVersionId(info.getVersionId());
-        }
 
         Set<Link> links = getLinks(info.getLinks(), entry);
         entry.setLinks(links);

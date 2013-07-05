@@ -3,7 +3,7 @@ package org.jbei.ice.client.common.table.cell;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.TipViewContentFactory;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;

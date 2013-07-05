@@ -1,5 +1,10 @@
 package org.jbei.ice.client.admin.search;
 
+import org.jbei.ice.client.admin.IAdminPanel;
+import org.jbei.ice.client.admin.setting.SettingPanel;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -7,10 +12,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Widget;
-import org.jbei.ice.client.admin.IAdminPanel;
-import org.jbei.ice.client.admin.setting.SettingPanel;
-import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * Admin panel for search management. Works with {@link AdminSearchPresenter}

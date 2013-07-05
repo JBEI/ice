@@ -14,7 +14,7 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
 import org.apache.commons.lang.RandomStringUtils;
 

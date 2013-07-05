@@ -6,13 +6,13 @@ import org.jbei.ice.client.collection.add.form.NewStrainWithPlasmidForm;
 import org.jbei.ice.client.collection.add.form.PartForm;
 import org.jbei.ice.client.collection.add.form.PlasmidForm;
 import org.jbei.ice.client.collection.add.form.StrainForm;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.entry.PartInfo;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartInfo;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
 
 public class EntryFormFactory {
     /**

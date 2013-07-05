@@ -3,8 +3,8 @@ package org.jbei.ice.client.bulkupload.sheet;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.DomEvent;

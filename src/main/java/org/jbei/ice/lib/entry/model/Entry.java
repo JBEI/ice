@@ -1,8 +1,15 @@
 package org.jbei.ice.lib.entry.model;
 
-import com.google.common.base.Objects;
-import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.filter.BlastFilterFactory;
 import org.jbei.ice.lib.entry.filter.EntryHasFilterFactory;
@@ -10,14 +17,13 @@ import org.jbei.ice.lib.entry.filter.EntrySecurityFilterFactory;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.model.Permission;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.Visibility;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import java.util.*;
+import com.google.common.base.Objects;
+import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.*;
 
 import org.jbei.ice.lib.entry.model.Parameter;
 
@@ -79,10 +85,10 @@ import org.jbei.ice.lib.entry.model.Parameter;
 @Indexed(index = "Entry")
 
 @FullTextFilterDefs({
-        @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class),
-        @FullTextFilterDef(name = "blastFilter", impl = BlastFilterFactory.class),
-        @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class)
-})
+                            @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class),
+                            @FullTextFilterDef(name = "blastFilter", impl = BlastFilterFactory.class),
+                            @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class)
+                    })
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -205,7 +211,7 @@ public class Entry implements IModel {
     private final List<Parameter> parameters = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "entry",
-            orphanRemoval = true, fetch = FetchType.EAGER)
+               orphanRemoval = true, fetch = FetchType.EAGER)
     @IndexedEmbedded
     private final Set<Permission> permissions = new HashSet<>();
 

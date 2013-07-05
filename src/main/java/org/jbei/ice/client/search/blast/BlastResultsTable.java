@@ -10,8 +10,8 @@ import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.cell.HasEntryPartIDCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.client.common.table.column.HasEntryPartIdColumn;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.TextCell;
@@ -47,13 +47,11 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
         columns.add(addAlignmentColumn());
         columns.add(addEValueColumn());
         columns.add(addDistributionColumn());
-
         return columns;
     }
 
     protected DataTableColumn<SearchResultInfo, SearchResultInfo> addPartIdColumn(ServiceDelegate<SearchResultInfo>
-            delegate, boolean sortable,
-            double width, Unit unit) {
+            delegate, boolean sortable, double width, Unit unit) {
         HasEntryPartIDCell<SearchResultInfo> cell = new HasEntryPartIDCell<SearchResultInfo>(delegate);
         DataTableColumn<SearchResultInfo, SearchResultInfo> partIdColumn = new HasEntryPartIdColumn<SearchResultInfo>(
                 cell);
@@ -94,8 +92,8 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
     }
 
     protected DataTableColumn<SearchResultInfo, SearchResultInfo> addDistributionColumn() {
-
         AbstractCell<SearchResultInfo> cell = new AbstractCell<SearchResultInfo>() {
+
             @Override
             public void render(Context context, SearchResultInfo value, SafeHtmlBuilder sb) {
                 // number of ticks per pixel
@@ -151,7 +149,7 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
                         width = fillStart - prevStart;
 
                     html += "<td><hr style=\"background-color: " + defColor + "; border: 0px; width: "
-                            + (width) + "px; height: 10px\"></hr></td>";
+                            + width + "px; height: 10px\"></hr></td>";
 
                     // mark stripe
                     prevStart = (fillStart - prevStart) + stripeBlockLength;
@@ -160,9 +158,10 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
                     fillEnd = fillStart + stripeBlockLength;
                 }
 
-                if (fillEnd < 100)
+                if (fillEnd < 100) {
                     html += "<td><hr style=\"background-color: " + defColor + "; border: 0px; width: "
                             + (100 - fillEnd) + "px; height: 10px\"></hr></td>";
+                }
 
                 html += "</tr></table>";
                 sb.append(SafeHtmlUtils.fromTrustedString(html));
@@ -177,7 +176,7 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
                     }
                 };
         col.setSortable(false);
-        this.addColumn(col, "Distribution");
+        this.addColumn(col, "Hits Distribution");
         this.setColumnWidth(col, 120, Unit.PX);
         return col;
     }

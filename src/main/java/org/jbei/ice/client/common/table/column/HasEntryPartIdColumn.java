@@ -1,8 +1,8 @@
 package org.jbei.ice.client.common.table.column;
 
 import org.jbei.ice.client.common.table.cell.HasEntryPartIDCell;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
 
 /**
  * Part id column for tables that display data that {@link HasEntryInfo}

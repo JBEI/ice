@@ -1,8 +1,8 @@
 package org.jbei.ice.client.common.table.column;
 
 import org.jbei.ice.client.common.table.cell.PartIDCell;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 
 /**
  * @author Hector Plahar

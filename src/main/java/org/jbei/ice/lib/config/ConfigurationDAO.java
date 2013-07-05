@@ -5,7 +5,7 @@ import java.util.List;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.models.Configuration;
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -30,7 +30,7 @@ class ConfigurationDAO extends HibernateRepository<Configuration> {
     }
 
     /**
-     * Retrieve the {@link Configuration} object with the given {@link org.jbei.ice.shared.dto.ConfigurationKey}.
+     * Retrieve the {@link Configuration} object with the given {@link org.jbei.ice.lib.shared.dto.ConfigurationKey}.
      *
      * @param key
      * @return Configuration

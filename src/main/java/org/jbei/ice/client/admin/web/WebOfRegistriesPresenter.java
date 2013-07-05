@@ -9,7 +9,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -57,10 +57,8 @@ public class WebOfRegistriesPresenter extends AdminPanelPresenter {
                 public void onSuccess(Boolean result) {
                     if (!result) {
                         Window.alert("There was a problem saving setting.");
-                        return;
                     }
                 }
-
             }.go(eventBus);
         }
     }

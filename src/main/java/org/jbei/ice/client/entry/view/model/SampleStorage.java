@@ -3,8 +3,8 @@ package org.jbei.ice.client.entry.view.model;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
+import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.StorageInfo;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 

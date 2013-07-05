@@ -5,7 +5,7 @@ import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
 /**
  * Application wide controller
@@ -76,8 +76,9 @@ public class ApplicationController {
                 ControllerFactory.getConfigurationController().upgradeConfiguration();
                 break;
 
+            // upgrade from 3.3 to 3.4
             case "3.3.0":
-                // nothing yet
+                // upgrade web of registries partners
                 break;
         }
     }

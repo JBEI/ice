@@ -1,13 +1,18 @@
 package org.jbei.ice.client.bulkupload;
 
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.SingleSelectionModel;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Set;
+
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
-import org.jbei.ice.client.bulkupload.widget.*;
+import org.jbei.ice.client.bulkupload.widget.CreatorWidget;
+import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
+import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
+import org.jbei.ice.client.bulkupload.widget.SavedDraftsMenu;
+import org.jbei.ice.client.bulkupload.widget.UploadCSV;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.AbstractLayout;
@@ -15,13 +20,28 @@ import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Set;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ToggleButton;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * View for the bulk import page. Works with {@link BulkUploadPresenter}
@@ -81,7 +101,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         draftInput.setVisible(false);
 
         updating = new HTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
-                + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
+                                    + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
         updating.setStyleName("display-inline");
         updating.addStyleName("relative_top_3");
         updating.setVisible(false);
@@ -126,7 +146,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             @Override
             public void onMouseOver(MouseOverEvent event) {
                 updating.setHTML("<span style=\"color: #999\"><i class=\"" + FAIconType.EDIT.getStyleName()
-                        + " font-80em\"></i></span>");
+                                         + " font-80em\"></i></span>");
                 updating.setVisible(true);
             }
         });
@@ -136,12 +156,12 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             public void onMouseOut(MouseOutEvent event) {
                 if (lastUpdated != null) {
                     updating.setHTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">Updated: "
-                            + lastUpdated + "</span>");
+                                             + lastUpdated + "</span>");
                     updating.setVisible(true);
                     return;
                 }
                 updating.setHTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
-                        + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
+                                         + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
                 updating.setVisible(false);
             }
         });
@@ -163,7 +183,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 draftInput.setVisible(false);
                 if (lastUpdated != null) {
                     updating.setHTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">Updated: "
-                            + lastUpdated + "</span>");
+                                             + lastUpdated + "</span>");
                     updating.setVisible(true);
                     return;
                 }
@@ -247,8 +267,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 ClientController.account.getEmail() : result.getAccount().getEmail();
         String name = result.getName() == null ? "Untitled" : result.getName();
         BulkUploadMenuItem item = new BulkUploadMenuItem(result.getId(), name, result.getCount(),
-                DateUtilities.formatMediumDate(result.getCreated()),
-                result.getType().getDisplay(), email);
+                                                         DateUtilities.formatMediumDate(result.getCreated()),
+                                                         result.getType().getDisplay(), email);
         draftsMenu.updateMenuItem(item);
         if (draftsMenu.getCount() == 1) {
             setToggleMenuVisibility(true);
@@ -280,18 +300,18 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         mainContent.getFlexCellFormatter().setWidth(0, 0, "140px");
 
         mainContent.setHTML(1, 0,
-                "<div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; "
-                        + "margin-top: 17px; background-color: #f1f1f1\"><p>Select the type "
-                        + "of entry you wish to bulk import.</p> <p>Please note that columns"
-                        + " with headers indicated by <span class=\"required\">*</span> "
-                        + "are required. You will not be able to submit the form until you enter a "
-                        + "value for those fields. The forms are automatically saved as a draft, "
-                        + "which will only be visible to you.</p>"
-                        + "<p>After submitting a saved draft or bulk upload, "
-                        + "an administrator must approve your"
-                        + " submission before they will show up in search listings for others. You will "
-                        + "however still be able to view and modify them on the collections page" +
-                        ".</p></div>");
+                            "<div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; "
+                                    + "margin-top: 17px; background-color: #f1f1f1\"><p>Select the type "
+                                    + "of entry you wish to bulk import.</p> <p>Please note that columns"
+                                    + " with headers indicated by <span class=\"required\">*</span> "
+                                    + "are required. You will not be able to submit the form until you enter a "
+                                    + "value for those fields. The forms are automatically saved as a draft, "
+                                    + "which will only be visible to you.</p>"
+                                    + "<p>After submitting a saved draft or bulk upload, "
+                                    + "an administrator must approve your"
+                                    + " submission before they will show up in search listings for others. You will "
+                                    + "however still be able to view and modify them on the collections page" +
+                                    ".</p></div>");
         return mainContent;
     }
 
@@ -353,8 +373,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         String name = bulkImport.getName() == null ? "Untitled" : bulkImport.getName();
         uploadName.setHTML(name);
         bulkImportDisplay.setHTML("<span style=\"color: #888; letter-spacing: -1px; text-transform: uppercase; "
-                + "vertical-align: middle; float: left\">"
-                + bulkImport.getImportType().getDisplay() + " bulk upload&nbsp;</span>");
+                                          + "vertical-align: middle; float: left\">"
+                                          + bulkImport.getImportType().getDisplay() + " bulk upload&nbsp;</span>");
 
 //        // TODO
 //        if (sampleSelection == null) {
@@ -394,7 +414,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     public void setUpdatingVisibility(boolean visible) {
         if (visible) {
             updating.setHTML("&nbsp;<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
-                    + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
+                                     + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
         } else {
             updating.setHTML(
                     "&nbsp;<span style=\"font-size: 11px; font-weight: normal; vertical-align: middle; color: #999\">"
@@ -427,7 +447,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_CENTER);
 
         updating.setHTML("<span style=\"font-size: 11px; font-weight: normal; vertical-align: middle; color: #999\">"
-                + "Updated: " + lastSaved + "</span>");
+                                 + "Updated: " + lastSaved + "</span>");
         updating.setVisible(true);
     }
 

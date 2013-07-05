@@ -11,9 +11,9 @@ import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.permissions.model.Permission;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 
 /**
  * Saved draft of bulk imports. Encapsulates a list of {@link Entry}s that are created and updated
@@ -73,7 +73,8 @@ public class BulkUpload implements IModel {
     private Set<Permission> permissions = new HashSet<>();
 
 
-    public BulkUpload() {}
+    public BulkUpload() {
+    }
 
     public Long getId() {
         return this.id;

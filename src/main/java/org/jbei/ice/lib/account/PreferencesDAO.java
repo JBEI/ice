@@ -1,20 +1,21 @@
 package org.jbei.ice.lib.account;
 
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Data accessor for working with preference objects
@@ -33,8 +34,8 @@ class PreferencesDAO extends HibernateRepository<Preference> {
 
         try {
             Criteria criteria = session.createCriteria(Preference.class)
-                    .add(Restrictions.eq("account", account))
-                    .add(Restrictions.in("key", keyString));
+                                       .add(Restrictions.eq("account", account))
+                                       .add(Restrictions.in("key", keyString));
             return new ArrayList<Preference>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
@@ -45,9 +46,9 @@ class PreferencesDAO extends HibernateRepository<Preference> {
     public Preference retrievePreference(Account account, String key, String value) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Preference.class)
-                .add(Restrictions.eq("account", account))
-                .add(Restrictions.eq("key", key.toUpperCase()))
-                .add(Restrictions.eq("value", value));
+                                   .add(Restrictions.eq("account", account))
+                                   .add(Restrictions.eq("key", key.toUpperCase()))
+                                   .add(Restrictions.eq("value", value));
         try {
             return (Preference) criteria.uniqueResult();
         } catch (HibernateException he) {
@@ -59,7 +60,7 @@ class PreferencesDAO extends HibernateRepository<Preference> {
     public HashMap<String, String> retrievePreferenceValues(Account account, HashSet<String> keys) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Preference.class)
-                .add(Restrictions.eq("account", account));
+                                   .add(Restrictions.eq("account", account));
         Iterator iterator = criteria.list().iterator();
         HashMap<String, String> results = new HashMap<>();
         while (iterator.hasNext()) {

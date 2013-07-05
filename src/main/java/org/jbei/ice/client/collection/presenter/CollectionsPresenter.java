@@ -3,7 +3,6 @@ package org.jbei.ice.client.collection.presenter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,13 +32,12 @@ import org.jbei.ice.client.event.ShowEntryListEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.search.advanced.ISearchView;
 import org.jbei.ice.client.search.advanced.SearchPresenter;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
-import org.jbei.ice.shared.dto.folder.FolderType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
-import org.jbei.ice.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -158,7 +156,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                if (entryViewPresenter == null) {// TODO : when user navigates to another page and returns this is null
+                if (entryViewPresenter == null) { //TODO : when user navigates to another page and returns this is null
                     entryViewPresenter = new EntryPresenter(model.getService(), CollectionsPresenter.this,
                                                             model.getEventBus(), null);
                     entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
@@ -233,37 +231,40 @@ public class CollectionsPresenter extends AbstractPresenter {
         // permission delegate for the menu (user)
         display.setPermissionDelegate(new PermissionDelegate());
 
-        // retrieve web of registries settings
-        if (ClientController.account.isAdmin()) {
-            model.retrieveWebOfRegistrySettings(new Callback<HashMap<String, String>>() {
-
-                @Override
-                public void onSuccess(HashMap<String, String> result) {
-                    String value = result.get(ConfigurationKey.WEB_PARTNERS.name());
-                    if (value == null)
-                        return;
-
-                    ArrayList<OptionSelect> values = new ArrayList<OptionSelect>();
-                    for (String split : value.split(";")) {
-                        if (split.isEmpty())
-                            continue;
-
-                        OptionSelect select = new OptionSelect(0, split);
-                        values.add(select);
-                    }
-                    display.setTransferOptions(values);
-
-                    // check if it is web enabled and set transfer widget to visible
-                }
-
-                @Override
-                public void onFailure() {
-                }
-            });
-        }
+        // retrieve web of registries settings to set the transfer widget options (admin only)
+        setTransferWidgetOptions();
 
         setPromotionDelegate();
         setDemotionDelegate();
+    }
+
+    private void setTransferWidgetOptions() {
+        if (ClientController.account.isAdmin()) {
+//            model.retrieveWebOfRegistrySettings(new Callback<HashMap<String, String>>() {
+//
+//                @Override
+//                public void onSuccess(HashMap<String, String> result) {
+//                    String value = result.get(ConfigurationKey.WEB_PARTNERS.name());
+//                    if (value == null)
+//                        return;
+//
+//                    ArrayList<OptionSelect> values = new ArrayList<OptionSelect>();
+//                    for (String split : value.split(";")) {
+//                        if (split.isEmpty())
+//                            continue;
+//
+//                        OptionSelect select = new OptionSelect(0, split);
+//                        values.add(select);
+//                    }
+//                    display.setTransferOptions(values);
+//                    // check if it is web enabled and set transfer widget to visible
+//                }
+//
+//                @Override
+//                public void onFailure() {
+//                }
+//            });
+        }
     }
 
     private void setPromotionDelegate() {
@@ -736,8 +737,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                         @Override
                         public void onSuccess(FolderDetails result) {
                             ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                            MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result.getCount()
-                            );
+                            MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result.getCount());
                             items.add(updateItem);
                             display.updateMenuItemCounts(items);
 
@@ -790,8 +790,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                     if (currentFolder.getId() == 0) {
                         ClientController.account.setUserEntryCount(ClientController.account.getUserEntryCount() - 1);
-                        MenuItem myItems = new MenuItem(0, "My Entries",
-                                                        ClientController.account.getUserEntryCount());
+                        MenuItem myItems = new MenuItem(0, "My Entries", ClientController.account.getUserEntryCount());
                         menuItems.add(myItems);
                     }
 

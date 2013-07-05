@@ -1,9 +1,10 @@
 package org.jbei.ice.client.bulkupload.events;
 
-import com.google.gwt.event.shared.GwtEvent;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-
 import java.util.ArrayList;
+
+import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
+
+import com.google.gwt.event.shared.GwtEvent;
 
 public class SavedDraftsEvent extends GwtEvent<SavedDraftsEventHandler> {
 

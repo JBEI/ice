@@ -1,16 +1,29 @@
 package org.jbei.ice.lib.utils;
 
-import org.dom4j.*;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.XMLWriter;
-import org.dom4j.tree.DefaultElement;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Name;
+import org.jbei.ice.lib.entry.model.PartNumber;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
 import org.jbei.ice.lib.logging.Logger;
@@ -18,13 +31,16 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimeZone;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.Namespace;
+import org.dom4j.QName;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
+import org.dom4j.tree.DefaultElement;
 
 /**
  * IceXML serializer/deserializer.
@@ -185,13 +201,13 @@ public class IceXmlSerializer {
         entryRoot.add(new DefaultElement(RECORD_ID, iceNamespace).addText(entry.getRecordId()));
         entryRoot.add(new DefaultElement(RECORD_TYPE, iceNamespace).addText(entry.getRecordType()));
         entryRoot.add(new DefaultElement(CREATION_TIME_STAMP, iceNamespace)
-                .addText(simpleDateFormat.format(entry.getCreationTime())));
+                              .addText(simpleDateFormat.format(entry.getCreationTime())));
         if (entry.getModificationTime() != null) {
             entryRoot.add(new DefaultElement(MODIFICATION_TIME_STAMP, iceNamespace)
-                    .addText(simpleDateFormat.format(entry.getModificationTime())));
+                                  .addText(simpleDateFormat.format(entry.getModificationTime())));
         } else {
             entryRoot.add(new DefaultElement(MODIFICATION_TIME_STAMP, iceNamespace)
-                    .addText(simpleDateFormat.format(entry.getCreationTime())));
+                                  .addText(simpleDateFormat.format(entry.getCreationTime())));
         }
         DefaultElement partNumbers = new DefaultElement(PART_NUMBERS, iceNamespace);
         for (PartNumber partNumber : entry.getPartNumbers()) {
@@ -219,8 +235,8 @@ public class IceXmlSerializer {
             DefaultElement links = new DefaultElement(LINKS, iceNamespace);
             for (Link link : entry.getLinks()) {
                 links.add(new DefaultElement(LINK, iceNamespace)
-                        .addAttribute(URL, emptyStringify(link.getUrl()))
-                        .addText(emptyStringify(link.getLink())));
+                                  .addAttribute(URL, emptyStringify(link.getUrl()))
+                                  .addText(emptyStringify(link.getLink())));
             }
             entryRoot.add(links);
         }
@@ -228,26 +244,26 @@ public class IceXmlSerializer {
         entryRoot.add(new DefaultElement(STATUS, iceNamespace).addText(emptyStringify(entry.getStatus())));
 
         entryRoot.add(new DefaultElement(LONG_DESCRIPTION, iceNamespace)
-                .addText(emptyStringify(entry.getLongDescription())));
+                              .addText(emptyStringify(entry.getLongDescription())));
         entryRoot.add(new DefaultElement(SHORT_DESCRIPTION, iceNamespace).addText(
                 entry.getShortDescription()));
         entryRoot.add(new DefaultElement(REFERENCES, iceNamespace).addText(emptyStringify(entry.getReferences())));
         entryRoot.add(getEntryTypeSpecificFields(entry));
 
         entryRoot.add(new DefaultElement(BIO_SAFETY_LEVEL, iceNamespace)
-                .addText(emptyStringify(entry.getBioSafetyLevel().toString())));
+                              .addText(emptyStringify(entry.getBioSafetyLevel().toString())));
         entryRoot.add(new DefaultElement(INTELLECTUAL_PROPERTY, iceNamespace)
-                .addText(emptyStringify(entry.getIntellectualProperty())));
+                              .addText(emptyStringify(entry.getIntellectualProperty())));
 
         if (entry.getFundingSources().size() > 0) {
             DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
             for (EntryFundingSource fundingSource : entry.getFundingSources()) {
                 fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace)
-                        .addText(emptyStringify(fundingSource.getFundingSource().getFundingSource()))
-                        .addAttribute(
-                                PRINCIPAL_INVESTIGATOR,
-                                emptyStringify(fundingSource.getFundingSource()
-                                        .getPrincipalInvestigator())));
+                                           .addText(emptyStringify(fundingSource.getFundingSource().getFundingSource()))
+                                           .addAttribute(
+                                                   PRINCIPAL_INVESTIGATOR,
+                                                   emptyStringify(fundingSource.getFundingSource()
+                                                                               .getPrincipalInvestigator())));
             }
             entryRoot.add(fundingSources);
         }
@@ -284,9 +300,9 @@ public class IceXmlSerializer {
                 }
 
                 attachmentsRoot.add(new DefaultElement(ATTACHMENT, iceNamespace)
-                        .addCDATA(fileString).addAttribute(FILE_NAME, attachment.getFileName())
-                        .addAttribute(FILE_ID, attachment.getFileId())
-                        .addAttribute(DESCRIPTION, attachment.getDescription()));
+                                            .addCDATA(fileString).addAttribute(FILE_NAME, attachment.getFileName())
+                                            .addAttribute(FILE_ID, attachment.getFileId())
+                                            .addAttribute(DESCRIPTION, attachment.getDescription()));
             }
             entryRoot.add(attachmentsRoot);
         }
@@ -323,11 +339,11 @@ public class IceXmlSerializer {
                 fields.add(getSelectionMarkers(plasmid));
             }
             fields.add(new DefaultElement(BACKBONE, iceNamespace).addText(emptyStringify(plasmid
-                    .getBackbone())));
+                                                                                                 .getBackbone())));
             fields.add(new DefaultElement(ORIGIN_OF_REPLICATION, iceNamespace)
-                    .addText(emptyStringify(plasmid.getOriginOfReplication())));
+                               .addText(emptyStringify(plasmid.getOriginOfReplication())));
             fields.add(new DefaultElement(PROMOTERS, iceNamespace).addText(emptyStringify(plasmid
-                    .getPromoters())));
+                                                                                                  .getPromoters())));
             fields.add(new DefaultElement(IS_CIRCULAR, iceNamespace).addText((plasmid.getCircular() ? "true"
                     : "false")));
         } else if (entry.getRecordType().equals(STRAIN)) {
@@ -336,9 +352,9 @@ public class IceXmlSerializer {
                 fields.add(getSelectionMarkers(strain));
             }
             fields.add(new DefaultElement(HOST, iceNamespace).addText(emptyStringify(strain
-                    .getHost())));
+                                                                                             .getHost())));
             fields.add(new DefaultElement(GENOTYPE_PHENOTYPE, iceNamespace)
-                    .addText(emptyStringify(strain.getGenotypePhenotype())));
+                               .addText(emptyStringify(strain.getGenotypePhenotype())));
             fields.add(new DefaultElement(PLASMIDS, iceNamespace).addText(emptyStringify(strain.getPlasmids())));
         } else if (entry.getRecordType().equals(ARABIDOPSIS)) {
             ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -347,7 +363,7 @@ public class IceXmlSerializer {
 
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             fields.add(new DefaultElement(HARVEST_DATE, iceNamespace).addText(simpleDateFormat
-                    .format(seed.getHarvestDate())));
+                                                                                      .format(seed.getHarvestDate())));
 
             fields.add(new DefaultElement(PARENTS, iceNamespace).addText(emptyStringify(seed.getParents())));
             fields.add(new DefaultElement(GENERATION, iceNamespace).addText(seed.getGeneration().toString()));
@@ -408,7 +424,7 @@ public class IceXmlSerializer {
                     traceFile = TraceSequenceDAO.getFile(new File(traceFilePath), trace);
                     traceString = SerializationUtils
                             .serializeBytesToBase64String(org.apache.commons.io.FileUtils
-                                    .readFileToByteArray(traceFile));
+                                                                               .readFileToByteArray(traceFile));
                 } catch (DAOException e) {
                     // skip this one
                     Logger.error("Could not read trace file " + trace.getFileId());
@@ -425,7 +441,7 @@ public class IceXmlSerializer {
                 traceElement.addAttribute(DEPOSITOR_EMAIL, trace.getDepositor());
                 simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                 traceElement.addAttribute(TIME_STAMP,
-                        simpleDateFormat.format(trace.getCreationTime()));
+                                          simpleDateFormat.format(trace.getCreationTime()));
                 tracesElement.add(traceElement);
                 counter++;
             }

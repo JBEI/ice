@@ -1,16 +1,16 @@
 package org.jbei.ice.lib.account;
 
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.Preference;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.shared.dto.search.SearchBoostField;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.account.model.Preference;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 /**
  * @author Hector Plahar

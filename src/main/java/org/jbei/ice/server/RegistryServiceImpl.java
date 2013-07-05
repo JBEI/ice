@@ -49,43 +49,43 @@ import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.SearchController;
+import org.jbei.ice.lib.shared.AutoCompleteField;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.AccountType;
+import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.NewsItem;
+import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.StorageInfo;
+import org.jbei.ice.lib.shared.dto.autocomplete.AutoCompleteSuggestion;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.shared.dto.comment.UserComment;
+import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.message.MessageList;
+import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.PermissionSuggestion;
+import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
+import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.search.SearchResults;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.services.webservices.ServiceException;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountResults;
-import org.jbei.ice.shared.dto.AccountType;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.MessageInfo;
-import org.jbei.ice.shared.dto.NewsItem;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
-import org.jbei.ice.shared.dto.autocomplete.AutoCompleteSuggestion;
-import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.shared.dto.comment.UserComment;
-import org.jbei.ice.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
-import org.jbei.ice.shared.dto.folder.FolderType;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
-import org.jbei.ice.shared.dto.message.MessageList;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
-import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
-import org.jbei.ice.shared.dto.search.SearchBoostField;
-import org.jbei.ice.shared.dto.search.SearchQuery;
-import org.jbei.ice.shared.dto.search.SearchResults;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
@@ -797,7 +797,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 details.setType(folder.getType());
                 results.add(details);
             } catch (ControllerException ce) {
-                continue;
             }
         }
 
@@ -926,10 +925,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<BulkUploadInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            BulkUploadController controller = ControllerFactory.getBulkUploadController();
             Logger.info(account.getEmail() + ": retrieve user saved drafts");
-            ArrayList<BulkUploadInfo> result = controller.retrieveByUser(account, account);
-            return result;
+            return ControllerFactory.getBulkUploadController().retrieveByUser(account, account);
         } catch (Exception ce) {
             return null;
         }
@@ -945,10 +942,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
             }
 
-            BulkUploadController controller = ControllerFactory.getBulkUploadController();
             Logger.info(account.getEmail() + ": retrieving drafts pending verification");
-            ArrayList<BulkUploadInfo> result = controller.retrievePendingImports(account);
-            return result;
+            return ControllerFactory.getBulkUploadController().retrievePendingImports(account);
         } catch (Exception ce) {
             return null;
         }
@@ -980,8 +975,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account account = retrieveAccountForSid(sid);
             BulkUploadController draftController = ControllerFactory.getBulkUploadController();
             Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draftId);
-            BulkUploadInfo result = draftController.deleteDraftById(account, draftId);
-            return result;
+            return draftController.deleteDraftById(account, draftId);
         } catch (Exception ce) {
             return null;
         }
@@ -994,8 +988,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             Logger.info(account.getEmail() + ": retrieving bulk import with id \"" + id + "\"");
-            BulkUploadInfo result = controller.retrieveById(account, id, start, limit);
-            return result;
+            return controller.retrieveById(account, id, start, limit);
         } catch (Exception e) {
             return null;
         }
@@ -1028,30 +1021,27 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + " retrieving system settings");
-            ConfigurationController configurationController = ControllerFactory.getConfigurationController();
-            HashMap<String, String> settings = configurationController.retrieveSystemSettings();
-            return settings;
+            return ControllerFactory.getConfigurationController().retrieveSystemSettings();
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public HashMap<String, String> retrieveWebOfRegistrySettings(String sid) throws AuthenticationException {
+    public HashMap<String, String> retrieveWebOfRegistryPartners(String sid) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            AccountController controller = ControllerFactory.getAccountController();
-            if (!controller.isAdministrator(account))
+            if (!ControllerFactory.getAccountController().isAdministrator(account))
                 return null;
 
             Logger.info(account.getEmail() + " retrieving web of registry system settings");
             ConfigurationController configurationController = ControllerFactory.getConfigurationController();
             HashMap<String, String> settings = new HashMap<>();
 
-            String v = configurationController.getPropertyValue(ConfigurationKey.WEB_PARTNERS);
-            settings.put(ConfigurationKey.WEB_PARTNERS.name(), v);
-            v = configurationController.getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-            settings.put(ConfigurationKey.JOIN_WEB_OF_REGISTRIES.name(), v);
+//            String v = configurationController.getPropertyValue(ConfigurationKey.WEB_PARTNERS);
+//            settings.put(ConfigurationKey.WEB_PARTNERS.name(), v);
+//            v = configurationController.getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
+//            settings.put(ConfigurationKey.JOIN_WEB_OF_REGISTRIES.name(), v);
             return settings;
         } catch (ControllerException e) {
             return null;
@@ -1113,12 +1103,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": adding web partner " + webPartner);
             ConfigurationController configurationController = ControllerFactory.getConfigurationController();
-            String value = configurationController.getPropertyValue(ConfigurationKey.WEB_PARTNERS);
-            if (value == null || value.isEmpty())
-                value = webPartner;
-            else
-                value += (";" + webPartner);
-            configurationController.setPropertyValue(ConfigurationKey.WEB_PARTNERS, value);
+//            String value = configurationController.getPropertyValue(ConfigurationKey.WEB_PARTNERS);
+//            if (value == null || value.isEmpty())
+//                value = webPartner;
+//            else
+//                value += (";" + webPartner);
+//            configurationController.setPropertyValue(ConfigurationKey.WEB_PARTNERS, value);
             return true;
         } catch (ControllerException | AuthenticationException e) {
             return false;

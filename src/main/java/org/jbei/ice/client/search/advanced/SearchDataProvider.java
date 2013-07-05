@@ -6,11 +6,11 @@ import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.Utils;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.HasEntryInfo;
-import org.jbei.ice.shared.dto.search.SearchResultInfo;
-import org.jbei.ice.shared.dto.search.SearchResults;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchResults;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;

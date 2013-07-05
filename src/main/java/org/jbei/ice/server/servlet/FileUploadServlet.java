@@ -1,10 +1,19 @@
 package org.jbei.ice.server.servlet;
 
-import gwtupload.server.UploadAction;
-import gwtupload.server.exceptions.UploadActionException;
-import gwtupload.shared.UConsts;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.IOUtils;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -18,23 +27,19 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.shared.dto.entry.EntryType;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import gwtupload.server.UploadAction;
+import gwtupload.server.exceptions.UploadActionException;
+import gwtupload.shared.UConsts;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.IOUtils;
 
 /**
  * GWTUpload servlet that handles file uploads. If an upload type (e.g. sequence or attachment)
@@ -144,7 +149,7 @@ public class FileUploadServlet extends UploadAction {
                 case BULK_UPLOAD_FILE_TYPE:
                     Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
                     result = uploadBulkUploadFile(account, file, bulkUploadId, entryId, saveName, isSequence, entryType,
-                            entryAddType);
+                                                  entryAddType);
                     break;
 
                 case BULK_CSV_UPLOAD:
@@ -162,7 +167,7 @@ public class FileUploadServlet extends UploadAction {
     }
 
     public String uploadBulkUploadFile(Account account, File file, String bulkUploadIdStr, String entryId,
-                                       String saveName, boolean isSequence, String entryType, String entryAddType) {
+            String saveName, boolean isSequence, String entryType, String entryAddType) {
         long bulkUploadId;
         try {
             bulkUploadId = Long.decode(bulkUploadIdStr);
@@ -192,8 +197,8 @@ public class FileUploadServlet extends UploadAction {
                 if (isStrainWithPlasmidPlasmid) {
                     String plasmid = ((Strain) entry).getPlasmids();
                     entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account,
-                            ControllerFactory.getEntryController(),
-                            plasmid);
+                                                                         ControllerFactory.getEntryController(),
+                                                                         plasmid);
                 }
             } catch (NumberFormatException | ControllerException e) {
                 Logger.error(e);
@@ -238,7 +243,7 @@ public class FileUploadServlet extends UploadAction {
     }
 
     public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, EntryType type,
-                                   EntryAddType addType, long bid) {
+            EntryAddType addType, long bid) {
         BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
         update.setBulkUploadId(bid);
         update.setType(type);
@@ -250,7 +255,7 @@ public class FileUploadServlet extends UploadAction {
             if (isStrainWithPlasmidPlasmid) {
                 String plasmid = ((Strain) entry).getPlasmids();
                 entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account, ControllerFactory.getEntryController(),
-                        plasmid);
+                                                                     plasmid);
             }
 
             if (isSequence) {
@@ -357,9 +362,9 @@ public class FileUploadServlet extends UploadAction {
                 }
 
                 sequenceAnalysisController.uploadTraceSequence(entry, byteHolder.getName(),
-                        account.getEmail(),
-                        dnaSequence.getSequence().toLowerCase(),
-                        new ByteArrayInputStream(byteHolder.getBytes()));
+                                                               account.getEmail(),
+                                                               dnaSequence.getSequence().toLowerCase(),
+                                                               new ByteArrayInputStream(byteHolder.getBytes()));
             }
             sequenceAnalysisController.rebuildAllAlignments(entry);
             return "";

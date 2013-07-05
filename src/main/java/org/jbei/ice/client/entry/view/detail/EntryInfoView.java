@@ -2,10 +2,10 @@ package org.jbei.ice.client.entry.view.detail;
 
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.StatusType;
-import org.jbei.ice.shared.dto.ParameterInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.shared.StatusType;
+import org.jbei.ice.lib.shared.dto.ParameterInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;

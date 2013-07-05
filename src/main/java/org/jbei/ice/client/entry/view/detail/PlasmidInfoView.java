@@ -3,7 +3,7 @@ package org.jbei.ice.client.entry.view.detail;
 import java.util.HashMap;
 
 import org.jbei.ice.client.Page;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Hyperlink;

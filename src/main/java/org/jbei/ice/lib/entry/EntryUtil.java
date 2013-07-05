@@ -1,20 +1,30 @@
 package org.jbei.ice.lib.entry;
 
-import com.google.common.base.Joiner;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jbei.ice.client.Page;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.PartNumber;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.base.Joiner;
 
 /**
  * Utility class for operating on entries
@@ -178,7 +188,7 @@ public class EntryUtil {
         Matcher secureUrlMatcher = secureUrlPattern.matcher(text);
         while (secureUrlMatcher.find()) {
             urls.add(new UrlLinkText(secureUrlMatcher.group(0).trim(), secureUrlMatcher.start(),
-                    secureUrlMatcher.end()));
+                                     secureUrlMatcher.end()));
         }
         Collections.sort(urls, urlComparator);
         String newText = text;
@@ -217,9 +227,9 @@ public class EntryUtil {
             }
             Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(text);
 
-            ArrayList<IceLink> jbeiLinks = new ArrayList<IceLink>();
-            ArrayList<Integer> starts = new ArrayList<Integer>();
-            ArrayList<Integer> ends = new ArrayList<Integer>();
+            ArrayList<IceLink> jbeiLinks = new ArrayList<>();
+            ArrayList<Integer> starts = new ArrayList<>();
+            ArrayList<Integer> ends = new ArrayList<>();
 
             while (basicWikiLinkMatcher.find()) {
                 String partNumber = null;
@@ -262,47 +272,6 @@ public class EntryUtil {
         }
 
         return text;
-    }
-
-    public static String getParsedNotes(String s) {
-        if (s == null) {
-            return null;
-        }
-
-        final StringBuilder buffer = new StringBuilder();
-        int newlineCount = 0;
-
-        buffer.append("<p>");
-        for (int i = 0; i < s.length(); i++) {
-            final char c = s.charAt(i);
-
-            switch (c) {
-                case '\n':
-                    newlineCount++;
-                    break;
-
-                case '\r':
-                    break;
-
-                default:
-                    if (newlineCount == 1) {
-                        buffer.append("<br/>");
-                    } else if (newlineCount > 1) {
-                        buffer.append("</p><p>");
-                    }
-
-                    buffer.append(c);
-                    newlineCount = 0;
-                    break;
-            }
-        }
-        if (newlineCount == 1) {
-            buffer.append("<br/>");
-        } else if (newlineCount > 1) {
-            buffer.append("</p><p>");
-        }
-        buffer.append("</p>");
-        return buffer.toString();
     }
 
     /**
@@ -364,11 +333,11 @@ public class EntryUtil {
      * table for the plasmid, parse the wiki text, and check that those plasmids actually exist
      * before being certain that strain actually harbors this plasmid.
      *
-     * @param plasmid
+     * @param plasmid plasmid whose associated strains are being retrieved
      * @return LinkedHashSet of Strain objects.
      */
     public static LinkedHashSet<Strain> getStrainsForPlasmid(Plasmid plasmid) {
-        LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
+        LinkedHashSet<Strain> resultStrains = new LinkedHashSet<>();
         EntryController entryController = ControllerFactory.getEntryController();
         String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
 

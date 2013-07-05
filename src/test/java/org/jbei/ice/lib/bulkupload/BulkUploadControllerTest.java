@@ -11,20 +11,20 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.permissions.model.Permission;
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.StatusType;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountType;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.Visibility;
-import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.StatusType;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.AccountType;
+import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.Visibility;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -99,13 +99,16 @@ public class BulkUploadControllerTest {
     }
 
     @Test
-    public void testRetrieveById() throws Exception { }
+    public void testRetrieveById() throws Exception {
+    }
 
     @Test
-    public void testRetrieveByUser() throws Exception { }
+    public void testRetrieveByUser() throws Exception {
+    }
 
     @Test
-    public void testDeleteDraftById() throws Exception { }
+    public void testDeleteDraftById() throws Exception {
+    }
 
     @Test
     public void testAutoUpdateBulkUpload() throws Exception {

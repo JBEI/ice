@@ -1,5 +1,16 @@
 package org.jbei.ice.client.profile.message;
 
+import java.util.List;
+import java.util.Set;
+
+import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.PopupHandler;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,16 +25,6 @@ import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
-import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.client.collection.view.OptionSelect;
-import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.MessageInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * Panel for creating a new message
@@ -118,7 +119,8 @@ public class CreateMessagePanel extends Composite {
         // to
         toBox = new TextBox();
         toBox.getElement().setAttribute("placeHolder",
-                "Enter comma separated list of user ids (emails) and/or select available group(s)");
+                                        "Enter comma separated list of user ids (emails) and/or select available " +
+                                                "group(s)");
         toBox.setStyleName("input_box");
         toBox.setWidth("500px");
         recipientWidget = new RecipientWidget();

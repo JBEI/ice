@@ -6,8 +6,8 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Configuration;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * @author Hector Plahar

@@ -1,7 +1,7 @@
 package org.jbei.ice.client.collection.add.form;
 
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.PartInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.PartInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Widget;
