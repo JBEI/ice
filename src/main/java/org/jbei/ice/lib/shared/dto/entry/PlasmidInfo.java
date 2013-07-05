@@ -8,6 +8,7 @@ public class PlasmidInfo extends EntryInfo {
     private String originOfReplication;
     private String promoters;
     private Boolean circular;
+    private String replicatesIn;
     private HashMap<Long, String> strains; // id -> partNumber
 
     public PlasmidInfo() {
@@ -53,5 +54,13 @@ public class PlasmidInfo extends EntryInfo {
 
     public void setStrains(HashMap<Long, String> strains) {
         this.strains = strains;
+    }
+
+    public String getReplicatesIn() {
+        return replicatesIn;
+    }
+
+    public void setReplicatesIn(String replicatesIn) {
+        this.replicatesIn = replicatesIn;
     }
 }
