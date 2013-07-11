@@ -20,7 +20,12 @@ public class BulkUploadAutoUpdate implements IDTOModel {
     private int row;
 
     // no arg constructor for serializations
-    public BulkUploadAutoUpdate() {
+    private BulkUploadAutoUpdate() {
+        keyValue = new HashMap<EntryField, String>();
+    }
+
+    public BulkUploadAutoUpdate(EntryType type) {
+        this.type = type;
         keyValue = new HashMap<EntryField, String>();
     }
 
@@ -60,10 +65,6 @@ public class BulkUploadAutoUpdate implements IDTOModel {
 
     public EntryType getType() {
         return type;
-    }
-
-    public void setType(EntryType type) {
-        this.type = type;
     }
 
     public Date getLastUpdate() {

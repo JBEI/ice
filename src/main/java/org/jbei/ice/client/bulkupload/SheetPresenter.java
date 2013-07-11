@@ -133,9 +133,8 @@ public class SheetPresenter {
 
             @Override
             public void callBackForLockedColumns(int row, long bulkUploadId, long entryId, EntryType entryType) {
-                BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
+                BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(entryType);
                 update.setEntryId(entryId);
-                update.setType(entryType);
                 update.setBulkUploadId(bulkUploadId);
                 update.setRow(row);
 
@@ -303,10 +302,9 @@ public class SheetPresenter {
         }
 
         // submit for auto update
-        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
+        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(entryType);
         update.setEntryId(entryId);
         update.getKeyValue().put(header.getHeaderType(), value);
-        update.setType(entryType);
         long bulkUpload = currentInfo == null ? 0 : currentInfo.getId();
         update.setBulkUploadId(bulkUpload);
         update.setRow(inputRow);

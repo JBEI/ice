@@ -3,6 +3,7 @@ package org.jbei.ice.lib.bulkupload;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -406,6 +407,14 @@ public class BulkUploadController {
         try {
             draft = dao.retrieveById(autoUpdate.getBulkUploadId());
             if (draft == null) {
+                // validate add type and entrytype
+                if (addType != EntryAddType.STRAIN_WITH_PLASMID && EntryType.nameToType(addType.name()) != autoUpdate
+                        .getType()) {
+                    throw new ControllerException("Incompatible add type (" + addType.toString()
+                                                          + " and auto update entry type ("
+                                                          + autoUpdate.getType().toString() + ")");
+                }
+
                 draft = new BulkUpload();
                 draft.setName("Untitled");
                 draft.setAccount(account);
@@ -420,8 +429,8 @@ public class BulkUploadController {
             throw new ControllerException(de);
         }
 
-        Entry entry = entryController.get(account,
-                                          autoUpdate.getEntryId()); // for strain with plasmid this is the strain
+        // for strain with plasmid this is the strain
+        Entry entry = entryController.get(account, autoUpdate.getEntryId());
         Entry otherEntry = null;  // for strain with plasmid this is the entry
 
         // if entry is null, create entry
@@ -557,6 +566,17 @@ public class BulkUploadController {
         if (!draft.getAccount().equals(account) && !accountController.isAdministrator(account))
             throw new PermissionException("User " + account.getEmail()
                                                   + " does not have permission to update draft " + draftId);
+        // set preferences
+        Set<Preference> bulkUploadPreferences = new HashSet<>(draft.getPreferences());
+
+        if (!bulkUploadPreferences.isEmpty()) {
+            for (Entry entry : draft.getContents()) {
+                for (Preference preference : bulkUploadPreferences) {
+                    EntryField field = EntryField.fromString(preference.getKey());
+                    InfoToModelFactory.infoToEntryForField(entry, null, preference.getValue(), field);
+                }
+            }
+        }
 
         if (!BulkUploadUtil.validate(draft)) {
             Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
@@ -654,6 +674,8 @@ public class BulkUploadController {
         // TODO : this needs to go into a task that auto updates
         for (Entry entry : bulkUpload.getContents()) {
             entry.setVisibility(Visibility.OK.getValue());
+
+            // set permissions
             for (Permission permission : bulkUpload.getPermissions()) {
                 PermissionInfo info = new PermissionInfo();
                 info.setType(PermissionInfo.Type.READ_ENTRY);

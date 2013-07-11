@@ -34,6 +34,9 @@ public enum BioSafetyOption implements IsSerializable {
     }
 
     public static boolean isValidOption(Integer integer) {
+        if (integer == null)
+            return false;
+
         for (BioSafetyOption option : BioSafetyOption.values()) {
             if (integer.intValue() == intValue(option.toString()).intValue())
                 return true;

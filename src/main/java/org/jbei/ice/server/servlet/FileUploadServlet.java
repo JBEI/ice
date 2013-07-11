@@ -244,9 +244,8 @@ public class FileUploadServlet extends UploadAction {
 
     public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, EntryType type,
             EntryAddType addType, long bid) {
-        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
+        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(type);
         update.setBulkUploadId(bid);
-        update.setType(type);
         try {
             update = ControllerFactory.getBulkUploadController().autoUpdateBulkUpload(account, update, addType);
             boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID

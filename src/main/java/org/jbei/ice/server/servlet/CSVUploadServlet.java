@@ -84,11 +84,10 @@ public class CSVUploadServlet extends UploadAction {
                     } else {
                         // process values
                         for (int i = 0; i < lines.length; i += 1) {
-                            BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate();
                             EntryField field = fields.get(i);
-                            autoUpdate.getKeyValue().put(field, lines[i]);
                             EntryType type = toEntryType(addType, field);
-                            autoUpdate.setType(type);
+                            BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(type);
+                            autoUpdate.getKeyValue().put(field, lines[i]);
                             updates.add(autoUpdate);
                         }
                     }
