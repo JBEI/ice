@@ -13,6 +13,8 @@ import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 /**
+ * Controller for managing user preferences.
+ *
  * @author Hector Plahar
  */
 public class PreferencesController {
@@ -28,7 +30,7 @@ public class PreferencesController {
         HashMap<PreferenceKey, String> preferences = new HashMap<>();
         ArrayList<Preference> results;
         try {
-            results = dao.getAcccountPreferences(account, keys);
+            results = dao.getAccountPreferences(account, keys);
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
@@ -46,6 +48,15 @@ public class PreferencesController {
         return preferences;
     }
 
+    /**
+     * Retrieves preference with the exact key value pair for specified account
+     *
+     * @param account owning account
+     * @param key     unique key identifier. Typically one of {@link PreferenceKey}
+     * @param value   value associated with key
+     * @return retrieved preference object
+     * @throws ControllerException
+     */
     public Preference retrievePreference(Account account, String key, String value) throws ControllerException {
         try {
             return dao.retrievePreference(account, key, value);
@@ -59,7 +70,7 @@ public class PreferencesController {
         try {
             HashSet<String> values = new HashSet<>();
             for (SearchBoostField field : fields)
-                values.add(field.name());
+                values.add("BOOST_" + field.name());
             return dao.retrievePreferenceValues(account, values);
         } catch (DAOException de) {
             throw new ControllerException(de);

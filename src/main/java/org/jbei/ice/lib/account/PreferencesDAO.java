@@ -25,7 +25,7 @@ import org.hibernate.criterion.Restrictions;
 class PreferencesDAO extends HibernateRepository<Preference> {
 
     @SuppressWarnings("unchecked")
-    public ArrayList<Preference> getAcccountPreferences(Account account, ArrayList<PreferenceKey> keys)
+    public ArrayList<Preference> getAccountPreferences(Account account, ArrayList<PreferenceKey> keys)
             throws DAOException {
         Session session = currentSession();
         ArrayList<String> keyString = new ArrayList<>();
