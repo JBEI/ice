@@ -97,9 +97,6 @@ public class MessageController {
         }
     }
 
-    public void deleteMessage(long messageId) throws ControllerException {
-    }
-
     public MessageList retrieveMessages(Account requester, Account owner, int start, int count)
             throws ControllerException {
         Logger.info(requester.getEmail() + ": retrieving messages for " + owner.getEmail());
