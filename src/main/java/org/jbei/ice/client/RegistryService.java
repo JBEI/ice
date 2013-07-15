@@ -134,7 +134,7 @@ public interface RegistryService extends RemoteService {
 
     boolean deleteEntryAttachment(String sid, String fileId) throws AuthenticationException;
 
-    EntryInfo retrieveEntryTipDetails(String sessionId, String id, String url) throws AuthenticationException;
+    EntryInfo retrieveEntryTipDetails(String sessionId, long id, String url) throws AuthenticationException;
 
     BulkUploadInfo deleteSavedDraft(String sid, long draftId) throws AuthenticationException;
 

@@ -45,7 +45,7 @@ public interface RegistryServiceAsync {
     void retrieveEntryDetails(String sessionId, long id, String url, AsyncCallback<EntryInfo> callback)
             throws AuthenticationException;
 
-    void retrieveEntryTipDetails(String sessionId, String rid, String url, AsyncCallback<EntryInfo> callback)
+    void retrieveEntryTipDetails(String sessionId, long id, String url, AsyncCallback<EntryInfo> callback)
             throws AuthenticationException;
 
     void getPermissionSuggestions(SuggestOracle.Request req, AsyncCallback<SuggestOracle.Response> callback);

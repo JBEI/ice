@@ -781,9 +781,9 @@ public class EntryController {
         return Comment.toDTO(comment);
     }
 
-    public EntryInfo retrieveEntryTipDetailsFromURL(String recordId, IRegistryAPI api) throws ControllerException {
+    public EntryInfo retrieveEntryTipDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
         try {
-            EntryInfo info = api.getPublicEntryByRecordId(recordId);
+            EntryInfo info = api.getPublicEntryById(entryId);
             boolean hasSequence = api.hasSequence(info.getRecordId());
             info.setHasSequence(hasSequence);
             boolean hasOriginalSequence = api.hasOriginalSequence(info.getRecordId());
@@ -795,11 +795,11 @@ public class EntryController {
         }
     }
 
-    public EntryInfo retrieveEntryTipDetails(Account account, String recordId) throws ControllerException {
+    public EntryInfo retrieveEntryTipDetails(Account account, long entryId) throws ControllerException {
         Entry entry;
 
         try {
-            entry = dao.getByRecordId(recordId);
+            entry = dao.get(entryId);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

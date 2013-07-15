@@ -33,7 +33,7 @@ public class TipViewContentFactory {
 
     public static void getContents(final EntryInfo entry, String url, final Callback<Widget> callback) {
         try {
-            service.retrieveEntryTipDetails(ClientController.sessionId, entry.getRecordId(), url,
+            service.retrieveEntryTipDetails(ClientController.sessionId, entry.getId(), url,
                                             new AsyncCallback<EntryInfo>() {
 
                                                 @Override

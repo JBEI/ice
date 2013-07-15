@@ -391,7 +391,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.enableExportAs(true);
         display.setMainContent(entryViewPresenter.getView().asWidget());
         boolean enable = false;
-        if (currentFolder != null) {
+        if (currentFolder != null && currentFolder.getPermissions() != null) {
             for (PermissionInfo permissionInfo : currentFolder.getPermissions()) {
                 if (permissionInfo.isCanWrite()) {
                     enable = true;

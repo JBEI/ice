@@ -696,22 +696,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public EntryInfo retrieveEntryTipDetails(String sid, String recordId, String url) throws AuthenticationException {
+    public EntryInfo retrieveEntryTipDetails(String sid, long entryId, String url) throws AuthenticationException {
         EntryController controller = ControllerFactory.getEntryController();
         Account account = retrieveAccountForSid(sid);
 
         try {
             if (url != null && !url.isEmpty()) {
-                Logger.info(account.getEmail() + ": retrieving entry details for " + recordId + " from " + url);
+                Logger.info(account.getEmail() + ": retrieving entry tip details for " + entryId + " from " + url);
                 IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
                 if (api == null)
                     return null;
 
-                return controller.retrieveEntryTipDetailsFromURL(recordId, api);
+                return controller.retrieveEntryTipDetailsFromURL(entryId, api);
             }
 
-            Logger.info(account.getEmail() + ": retrieving entry details for " + recordId);
-            return controller.retrieveEntryTipDetails(account, recordId);
+            Logger.info(account.getEmail() + ": retrieving entry tip details for " + entryId);
+            return controller.retrieveEntryTipDetails(account, entryId);
         } catch (ControllerException ce) {
             Logger.error(ce);
             return null;
