@@ -193,27 +193,24 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         return sequence;
     }
 
-    public boolean hasSequence(Entry entry) throws DAOException {
+    public boolean hasSequence(long entryId) throws DAOException {
         Session session = currentSession();
         try {
-
             Number itemCount = (Number) session.createCriteria(Sequence.class)
                                                .setProjection(Projections.countDistinct("id"))
-                                               .add(Restrictions.eq("entry", entry)).uniqueResult();
-
+                                               .add(Restrictions.eq("entry.id", entryId)).uniqueResult();
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
+            throw new DAOException("Failed to retrieve sequence by entry: " + entryId, e);
         }
     }
 
-    public boolean hasOriginalSequence(Entry entry) throws DAOException {
+    public boolean hasOriginalSequence(long entryId) throws DAOException {
         Session session = currentSession();
         try {
-
             Number itemCount = (Number) session.createCriteria(Sequence.class)
                                                .setProjection(Projections.countDistinct("id"))
-                                               .add(Restrictions.eq("entry", entry))
+                                               .add(Restrictions.eq("entry.id", entryId))
                                                .add(Restrictions.conjunction().add(
                                                        Restrictions.ne("sequenceUser", "")).add(
                                                        Restrictions.isNotNull("sequenceUser")))
@@ -221,7 +218,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
 
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
+            throw new DAOException("Failed to retrieve sequence by entry: " + entryId, e);
         }
     }
 

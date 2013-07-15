@@ -32,7 +32,7 @@ public enum ConfigurationKey implements IDTOModel {
     ERROR_EMAIL_EXCEPTION_PREFIX("ERROR", "Error email title prefix", true),
     SEND_EMAIL_ON_ERRORS("NO", "send email on error", true),
     PROJECT_NAME("JBEI Registry", "Project Name", true),
-    URI_PREFIX("localhost:8443", "", true),
+    URI_PREFIX("localhost:8443", "", false),
     PART_NUMBER_PREFIX("TEST", "", true),
     PART_NUMBER_DIGITAL_SUFFIX("000001", "", true),
     PART_NUMBER_DELIMITER("_", "", true),

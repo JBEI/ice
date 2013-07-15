@@ -104,6 +104,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             value = controller.getPropertyValue(name);
         } catch (ControllerException e) {
+            Logger.error(e);
         }
         return value;
     }
@@ -149,10 +150,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public HashMap<String, String> retrieveUserSearchPreferences(String sid) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         try {
-            return ControllerFactory.getPreferencesController().retrieveUserPreferenceList(account,
-                                                                                           Arrays.asList(
-                                                                                                   SearchBoostField
-                                                                                                           .values()));
+            List<SearchBoostField> searchBoostFields = Arrays.asList(SearchBoostField.values());
+            return ControllerFactory.getPreferencesController().retrieveUserPreferenceList(account, searchBoostFields);
         } catch (ControllerException e) {
             return null;
         }
@@ -675,65 +674,48 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public EntryInfo retrieveEntryDetails(String sid, long id, String recordId, String url)
-            throws AuthenticationException {
+    public EntryInfo retrieveEntryDetails(String sid, long id, String url) throws AuthenticationException {
+        EntryController controller = ControllerFactory.getEntryController();
         Account account = retrieveAccountForSid(sid);
 
         try {
-            Entry entry;
-            if (recordId == null || recordId.isEmpty()) {
-                entry = ControllerFactory.getEntryController().get(account, id);
-                return ControllerFactory.getEntryController().retrieveEntryDetails(account, entry);
-            }
-
-            if (url != null) {
+            if (url != null && !url.isEmpty()) {
+                Logger.info(account.getEmail() + ": retrieving entry details for " + id + " from " + url);
                 IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
-                entry = api.getPublicEntryByRecordId(recordId);
-                boolean hasSequence = api.hasSequence(entry.getRecordId());
-                boolean hasOriginalSequence = api.hasOriginalSequence(entry.getRecordId());
-                return ModelToInfoFactory.getInfo(null, entry, null, null, null, hasSequence, hasOriginalSequence);
+                if (api == null)
+                    return null;
+                return controller.retrieveEntryDetailsFromURL(id, api);
             }
 
-            entry = ControllerFactory.getEntryController().getByRecordId(account, recordId);
-            return ControllerFactory.getEntryController().retrieveEntryDetails(account, entry);
-        } catch (ControllerException | ServiceException ce) {
+            Logger.info(account.getEmail() + ": retrieving entry details for " + id);
+            return controller.retrieveEntryDetails(account, id);
+        } catch (ControllerException ce) {
             Logger.error(ce);
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
+            return null;
         }
-        return null;
     }
 
     @Override
     public EntryInfo retrieveEntryTipDetails(String sid, String recordId, String url) throws AuthenticationException {
-        Account account = null;
-        if (url == null) {
-            try {
-                account = retrieveAccountForSid(sid);
-                Entry entry;
-                try {
-                    entry = ControllerFactory.getEntryController().getByRecordId(account, recordId);
-                } catch (PermissionException e) {
-                    Logger.warn(account.getEmail() + ": No read permission for " + recordId);
-                    return null;
-                }
+        EntryController controller = ControllerFactory.getEntryController();
+        Account account = retrieveAccountForSid(sid);
 
-                Logger.info(account.getEmail() + ": retrieving entry tip details for " + entry.getId());
-                return ModelToInfoFactory.createTipView(account, entry);
-            } catch (ControllerException e) {
-                Logger.error(e);
-                return null;
-            }
-        }
-
-        IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
         try {
-            Entry entry = api.getPublicEntryByRecordId(recordId);
-            return ModelToInfoFactory.createTipView(account, entry);
-        } catch (ServiceException e) {
-            Logger.error(e);
+            if (url != null && !url.isEmpty()) {
+                Logger.info(account.getEmail() + ": retrieving entry details for " + recordId + " from " + url);
+                IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
+                if (api == null)
+                    return null;
+
+                return controller.retrieveEntryTipDetailsFromURL(recordId, api);
+            }
+
+            Logger.info(account.getEmail() + ": retrieving entry details for " + recordId);
+            return controller.retrieveEntryTipDetails(account, recordId);
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -1087,21 +1069,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean addWebPartner(String sessionId, String webPartner) {
+    public boolean addWebPartner(String sessionId, String partnerUrl, String partnerName) {
         try {
             Account account = retrieveAccountForSid(sessionId);
             AccountController accountController = ControllerFactory.getAccountController();
             if (!accountController.isAdministrator(account))
                 return false;
 
-            Logger.info(account.getEmail() + ": adding web partner " + webPartner);
-            ConfigurationController configurationController = ControllerFactory.getConfigurationController();
-//            String value = configurationController.getPropertyValue(ConfigurationKey.WEB_PARTNERS);
-//            if (value == null || value.isEmpty())
-//                value = webPartner;
-//            else
-//                value += (";" + webPartner);
-//            configurationController.setPropertyValue(ConfigurationKey.WEB_PARTNERS, value);
+            Logger.info(account.getEmail() + ": adding web partner " + partnerName + "(" + partnerUrl + ")");
+            ControllerFactory.getWebController().addWebPartner(partnerUrl, partnerName);
             return true;
         } catch (ControllerException | AuthenticationException e) {
             return false;
@@ -1384,8 +1360,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": updating entry " + info.getId());
             EntryController controller = ControllerFactory.getEntryController();
-            Entry existing = controller.getByRecordId(account, info.getRecordId());
-
+            Entry existing = controller.get(account, info.getId());
             Entry entry = InfoToModelFactory.infoToEntry(info, existing);
             controller.update(account, entry);
             return true;
@@ -1505,9 +1480,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return item;
         } catch (ControllerException e) {
             Logger.error(e);
+            return null;
         }
-
-        return null;
     }
 
     @Override
@@ -1654,7 +1628,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entry == null)
                 return null;
 
-            controller.delete(account, entry);
+            controller.delete(account, entry.getId());
 
             ArrayList<FolderDetails> folderList = new ArrayList<>();
             List<Folder> folders = folderController.getFoldersByEntry(entry);
@@ -1725,5 +1699,25 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Account account = retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": sending alert for entry " + entryID + " with details " + details);
         return ControllerFactory.getEntryController().sendProblemNotification(account, entryID, details);
+    }
+
+    @Override
+    public boolean setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        if (account.getType() != AccountType.ADMIN)
+            return false;
+
+        if (value)
+            Logger.info(account.getEmail() + ": joining web of registries");
+        else
+            Logger.info(account.getEmail() + ": dropping membership from web of registries");
+        String uri = getThreadLocalRequest().getRequestURL().substring(
+                getThreadLocalRequest().getScheme().length() + 3);
+        uri.substring(0, uri.indexOf("/"));
+        try {
+            return ControllerFactory.getWebController().setEnable(uri, value);
+        } catch (ControllerException e) {
+            return false;
+        }
     }
 }

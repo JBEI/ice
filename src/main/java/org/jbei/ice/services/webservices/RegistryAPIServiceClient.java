@@ -60,6 +60,9 @@ public class RegistryAPIServiceClient {
     }
 
     public IRegistryAPI getAPIPortForURL(String namespaceURI) {
+        if (namespaceURI == null || namespaceURI.trim().isEmpty())
+            return null;
+
         addPortName(namespaceURI);
         Iterator<QName> iter = service.getPorts();
         while (iter.hasNext()) {

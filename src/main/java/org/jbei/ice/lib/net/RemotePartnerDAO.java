@@ -8,6 +8,7 @@ import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
 
 import org.hibernate.HibernateException;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Data Accessor Object for managing {@link RemotePartner} Objects
@@ -25,5 +26,21 @@ class RemotePartnerDAO extends HibernateRepository<RemotePartner> {
             Logger.error(he);
             throw new DAOException(he);
         }
+    }
+
+    /**
+     * Retrieves remote partners by url. the url is also a unique identifier
+     * for a partner
+     *
+     * @param url partner url to retrieve by
+     * @return partner is found, null otherwise
+     */
+    public RemotePartner getByUrl(String url) {
+        Object object = currentSession().createCriteria(RemotePartner.class.getName())
+                .add(Restrictions.eq("url", url)).uniqueResult();
+        if (object == null)
+            return null;
+
+        return (RemotePartner) object;
     }
 }

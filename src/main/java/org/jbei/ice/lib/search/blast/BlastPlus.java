@@ -235,7 +235,6 @@ public class BlastPlus {
             }
         }
 
-
         return hashMap;
     }
 

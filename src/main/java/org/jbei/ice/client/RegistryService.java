@@ -56,7 +56,7 @@ public interface RegistryService extends RemoteService {
     FolderDetails retrieveUserEntries(String sid, String userId, ColumnField sort, boolean asc,
             int start, int limit) throws AuthenticationException;
 
-    EntryInfo retrieveEntryDetails(String sid, long id, String recordId, String url) throws AuthenticationException;
+    EntryInfo retrieveEntryDetails(String sid, long id, String url) throws AuthenticationException;
 
     FolderDetails createUserCollection(String sid, String name, String description,
             ArrayList<Long> contents) throws AuthenticationException;
@@ -164,7 +164,7 @@ public interface RegistryService extends RemoteService {
 
     WebOfRegistries retrieveWebOfRegistryPartners(String sid) throws AuthenticationException;
 
-    boolean addWebPartner(String sessionId, String webPartner);
+    boolean addWebPartner(String sessionId, String partnerUrl, String partnerName);
 
     SearchResults performSearch(String sid, SearchQuery searchQuery, boolean isWeb) throws AuthenticationException;
 
@@ -217,4 +217,6 @@ public interface RegistryService extends RemoteService {
     boolean requestSample(String sid, long entryID, String details) throws AuthenticationException;
 
     UserComment alertToEntryProblem(String sid, long entryID, String details) throws AuthenticationException;
+
+    boolean setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException;
 }

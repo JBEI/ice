@@ -1,6 +1,11 @@
 package org.jbei.ice.lib.utils;
 
-import org.apache.commons.lang.StringUtils;
+import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.entry.EntryUtil;
@@ -12,11 +17,7 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 
-import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Serializer for entry -> xls conversion
@@ -213,7 +214,7 @@ public class IceXlsSerializer {
 
             stringBuilder.append(attachmentController.hasAttachment(entry) ? "Yes" : "No").append("\t");
             stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append("\t");
-            stringBuilder.append((sequenceController.hasSequence(entry)) ? "Yes" : "No").append("\n");
+            stringBuilder.append((sequenceController.hasSequence(entry.getId())) ? "Yes" : "No").append("\n");
         }
 
         return stringBuilder.toString();

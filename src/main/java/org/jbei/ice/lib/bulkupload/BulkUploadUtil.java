@@ -11,7 +11,6 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.StatusType;
@@ -52,10 +51,8 @@ public class BulkUploadUtil {
 
             if (partNumber != null) {
                 try {
-                    return controller.getByPartNumber(account, partNumber);
+                    return controller.getEntryByPartNumber(account, partNumber);
                 } catch (ControllerException e) {
-                    Logger.error(e);
-                } catch (PermissionException e) {
                     Logger.error(e);
                 }
             }
@@ -157,10 +154,7 @@ public class BulkUploadUtil {
         if (entry.getEntryFundingSources() == null || entry.getEntryFundingSources().isEmpty())
             return false;
 
-        if (stringIsEmpty(entry.getShortDescription()))
-            return false;
-
-        return true;
+        return !stringIsEmpty(entry.getShortDescription());
     }
 
     private static boolean stringIsEmpty(String s) {

@@ -41,9 +41,9 @@ import org.jbei.ice.lib.vo.IDNASequence;
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
 public class SequenceController {
+
     private final SequenceDAO dao;
     private final PermissionsController permissionsController;
-
 
     public SequenceController() {
         dao = new SequenceDAO();
@@ -221,7 +221,7 @@ public class SequenceController {
      * @param sequence
      * @return FeaturedDNASequence
      */
-    public static FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
+    public FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
         if (sequence == null) {
             return null;
         }
@@ -385,9 +385,9 @@ public class SequenceController {
         return sequence;
     }
 
-    public boolean hasSequence(Entry entry) throws ControllerException {
+    public boolean hasSequence(long entryId) throws ControllerException {
         try {
-            return dao.hasSequence(entry);
+            return dao.hasSequence(entryId);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -396,13 +396,13 @@ public class SequenceController {
     /**
      * Determines if the user uploaded a sequence file and associated it with an entry
      *
-     * @param entry entry sequence file is associated with
+     * @param entryId unique identifier for entry
      * @return true if there is a sequence file that was originally uploaded by user, false otherwise
      * @throws ControllerException
      */
-    public boolean hasOriginalSequence(Entry entry) throws ControllerException {
+    public boolean hasOriginalSequence(long entryId) throws ControllerException {
         try {
-            return dao.hasOriginalSequence(entry);
+            return dao.hasOriginalSequence(entryId);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

@@ -3,12 +3,9 @@ package org.jbei.ice.lib.entry;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.controllers.ApplicationController;
@@ -18,18 +15,12 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.attachment.Attachment;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.entry.sample.StorageDAO;
-import org.jbei.ice.lib.entry.sample.model.Sample;
-import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
@@ -37,8 +28,6 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Comment;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.AutoCompleteField;
@@ -50,7 +39,10 @@ import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.server.ModelToInfoFactory;
+import org.jbei.ice.services.webservices.IRegistryAPI;
+import org.jbei.ice.services.webservices.ServiceException;
 
 /**
  * ABI to manipulate {@link org.jbei.ice.lib.entry.model.Entry}s.
@@ -63,9 +55,6 @@ public class EntryController {
     private CommentDAO commentDAO;
     private PermissionsController permissionsController;
     private AccountController accountController;
-    private AttachmentController attachmentController;
-    private SampleController sampleController;
-    private SequenceAnalysisController sequenceAnalysisController;
     private SequenceController sequenceController;
 
     public EntryController() {
@@ -73,9 +62,6 @@ public class EntryController {
         commentDAO = new CommentDAO();
         permissionsController = ControllerFactory.getPermissionController();
         accountController = ControllerFactory.getAccountController();
-        attachmentController = ControllerFactory.getAttachmentController();
-        sampleController = ControllerFactory.getSampleController();
-        sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
         sequenceController = ControllerFactory.getSequenceController();
     }
 
@@ -180,8 +166,6 @@ public class EntryController {
         PartNumber partNumber = new PartNumber();
         String nextPart = getNextPartNumber();
         partNumber.setPartNumber(nextPart);
-        Set<PartNumber> partNumbers = new LinkedHashSet<>();
-        partNumbers.add(partNumber);
         entry.getPartNumbers().add(partNumber);
 
         partNumber.setEntry(entry);
@@ -255,7 +239,7 @@ public class EntryController {
 //            permissionsController.addPermission(account, permissionInfo);
 //        }
 
-        if (sequenceController.hasSequence(entry)) {
+        if (sequenceController.hasSequence(entry.getId())) {
             ApplicationController.scheduleBlastIndexRebuildTask(true);
         }
 
@@ -267,8 +251,6 @@ public class EntryController {
         PartNumber partNumber = new PartNumber();
         String nextPart = getNextPartNumber();
         partNumber.setPartNumber(nextPart);
-        Set<PartNumber> partNumbers = new LinkedHashSet<>();
-        partNumbers.add(partNumber);
         entry.getPartNumbers().add(partNumber);
 
         partNumber.setEntry(entry);
@@ -330,7 +312,7 @@ public class EntryController {
             }
         }
 
-        if (sequenceController.hasSequence(entry)) {
+        if (sequenceController.hasSequence(entry.getId())) {
             ApplicationController.scheduleBlastIndexRebuildTask(true);
         }
 
@@ -378,14 +360,43 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
+        if (entry == null)
+            return null;
+
+        if (!permissionsController.hasReadPermission(account, entry)) {
             throw new PermissionException("No read permission for entry!");
         }
 
         return entry;
+
+//        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+//        boolean hasSequence = sequenceController.hasSequence(entry.getId());
+//        info.setHasSequence(hasSequence);
+//        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
+//        info.setHasOriginalSequence(hasOriginalSequence);
+//        return info;
     }
 
-    public Entry getPublicEntryByRecordId(String recordId) throws ControllerException {
+    public FeaturedDNASequence getPublicSequence(String recordId) throws ControllerException {
+        Entry entry;
+        try {
+            entry = dao.getByRecordId(recordId);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        if (entry == null)
+            return null;
+
+        if (!permissionsController.isPubliclyVisible(entry)) {
+            String errMsg = "Entry " + recordId + " is not public";
+            Logger.warn(errMsg);
+            throw new ControllerException(errMsg);
+        }
+        return sequenceController.sequenceToDNASequence(sequenceController.getByEntry(entry));
+    }
+
+    public EntryInfo getPublicEntryByRecordId(String recordId) throws ControllerException {
         Entry entry;
 
         try {
@@ -394,16 +405,47 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        Group publicGroup = ControllerFactory.getGroupController().createOrRetrievePublicGroup();
-        Set<Group> groups = new HashSet<>();
-        groups.add(publicGroup);
-        if (entry != null && !permissionsController.groupHasReadPermission(groups, entry)) {
+        if (entry == null)
+            return null;
+
+        if (!permissionsController.isPubliclyVisible(entry)) {
             String errMsg = "Entry " + recordId + " is not public";
             Logger.warn(errMsg);
             throw new ControllerException(errMsg);
         }
 
-        return entry;
+        EntryInfo info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
+        boolean hasSequence = sequenceController.hasSequence(entry.getId());
+        info.setHasSequence(hasSequence);
+        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
+        info.setHasOriginalSequence(hasOriginalSequence);
+        return info;
+    }
+
+    public EntryInfo getPublicEntryById(long id) throws ControllerException {
+        Entry entry;
+
+        try {
+            entry = dao.get(id);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        if (entry == null)
+            return null;
+
+        if (!permissionsController.isPubliclyVisible(entry)) {
+            String errMsg = "Entry " + id + " is not public";
+            Logger.warn(errMsg);
+            throw new ControllerException(errMsg);
+        }
+
+        EntryInfo info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
+        boolean hasSequence = sequenceController.hasSequence(entry.getId());
+        info.setHasSequence(hasSequence);
+        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
+        info.setHasOriginalSequence(hasOriginalSequence);
+        return info;
     }
 
     /**
@@ -416,7 +458,8 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Entry getByPartNumber(Account account, String partNumber) throws ControllerException, PermissionException {
+    public EntryInfo getByPartNumber(Account account, String partNumber) throws ControllerException,
+            PermissionException {
         Entry entry;
         try {
             entry = dao.getByPartNumber(partNumber);
@@ -424,10 +467,36 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
+        if (entry == null)
+            return null;
+
+        if (!permissionsController.hasReadPermission(account, entry)) {
             throw new PermissionException("No read permission for entry!");
         }
 
+        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+        boolean hasSequence = sequenceController.hasSequence(entry.getId());
+        info.setHasSequence(hasSequence);
+        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
+        info.setHasOriginalSequence(hasOriginalSequence);
+        return info;
+    }
+
+    //TODO hack for BulkUploadUtil that needs Entry Object.
+    public Entry getEntryByPartNumber(Account account, String partNumber) throws ControllerException {
+        Entry entry;
+        try {
+            entry = dao.getByPartNumber(partNumber);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        if (entry == null)
+            return null;
+
+        if (!permissionsController.hasReadPermission(account, entry)) {
+            throw new ControllerException("No read permission for entry!");
+        }
         return entry;
     }
 
@@ -441,7 +510,7 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Entry getByName(Account account, String name) throws ControllerException, PermissionException {
+    public EntryInfo getByUniqueName(Account account, String name) throws ControllerException, PermissionException {
         Entry entry;
         try {
             entry = dao.getByUniqueName(name);
@@ -449,11 +518,19 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
+        if (entry == null)
+            return null;
+
+        if (!permissionsController.hasReadPermission(account, entry)) {
             throw new PermissionException("No read permission for entry!");
         }
 
-        return entry;
+        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+        boolean hasSequence = sequenceController.hasSequence(entry.getId());
+        info.setHasSequence(hasSequence);
+        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
+        info.setHasOriginalSequence(hasOriginalSequence);
+        return info;
     }
 
     public FolderDetails retrieveVisibleEntries(Account account, ColumnField field, boolean asc, int start, int limit)
@@ -544,8 +621,7 @@ public class EntryController {
         }
     }
 
-    public Entry update(Account account, Entry entry)
-            throws ControllerException, PermissionException {
+    public Entry update(Account account, Entry entry) throws ControllerException, PermissionException {
         if (entry == null) {
             throw new ControllerException("Failed to update null entry!");
         }
@@ -554,7 +630,7 @@ public class EntryController {
             throw new PermissionException("No write permission for entry!");
         }
 
-        boolean scheduleRebuild = sequenceController.hasSequence(entry);
+        boolean scheduleRebuild = sequenceController.hasSequence(entry.getId());
         Entry savedEntry;
 
         try {
@@ -574,12 +650,18 @@ public class EntryController {
     /**
      * Delete the entry in the database. Schedule an index rebuild.
      *
-     * @param entry
+     * @param entryId unique identifier for entry to be deleted
      * @throws ControllerException
      * @throws PermissionException
      */
-    public void delete(Account account, Entry entry) throws ControllerException, PermissionException {
-        boolean schedule = sequenceController.hasSequence(entry);
+    public void delete(Account account, long entryId) throws ControllerException, PermissionException {
+        Entry entry;
+        try {
+            entry = dao.get(entryId);
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+        boolean schedule = sequenceController.hasSequence(entry.getId());
 //        if (entry.getVisibility() == Visibility.DRAFT.getValue())   TODO
 //            fullDelete(entry, schedule);
 //        else
@@ -605,7 +687,6 @@ public class EntryController {
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
-
     }
 
     /**
@@ -648,7 +729,8 @@ public class EntryController {
      * <p/>
      * Given a List of entry id's, keep only id's that user has read access to.
      *
-     * @param ids
+     * @param account user account
+     * @param ids     list of entry ids
      * @return List of Entry ids.
      * @throws ControllerException
      */
@@ -674,8 +756,7 @@ public class EntryController {
             throws ControllerException {
         List<Long> filtered = this.filterEntriesByPermission(account, queryResultIds);
         try {
-            ArrayList<Entry> results = new ArrayList<>(dao.getEntriesByIdSet(filtered));
-            return results;
+            return new ArrayList<>(dao.getEntriesByIdSet(filtered));
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -700,30 +781,53 @@ public class EntryController {
         return Comment.toDTO(comment);
     }
 
-    public EntryInfo retrieveEntryDetails(Account account, Entry entry) throws ControllerException {
-        ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
-        ArrayList<Sample> samples = sampleController.getSamplesByEntry(entry);
-        List<TraceSequence> sequences = sequenceAnalysisController.getTraceSequences(entry);
+    public EntryInfo retrieveEntryTipDetailsFromURL(String recordId, IRegistryAPI api) throws ControllerException {
+        try {
+            EntryInfo info = api.getPublicEntryByRecordId(recordId);
+            boolean hasSequence = api.hasSequence(info.getRecordId());
+            info.setHasSequence(hasSequence);
+            boolean hasOriginalSequence = api.hasOriginalSequence(info.getRecordId());
+            info.setHasOriginalSequence(hasOriginalSequence);
+            return info;
+        } catch (ServiceException se) {
+            Logger.error(se);
+            throw new ControllerException(se);
+        }
+    }
 
-        // samples
-        Map<Sample, LinkedList<Storage>> sampleMap = new HashMap<>();
-        for (Sample sample : samples) {
-            Storage storage = sample.getStorage();
-            LinkedList<Storage> storageList = new LinkedList<>();
-            List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
-            if (storages != null)
-                storageList.addAll(storages);
-            Storage scheme = StorageDAO.getSchemeContainingParentStorage(storage);
-            if (scheme != null)
-                storageList.add(scheme);
+    public EntryInfo retrieveEntryTipDetails(Account account, String recordId) throws ControllerException {
+        Entry entry;
 
-            sampleMap.put(sample, storageList);
+        try {
+            entry = dao.getByRecordId(recordId);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
         }
 
-        boolean hasSequence = sequenceController.hasSequence(entry);
-        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry);
-        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, sampleMap, sequences, hasSequence,
-                                                    hasOriginalSequence);
+        return ModelToInfoFactory.createTipView(account, entry);
+    }
+
+    public EntryInfo retrieveEntryDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
+        try {
+            EntryInfo info = api.getPublicEntryById(entryId);
+            boolean hasSequence = api.hasSequence(info.getRecordId());
+            info.setHasSequence(hasSequence);
+            boolean hasOriginalSequence = api.hasOriginalSequence(info.getRecordId());
+            info.setHasOriginalSequence(hasOriginalSequence);
+            return info;
+        } catch (ServiceException e) {
+            Logger.error(e);
+            throw new ControllerException(e);
+        }
+    }
+
+    public EntryInfo retrieveEntryDetails(Account account, long entryId) throws ControllerException {
+        Entry entry = get(account, entryId);
+        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+        boolean hasSequence = sequenceController.hasSequence(entry.getId());
+        info.setHasSequence(hasSequence);
+        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
+        info.setHasOriginalSequence(hasOriginalSequence);
 
         // comments
         ArrayList<Comment> comments = commentDAO.retrieveComments(entry);
@@ -770,7 +874,7 @@ public class EntryController {
             }
 
             String site = ControllerFactory.getConfigurationController().getPropertyValue(ConfigurationKey.URI_PREFIX);
-            StringBuffer body = new StringBuffer();
+            StringBuilder body = new StringBuilder();
             body.append("A sample request has been received from ")
                 .append(account.getFullName())
                 .append(" (")
@@ -801,7 +905,7 @@ public class EntryController {
             }
 
             String site = ControllerFactory.getConfigurationController().getPropertyValue(ConfigurationKey.URI_PREFIX);
-            StringBuffer body = new StringBuffer();
+            StringBuilder body = new StringBuilder();
             body.append("A problem notification was sent by ")
                 .append(account.getFullName())
                 .append(" for entry ")
@@ -821,5 +925,19 @@ public class EntryController {
             Logger.error(e);
         }
         return null;
+    }
+
+    public boolean hasWritePermission(Account account, long entryId) throws ControllerException {
+        Entry entry;
+        try {
+            entry = dao.get(entryId);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        if (entry == null)
+            return false;
+
+        return permissionsController.hasWritePermission(account, entry);
     }
 }

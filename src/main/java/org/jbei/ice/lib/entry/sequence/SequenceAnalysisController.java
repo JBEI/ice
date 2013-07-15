@@ -82,8 +82,7 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to save trace sequence without sequence!");
         }
 
-        TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence,
-                                                        date);
+        TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence, date);
 
         try {
             return traceDao.create(traceSequenceFileDir, traceSequence, inputStream);
@@ -107,9 +106,7 @@ public class SequenceAnalysisController {
      */
     public TraceSequence uploadTraceSequence(Entry entry, String filename, String depositor,
             String sequence, InputStream inputStream) throws ControllerException {
-
-        return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(),
-                                   new Date(), inputStream);
+        return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(), new Date(), inputStream);
     }
 
     /**

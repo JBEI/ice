@@ -54,8 +54,7 @@ import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
 public class ModelToInfoFactory {
 
     public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
-            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences,
-            boolean hasSequence, boolean hasOriginalSequence) {
+            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences) {
         EntryInfo info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
@@ -109,10 +108,6 @@ public class ModelToInfoFactory {
         // get trace sequences 
         ArrayList<SequenceAnalysisInfo> analysisInfo = getSequenceAnalysis(sequences);
         info.setSequenceAnalysis(analysisInfo);
-
-        // has sequence (different from trace sequence above)
-        info.setHasSequence(hasSequence);
-        info.setHasOriginalSequence(hasOriginalSequence);
 
         return info;
     }
@@ -231,9 +226,8 @@ public class ModelToInfoFactory {
         info.setEcotype(seed.getEcotype());
         info.setParents(seed.getParents());
         info.setHarvestDate(seed.getHarvestDate());
-        boolean isSent = seed.isSentToABRC() == null || !seed.isSentToABRC() ? false : true;
+        boolean isSent = !(seed.isSentToABRC() == null || !seed.isSentToABRC());
         info.setSentToAbrc(isSent);
-
         return info;
     }
 
@@ -292,6 +286,7 @@ public class ModelToInfoFactory {
                 info.setCreatorId(creatorId);
             }
         } catch (ControllerException ce) {
+            Logger.warn(ce.getMessage());
         }
 
         info.setAlias(entry.getAlias());
@@ -356,36 +351,6 @@ public class ModelToInfoFactory {
         return info;
     }
 
-    public static EntryInfo getSummaryInfo(Entry entry) {
-        EntryInfo info;
-        EntryType type = EntryType.nameToType(entry.getRecordType());
-
-        switch (type) {
-            case ARABIDOPSIS:
-                info = new ArabidopsisSeedInfo();
-                break;
-
-            case PART:
-            default:
-                info = new PartInfo();
-                break;
-
-            case PLASMID:
-                info = new PlasmidInfo();
-                break;
-
-            case STRAIN:
-                info = new StrainInfo();
-                break;
-        }
-
-        info.setId(entry.getId());
-        info.setRecordId(entry.getRecordId());
-        info.setPartId(EntryUtil.getPartNumbersAsString(entry));
-        info.setName(entry.getNamesAsString());
-        return info;
-    }
-
     private static void getTipViewCommon(EntryInfo view, Entry entry) {
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
@@ -408,6 +373,7 @@ public class ModelToInfoFactory {
             if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
                 view.setCreatorId(account1.getId());
         } catch (ControllerException ce) {
+            Logger.warn(ce.getMessage());
         }
 
         view.setKeywords(entry.getKeywords());
@@ -448,6 +414,7 @@ public class ModelToInfoFactory {
                 if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
                     view.setCreatorId(account1.getId());
             } catch (ControllerException ce) {
+                Logger.warn(ce.getMessage());
             }
         }
 
@@ -472,8 +439,8 @@ public class ModelToInfoFactory {
         // has sequence
         try {
             SequenceController sequenceController = ControllerFactory.getSequenceController();
-            view.setHasSequence(sequenceController.hasSequence(entry));
-            view.setHasOriginalSequence(sequenceController.hasOriginalSequence(entry));
+            view.setHasSequence(sequenceController.hasSequence(entry.getId()));
+            view.setHasOriginalSequence(sequenceController.hasOriginalSequence(entry.getId()));
         } catch (ControllerException e) {
             Logger.error(e);
         }

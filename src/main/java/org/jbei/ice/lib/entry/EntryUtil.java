@@ -22,6 +22,7 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.utils.Utils;
 
 import com.google.common.base.Joiner;
@@ -55,11 +56,9 @@ public class EntryUtil {
      */
     private static String makeEntryLink(Account account, IceLink iceLink) throws ControllerException {
         String result;
-
         EntryController entryController = ControllerFactory.getEntryController();
-
         long id = 0;
-        Entry entry;
+        EntryInfo entry;
 
         try {
             entry = entryController.getByPartNumber(account, iceLink.getPartNumber());
@@ -248,7 +247,7 @@ public class EntryUtil {
 
                 if (partNumber != null) {
                     try {
-                        Entry entry = entryController.getByPartNumber(account, partNumber);
+                        EntryInfo entry = entryController.getByPartNumber(account, partNumber);
 
                         if (entry != null) {
                             jbeiLinks.add(new IceLink(partNumber, descriptive));

@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.permissions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -261,6 +262,13 @@ public class PermissionsController {
         }
     }
 
+    public boolean isPubliclyVisible(Entry entry) throws ControllerException {
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        Set<Group> groups = new HashSet<>();
+        groups.add(publicGroup);
+        return groupHasReadPermission(groups, entry);
+    }
+
     public boolean groupHasReadPermission(Set<Group> groups, Set<Folder> folders) throws ControllerException {
         if (groups.isEmpty() || folders.isEmpty())
             return false;
@@ -442,8 +450,7 @@ public class PermissionsController {
      * @param folder folder whose permissions are being retrieved
      * @return list of permissions that have been found for the specified folder
      */
-    public ArrayList<PermissionInfo> retrieveSetFolderPermission(Folder folder)
-            throws ControllerException {
+    public ArrayList<PermissionInfo> retrieveSetFolderPermission(Folder folder) throws ControllerException {
         ArrayList<PermissionInfo> permissionInfos = new ArrayList<>();
 
         try {

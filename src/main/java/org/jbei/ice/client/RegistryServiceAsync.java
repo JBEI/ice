@@ -42,8 +42,8 @@ public interface RegistryServiceAsync {
 
     void logout(String sessionId, AsyncCallback<Boolean> callback);
 
-    void retrieveEntryDetails(String sessionId, long id, String recordId, String url,
-            AsyncCallback<EntryInfo> callback) throws AuthenticationException;
+    void retrieveEntryDetails(String sessionId, long id, String url, AsyncCallback<EntryInfo> callback)
+            throws AuthenticationException;
 
     void retrieveEntryTipDetails(String sessionId, String rid, String url, AsyncCallback<EntryInfo> callback)
             throws AuthenticationException;
@@ -193,7 +193,7 @@ public interface RegistryServiceAsync {
 
     void retrieveAvailableAccounts(String sessionId, AsyncCallback<ArrayList<AccountInfo>> callback);
 
-    void addWebPartner(String sessionId, String webPartner, AsyncCallback<Boolean> callback);
+    void addWebPartner(String sessionId, String partnerName, String partnerUrl, AsyncCallback<Boolean> callback);
 
     void autoUpdateBulkUpload(String sid, BulkUploadAutoUpdate wrapper, EntryAddType addType,
             AsyncCallback<BulkUploadAutoUpdate> callback) throws AuthenticationException;
@@ -246,4 +246,7 @@ public interface RegistryServiceAsync {
     void requestSample(String sid, long entryID, String details, AsyncCallback<Boolean> callback);
 
     void alertToEntryProblem(String sid, long entryID, String details, AsyncCallback<UserComment> callback);
+
+    void setEnableWebOfRegistries(String sessionId, boolean value, AsyncCallback<Boolean> callback)
+            throws AuthenticationException;
 }

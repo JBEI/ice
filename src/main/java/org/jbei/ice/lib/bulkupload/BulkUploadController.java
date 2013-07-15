@@ -184,10 +184,11 @@ public class BulkUploadController {
         // convert
         for (Entry entry : contents) {
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
-            boolean hasSequence = sequenceController.hasSequence(entry);
-            boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry);
-            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, null, null,
-                                                        hasSequence, hasOriginalSequence);
+            boolean hasSequence = sequenceController.hasSequence(entry.getId());
+            boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
+            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, null, null);
+            info.setHasSequence(hasSequence);
+            info.setHasOriginalSequence(hasOriginalSequence);
 
             // retrieve permission
             Set<Permission> entryPermissions = entry.getPermissions();
@@ -206,10 +207,11 @@ public class BulkUploadController {
                     Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController, plasmids);
                     if (plasmid != null) {
                         attachments = attachmentController.getByEntry(account, plasmid);
-                        hasSequence = sequenceController.hasSequence(plasmid);
-                        hasOriginalSequence = sequenceController.hasOriginalSequence(plasmid);
-                        EntryInfo plasmidInfo = ModelToInfoFactory.getInfo(account, plasmid, attachments, null, null,
-                                                                           hasSequence, hasOriginalSequence);
+                        hasSequence = sequenceController.hasSequence(plasmid.getId());
+                        hasOriginalSequence = sequenceController.hasOriginalSequence(plasmid.getId());
+                        EntryInfo plasmidInfo = ModelToInfoFactory.getInfo(account, plasmid, attachments, null, null);
+                        plasmidInfo.setHasSequence(hasSequence);
+                        plasmidInfo.setHasOriginalSequence(hasOriginalSequence);
                         Set<Permission> permissions = plasmid.getPermissions();
                         if (permissions != null && !permissions.isEmpty()) {
                             for (Permission permission : permissions) {
@@ -222,17 +224,14 @@ public class BulkUploadController {
                     continue;
             }
 
-            if (info != null) {
-                SampleStorage sampleStorage = retrieveSampleStorage(entry);
-                if (sampleStorage != null) {
-                    ArrayList<SampleStorage> sampleStorageArrayList = new ArrayList<>();
-                    sampleStorageArrayList.add(sampleStorage);
-                    info.setSampleMap(sampleStorageArrayList);
-                }
+            SampleStorage sampleStorage = retrieveSampleStorage(entry);
+            if (sampleStorage != null) {
+                ArrayList<SampleStorage> sampleStorageArrayList = new ArrayList<>();
+                sampleStorageArrayList.add(sampleStorage);
+                info.setSampleMap(sampleStorageArrayList);
             }
 
-            if (info != null)
-                draftInfo.getEntryList().add(info);
+            draftInfo.getEntryList().add(info);
         }
 
         HashMap<PreferenceKey, String> userSaved = null;
@@ -383,7 +382,7 @@ public class BulkUploadController {
             // delete all associated entries. for strain with plasmids both are returned
             for (Entry entry : draft.getContents()) {
                 try {
-                    entryController.delete(requesting, entry);
+                    entryController.delete(requesting, entry.getId());
                 } catch (PermissionException pe) {
                     Logger.warn("Could not delete entry " + entry.getRecordId() + " for bulk upload " + draftId);
                 }

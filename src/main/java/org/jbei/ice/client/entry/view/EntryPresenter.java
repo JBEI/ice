@@ -345,7 +345,6 @@ public class EntryPresenter extends AbstractPresenter {
                     }.go(eventBus);
                 } else {
                     eventBus.fireEvent(new FeedbackEvent(true, "Invalid selection!"));
-                    return;
                 }
             }
         };
@@ -368,7 +367,7 @@ public class EntryPresenter extends AbstractPresenter {
                     @Override
                     protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback)
                             throws AuthenticationException {
-                        service.retrieveEntryTraceSequences(ClientController.sessionId, aLong.longValue(), callback);
+                        service.retrieveEntryTraceSequences(ClientController.sessionId, aLong, callback);
                     }
 
                     @Override
@@ -392,7 +391,7 @@ public class EntryPresenter extends AbstractPresenter {
             @Override
             protected void callService(AsyncCallback<EntryInfo> callback) throws AuthenticationException {
                 service.retrieveEntryDetails(ClientController.sessionId, currentContext.getId(),
-                                             currentContext.getRecordId(), currentContext.getPartnerUrl(), callback);
+                                             currentContext.getPartnerUrl(), callback);
             }
 
             @Override

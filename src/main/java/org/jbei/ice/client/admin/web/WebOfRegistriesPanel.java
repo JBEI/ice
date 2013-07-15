@@ -80,8 +80,8 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         joinBox.addChangeHandler(handler);
     }
 
-    public String getJoinSelectedValue() {
-        return joinBox.getSelectedIndex() == 0 ? "yes" : "no";
+    public boolean getJoinSelectedValue() {
+        return joinBox.getSelectedIndex() == 0;
     }
 
     public void addPartner(String partner) {

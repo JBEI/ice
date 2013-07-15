@@ -70,7 +70,6 @@ public class RegistryAMFAPI extends BaseService {
             return null;
         } catch (PermissionException e) {
             Logger.warn(getLoggerPrefix() + account.getFullName() + " tried to access entry without permissions.");
-
             return null;
         }
     }
@@ -123,17 +122,15 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         EntryController entryController = ControllerFactory.getEntryController();
+        Entry entry;
 
-        Entry entry = null;
         try {
             entry = entryController.getByRecordId(account, entryId);
         } catch (ControllerException e) {
             Logger.error("Failed to get entry!", e);
-
             return null;
         } catch (PermissionException e) {
             Logger.warn(getLoggerPrefix() + account.getFullName() + " tried to access entry without permissions.");
-
             return null;
         }
         // TODO : this is a bit of a hack. basically searching through all partners to see if they have this entry
@@ -153,7 +150,6 @@ public class RegistryAMFAPI extends BaseService {
                     }
                 } catch (ServiceException e) {
                     Logger.error(e);
-                    continue;
                 }
             }
         }
@@ -161,7 +157,7 @@ public class RegistryAMFAPI extends BaseService {
 
         try {
             Sequence sequence = ControllerFactory.getSequenceController().getByEntry(entry);
-            return SequenceController.sequenceToDNASequence(sequence);
+            return ControllerFactory.getSequenceController().sequenceToDNASequence(sequence);
         } catch (ControllerException e) {
             Logger.error("Failed to get entry!", e);
             return null;

@@ -14,6 +14,7 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
@@ -31,32 +32,33 @@ public interface IRegistryAPI {
 
     boolean isAuthenticated(@WebParam(name = "sessionId") String sessionId) throws ServiceException;
 
-    boolean isModerator(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "login") String login)
+    boolean isAdministrator(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "login") String login)
             throws SessionException, ServiceException;
 
-    Entry getEntryByName(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "name") String name)
+    EntryInfo getEntryByName(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "name") String name)
             throws ServiceException;
 
     boolean hasSequence(@WebParam(name = "recordId") String recordId) throws ServiceException;
 
     boolean hasOriginalSequence(@WebParam(name = "recordId") String recordId) throws ServiceException;
 
-    Entry getByRecordId(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
-            ServicePermissionException;
+    EntryInfo getByRecordId(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException;
 
-    Entry getPublicEntryByRecordId(@WebParam(name = "recordId") String recordId) throws ServiceException;
+    EntryInfo getPublicEntryByRecordId(@WebParam(name = "recordId") String recordId) throws ServiceException;
 
-    Entry getByPartNumber(@WebParam(name = "sessionId") String sessionId,
+    EntryInfo getPublicEntryById(@WebParam(name = "entryId") long entryId) throws ServiceException;
+
+    EntryInfo getByPartNumber(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "partNumber") String partNumber) throws SessionException,
-            ServiceException, ServicePermissionException;
+            ServiceException;
 
-    boolean hasReadPermissions(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
-            ServicePermissionException;
+//    boolean hasReadPermissions(@WebParam(name = "sessionId") String sessionId,
+//            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+//            ServicePermissionException;
 
     boolean hasWritePermissions(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException;
+            @WebParam(name = "entryId") long entryId) throws SessionException, ServiceException;
 
     Plasmid createPlasmid(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException;
@@ -70,50 +72,51 @@ public interface IRegistryAPI {
     ArabidopsisSeed createSeed(@WebParam(name = "sessionId") String sessionId, @WebParam(
             name = "seed") ArabidopsisSeed seed) throws SessionException, ServiceException;
 
-    Plasmid updatePlasmid(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "plasmid") Plasmid plasmid)
-            throws SessionException, ServiceException, ServicePermissionException;
-
-    Strain updateStrain(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "strain") Strain strain)
-            throws SessionException, ServiceException, ServicePermissionException;
-
-    Part updatePart(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "part") Part part)
-            throws SessionException, ServiceException, ServicePermissionException;
-
-    void removeEntry(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "entryId") String entryId)
-            throws SessionException, ServiceException, ServicePermissionException;
+    //    Plasmid updatePlasmid(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "plasmid") Plasmid
+    // plasmid)
+//            throws SessionException, ServiceException;
+//
+//    Strain updateStrain(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "strain") Strain strain)
+//            throws SessionException, ServiceException;
+//
+//    Part updatePart(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "part") Part part)
+//            throws SessionException, ServiceException;
+//
+    void deleteEntry(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "entryId") long entryId)
+            throws SessionException, ServiceException;
 
     FeaturedDNASequence getSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId)
-            throws SessionException, ServiceException, ServicePermissionException;
+            throws SessionException, ServiceException;
 
     FeaturedDNASequence getPublicSequence(@WebParam(name = "entryId") String entryId) throws ServiceException;
 
     String getOriginalGenBankSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId)
-            throws SessionException, ServiceException, ServicePermissionException;
+            throws SessionException, ServiceException;
 
     String getGenBankSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId)
-            throws SessionException, ServiceException, ServicePermissionException;
+            throws SessionException, ServiceException;
 
     String getFastaSequence(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "entryId") String entryId)
-            throws SessionException, ServiceException, ServicePermissionException;
+            throws SessionException, ServiceException;
 
     FeaturedDNASequence createSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId,
             @WebParam(name = "sequence") FeaturedDNASequence featuredDNASequence)
-            throws SessionException, ServiceException, ServicePermissionException;
+            throws SessionException, ServiceException;
 
     void removeSequence(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "entryId") String entryId)
-            throws SessionException, ServiceException, ServicePermissionException;
+            throws SessionException, ServiceException;
 
     FeaturedDNASequence uploadSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId, @WebParam(name = "sequence") String sequence)
-            throws SessionException, ServiceException, ServicePermissionException;
+            throws SessionException, ServiceException;
 
     ArrayList<Sample> retrieveEntrySamples(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId)
-            throws SessionException, ServiceException, ServicePermissionException;
+            throws SessionException, ServiceException;
 
     ArrayList<Sample> retrieveSamplesByBarcode(
             @WebParam(name = "sessionId") String sessionId,
@@ -147,6 +150,17 @@ public interface IRegistryAPI {
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException;
 
     SearchResults runSearch(@WebParam(name = "searchQuery") SearchQuery query) throws ServiceException;
+
+    /**
+     * adds or removes a partner from the web of registries. This call is typically used for the node master
+     * who maintains (any maybe curates? the information)
+     *
+     * @param uri  unique resource identifier for the machine(s) hosting the partner
+     * @param name name of the partner. Should be unique but is not enforced
+     * @param add  whether to add or remove partner
+     * @throws ServiceException
+     */
+    void processWebOfRegistryPartnerInformation(String uri, String name, boolean add) throws ServiceException;
 
     /**
      * WARNING

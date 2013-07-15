@@ -8,6 +8,8 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 /**
+ * Data model for bulk upload auto updates
+ *
  * @author Hector Plahar
  */
 public class BulkUploadAutoUpdate implements IDTOModel {

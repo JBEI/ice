@@ -31,7 +31,7 @@ import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
 import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
 
 /**
- * Factory object for converting data transfer objects to model
+ * Factory object for converting data transfer objects to model objects
  *
  * @author Hector Plahar
  */
