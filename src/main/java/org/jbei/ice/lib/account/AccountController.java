@@ -14,20 +14,20 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.authentication.IAuthentication;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
-import org.jbei.ice.lib.authentication.LocalBackend;
+import org.jbei.ice.lib.authentication.UserIdAuthentication;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.session.PersistentSessionDataWrapper;
+import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.AccountType;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountResults;
-import org.jbei.ice.shared.dto.AccountType;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * ABI to manipulate {@link Account} objects.
@@ -113,6 +113,25 @@ public class AccountController {
     }
 
     /**
+     * validates the account dto to ensure that the fields required (especially by the database)
+     * are present
+     *
+     * @param accountInfo account dto for validation
+     * @throws ControllerException if validation fails
+     */
+    private void validateRequiredAccountFields(AccountInfo accountInfo) throws ControllerException {
+        if (accountInfo.getFirstName() == null || accountInfo.getFirstName().trim().isEmpty())
+            throw new ControllerException("Account first name is required");
+
+        if (accountInfo.getLastName() == null || accountInfo.getLastName().trim().isEmpty())
+            throw new ControllerException("Account last name is required");
+
+        if (accountInfo.getEmail() == null || accountInfo.getEmail().trim().isEmpty()) {
+            throw new ControllerException("Cannot create account without user id");
+        }
+    }
+
+    /**
      * Creates a new account using the parameters passed. A random password is initially generated ,
      * encrypted and assigned to the account
      *
@@ -122,11 +141,10 @@ public class AccountController {
      * @throws ControllerException in the event email is already assigned to another user or is empty
      */
     public String createNewAccount(AccountInfo info, boolean sendEmail) throws ControllerException {
-        String email = info.getEmail().trim();
-        if (email == null || email.isEmpty()) {
-            throw new ControllerException("Cannot create account without user id");
-        }
+        // validate fields required by the database
+        validateRequiredAccountFields(info);
 
+        String email = info.getEmail().trim();
         if (getByEmail(email) != null) {
             throw new ControllerException("Account with id \"" + email + "\" already exists");
         }
@@ -371,13 +389,13 @@ public class AccountController {
         SessionData result = null;
         Account account;
         try {
-            IAuthentication authentication = new LocalBackend();
+            IAuthentication authentication = new UserIdAuthentication();
             account = authentication.authenticate(login, password);
         } catch (AuthenticationException e2) {
             throw new ControllerException(e2);
         } catch (InvalidCredentialsException e) {
             try {
-                Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password bruteforce hacking
+                Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password brute force hacking
             } catch (InterruptedException ie) {
                 throw new ControllerException(ie);
             }
