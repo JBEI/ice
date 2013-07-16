@@ -9,9 +9,9 @@ import org.jbei.ice.client.bulkupload.sheet.cell.AutoCompleteSheetCell;
 import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 /**
  * @author Hector Plahar
@@ -31,12 +31,12 @@ public class StrainHeaders extends PartHeader {
     }
 
     @Override
-    public SheetCellData extractValue(EntryField header, EntryInfo info) {
+    public SheetCellData extractValue(EntryField header, PartData info) {
         SheetCellData data = extractCommon(header, info);
         if (data != null)
             return data;
 
-        StrainInfo strain = (StrainInfo) info;
+        StrainData strain = (StrainData) info;
         String value = null;
         switch (header) {
             case PARENTAL_STRAIN:

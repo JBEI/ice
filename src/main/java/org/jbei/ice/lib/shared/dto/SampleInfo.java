@@ -2,9 +2,9 @@ package org.jbei.ice.lib.shared.dto;
 
 import java.util.Date;
 
-import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 
-public class SampleInfo extends HasEntryInfo implements Comparable<SampleInfo> {
+public class SampleInfo extends HasEntryData implements Comparable<SampleInfo> {
 
     private String sampleId;
     private String label;

@@ -8,7 +8,7 @@ import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
 /**
@@ -46,7 +46,7 @@ public abstract class BulkUploadHeaders {
      * @param info
      * @return extracted value or null if none is found
      */
-    public SheetCellData extractCommon(EntryField header, EntryInfo info) {
+    public SheetCellData extractCommon(EntryField header, PartData info) {
         String value = null;
         String id = null;
 
@@ -174,5 +174,5 @@ public abstract class BulkUploadHeaders {
         return data;
     }
 
-    public abstract SheetCellData extractValue(EntryField header, EntryInfo info);
+    public abstract SheetCellData extractValue(EntryField header, PartData info);
 }

@@ -6,8 +6,8 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
-import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
 
 import com.google.gwt.view.client.Range;
@@ -50,9 +50,9 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
     }
 
     @Override
-    public EntryInfo getCachedData(long entryId, String recordId) {
-        for (HasEntryInfo result : results) {
-            EntryInfo info = result.getEntryInfo();
+    public PartData getCachedData(long entryId, String recordId) {
+        for (HasEntryData result : results) {
+            PartData info = result.getEntryInfo();
 
             if (info.getId() == entryId)
                 return info;
@@ -61,9 +61,9 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
     }
 
     @Override
-    public int indexOfCached(EntryInfo info) {
+    public int indexOfCached(PartData info) {
         int i = 0;
-        for (HasEntryInfo result : results) {
+        for (HasEntryData result : results) {
 
             if (result.getEntryInfo().getId() == info.getId())
                 return i;
@@ -78,7 +78,7 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
     }
 
     @Override
-    public EntryInfo getNext(EntryInfo info) {
+    public PartData getNext(PartData info) {
         int idx = indexOfCached(info);
         if (idx == -1)
             return null;
@@ -86,7 +86,7 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
     }
 
     @Override
-    public EntryInfo getPrev(EntryInfo info) {
+    public PartData getPrev(PartData info) {
         int idx = indexOfCached(info);
         if (idx == -1)
             return null;

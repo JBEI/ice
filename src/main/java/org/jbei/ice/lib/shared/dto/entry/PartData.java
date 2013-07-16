@@ -12,7 +12,7 @@ import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
 @XmlRootElement
-public class EntryInfo implements IDTOModel {
+public class PartData implements IDTOModel {
 
     private long id;
     private String recordId;
@@ -55,12 +55,13 @@ public class EntryInfo implements IDTOModel {
     private ArrayList<UserComment> comments;
     private String sbolVisualURL;
 
-    private EntryInfo info; // typically used with strain with plasmid
+    private PartData info; // typically used with strain with plasmid
 
-    public EntryInfo() {
+    public PartData() {
+        this(EntryType.PART);
     }
 
-    public EntryInfo(EntryType type) {
+    public PartData(EntryType type) {
         this.type = type;
         sampleStorage = new ArrayList<SampleStorage>();
         permissions = new ArrayList<PermissionInfo>();
@@ -349,11 +350,11 @@ public class EntryInfo implements IDTOModel {
         this.visible = visible;
     }
 
-    public EntryInfo getInfo() {
+    public PartData getInfo() {
         return info;
     }
 
-    public void setInfo(EntryInfo info) {
+    public void setInfo(PartData info) {
         this.info = info;
     }
 

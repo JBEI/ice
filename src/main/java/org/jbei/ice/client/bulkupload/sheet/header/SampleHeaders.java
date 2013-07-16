@@ -8,7 +8,7 @@ import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 /**
  * @author Hector Plahar
@@ -41,9 +41,9 @@ public abstract class SampleHeaders {
         return this.headers.size();
     }
 
-    public abstract SheetCellData extractValue(EntryField headerType, EntryInfo info);
+    public abstract SheetCellData extractValue(EntryField headerType, PartData info);
 
-    SheetCellData extractCommon(EntryField headerType, EntryInfo info) {
+    SheetCellData extractCommon(EntryField headerType, PartData info) {
 
         if (!info.isHasSample())
             return null;

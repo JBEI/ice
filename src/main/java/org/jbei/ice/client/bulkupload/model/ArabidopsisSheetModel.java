@@ -6,23 +6,23 @@ import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 
-public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedInfo> {
+public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedData> {
 
     @Override
-    public ArabidopsisSeedInfo setField(ArabidopsisSeedInfo info, SheetCellData datum) {
+    public ArabidopsisSeedData setField(ArabidopsisSeedData data, SheetCellData datum) {
         if (datum == null)
-            return info;
+            return data;
 
         EntryField header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null)
-            return info;
+            return data;
 
         // arabidopsis seed specific fields
         switch (header) {
@@ -31,8 +31,8 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
                     break;
 
                 try {
-                    ArabidopsisSeedInfo.PlantType type = ArabidopsisSeedInfo.PlantType.valueOf(value);
-                    info.setPlantType(type);
+                    ArabidopsisSeedData.PlantType type = ArabidopsisSeedData.PlantType.valueOf(value);
+                    data.setPlantType(type);
                 } catch (IllegalArgumentException iae) {
                     GWT.log(iae.getMessage());
                 }
@@ -43,8 +43,8 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
                     break;
 
                 try {
-                    ArabidopsisSeedInfo.Generation generation = ArabidopsisSeedInfo.Generation.valueOf(value);
-                    info.setGeneration(generation);
+                    ArabidopsisSeedData.Generation generation = ArabidopsisSeedData.Generation.valueOf(value);
+                    data.setGeneration(generation);
                 } catch (IllegalArgumentException iae) {
                     GWT.log(iae.getMessage());
                 }
@@ -56,30 +56,30 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
 
                 try {
                     Date date = DateTimeFormat.getFormat("MM/dd/yyyy").parse(value);
-                    info.setHarvestDate(date);
+                    data.setHarvestDate(date);
                 } catch (IllegalArgumentException ia) {
                     GWT.log("Could not parse date " + value);
                 }
                 break;
 
             case PARENTS:
-                info.setParents(value);
+                data.setParents(value);
                 break;
 
             case ECOTYPE:
-                info.setEcotype(value);
+                data.setEcotype(value);
                 break;
 
             case SENT_TO_ABRC:
-                info.setSentToAbrc(BooleanSheetCell.getBooleanValue(value));
+                data.setSentToAbrc(BooleanSheetCell.getBooleanValue(value));
                 break;
 
             case SAMPLE_DRAWER: {
-                SampleStorage sampleStorage = info.getOneSampleStorage();
+                SampleStorage sampleStorage = data.getOneSampleStorage();
                 for (StorageInfo storageInfo : sampleStorage.getStorageList()) {
                     if (storageInfo.getType().equalsIgnoreCase("shelf")) {
                         storageInfo.setDisplay(value);
-                        return info;
+                        return data;
                     }
                 }
                 StorageInfo storageInfo = new StorageInfo();
@@ -90,11 +90,11 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
             }
 
             case SAMPLE_BOX: {
-                SampleStorage sampleStorage = info.getOneSampleStorage();
+                SampleStorage sampleStorage = data.getOneSampleStorage();
                 for (StorageInfo storageInfo : sampleStorage.getStorageList()) {
                     if (storageInfo.getType().equalsIgnoreCase("box_unindexed")) {
                         storageInfo.setDisplay(value);
-                        return info;
+                        return data;
                     }
                 }
 
@@ -106,11 +106,11 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
             }
 
             case SAMPLE_TUBE:
-                SampleStorage sampleStorage = info.getOneSampleStorage();
+                SampleStorage sampleStorage = data.getOneSampleStorage();
                 for (StorageInfo storageInfo : sampleStorage.getStorageList()) {
                     if (storageInfo.getType().equalsIgnoreCase("tube")) {
                         storageInfo.setDisplay(value);
-                        return info;
+                        return data;
                     }
                 }
                 StorageInfo storageInfo = new StorageInfo();
@@ -122,11 +122,11 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
             // TODO : abrc
         }
 
-        return info;
+        return data;
     }
 
     @Override
-    public ArabidopsisSeedInfo createInfo() {
-        return new ArabidopsisSeedInfo();
+    public ArabidopsisSeedData createInfo() {
+        return new ArabidopsisSeedData();
     }
 }

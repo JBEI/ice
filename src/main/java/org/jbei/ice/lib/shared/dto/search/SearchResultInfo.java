@@ -2,14 +2,14 @@ package org.jbei.ice.lib.shared.dto.search;
 
 import java.util.LinkedList;
 
-import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 
 /**
  * DTO for searches
  *
  * @author Hector Plahar
  */
-public class SearchResultInfo extends HasEntryInfo implements Comparable<SearchResultInfo> {
+public class SearchResultInfo extends HasEntryData implements Comparable<SearchResultInfo> {
 
     public static final long serialVersionUID = 1l;
 

@@ -18,8 +18,8 @@ import org.jbei.ice.lib.shared.dto.SampleInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
@@ -42,10 +42,10 @@ public interface RegistryServiceAsync {
 
     void logout(String sessionId, AsyncCallback<Boolean> callback);
 
-    void retrieveEntryDetails(String sessionId, long id, String url, AsyncCallback<EntryInfo> callback)
+    void retrieveEntryDetails(String sessionId, long id, String url, AsyncCallback<PartData> callback)
             throws AuthenticationException;
 
-    void retrieveEntryTipDetails(String sessionId, long id, String url, AsyncCallback<EntryInfo> callback)
+    void retrieveEntryTipDetails(String sessionId, long id, String url, AsyncCallback<PartData> callback)
             throws AuthenticationException;
 
     void getPermissionSuggestions(SuggestOracle.Request req, AsyncCallback<SuggestOracle.Response> callback);
@@ -90,7 +90,7 @@ public interface RegistryServiceAsync {
     void addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds,
             AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
 
-    void updateEntry(String sid, EntryInfo info, AsyncCallback<Boolean> callback) throws AuthenticationException;
+    void updateEntry(String sid, PartData info, AsyncCallback<Boolean> callback) throws AuthenticationException;
 
     void retrieveStorageSchemes(String sessionId, EntryType type,
             AsyncCallback<HashMap<SampleInfo, ArrayList<String>>> callback);
@@ -161,10 +161,10 @@ public interface RegistryServiceAsync {
     void createNewGroup(String sessionId, GroupInfo info,
             AsyncCallback<GroupInfo> callback) throws AuthenticationException;
 
-    void deleteEntry(String sessionId, EntryInfo info, AsyncCallback<ArrayList<FolderDetails>> callback)
+    void deleteEntry(String sessionId, PartData info, AsyncCallback<ArrayList<FolderDetails>> callback)
             throws AuthenticationException;
 
-    void createEntry(String sid, EntryInfo info, AsyncCallback<Long> async) throws AuthenticationException;
+    void createEntry(String sid, PartData info, AsyncCallback<Long> async) throws AuthenticationException;
 
     void removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids,
             AsyncCallback<FolderDetails> async) throws AuthenticationException;

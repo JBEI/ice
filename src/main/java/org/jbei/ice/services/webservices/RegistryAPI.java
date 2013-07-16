@@ -43,8 +43,8 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.utils.SerializationUtils;
@@ -159,7 +159,7 @@ public class RegistryAPI implements IRegistryAPI {
      * @throws ServiceException
      */
     @Override
-    public EntryInfo getEntryByName(@WebParam(name = "sessionId") String sessionId,
+    public PartData getEntryByName(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "name") String name) throws ServiceException {
         log(sessionId, "getEntryByName: " + name);
         try {
@@ -175,7 +175,7 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean hasSequence(@WebParam(name = "recordId") String recordId) throws ServiceException {
         try {
             log("hasSequence " + recordId);
-            EntryInfo entry = ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
+            PartData entry = ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
             return ControllerFactory.getSequenceController().hasSequence(entry.getId());
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
@@ -186,7 +186,7 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean hasOriginalSequence(@WebParam(name = "recordId") String recordId) throws ServiceException {
         try {
             log("hasSequence " + recordId);
-            EntryInfo entry = ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
+            PartData entry = ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
             return ControllerFactory.getSequenceController().hasOriginalSequence(entry.getId());
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
@@ -203,7 +203,7 @@ public class RegistryAPI implements IRegistryAPI {
      * @throws ServiceException
      */
     @Override
-    public EntryInfo getByRecordId(@WebParam(name = "sessionId") String sessionId,
+    public PartData getByRecordId(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
         log(sessionId, "getByRecordId: " + entryId);
         Account account = validateAccount(sessionId);
@@ -211,7 +211,7 @@ public class RegistryAPI implements IRegistryAPI {
         try {
             Entry entry = ControllerFactory.getEntryController().getByRecordId(account, entryId);
             SequenceController sequenceController = ControllerFactory.getSequenceController();
-            EntryInfo info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
+            PartData info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
             boolean hasSequence = sequenceController.hasSequence(entry.getId());
             info.setHasSequence(hasSequence);
             boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -227,7 +227,7 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     @Override
-    public EntryInfo getPublicEntryByRecordId(@WebParam(name = "recordId") String recordId) throws ServiceException {
+    public PartData getPublicEntryByRecordId(@WebParam(name = "recordId") String recordId) throws ServiceException {
         log("getByRecordId " + recordId);
         try {
             return ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
@@ -238,7 +238,7 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     @Override
-    public EntryInfo getPublicEntryById(@WebParam(name = "entryId") long entryId) throws ServiceException {
+    public PartData getPublicEntryById(@WebParam(name = "entryId") long entryId) throws ServiceException {
         log("getByEntryId" + entryId);
         try {
             return ControllerFactory.getEntryController().getPublicEntryById(entryId);
@@ -258,7 +258,7 @@ public class RegistryAPI implements IRegistryAPI {
      * @throws ServiceException
      */
     @Override
-    public EntryInfo getByPartNumber(@WebParam(name = "sessionId") String sessionId,
+    public PartData getByPartNumber(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "partNumber") String partNumber) throws SessionException, ServiceException {
         log(sessionId, "getByPartNumber: " + partNumber);
         Account account = validateAccount(sessionId);

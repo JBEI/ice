@@ -24,11 +24,11 @@ import org.jbei.ice.lib.shared.dto.ParameterInfo;
 import org.jbei.ice.lib.shared.dto.ParameterType;
 import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 /**
  * Factory object for converting data transfer objects to model objects
@@ -37,16 +37,16 @@ import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
  */
 public class InfoToModelFactory {
 
-    public static Entry infoToEntry(EntryInfo info) {
+    public static Entry infoToEntry(PartData info) {
         return infoToEntry(info, null);
     }
 
     /**
-     * @param info  EntryInfo object to converted to Entry
+     * @param info  PartData object to converted to Entry
      * @param entry if null, a new entry is created otherwise entry is used
-     * @return converted EntryInfo object
+     * @return converted PartData object
      */
-    public static Entry infoToEntry(EntryInfo info, Entry entry) {
+    public static Entry infoToEntry(PartData info, Entry entry) {
         EntryType type = info.getType();
 
         switch (type) {
@@ -58,11 +58,11 @@ public class InfoToModelFactory {
                 } else
                     plasmid = (Plasmid) entry;
 
-                PlasmidInfo plasmidInfo = (PlasmidInfo) info;
-                plasmid.setBackbone(plasmidInfo.getBackbone());
-                plasmid.setOriginOfReplication(plasmidInfo.getOriginOfReplication());
-                plasmid.setPromoters(plasmidInfo.getPromoters());
-                plasmid.setCircular(plasmidInfo.getCircular());
+                PlasmidData plasmidData = (PlasmidData) info;
+                plasmid.setBackbone(plasmidData.getBackbone());
+                plasmid.setOriginOfReplication(plasmidData.getOriginOfReplication());
+                plasmid.setPromoters(plasmidData.getPromoters());
+                plasmid.setCircular(plasmidData.getCircular());
                 break;
 
             case STRAIN:
@@ -73,10 +73,10 @@ public class InfoToModelFactory {
                 } else
                     strain = (Strain) entry;
 
-                StrainInfo strainInfo = (StrainInfo) info;
-                strain.setHost(strainInfo.getHost());
-                strain.setGenotypePhenotype(strainInfo.getGenotypePhenotype());
-                strain.setPlasmids(strainInfo.getPlasmids());
+                StrainData strainData = (StrainData) info;
+                strain.setHost(strainData.getHost());
+                strain.setGenotypePhenotype(strainData.getGenotypePhenotype());
+                strain.setPlasmids(strainData.getPlasmids());
                 break;
 
             case PART:
@@ -93,31 +93,31 @@ public class InfoToModelFactory {
                 } else
                     seed = (ArabidopsisSeed) entry;
 
-                ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
-                String homozygosity = seedInfo.getHomozygosity() == null ? "" : seedInfo.getHomozygosity();
+                ArabidopsisSeedData seedData = (ArabidopsisSeedData) info;
+                String homozygosity = seedData.getHomozygosity() == null ? "" : seedData.getHomozygosity();
                 seed.setHomozygosity(homozygosity);
-                seed.setHarvestDate(seedInfo.getHarvestDate());
-                String ecoType = seedInfo.getEcotype() == null ? "" : seedInfo.getEcotype();
+                seed.setHarvestDate(seedData.getHarvestDate());
+                String ecoType = seedData.getEcotype() == null ? "" : seedData.getEcotype();
                 seed.setEcotype(ecoType);
-                String parents = seedInfo.getParents() == null ? "" : seedInfo.getParents();
+                String parents = seedData.getParents() == null ? "" : seedData.getParents();
                 seed.setParents(parents);
 
-                if (seedInfo.getGeneration() != null) {
+                if (seedData.getGeneration() != null) {
                     ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(
-                            seedInfo.getGeneration().name());
+                            seedData.getGeneration().name());
                     seed.setGeneration(generation);
                 } else {
                     seed.setGeneration(ArabidopsisSeed.Generation.NULL);
                 }
 
-                if (seedInfo.getPlantType() != null) {
+                if (seedData.getPlantType() != null) {
                     ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(
-                            seedInfo.getPlantType().name());
+                            seedData.getPlantType().name());
                     seed.setPlantType(plantType);
                 } else {
                     seed.setPlantType(ArabidopsisSeed.PlantType.NULL);
                 }
-                seed.setSentToABRC(seedInfo.isSentToAbrc());
+                seed.setSentToABRC(seedData.isSentToAbrc());
                 break;
 
             default:
@@ -128,7 +128,7 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    private static Entry setCommon(Entry entry, EntryInfo info) {
+    private static Entry setCommon(Entry entry, PartData info) {
         if (entry == null || info == null)
             return null;
 

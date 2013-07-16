@@ -2,7 +2,7 @@ package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Hector Plahar
  */
 
-public class PlasmidForm extends EntryForm<PlasmidInfo> {
+public class PlasmidForm extends EntryForm<PlasmidData> {
 
     private CheckBox circular;
     private TextBox backbone;
@@ -25,14 +25,14 @@ public class PlasmidForm extends EntryForm<PlasmidInfo> {
     private SuggestBox origin;
     private SuggestBox promoters;
 
-    public PlasmidForm(PlasmidInfo info) {
-        super(info);
+    public PlasmidForm(PlasmidData data) {
+        super(data);
 
-        circular.setValue(info.getCircular());
-        backbone.setText(info.getBackbone());
-        origin.setText(info.getOriginOfReplication());
-        promoters.setText(info.getPromoters());
-        markers.setText(info.getSelectionMarkers());
+        circular.setValue(data.getCircular());
+        backbone.setText(data.getBackbone());
+        origin.setText(data.getOriginOfReplication());
+        promoters.setText(data.getPromoters());
+        markers.setText(data.getSelectionMarkers());
     }
 
     protected void addField(FlexTable table, String label, int row, int col, TextBox box,
@@ -172,14 +172,14 @@ public class PlasmidForm extends EntryForm<PlasmidInfo> {
         super.populateEntries();
 
         // plasmid specific fields
-        PlasmidInfo info = super.getEntryInfo();
+        PlasmidData data = super.getEntryInfo();
 
         String selectionMarkers = ((MultipleTextBox) markers.getValueBox()).getWholeText();
-        info.setSelectionMarkers(selectionMarkers);
-        info.setBackbone(this.backbone.getText());
-        info.setOriginOfReplication(((MultipleTextBox) origin.getValueBox()).getWholeText());
-        info.setPromoters(((MultipleTextBox) promoters.getValueBox()).getWholeText());
-        info.setCircular(this.circular.getValue());
+        data.setSelectionMarkers(selectionMarkers);
+        data.setBackbone(this.backbone.getText());
+        data.setOriginOfReplication(((MultipleTextBox) origin.getValueBox()).getWholeText());
+        data.setPromoters(((MultipleTextBox) promoters.getValueBox()).getWholeText());
+        data.setCircular(this.circular.getValue());
     }
 
     @Override

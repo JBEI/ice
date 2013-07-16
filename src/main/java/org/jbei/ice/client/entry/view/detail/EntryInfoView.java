@@ -5,7 +5,7 @@ import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
 import org.jbei.ice.lib.shared.dto.ParameterInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @param <T> Specific type of entry info to be shown by the view
  * @author Hector Plahar
  */
-public abstract class EntryInfoView<T extends EntryInfo> extends Composite {
+public abstract class EntryInfoView<T extends PartData> extends Composite {
 
     private final FlexTable table;
     protected T info;

@@ -1,6 +1,6 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 /**
  * View for displaying strain specific entries
@@ -8,10 +8,10 @@ import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
  * @author Hector Plahar
  */
 
-public class StrainInfoView extends EntryInfoView<StrainInfo> {
+public class StrainInfoView extends EntryInfoView<StrainData> {
 
-    public StrainInfoView(StrainInfo info) {
-        super(info);
+    public StrainInfoView(StrainData data) {
+        super(data);
     }
 
     @Override

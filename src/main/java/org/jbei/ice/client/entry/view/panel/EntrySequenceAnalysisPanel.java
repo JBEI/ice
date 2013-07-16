@@ -6,7 +6,7 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.view.SequenceAnalysisHeaderPanel;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -35,7 +35,7 @@ public class EntrySequenceAnalysisPanel extends Composite {
     private HTML sequenceAddCancelButton;
     private Widget uploadPanel;
     private HandlerRegistration sequenceUploadFinish;
-    private EntryInfo currentInfo;
+    private PartData currentInfo;
     private final Delegate<Long> retrieveSequenceTracesDelegate;
 
     public EntrySequenceAnalysisPanel(Delegate<Long> retrieveSequenceTracesDelegate) {
@@ -85,7 +85,7 @@ public class EntrySequenceAnalysisPanel extends Composite {
         layout.setHTML(2, 0, "<i class=\"font-75em\">No sequence trace file available.</i>");
     }
 
-    public void setCurrentInfo(EntryInfo info) {
+    public void setCurrentInfo(PartData info) {
         this.currentInfo = info;
         if (info == null)
             return;
@@ -113,7 +113,7 @@ public class EntrySequenceAnalysisPanel extends Composite {
         return sequenceTable.getSelectionModel();
     }
 
-    public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, EntryInfo info) {
+    public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, PartData info) {
         sequenceTable.setData(data);
         if (!data.isEmpty()) {
             layout.setWidget(2, 0, sequenceTable);

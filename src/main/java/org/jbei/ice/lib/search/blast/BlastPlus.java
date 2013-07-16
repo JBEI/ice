@@ -35,12 +35,11 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PartInfo;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.search.BlastProgram;
 import org.jbei.ice.lib.shared.dto.search.BlastQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
@@ -124,23 +123,23 @@ public class BlastPlus {
             name = idLineFields[2];
             partNumber = idLineFields[3];
 
-            EntryInfo view;
+            PartData view;
             switch (recordType) {
                 case PART:
                 default:
-                    view = new PartInfo();
+                    view = new PartData();
                     break;
 
                 case ARABIDOPSIS:
-                    view = new ArabidopsisSeedInfo();
+                    view = new ArabidopsisSeedData();
                     break;
 
                 case PLASMID:
-                    view = new PlasmidInfo();
+                    view = new PlasmidData();
                     break;
 
                 case STRAIN:
-                    view = new StrainInfo();
+                    view = new StrainData();
                     break;
             }
 

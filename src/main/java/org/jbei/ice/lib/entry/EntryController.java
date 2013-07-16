@@ -34,7 +34,7 @@ import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.utils.Emailer;
@@ -369,7 +369,7 @@ public class EntryController {
 
         return entry;
 
-//        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+//        PartData info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
 //        boolean hasSequence = sequenceController.hasSequence(entry.getId());
 //        info.setHasSequence(hasSequence);
 //        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -396,7 +396,7 @@ public class EntryController {
         return sequenceController.sequenceToDNASequence(sequenceController.getByEntry(entry));
     }
 
-    public EntryInfo getPublicEntryByRecordId(String recordId) throws ControllerException {
+    public PartData getPublicEntryByRecordId(String recordId) throws ControllerException {
         Entry entry;
 
         try {
@@ -414,7 +414,7 @@ public class EntryController {
             throw new ControllerException(errMsg);
         }
 
-        EntryInfo info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -422,7 +422,7 @@ public class EntryController {
         return info;
     }
 
-    public EntryInfo getPublicEntryById(long id) throws ControllerException {
+    public PartData getPublicEntryById(long id) throws ControllerException {
         Entry entry;
 
         try {
@@ -440,7 +440,7 @@ public class EntryController {
             throw new ControllerException(errMsg);
         }
 
-        EntryInfo info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -458,7 +458,7 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public EntryInfo getByPartNumber(Account account, String partNumber) throws ControllerException,
+    public PartData getByPartNumber(Account account, String partNumber) throws ControllerException,
             PermissionException {
         Entry entry;
         try {
@@ -474,7 +474,7 @@ public class EntryController {
             throw new PermissionException("No read permission for entry!");
         }
 
-        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -510,7 +510,7 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public EntryInfo getByUniqueName(Account account, String name) throws ControllerException, PermissionException {
+    public PartData getByUniqueName(Account account, String name) throws ControllerException, PermissionException {
         Entry entry;
         try {
             entry = dao.getByUniqueName(name);
@@ -525,7 +525,7 @@ public class EntryController {
             throw new PermissionException("No read permission for entry!");
         }
 
-        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -551,7 +551,7 @@ public class EntryController {
             }
 
             for (Entry entry : results) {
-                EntryInfo info = ModelToInfoFactory.createTableViewData(entry, false);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, false);
                 details.getEntries().add(info);
             }
         } catch (DAOException de) {
@@ -781,9 +781,9 @@ public class EntryController {
         return Comment.toDTO(comment);
     }
 
-    public EntryInfo retrieveEntryTipDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
+    public PartData retrieveEntryTipDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
         try {
-            EntryInfo info = api.getPublicEntryById(entryId);
+            PartData info = api.getPublicEntryById(entryId);
             boolean hasSequence = api.hasSequence(info.getRecordId());
             info.setHasSequence(hasSequence);
             boolean hasOriginalSequence = api.hasOriginalSequence(info.getRecordId());
@@ -795,7 +795,7 @@ public class EntryController {
         }
     }
 
-    public EntryInfo retrieveEntryTipDetails(Account account, long entryId) throws ControllerException {
+    public PartData retrieveEntryTipDetails(Account account, long entryId) throws ControllerException {
         Entry entry;
 
         try {
@@ -807,9 +807,9 @@ public class EntryController {
         return ModelToInfoFactory.createTipView(account, entry);
     }
 
-    public EntryInfo retrieveEntryDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
+    public PartData retrieveEntryDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
         try {
-            EntryInfo info = api.getPublicEntryById(entryId);
+            PartData info = api.getPublicEntryById(entryId);
             boolean hasSequence = api.hasSequence(info.getRecordId());
             info.setHasSequence(hasSequence);
             boolean hasOriginalSequence = api.hasOriginalSequence(info.getRecordId());
@@ -821,9 +821,9 @@ public class EntryController {
         }
     }
 
-    public EntryInfo retrieveEntryDetails(Account account, long entryId) throws ControllerException {
+    public PartData retrieveEntryDetails(Account account, long entryId) throws ControllerException {
         Entry entry = get(account, entryId);
-        EntryInfo info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());

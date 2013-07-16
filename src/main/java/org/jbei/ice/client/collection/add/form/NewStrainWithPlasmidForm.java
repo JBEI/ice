@@ -9,9 +9,9 @@ import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.StatusType;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -59,22 +59,22 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private Button submit;
     private HTML cancel;
 
-    private final StrainInfo strain;
-    private final PlasmidInfo plasmid;
+    private final StrainData strain;
+    private final PlasmidData plasmid;
 
     private final FlexTable layout;
 
     private HandlerRegistration cancelRegistration;
     private HandlerRegistration submitRegistration;
 
-    public NewStrainWithPlasmidForm(StrainInfo strain) {
+    public NewStrainWithPlasmidForm(StrainData strain) {
         this.layout = new FlexTable();
         initWidget(layout);
         initComponents();
         initLayout();
 
         this.strain = strain;
-        this.plasmid = (PlasmidInfo) strain.getInfo();
+        this.plasmid = (PlasmidData) strain.getInfo();
 
         this.creator.setText(strain.getCreator());
         this.creatorEmail.setText(strain.getCreatorEmail());
@@ -648,7 +648,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     @Override
-    public EntryInfo getEntry() {
+    public PartData getEntry() {
         return strain;
     }
 

@@ -33,19 +33,18 @@ import org.jbei.ice.lib.shared.dto.ParameterType;
 import org.jbei.ice.lib.shared.dto.SampleInfo;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.shared.dto.Visibility;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo.Generation;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.Generation;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.PlantType;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PartInfo;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 /**
- * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.lib.shared.dto.entry.EntryInfo}
+ * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.lib.shared.dto.entry.PartData}
  * data
  * transfer objects
  *
@@ -53,9 +52,9 @@ import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
  */
 public class ModelToInfoFactory {
 
-    public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
+    public static PartData getInfo(Account account, Entry entry, List<Attachment> attachments,
             Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences) {
-        EntryInfo info;
+        PartData info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
             return null;
@@ -201,73 +200,73 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static PartInfo partInfo(Account account, Entry entry) {
-        PartInfo info = new PartInfo();
-        return (PartInfo) getCommon(account, info, entry);
+    private static PartData partInfo(Account account, Entry entry) {
+        PartData info = new PartData();
+        return getCommon(account, info, entry);
     }
 
-    private static ArabidopsisSeedInfo seedInfo(Account account, Entry entry) {
-        ArabidopsisSeedInfo info = new ArabidopsisSeedInfo();
-        info = (ArabidopsisSeedInfo) getCommon(account, info, entry);
+    private static ArabidopsisSeedData seedInfo(Account account, Entry entry) {
+        ArabidopsisSeedData data = new ArabidopsisSeedData();
+        data = (ArabidopsisSeedData) getCommon(account, data, entry);
 
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
 
         if (seed.getPlantType() != null && seed.getPlantType() != ArabidopsisSeed.PlantType.NULL) {
             PlantType type = PlantType.valueOf(seed.getPlantType().name());
-            info.setPlantType(type);
+            data.setPlantType(type);
         }
 
         if (seed.getGeneration() != null && seed.getGeneration() != ArabidopsisSeed.Generation.NULL) {
             Generation generation = Generation.valueOf(seed.getGeneration().name());
-            info.setGeneration(generation);
+            data.setGeneration(generation);
         }
-        info.setHomozygosity(seed.getHomozygosity());
-        info.setEcotype(seed.getEcotype());
-        info.setParents(seed.getParents());
-        info.setHarvestDate(seed.getHarvestDate());
+        data.setHomozygosity(seed.getHomozygosity());
+        data.setEcotype(seed.getEcotype());
+        data.setParents(seed.getParents());
+        data.setHarvestDate(seed.getHarvestDate());
         boolean isSent = !(seed.isSentToABRC() == null || !seed.isSentToABRC());
-        info.setSentToAbrc(isSent);
-        return info;
+        data.setSentToAbrc(isSent);
+        return data;
     }
 
-    private static StrainInfo strainInfo(Account account, Strain strain) {
-        StrainInfo info = new StrainInfo();
-        info = (StrainInfo) getCommon(account, info, strain);
+    private static StrainData strainInfo(Account account, Strain strain) {
+        StrainData data = new StrainData();
+        data = (StrainData) getCommon(account, data, strain);
 
         // strain specific
-        info.setGenotypePhenotype(strain.getGenotypePhenotype());
-        info.setPlasmids(strain.getPlasmids());
-        info.setLinkifiedPlasmids(EntryUtil.linkifyText(account, info.getPlasmids()));
-        info.setHost(strain.getHost());
-        info.setLinkifiedHost(EntryUtil.linkifyText(account, info.getHost()));
-        return info;
+        data.setGenotypePhenotype(strain.getGenotypePhenotype());
+        data.setPlasmids(strain.getPlasmids());
+        data.setLinkifiedPlasmids(EntryUtil.linkifyText(account, data.getPlasmids()));
+        data.setHost(strain.getHost());
+        data.setLinkifiedHost(EntryUtil.linkifyText(account, data.getHost()));
+        return data;
     }
 
-    private static PlasmidInfo plasmidInfo(Account account, Entry entry) {
-        PlasmidInfo info = new PlasmidInfo();
-        info = (PlasmidInfo) getCommon(account, info, entry);
+    private static PlasmidData plasmidInfo(Account account, Entry entry) {
+        PlasmidData data = new PlasmidData();
+        data = (PlasmidData) getCommon(account, data, entry);
         Plasmid plasmid = (Plasmid) entry;
 
         // plasmid specific fields
-        info.setBackbone(plasmid.getBackbone());
-        info.setCircular(plasmid.getCircular());
-        info.setOriginOfReplication(plasmid.getOriginOfReplication());
-        info.setPromoters(plasmid.getPromoters());
+        data.setBackbone(plasmid.getBackbone());
+        data.setCircular(plasmid.getCircular());
+        data.setOriginOfReplication(plasmid.getOriginOfReplication());
+        data.setPromoters(plasmid.getPromoters());
 
         // get strains for plasmid
         Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
         if (strains != null) {
             for (Strain strain : strains) {
-                info.getStrains()
+                data.getStrains()
                     .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
             }
         }
 
-        return info;
+        return data;
     }
 
-    private static EntryInfo getCommon(Account account, EntryInfo info, Entry entry) {
+    private static PartData getCommon(Account account, PartData info, Entry entry) {
         info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
         info.setPartId(EntryUtil.getPartNumbersAsString(entry));
@@ -351,7 +350,7 @@ public class ModelToInfoFactory {
         return info;
     }
 
-    private static void getTipViewCommon(EntryInfo view, Entry entry) {
+    private static void getTipViewCommon(PartData view, Entry entry) {
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
         view.setPartId(EntryUtil.getPartNumbersAsString(entry));
@@ -388,11 +387,11 @@ public class ModelToInfoFactory {
         }
     }
 
-    public static EntryInfo createTableViewData(Entry entry, boolean includeOwnerInfo) {
+    public static PartData createTableViewData(Entry entry, boolean includeOwnerInfo) {
         if (entry == null)
             return null;
         EntryType type = EntryType.nameToType(entry.getRecordType());
-        EntryInfo view = new EntryInfo();
+        PartData view = new PartData();
         view.setType(type);
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
@@ -448,12 +447,12 @@ public class ModelToInfoFactory {
         return view;
     }
 
-    public static EntryInfo createTipView(Account account, Entry entry) {
+    public static PartData createTipView(Account account, Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         switch (type) {
 
             case STRAIN: {
-                StrainInfo view = new StrainInfo();
+                StrainData view = new StrainData();
 
                 // common
                 getTipViewCommon(view, entry);
@@ -469,7 +468,7 @@ public class ModelToInfoFactory {
             }
 
             case ARABIDOPSIS: {
-                ArabidopsisSeedInfo view = new ArabidopsisSeedInfo();
+                ArabidopsisSeedData view = new ArabidopsisSeedData();
                 getTipViewCommon(view, entry);
 
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -487,13 +486,13 @@ public class ModelToInfoFactory {
             }
 
             case PART: {
-                PartInfo view = new PartInfo();
+                PartData view = new PartData();
                 getTipViewCommon(view, entry);
                 return view;
             }
 
             case PLASMID: {
-                PlasmidInfo view = new PlasmidInfo();
+                PlasmidData view = new PlasmidData();
                 getTipViewCommon(view, entry);
 
                 Plasmid plasmid = (Plasmid) entry;

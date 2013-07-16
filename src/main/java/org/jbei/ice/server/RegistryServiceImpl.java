@@ -66,8 +66,8 @@ import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
@@ -548,7 +548,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             long count = entryController.getNumberOfOwnerEntries(account, user.getEmail());
             details.setCount(count);
             for (Entry entry : entries) {
-                EntryInfo info = ModelToInfoFactory.createTableViewData(entry, false);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, false);
                 details.getEntries().add(info);
             }
             return details;
@@ -674,7 +674,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public EntryInfo retrieveEntryDetails(String sid, long id, String url) throws AuthenticationException {
+    public PartData retrieveEntryDetails(String sid, long id, String url) throws AuthenticationException {
         EntryController controller = ControllerFactory.getEntryController();
         Account account = retrieveAccountForSid(sid);
 
@@ -696,7 +696,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public EntryInfo retrieveEntryTipDetails(String sid, long entryId, String url) throws AuthenticationException {
+    public PartData retrieveEntryTipDetails(String sid, long entryId, String url) throws AuthenticationException {
         EntryController controller = ControllerFactory.getEntryController();
         Account account = retrieveAccountForSid(sid);
 
@@ -1145,7 +1145,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public Long createEntry(String sid, EntryInfo info) throws AuthenticationException {
+    public Long createEntry(String sid, PartData info) throws AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": creating new entry");
@@ -1354,7 +1354,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean updateEntry(String sid, EntryInfo info) throws AuthenticationException {
+    public boolean updateEntry(String sid, PartData info) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
 
@@ -1616,7 +1616,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<FolderDetails> deleteEntry(String sessionId, EntryInfo info)
+    public ArrayList<FolderDetails> deleteEntry(String sessionId, PartData info)
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);

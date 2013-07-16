@@ -35,7 +35,7 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.SampleInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
@@ -60,7 +60,7 @@ public class EntryPresenter extends AbstractPresenter {
 
     private final IEntryView display;
     private final EntryModel model;
-    private EntryInfo currentInfo;
+    private PartData currentInfo;
     private EntryContext currentContext;
     private EntryAddPresenter entryAddPresenter;
     private IEntryFormSubmit formSubmit;
@@ -200,7 +200,7 @@ public class EntryPresenter extends AbstractPresenter {
             display.enablePrev(false);
         }
 
-        EntryInfo info = nav.getCachedData(this.currentContext.getId(), this.currentContext.getRecordId());
+        PartData info = nav.getCachedData(this.currentContext.getId(), this.currentContext.getRecordId());
         int idx = nav.indexOfCached(info);
 
         display.enablePrev(!(idx == 0));
@@ -228,8 +228,8 @@ public class EntryPresenter extends AbstractPresenter {
             @Override
             public void onClick(ClickEvent event) {
                 IHasNavigableData nav = currentContext.getNav();
-                EntryInfo currentInfo = nav.getCachedData(EntryPresenter.this.currentInfo.getId(),
-                                                          EntryPresenter.this.currentInfo.getRecordId());
+                PartData currentInfo = nav.getCachedData(EntryPresenter.this.currentInfo.getId(),
+                                                         EntryPresenter.this.currentInfo.getRecordId());
                 int idx = nav.indexOfCached(currentInfo);
 
                 if (idx == -1) {
@@ -243,7 +243,7 @@ public class EntryPresenter extends AbstractPresenter {
                 if (next + 1 == size)
                     display.enableNext(false);
 
-                EntryInfo nextInfo = nav.getNext(currentInfo);
+                PartData nextInfo = nav.getNext(currentInfo);
                 long currentId = nextInfo.getId();
                 History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId, false);
 //                EntryPresenter.this.currentInfo = nextInfo;
@@ -263,7 +263,7 @@ public class EntryPresenter extends AbstractPresenter {
             public void onClick(ClickEvent event) {
 
                 IHasNavigableData nav = currentContext.getNav();
-                EntryInfo currentInfo = nav.getCachedData(currentContext.getId(), currentContext.getRecordId());
+                PartData currentInfo = nav.getCachedData(currentContext.getId(), currentContext.getRecordId());
                 int idx = nav.indexOfCached(currentInfo);
 
                 if (idx == -1) {
@@ -277,7 +277,7 @@ public class EntryPresenter extends AbstractPresenter {
                     display.enablePrev(false);
                 }
 
-                EntryInfo prevInfo = nav.getPrev(currentInfo);
+                PartData prevInfo = nav.getPrev(currentInfo);
 
                 long currentId = prevInfo.getId();
                 History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId, false);
@@ -386,16 +386,16 @@ public class EntryPresenter extends AbstractPresenter {
 
         display.showLoadingIndicator(false);
 
-        new IceAsyncCallback<EntryInfo>() {
+        new IceAsyncCallback<PartData>() {
 
             @Override
-            protected void callService(AsyncCallback<EntryInfo> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<PartData> callback) throws AuthenticationException {
                 service.retrieveEntryDetails(ClientController.sessionId, currentContext.getId(),
                                              currentContext.getPartnerUrl(), callback);
             }
 
             @Override
-            public void onSuccess(EntryInfo result) {
+            public void onSuccess(PartData result) {
                 if (result == null) {
                     FeedbackEvent event = new FeedbackEvent(true, "Error retrieving entry with id \""
                             + currentContext.getId() + "\"");
@@ -458,7 +458,7 @@ public class EntryPresenter extends AbstractPresenter {
         return this.display;
     }
 
-    public EntryInfo getCurrentInfo() {
+    public PartData getCurrentInfo() {
         return currentInfo;
     }
 
@@ -637,7 +637,7 @@ public class EntryPresenter extends AbstractPresenter {
         /**
          * Makes an rpc to save the set of entrys
          */
-        protected void update(final EntryInfo info) {
+        protected void update(final PartData info) {
             if (info == null)
                 return;
 

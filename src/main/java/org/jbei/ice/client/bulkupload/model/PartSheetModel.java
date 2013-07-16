@@ -1,16 +1,16 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.lib.shared.dto.entry.PartInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
-public class PartSheetModel extends SingleInfoSheetModel<PartInfo> {
+public class PartSheetModel extends SingleInfoSheetModel<PartData> {
 
     @Override
-    public PartInfo createInfo() {
-        return new PartInfo();
+    public PartData createInfo() {
+        return new PartData();
     }
 
     @Override
-    public PartInfo setField(PartInfo info, SheetCellData datum) {
+    public PartData setField(PartData info, SheetCellData datum) {
         // nothing part specific
         return info;
     }

@@ -1,7 +1,7 @@
 package org.jbei.ice.client.entry.view.detail;
 
 import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
@@ -17,7 +17,7 @@ public class SequenceViewPanelPresenter {
 
         String getSequence();
 
-        EntryInfo getInfo();
+        PartData getInfo();
 
         void setHasSequence(boolean hasSequence);
 
@@ -53,7 +53,7 @@ public class SequenceViewPanelPresenter {
         return view.getSequence();
     }
 
-    public EntryInfo getEntry() {
+    public PartData getEntry() {
         return view.getInfo();
     }
 

@@ -2,7 +2,7 @@ package org.jbei.ice.lib.shared.dto.entry;
 
 import java.util.HashMap;
 
-public class PlasmidInfo extends EntryInfo {
+public class PlasmidData extends PartData {
 
     private String backbone;
     private String originOfReplication;
@@ -11,7 +11,7 @@ public class PlasmidInfo extends EntryInfo {
     private String replicatesIn;
     private HashMap<Long, String> strains; // id -> partNumber
 
-    public PlasmidInfo() {
+    public PlasmidData() {
         super(EntryType.PLASMID);
         setStrains(new HashMap<Long, String>());
     }

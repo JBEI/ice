@@ -1,16 +1,16 @@
 package org.jbei.ice.client.common;
 
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 public interface IHasNavigableData {
 
-    EntryInfo getCachedData(long id, String recordId);
+    PartData getCachedData(long id, String recordId);
 
-    int indexOfCached(EntryInfo info);
+    int indexOfCached(PartData info);
 
     int getSize();
 
-    EntryInfo getNext(EntryInfo info);
+    PartData getNext(PartData info);
 
-    EntryInfo getPrev(EntryInfo info);
+    PartData getPrev(PartData info);
 }

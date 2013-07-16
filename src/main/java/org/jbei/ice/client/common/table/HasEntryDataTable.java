@@ -9,7 +9,7 @@ import org.jbei.ice.client.common.table.cell.HasEntrySelectionColumnHeaderCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.client.common.table.column.ImageColumn;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -32,9 +32,9 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
  * has a @see EntryDataView
  *
  * @author Hector Plahar
- * @see HasEntryInfo
+ * @see org.jbei.ice.lib.shared.dto.entry.HasEntryData
  */
-public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTable<T> implements IHasEntryId {
+public abstract class HasEntryDataTable<T extends HasEntryData> extends DataTable<T> implements IHasEntryId {
 
     private HasEntrySelectionModel<T> selectionModel;
 
@@ -51,8 +51,8 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
     @Override
     public Set<Long> getSelectedEntrySet() {
         Set<Long> infoSet = new HashSet<Long>();
-        for (HasEntryInfo info : selectionModel.getSelectedSet()) {
-            infoSet.add(info.getEntryInfo().getId());
+        for (HasEntryData data : selectionModel.getSelectedSet()) {
+            infoSet.add(data.getEntryInfo().getId());
         }
         return infoSet;
     }
@@ -114,7 +114,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
     protected void addHasAttachmentColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT) {
-            public boolean showImage(HasEntryInfo info) {
+            public boolean showImage(HasEntryData info) {
                 return info.getEntryInfo().isHasAttachment();
             }
         };
@@ -124,7 +124,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
     protected void addHasSampleColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE) {
-            public boolean showImage(HasEntryInfo info) {
+            public boolean showImage(HasEntryData info) {
                 return info.getEntryInfo().isHasSample();
             }
         };
@@ -134,7 +134,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
     protected void addHasSequenceColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE) {
-            public boolean showImage(HasEntryInfo info) {
+            public boolean showImage(HasEntryData info) {
                 return info.getEntryInfo().isHasSequence();
             }
         };
@@ -142,10 +142,10 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
         this.setColumnWidth(column, 30, Unit.PX);
     }
 
-//    protected DataTableColumn<T, HasEntryInfo> addPartIdColumn(ServiceDelegate<HasEntryInfo> delegate,
+//    protected DataTableColumn<T, HasEntryData> addPartIdColumn(ServiceDelegate<HasEntryData> delegate,
 // boolean sortable, double width, Unit unit) {
-//        HasEntryPartIDCell<HasEntryInfo> cell = new HasEntryPartIDCell<HasEntryInfo>(delegate);
-//        DataTableColumn<T, HasEntryInfo> partIdColumn = new HasEntryPartIdColumn<T>(cell);
+//        HasEntryPartIDCell<HasEntryData> cell = new HasEntryPartIDCell<HasEntryData>(delegate);
+//        DataTableColumn<T, HasEntryData> partIdColumn = new HasEntryPartIdColumn<T>(cell);
 //        this.setColumnWidth(partIdColumn, width, unit);
 //        partIdColumn.setSortable(sortable);
 //        this.addColumn(partIdColumn, "Part ID");
@@ -210,7 +210,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
         DataTableColumn<T, String> createdColumn = new DataTableColumn<T, String>(new TextCell(), ColumnField.CREATED) {
 
             @Override
-            public String getValue(HasEntryInfo object) {
+            public String getValue(HasEntryData object) {
 
                 DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
                 String value = format.format(object.getEntryInfo().getCreationTime());

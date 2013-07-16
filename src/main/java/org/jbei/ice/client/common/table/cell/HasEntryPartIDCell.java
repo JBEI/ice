@@ -3,7 +3,7 @@ package org.jbei.ice.client.common.table.cell;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.TipViewContentFactory;
-import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Hector Plahar
  */
 
-public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> {
+public class HasEntryPartIDCell<T extends HasEntryData> extends AbstractCell<T> {
 
     protected static final PopupPanel popup = new PopupPanel(true);
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";

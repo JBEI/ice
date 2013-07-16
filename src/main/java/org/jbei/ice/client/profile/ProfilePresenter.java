@@ -66,10 +66,10 @@ public class ProfilePresenter extends AbstractPresenter {
 //        {
 //
 //            @Override
-//            protected ArrayList<DataTableColumn<EntryInfo, ?>> createColumns() {
-//                ArrayList<DataTableColumn<EntryInfo, ?>> columns = new ArrayList<DataTableColumn<EntryInfo, ?>>();
+//            protected ArrayList<DataTableColumn<PartData, ?>> createColumns() {
+//                ArrayList<DataTableColumn<PartData, ?>> columns = new ArrayList<DataTableColumn<PartData, ?>>();
 //                columns.add(super.addTypeColumn(true, 60, com.google.gwt.dom.client.Style.Unit.PX));
-//                DataTableColumn<EntryInfo, EntryInfo> partIdCol = addPartIdColumn(false, 120,
+//                DataTableColumn<PartData, PartData> partIdCol = addPartIdColumn(false, 120,
 //                        com.google.gwt.dom.client.Style.Unit.PX);
 //                columns.add(partIdCol);
 //                columns.add(super.addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));

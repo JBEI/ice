@@ -7,8 +7,8 @@ import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
-import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 
@@ -33,9 +33,9 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
     }
 
     @Override
-    public EntryInfo getCachedData(long id, String recordId) {
-        for (HasEntryInfo result : results) {
-            EntryInfo info = result.getEntryInfo();
+    public PartData getCachedData(long id, String recordId) {
+        for (HasEntryData result : results) {
+            PartData info = result.getEntryInfo();
             if (recordId != null && info.getRecordId().equalsIgnoreCase(recordId))
                 return info;
 
@@ -46,7 +46,7 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
     }
 
     @Override
-    public int indexOfCached(EntryInfo info) {
+    public int indexOfCached(PartData info) {
         for (int i = 0; i < results.size(); i += 1) {
             SearchResultInfo searchResultInfo = results.get(i);
             if (searchResultInfo.getEntryInfo().getId() == info.getId())
@@ -61,7 +61,7 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
     }
 
     @Override
-    public EntryInfo getNext(EntryInfo info) {
+    public PartData getNext(PartData info) {
         int idx = indexOfCached(info);
         if (idx == -1)
             return null;
@@ -69,7 +69,7 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
     }
 
     @Override
-    public EntryInfo getPrev(EntryInfo info) {
+    public PartData getPrev(PartData info) {
         int idx = indexOfCached(info);
         if (idx == -1)
             return null;

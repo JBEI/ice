@@ -11,9 +11,9 @@ import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 
 /**
  * @author Hector Plahar
@@ -38,12 +38,12 @@ public class PlasmidHeader extends PartHeader {
     }
 
     @Override
-    public SheetCellData extractValue(EntryField header, EntryInfo info) {
+    public SheetCellData extractValue(EntryField header, PartData info) {
         SheetCellData data = extractCommon(header, info);
         if (data != null)
             return data;
 
-        PlasmidInfo plasmid = (PlasmidInfo) info;
+        PlasmidData plasmid = (PlasmidData) info;
         String value = null;
 
         switch (header) {

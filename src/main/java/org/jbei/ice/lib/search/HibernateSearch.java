@@ -25,8 +25,8 @@ import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.AccountType;
 import org.jbei.ice.lib.shared.dto.Visibility;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
@@ -217,7 +217,7 @@ public class HibernateSearch {
             } else {
                 searchResult = new SearchResultInfo();
                 searchResult.setScore(score);
-                EntryInfo info = ModelToInfoFactory.createTableViewData(entry, true);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, true);
                 searchResult.setEntryInfo(info);
             }
 
@@ -408,7 +408,7 @@ public class HibernateSearch {
             } else {
                 searchResult = new SearchResultInfo();
                 searchResult.setScore(score);
-                EntryInfo info = ModelToInfoFactory.createTableViewData(entry, true);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, true);
                 if (info == null)
                     continue;
                 searchResult.setEntryInfo(info);

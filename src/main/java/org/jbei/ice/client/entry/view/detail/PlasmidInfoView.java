@@ -3,7 +3,7 @@ package org.jbei.ice.client.entry.view.detail;
 import java.util.HashMap;
 
 import org.jbei.ice.client.Page;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -15,10 +15,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Hector Plahar
  */
 
-public class PlasmidInfoView extends EntryInfoView<PlasmidInfo> {
+public class PlasmidInfoView extends EntryInfoView<PlasmidData> {
 
-    public PlasmidInfoView(PlasmidInfo info) {
-        super(info);
+    public PlasmidInfoView(PlasmidData data) {
+        super(data);
     }
 
     @Override

@@ -3,11 +3,10 @@ package org.jbei.ice.lib.group;
 import java.util.ArrayList;
 import java.util.Set;
 
-import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.AccountType;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
 
@@ -42,7 +41,7 @@ public class GroupControllerTest {
 
     @Test
     public void testGetGroupByUUID() throws Exception {
-        Account account = createTestAccount("testGetGroupByUUID", false);
+        Account account = AccountCreator.createTestAccount("testGetGroupByUUID", false);
         GroupInfo groupInfo = new GroupInfo();
         groupInfo.setLabel("test Group");
         groupInfo.setDescription("test");
@@ -54,7 +53,7 @@ public class GroupControllerTest {
 
     @Test
     public void testGetGroupById() throws Exception {
-        Account account = createTestAccount("testGetGroupById", false);
+        Account account = AccountCreator.createTestAccount("testGetGroupById", false);
         GroupInfo group1 = new GroupInfo();
         group1.setDescription("test1");
         group1.setType(GroupType.PRIVATE);
@@ -65,7 +64,7 @@ public class GroupControllerTest {
 
     @Test
     public void testSave() throws Exception {
-        Account account = createTestAccount("testSave", false);
+        Account account = AccountCreator.createTestAccount("testSave", false);
         Group group = new Group();
         group.setAutoJoin(false);
         group.setOwner(account);
@@ -76,7 +75,7 @@ public class GroupControllerTest {
 
     @Test
     public void testCreate() throws Exception {
-        Account account = createTestAccount("testCreate", false);
+        Account account = AccountCreator.createTestAccount("testCreate", false);
         GroupInfo groupInfo = new GroupInfo();
         groupInfo.setLabel("test Group");
         groupInfo.setDescription("test");
@@ -93,7 +92,7 @@ public class GroupControllerTest {
 
     @Test
     public void testGetMatchingGroups() throws Exception {
-        Account account = createTestAccount("testGetMatchingGroups", false);
+        Account account = AccountCreator.createTestAccount("testGetMatchingGroups", false);
         GroupInfo g1 = new GroupInfo();
         g1.setDescription("desc");
         g1.setLabel("label");
@@ -111,9 +110,9 @@ public class GroupControllerTest {
 
     @Test
     public void testRetrieveGroupMembers() throws Exception {
-        Account a1 = createTestAccount("testRetrieveGroupMembers1", false);
-        Account a2 = createTestAccount("testRetrieveGroupMembers2", false);
-        Account a3 = createTestAccount("testRetrieveGroupMembers3", false);
+        Account a1 = AccountCreator.createTestAccount("testRetrieveGroupMembers1", false);
+        Account a2 = AccountCreator.createTestAccount("testRetrieveGroupMembers2", false);
+        Account a3 = AccountCreator.createTestAccount("testRetrieveGroupMembers3", false);
 
         GroupInfo info = new GroupInfo();
         info.setDescription("desc");
@@ -138,9 +137,9 @@ public class GroupControllerTest {
 
     @Test
     public void testSetGroupMembers() throws Exception {
-        Account a1 = createTestAccount("testSetGroupMembers1", false);
-        Account a2 = createTestAccount("testSetGroupMembers2", false);
-        Account a3 = createTestAccount("testSetGroupMembers3", false);
+        Account a1 = AccountCreator.createTestAccount("testSetGroupMembers1", false);
+        Account a2 = AccountCreator.createTestAccount("testSetGroupMembers2", false);
+        Account a3 = AccountCreator.createTestAccount("testSetGroupMembers3", false);
 
         GroupInfo info = new GroupInfo();
         info.setDescription("desc");
@@ -158,28 +157,5 @@ public class GroupControllerTest {
         infos = controller.setGroupMembers(a1, info, infos);
         Assert.assertNotNull(infos);
         Assert.assertTrue(infos.size() == 2);
-    }
-
-    protected Account createTestAccount(String testName, boolean admin) throws Exception {
-        String email = testName + "@TESTER";
-        AccountController accountController = new AccountController();
-        Account account = accountController.getByEmail(email);
-        if (account != null)
-            throw new Exception("duplicate account");
-
-        AccountInfo accountInfo = new AccountInfo();
-        accountInfo.setFirstName("");
-        accountInfo.setLastName("TEST");
-        accountInfo.setEmail(email);
-        String pass = accountController.createNewAccount(accountInfo, false);
-        Assert.assertNotNull(pass);
-        account = accountController.getByEmail(email);
-        Assert.assertNotNull(account);
-
-        if (admin) {
-            account.setType(AccountType.ADMIN);
-            accountController.save(account);
-        }
-        return account;
     }
 }

@@ -13,7 +13,7 @@ import org.jbei.ice.client.entry.view.model.FlagEntry;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.shared.dto.SampleInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -26,9 +26,9 @@ public interface IEntryView {
 
     void setEntryHeader(String typeDisplay, String name, String owner, String ownerId, Date creationDate);
 
-    void showSequenceView(EntryInfo info);
+    void showSequenceView(PartData info);
 
-    IEntryFormSubmit showUpdateForm(EntryInfo info);
+    IEntryFormSubmit showUpdateForm(PartData info);
 
     PermissionsPresenter getPermissionsWidget();
 
@@ -70,13 +70,13 @@ public interface IEntryView {
 
     void showLoadingIndicator(boolean showErrorLoad);
 
-    void setSequenceData(ArrayList<SequenceAnalysisInfo> data, EntryInfo info);
+    void setSequenceData(ArrayList<SequenceAnalysisInfo> data, PartData info);
 
     MultiSelectionModel<SequenceAnalysisInfo> getSequenceTableSelectionModel();
 
     void setSequenceDeleteHandler(ClickHandler handler);
 
-    SequenceViewPanelPresenter setEntryInfoForView(EntryInfo info, ServiceDelegate<SampleInfo> delegate);
+    SequenceViewPanelPresenter setEntryInfoForView(PartData info, ServiceDelegate<SampleInfo> delegate);
 
     void setAttachmentDeleteHandler(HasAttachmentDeleteHandler handler);
 

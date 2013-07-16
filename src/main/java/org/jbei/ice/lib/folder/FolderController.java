@@ -17,7 +17,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.AccountType;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
@@ -155,7 +155,7 @@ public class FolderController {
 
             ArrayList<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit);
             for (Entry entry : results) {
-                EntryInfo info = ModelToInfoFactory.createTableViewData(entry, false);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, false);
                 details.getEntries().add(info);
             }
             return details;

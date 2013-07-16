@@ -2,7 +2,7 @@ package org.jbei.ice.client.common.table.cell;
 
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.HasEntrySelectionModel;
-import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -15,7 +15,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 /**
  * @author Hector Plahar
  */
-public class HasEntrySelectionColumnHeaderCell<T extends HasEntryInfo> extends CheckboxCell {
+public class HasEntrySelectionColumnHeaderCell<T extends HasEntryData> extends CheckboxCell {
 
     private final HasEntrySelectionModel<T> selectionModel;
     private final HasEntryDataTable<T> tEntryDataTable;

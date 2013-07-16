@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.shared.dto.entry;
 
-public class StrainInfo extends EntryInfo {
+public class StrainData extends PartData {
 
     private static final long serialVersionUID = 1L;
 
@@ -10,7 +10,7 @@ public class StrainInfo extends EntryInfo {
     private String linkifiedPlasmids;
     private String linkifiedHost;
 
-    public StrainInfo() {
+    public StrainData() {
         super(EntryType.STRAIN);
     }
 

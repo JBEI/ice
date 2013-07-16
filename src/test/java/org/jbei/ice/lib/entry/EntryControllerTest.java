@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
@@ -17,12 +17,11 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.AccountType;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
@@ -48,29 +47,6 @@ public class EntryControllerTest {
         controller = new EntryController();
     }
 
-    protected Account createTestAccount(String testName, boolean admin) throws Exception {
-        String email = testName + "@TESTER";
-        AccountController accountController = new AccountController();
-        Account account = accountController.getByEmail(email);
-        if (account != null)
-            throw new Exception("duplicate account");
-
-        AccountInfo info = new AccountInfo();
-        info.setFirstName("");
-        info.setLastName("TEST");
-        info.setEmail(email);
-        String pass = accountController.createNewAccount(info, false);
-        Assert.assertNotNull(pass);
-        account = accountController.getByEmail(email);
-        Assert.assertNotNull(account);
-
-        if (admin) {
-            account.setType(AccountType.ADMIN);
-            accountController.save(account);
-        }
-        return account;
-    }
-
     @After
     public void tearDown() {
         HibernateHelper.commitTransaction();
@@ -91,29 +67,29 @@ public class EntryControllerTest {
 
     @Test
     public void testCreateStrainWithPlasmid() throws Exception {
-        Account account = createTestAccount("testCreateStrainWithPlasmid", false);
+        Account account = AccountCreator.createTestAccount("testCreateStrainWithPlasmid", false);
         try {
             controller.createStrainWithPlasmid(account, null, null, null);
         } catch (ControllerException ce) {
             // expecting ce
         }
 
-        StrainInfo strainInfo = new StrainInfo();
-        strainInfo.setAlias("testStrainAlias");
-        strainInfo.setBioSafetyLevel(1);
-        strainInfo.setGenotypePhenotype("genPhenTest");
-        strainInfo.setHost("testHost");
-        strainInfo.setName("sTrain");
-        Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
+        StrainData strainData = new StrainData();
+        strainData.setAlias("testStrainAlias");
+        strainData.setBioSafetyLevel(1);
+        strainData.setGenotypePhenotype("genPhenTest");
+        strainData.setHost("testHost");
+        strainData.setName("sTrain");
+        Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainData);
         Assert.assertNotNull(strain);
 
-        PlasmidInfo plasmidInfo = new PlasmidInfo();
-        plasmidInfo.setName("pLasmid");
-        plasmidInfo.setCircular(true);
-        plasmidInfo.setOriginOfReplication("repOrigin");
-        plasmidInfo.setPromoters("None");
-        plasmidInfo.setBackbone("backbone");
-        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
+        PlasmidData plasmidData = new PlasmidData();
+        plasmidData.setName("pLasmid");
+        plasmidData.setCircular(true);
+        plasmidData.setOriginOfReplication("repOrigin");
+        plasmidData.setPromoters("None");
+        plasmidData.setBackbone("backbone");
+        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidData);
         Assert.assertNotNull(plasmid);
 
         HashSet<Entry> results = controller.createStrainWithPlasmid(account, strain, plasmid, null);
@@ -123,7 +99,7 @@ public class EntryControllerTest {
 
     @Test
     public void testCreateEntry() throws Exception {
-        Account account = createTestAccount("testCreateEntry", false);
+        Account account = AccountCreator.createTestAccount("testCreateEntry", false);
         Entry strain = new Strain();
         strain = controller.createEntry(account, strain, null);
         Assert.assertNotNull(strain);
@@ -132,7 +108,7 @@ public class EntryControllerTest {
 
     @Test
     public void testGet() throws Exception {
-        Account account = createTestAccount("testGet", false);
+        Account account = AccountCreator.createTestAccount("testGet", false);
         Entry plasmid = new Plasmid();
         plasmid = controller.createEntry(account, plasmid, null);
         Entry ret = controller.get(account, plasmid.getId());
@@ -141,7 +117,7 @@ public class EntryControllerTest {
 
     @Test
     public void testGetByRecordId() throws Exception {
-        Account account = createTestAccount("testGetByRecordId", false);
+        Account account = AccountCreator.createTestAccount("testGetByRecordId", false);
         ArabidopsisSeed seed = new ArabidopsisSeed();
         seed.setEcotype("ecotype");
         seed.setGeneration(ArabidopsisSeed.Generation.M0);
@@ -161,23 +137,23 @@ public class EntryControllerTest {
 
     @Test
     public void testGetByPartNumber() throws Exception {
-        Account creator = createTestAccount("testGetByPartNumber", false);
+        Account creator = AccountCreator.createTestAccount("testGetByPartNumber", false);
 
-        PlasmidInfo info = new PlasmidInfo();
-        info.setType(EntryType.PLASMID);
-        info.setBioSafetyLevel(1);
-        info.setOriginOfReplication("kanamycin");
-        info.setCircular(false);
-        info.setOwnerEmail(info.getCreatorEmail());
-        info.setOwner(info.getCreator());
-        info.setShortDescription("testing");
-        info.setStatus("Complete");
-        info.setName("pSTC100");
+        PlasmidData data = new PlasmidData();
+        data.setType(EntryType.PLASMID);
+        data.setBioSafetyLevel(1);
+        data.setOriginOfReplication("kanamycin");
+        data.setCircular(false);
+        data.setOwnerEmail(data.getCreatorEmail());
+        data.setOwner(data.getCreator());
+        data.setShortDescription("testing");
+        data.setStatus("Complete");
+        data.setName("pSTC100");
 
-        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        Entry plasmid = InfoToModelFactory.infoToEntry(data);
         plasmid = controller.createEntry(creator, plasmid);
         String partNumber = plasmid.getOnePartNumber().getPartNumber();
-        EntryInfo result = controller.getByPartNumber(creator, partNumber);
+        PartData result = controller.getByPartNumber(creator, partNumber);
         Assert.assertNotNull(result);
         Assert.assertEquals(EntryType.PLASMID, result.getType());
         result = controller.getByPartNumber(creator, "fake");
@@ -186,24 +162,24 @@ public class EntryControllerTest {
 
     @Test
     public void testUpdate() throws Exception {
-        Account creator = createTestAccount("testUpdate1", false);
-        Account account = createTestAccount("testUpdate2", false);
+        Account creator = AccountCreator.createTestAccount("testUpdate1", false);
+        Account account = AccountCreator.createTestAccount("testUpdate2", false);
 
         // create entry
-        PlasmidInfo info = new PlasmidInfo();
-        info.setType(EntryType.PLASMID);
-        info.setBioSafetyLevel(1);
-        info.setCreatorEmail(creator.getEmail());
-        info.setCreator(creator.getFullName());
-        info.setOriginOfReplication("kanamycin");
-        info.setCircular(false);
-        info.setOwnerEmail(info.getCreatorEmail());
-        info.setOwner(info.getCreator());
-        info.setShortDescription("testing");
-        info.setStatus("Complete");
-        info.setName("pSTC100");
+        PlasmidData data = new PlasmidData();
+        data.setType(EntryType.PLASMID);
+        data.setBioSafetyLevel(1);
+        data.setCreatorEmail(creator.getEmail());
+        data.setCreator(creator.getFullName());
+        data.setOriginOfReplication("kanamycin");
+        data.setCircular(false);
+        data.setOwnerEmail(data.getCreatorEmail());
+        data.setOwner(data.getCreator());
+        data.setShortDescription("testing");
+        data.setStatus("Complete");
+        data.setName("pSTC100");
 
-        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(info);
+        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(data);
         Assert.assertNotNull(plasmid);
 
         // add Write permission for account
@@ -222,38 +198,37 @@ public class EntryControllerTest {
 
 
         // update with account
-        info.setCircular(true);
-        info.setRecordId(plasmid.getRecordId());
-        Entry existing = controller.getByRecordId(account, info.getRecordId());
+        data.setCircular(true);
+        data.setRecordId(plasmid.getRecordId());
+        Entry existing = controller.getByRecordId(account, data.getRecordId());
         ArrayList<PermissionInfo> p = ControllerFactory.getPermissionController()
                                                        .retrieveSetEntryPermissions(account, plasmid);
-        info.setPermissions(p);
+        data.setPermissions(p);
 
-        // TODO
-//        Entry entry = InfoToModelFactory.infoToEntry(info, existing);
-//        Entry updated = controller.update(account, entry);
-//        Assert.assertNotNull(updated);
+        Entry entry = InfoToModelFactory.infoToEntry(data, existing);
+        Entry updated = controller.update(account, entry);
+        Assert.assertNotNull(updated);
     }
 
     @Test
     public void testGetByName() throws Exception {
-        Account creator = createTestAccount("testGetByName", false);
+        Account creator = AccountCreator.createTestAccount("testGetByName", false);
 
-        PlasmidInfo info = new PlasmidInfo();
-        info.setType(EntryType.PLASMID);
-        info.setBioSafetyLevel(1);
-        info.setOriginOfReplication("kanamycin");
-        info.setCircular(false);
-        info.setOwnerEmail(info.getCreatorEmail());
-        info.setOwner(info.getCreator());
-        info.setShortDescription("testing");
-        info.setStatus("Complete");
-        info.setName("pSTC1000");
+        PlasmidData data = new PlasmidData();
+        data.setType(EntryType.PLASMID);
+        data.setBioSafetyLevel(1);
+        data.setOriginOfReplication("kanamycin");
+        data.setCircular(false);
+        data.setOwnerEmail(data.getCreatorEmail());
+        data.setOwner(data.getCreator());
+        data.setShortDescription("testing");
+        data.setStatus("Complete");
+        data.setName("pSTC1000");
 
-        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        Entry plasmid = InfoToModelFactory.infoToEntry(data);
         plasmid = controller.createEntry(creator, plasmid);
         String name = plasmid.getOneName().getName();
-        EntryInfo result = controller.getByUniqueName(creator, name);
+        PartData result = controller.getByUniqueName(creator, name);
         Assert.assertNotNull(result);
         Assert.assertEquals(EntryType.PLASMID, result.getType());
         String partNumber = plasmid.getOnePartNumber().getPartNumber();
@@ -263,27 +238,27 @@ public class EntryControllerTest {
 
     @Test
     public void testAddComment() throws Exception {
-        Account creator = createTestAccount("testAddComment", false);
+        Account creator = AccountCreator.createTestAccount("testAddComment", false);
 
-        PlasmidInfo info = new PlasmidInfo();
-        info.setType(EntryType.PLASMID);
-        info.setBioSafetyLevel(1);
-        info.setOriginOfReplication("kanamycin");
-        info.setCircular(false);
-        info.setOwnerEmail(info.getCreatorEmail());
-        info.setOwner(info.getCreator());
-        info.setShortDescription("testing");
-        info.setStatus("Complete");
-        info.setName("pSTC1005");
+        PlasmidData data = new PlasmidData();
+        data.setType(EntryType.PLASMID);
+        data.setBioSafetyLevel(1);
+        data.setOriginOfReplication("kanamycin");
+        data.setCircular(false);
+        data.setOwnerEmail(data.getCreatorEmail());
+        data.setOwner(data.getCreator());
+        data.setShortDescription("testing");
+        data.setStatus("Complete");
+        data.setName("pSTC1005");
 
-        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        Entry plasmid = InfoToModelFactory.infoToEntry(data);
         plasmid = controller.createEntry(creator, plasmid);
         Assert.assertNotNull(plasmid);
         UserComment comment = new UserComment("This is a test");
         comment.setEntryId(plasmid.getId());
         comment = controller.addCommentToEntry(creator, comment);
         Assert.assertNotNull(comment);
-        EntryInfo entryInfo = controller.retrieveEntryDetails(creator, plasmid.getId());
+        PartData entryInfo = controller.retrieveEntryDetails(creator, plasmid.getId());
         Assert.assertNotNull(entryInfo);
         Assert.assertEquals(1, entryInfo.getComments().size());
     }
@@ -295,18 +270,18 @@ public class EntryControllerTest {
 
     @Test
     public void testGetNumberOfVisibleEntries() throws Exception {
-        Account account1 = createTestAccount("testGetNumberOfVisibleEntries1", false);
-        PlasmidInfo info = new PlasmidInfo();
-        info.setType(EntryType.PLASMID);
-        info.setBioSafetyLevel(1);
-        info.setOriginOfReplication("kanamycin");
-        info.setCircular(false);
-        info.setOwnerEmail(info.getCreatorEmail());
-        info.setOwner(info.getCreator());
-        info.setShortDescription("testing");
-        info.setStatus("Complete");
-        info.setName("pSTC1005123q");
-        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        Account account1 = AccountCreator.createTestAccount("testGetNumberOfVisibleEntries1", false);
+        PlasmidData data = new PlasmidData();
+        data.setType(EntryType.PLASMID);
+        data.setBioSafetyLevel(1);
+        data.setOriginOfReplication("kanamycin");
+        data.setCircular(false);
+        data.setOwnerEmail(data.getCreatorEmail());
+        data.setOwner(data.getCreator());
+        data.setShortDescription("testing");
+        data.setStatus("Complete");
+        data.setName("pSTC1005123q");
+        Entry plasmid = InfoToModelFactory.infoToEntry(data);
         plasmid = controller.createEntry(account1, plasmid);
         Assert.assertNotNull(plasmid);
         long count = controller.getNumberOfVisibleEntries(account1);
@@ -334,13 +309,13 @@ public class EntryControllerTest {
         count = controller.getNumberOfVisibleEntries(account1);
         Assert.assertEquals(1, count);
 
-        Account account2 = createTestAccount("testGetNumberOfVisibleEntries2", false);
+        Account account2 = AccountCreator.createTestAccount("testGetNumberOfVisibleEntries2", false);
         Assert.assertEquals(0, controller.getNumberOfVisibleEntries(account2));
     }
 
     @Test
     public void retrieveVisibleEntries() throws Exception {
-        Account account = createTestAccount("testGetNumberOfVisibleEntries", false);
+        Account account = AccountCreator.createTestAccount("testGetNumberOfVisibleEntries", false);
         GroupInfo info = new GroupInfo();
         info.setLabel("test");
         info.setDescription("test");

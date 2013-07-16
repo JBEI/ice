@@ -10,8 +10,8 @@ import org.jbei.ice.client.bulkupload.sheet.cell.FileInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.StatusSheetCell;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 /**
  * Headers for part bulk upload
@@ -41,7 +41,7 @@ public class PartHeader extends BulkUploadHeaders {
     }
 
     @Override
-    public SheetCellData extractValue(EntryField header, EntryInfo info) {
+    public SheetCellData extractValue(EntryField header, PartData info) {
         return extractCommon(header, info);
     }
 }

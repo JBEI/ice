@@ -1,12 +1,12 @@
 package org.jbei.ice.client.entry.view.detail;
 
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 
-public class ArabidopsisInfoView extends EntryInfoView<ArabidopsisSeedInfo> {
+public class ArabidopsisInfoView extends EntryInfoView<ArabidopsisSeedData> {
 
-    public ArabidopsisInfoView(ArabidopsisSeedInfo info) {
-        super(info);
+    public ArabidopsisInfoView(ArabidopsisSeedData data) {
+        super(data);
     }
 
     @Override

@@ -2,7 +2,7 @@ package org.jbei.ice.client.collection.add.form;
 
 import java.util.HashMap;
 
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -27,7 +27,7 @@ public interface IEntryFormSubmit {
 
     void populateEntries();
 
-    EntryInfo getEntry();
+    PartData getEntry();
 
     void setPreferences(HashMap<PreferenceKey, String> preferences);
 

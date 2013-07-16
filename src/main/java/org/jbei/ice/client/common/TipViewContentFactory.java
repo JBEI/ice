@@ -8,11 +8,10 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
-import org.jbei.ice.lib.shared.dto.entry.PartInfo;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -31,13 +30,13 @@ public class TipViewContentFactory {
 
     private static final RegistryServiceAsync service = GWT.create(RegistryService.class);
 
-    public static void getContents(final EntryInfo entry, String url, final Callback<Widget> callback) {
+    public static void getContents(final PartData entry, String url, final Callback<Widget> callback) {
         try {
             service.retrieveEntryTipDetails(ClientController.sessionId, entry.getId(), url,
-                                            new AsyncCallback<EntryInfo>() {
+                                            new AsyncCallback<PartData>() {
 
                                                 @Override
-                                                public void onSuccess(EntryInfo result) {
+                                                public void onSuccess(PartData result) {
                                                     Widget contents = getContents(result);
                                                     callback.onSuccess(contents);
                                                 }
@@ -52,7 +51,7 @@ public class TipViewContentFactory {
         }
     }
 
-    private static Widget getContents(EntryInfo entry) {
+    private static Widget getContents(PartData entry) {
         FlexTable table = new FlexTable();
         table.setWidth("650px");
         table.setCellPadding(2);
@@ -63,23 +62,23 @@ public class TipViewContentFactory {
 
         switch (entry.getType()) {
             case STRAIN:
-                StrainInfo view = (StrainInfo) entry;
+                StrainData view = (StrainData) entry;
                 r = getStrainContent(table, view);
                 break;
 
             case PLASMID:
-                PlasmidInfo plasmidInfo = (PlasmidInfo) entry;
-                r = getPlasmidContent(table, plasmidInfo);
+                PlasmidData plasmidData = (PlasmidData) entry;
+                r = getPlasmidContent(table, plasmidData);
                 break;
 
             case ARABIDOPSIS:
-                ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) entry;
-                r = getSeedContent(table, seedInfo);
+                ArabidopsisSeedData seedData = (ArabidopsisSeedData) entry;
+                r = getSeedContent(table, seedData);
                 break;
 
             case PART:
-                PartInfo partInfo = (PartInfo) entry;
-                r = getPartContent(table, partInfo);
+                PartData partInfo = (PartData) entry;
+                r = getPartContent(table, entry);
                 break;
 
             default:
@@ -90,7 +89,7 @@ public class TipViewContentFactory {
         return table;
     }
 
-    private static int getPlasmidContent(FlexTable table, PlasmidInfo view) {
+    private static int getPlasmidContent(FlexTable table, PlasmidData view) {
         setLeftColumn(table, view);
 
         // second column
@@ -110,7 +109,7 @@ public class TipViewContentFactory {
         return 7;
     }
 
-    private static int getStrainContent(FlexTable table, StrainInfo view) {
+    private static int getStrainContent(FlexTable table, StrainData view) {
         setLeftColumn(table, view);
 
         // second column
@@ -122,7 +121,7 @@ public class TipViewContentFactory {
         return 6;
     }
 
-    private static int getPartContent(FlexTable table, PartInfo view) {
+    private static int getPartContent(FlexTable table, PartData view) {
         setLeftColumn(table, view);
 
         // second column
@@ -131,7 +130,7 @@ public class TipViewContentFactory {
         return 2;
     }
 
-    private static int getSeedContent(FlexTable table, ArabidopsisSeedInfo view) {
+    private static int getSeedContent(FlexTable table, ArabidopsisSeedData view) {
         setLeftColumn(table, view);
 
         // second column
@@ -162,7 +161,7 @@ public class TipViewContentFactory {
         table.getFlexCellFormatter().setVerticalAlignment(row, col, HasAlignment.ALIGN_TOP);
     }
 
-    private static void setLeftColumn(FlexTable table, EntryInfo entry) {
+    private static void setLeftColumn(FlexTable table, PartData entry) {
         addField(table, 1, 0, "Part ID", entry.getPartId(), "115px", "170px");
         addField(table, 2, 0, "Alias", entry.getAlias(), "115px", "170px");
         addField(table, 3, 0, "Creator", entry.getCreator(), "115px", "170px");

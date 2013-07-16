@@ -41,8 +41,8 @@ import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import org.jbei.ice.lib.utils.Emailer;
@@ -186,7 +186,7 @@ public class BulkUploadController {
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
             boolean hasSequence = sequenceController.hasSequence(entry.getId());
             boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
-            EntryInfo info = ModelToInfoFactory.getInfo(account, entry, attachments, null, null);
+            PartData info = ModelToInfoFactory.getInfo(account, entry, attachments, null, null);
             info.setHasSequence(hasSequence);
             info.setHasOriginalSequence(hasOriginalSequence);
 
@@ -209,7 +209,7 @@ public class BulkUploadController {
                         attachments = attachmentController.getByEntry(account, plasmid);
                         hasSequence = sequenceController.hasSequence(plasmid.getId());
                         hasOriginalSequence = sequenceController.hasOriginalSequence(plasmid.getId());
-                        EntryInfo plasmidInfo = ModelToInfoFactory.getInfo(account, plasmid, attachments, null, null);
+                        PartData plasmidInfo = ModelToInfoFactory.getInfo(account, plasmid, attachments, null, null);
                         plasmidInfo.setHasSequence(hasSequence);
                         plasmidInfo.setHasOriginalSequence(hasOriginalSequence);
                         Set<Permission> permissions = plasmid.getPermissions();

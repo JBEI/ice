@@ -1,10 +1,10 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import org.jbei.ice.lib.shared.dto.entry.PartInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
-public class PartInfoView extends EntryInfoView<PartInfo> {
+public class PartInfoView extends EntryInfoView<PartData> {
 
-    public PartInfoView(PartInfo partInfo) {
+    public PartInfoView(PartData partInfo) {
         super(partInfo);
     }
 

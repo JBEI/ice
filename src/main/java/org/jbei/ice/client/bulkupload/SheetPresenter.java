@@ -23,8 +23,8 @@ import org.jbei.ice.lib.shared.dto.SampleInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -67,9 +67,9 @@ public class SheetPresenter {
     private final HashMap<Integer, BitSet> rowBitSet;
     private ServiceDelegate<BulkUploadAutoUpdate> autoUpdateDelegate;
     private final ServiceDelegate<PreferenceInfo> serviceDelegate;
-    private final HashMap<Integer, EntryInfo> rowInfoMap;
-    private static final HashMap<EntryAddType, SheetModel<? extends EntryInfo>> sheetModelCache =
-            new HashMap<EntryAddType, SheetModel<? extends EntryInfo>>();
+    private final HashMap<Integer, PartData> rowInfoMap;
+    private static final HashMap<EntryAddType, SheetModel<? extends PartData>> sheetModelCache =
+            new HashMap<EntryAddType, SheetModel<? extends PartData>>();
 
     public SheetPresenter(View view, EntryAddType type, BulkUploadInfo info, ServiceDelegate<PreferenceInfo>
             serviceDelegate) {
@@ -77,13 +77,13 @@ public class SheetPresenter {
         this.type = type;
         this.serviceDelegate = serviceDelegate;
         this.rowBitSet = new HashMap<Integer, BitSet>();
-        this.rowInfoMap = new HashMap<Integer, EntryInfo>();
+        this.rowInfoMap = new HashMap<Integer, PartData>();
 
         this.currentInfo = info;
         if (info != null && info.getEntryList() != null) {
-            Collections.sort(info.getEntryList(), new Comparator<EntryInfo>() {
+            Collections.sort(info.getEntryList(), new Comparator<PartData>() {
                 @Override
-                public int compare(EntryInfo o1, EntryInfo o2) {
+                public int compare(PartData o1, PartData o2) {
                     return o1.getCreationTime().compareTo(o2.getCreationTime());
                 }
             });
@@ -125,7 +125,7 @@ public class SheetPresenter {
 
             @Override
             public long getEntryIdForRow(int row) {
-                EntryInfo info = rowInfoMap.get(row);
+                PartData info = rowInfoMap.get(row);
                 if (info == null)
                     return 0;
                 return info.getId();
@@ -217,7 +217,7 @@ public class SheetPresenter {
         }
         currentInfo.setId(autoUpdate.getBulkUploadId());
 
-        EntryInfo info = rowInfoMap.get(autoUpdate.getRow());
+        PartData info = rowInfoMap.get(autoUpdate.getRow());
 
         // display all fields that were added
         for (Map.Entry<EntryField, String> set : autoUpdate.getKeyValue().entrySet()) {
@@ -242,8 +242,8 @@ public class SheetPresenter {
         return sampleHeaders.getHeaderForIndex(index).getCell();
     }
 
-    private SheetModel<? extends EntryInfo> getModelForCurrentType() {
-        SheetModel<? extends EntryInfo> model = sheetModelCache.get(type);
+    private SheetModel<? extends PartData> getModelForCurrentType() {
+        SheetModel<? extends PartData> model = sheetModelCache.get(type);
         if (model == null) {
             model = ModelFactory.getModelForType(type);
             sheetModelCache.put(type, model);
@@ -281,7 +281,7 @@ public class SheetPresenter {
 
         // determine if the entry exists and we are updating based on the entryid
         long entryId = 0;
-        EntryInfo rowInfo = rowInfoMap.get(inputRow);
+        PartData rowInfo = rowInfoMap.get(inputRow);
         EntryType entryType;
         if (type == EntryAddType.STRAIN_WITH_PLASMID) {
             boolean isPlasmid = StrainWithPlasmidHeaders.isPlasmidHeader(header.getHeaderType());
@@ -355,7 +355,7 @@ public class SheetPresenter {
             String value = "";
 
             // check for existing infos
-            EntryInfo info = rowInfoMap.get(row);
+            PartData info = rowInfoMap.get(row);
             if (info != null) {
                 // extractor also sets the header data structure
                 CellColumnHeader header = headers.getHeaderForIndex(i);
@@ -377,7 +377,7 @@ public class SheetPresenter {
         int i = headers.getHeaderSize();   // starting point
         for (CellColumnHeader header : sampleHeaders.getHeaders()) {
             String value = "";
-            EntryInfo info = rowInfoMap.get(row);
+            PartData info = rowInfoMap.get(row);
             if (info != null) {
                 // extractor also sets the header data structure
                 if (info.isHasSample()) {

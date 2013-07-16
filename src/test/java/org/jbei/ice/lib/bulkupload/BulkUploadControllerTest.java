@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.EntryController;
@@ -15,15 +15,13 @@ import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.StatusType;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.AccountType;
 import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
@@ -60,7 +58,7 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testRetrievePendingImports() throws Exception {
-        Account account = createTestAccount("testRetrievePendingImports", true);
+        Account account = AccountCreator.createTestAccount("testRetrievePendingImports", true);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
         autoUpdate.setRow(0);
         autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
@@ -102,7 +100,7 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testRetrieveById() throws Exception {
-        Account account = createTestAccount("testRetrieveById", false);
+        Account account = AccountCreator.createTestAccount("testRetrieveById", false);
         Assert.assertNull(controller.retrieveById(account, 100l, 0, 1));
 
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
@@ -130,7 +128,7 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testRetrieveByUser() throws Exception {
-        Account account = createTestAccount("testRetrieveByUser", false);
+        Account account = AccountCreator.createTestAccount("testRetrieveByUser", false);
         ArrayList<BulkUploadInfo> results = controller.retrieveByUser(account, account);
         Assert.assertEquals(0, results.size());
 
@@ -151,7 +149,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(userUpload);
         Assert.assertEquals(1, userUpload.size());
 
-        Account account2 = createTestAccount("testRetrieveByUser2", false);
+        Account account2 = AccountCreator.createTestAccount("testRetrieveByUser2", false);
         int count = 10;
         for (int i = 0; i < count; i += 1) {
             autoUpdate = new BulkUploadAutoUpdate(EntryType.PART);
@@ -171,7 +169,7 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testDeleteDraftById() throws Exception {
-        Account account = createTestAccount("testDeleteDraftById", false);
+        Account account = AccountCreator.createTestAccount("testDeleteDraftById", false);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "plasmid summary");
         autoUpdate.getKeyValue().put(EntryField.NAME, "plasmid name");
@@ -190,7 +188,7 @@ public class BulkUploadControllerTest {
     @Test
     public void testAutoUpdateBulkUpload() throws Exception {
         EntryAddType type = EntryAddType.STRAIN_WITH_PLASMID;
-        Account account = createTestAccount("testAutoUpdateBulkUpload", false);
+        Account account = AccountCreator.createTestAccount("testAutoUpdateBulkUpload", false);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
         autoUpdate.getKeyValue().put(EntryField.LINKS, "google");
 
@@ -230,7 +228,7 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testSubmitBulkImportDraft() throws Exception {
-        Account account = createTestAccount("testSubmitBulkImportDraft", false);
+        Account account = AccountCreator.createTestAccount("testSubmitBulkImportDraft", false);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
         autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
         autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN);
@@ -275,7 +273,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(info.getEntryList().get(0).getVisibility() == Visibility.PENDING);
 
         // check the data associated with it
-        EntryInfo entryInfo = info.getEntryList().get(0);
+        PartData entryInfo = info.getEntryList().get(0);
         Assert.assertEquals(entryInfo.getName(), "JBEI-0001");
         Assert.assertEquals(entryInfo.getShortDescription(), "this is a test");
         Assert.assertEquals(entryInfo.getPrincipalInvestigator(), "test");
@@ -283,8 +281,8 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testRevertSubmitted() throws Exception {
-        Account account = createTestAccount("testRevertSubmitted", false);
-        Account admin = createTestAccount("testRevertSubmitted+Admin", true);
+        Account account = AccountCreator.createTestAccount("testRevertSubmitted", false);
+        Account admin = AccountCreator.createTestAccount("testRevertSubmitted+Admin", true);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.ARABIDOPSIS);
         autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
@@ -310,7 +308,7 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testApproveBulkImport() throws Exception {
-        Account account = createTestAccount("testApproveBulkImport", true);
+        Account account = AccountCreator.createTestAccount("testApproveBulkImport", true);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
         autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
@@ -353,7 +351,7 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testRenameDraft() throws Exception {
-        Account account = createTestAccount("testRenameDraft", false);
+        Account account = AccountCreator.createTestAccount("testRenameDraft", false);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
         autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
@@ -375,7 +373,7 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testUpdatePreference() throws Exception {
-        Account account = createTestAccount("testUpdatePreference", false);
+        Account account = AccountCreator.createTestAccount("testUpdatePreference", false);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PART);
         autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.PART);
         Assert.assertNotNull(autoUpdate);
@@ -397,7 +395,7 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testUpdatePermissions() throws Exception {
-        Account account = createTestAccount("testUpdatePermissions", true);
+        Account account = AccountCreator.createTestAccount("testUpdatePermissions", true);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
         autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
@@ -519,29 +517,5 @@ public class BulkUploadControllerTest {
             }
             Assert.assertTrue("Permissions for bulk upload were not propagated to the entry", found);
         }
-    }
-
-    protected Account createTestAccount(String testName, boolean admin) throws Exception {
-        String email = testName + "@TESTER";
-        AccountController accountController = new AccountController();
-        Account account = accountController.getByEmail(email);
-        if (account != null)
-            throw new Exception("duplicate account");
-
-        AccountInfo accountInfo = new AccountInfo();
-        accountInfo.setFirstName("");
-        accountInfo.setLastName("TEST");
-        accountInfo.setEmail(email);
-        String pass = accountController.createNewAccount(accountInfo, false);
-
-        Assert.assertNotNull(pass);
-        account = accountController.getByEmail(email);
-        Assert.assertNotNull(account);
-
-        if (admin) {
-            account.setType(AccountType.ADMIN);
-            accountController.save(account);
-        }
-        return account;
     }
 }

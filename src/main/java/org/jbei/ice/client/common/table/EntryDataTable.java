@@ -9,7 +9,7 @@ import org.jbei.ice.client.common.table.cell.EntrySelectionColumnHeaderCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.client.common.table.column.ImageColumn;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -35,7 +35,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
  * @author Hector Plahar
  */
 
-public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements IHasEntryId {
+public abstract class EntryDataTable<T extends PartData> extends DataTable<T> implements IHasEntryId {
 
     private EntrySelectionModel<T> selectionModel;
 
@@ -185,7 +185,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected void addHasAttachmentColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT) {
-            public boolean showImage(EntryInfo info) {
+            public boolean showImage(PartData info) {
                 return info.isHasAttachment();
             }
         };
@@ -195,7 +195,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected void addHasSampleColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE) {
-            public boolean showImage(EntryInfo info) {
+            public boolean showImage(PartData info) {
                 return info.isHasSample();
             }
         };
@@ -205,7 +205,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected void addHasSequenceColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE) {
-            public boolean showImage(EntryInfo info) {
+            public boolean showImage(PartData info) {
                 return info.isHasSequence();
             }
         };
@@ -217,7 +217,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         DataTableColumn<T, String> createdColumn = new DataTableColumn<T, String>(new TextCell(), ColumnField.CREATED) {
 
             @Override
-            public String getValue(EntryInfo object) {
+            public String getValue(PartData object) {
                 DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("MMM d, yyyy");
                 return dateTimeFormat.format(object.getCreationTime());
             }
@@ -233,7 +233,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     // returns the selected entry set
     public Set<Long> getSelectedEntrySet() {
         Set<Long> entrySet = new HashSet<Long>();
-        for (EntryInfo info : selectionModel.getSelectedSet()) {
+        for (PartData info : selectionModel.getSelectedSet()) {
             entrySet.add(info.getId());
         }
 

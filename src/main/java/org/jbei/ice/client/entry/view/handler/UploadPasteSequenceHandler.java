@@ -5,7 +5,7 @@ import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -29,7 +29,7 @@ public class UploadPasteSequenceHandler implements ClickHandler {
     @Override
     public void onClick(ClickEvent event) {
         final String sequence = presenter.getSequence();
-        final EntryInfo info = presenter.getEntry();
+        final PartData info = presenter.getEntry();
 
         new IceAsyncCallback<Boolean>() {
 

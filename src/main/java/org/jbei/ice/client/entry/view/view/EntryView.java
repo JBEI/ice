@@ -24,8 +24,8 @@ import org.jbei.ice.client.entry.view.panel.EntrySequenceAnalysisPanel;
 import org.jbei.ice.lib.shared.dto.SampleInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -147,7 +147,7 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public IEntryFormSubmit showUpdateForm(EntryInfo info) {
+    public IEntryFormSubmit showUpdateForm(PartData info) {
         if (info.getCreatorEmail() == null || info.getCreatorEmail().isEmpty())
             info.setCreatorEmail(ClientController.account.getEmail());
         if (info.getCreator() == null || info.getCreator().isEmpty())
@@ -264,7 +264,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     @SuppressWarnings("unchecked")
-    public SequenceViewPanelPresenter setEntryInfoForView(EntryInfo info, ServiceDelegate<SampleInfo> handler) {
+    public SequenceViewPanelPresenter setEntryInfoForView(PartData info, ServiceDelegate<SampleInfo> handler) {
         boolean showEdit = info.isCanEdit();
         currentView = viewCache.get(info.getType());
         if (currentView == null) {
@@ -371,7 +371,7 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void showSequenceView(EntryInfo info) {
+    public void showSequenceView(PartData info) {
         sequencePanel.setCurrentInfo(info);
         mainContent.setWidget(1, 0, sequencePanel);
     }
@@ -444,7 +444,7 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, EntryInfo info) {
+    public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, PartData info) {
         sequencePanel.setSequenceData(data, info);
         mainContent.setWidget(1, 0, sequencePanel);
     }

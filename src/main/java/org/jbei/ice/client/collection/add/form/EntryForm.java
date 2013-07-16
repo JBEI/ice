@@ -12,7 +12,7 @@ import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
 import org.jbei.ice.lib.shared.dto.ParameterInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -24,7 +24,7 @@ import com.google.gwt.user.client.ui.*;
  *
  * @author Hector Plahar
  */
-public abstract class EntryForm<T extends EntryInfo> extends Composite implements IEntryFormSubmit {
+public abstract class EntryForm<T extends PartData> extends Composite implements IEntryFormSubmit {
 
     protected final FlexTable layout;
     protected HTML cancel;
@@ -406,7 +406,7 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
     }
 
     @Override
-    public EntryInfo getEntry() {
+    public PartData getEntry() {
         return getEntryInfo();
     }
 }

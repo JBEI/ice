@@ -14,8 +14,8 @@ import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.dto.SampleInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -42,7 +42,7 @@ public class EntryModel {
         this.cache = new HashMap<EntryType, SampleLocation>();
     }
 
-    public void retrieveStorageSchemes(final EntryInfo currentInfo) {
+    public void retrieveStorageSchemes(final PartData currentInfo) {
         SampleLocation cacheLocation = cache.get(currentInfo.getType());
         if (cacheLocation != null) {
             display.setSampleOptions(cacheLocation);
@@ -98,9 +98,9 @@ public class EntryModel {
 
     private class SampleAddHandler implements ClickHandler {
 
-        private final EntryInfo currentInfo;
+        private final PartData currentInfo;
 
-        public SampleAddHandler(EntryInfo currentInfo) {
+        public SampleAddHandler(PartData currentInfo) {
             this.currentInfo = currentInfo;
         }
 

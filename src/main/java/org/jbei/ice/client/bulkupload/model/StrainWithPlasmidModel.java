@@ -5,41 +5,41 @@ import java.util.ArrayList;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
-public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
+public class StrainWithPlasmidModel extends SheetModel<StrainData> {
 
     @Override
-    public StrainInfo setInfoField(SheetCellData datum, EntryInfo strain) {
+    public StrainData setInfoField(SheetCellData datum, PartData strain) {
         if (strain == null) {
-            strain = new StrainInfo();
+            strain = new StrainData();
         }
 
-        PlasmidInfo plasmid = (PlasmidInfo) strain.getInfo();
+        PlasmidData plasmid = (PlasmidData) strain.getInfo();
         if (plasmid == null) {
-            plasmid = new PlasmidInfo();
+            plasmid = new PlasmidData();
             strain.setInfo(plasmid);
         }
 
         setPlasmidInfo(plasmid, datum);
-        setStrainInfo((StrainInfo) strain, datum);
+        setStrainInfo((StrainData) strain, datum);
 
 //        strain.setInfo(plasmid);
-        return (StrainInfo) strain;
+        return (StrainData) strain;
     }
 
     @Override
-    public StrainInfo createInfo() {
-        PlasmidInfo plasmid = new PlasmidInfo();
-        StrainInfo strain = new StrainInfo();
+    public StrainData createInfo() {
+        PlasmidData plasmid = new PlasmidData();
+        StrainData strain = new StrainData();
         strain.setInfo(plasmid);
         return strain;
     }
 
-    private void setStrainInfo(StrainInfo strain, SheetCellData datum) {
+    private void setStrainInfo(StrainData strain, SheetCellData datum) {
         if (datum == null)
             return;
 
@@ -174,7 +174,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
         }
     }
 
-    public void setPlasmidInfo(PlasmidInfo info, SheetCellData datum) {
+    public void setPlasmidInfo(PlasmidData data, SheetCellData datum) {
         if (datum == null)
             return;
 
@@ -186,62 +186,62 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
         switch (header) {
             case PI:
-                info.setPrincipalInvestigator(value);
+                data.setPrincipalInvestigator(value);
                 break;
 
             case FUNDING_SOURCE:
-                info.setFundingSource(value);
+                data.setFundingSource(value);
                 break;
             case IP:
-                info.setIntellectualProperty(value);
+                data.setIntellectualProperty(value);
                 break;
 
             case BIOSAFETY_LEVEL:
                 Integer optionValue = BioSafetyOption.intValue(value);
-                info.setBioSafetyLevel(optionValue);
+                data.setBioSafetyLevel(optionValue);
                 break;
 
             case STATUS:
-                info.setStatus(value);
+                data.setStatus(value);
                 break;
 
             case PLASMID_NAME:
-                info.setName(value);
+                data.setName(value);
                 break;
 
             case PLASMID_ALIAS:
-                info.setAlias(value);
+                data.setAlias(value);
                 break;
 
             case PLASMID_KEYWORDS:
-                info.setKeywords(value);
+                data.setKeywords(value);
                 break;
 
             case PLASMID_SUMMARY:
-                info.setShortDescription(value);
+                data.setShortDescription(value);
                 break;
 
             case PLASMID_NOTES:
-                info.setLongDescription(value);
+                data.setLongDescription(value);
                 break;
 
             case PLASMID_REFERENCES:
-                info.setReferences(value);
+                data.setReferences(value);
                 break;
 
             case PLASMID_LINKS:
-                info.setLinks(value);
+                data.setLinks(value);
                 break;
 
             case PLASMID_STATUS:
-                info.setStatus(value);
+                data.setStatus(value);
                 break;
 
             case PLASMID_SEQ_FILENAME:
-                ArrayList<SequenceAnalysisInfo> seq = info.getSequenceAnalysis();
+                ArrayList<SequenceAnalysisInfo> seq = data.getSequenceAnalysis();
                 if (seq == null) {
                     seq = new ArrayList<SequenceAnalysisInfo>();
-                    info.setSequenceAnalysis(seq);
+                    data.setSequenceAnalysis(seq);
                 }
 
                 SequenceAnalysisInfo analysisInfo = seq.isEmpty() ? null : seq.get(0);
@@ -261,15 +261,15 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 analysisInfo.setName(value);
                 analysisInfo.setFileId(datum.getId());
                 seq.add(analysisInfo);
-                info.setHasSequence(true);
-                info.setHasOriginalSequence(true);
+                data.setHasSequence(true);
+                data.setHasOriginalSequence(true);
                 break;
 
             case PLASMID_ATT_FILENAME:
-                ArrayList<AttachmentInfo> attInfo = info.getAttachments();
+                ArrayList<AttachmentInfo> attInfo = data.getAttachments();
                 if (attInfo == null) {
                     attInfo = new ArrayList<AttachmentInfo>();
-                    info.setAttachments(attInfo);
+                    data.setAttachments(attInfo);
                 }
 
                 AttachmentInfo attachmentInfo = attInfo.isEmpty() ? null : attInfo.get(0);
@@ -291,11 +291,11 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                 attachmentInfo.setFilename(value);
                 attachmentInfo.setFileId(datum.getId());
                 attInfo.add(attachmentInfo);
-                info.setHasAttachment(true);
+                data.setHasAttachment(true);
                 break;
 
             case PLASMID_SELECTION_MARKERS:
-                info.setSelectionMarkers(value);
+                data.setSelectionMarkers(value);
                 break;
 
             case CIRCULAR:
@@ -303,24 +303,24 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
                         && !"True".equalsIgnoreCase(value)
                         && !"False".equalsIgnoreCase(value)
                         && !"No".equalsIgnoreCase(value))) {
-                    info.setCircular(null);
+                    data.setCircular(null);
                     break;
                 }
 
                 boolean circular = "Yes".equalsIgnoreCase(value) || "True".equalsIgnoreCase(value);
-                info.setCircular(circular);
+                data.setCircular(circular);
                 break;
 
             case PLASMID_BACKBONE:
-                info.setBackbone(value);
+                data.setBackbone(value);
                 break;
 
             case PLASMID_PROMOTERS:
-                info.setPromoters(value);
+                data.setPromoters(value);
                 break;
 
             case PLASMID_ORIGIN_OF_REPLICATION:
-                info.setOriginOfReplication(value);
+                data.setOriginOfReplication(value);
                 break;
         }
     }

@@ -14,9 +14,9 @@ import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
 import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 
@@ -41,12 +41,12 @@ public class ArabidopsisSeedHeaders extends PartHeader {
     }
 
     @Override
-    public SheetCellData extractValue(EntryField header, EntryInfo info) {
+    public SheetCellData extractValue(EntryField header, PartData info) {
         SheetCellData data = extractCommon(header, info);
         if (data != null)
             return data;
 
-        ArabidopsisSeedInfo seed = (ArabidopsisSeedInfo) info;
+        ArabidopsisSeedData seed = (ArabidopsisSeedData) info;
         String value = null;
 
         switch (header) {
@@ -73,7 +73,7 @@ public class ArabidopsisSeedHeaders extends PartHeader {
                 break;
 
             case GENERATION:
-                ArabidopsisSeedInfo.Generation generation = seed.getGeneration();
+                ArabidopsisSeedData.Generation generation = seed.getGeneration();
                 if (generation == null)
                     value = "";
                 else
@@ -81,7 +81,7 @@ public class ArabidopsisSeedHeaders extends PartHeader {
                 break;
 
             case PLANT_TYPE:
-                ArabidopsisSeedInfo.PlantType plantType = seed.getPlantType();
+                ArabidopsisSeedData.PlantType plantType = seed.getPlantType();
                 if (plantType == null)
                     value = "";
                 else

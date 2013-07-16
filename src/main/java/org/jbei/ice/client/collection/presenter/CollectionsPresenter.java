@@ -33,7 +33,7 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.search.advanced.ISearchView;
 import org.jbei.ice.client.search.advanced.SearchPresenter;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
@@ -105,10 +105,10 @@ public class CollectionsPresenter extends AbstractPresenter {
         retrieveEntriesForFolder(id, null);
     }
 
-    private ServiceDelegate<EntryInfo> createDelegate() {
-        return new ServiceDelegate<EntryInfo>() {
+    private ServiceDelegate<PartData> createDelegate() {
+        return new ServiceDelegate<PartData>() {
             @Override
-            public void execute(EntryInfo entryInfo) {
+            public void execute(PartData entryInfo) {
                 EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
                 context.setNav(folderDataProvider);
                 context.setId(entryInfo.getId());
@@ -306,7 +306,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     }
 
     private void initCollectionTableSelectionHandler() {
-        final EntrySelectionModel<EntryInfo> selectionModel = this.collectionsDataTable.getSelectionModel();
+        final EntrySelectionModel<PartData> selectionModel = this.collectionsDataTable.getSelectionModel();
         this.collectionsDataTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
 
             @Override
@@ -762,7 +762,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-            final EntryInfo toDelete = entryViewPresenter.getCurrentInfo();
+            final PartData toDelete = entryViewPresenter.getCurrentInfo();
             if (toDelete == null)
                 return;
 

@@ -18,8 +18,8 @@ import org.jbei.ice.lib.shared.dto.SampleInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
@@ -56,7 +56,7 @@ public interface RegistryService extends RemoteService {
     FolderDetails retrieveUserEntries(String sid, String userId, ColumnField sort, boolean asc,
             int start, int limit) throws AuthenticationException;
 
-    EntryInfo retrieveEntryDetails(String sid, long id, String url) throws AuthenticationException;
+    PartData retrieveEntryDetails(String sid, long id, String url) throws AuthenticationException;
 
     FolderDetails createUserCollection(String sid, String name, String description,
             ArrayList<Long> contents) throws AuthenticationException;
@@ -66,7 +66,7 @@ public interface RegistryService extends RemoteService {
 
     AccountInfo retrieveProfileInfo(String sid, String userId) throws AuthenticationException;
 
-    Long createEntry(String sid, EntryInfo info) throws AuthenticationException;
+    Long createEntry(String sid, PartData info) throws AuthenticationException;
 
     ArrayList<FolderDetails> addEntriesToCollection(String sid, ArrayList<Long> destination,
             ArrayList<Long> entryIds) throws AuthenticationException;
@@ -83,7 +83,7 @@ public interface RegistryService extends RemoteService {
     FolderDetails removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids)
             throws AuthenticationException;
 
-    boolean updateEntry(String sid, EntryInfo info) throws AuthenticationException;
+    boolean updateEntry(String sid, PartData info) throws AuthenticationException;
 
     ArrayList<BulkUploadInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException;
 
@@ -134,11 +134,11 @@ public interface RegistryService extends RemoteService {
 
     boolean deleteEntryAttachment(String sid, String fileId) throws AuthenticationException;
 
-    EntryInfo retrieveEntryTipDetails(String sessionId, long id, String url) throws AuthenticationException;
+    PartData retrieveEntryTipDetails(String sessionId, long id, String url) throws AuthenticationException;
 
     BulkUploadInfo deleteSavedDraft(String sid, long draftId) throws AuthenticationException;
 
-    ArrayList<FolderDetails> deleteEntry(String sessionId, EntryInfo info) throws AuthenticationException;
+    ArrayList<FolderDetails> deleteEntry(String sessionId, PartData info) throws AuthenticationException;
 
     boolean approvePendingBulkImport(String sessionId, long id) throws AuthenticationException;
 

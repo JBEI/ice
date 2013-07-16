@@ -17,7 +17,7 @@ import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -133,7 +133,7 @@ public class EntryAddPresenter {
     /**
      * Makes an rpc to save the set of entrys
      */
-    protected void save(final EntryInfo primary) {
+    protected void save(final PartData primary) {
         if (primary == null)
             return;
 
@@ -214,7 +214,7 @@ public class EntryAddPresenter {
                 }
 
                 form.populateEntries();
-                EntryInfo primary = form.getEntry();
+                PartData primary = form.getEntry();
 
                 // attachments
                 ArrayList<AttachmentInfo> attachmentInfos = new ArrayList<AttachmentInfo>();

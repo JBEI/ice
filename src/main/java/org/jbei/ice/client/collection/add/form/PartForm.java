@@ -1,14 +1,14 @@
 package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.entry.PartInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Widget;
 
-public class PartForm extends EntryForm<PartInfo> {
+public class PartForm extends EntryForm<PartData> {
 
-    public PartForm(PartInfo partInfo) {
+    public PartForm(PartData partInfo) {
         super(partInfo);
     }
 

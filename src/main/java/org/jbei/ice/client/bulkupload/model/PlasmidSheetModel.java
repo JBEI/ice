@@ -1,23 +1,23 @@
 package org.jbei.ice.client.bulkupload.model;
 
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 
-public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
+public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidData> {
 
-    public PlasmidInfo setField(PlasmidInfo info, SheetCellData datum) {
+    public PlasmidData setField(PlasmidData data, SheetCellData datum) {
         if (datum == null)
-            return info;
+            return data;
 
         EntryField header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null)
-            return info;
+            return data;
 
         switch (header) {
             case SELECTION_MARKERS:
-                info.setSelectionMarkers(value);
+                data.setSelectionMarkers(value);
                 break;
 
             case CIRCULAR:
@@ -25,32 +25,32 @@ public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
                         && !"True".equalsIgnoreCase(value)
                         && !"False".equalsIgnoreCase(value)
                         && !"No".equalsIgnoreCase(value))) {
-                    info.setCircular(null);
+                    data.setCircular(null);
                     break;
                 }
 
                 boolean circular = "Yes".equalsIgnoreCase(value) || "True".equalsIgnoreCase(value);
-                info.setCircular(circular);
+                data.setCircular(circular);
                 break;
 
             case BACKBONE:
-                info.setBackbone(value);
+                data.setBackbone(value);
                 break;
 
             case PROMOTERS:
-                info.setPromoters(value);
+                data.setPromoters(value);
                 break;
 
             case ORIGIN_OF_REPLICATION:
-                info.setOriginOfReplication(value);
+                data.setOriginOfReplication(value);
                 break;
         }
 
-        return info;
+        return data;
     }
 
     @Override
-    public PlasmidInfo createInfo() {
-        return new PlasmidInfo();
+    public PlasmidData createInfo() {
+        return new PlasmidData();
     }
 }

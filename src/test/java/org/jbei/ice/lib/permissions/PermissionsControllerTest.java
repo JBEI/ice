@@ -41,14 +41,14 @@ public class PermissionsControllerTest {
 
         AccountController accountController = new AccountController();
         AccountInfo info = new AccountInfo();
-        info.setFirstName("");
+        info.setFirstName("Ter");
         info.setLastName("TEST");
         info.setEmail(email);
         String pass = accountController.createNewAccount(info, false);
         Assert.assertNotNull(pass);
 
         AccountInfo info2 = new AccountInfo();
-        info2.setFirstName("");
+        info2.setFirstName("T");
         info2.setLastName("TEST");
         info2.setEmail(email2);
         accountController.createNewAccount(info2, false);

@@ -13,10 +13,10 @@ import org.jbei.ice.client.bulkupload.sheet.cell.StatusSheetCell;
 import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 /**
  * Headers for strain with plasmid sheet
@@ -93,7 +93,7 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
     }
 
     @Override
-    public SheetCellData extractValue(EntryField header, EntryInfo info) {
+    public SheetCellData extractValue(EntryField header, PartData info) {
         SheetCellData data = extractCommon(header, info);
         if (data != null)
             return data;
@@ -102,8 +102,8 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         if (data != null)
             return data;
 
-        StrainInfo strain = (StrainInfo) info;
-        PlasmidInfo plasmid = (PlasmidInfo) info.getInfo();
+        StrainData strain = (StrainData) info;
+        PlasmidData plasmid = (PlasmidData) info.getInfo();
 
         String value = null;
         switch (header) {

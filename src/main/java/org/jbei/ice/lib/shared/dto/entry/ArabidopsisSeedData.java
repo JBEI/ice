@@ -7,7 +7,7 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class ArabidopsisSeedInfo extends EntryInfo {
+public class ArabidopsisSeedData extends PartData {
 
     private static final long serialVersionUID = 1L;
 
@@ -75,7 +75,7 @@ public class ArabidopsisSeedInfo extends EntryInfo {
     private PlantType plantType;
     private Boolean sentToAbrc;
 
-    public ArabidopsisSeedInfo() {
+    public ArabidopsisSeedData() {
         super(EntryType.ARABIDOPSIS);
     }
 

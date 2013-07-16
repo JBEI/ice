@@ -2,7 +2,7 @@ package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -10,20 +10,20 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class StrainForm extends EntryForm<StrainInfo> {
+public class StrainForm extends EntryForm<StrainData> {
 
     private TextBox host;
     private TextBox genPhen;
     private SuggestBox plasmids;
     private SuggestBox markers;
 
-    public StrainForm(StrainInfo strainInfo) {
-        super(strainInfo);
+    public StrainForm(StrainData strainData) {
+        super(strainData);
 
-        host.setText(strainInfo.getHost());
-        genPhen.setText(strainInfo.getGenotypePhenotype());
-        plasmids.setText(strainInfo.getPlasmids());
-        markers.setText(strainInfo.getSelectionMarkers());
+        host.setText(strainData.getHost());
+        genPhen.setText(strainData.getGenotypePhenotype());
+        plasmids.setText(strainData.getPlasmids());
+        markers.setText(strainData.getSelectionMarkers());
     }
 
     @Override
@@ -147,7 +147,7 @@ public class StrainForm extends EntryForm<StrainInfo> {
     public void populateEntries() {
         super.populateEntries();
 
-        StrainInfo strain = super.getEntryInfo();
+        StrainData strain = super.getEntryInfo();
         strain.setHost(host.getText());
         strain.setGenotypePhenotype(genPhen.getText());
         strain.setPlasmids(((MultipleTextBox) plasmids.getValueBox()).getWholeText());

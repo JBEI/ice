@@ -28,7 +28,7 @@ import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
@@ -488,7 +488,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     }
 
                     BulkUploadInfo info = event.getData().get(0);
-                    EntryInfo firstEntry = info.getEntryList().isEmpty() ? null : info.getEntryList().get(0);
+                    PartData firstEntry = info.getEntryList().isEmpty() ? null : info.getEntryList().get(0);
                     Sheet sheet = new Sheet(info.getType(), updatePreferenceDelegate, info);
                     sheet.setAutoUpdateDelegate(autoUpdateDelegate);
                     currentInput = new NewBulkInput(info.getType(), sheet);

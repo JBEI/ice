@@ -14,7 +14,7 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
@@ -35,21 +35,21 @@ public interface IRegistryAPI {
     boolean isAdministrator(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "login") String login)
             throws SessionException, ServiceException;
 
-    EntryInfo getEntryByName(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "name") String name)
+    PartData getEntryByName(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "name") String name)
             throws ServiceException;
 
     boolean hasSequence(@WebParam(name = "recordId") String recordId) throws ServiceException;
 
     boolean hasOriginalSequence(@WebParam(name = "recordId") String recordId) throws ServiceException;
 
-    EntryInfo getByRecordId(@WebParam(name = "sessionId") String sessionId,
+    PartData getByRecordId(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException;
 
-    EntryInfo getPublicEntryByRecordId(@WebParam(name = "recordId") String recordId) throws ServiceException;
+    PartData getPublicEntryByRecordId(@WebParam(name = "recordId") String recordId) throws ServiceException;
 
-    EntryInfo getPublicEntryById(@WebParam(name = "entryId") long entryId) throws ServiceException;
+    PartData getPublicEntryById(@WebParam(name = "entryId") long entryId) throws ServiceException;
 
-    EntryInfo getByPartNumber(@WebParam(name = "sessionId") String sessionId,
+    PartData getByPartNumber(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "partNumber") String partNumber) throws SessionException,
             ServiceException;
 

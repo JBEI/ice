@@ -23,7 +23,7 @@ public class AccountCreator {
             throw new Exception("duplicate account");
 
         AccountInfo accountInfo = new AccountInfo();
-        accountInfo.setFirstName("TESTFNAME");
+        accountInfo.setFirstName("TEST_FNAME");
         accountInfo.setLastName("TEST");
         accountInfo.setEmail(email);
         String pass = accountController.createNewAccount(accountInfo, false);

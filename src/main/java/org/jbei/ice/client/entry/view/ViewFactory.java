@@ -5,33 +5,31 @@ import org.jbei.ice.client.entry.view.detail.EntryInfoView;
 import org.jbei.ice.client.entry.view.detail.PartInfoView;
 import org.jbei.ice.client.entry.view.detail.PlasmidInfoView;
 import org.jbei.ice.client.entry.view.detail.StrainInfoView;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
-import org.jbei.ice.lib.shared.dto.entry.PartInfo;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 public class ViewFactory {
 
-    public static EntryInfoView createDetailView(EntryInfo info) {
+    public static EntryInfoView createDetailView(PartData info) {
 
         switch (info.getType()) {
 
             case PLASMID:
-                PlasmidInfo plasmidInfo = (PlasmidInfo) info;
-                return new PlasmidInfoView(plasmidInfo);
+                PlasmidData plasmidData = (PlasmidData) info;
+                return new PlasmidInfoView(plasmidData);
 
             case PART:
-                PartInfo partInfo = (PartInfo) info;
-                return new PartInfoView(partInfo);
+                return new PartInfoView(info);
 
             case ARABIDOPSIS:
-                ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
-                return new ArabidopsisInfoView(seedInfo);
+                ArabidopsisSeedData seedData = (ArabidopsisSeedData) info;
+                return new ArabidopsisInfoView(seedData);
 
             case STRAIN:
-                StrainInfo strainInfo = (StrainInfo) info;
-                return new StrainInfoView(strainInfo);
+                StrainData strainData = (StrainData) info;
+                return new StrainInfoView(strainData);
 
             default:
                 return null;

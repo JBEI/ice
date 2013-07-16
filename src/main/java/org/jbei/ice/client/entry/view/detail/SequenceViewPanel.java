@@ -4,7 +4,7 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter.ISequenceView;
 import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,13 +29,13 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
     private final SequenceFileDownload sequenceDownload;
     private final SequenceFileUpload sequenceUpload;
-    private final EntryInfo info;
+    private final PartData info;
     private final FlexTable layout;
     private HTMLPanel headerPanel;
     private final SequenceViewPanelPresenter presenter;
     private DeleteSequenceHandler deleteHandler;
 
-    public SequenceViewPanel(EntryInfo info) {
+    public SequenceViewPanel(PartData info) {
         this.info = info;
         layout = new FlexTable();
         layout.setCellPadding(0);
@@ -87,7 +87,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         updateSequenceHeaders();
     }
 
-    public EntryInfo getInfo() {
+    public PartData getInfo() {
         return this.info;
     }
 

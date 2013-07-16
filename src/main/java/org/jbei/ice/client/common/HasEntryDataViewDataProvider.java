@@ -6,7 +6,7 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
@@ -16,7 +16,7 @@ import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
-public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> extends AsyncDataProvider<T>
+public abstract class HasEntryDataViewDataProvider<T extends HasEntryData> extends AsyncDataProvider<T>
         implements IHasNavigableData {
 
     protected int resultSize;

@@ -37,7 +37,7 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
         ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(table);
         table.addColumnSortHandler(columnSortHandler);
 
-//        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
+//        DataTable<PartData>.DataTableColumn<?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
 //
 //        if (defaultSortField != null) {
 //            ColumnSortList.ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
@@ -134,7 +134,7 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
 //            lastSortField = ColumnField.CREATED;
 //
 //            this.table.getColumnSortList().clear();
-//            DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(lastSortField);
+//            DataTable<PartData>.DataTableColumn<?> defaultSortField = this.table.getColumn(lastSortField);
 //
 //            if (defaultSortField != null) {
 //                ColumnSortList.ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);

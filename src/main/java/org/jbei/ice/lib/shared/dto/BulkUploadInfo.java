@@ -5,7 +5,7 @@ import java.util.Date;
 
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
 /**
@@ -22,12 +22,12 @@ public class BulkUploadInfo implements IDTOModel {
     private Date created;
     private Date lastUpdate;
     private AccountInfo account;
-    private ArrayList<EntryInfo> entryList;
+    private ArrayList<PartData> entryList;
     private ArrayList<PreferenceInfo> preferences;
     private ArrayList<PermissionInfo> permissions;
 
     public BulkUploadInfo() {
-        entryList = new ArrayList<EntryInfo>();
+        entryList = new ArrayList<PartData>();
         preferences = new ArrayList<PreferenceInfo>();
         permissions = new ArrayList<PermissionInfo>();
     }
@@ -88,7 +88,7 @@ public class BulkUploadInfo implements IDTOModel {
         this.lastUpdate = lastUpdate;
     }
 
-    public ArrayList<EntryInfo> getEntryList() {
+    public ArrayList<PartData> getEntryList() {
         return entryList;
     }
 
