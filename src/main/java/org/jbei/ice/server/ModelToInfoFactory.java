@@ -253,6 +253,7 @@ public class ModelToInfoFactory {
         data.setCircular(plasmid.getCircular());
         data.setOriginOfReplication(plasmid.getOriginOfReplication());
         data.setPromoters(plasmid.getPromoters());
+        data.setReplicatesIn(plasmid.getReplicatesIn());
 
         // get strains for plasmid
         Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
@@ -499,6 +500,7 @@ public class ModelToInfoFactory {
                 view.setBackbone(plasmid.getBackbone());
                 view.setOriginOfReplication(plasmid.getOriginOfReplication());
                 view.setPromoters(plasmid.getPromoters());
+                view.setReplicatesIn(plasmid.getReplicatesIn());
 
                 // get strains for plasmid
                 Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);

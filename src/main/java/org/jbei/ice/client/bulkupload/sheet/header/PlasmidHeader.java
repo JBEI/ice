@@ -1,6 +1,5 @@
 package org.jbei.ice.client.bulkupload.sheet.header;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
@@ -24,13 +23,11 @@ public class PlasmidHeader extends PartHeader {
         super(delegate, preferences, EntryType.PLASMID, EntryAddType.PLASMID);
 
         // plasmid specific headers
-        ArrayList<String> data = new ArrayList<String>();
-        data.add("Yes");
-        data.add("No");
         headers.add(new CellColumnHeader(EntryField.CIRCULAR, preferences, false, new BooleanSheetCell()));
         headers.add(new CellColumnHeader(EntryField.BACKBONE, preferences));
         headers.add(new CellColumnHeader(EntryField.PROMOTERS, preferences, false, new AutoCompleteSheetCell(
                 AutoCompleteField.PROMOTERS)));
+        headers.add(new CellColumnHeader(EntryField.REPLICATES_IN, preferences, false));
         headers.add(new CellColumnHeader(EntryField.ORIGIN_OF_REPLICATION, preferences, false,
                                          new AutoCompleteSheetCell(AutoCompleteField.ORIGIN_OF_REPLICATION)));
         headers.add(new CellColumnHeader(EntryField.SELECTION_MARKERS, preferences, true,
@@ -60,15 +57,15 @@ public class PlasmidHeader extends PartHeader {
                 value = plasmid.getPromoters();
                 break;
 
+            case REPLICATES_IN:
+                value = plasmid.getReplicatesIn();
+                break;
+
             case CIRCULAR:
                 if (plasmid.getCircular() == null)
                     value = "";
-                else {
-                    if (plasmid.getCircular().booleanValue())
-                        value = "Yes";
-                    else
-                        value = "No";
-                }
+                else
+                    value = plasmid.getCircular() ? "Yes" : "No";
                 break;
         }
 

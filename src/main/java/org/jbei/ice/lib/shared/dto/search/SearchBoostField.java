@@ -38,6 +38,7 @@ public enum SearchBoostField implements IDTOModel {
     // plasmid fields
     BACKBONE("backbone"),
     PROMOTERS("promoters"),
+    REPLICATES_IN("replicatesIn"),
     ORIGIN_OF_REPLICATION("originOfReplication"),
 
     // seed fields

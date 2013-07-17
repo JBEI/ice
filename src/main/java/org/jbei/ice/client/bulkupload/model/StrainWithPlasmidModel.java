@@ -319,6 +319,10 @@ public class StrainWithPlasmidModel extends SheetModel<StrainData> {
                 data.setPromoters(value);
                 break;
 
+            case PLASMID_REPLICATES_IN:
+                data.setReplicatesIn(value);
+                break;
+
             case PLASMID_ORIGIN_OF_REPLICATION:
                 data.setOriginOfReplication(value);
                 break;

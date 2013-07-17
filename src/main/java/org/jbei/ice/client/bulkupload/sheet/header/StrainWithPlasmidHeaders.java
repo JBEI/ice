@@ -61,6 +61,7 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(EntryField.PLASMID_BACKBONE, preferences));
         headers.add(new CellColumnHeader(EntryField.PLASMID_PROMOTERS, preferences, false,
                                          new AutoCompleteSheetCell(AutoCompleteField.PROMOTERS)));
+        headers.add(new CellColumnHeader(EntryField.REPLICATES_IN, preferences, false));
         headers.add(new CellColumnHeader(EntryField.PLASMID_ORIGIN_OF_REPLICATION, preferences, false,
                                          new AutoCompleteSheetCell(AutoCompleteField.ORIGIN_OF_REPLICATION)));
         headers.add(new CellColumnHeader(EntryField.PLASMID_KEYWORDS, preferences));
@@ -83,6 +84,7 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                 || header == EntryField.CIRCULAR
                 || header == EntryField.PLASMID_BACKBONE
                 || header == EntryField.PLASMID_PROMOTERS
+                || header == EntryField.REPLICATES_IN
                 || header == EntryField.PLASMID_ORIGIN_OF_REPLICATION
                 || header == EntryField.PLASMID_KEYWORDS
                 || header == EntryField.PLASMID_SUMMARY
@@ -164,15 +166,15 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                 value = plasmid.getPromoters();
                 break;
 
+            case PLASMID_REPLICATES_IN:
+                value = plasmid.getReplicatesIn();
+                break;
+
             case CIRCULAR:
                 if (plasmid.getCircular() == null)
                     value = "";
-                else {
-                    if (plasmid.getCircular().booleanValue())
-                        value = "Yes";
-                    else
-                        value = "No";
-                }
+                else
+                    value = plasmid.getCircular() ? "Yes" : "No";
                 break;
 
             case PLASMID_NAME:

@@ -252,28 +252,12 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
     /**
      * @return text input for auto complete data
      */
-    private SuggestBox createSuggestBox(AutoCompleteField field, String width) {
+    protected SuggestBox createSuggestBox(AutoCompleteField field, String width) {
         AutoCompleteSuggestOracle oracle = new AutoCompleteSuggestOracle(field);
         SuggestBox box = new SuggestBox(oracle, new MultipleTextBox());
         box.setStyleName("input_box");
         box.setWidth(width);
         return box;
-    }
-
-    public SuggestBox createAutoCompleteForPromoters(String width) {
-        return createSuggestBox(AutoCompleteField.PROMOTERS, width);
-    }
-
-    public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
-        return createSuggestBox(AutoCompleteField.SELECTION_MARKERS, width);
-    }
-
-    public SuggestBox createAutoCompleteForPlasmidNames(String width) {
-        return createSuggestBox(AutoCompleteField.PLASMID_NAME, width);
-    }
-
-    public SuggestBox createAutoCompleteForOriginOfReplication(String width) {
-        return createSuggestBox(AutoCompleteField.ORIGIN_OF_REPLICATION, width);
     }
 
     @Override

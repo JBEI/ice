@@ -1247,7 +1247,7 @@ public class RegistryAPI implements IRegistryAPI {
             @WebParam(name = "samples") Sample[] samples) throws SessionException, ServiceException {
         log(sessionId, "samplePlate");
         StorageController storageController = ControllerFactory.getStorageController();
-        HashMap<String, Integer> plateIndex = new HashMap<String, Integer>();
+        HashMap<String, Integer> plateIndex = new HashMap<>();
 
         Sample initial = samples[0];
         Storage tube = initial.getStorage();
@@ -1427,7 +1427,7 @@ public class RegistryAPI implements IRegistryAPI {
         SampleController sampleController = ControllerFactory.getSampleController();
 
         // count of plates seen so far
-        List<Sample> retSamples = new LinkedList<Sample>();
+        List<Sample> retSamples = new LinkedList<>();
 
         // for each sample (unique elements are the barcode (tube index))
         for (Sample sample : samples) {

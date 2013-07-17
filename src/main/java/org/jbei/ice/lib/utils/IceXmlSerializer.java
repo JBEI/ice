@@ -2,9 +2,7 @@ package org.jbei.ice.lib.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +80,7 @@ public class IceXmlSerializer {
     private static final String HOST = "host";
     private static final String IS_CIRCULAR = "isCircular";
     private static final String PROMOTERS = "promoters";
+    private static final String REPLICATES_IN = "replicatesIn";
     private static final String ORIGIN_OF_REPLICATION = "originOfReplication";
     private static final String BACKBONE = "backbone";
     private static final String FILE_NAME = "fileName";
@@ -140,14 +139,10 @@ public class IceXmlSerializer {
         try {
             writer = new XMLWriter(byteArrayOutputStream, format);
             writer.write(serializeToJbeiXml(account, entries, sequences));
-            String temp = byteArrayOutputStream.toString("utf8");
-            return temp;
-        } catch (UnsupportedEncodingException e) {
-            throw new UtilityException(e);
+            return byteArrayOutputStream.toString("utf8");
         } catch (IOException e) {
             throw new UtilityException(e);
         }
-
     }
 
     /**
@@ -289,13 +284,7 @@ public class IceXmlSerializer {
                     file = attachmentController.getFile(account, attachment);
                     fileString = SerializationUtils
                             .serializeBytesToBase64String(org.apache.commons.io.FileUtils.readFileToByteArray(file));
-                } catch (FileNotFoundException e) {
-                    throw new UtilityException(e);
-                } catch (IOException e) {
-                    throw new UtilityException(e);
-                } catch (ControllerException e) {
-                    throw new UtilityException(e);
-                } catch (PermissionException e) {
+                } catch (IOException | ControllerException | PermissionException e) {
                     throw new UtilityException(e);
                 }
 
@@ -338,12 +327,12 @@ public class IceXmlSerializer {
             if (getSelectionMarkers(plasmid) != null) {
                 fields.add(getSelectionMarkers(plasmid));
             }
-            fields.add(new DefaultElement(BACKBONE, iceNamespace).addText(emptyStringify(plasmid
-                                                                                                 .getBackbone())));
+            fields.add(new DefaultElement(BACKBONE, iceNamespace).addText(emptyStringify(plasmid.getBackbone())));
             fields.add(new DefaultElement(ORIGIN_OF_REPLICATION, iceNamespace)
                                .addText(emptyStringify(plasmid.getOriginOfReplication())));
-            fields.add(new DefaultElement(PROMOTERS, iceNamespace).addText(emptyStringify(plasmid
-                                                                                                  .getPromoters())));
+            fields.add(new DefaultElement(PROMOTERS, iceNamespace).addText(emptyStringify(plasmid.getPromoters())));
+            fields.add(new DefaultElement(REPLICATES_IN, iceNamespace).addText(
+                    emptyStringify(plasmid.getReplicatesIn())));
             fields.add(new DefaultElement(IS_CIRCULAR, iceNamespace).addText((plasmid.getCircular() ? "true"
                     : "false")));
         } else if (entry.getRecordType().equals(STRAIN)) {
@@ -351,8 +340,7 @@ public class IceXmlSerializer {
             if (getSelectionMarkers(strain) != null) {
                 fields.add(getSelectionMarkers(strain));
             }
-            fields.add(new DefaultElement(HOST, iceNamespace).addText(emptyStringify(strain
-                                                                                             .getHost())));
+            fields.add(new DefaultElement(HOST, iceNamespace).addText(emptyStringify(strain.getHost())));
             fields.add(new DefaultElement(GENOTYPE_PHENOTYPE, iceNamespace)
                                .addText(emptyStringify(strain.getGenotypePhenotype())));
             fields.add(new DefaultElement(PLASMIDS, iceNamespace).addText(emptyStringify(strain.getPlasmids())));
@@ -456,11 +444,7 @@ public class IceXmlSerializer {
     }
 
     /**
-     * Replace null value of a string object into an empty string. Non-null value is returned
-     * unaltered.
-     *
-     * @param string
-     * @return
+     * Replace null value of a string object into an empty string. Non-null value is returned unaltered.
      */
     private static String emptyStringify(String string) {
         if (string == null) {

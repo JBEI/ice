@@ -46,6 +46,7 @@ public class SearchFieldFactory {
         // plasmid fields
         plasmidFields.add("backbone");
         plasmidFields.add("promoters");
+        plasmidFields.add("replicatesIn");
         plasmidFields.add("originOfReplication");
 
         // seed fields

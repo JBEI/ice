@@ -49,6 +49,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private SuggestBox plasmidMarkers;
     private SuggestBox origin;
     private SuggestBox promoters;
+    private TextBox replicatesIn;
     private TextBox plasmidKeywords;
     private TextArea plasmidSummary;
     private TextArea plasmidReferences;
@@ -237,6 +238,14 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         setLabel(false, "Promoters", general, row, 0);
         promoters = createAutoCompleteForPromoters("300px");
         widget = createTextBoxWithHelp(promoters, "Comma separated");
+        general.setWidget(row, 1, widget);
+        general.getFlexCellFormatter().setColSpan(row, 1, 3);
+
+        // replicates in
+        row += 1;
+        setLabel(false, "Replicates In", general, row, 0);
+        replicatesIn = createStandardTextBox("300px");
+        widget = createTextBoxWithHelp(replicatesIn, "Comma separated");
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -447,11 +456,8 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     protected Widget createTextBoxWithHelp(Widget box, String helpText) {
-        String html = "<span id=\"box_id\"></span><span class=\"help_text\">" + helpText
-                + "</span>";
-        HTMLPanel panel = new HTMLPanel(html);
-        panel.addAndReplaceElement(box, "box_id");
-        return panel;
+        box.getElement().setAttribute("placeHolder", helpText);
+        return box;
     }
 
     protected TextBox createStandardTextBox(String width) {
@@ -629,6 +635,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         plasmid.setSelectionMarkers(plasmidSelectionMarkers);
         plasmid.setOriginOfReplication(origin.getText());
         plasmid.setPromoters(promoters.getText());
+        plasmid.setReplicatesIn(replicatesIn.getText());
         plasmid.setKeywords(plasmidKeywords.getText());
         plasmid.setShortDescription(plasmidSummary.getText());
         plasmid.setReferences(plasmidReferences.getText());

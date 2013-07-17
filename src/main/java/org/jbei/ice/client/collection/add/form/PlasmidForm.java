@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 
@@ -24,6 +25,7 @@ public class PlasmidForm extends EntryForm<PlasmidData> {
     private SuggestBox markers;
     private SuggestBox origin;
     private SuggestBox promoters;
+    private SuggestBox replicatesIn;
 
     public PlasmidForm(PlasmidData data) {
         super(data);
@@ -32,6 +34,7 @@ public class PlasmidForm extends EntryForm<PlasmidData> {
         backbone.setText(data.getBackbone());
         origin.setText(data.getOriginOfReplication());
         promoters.setText(data.getPromoters());
+        replicatesIn.setText(data.getReplicatesIn());
         markers.setText(data.getSelectionMarkers());
     }
 
@@ -49,10 +52,11 @@ public class PlasmidForm extends EntryForm<PlasmidData> {
     protected void initComponents() {
         super.initComponents();
 
-        markers = createAutoCompleteForSelectionMarkers("300px");
+        markers = createSuggestBox(AutoCompleteField.SELECTION_MARKERS, "300px");
         circular = new CheckBox();
-        origin = createAutoCompleteForOriginOfReplication("300px");
-        promoters = createAutoCompleteForPromoters("300px");
+        origin = createSuggestBox(AutoCompleteField.ORIGIN_OF_REPLICATION, "300px");
+        promoters = createSuggestBox(AutoCompleteField.PROMOTERS, "300px");
+        replicatesIn = createSuggestBox(AutoCompleteField.REPLICATES_IN, "300px");
         backbone = createStandardTextBox("300px", 150);
     }
 
@@ -140,6 +144,12 @@ public class PlasmidForm extends EntryForm<PlasmidData> {
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
+        // replicates In
+        row += 1;
+        setLabel(false, "Replicates In", general, row, 0);
+        general.setWidget(row, 1, replicatesIn);
+        general.getFlexCellFormatter().setColSpan(row, 1, 3);
+
         // keywords
         row += 1;
         setLabel(false, "Keywords", general, row, 0);
@@ -179,6 +189,7 @@ public class PlasmidForm extends EntryForm<PlasmidData> {
         data.setBackbone(this.backbone.getText());
         data.setOriginOfReplication(((MultipleTextBox) origin.getValueBox()).getWholeText());
         data.setPromoters(((MultipleTextBox) promoters.getValueBox()).getWholeText());
+        data.setReplicatesIn(replicatesIn.getText());
         data.setCircular(this.circular.getValue());
     }
 

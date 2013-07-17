@@ -9,6 +9,7 @@ public enum AutoCompleteField implements IsSerializable {
 
     SELECTION_MARKERS,
     PROMOTERS,
+    REPLICATES_IN,
     PLASMID_NAME,
-    ORIGIN_OF_REPLICATION;
+    ORIGIN_OF_REPLICATION
 }

@@ -17,6 +17,7 @@ import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.BioSafetyOption;
@@ -62,6 +63,7 @@ public class InfoToModelFactory {
                 plasmid.setBackbone(plasmidData.getBackbone());
                 plasmid.setOriginOfReplication(plasmidData.getOriginOfReplication());
                 plasmid.setPromoters(plasmidData.getPromoters());
+                plasmid.setReplicatesIn(plasmidData.getReplicatesIn());
                 plasmid.setCircular(plasmidData.getCircular());
                 break;
 
@@ -532,6 +534,8 @@ public class InfoToModelFactory {
             case PLASMID_BACKBONE:
             case PROMOTERS:
             case PLASMID_PROMOTERS:
+            case REPLICATES_IN:
+            case PLASMID_REPLICATES_IN:
             case CIRCULAR:
             case ORIGIN_OF_REPLICATION:
             case PLASMID_ORIGIN_OF_REPLICATION:
@@ -597,6 +601,11 @@ public class InfoToModelFactory {
                 plasmid.setPromoters(value);
                 return plasmid;
 
+            case REPLICATES_IN:
+            case PLASMID_REPLICATES_IN:
+                plasmid.setReplicatesIn(value);
+                return plasmid;
+
             case CIRCULAR:
                 plasmid.setCircular("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
                 return plasmid;
@@ -631,6 +640,7 @@ public class InfoToModelFactory {
                     Date date = SimpleDateFormat.getDateInstance().parse(value);
                     seed.setHarvestDate(date);
                 } catch (ParseException ia) {
+                    Logger.error(ia);
                 }
                 return seed;
 

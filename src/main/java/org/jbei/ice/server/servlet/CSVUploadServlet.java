@@ -128,6 +128,7 @@ public class CSVUploadServlet extends UploadAction {
                 || entryField == EntryField.CIRCULAR
                 || entryField == EntryField.PLASMID_BACKBONE
                 || entryField == EntryField.PLASMID_PROMOTERS
+                || entryField == EntryField.PLASMID_REPLICATES_IN
                 || entryField == EntryField.PLASMID_ORIGIN_OF_REPLICATION
                 || entryField == EntryField.PLASMID_KEYWORDS
                 || entryField == EntryField.PLASMID_SUMMARY

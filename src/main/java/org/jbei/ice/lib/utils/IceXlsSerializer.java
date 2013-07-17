@@ -48,6 +48,7 @@ public class IceXlsSerializer {
                 headers.add("Circular");
                 headers.add("Backbone");
                 headers.add("Promoters");
+                headers.add("Replicates In");
                 headers.add("Origin of Replication");
                 break;
 
@@ -181,6 +182,8 @@ public class IceXlsSerializer {
                             stringBuilder.append(escapeCSVValue(plasmid.getBackbone())).append("\t");
                         if (header.equalsIgnoreCase("Promoters"))
                             stringBuilder.append(escapeCSVValue(plasmid.getPromoters())).append("\t");
+                        if (header.equalsIgnoreCase("Replicates In"))
+                            stringBuilder.append(escapeCSVValue(plasmid.getReplicatesIn())).append("\t");
                         if (header.equalsIgnoreCase("Origin of Replication"))
                             stringBuilder.append(escapeCSVValue(plasmid.getOriginOfReplication())).append("\t");
                     }

@@ -36,6 +36,7 @@ public class PlasmidInfoView extends EntryInfoView<PlasmidData> {
         addLongField("Origin Of Replication", info.getOriginOfReplication());
         addLongField("Selection Markers", info.getSelectionMarkers());
         addLongField("Promoters", info.getPromoters());
+        addLongField("Replicates In", info.getReplicatesIn());
     }
 
     private static class StrainWidget extends Composite {
@@ -46,8 +47,7 @@ public class PlasmidInfoView extends EntryInfoView<PlasmidData> {
 
             for (Long id : strains.keySet()) {
                 String partNumber = strains.get(id);
-                panel.add(new Hyperlink(partNumber, Page.ENTRY_VIEW.getLink() + ";id="
-                        + id.toString()));
+                panel.add(new Hyperlink(partNumber, Page.ENTRY_VIEW.getLink() + ";id=" + id.toString()));
             }
         }
     }

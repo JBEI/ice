@@ -77,7 +77,6 @@ public class TipViewContentFactory {
                 break;
 
             case PART:
-                PartData partInfo = (PartData) entry;
                 r = getPartContent(table, entry);
                 break;
 
@@ -97,6 +96,7 @@ public class TipViewContentFactory {
         addField(table, 2, 2, "Backbone", view.getBackbone(), "135px", "230px");
         addField(table, 3, 2, "Origin of Replication", view.getOriginOfReplication(), "135px", "230px");
         addField(table, 4, 2, "Promoters", view.getPromoters(), "135px", "230px");
+        addField(table, 5, 2, "Replicates In", view.getReplicatesIn(), "135px", "230px");
 
         String strains = "";
         for (Long id : view.getStrains().keySet())
@@ -104,9 +104,9 @@ public class TipViewContentFactory {
 
         if (view.getStrains().keySet().size() > 0)
             strains = strains.substring(0, strains.lastIndexOf(", "));
-        addField(table, 5, 2, "Strains", strains, "135px", "230px");
-        addField(table, 6, 2, "Funding Source", view.getFundingSource(), "135px", "230px");
-        return 7;
+        addField(table, 6, 2, "Strains", strains, "135px", "230px");
+        addField(table, 7, 2, "Funding Source", view.getFundingSource(), "135px", "230px");
+        return 8;
     }
 
     private static int getStrainContent(FlexTable table, StrainData view) {

@@ -41,6 +41,10 @@ public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidData> {
                 data.setPromoters(value);
                 break;
 
+            case REPLICATES_IN:
+                data.setReplicatesIn(value);
+                break;
+
             case ORIGIN_OF_REPLICATION:
                 data.setOriginOfReplication(value);
                 break;
