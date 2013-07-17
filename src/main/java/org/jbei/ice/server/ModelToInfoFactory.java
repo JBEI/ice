@@ -30,7 +30,7 @@ import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.ParameterInfo;
 import org.jbei.ice.lib.shared.dto.ParameterType;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
@@ -90,7 +90,7 @@ public class ModelToInfoFactory {
         ArrayList<SampleStorage> samplesList = new ArrayList<>();
         if (samples != null) {
             for (Map.Entry<Sample, LinkedList<Storage>> sample : samples.entrySet()) {
-                SampleInfo key = getSampleInfo(sample.getKey());
+                PartSample key = getSampleInfo(sample.getKey());
                 Storage storage = sample.getKey().getStorage();
                 if (storage != null) {
                     key.setLocationId(String.valueOf(storage.getId()));
@@ -141,23 +141,23 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static SampleInfo getSampleInfo(Sample sample) {
-        SampleInfo info = new SampleInfo();
+    private static PartSample getSampleInfo(Sample sample) {
+        PartSample part = new PartSample();
         if (sample == null)
-            return info;
+            return part;
 
-        info.setSampleId(Long.toString(sample.getId()));
-        info.setCreationTime(sample.getCreationTime());
-        info.setLabel(sample.getLabel());
-        info.setNotes(sample.getNotes());
-        info.setDepositor(sample.getDepositor());
+        part.setSampleId(Long.toString(sample.getId()));
+        part.setCreationTime(sample.getCreationTime());
+        part.setLabel(sample.getLabel());
+        part.setNotes(sample.getNotes());
+        part.setDepositor(sample.getDepositor());
 
         Storage storage = sample.getStorage(); // specific storage to this sample. e.g. Tube
         if (storage != null) {
-            info.setLocationId(String.valueOf(storage.getId()));
-            info.setLocation(storage.getIndex());
+            part.setLocationId(String.valueOf(storage.getId()));
+            part.setLocation(storage.getIndex());
         }
-        return info;
+        return part;
     }
 
     public static StorageInfo getStorageInfo(Storage storage) {

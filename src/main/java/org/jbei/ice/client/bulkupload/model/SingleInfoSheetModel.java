@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.shared.BioSafetyOption;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
@@ -144,10 +144,10 @@ public abstract class SingleInfoSheetModel<T extends PartData> extends SheetMode
                     break;
 
                 SampleStorage sampleStorage = info.getOneSampleStorage();
-                if (sampleStorage.getSample() == null)
-                    sampleStorage.setSample(new SampleInfo());
+                if (sampleStorage.getPartSample() == null)
+                    sampleStorage.setPartSample(new PartSample());
 
-                sampleStorage.getSample().setLabel(value);
+                sampleStorage.getPartSample().setLabel(value);
                 break;
         }
 

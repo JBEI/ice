@@ -36,7 +36,7 @@ import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.AccountType;
 import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
@@ -281,12 +281,12 @@ public class BulkUploadController {
             SampleStorage sampleStorage = new SampleStorage();
 
             // convert sample to info
-            SampleInfo sampleInfo = new SampleInfo();
-            sampleInfo.setCreationTime(sample.getCreationTime());
-            sampleInfo.setLabel(sample.getLabel());
-            sampleInfo.setNotes(sample.getNotes());
-            sampleInfo.setDepositor(sample.getDepositor());
-            sampleStorage.setSample(sampleInfo);
+            PartSample partSample = new PartSample();
+            partSample.setCreationTime(sample.getCreationTime());
+            partSample.setLabel(sample.getLabel());
+            partSample.setNotes(sample.getNotes());
+            partSample.setDepositor(sample.getDepositor());
+            sampleStorage.setPartSample(partSample);
 
             // convert sample to info
             Storage storage = sample.getStorage();
@@ -294,8 +294,8 @@ public class BulkUploadController {
             while (storage != null) {
 
                 if (storage.getStorageType() == Storage.StorageType.SCHEME) {
-                    sampleInfo.setLocationId(storage.getId() + "");
-                    sampleInfo.setLocation(storage.getName());
+                    partSample.setLocationId(storage.getId() + "");
+                    partSample.setLocation(storage.getName());
                     break;
                 }
 

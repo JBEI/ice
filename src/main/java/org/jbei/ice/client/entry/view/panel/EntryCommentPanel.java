@@ -215,7 +215,7 @@ public class EntryCommentPanel extends Composite {
             }
 
             for (SampleStorage storage : samples) {
-                sampleOptions.addItem(storage.getSample().getLabel());
+                sampleOptions.addItem(storage.getPartSample().getLabel());
             }
             sampleOptions.setEnabled(true);
             hasData = true;

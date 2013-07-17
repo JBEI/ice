@@ -116,7 +116,7 @@ public class EntryActionWidget extends Composite {
         }
 
         for (SampleStorage storage : samples) {
-            sampleOptions.addItem(storage.getSample().getLabel());
+            sampleOptions.addItem(storage.getPartSample().getLabel());
         }
         sampleOptions.setVisible(true);
         samplePanel.setVisible(true);

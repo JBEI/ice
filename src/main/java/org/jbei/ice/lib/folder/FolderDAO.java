@@ -110,8 +110,7 @@ class FolderDAO extends HibernateRepository<Folder> {
             queryString += (asc ? " asc" : " desc");
             Query query = session.createFilter(folder.getContents(), queryString);
             List list = query.setFirstResult(start).setMaxResults(limit).list();
-            ArrayList<Entry> results = new ArrayList<Entry>(list);
-            return results;
+            return new ArrayList<Entry>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

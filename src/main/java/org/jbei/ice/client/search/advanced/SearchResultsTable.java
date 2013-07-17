@@ -65,8 +65,7 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResultInfo> {
     }
 
     protected DataTableColumn<SearchResultInfo, SearchResultInfo> addPartIdColumn(ServiceDelegate<SearchResultInfo>
-            delegate,
-            boolean sortable, double width, Unit unit) {
+            delegate, boolean sortable, double width, Unit unit) {
         HasEntryPartIDCell<SearchResultInfo> cell = new HasEntryPartIDCell<SearchResultInfo>(delegate) {
             @Override
             protected String getURI(SearchResultInfo value) {

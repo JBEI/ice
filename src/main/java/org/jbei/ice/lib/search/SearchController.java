@@ -42,7 +42,7 @@ public class SearchController {
     public SearchResults runSearch(Account account, SearchQuery query, boolean searchWeb) throws ControllerException {
         if (searchWeb)
             return runWebSearch(query);
-        return runLocalSearch(account, query);
+        return runLocalSearch(account, query, false);
     }
 
     public SearchResults runWebSearch(SearchQuery query) {
@@ -77,11 +77,23 @@ public class SearchController {
         return results;
     }
 
-    public SearchResults runLocalSearch(Account account, SearchQuery query) throws ControllerException {
-        // TODO run this only if we are searching from the api.
-        ConfigurationController configurationController = ControllerFactory.getConfigurationController();
-        String projectName = configurationController.getPropertyValue(ConfigurationKey.PROJECT_NAME);
-        String projectURI = configurationController.getPropertyValue(ConfigurationKey.URI_PREFIX);
+    /**
+     * Executes search using parameters specified in the query.
+     *
+     * @param account
+     * @param query
+     * @return
+     * @throws ControllerException
+     */
+    public SearchResults runLocalSearch(Account account, SearchQuery query, boolean isAPISearch)
+            throws ControllerException {
+        String projectName = "";
+        String projectURI = "";
+        if (isAPISearch) {
+            ConfigurationController configurationController = ControllerFactory.getConfigurationController();
+            projectName = configurationController.getPropertyValue(ConfigurationKey.PROJECT_NAME);
+            projectURI = configurationController.getPropertyValue(ConfigurationKey.URI_PREFIX);
+        }
 
         String queryString = query.getQueryString();
         // TODO : split on \" first for phrase query

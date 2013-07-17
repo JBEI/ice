@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -124,14 +124,14 @@ public class CreateSampleForm extends Composite {
         if (!validates())
             return null;
 
-        SampleInfo info = new SampleInfo();
-        info.setLabel(sampleLabel.getText());
-        info.setNotes(sampleNotes.getText());
-        info.setDepositor(depositor.getText());
-        info.setCreationTime(new Date());
+        PartSample part = new PartSample();
+        part.setLabel(sampleLabel.getText());
+        part.setNotes(sampleNotes.getText());
+        part.setDepositor(depositor.getText());
+        part.setCreationTime(new Date());
 
         String location = locationOptions.getValue(locationOptions.getSelectedIndex());
-        info.setLocationId(location);
+        part.setLocationId(location);
 
         LinkedList<StorageInfo> storageInfos = new LinkedList<StorageInfo>();
 
@@ -143,7 +143,7 @@ public class CreateSampleForm extends Composite {
             storageInfos.add(storageInfo);
         }
 
-        return new SampleStorage(info, storageInfos);
+        return new SampleStorage(part, storageInfos);
     }
 
     /**
@@ -182,7 +182,7 @@ public class CreateSampleForm extends Composite {
         table.setWidget(0, 1, panel);
         table.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
 
-        for (SampleInfo location : sampleLocation.getLocations()) {
+        for (PartSample location : sampleLocation.getLocations()) {
             locationOptions.addItem(location.getLocation(), location.getLocationId());
         }
 

@@ -48,7 +48,6 @@ import org.jbei.ice.lib.news.NewsController;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
@@ -59,7 +58,7 @@ import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.MessageInfo;
 import org.jbei.ice.lib.shared.dto.NewsItem;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.shared.dto.autocomplete.AutoCompleteSuggestion;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
@@ -722,8 +721,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public SearchResults performSearch(String sid, SearchQuery query, boolean isWeb) throws AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sid);
-            SearchController search = ControllerFactory.getSearchController();
-            SearchResults searchResults = search.runSearch(account, query, isWeb);
+            SearchResults searchResults = ControllerFactory.getSearchController().runSearch(account, query, isWeb);
             if (searchResults == null)
                 return null;
             searchResults.setQuery(query);
@@ -749,9 +747,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public ArrayList<FolderDetails> moveToUserCollection(String sid, long source,
-            ArrayList<Long> destination,
-            ArrayList<Long> entryIds)
-            throws AuthenticationException {
+            ArrayList<Long> destination, ArrayList<Long> entryIds) throws AuthenticationException {
         Account account = this.retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": moving entries to user collection.");
         EntryController entryController = ControllerFactory.getEntryController();
@@ -779,6 +775,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 details.setType(folder.getType());
                 results.add(details);
             } catch (ControllerException ce) {
+                return null;
             }
         }
 
@@ -1164,11 +1161,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (sampleMap != null) {
                 for (SampleStorage sampleStorage : sampleMap) {
-                    SampleInfo sampleInfo = sampleStorage.getSample();
+                    PartSample partSample = sampleStorage.getPartSample();
                     LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
 
-                    Sample sample = sampleController.createSample(sampleInfo.getLabel(),
-                                                                  account.getEmail(), sampleInfo.getNotes());
+                    Sample sample = sampleController.createSample(partSample.getLabel(),
+                                                                  account.getEmail(), partSample.getNotes());
                     sample.setEntry(entry);
 
                     if (locations == null || locations.isEmpty()) {
@@ -1197,7 +1194,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         Logger.info("Creating sample with locations " + sb.toString());
                         Storage storage;
                         try {
-                            Storage scheme = storageController.get(Long.parseLong(sampleInfo.getLocationId()), false);
+                            Storage scheme = storageController.get(Long.parseLong(partSample.getLocationId()), false);
                             storage = storageController.getLocation(scheme, labels);
                             storage = storageController.update(storage);
                             sample.setStorage(storage);
@@ -1248,12 +1245,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean deleteSample(String sessionId, SampleInfo info) throws AuthenticationException {
+    public boolean deleteSample(String sessionId, PartSample part) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        Logger.info(account.getEmail() + ": deleting sample " + info.getSampleId());
+        Logger.info(account.getEmail() + ": deleting sample " + part.getSampleId());
         SampleController sampleController = ControllerFactory.getSampleController();
         try {
-            long id = Long.decode(info.getSampleId());
+            long id = Long.decode(part.getSampleId());
             Sample sample = sampleController.getSampleById(id);
             sampleController.deleteSample(account, sample);
             return true;
@@ -1288,10 +1285,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return null;
         }
 
-        SampleInfo sampleInfo = sampleStorage.getSample();
+        PartSample partSample = sampleStorage.getPartSample();
         LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
 
-        Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(), sampleInfo.getNotes());
+        Sample sample = sampleController.createSample(partSample.getLabel(), account.getEmail(), partSample.getNotes());
         sample.setEntry(entry);
 
         if (locations == null || locations.isEmpty()) {
@@ -1300,8 +1297,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             // create sample, but not location
             try {
                 sample = sampleController.saveSample(account, sample);
-                sampleStorage.getSample().setSampleId(sample.getId() + "");
-                sampleStorage.getSample().setDepositor(account.getEmail());
+                sampleStorage.getPartSample().setSampleId(sample.getId() + "");
+                sampleStorage.getPartSample().setDepositor(account.getEmail());
                 return sampleStorage;
             } catch (ControllerException e) {
                 Logger.error(e);
@@ -1323,7 +1320,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         Logger.info("Creating sample with locations " + sb.toString());
         try {
-            Storage scheme = storageController.get(Long.parseLong(sampleInfo.getLocationId()), false);
+            Storage scheme = storageController.get(Long.parseLong(partSample.getLocationId()), false);
             Storage storage = storageController.getLocation(scheme, labels);
             storage = storageController.update(storage);
             sample.setStorage(storage);
@@ -1341,8 +1338,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
             }
 
-            sampleStorage.getSample().setSampleId(sample.getId() + "");
-            sampleStorage.getSample().setDepositor(account.getEmail());
+            sampleStorage.getPartSample().setSampleId(sample.getId() + "");
+            sampleStorage.getPartSample().setDepositor(account.getEmail());
             return sampleStorage;
         } catch (NumberFormatException | ControllerException e) {
             Logger.error(e);
@@ -1373,10 +1370,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public HashMap<SampleInfo, ArrayList<String>> retrieveStorageSchemes(String sessionId,
+    public HashMap<PartSample, ArrayList<String>> retrieveStorageSchemes(String sessionId,
             EntryType type) throws AuthenticationException {
         retrieveAccountForSid(sessionId);
-        HashMap<SampleInfo, ArrayList<String>> schemeMap = new HashMap<>();
+        HashMap<PartSample, ArrayList<String>> schemeMap = new HashMap<>();
         StorageController storageController = ControllerFactory.getStorageController();
         List<Storage> schemes;
         try {
@@ -1387,9 +1384,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         for (Storage scheme : schemes) {
-            SampleInfo sampleInfo = new SampleInfo();
-            sampleInfo.setLocation(scheme.getName());
-            sampleInfo.setLocationId(String.valueOf(scheme.getId()));
+            PartSample partSample = new PartSample();
+            partSample.setLocation(scheme.getName());
+            partSample.setLocationId(String.valueOf(scheme.getId()));
 
             ArrayList<String> schemeOptions = new ArrayList<>();
             try {
@@ -1405,8 +1402,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 continue;
             }
 
-            sampleInfo.setLabel(scheme.getName());
-            schemeMap.put(sampleInfo, schemeOptions);
+            partSample.setLabel(scheme.getName());
+            schemeMap.put(partSample, schemeOptions);
         }
 
         return schemeMap;

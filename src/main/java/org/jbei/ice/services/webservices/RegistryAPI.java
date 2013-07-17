@@ -1696,7 +1696,7 @@ public class RegistryAPI implements IRegistryAPI {
         Logger.info("Registry API: web search");
         SearchController controller = ControllerFactory.getSearchController();
         try {
-            return controller.runLocalSearch(null, query);
+            return controller.runLocalSearch(null, query, true);
         } catch (ControllerException e) {
             throw new ServiceException(e);
         }

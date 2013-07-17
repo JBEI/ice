@@ -14,7 +14,7 @@ import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.MessageInfo;
 import org.jbei.ice.lib.shared.dto.NewsItem;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
@@ -93,7 +93,7 @@ public interface RegistryServiceAsync {
     void updateEntry(String sid, PartData info, AsyncCallback<Boolean> callback) throws AuthenticationException;
 
     void retrieveStorageSchemes(String sessionId, EntryType type,
-            AsyncCallback<HashMap<SampleInfo, ArrayList<String>>> callback);
+            AsyncCallback<HashMap<PartSample, ArrayList<String>>> callback);
 
     // news
     void retrieveNewsItems(String sessionId, AsyncCallback<ArrayList<NewsItem>> callback)
@@ -227,7 +227,7 @@ public interface RegistryServiceAsync {
 
     void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites, AsyncCallback<Void> callback);
 
-    void deleteSample(String sessionId, SampleInfo info, AsyncCallback<Boolean> async);
+    void deleteSample(String sessionId, PartSample part, AsyncCallback<Boolean> async);
 
     void retrieveUserGroups(String sessionId, AsyncCallback<ArrayList<GroupInfo>> async);
 

@@ -14,7 +14,7 @@ import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.MessageInfo;
 import org.jbei.ice.lib.shared.dto.NewsItem;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
@@ -71,7 +71,7 @@ public interface RegistryService extends RemoteService {
     ArrayList<FolderDetails> addEntriesToCollection(String sid, ArrayList<Long> destination,
             ArrayList<Long> entryIds) throws AuthenticationException;
 
-    HashMap<SampleInfo, ArrayList<String>> retrieveStorageSchemes(String sessionId, EntryType type)
+    HashMap<PartSample, ArrayList<String>> retrieveStorageSchemes(String sessionId, EntryType type)
             throws AuthenticationException;
 
     ArrayList<NewsItem> retrieveNewsItems(String sessionId) throws AuthenticationException;
@@ -197,7 +197,7 @@ public interface RegistryService extends RemoteService {
 
     void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites);
 
-    boolean deleteSample(String sessionId, SampleInfo info) throws AuthenticationException;
+    boolean deleteSample(String sessionId, PartSample part) throws AuthenticationException;
 
     ArrayList<GroupInfo> retrieveUserGroups(String sessionId) throws AuthenticationException;
 

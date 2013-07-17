@@ -51,7 +51,7 @@ public abstract class SampleHeaders {
         switch (headerType) {
             case SAMPLE_NAME:
                 SampleStorage sampleStorage = info.getOneSampleStorage();
-                String value = sampleStorage.getSample().getLabel();
+                String value = sampleStorage.getPartSample().getLabel();
                 return new SheetCellData(headerType, value, value);
 
             default:

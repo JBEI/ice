@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 
-public class SampleInfo extends HasEntryData implements Comparable<SampleInfo> {
+public class PartSample extends HasEntryData implements Comparable<PartSample> {
 
     private String sampleId;
     private String label;
@@ -71,7 +71,7 @@ public class SampleInfo extends HasEntryData implements Comparable<SampleInfo> {
     }
 
     @Override
-    public int compareTo(SampleInfo o) {
+    public int compareTo(PartSample o) {
         return this.label.compareTo(o.getLabel());
     }
 }

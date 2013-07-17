@@ -3,7 +3,7 @@ package org.jbei.ice.client.entry.view.panel.sample;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -25,7 +25,7 @@ public class Storage96WellPanel extends Composite {
         panel.setStyleName("entry_sample_panel");
         initWidget(panel);
 
-        SampleInfo info = storage.getSample();
+        PartSample part = storage.getPartSample();
 
         panel.setHTML(0, 0, "<b> PLATE " + plateName + "</b>");
         panel.getFlexCellFormatter().setColSpan(0, 0, 12);
@@ -58,8 +58,8 @@ public class Storage96WellPanel extends Composite {
             }
         }
 
-        String html = "<b>" + info.getLabel() + "</b> - " + info.getNotes();
-        SafeHtmlBuilder sb = addDepositor(info);
+        String html = "<b>" + part.getLabel() + "</b> - " + part.getNotes();
+        SafeHtmlBuilder sb = addDepositor(part);
         html += ("<br>" + sb.toSafeHtml().asString());
 
         panel.setHTML(9, 0, html);
@@ -68,12 +68,12 @@ public class Storage96WellPanel extends Composite {
         panel.getCellFormatter().setStyleName(9, 0, "bg_cc");
     }
 
-    private SafeHtmlBuilder addDepositor(SampleInfo sampleInfo) {
+    private SafeHtmlBuilder addDepositor(PartSample partSample) {
         SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.appendEscaped(DateUtilities.formatDate(sampleInfo.getCreationTime()));
+        sb.appendEscaped(DateUtilities.formatDate(partSample.getCreationTime()));
 
-        Hyperlink link = new Hyperlink(sampleInfo.getDepositor(), Page.PROFILE.getLink() + ";id="
-                + sampleInfo.getDepositor());
+        Hyperlink link = new Hyperlink(partSample.getDepositor(), Page.PROFILE.getLink() + ";id="
+                + partSample.getDepositor());
 
         sb.appendHtmlConstant(" by " + link.getElement().getInnerHTML());
         return sb;

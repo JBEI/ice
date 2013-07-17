@@ -19,7 +19,7 @@ import org.jbei.ice.client.bulkupload.sheet.header.StrainWithPlasmidHeaders;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
@@ -528,7 +528,7 @@ public class SheetPresenter {
     }
 
     public HandlerRegistration setSampleSelectionHandler(final EntryAddType addType,
-            final SingleSelectionModel<SampleInfo> selectionModel) {
+            final SingleSelectionModel<PartSample> selectionModel) {
 
         return selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -536,9 +536,9 @@ public class SheetPresenter {
                 if (SheetPresenter.this.type != addType)
                     return;
 
-                // get selected sample info and retrieve storage list options
-                SampleInfo info = selectionModel.getSelectedObject();
-                if (selectSample(addType, info.getLocationId())) {
+                // get selected sample part and retrieve storage list options
+                PartSample part = selectionModel.getSelectedObject();
+                if (selectSample(addType, part.getLocationId())) {
                     // scroll everything into view
                     view.scrollElementToView(0, getFieldSize() - 1);
                 }

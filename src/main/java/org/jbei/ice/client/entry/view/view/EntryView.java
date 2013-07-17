@@ -21,7 +21,7 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.panel.EntryCommentPanel;
 import org.jbei.ice.client.entry.view.panel.EntrySamplePanel;
 import org.jbei.ice.client.entry.view.panel.EntrySequenceAnalysisPanel;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
@@ -264,7 +264,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     @SuppressWarnings("unchecked")
-    public SequenceViewPanelPresenter setEntryInfoForView(PartData info, ServiceDelegate<SampleInfo> handler) {
+    public SequenceViewPanelPresenter setEntryInfoForView(PartData info, ServiceDelegate<PartSample> handler) {
         boolean showEdit = info.isCanEdit();
         currentView = viewCache.get(info.getType());
         if (currentView == null) {
@@ -399,7 +399,7 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void setSampleData(ArrayList<SampleStorage> data, ServiceDelegate<SampleInfo> deleteSampleHandler) {
+    public void setSampleData(ArrayList<SampleStorage> data, ServiceDelegate<PartSample> deleteSampleHandler) {
         samplePanel.setData(data, deleteSampleHandler);
     }
 

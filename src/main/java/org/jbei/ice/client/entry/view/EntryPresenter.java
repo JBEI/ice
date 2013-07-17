@@ -33,7 +33,7 @@ import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
@@ -408,7 +408,7 @@ public class EntryPresenter extends AbstractPresenter {
                 currentContext.setRecordId(currentInfo.getRecordId());
 
                 // permission (order is important here)
-                ServiceDelegate<SampleInfo> delegate = model.createDeleteSampleHandler();
+                ServiceDelegate<PartSample> delegate = model.createDeleteSampleHandler();
                 SequenceViewPanelPresenter sequencePresenter = display.setEntryInfoForView(currentInfo, delegate);
                 display.getPermissionsWidget().setPermissionData(result.getPermissions(), new DeletePermission());
                 UploadPasteSequenceHandler handler = new UploadPasteSequenceHandler(service,

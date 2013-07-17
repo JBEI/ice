@@ -8,7 +8,7 @@ public class StorageInfo implements IDTOModel {
     private long id;
     private String type;
     private int childCount;
-    private ArrayList<SampleInfo> samples;
+    private ArrayList<PartSample> partSamples;
 
     public StorageInfo() {
     }
@@ -45,11 +45,11 @@ public class StorageInfo implements IDTOModel {
         this.type = type;
     }
 
-    public void setSamples(ArrayList<SampleInfo> samples) {
-        this.samples = samples;
+    public void setPartSamples(ArrayList<PartSample> partSamples) {
+        this.partSamples = partSamples;
     }
 
-    public ArrayList<SampleInfo> getSamples() {
-        return this.samples;
+    public ArrayList<PartSample> getPartSamples() {
+        return this.partSamples;
     }
 }

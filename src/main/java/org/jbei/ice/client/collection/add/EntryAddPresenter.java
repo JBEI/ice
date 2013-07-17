@@ -105,16 +105,16 @@ public class EntryAddPresenter {
 //            return;
 //        }
 //
-//        new IceAsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
+//        new IceAsyncCallback<HashMap<PartSample, ArrayList<String>>>() {
 //
 //            @Override
-//            protected void callService(AsyncCallback<HashMap<SampleInfo, ArrayList<String>>> callback)
+//            protected void callService(AsyncCallback<HashMap<PartSample, ArrayList<String>>> callback)
 //                    throws AuthenticationException {
 //                service.retrieveStorageSchemes(ClientController.sessionId, type, callback);
 //            }
 //
 //            @Override
-//            public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
+//            public void onSuccess(HashMap<PartSample, ArrayList<String>> result) {
 //                if (result == null)
 //                    return;
 //

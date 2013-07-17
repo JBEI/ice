@@ -15,7 +15,7 @@ import org.jbei.ice.client.entry.view.model.FlagEntry;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.panel.sample.Storage96WellPanel;
 import org.jbei.ice.client.entry.view.view.CreateSampleForm;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -143,7 +143,7 @@ public class EntrySamplePanel extends Composite {
         this.sampleForm.setVisible(visible);
     }
 
-    public void setData(ArrayList<SampleStorage> data, ServiceDelegate<SampleInfo> deleteHandler) {
+    public void setData(ArrayList<SampleStorage> data, ServiceDelegate<PartSample> deleteHandler) {
         table.removeAllRows();
         table.setWidget(0, 0, panel);
         table.setHTML(1, 0, "");
@@ -152,7 +152,7 @@ public class EntrySamplePanel extends Composite {
         Collections.sort(data, new Comparator<SampleStorage>() {
             @Override
             public int compare(SampleStorage o1, SampleStorage o2) {
-                return o1.getSample().getLabel().compareToIgnoreCase(o2.getSample().getLabel());
+                return o1.getPartSample().getLabel().compareToIgnoreCase(o2.getPartSample().getLabel());
             }
         });
 
@@ -214,9 +214,9 @@ public class EntrySamplePanel extends Composite {
     private static class GenericStoragePanel extends Composite {
 
         private final SampleStorage storage;
-        private final ServiceDelegate<SampleInfo> deleteHandler;
+        private final ServiceDelegate<PartSample> deleteHandler;
 
-        public GenericStoragePanel(SampleStorage storage, ServiceDelegate<SampleInfo> deleteHandler) {
+        public GenericStoragePanel(SampleStorage storage, ServiceDelegate<PartSample> deleteHandler) {
             this.storage = storage;
             this.deleteHandler = deleteHandler;
 
@@ -228,7 +228,7 @@ public class EntrySamplePanel extends Composite {
             initWidget(panel);
             panel.setWidth("90%");
 
-            panel.setHTML(0, 0, storage.getSample().getLocation());
+            panel.setHTML(0, 0, storage.getPartSample().getLocation());
             panel.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
             panel.getFlexCellFormatter().setStyleName(0, 0, "pad-4");
 
@@ -259,9 +259,9 @@ public class EntrySamplePanel extends Composite {
             table.setCellSpacing(0);
             table.setWidth("100%");
 
-            table.setHTML(0, 0, storage.getSample().getLabel());
+            table.setHTML(0, 0, storage.getPartSample().getLabel());
             if (ClientController.account.isAdmin() ||
-                    ClientController.account.getEmail().equalsIgnoreCase(storage.getSample().getDepositor())) {
+                    ClientController.account.getEmail().equalsIgnoreCase(storage.getPartSample().getDepositor())) {
                 HTML label = new HTML("<i class=\"" + FAIconType.TRASH.getStyleName() + "\"></i> Delete");
                 label.setStyleName("footer_feedback_widget");
                 label.addStyleName("font-70em");
@@ -270,8 +270,9 @@ public class EntrySamplePanel extends Composite {
                     label.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
-                            if (Window.confirm("Confirm deletion of sample \"" + storage.getSample().getLabel() + "\""))
-                                deleteHandler.execute(storage.getSample());
+                            if (Window.confirm(
+                                    "Confirm deletion of sample \"" + storage.getPartSample().getLabel() + "\""))
+                                deleteHandler.execute(storage.getPartSample());
                         }
                     });
                 }

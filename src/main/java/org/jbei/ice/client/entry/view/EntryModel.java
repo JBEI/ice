@@ -13,7 +13,7 @@ import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.lib.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
@@ -53,7 +53,7 @@ public class EntryModel {
         }
 
         service.retrieveStorageSchemes(ClientController.sessionId, currentInfo.getType(),
-                                       new AsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
+                                       new AsyncCallback<HashMap<PartSample, ArrayList<String>>>() {
 
                                            @Override
                                            public void onFailure(Throwable caught) {
@@ -62,7 +62,7 @@ public class EntryModel {
                                            }
 
                                            @Override
-                                           public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
+                                           public void onSuccess(HashMap<PartSample, ArrayList<String>> result) {
                                                if (result == null)
                                                    return;
 
@@ -76,15 +76,15 @@ public class EntryModel {
                                        });
     }
 
-    public ServiceDelegate<SampleInfo> createDeleteSampleHandler() {
-        return new ServiceDelegate<SampleInfo>() {
+    public ServiceDelegate<PartSample> createDeleteSampleHandler() {
+        return new ServiceDelegate<PartSample>() {
             @Override
-            public void execute(final SampleInfo sampleInfo) {
+            public void execute(final PartSample partSample) {
                 new IceAsyncCallback<Boolean>() {
 
                     @Override
                     protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        service.deleteSample(ClientController.sessionId, sampleInfo, callback);
+                        service.deleteSample(ClientController.sessionId, partSample, callback);
                     }
 
                     @Override

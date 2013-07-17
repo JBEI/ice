@@ -9,8 +9,7 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
  * @author Hector Plahar
  */
 public enum FolderType implements IDTOModel {
-
     PUBLIC,
     PRIVATE,
-    SHARED;
+    SHARED
 }
