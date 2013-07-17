@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
@@ -31,9 +32,9 @@ public class StrainForm extends EntryForm<StrainData> {
         super.initComponents();
 
         host = createStandardTextBox("300px", 150);
-        markers = createAutoCompleteForSelectionMarkers("300px");
+        markers = createSuggestBox(AutoCompleteField.SELECTION_MARKERS, "300px");
         genPhen = createStandardTextBox("300px", 150);
-        plasmids = createAutoCompleteForPlasmidNames("300px");
+        plasmids = createSuggestBox(AutoCompleteField.PLASMID_NAME, "300px");
     }
 
     protected Widget createGeneralWidget() {

@@ -158,15 +158,16 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
+                EntryAddType type = selectionModel.getSelectedObject();
+                if (type == null)
+                    return;
+
                 if (entryViewPresenter == null) { //TODO : when user navigates to another page and returns this is null
                     entryViewPresenter = new EntryPresenter(model.getService(), CollectionsPresenter.this,
                                                             model.getEventBus(), null);
                     entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
                 }
 
-                EntryAddType type = selectionModel.getSelectedObject();
-                if (type == null)
-                    return;
                 selectionModel.setSelected(type, false);
                 mode = Mode.ENTRY;
                 display.setMainContent(entryViewPresenter.getView().asWidget());

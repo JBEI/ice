@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.Generation;
@@ -59,7 +60,7 @@ public class ArabidopsisForm extends EntryForm<ArabidopsisSeedData> {
 
     protected void initComponents() {
         super.initComponents();
-        markers = createAutoCompleteForSelectionMarkers("300px");
+        markers = createSuggestBox(AutoCompleteField.SELECTION_MARKERS, "300px");
         generation = new ListBox();
         generation.setVisibleItemCount(1);
         for (Generation gen : Generation.values()) {

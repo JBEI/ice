@@ -8,6 +8,7 @@ import org.jbei.ice.lib.shared.EntryAddType;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
@@ -40,6 +41,7 @@ public class CreateEntryMenu implements IsWidget {
 
     private final Button createEntry;
     private final SingleSelectionModel<EntryAddType> optionSelection;
+    private HandlerRegistration handlerRegistration;
 
     public CreateEntryMenu(String label) {
         ExportAsResource.INSTANCE.cellListStyle().ensureInjected();
@@ -61,7 +63,9 @@ public class CreateEntryMenu implements IsWidget {
 
         createEntry.addClickHandler(clickHandler);
         optionSelection = new SingleSelectionModel<EntryAddType>();
-        optionSelection.addSelectionChangeHandler(new Handler() {
+        if (handlerRegistration != null)
+            handlerRegistration.removeHandler();
+        handlerRegistration = optionSelection.addSelectionChangeHandler(new Handler() {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
