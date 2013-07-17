@@ -173,7 +173,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public Long updateBulkUploadPreference(String sid, long bulkUploadId, EntryAddType addType, PreferenceInfo info)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        Logger.info(account.getEmail() + ": Preference " + info.toString() + " for bulk upload " + bulkUploadId);
+        Logger.info(account.getEmail() + ": preference " + info.toString() + " for bulk upload " + bulkUploadId);
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         try {
             return controller.updatePreference(account, bulkUploadId, addType, info);
@@ -999,7 +999,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (!controller.isAdministrator(account))
                 return null;
 
-            Logger.info(account.getEmail() + " retrieving system settings");
+            Logger.info(account.getEmail() + ": retrieving system settings");
             return ControllerFactory.getConfigurationController().retrieveSystemSettings();
         } catch (ControllerException e) {
             return null;
@@ -1013,7 +1013,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (!ControllerFactory.getAccountController().isAdministrator(account))
                 return null;
 
-            Logger.info(account.getEmail() + " retrieving web of registry system settings");
+            Logger.info(account.getEmail() + ": retrieving web of registry system settings");
             return ControllerFactory.getWebController().getRegistryPartners();
         } catch (ControllerException e) {
             return null;
@@ -1088,8 +1088,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account account = retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + " retrieving members for group " + info.getLabel());
             GroupController controller = ControllerFactory.getGroupController();
-            ArrayList<AccountInfo> result = controller.retrieveGroupMembers(info.getUuid());
-            return result;
+            return controller.retrieveGroupMembers(info.getUuid());
         } catch (ControllerException e) {
             return null;
         }
@@ -1233,7 +1232,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         attachmentController.save(account, attachment, inputStream);
                     } catch (FileNotFoundException e) {
                         Logger.warn(e.getMessage());
-                        continue;
                     }
                 }
             }
@@ -1640,7 +1638,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         details.setCount(size);
                         folderList.add(details);
                     } catch (ControllerException me) {
-                        continue;
+                        Logger.error(me);
                     }
                 }
             }
@@ -1710,7 +1708,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": dropping membership from web of registries");
         String uri = getThreadLocalRequest().getRequestURL().substring(
                 getThreadLocalRequest().getScheme().length() + 3);
-        uri.substring(0, uri.indexOf("/"));
+        uri = uri.substring(0, uri.indexOf("/"));
         try {
             return ControllerFactory.getWebController().setEnable(uri, value);
         } catch (ControllerException e) {

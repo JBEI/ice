@@ -5,7 +5,7 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
-import org.jbei.ice.lib.shared.dto.web.RemoteActionStatus;
+import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
 
 /**
  * Stores information about partners that this registry is involved with in web of registries
@@ -31,7 +31,7 @@ public class RemotePartner implements IModel {
 
     @Column(name = "status")
     @Enumerated(value = EnumType.STRING)
-    private RemoteActionStatus actionStatus;
+    private RemotePartnerStatus partnerStatus;
 
     @Column(name = "add_time")
     @Temporal(TemporalType.TIMESTAMP)
@@ -40,6 +40,12 @@ public class RemotePartner implements IModel {
     @Column(name = "last_contact_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastContact;
+
+    @Column(name = "fetched")
+    private long fetched;
+
+    @Column(name = "sent")
+    private long sent;
 
     public long getId() {
         return id;
@@ -61,12 +67,12 @@ public class RemotePartner implements IModel {
         this.url = url;
     }
 
-    public RemoteActionStatus getActionStatus() {
-        return actionStatus;
+    public RemotePartnerStatus getPartnerStatus() {
+        return partnerStatus;
     }
 
-    public void setActionStatus(RemoteActionStatus approved) {
-        this.actionStatus = approved;
+    public void setPartnerStatus(RemotePartnerStatus approved) {
+        this.partnerStatus = approved;
     }
 
     public Date getAdded() {
@@ -85,12 +91,31 @@ public class RemotePartner implements IModel {
         this.lastContact = lastContact;
     }
 
+    public long getFetched() {
+        return fetched;
+    }
+
+    public void setFetched(long fetched) {
+        this.fetched = fetched;
+    }
+
+    public long getSent() {
+        return sent;
+    }
+
+    public void setSent(long sent) {
+        this.sent = sent;
+    }
+
     public static RegistryPartner toDTO(RemotePartner partner) {
         RegistryPartner registryPartner = new RegistryPartner();
         registryPartner.setId(partner.getId());
         registryPartner.setName(partner.getName());
         registryPartner.setUrl(partner.getUrl());
-        registryPartner.setStatus(partner.getActionStatus());
+        registryPartner.setStatus(partner.getPartnerStatus());
+        registryPartner.setSent(partner.getSent());
+        registryPartner.setFetched(partner.getFetched());
         return registryPartner;
     }
+
 }

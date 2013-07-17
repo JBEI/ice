@@ -45,7 +45,7 @@ public class SystemSettingPanel extends Composite implements IAdminPanel {
     private Widget createGeneralSettingPanel(HashMap<String, String> settings) {
         return new SettingPanel(settings, "General Settings", serviceDelegate,
                                 ConfigurationKey.PROFILE_EDIT_ALLOWED,
-                                ConfigurationKey.WIKILINK_PREFIX,
+//                                ConfigurationKey.WIKILINK_PREFIX,
                                 ConfigurationKey.PART_NUMBER_DELIMITER,
                                 ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX,
                                 ConfigurationKey.PART_NUMBER_PREFIX,

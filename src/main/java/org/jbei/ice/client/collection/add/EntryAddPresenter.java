@@ -138,7 +138,7 @@ public class EntryAddPresenter {
             return;
 
         final Set<Long> list = new HashSet<Long>();
-        list.add(Long.valueOf(0));
+        list.add((long) 0);
         presenter.getView().setBusyIndicator(list, true);
 
         new IceAsyncCallback<Long>() {

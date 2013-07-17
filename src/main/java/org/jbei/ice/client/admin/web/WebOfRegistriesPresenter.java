@@ -9,8 +9,8 @@ import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -37,26 +37,21 @@ public class WebOfRegistriesPresenter extends AdminPanelPresenter {
         return panel;
     }
 
-    private class JoinBoxChangeHandler implements ChangeHandler {
+    private class JoinBoxChangeHandler implements ClickHandler {
 
         @Override
-        public void onChange(ChangeEvent event) {
-
+        public void onClick(ClickEvent event) {
             new IceAsyncCallback<Boolean>() {
 
                 @Override
                 protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                    boolean value = panel.getJoinSelectedValue();
-                    service.setEnableWebOfRegistries(ClientController.sessionId, value, callback);
-
-//                    setConfigurationSetting(ClientController.sessionId, ConfigurationKey.JOIN_WEB_OF_REGISTRIES,
-//                                                    value, callback);
+                    service.setEnableWebOfRegistries(ClientController.sessionId, panel.isToggled(), callback);
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
                     if (!result) {
-                        Window.alert("There was a problem saving setting.");
+                        Window.alert("There was a problem processing your request");
                     }
                 }
             }.go(eventBus);

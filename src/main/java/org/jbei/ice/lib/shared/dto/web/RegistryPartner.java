@@ -10,9 +10,11 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
 public class RegistryPartner implements IDTOModel {
 
     private long id;
-    private RemoteActionStatus status;
+    private RemotePartnerStatus status;
     private String name;
     private String url;
+    private long sent;
+    private long fetched;
 
     public RegistryPartner() {
     }
@@ -25,11 +27,11 @@ public class RegistryPartner implements IDTOModel {
         this.id = id;
     }
 
-    public RemoteActionStatus getStatus() {
+    public RemotePartnerStatus getStatus() {
         return status;
     }
 
-    public void setStatus(RemoteActionStatus status) {
+    public void setStatus(RemotePartnerStatus status) {
         this.status = status;
     }
 
@@ -47,5 +49,21 @@ public class RegistryPartner implements IDTOModel {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public long getSent() {
+        return sent;
+    }
+
+    public void setSent(long sent) {
+        this.sent = sent;
+    }
+
+    public long getFetched() {
+        return fetched;
+    }
+
+    public void setFetched(long fetched) {
+        this.fetched = fetched;
     }
 }

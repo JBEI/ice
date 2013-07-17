@@ -79,7 +79,6 @@ public class ApplicationController {
             // upgrade from 3.3 to 3.4
             case "3.3.0":
                 // upgrade web of registries partners
-                ControllerFactory.getWebController().upgradeWebOfRegistries();
                 ControllerFactory.getFolderController().upgradeFolders();
                 break;
         }

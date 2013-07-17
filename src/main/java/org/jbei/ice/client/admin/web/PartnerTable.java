@@ -4,8 +4,11 @@ import java.util.ArrayList;
 
 import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
 
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Label;
@@ -44,12 +47,15 @@ public class PartnerTable extends CellTable<RegistryPartner> {
     protected void createColumns() {
         createNameColumn();
         createURLColumn();
+        createFetchColumn();
+        createSentToColumn();
         createStatusColumn();
         createActionColumn();
     }
 
     protected void createNameColumn() {
         Column<RegistryPartner, String> column = new Column<RegistryPartner, String>(new TextCell()) {
+
             @Override
             public String getValue(RegistryPartner object) {
                 if (object == null)
@@ -65,13 +71,15 @@ public class PartnerTable extends CellTable<RegistryPartner> {
     }
 
     protected void createURLColumn() {
-        Column<RegistryPartner, String> column = new Column<RegistryPartner, String>(new TextCell()) {
-            @Override
-            public String getValue(RegistryPartner object) {
-                if (object == null)
-                    return "";
+        Column<RegistryPartner, SafeHtml> column = new Column<RegistryPartner, SafeHtml>(new SafeHtmlCell()) {
 
-                return object.getUrl();
+            @Override
+            public SafeHtml getValue(RegistryPartner object) {
+                if (object == null)
+                    return SafeHtmlUtils.EMPTY_SAFE_HTML;
+
+                return SafeHtmlUtils.fromSafeConstant(
+                        "<a href=\"https://" + object.getUrl() + "\" target=\"_blank\">" + object.getUrl() + "</a>");
             }
         };
 
@@ -84,13 +92,39 @@ public class PartnerTable extends CellTable<RegistryPartner> {
         Column<RegistryPartner, String> column = new Column<RegistryPartner, String>(new TextCell()) {
             @Override
             public String getValue(RegistryPartner object) {
-                return object.getStatus().name();
+                return object.getStatus().toString();
             }
         };
 
         column.setSortable(false);
         addColumn(column, "Status");
         setColumnWidth(column, 180, com.google.gwt.dom.client.Style.Unit.PX);
+    }
+
+    protected void createFetchColumn() {
+        Column<RegistryPartner, String> column = new Column<RegistryPartner, String>(new TextCell()) {
+            @Override
+            public String getValue(RegistryPartner object) {
+                return Long.toString(object.getFetched());
+            }
+        };
+
+        column.setSortable(false);
+        addColumn(column, "Retrieved");
+        setColumnWidth(column, 100, com.google.gwt.dom.client.Style.Unit.PX);
+    }
+
+    protected void createSentToColumn() {
+        Column<RegistryPartner, String> column = new Column<RegistryPartner, String>(new TextCell()) {
+            @Override
+            public String getValue(RegistryPartner object) {
+                return Long.toString(object.getSent());
+            }
+        };
+
+        column.setSortable(false);
+        addColumn(column, "Sent To");
+        setColumnWidth(column, 100, com.google.gwt.dom.client.Style.Unit.PX);
     }
 
     protected void createActionColumn() {
@@ -103,7 +137,7 @@ public class PartnerTable extends CellTable<RegistryPartner> {
         };
 
         column.setSortable(false);
-        addColumn(column, "");
+        addColumn(column, "Action");
         setColumnWidth(column, 50, com.google.gwt.dom.client.Style.Unit.PX);
     }
 

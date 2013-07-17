@@ -12,6 +12,14 @@ body {
     color: #007dbc;
 }
 
+.green {
+    color: green;
+}
+
+.red {
+    color: #CC3333;
+}
+
 .font-95em {
     font-size: 0.95em;
 }
@@ -1298,6 +1306,30 @@ a:hover {
     border-radius: 2px 4px;
     box-shadow: 0 0 0 0 #ddd;
     cursor: default;
+}
+
+.sub-button {
+    border-radius: 2px;
+    border: 1px solid #ccc;
+    padding: 4px 6px;
+    background: linear-gradient(0deg, #eee 10%, white 60%) repeat scroll 0% 0% transparent;
+    color: #555;
+    box-shadow: 0 0 1px 0 #ddd;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: Arial, serif;
+}
+
+.sub-button:hover {
+    background: linear-gradient(180deg, #eee 10%, white 40%) repeat scroll 0% 0% transparent;
+    border: 1px solid #888;
+    padding: 4px 6px;
+    font-weight: bold;
+    color: #222;
+    font-family: Arial, serif;
+    box-shadow: 0 0 1px 1px #ddd;
+    border-radius: 2px;
+    cursor: pointer;
 }
 
 .pager {

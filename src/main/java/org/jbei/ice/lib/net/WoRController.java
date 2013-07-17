@@ -21,6 +21,7 @@ import org.jbei.ice.services.webservices.ServiceException;
 public class WoRController {
 
     private final RemotePartnerDAO dao;
+    public static final String NODE_MASTER = "registry.jbei.org";
 
     public WoRController() {
         dao = new RemotePartnerDAO();
@@ -94,13 +95,6 @@ public class WoRController {
     }
 
     /**
-     * Upgrades older versions of the registry to use the more fully featured data model for web of registries
-     */
-    public void upgradeWebOfRegistries() {
-        // TODO
-    }
-
-    /**
      * Enables or disables web of registries (WoR) functionality
      *
      * @param url   this site's url
@@ -113,13 +107,14 @@ public class WoRController {
             controller.setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, Boolean.toString(value));
             controller.setPropertyValue(ConfigurationKey.URI_PREFIX, url);
             String name = controller.getConfiguration(ConfigurationKey.PROJECT_NAME).getValue();
-            if (name == null || name.trim().isEmpty())
+            if (name == null || name.trim().isEmpty()
+                    || (name.equals(ConfigurationKey.PROJECT_NAME.getDefaultValue())
+                    && !NODE_MASTER.equalsIgnoreCase(url))) {
                 name = url;
+            }
 
             RegistryAPIServiceClient client = RegistryAPIServiceClient.getInstance();
-
-            // contact node master (in this case JBEI registry) // TODO : hard coding url
-            client.getAPIPortForURL("registry.jbei.org").processWebOfRegistryPartnerInformation(url, name, value);
+            client.getAPIPortForURL(NODE_MASTER).processWebOfRegistryPartnerInformation(url, name, value);
             return true;
         } catch (ControllerException e) {
             Logger.error(e);

@@ -3,6 +3,7 @@ package org.jbei.ice.client.admin.web;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -12,11 +13,12 @@ import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 
 /**
- * Custom cell that displays the remote partner's {@link org.jbei.ice.lib.shared.dto.web.RemoteActionStatus} in a
+ * Custom cell that displays the remote partner's {@link org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus} in a
  * Partner table. Also adds the ability to change the status of the partner.
  *
  * @author Hector Plahar
@@ -53,7 +55,10 @@ public class ActionCell extends AbstractCell<RegistryPartner> {
 
     @Override
     public void render(Context context, RegistryPartner value, SafeHtmlBuilder sb) {
-        sb.append(html);
+        if (value.getStatus() == RemotePartnerStatus.APPROVED)
+            sb.append(html);
+        else
+            sb.append(SafeHtmlUtils.EMPTY_SAFE_HTML);
     }
 
     @Override
@@ -61,5 +66,4 @@ public class ActionCell extends AbstractCell<RegistryPartner> {
             NativeEvent event, ValueUpdater<RegistryPartner> valueUpdater) {
         delegate.execute(value);
     }
-
 }

@@ -10,7 +10,8 @@ import org.jbei.ice.client.common.widget.FAIconType;
 public enum AdminOption {
 
     SETTINGS(FAIconType.COGS, "System Settings", "Site wide system settings"),
-    WEB(FAIconType.GLOBE, "Web of Registries", "Enable information sharing and retrieval from other ICE instances"),
+    WEB(FAIconType.GLOBE, "Web of Registries",
+        "Enable/Disable information sharing and retrieval from other ICE instances"),
     USERS(FAIconType.USER, "Manage Users", "Manage user accounts and privileges"),
     GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members"),
     SEARCH(FAIconType.SEARCH, "Manage Search", "Rebuild the search indices and change search settings");
