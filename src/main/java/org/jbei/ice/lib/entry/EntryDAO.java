@@ -90,6 +90,10 @@ public class EntryDAO extends HibernateRepository<Entry> {
         return getMatchingField("plasmid.promoters", "Plasmid plasmid", token, limit);
     }
 
+    public Set<String> getMatchingReplicatesIn(String token, int limit) throws DAOException {
+        return getMatchingField("plasmid.replicatesIn", "Plasmid plasmid", token, limit);
+    }
+
     @SuppressWarnings("unchecked")
     protected Set<String> getMatchingField(String field, String object, String token, int limit) throws DAOException {
         Session session = currentSession();
@@ -100,8 +104,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Query query = session.createQuery(queryString);
             if (limit > 0)
                 query.setMaxResults(limit);
-            HashSet<String> results = new HashSet<String>(query.list());
-            return results;
+            return new HashSet<String>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -117,8 +120,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             if (limit > 0)
                 query.setMaxResults(limit);
 
-            HashSet<String> results = new HashSet<String>(query.list());
-            return results;
+            return new HashSet<String>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -429,8 +431,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         criteria.add(Restrictions.disjunction()
                                  .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
                                  .add(Restrictions.isNull("visibility")));
-        Long result = (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
-        return result.longValue();
+        return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 
     /**
@@ -451,8 +452,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
         try {
             Query query = session.createQuery("from " + Entry.class.getName() + " WHERE id in (" + filter + ")");
-            LinkedList<Entry> results = new LinkedList<Entry>(query.list());
-            return results;
+            return new LinkedList<Entry>(query.list());
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entries!", e);
         }

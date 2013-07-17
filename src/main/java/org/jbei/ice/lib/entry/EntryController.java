@@ -78,6 +78,9 @@ public class EntryController {
                 case PROMOTERS:
                     return dao.getMatchingPromoters(token, limit);
 
+                case REPLICATES_IN:
+                    return dao.getMatchingReplicatesIn(token, limit);
+
                 case PLASMID_NAME:
                     return dao.getMatchingPlasmidNames(token, limit);
 
