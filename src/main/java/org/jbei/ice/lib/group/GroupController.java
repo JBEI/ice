@@ -12,10 +12,10 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.AccountType;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.Utils;
 
 public class GroupController {
@@ -153,8 +153,8 @@ public class GroupController {
         group = save(group);
 
         ArrayList<Account> accounts = new ArrayList<>();
-        for (AccountInfo accountInfo : info.getMembers()) {
-            Account memberAccount = accountController.getByEmail(accountInfo.getEmail());
+        for (User user : info.getMembers()) {
+            Account memberAccount = accountController.getByEmail(user.getEmail());
             if (memberAccount == null)
                 continue;
             memberAccount.getGroups().add(group);
@@ -337,13 +337,13 @@ public class GroupController {
         return groupIds;
     }
 
-    public ArrayList<AccountInfo> retrieveGroupMembers(String uuid) throws ControllerException {
+    public ArrayList<User> retrieveGroupMembers(String uuid) throws ControllerException {
         try {
-            ArrayList<AccountInfo> result = new ArrayList<>();
+            ArrayList<User> result = new ArrayList<>();
             Group group = dao.get(uuid);
             for (Account account : group.getMembers()) {
-                AccountInfo accountInfo = Account.toDTO(account);
-                result.add(accountInfo);
+                User user = Account.toDTO(account);
+                result.add(user);
             }
             return result;
         } catch (DAOException e) {
@@ -367,22 +367,22 @@ public class GroupController {
         }
     }
 
-    public ArrayList<AccountInfo> retrieveAccountsForGroupCreation(Account account) throws ControllerException {
+    public ArrayList<User> retrieveAccountsForGroupCreation(Account account) throws ControllerException {
         Set<Group> groups = getAllGroups(account);
-        Set<AccountInfo> accounts = new HashSet<>();
+        Set<User> accounts = new HashSet<>();
 
         for (Group group : groups) {
             if (group.getType() == GroupType.PRIVATE)
                 continue;
 
-            ArrayList<AccountInfo> members = retrieveGroupMembers(group.getUuid());
+            ArrayList<User> members = retrieveGroupMembers(group.getUuid());
             accounts.addAll(members);
         }
 
         return new ArrayList<>(accounts);
     }
 
-    public ArrayList<AccountInfo> setGroupMembers(Account account, GroupInfo info, ArrayList<AccountInfo> members)
+    public ArrayList<User> setGroupMembers(Account account, GroupInfo info, ArrayList<User> members)
             throws ControllerException {
         Group group = getGroupById(info.getId());
         if (group == null) {
@@ -415,8 +415,8 @@ public class GroupController {
 
         // add
         ArrayList<Account> accounts = new ArrayList<>();
-        for (AccountInfo accountInfo : members) {
-            Account memberAccount = accountController.getByEmail(accountInfo.getEmail());
+        for (User user : members) {
+            Account memberAccount = accountController.getByEmail(user.getEmail());
             if (memberAccount == null)
                 continue;
             memberAccount.getGroups().add(group);

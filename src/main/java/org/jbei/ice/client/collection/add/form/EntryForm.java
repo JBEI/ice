@@ -8,10 +8,10 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
-import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
-import org.jbei.ice.lib.shared.dto.ParameterInfo;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.shared.dto.entry.CustomField;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
@@ -341,7 +341,7 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         }
 
         // parameters
-        ArrayList<ParameterInfo> parameters = new ArrayList<ParameterInfo>();
+        ArrayList<CustomField> parameters = new ArrayList<CustomField>();
         LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
 
         for (Integer key : map.keySet()) {
@@ -350,7 +350,7 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
             String value = parameter.getValue();
 
             if (!name.isEmpty() && !value.isEmpty()) {
-                parameters.add(new ParameterInfo(name, value));
+                parameters.add(new CustomField(name, value));
             }
         }
         this.entryInfo.setParameters(parameters);

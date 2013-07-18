@@ -23,13 +23,13 @@ import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.filter.SearchFieldFactory;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.AccountType;
-import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
-import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchResult;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.server.ModelToInfoFactory;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -187,7 +187,7 @@ public class HibernateSearch {
         fullTextQuery = checkEnableHasAttribute(session, fullTextQuery, searchQuery);
 
         // check if there is also a blast search
-        HashMap<String, SearchResultInfo> blastInfo;
+        HashMap<String, SearchResult> blastInfo;
         try {
             blastInfo = checkEnableBlast(account, fullTextQuery, searchQuery);
         } catch (BlastException e) {
@@ -202,19 +202,19 @@ public class HibernateSearch {
         resultCount = fullTextQuery.getResultSize();
         result = fullTextQuery.list();
 
-        LinkedList<SearchResultInfo> searchResultInfos = new LinkedList<>();
+        LinkedList<SearchResult> searchResults = new LinkedList<>();
         Iterator<Object[]> iterator = result.iterator();
         while (iterator.hasNext()) {
             Object[] objects = iterator.next();
             float score = (Float) objects[0];
             Entry entry = (Entry) objects[1];
-            SearchResultInfo searchResult;
+            SearchResult searchResult;
             if (blastInfo != null) {
                 searchResult = blastInfo.get(Long.toString(entry.getId()));
                 if (searchResult == null) // this should not really happen since we already filter
                     continue;
             } else {
-                searchResult = new SearchResultInfo();
+                searchResult = new SearchResult();
                 searchResult.setScore(score);
                 PartData info = ModelToInfoFactory.createTableViewData(entry, true);
                 searchResult.setEntryInfo(info);
@@ -223,12 +223,12 @@ public class HibernateSearch {
             searchResult.setMaxScore(maxScore);
             searchResult.setWebPartnerName(projectName);
             searchResult.setWebPartnerURL(projectURL);
-            searchResultInfos.add(searchResult);
+            searchResults.add(searchResult);
         }
 
         SearchResults results = new SearchResults();
         results.setResultCount(resultCount);
-        results.setResults(searchResultInfos);
+        results.setResults(searchResults);
         String email = "Anon";
         if (account != null)
             email = account.getEmail();
@@ -236,7 +236,7 @@ public class HibernateSearch {
         return results;
     }
 
-    public SearchResults runSearchFilter(Account account, HashMap<String, SearchResultInfo> blastResults) {
+    public SearchResults runSearchFilter(Account account, HashMap<String, SearchResult> blastResults) {
         Session session = HibernateHelper.getSessionFactory().getCurrentSession();
         FullTextSession fullTextSession = Search.getFullTextSession(session);
 
@@ -294,11 +294,11 @@ public class HibernateSearch {
 
         // execute search
         List result = fullTextQuery.list();
-        LinkedList<SearchResultInfo> filtered = new LinkedList<>();
+        LinkedList<SearchResult> filtered = new LinkedList<>();
 
         for (Object object : result) {
             Entry entry = (Entry) object;
-            SearchResultInfo info = blastResults.get(entry.getId() + "");
+            SearchResult info = blastResults.get(entry.getId() + "");
             if (info == null)
                 continue;
             filtered.add(info);
@@ -372,7 +372,7 @@ public class HibernateSearch {
         fullTextQuery = checkEnableHasAttribute(session, fullTextQuery, searchQuery);
 
         // check if there is also a blast search
-        HashMap<String, SearchResultInfo> blastInfo;
+        HashMap<String, SearchResult> blastInfo;
         try {
             blastInfo = checkEnableBlast(account, fullTextQuery, searchQuery);
         } catch (BlastException e) {
@@ -393,19 +393,19 @@ public class HibernateSearch {
             email = account.getEmail();
         Logger.info(email + ": obtained " + resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
 
-        LinkedList<SearchResultInfo> searchResultInfos = new LinkedList<>();
+        LinkedList<SearchResult> searchResults = new LinkedList<>();
         Iterator<Object[]> iterator = result.iterator();
         while (iterator.hasNext()) {
             Object[] objects = iterator.next();
             float score = (Float) objects[0];
             Entry entry = (Entry) objects[1];
-            SearchResultInfo searchResult;
+            SearchResult searchResult;
             if (blastInfo != null) {
                 searchResult = blastInfo.get(Long.toString(entry.getId()));
                 if (searchResult == null) // this should not really happen since we already filter
                     continue;
             } else {
-                searchResult = new SearchResultInfo();
+                searchResult = new SearchResult();
                 searchResult.setScore(score);
                 PartData info = ModelToInfoFactory.createTableViewData(entry, true);
                 if (info == null)
@@ -416,12 +416,12 @@ public class HibernateSearch {
             searchResult.setMaxScore(maxScore);
             searchResult.setWebPartnerName(projectName);
             searchResult.setWebPartnerURL(projectURL);
-            searchResultInfos.add(searchResult);
+            searchResults.add(searchResult);
         }
 
         SearchResults results = new SearchResults();
         results.setResultCount(resultCount);
-        results.setResults(searchResultInfos);
+        results.setResults(searchResults);
         return results;
     }
 
@@ -462,13 +462,13 @@ public class HibernateSearch {
                      .setParameter("groupUUids", groupUUIDs);
     }
 
-    protected HashMap<String, SearchResultInfo> checkEnableBlast(Account account, FullTextQuery fullTextQuery,
+    protected HashMap<String, SearchResult> checkEnableBlast(Account account, FullTextQuery fullTextQuery,
             SearchQuery query) throws BlastException {
         if (!query.hasBlastQuery())
             return null;
 
         BlastPlus blast = new BlastPlus();
-        HashMap<String, SearchResultInfo> rids = blast.runBlast(account, query.getBlastQuery());
+        HashMap<String, SearchResult> rids = blast.runBlast(account, query.getBlastQuery());
         fullTextQuery.enableFullTextFilter("blastFilter").setParameter("recordIds", new HashSet<>(rids.keySet()));
         return rids;
     }

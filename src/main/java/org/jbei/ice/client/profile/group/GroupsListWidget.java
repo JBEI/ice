@@ -9,9 +9,9 @@ import org.jbei.ice.client.admin.group.GroupMembersWidget;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.profile.group.widget.CreateGroupCell;
 import org.jbei.ice.client.profile.group.widget.EditGroupCell;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -126,18 +126,18 @@ public class GroupsListWidget extends Composite {
         mode = Mode.VIEW_GROUP_LIST;
     }
 
-    public void addVerifiedAccount(AccountInfo accountInfo) {
+    public void addVerifiedAccount(User user) {
         if (mode == Mode.ADDING_MEMBER)
-            addMembersWidget.addVerifiedMember(accountInfo);
+            addMembersWidget.addVerifiedMember(user);
         else
-            createGroupMembersWidget.addVerifiedMember(accountInfo);
+            createGroupMembersWidget.addVerifiedMember(user);
     }
 
     public void setDeleteGroupDelegate(ServiceDelegate<GroupInfo> deleteGroupDelegate) {
         this.deleteGroupDelegate = deleteGroupDelegate;
     }
 
-    public void setDeleteGroupMemberDelegate(ServiceDelegate<AccountInfo> deleteGroupMemberDelegate) {
+    public void setDeleteGroupMemberDelegate(ServiceDelegate<User> deleteGroupMemberDelegate) {
         groupMembers.setDeleteMemberDelegate(deleteGroupMemberDelegate);
     }
 
@@ -171,7 +171,7 @@ public class GroupsListWidget extends Composite {
             layout.getFlexCellFormatter().removeStyleName(0, 1, "bg_gray_with_border");
     }
 
-    public ArrayList<AccountInfo> getSelectedMembers() {
+    public ArrayList<User> getSelectedMembers() {
         return addMembersWidget.getSelectedMembers();
     }
 
@@ -208,11 +208,11 @@ public class GroupsListWidget extends Composite {
         return ((Cell) widget).getInfo();
     }
 
-    public void setAvailableAccounts(ArrayList<AccountInfo> available) {
-        Collections.sort(available, new Comparator<AccountInfo>() {
+    public void setAvailableAccounts(ArrayList<User> available) {
+        Collections.sort(available, new Comparator<User>() {
 
             @Override
-            public int compare(AccountInfo o1, AccountInfo o2) {
+            public int compare(User o1, User o2) {
                 return o1.getFullName().compareTo(o2.getFullName());
             }
         });
@@ -220,7 +220,7 @@ public class GroupsListWidget extends Composite {
         addMembersWidget.setAvailableAccounts(available);
     }
 
-    public void setGroupMembers(GroupInfo info, ArrayList<AccountInfo> members) {
+    public void setGroupMembers(GroupInfo info, ArrayList<User> members) {
         if (mode == null || mode == Mode.VIEW_GROUP_LIST || mode == Mode.VIEW_GROUP_MEMBERS) {
             groupMembers.setMemberList(members);
             groupMembers.setVisible(true);
@@ -262,7 +262,7 @@ public class GroupsListWidget extends Composite {
     }
 
     public void setGroupList(ArrayList<GroupInfo> list) {
-        groupMembers.setMemberList(new ArrayList<AccountInfo>());  // reset
+        groupMembers.setMemberList(new ArrayList<User>());  // reset
         groupMembers.setVisible(false);
 
         for (int i = 0; i < list.size(); i += 1) {
@@ -273,7 +273,7 @@ public class GroupsListWidget extends Composite {
     }
 
     public void addGroup(GroupInfo info) {
-        groupMembers.setMemberList(new ArrayList<AccountInfo>());  // reset
+        groupMembers.setMemberList(new ArrayList<User>());  // reset
         groupMembers.setVisible(false);
 
         Cell cell = new Cell(info);
@@ -330,7 +330,7 @@ public class GroupsListWidget extends Composite {
         emailVerifierDelegate = serviceDelegate;
     }
 
-    public void removeGroupMember(GroupInfo group, AccountInfo info) {
+    public void removeGroupMember(GroupInfo group, User info) {
         for (int i = 0; i < groupList.getRowCount(); i += 1) {
             Widget widget = groupList.getWidget(i, 0);
             if (!(widget instanceof Cell))

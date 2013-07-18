@@ -2,8 +2,8 @@ package org.jbei.ice.lib.shared.dto.group;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.IDTOModel;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * DTO for groups
@@ -19,13 +19,13 @@ public class GroupInfo implements IDTOModel {
     private long parentId;
     private String description;
     private ArrayList<GroupInfo> children;
-    private ArrayList<AccountInfo> members;
+    private ArrayList<User> members;
     private long memberCount;
     private GroupType type;
 
     public GroupInfo() {
         children = new ArrayList<GroupInfo>();
-        members = new ArrayList<AccountInfo>();
+        members = new ArrayList<User>();
     }
 
     public String getUuid() {
@@ -72,11 +72,11 @@ public class GroupInfo implements IDTOModel {
         return this.children;
     }
 
-    public ArrayList<AccountInfo> getMembers() {
+    public ArrayList<User> getMembers() {
         return members;
     }
 
-    public void setMembers(ArrayList<AccountInfo> members) {
+    public void setMembers(ArrayList<User> members) {
         this.members = members;
         if (members == null)
             setMemberCount(0);

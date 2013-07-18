@@ -2,8 +2,8 @@ package org.jbei.ice.lib;
 
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.AccountType;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import junit.framework.Assert;
 
@@ -22,11 +22,11 @@ public class AccountCreator {
         if (account != null)
             throw new Exception("duplicate account");
 
-        AccountInfo accountInfo = new AccountInfo();
-        accountInfo.setFirstName("TEST_FNAME");
-        accountInfo.setLastName("TEST");
-        accountInfo.setEmail(email);
-        String pass = accountController.createNewAccount(accountInfo, false);
+        User user = new User();
+        user.setFirstName("TEST_FNAME");
+        user.setLastName("TEST");
+        user.setEmail(email);
+        String pass = accountController.createNewAccount(user, false);
 
         Assert.assertNotNull(pass);
         account = accountController.getByEmail(email);

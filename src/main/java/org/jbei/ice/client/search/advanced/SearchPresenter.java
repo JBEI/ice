@@ -17,7 +17,7 @@ import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
-import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchResult;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -71,12 +71,12 @@ public class SearchPresenter extends AbstractPresenter {
         addSearchHandlers();
     }
 
-    private ServiceDelegate<SearchResultInfo> createContext(final boolean search, final boolean web,
+    private ServiceDelegate<SearchResult> createContext(final boolean search, final boolean web,
             final boolean blast,
             final ServiceDelegate<EntryContext> contextDelegate) {
-        return new ServiceDelegate<SearchResultInfo>() {
+        return new ServiceDelegate<SearchResult>() {
             @Override
-            public void execute(SearchResultInfo searchResultInfo) {
+            public void execute(SearchResult searchResult) {
                 EntryContext context = new EntryContext(EntryContext.Type.SEARCH);
                 if (search)
                     context.setNav(dataProvider);
@@ -85,9 +85,9 @@ public class SearchPresenter extends AbstractPresenter {
                 else if (blast)
                     context.setNav(blastProvider);
 
-                context.setId(searchResultInfo.getEntryInfo().getId());
-                context.setRecordId(searchResultInfo.getEntryInfo().getRecordId());
-                context.setPartnerUrl(searchResultInfo.getWebPartnerURL());
+                context.setId(searchResult.getEntryInfo().getId());
+                context.setRecordId(searchResult.getEntryInfo().getRecordId());
+                context.setPartnerUrl(searchResult.getWebPartnerURL());
                 contextDelegate.execute(context);
             }
         };
@@ -134,7 +134,7 @@ public class SearchPresenter extends AbstractPresenter {
         this.table.getSelectionModel().addSelectionChangeHandler(handler);
     }
 
-    public Set<SearchResultInfo> getResultSelectedSet() {
+    public Set<SearchResult> getResultSelectedSet() {
         return this.table.getSelectionModel().getSelectedSet();
     }
 
@@ -223,7 +223,7 @@ public class SearchPresenter extends AbstractPresenter {
 
         public void onFailure() {
             if (mode == Mode.BLAST)
-                blastProvider.setBlastData(new LinkedList<SearchResultInfo>());
+                blastProvider.setBlastData(new LinkedList<SearchResult>());
             else {
                 if (webSearch)
                     webDataProvider.setSearchData(null);
@@ -235,15 +235,15 @@ public class SearchPresenter extends AbstractPresenter {
 
     private class WebResultsTable extends SearchResultsTable {
 
-        public WebResultsTable(ServiceDelegate<SearchResultInfo> delegate) {
+        public WebResultsTable(ServiceDelegate<SearchResult> delegate) {
             super(delegate);
         }
 
         @Override
-        protected ArrayList<DataTableColumn<SearchResultInfo, ?>> createColumns(ServiceDelegate<SearchResultInfo>
+        protected ArrayList<DataTableColumn<SearchResult, ?>> createColumns(ServiceDelegate<SearchResult>
                 delegate) {
-            ArrayList<DataTableColumn<SearchResultInfo, ?>> columns =
-                    new ArrayList<DataTableColumn<SearchResultInfo, ?>>();
+            ArrayList<DataTableColumn<SearchResult, ?>> columns =
+                    new ArrayList<DataTableColumn<SearchResult, ?>>();
             columns.add(addScoreColumn());
             columns.add(super.addTypeColumn(true));
             columns.add(addPartIdColumn(delegate, false, 120, com.google.gwt.dom.client.Style.Unit.PX));
@@ -256,13 +256,13 @@ public class SearchPresenter extends AbstractPresenter {
             return columns;
         }
 
-        protected DataTableColumn<SearchResultInfo, SafeHtml> addWebPartnerName() {
+        protected DataTableColumn<SearchResult, SafeHtml> addWebPartnerName() {
             SafeHtmlCell htmlCell = new SafeHtmlCell();
-            DataTableColumn<SearchResultInfo, SafeHtml> partner =
-                    new DataTableColumn<SearchResultInfo, SafeHtml>(htmlCell, ColumnField.ICE_PROJECT) {
+            DataTableColumn<SearchResult, SafeHtml> partner =
+                    new DataTableColumn<SearchResult, SafeHtml>(htmlCell, ColumnField.ICE_PROJECT) {
 
                         @Override
-                        public SafeHtml getValue(SearchResultInfo object) {
+                        public SafeHtml getValue(SearchResult object) {
                             String projectName = object.getWebPartnerName();
                             String projectURI = object.getWebPartnerURL();
                             if (projectName == null && projectURI == null)
@@ -284,13 +284,13 @@ public class SearchPresenter extends AbstractPresenter {
         }
 
         @Override
-        protected DataTableColumn<SearchResultInfo, SafeHtml> addNameColumn(final double width, Unit unit) {
+        protected DataTableColumn<SearchResult, SafeHtml> addNameColumn(final double width, Unit unit) {
 
-            DataTableColumn<SearchResultInfo, SafeHtml> nameColumn =
-                    new DataTableColumn<SearchResultInfo, SafeHtml>(new SafeHtmlCell(), ColumnField.NAME) {
+            DataTableColumn<SearchResult, SafeHtml> nameColumn =
+                    new DataTableColumn<SearchResult, SafeHtml>(new SafeHtmlCell(), ColumnField.NAME) {
 
                         @Override
-                        public SafeHtml getValue(SearchResultInfo object) {
+                        public SafeHtml getValue(SearchResult object) {
                             String name = object.getEntryInfo().getOwner();
                             if (name == null)
                                 return SafeHtmlUtils.EMPTY_SAFE_HTML;

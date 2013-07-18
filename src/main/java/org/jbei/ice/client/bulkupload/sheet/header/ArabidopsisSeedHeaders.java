@@ -11,10 +11,10 @@ import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.DateInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.GenerationSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.PlantTypeSheetCell;
-import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 

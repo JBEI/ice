@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -27,7 +27,7 @@ public class GroupsWidget extends Composite {
     private HashMap<Integer, GroupInfo> mapping;
     private final GroupMembersWidget groupMembers;
 
-    public GroupsWidget(ServiceDelegate<AccountInfo> delegate) {
+    public GroupsWidget(ServiceDelegate<User> delegate) {
         groupList = new FlexTable();
         groupList.setCellPadding(0);
         groupList.setCellSpacing(0);
@@ -52,7 +52,7 @@ public class GroupsWidget extends Composite {
         return mapping.get(cell.getRowIndex());
     }
 
-    public void setGroupMembers(ArrayList<AccountInfo> members) {
+    public void setGroupMembers(ArrayList<User> members) {
         groupMembers.setMemberList(members);
         groupMembers.setVisible(true);
     }
@@ -64,7 +64,7 @@ public class GroupsWidget extends Composite {
     public void setRootGroup(GroupInfo list) {
         this.root = list;
         mapping.clear();
-        groupMembers.setMemberList(new ArrayList<AccountInfo>());  // reset
+        groupMembers.setMemberList(new ArrayList<User>());  // reset
         groupMembers.setVisible(false);
         row = 0;
     }

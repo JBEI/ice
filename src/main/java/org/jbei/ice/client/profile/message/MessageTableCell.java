@@ -1,7 +1,7 @@
 package org.jbei.ice.client.profile.message;
 
 import org.jbei.ice.client.Delegate;
-import org.jbei.ice.lib.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;

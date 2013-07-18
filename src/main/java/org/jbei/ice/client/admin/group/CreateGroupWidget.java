@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -69,7 +69,7 @@ public class CreateGroupWidget {
         this.createButton.addClickHandler(handler);
     }
 
-    public void setAvailableMemberList(ArrayList<AccountInfo> memberList) {
+    public void setAvailableMemberList(ArrayList<User> memberList) {
         table.setData(memberList);
     }
 
@@ -106,7 +106,7 @@ public class CreateGroupWidget {
         return groupDescription.getText().trim();
     }
 
-    public void setGroupCreationMembers(ArrayList<AccountInfo> list) {
+    public void setGroupCreationMembers(ArrayList<User> list) {
         table.setData(list);
     }
 

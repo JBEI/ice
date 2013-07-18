@@ -6,9 +6,9 @@ import java.util.Set;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -123,14 +123,14 @@ public class GroupControllerTest {
         info = controller.createGroup(a1, info);
         Assert.assertNotNull(info);
 
-        ArrayList<AccountInfo> infos = new ArrayList<>();
+        ArrayList<User> infos = new ArrayList<>();
         infos.add(Account.toDTO(a2));
         infos.add(Account.toDTO(a3));
 
         infos = controller.setGroupMembers(a1, info, infos);
         Assert.assertNotNull(infos);
         Assert.assertTrue(infos.size() == 2);
-        ArrayList<AccountInfo> list = controller.retrieveGroupMembers(info.getUuid());
+        ArrayList<User> list = controller.retrieveGroupMembers(info.getUuid());
         Assert.assertNotNull(list);
         Assert.assertEquals(2, list.size());
     }
@@ -150,7 +150,7 @@ public class GroupControllerTest {
         info = controller.createGroup(a1, info);
         Assert.assertNotNull(info);
 
-        ArrayList<AccountInfo> infos = new ArrayList<>();
+        ArrayList<User> infos = new ArrayList<>();
         infos.add(Account.toDTO(a2));
         infos.add(Account.toDTO(a3));
 

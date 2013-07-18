@@ -9,7 +9,7 @@ import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchResult;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 
 import com.google.gwt.core.client.GWT;
@@ -20,7 +20,7 @@ import com.google.gwt.view.client.Range;
 /**
  * @author Hector Plahar
  */
-public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResultInfo> {
+public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResult> {
 
     private SearchResults searchResults;
     private final EntryTablePager pager;
@@ -48,8 +48,8 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
     @Override
     public int indexOfCached(PartData info) {
         for (int i = 0; i < results.size(); i += 1) {
-            SearchResultInfo searchResultInfo = results.get(i);
-            if (searchResultInfo.getEntryInfo().getId() == info.getId())
+            SearchResult searchResult = results.get(i);
+            if (searchResult.getEntryInfo().getId() == info.getId())
                 return i;
         }
         return 0;

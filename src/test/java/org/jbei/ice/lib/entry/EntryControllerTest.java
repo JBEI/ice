@@ -17,9 +17,8 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.shared.AutoCompleteField;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
@@ -28,6 +27,7 @@ import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.server.InfoToModelFactory;
 
 import junit.framework.Assert;
@@ -318,7 +318,7 @@ public class EntryControllerTest {
         newGroup = groupController.createGroup(account1, newGroup);
         Assert.assertNotNull(newGroup);
         Assert.assertTrue(newGroup.getId() > 0);
-        ArrayList<AccountInfo> members = new ArrayList<>();
+        ArrayList<User> members = new ArrayList<>();
         members.add(Account.toDTO(account1));
         Assert.assertNotNull(groupController.setGroupMembers(account1, newGroup, members));
         PermissionInfo permission = new PermissionInfo();

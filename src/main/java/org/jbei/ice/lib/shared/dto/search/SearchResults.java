@@ -13,18 +13,18 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
 public class SearchResults implements IDTOModel {
 
     private long resultCount;
-    private LinkedList<SearchResultInfo> resultInfos;
+    private LinkedList<SearchResult> results;
     private SearchQuery query;
 
     public SearchResults() {
     }
 
-    public LinkedList<SearchResultInfo> getResults() {
-        return this.resultInfos;
+    public LinkedList<SearchResult> getResults() {
+        return this.results;
     }
 
-    public void setResults(LinkedList<SearchResultInfo> results) {
-        this.resultInfos = results;
+    public void setResults(LinkedList<SearchResult> results) {
+        this.results = results;
     }
 
     public void setResultCount(long count) {

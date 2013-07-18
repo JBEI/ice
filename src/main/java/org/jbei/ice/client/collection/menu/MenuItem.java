@@ -3,15 +3,15 @@ package org.jbei.ice.client.collection.menu;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.view.OptionSelect;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 public class MenuItem extends OptionSelect {
 
     private long count;
     private ArrayList<PermissionInfo> permissions;
-    private AccountInfo owner;
+    private User owner;
     private FolderType type;
 
     public MenuItem(long id, String name, long count) {
@@ -39,11 +39,11 @@ public class MenuItem extends OptionSelect {
         return permissions;
     }
 
-    public AccountInfo getOwner() {
+    public User getOwner() {
         return owner;
     }
 
-    public void setOwner(AccountInfo owner) {
+    public void setOwner(User owner) {
         this.owner = owner;
     }
 

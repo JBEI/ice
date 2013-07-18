@@ -5,30 +5,30 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.AccountResults;
-import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.MessageInfo;
 import org.jbei.ice.lib.shared.dto.NewsItem;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -42,9 +42,9 @@ import com.google.gwt.user.client.ui.SuggestOracle.Request;
 @RemoteServiceRelativePath("ice")
 public interface RegistryService extends RemoteService {
 
-    AccountInfo login(String name, String pass) throws AuthenticationException;
+    User login(String name, String pass) throws AuthenticationException;
 
-    AccountInfo sessionValid(String sid);
+    User sessionValid(String sid);
 
     boolean logout(String sessionId);
 
@@ -64,7 +64,7 @@ public interface RegistryService extends RemoteService {
     ArrayList<FolderDetails> moveToUserCollection(String sid, long source, ArrayList<Long> destination,
             ArrayList<Long> entryIds) throws AuthenticationException;
 
-    AccountInfo retrieveProfileInfo(String sid, String userId) throws AuthenticationException;
+    User retrieveProfileInfo(String sid, String userId) throws AuthenticationException;
 
     Long createEntry(String sid, PartData info) throws AuthenticationException;
 
@@ -108,11 +108,11 @@ public interface RegistryService extends RemoteService {
 
     String getConfigurationSetting(String name);
 
-    AccountInfo retrieveAccount(String email);
+    User retrieveAccount(String email);
 
-    String createNewAccount(AccountInfo info, boolean sendEmail);
+    String createNewAccount(User info, boolean sendEmail);
 
-    AccountInfo updateAccount(String sid, String email, AccountInfo info) throws AuthenticationException;
+    User updateAccount(String sid, String email, User info) throws AuthenticationException;
 
     boolean updateAccountPassword(String sid, String email, String password) throws AuthenticationException;
 
@@ -146,9 +146,9 @@ public interface RegistryService extends RemoteService {
 
     HashMap<String, String> retrieveSystemSettings(String sid) throws AuthenticationException;
 
-    ArrayList<AccountInfo> retrieveGroupMembers(String sessionId, GroupInfo info) throws AuthenticationException;
+    ArrayList<User> retrieveGroupMembers(String sessionId, GroupInfo info) throws AuthenticationException;
 
-    ArrayList<AccountInfo> setGroupMembers(String sessionId, GroupInfo info, ArrayList<AccountInfo> members)
+    ArrayList<User> setGroupMembers(String sessionId, GroupInfo info, ArrayList<User> members)
             throws AuthenticationException;
 
     Boolean setConfigurationSetting(String sid, ConfigurationKey key, String value);
@@ -160,7 +160,7 @@ public interface RegistryService extends RemoteService {
     FolderDetails retrieveAllVisibleEntrys(String sid, FolderDetails details, ColumnField field, boolean asc,
             int start, int limit) throws AuthenticationException;
 
-    ArrayList<AccountInfo> retrieveAvailableAccounts(String sessionId) throws AuthenticationException;
+    ArrayList<User> retrieveAvailableAccounts(String sessionId) throws AuthenticationException;
 
     WebOfRegistries retrieveWebOfRegistryPartners(String sid) throws AuthenticationException;
 
@@ -187,7 +187,7 @@ public interface RegistryService extends RemoteService {
 
     GroupInfo deleteGroup(String sessionId, GroupInfo info) throws AuthenticationException;
 
-    boolean removeAccountFromGroup(String sid, GroupInfo info, AccountInfo account) throws AuthenticationException;
+    boolean removeAccountFromGroup(String sid, GroupInfo info, User account) throws AuthenticationException;
 
     BulkUploadAutoUpdate autoUpdateBulkUpload(String sid, BulkUploadAutoUpdate wrapper, EntryAddType addType)
             throws AuthenticationException;

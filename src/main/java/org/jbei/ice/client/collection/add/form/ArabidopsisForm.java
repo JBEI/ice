@@ -1,11 +1,11 @@
 package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.Generation;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.PlantType;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;

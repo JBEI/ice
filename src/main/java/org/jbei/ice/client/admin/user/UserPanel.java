@@ -2,7 +2,7 @@ package org.jbei.ice.client.admin.user;
 
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -47,8 +47,8 @@ public class UserPanel extends Composite implements IAdminPanel {
         addCreateAccountHandler();
     }
 
-    public AccountInfo getNewUserDetails() {
-        AccountInfo info = new AccountInfo();
+    public User getNewUserDetails() {
+        User info = new User();
         info.setEmail(dialog.getUserId());
         info.setFirstName(dialog.getFirstName());
         info.setLastName(dialog.getLastName());

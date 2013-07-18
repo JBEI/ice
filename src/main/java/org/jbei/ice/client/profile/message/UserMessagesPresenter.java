@@ -13,9 +13,9 @@ import org.jbei.ice.client.common.header.HeaderView;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.PanelPresenter;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
-import org.jbei.ice.lib.shared.dto.MessageInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 
 import com.google.gwt.event.shared.HandlerManager;

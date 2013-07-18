@@ -3,10 +3,10 @@ package org.jbei.ice.lib.shared.dto.folder;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * Folder Transfer Object
@@ -22,7 +22,7 @@ public class FolderDetails implements IDTOModel {
     private String description;
     private LinkedList<PartData> entries = new LinkedList<PartData>();
     private FolderType type;
-    private AccountInfo owner;    // owner or person sharing this folder
+    private User owner;    // owner or person sharing this folder
     private ArrayList<PermissionInfo> permissions;
 
     public FolderDetails() {
@@ -81,11 +81,11 @@ public class FolderDetails implements IDTOModel {
         this.type = type;
     }
 
-    public AccountInfo getOwner() {
+    public User getOwner() {
         return owner;
     }
 
-    public void setOwner(AccountInfo owner) {
+    public void setOwner(User owner) {
         this.owner = owner;
     }
 

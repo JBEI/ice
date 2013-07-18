@@ -7,8 +7,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -48,7 +48,7 @@ public class AccountUtils {
         }
     }
 
-    public static Account fromDTO(AccountInfo info) {
+    public static Account fromDTO(User info) {
         Account account = new Account();
         account.setFirstName(info.getFirstName());
         account.setLastName(info.getLastName());

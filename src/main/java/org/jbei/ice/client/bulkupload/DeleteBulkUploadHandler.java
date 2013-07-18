@@ -7,7 +7,7 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;

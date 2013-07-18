@@ -6,7 +6,7 @@ package org.jbei.ice.lib.account;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -80,7 +80,7 @@ public class AccountControllerTest {
 
     @Test
     public void testCreateNewAccount() throws Exception {
-        AccountInfo info = new AccountInfo();
+        User info = new User();
         info.setEmail("testCreateNewAccount");
         info.setFirstName("Test");
         info.setLastName("Test");
@@ -131,7 +131,7 @@ public class AccountControllerTest {
     public void testGetAccountBySessionKey() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetAccountBySessionKey", false);
         controller.updatePassword(account.getEmail(), "p4ssw0rd");
-        AccountInfo info = controller.authenticate(account.getEmail(), "p4ssw0rd");
+        User info = controller.authenticate(account.getEmail(), "p4ssw0rd");
         Assert.assertNotNull(info);
         Assert.assertFalse(info.getSessionId().isEmpty());
         Account sessIdAccount = controller.getAccountBySessionKey(info.getSessionId());

@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.shared.dto;
+package org.jbei.ice.lib.shared.dto.entry;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 

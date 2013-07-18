@@ -3,7 +3,6 @@ package org.jbei.ice.lib.shared.dto.message;
 import java.util.ArrayList;
 
 import org.jbei.ice.lib.shared.dto.IDTOModel;
-import org.jbei.ice.lib.shared.dto.MessageInfo;
 
 /**
  * Wrapper around a list of messages that also contains information about start and count

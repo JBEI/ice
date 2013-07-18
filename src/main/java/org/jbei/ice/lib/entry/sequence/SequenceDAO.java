@@ -14,7 +14,7 @@ import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.shared.dto.Visibility;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 

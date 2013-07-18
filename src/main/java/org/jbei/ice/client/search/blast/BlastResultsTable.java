@@ -11,7 +11,7 @@ import org.jbei.ice.client.common.table.cell.HasEntryPartIDCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.client.common.table.column.HasEntryPartIdColumn;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchResult;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.TextCell;
@@ -24,23 +24,23 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
  *
  * @author Hector Plahar
  */
-public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
+public class BlastResultsTable extends HasEntryDataTable<SearchResult> {
 
     private final EntryTablePager pager;
 
-    public BlastResultsTable(ServiceDelegate<SearchResultInfo> delegate) {
+    public BlastResultsTable(ServiceDelegate<SearchResult> delegate) {
         super(delegate);
         this.pager = new EntryTablePager();
         pager.setDisplay(this);
     }
 
     @Override
-    protected ArrayList<DataTableColumn<SearchResultInfo, ?>> createColumns(ServiceDelegate<SearchResultInfo>
+    protected ArrayList<DataTableColumn<SearchResult, ?>> createColumns(ServiceDelegate<SearchResult>
             delegate) {
-        ArrayList<DataTableColumn<SearchResultInfo, ?>> columns = new ArrayList<DataTableColumn<SearchResultInfo, ?>>();
+        ArrayList<DataTableColumn<SearchResult, ?>> columns = new ArrayList<DataTableColumn<SearchResult, ?>>();
         columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(false));
-        DataTableColumn<SearchResultInfo, SearchResultInfo> partIdCol = addPartIdColumn(delegate, false, 100, Unit.PX);
+        DataTableColumn<SearchResult, SearchResult> partIdCol = addPartIdColumn(delegate, false, 100, Unit.PX);
         columns.add(partIdCol);
         columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(super.addSummaryColumn());
@@ -50,10 +50,10 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
         return columns;
     }
 
-    protected DataTableColumn<SearchResultInfo, SearchResultInfo> addPartIdColumn(ServiceDelegate<SearchResultInfo>
+    protected DataTableColumn<SearchResult, SearchResult> addPartIdColumn(ServiceDelegate<SearchResult>
             delegate, boolean sortable, double width, Unit unit) {
-        HasEntryPartIDCell<SearchResultInfo> cell = new HasEntryPartIDCell<SearchResultInfo>(delegate);
-        DataTableColumn<SearchResultInfo, SearchResultInfo> partIdColumn = new HasEntryPartIdColumn<SearchResultInfo>(
+        HasEntryPartIDCell<SearchResult> cell = new HasEntryPartIDCell<SearchResult>(delegate);
+        DataTableColumn<SearchResult, SearchResult> partIdColumn = new HasEntryPartIdColumn<SearchResult>(
                 cell);
         this.setColumnWidth(partIdColumn, width, unit);
         partIdColumn.setSortable(sortable);
@@ -61,12 +61,12 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
         return partIdColumn;
     }
 
-    protected DataTableColumn<SearchResultInfo, String> addAlignmentColumn() {
-        DataTableColumn<SearchResultInfo, String> alignedCol =
-                new DataTableColumn<SearchResultInfo, String>(new TextCell(), ColumnField.ALIGNED_IDENTITY) {
+    protected DataTableColumn<SearchResult, String> addAlignmentColumn() {
+        DataTableColumn<SearchResult, String> alignedCol =
+                new DataTableColumn<SearchResult, String>(new TextCell(), ColumnField.ALIGNED_IDENTITY) {
 
                     @Override
-                    public String getValue(SearchResultInfo info) {
+                    public String getValue(SearchResult info) {
                         return info.getAlignment();
                     }
                 };
@@ -76,12 +76,12 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
         return alignedCol;
     }
 
-    protected DataTableColumn<SearchResultInfo, String> addEValueColumn() {
-        DataTableColumn<SearchResultInfo, String> col =
-                new DataTableColumn<SearchResultInfo, String>(new TextCell(), ColumnField.E_VALUE) {
+    protected DataTableColumn<SearchResult, String> addEValueColumn() {
+        DataTableColumn<SearchResult, String> col =
+                new DataTableColumn<SearchResult, String>(new TextCell(), ColumnField.E_VALUE) {
 
                     @Override
-                    public String getValue(SearchResultInfo info) {
+                    public String getValue(SearchResult info) {
                         return String.valueOf(info.geteValue());
                     }
                 };
@@ -91,11 +91,11 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
         return col;
     }
 
-    protected DataTableColumn<SearchResultInfo, SearchResultInfo> addDistributionColumn() {
-        AbstractCell<SearchResultInfo> cell = new AbstractCell<SearchResultInfo>() {
+    protected DataTableColumn<SearchResult, SearchResult> addDistributionColumn() {
+        AbstractCell<SearchResult> cell = new AbstractCell<SearchResult>() {
 
             @Override
-            public void render(Context context, SearchResultInfo value, SafeHtmlBuilder sb) {
+            public void render(Context context, SearchResult value, SafeHtmlBuilder sb) {
                 // number of ticks per pixel
                 double ptsPerPixel = (double) value.getQueryLength() / 100;
                 int start = Integer.MAX_VALUE;
@@ -168,10 +168,10 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResultInfo> {
             }
         };
 
-        DataTableColumn<SearchResultInfo, SearchResultInfo> col =
-                new DataTableColumn<SearchResultInfo, SearchResultInfo>(cell, ColumnField.ALIGNMENT) {
+        DataTableColumn<SearchResult, SearchResult> col =
+                new DataTableColumn<SearchResult, SearchResult>(cell, ColumnField.ALIGNMENT) {
                     @Override
-                    public SearchResultInfo getValue(SearchResultInfo info) {
+                    public SearchResult getValue(SearchResult info) {
                         return info;
                     }
                 };

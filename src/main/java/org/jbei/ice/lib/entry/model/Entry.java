@@ -17,7 +17,7 @@ import org.jbei.ice.lib.entry.filter.EntrySecurityFilterFactory;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.model.Permission;
-import org.jbei.ice.lib.shared.dto.Visibility;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;

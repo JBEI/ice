@@ -9,7 +9,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;

@@ -2,7 +2,7 @@ package org.jbei.ice.client.bulkupload.events;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 
 import com.google.gwt.event.shared.GwtEvent;
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.lib.shared.dto.ParameterInfo;
+import org.jbei.ice.lib.shared.dto.entry.CustomField;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -37,12 +37,12 @@ public class ParametersPanel {
         addToMap(param);
     }
 
-    public ParametersPanel(FlexTable table, int row, ArrayList<ParameterInfo> parameters) {
+    public ParametersPanel(FlexTable table, int row, ArrayList<CustomField> parameters) {
         this.table = table;
         this.row = row;
 
         i = -1;
-        for (ParameterInfo paramInfo : parameters) {
+        for (CustomField paramInfo : parameters) {
             Parameter param = addRow();
             param.setName(paramInfo.getName());
             param.setValue(paramInfo.getValue());

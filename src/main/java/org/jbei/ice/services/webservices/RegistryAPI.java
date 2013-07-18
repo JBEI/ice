@@ -40,12 +40,12 @@ import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.SearchController;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -76,7 +76,7 @@ public class RegistryAPI implements IRegistryAPI {
 
         try {
             AccountController controller = ControllerFactory.getAccountController();
-            AccountInfo info = controller.authenticate(login, password);
+            User info = controller.authenticate(login, password);
             sessionId = info.getSessionId();
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by user: " + login);

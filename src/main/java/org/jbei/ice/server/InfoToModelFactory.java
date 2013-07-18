@@ -20,15 +20,15 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.BioSafetyOption;
-import org.jbei.ice.lib.shared.dto.ParameterInfo;
 import org.jbei.ice.lib.shared.dto.ParameterType;
-import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.CustomField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 
 /**
  * Factory object for converting data transfer objects to model objects
@@ -173,13 +173,13 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    private static List<Parameter> getParameters(ArrayList<ParameterInfo> infos, Entry entry) {
+    private static List<Parameter> getParameters(ArrayList<CustomField> infos, Entry entry) {
         List<Parameter> parameters = new ArrayList<>();
 
         if (infos == null)
             return parameters;
 
-        for (ParameterInfo info : infos) {
+        for (CustomField info : infos) {
             Parameter param = new Parameter();
             ParameterType type = ParameterType.valueOf(info.getType().name());
             param.setParameterType(type);

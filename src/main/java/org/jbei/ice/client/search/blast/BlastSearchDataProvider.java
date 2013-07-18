@@ -8,26 +8,26 @@ import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchResult;
 
 import com.google.gwt.view.client.Range;
 
-public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<SearchResultInfo> {
+public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<SearchResult> {
 
-    public BlastSearchDataProvider(HasEntryDataTable<SearchResultInfo> view, RegistryServiceAsync service) {
+    public BlastSearchDataProvider(HasEntryDataTable<SearchResult> view, RegistryServiceAsync service) {
         super(view, service, ColumnField.BIT_SCORE);
     }
 
-    public void setBlastData(LinkedList<SearchResultInfo> data) {
+    public void setBlastData(LinkedList<SearchResult> data) {
         reset();
         if (data == null) {
             updateRowCount(0, true);
             return;
         }
 
-//        Collections.sort(data, new Comparator<SearchResultInfo>() {
+//        Collections.sort(data, new Comparator<SearchResult>() {
 //            @Override
-//            public int compare(SearchResultInfo o1, SearchResultInfo o2) {
+//            public int compare(SearchResult o1, SearchResult o2) {
 //                Integer i1 = Integer.valueOf(o1.getAlignmentLength() / o1.getQueryLength() * 100);
 //                Integer i2 = Integer.valueOf(o2.getAlignmentLength() / o2.getQueryLength() * 100);
 //                return i1.compareTo(i2);

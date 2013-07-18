@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.profile.group.GroupsListWidget;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -67,7 +67,7 @@ public abstract class GroupPanel extends Composite {
         groupsWidget.setCreateNewHandler(handler);
     }
 
-    public void setDeleteMemberDelegate(ServiceDelegate<AccountInfo> deleteDelegate) {
+    public void setDeleteMemberDelegate(ServiceDelegate<User> deleteDelegate) {
         groupsWidget.setDeleteGroupMemberDelegate(deleteDelegate);
     }
 
@@ -83,7 +83,7 @@ public abstract class GroupPanel extends Composite {
         groupsWidget.setSaveHandler(handler);
     }
 
-    public ArrayList<AccountInfo> getSelectedMembers() {
+    public ArrayList<User> getSelectedMembers() {
         return groupsWidget.getSelectedMembers();
     }
 
@@ -103,11 +103,11 @@ public abstract class GroupPanel extends Composite {
         groupsWidget.setSelectionHandler(handler);
     }
 
-    public void setGroupMembers(GroupInfo group, ArrayList<AccountInfo> list) {
+    public void setGroupMembers(GroupInfo group, ArrayList<User> list) {
         groupsWidget.setGroupMembers(group, list);
     }
 
-    public void setAvailableAccounts(ArrayList<AccountInfo> result) {
+    public void setAvailableAccounts(ArrayList<User> result) {
         groupsWidget.setAvailableAccounts(result);
     }
 
@@ -118,11 +118,11 @@ public abstract class GroupPanel extends Composite {
     }
 
     // if info is null, then verification was invalid
-    public void addVerifiedAccount(AccountInfo info) {
+    public void addVerifiedAccount(User info) {
         groupsWidget.addVerifiedAccount(info);
     }
 
-    public void removeGroupMember(GroupInfo group, AccountInfo info) {
+    public void removeGroupMember(GroupInfo group, User info) {
         groupsWidget.removeGroupMember(group, info);
     }
 }

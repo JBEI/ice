@@ -3,7 +3,7 @@ package org.jbei.ice.client.admin.group;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -17,19 +17,19 @@ import com.google.gwt.view.client.ListDataProvider;
  */
 public class GroupMembersWidget extends Composite {
 
-    private final ArrayList<AccountInfo> infoList;
-    private final ListDataProvider<AccountInfo> dataProvider;
+    private final ArrayList<User> infoList;
+    private final ListDataProvider<User> dataProvider;
     private final VerticalPanel vPanel;
     private GroupMemberTable memberTable;
 
     public GroupMembersWidget() {
-        infoList = new ArrayList<AccountInfo>();
-        dataProvider = new ListDataProvider<AccountInfo>();
+        infoList = new ArrayList<User>();
+        dataProvider = new ListDataProvider<User>();
         vPanel = new VerticalPanel();
         initWidget(vPanel);
     }
 
-    public void setDeleteMemberDelegate(ServiceDelegate<AccountInfo> deleteDelegate) {
+    public void setDeleteMemberDelegate(ServiceDelegate<User> deleteDelegate) {
         memberTable = new GroupMemberTable(deleteDelegate);
         memberTable.setWidth("100%");
         ScrollPanel panel = new ScrollPanel(memberTable);
@@ -40,7 +40,7 @@ public class GroupMembersWidget extends Composite {
         vPanel.add(pager);
     }
 
-    public void setMemberList(ArrayList<AccountInfo> list) {
+    public void setMemberList(ArrayList<User> list) {
         infoList.clear();
         dataProvider.getList().clear();
 
@@ -51,16 +51,16 @@ public class GroupMembersWidget extends Composite {
         dataProvider.getList().addAll(infoList);
     }
 
-    public ArrayList<AccountInfo> getMemberList() {
+    public ArrayList<User> getMemberList() {
         return infoList;
     }
 
-    public void addMember(AccountInfo info) {
+    public void addMember(User info) {
         if (info == null)
             return;
 
-        for (AccountInfo accountInfo : infoList) {
-            if (info.getEmail().equals(accountInfo.getEmail()))
+        for (User user : infoList) {
+            if (info.getEmail().equals(user.getEmail()))
                 return;
         }
 
@@ -69,7 +69,7 @@ public class GroupMembersWidget extends Composite {
         memberTable.setRowCount(infoList.size());
     }
 
-    public void removeMember(AccountInfo info) {
+    public void removeMember(User info) {
         if (info == null)
             return;
 

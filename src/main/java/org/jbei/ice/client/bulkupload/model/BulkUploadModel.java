@@ -15,8 +15,8 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.PartSample;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 import com.google.gwt.event.shared.HandlerManager;

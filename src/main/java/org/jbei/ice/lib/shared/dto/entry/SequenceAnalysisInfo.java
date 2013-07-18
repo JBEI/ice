@@ -2,13 +2,13 @@ package org.jbei.ice.lib.shared.dto.entry;
 
 import java.util.Date;
 
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.IDTOModel;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 public class SequenceAnalysisInfo implements IDTOModel {
 
     private String name;
-    private AccountInfo depositor;
+    private User depositor;
     private Date created;
     private String fileId;
 
@@ -23,11 +23,11 @@ public class SequenceAnalysisInfo implements IDTOModel {
         this.name = name;
     }
 
-    public AccountInfo getDepositor() {
+    public User getDepositor() {
         return depositor;
     }
 
-    public void setDepositor(AccountInfo depositor) {
+    public void setDepositor(User depositor) {
         this.depositor = depositor;
     }
 

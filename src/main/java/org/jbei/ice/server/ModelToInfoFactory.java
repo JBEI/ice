@@ -28,21 +28,21 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.ParameterInfo;
 import org.jbei.ice.lib.shared.dto.ParameterType;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
-import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.Generation;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.PlantType;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.shared.dto.entry.CustomField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.lib.shared.dto.entry.PartData}
@@ -182,18 +182,18 @@ public class ModelToInfoFactory {
             SequenceAnalysisInfo info = new SequenceAnalysisInfo();
             info.setCreated(sequence.getCreationTime());
             info.setName(sequence.getFilename());
-            AccountInfo accountInfo = new AccountInfo();
+            User user = new User();
             try {
                 Account account = accountController.getByEmail(sequence.getDepositor());
                 if (account != null) {
-                    accountInfo.setFirstName(account.getFirstName());
-                    accountInfo.setLastName(account.getLastName());
-                    accountInfo.setId(account.getId());
+                    user.setFirstName(account.getFirstName());
+                    user.setLastName(account.getLastName());
+                    user.setId(account.getId());
                 }
             } catch (ControllerException e) {
                 Logger.warn(e.getMessage());
             }
-            info.setDepositor(accountInfo);
+            info.setDepositor(user);
             infos.add(info);
             info.setFileId(sequence.getFileId());
         }
@@ -323,11 +323,11 @@ public class ModelToInfoFactory {
         }
 
         info.setLinks(entry.getLinksAsString());
-        ArrayList<ParameterInfo> params = new ArrayList<>();
+        ArrayList<CustomField> params = new ArrayList<>();
 
         if (entry.getParameters() != null) {
             for (Parameter parameter : entry.getParameters()) {
-                ParameterInfo paramInfo = new ParameterInfo();
+                CustomField paramInfo = new CustomField();
                 paramInfo.setName(parameter.getKey());
                 paramInfo.setValue(parameter.getValue());
                 paramInfo.setType(ParameterType.valueOf(parameter.getParameterType().name()));

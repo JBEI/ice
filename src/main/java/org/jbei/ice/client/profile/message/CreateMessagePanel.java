@@ -7,9 +7,9 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.MessageInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -85,9 +85,9 @@ public class CreateMessagePanel extends Composite {
 
                 MessageInfo info = new MessageInfo();
                 for (String email : toBox.getText().split(",")) {
-                    AccountInfo accountInfo = new AccountInfo();
-                    accountInfo.setEmail(email);
-                    info.getAccounts().add(accountInfo);
+                    User user = new User();
+                    user.setEmail(email);
+                    info.getAccounts().add(user);
                 }
 
                 // set groups

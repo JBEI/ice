@@ -6,8 +6,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.shared.dto.IDTOModel;
-import org.jbei.ice.lib.shared.dto.ParameterInfo;
-import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
@@ -48,7 +46,7 @@ public class PartData implements IDTOModel {
     private ArrayList<AttachmentInfo> attachments;
     private ArrayList<SampleStorage> sampleStorage;
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
-    private ArrayList<ParameterInfo> parameters;
+    private ArrayList<CustomField> parameters;
     private boolean canEdit; // whether current user that requested this entry info has write privs
     private Visibility visible;
     private ArrayList<PermissionInfo> permissions;
@@ -244,11 +242,11 @@ public class PartData implements IDTOModel {
         this.sequenceAnalysis = analyses;
     }
 
-    public ArrayList<ParameterInfo> getParameters() {
+    public ArrayList<CustomField> getParameters() {
         return this.parameters;
     }
 
-    public void setParameters(ArrayList<ParameterInfo> parameters) {
+    public void setParameters(ArrayList<CustomField> parameters) {
         this.parameters = parameters;
     }
 

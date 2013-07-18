@@ -6,8 +6,8 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.Window;
@@ -19,10 +19,10 @@ import com.google.gwt.view.client.Range;
 /**
  * @author Hector Plahar
  */
-public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
+public class UserDataProvider extends AsyncDataProvider<User> {
 
     protected int resultSize;
-    protected LinkedList<AccountInfo> cachedEntries;
+    protected LinkedList<User> cachedEntries;
     protected final RegistryServiceAsync service;
     protected final UserTable table;
     protected ColumnField lastSortField;
@@ -31,7 +31,7 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
     public UserDataProvider(UserTable view, RegistryServiceAsync service) {
         this.table = view;
         this.service = service;
-        cachedEntries = new LinkedList<AccountInfo>();
+        cachedEntries = new LinkedList<User>();
 
         // connect sorting to async handler
         ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(table);
@@ -48,7 +48,7 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
     }
 
     @Override
-    protected void onRangeChanged(HasData<AccountInfo> display) {
+    protected void onRangeChanged(HasData<User> display) {
         if (resultSize == 0)   // display changed its range of interest but no data
             return;
 

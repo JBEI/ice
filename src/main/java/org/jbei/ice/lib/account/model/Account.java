@@ -7,8 +7,8 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.AccountType;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import org.hibernate.annotations.Type;
 
@@ -263,11 +263,11 @@ public class Account implements IModel {
         this.salt = salt;
     }
 
-    public static AccountInfo toDTO(Account account) {
+    public static User toDTO(Account account) {
         if (account == null)
             return null;
 
-        AccountInfo info = new AccountInfo();
+        User info = new User();
         info.setEmail(account.getEmail());
         info.setFirstName(account.getFirstName());
         info.setLastName(account.getLastName());

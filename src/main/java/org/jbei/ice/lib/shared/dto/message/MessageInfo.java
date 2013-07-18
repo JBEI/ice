@@ -1,9 +1,11 @@
-package org.jbei.ice.lib.shared.dto;
+package org.jbei.ice.lib.shared.dto.message;
 
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.jbei.ice.lib.shared.dto.IDTOModel;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * DTO for message object
@@ -19,11 +21,11 @@ public class MessageInfo implements IDTOModel {
     private String title;
     private boolean read;
     private ArrayList<GroupInfo> groups;
-    private ArrayList<AccountInfo> accounts;
+    private ArrayList<User> accounts;
 
     public MessageInfo() {
         groups = new ArrayList<GroupInfo>();
-        accounts = new ArrayList<AccountInfo>();
+        accounts = new ArrayList<User>();
     }
 
     public void setId(long id) {
@@ -78,7 +80,7 @@ public class MessageInfo implements IDTOModel {
         return groups;
     }
 
-    public ArrayList<AccountInfo> getAccounts() {
+    public ArrayList<User> getAccounts() {
         return accounts;
     }
 }

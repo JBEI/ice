@@ -7,8 +7,8 @@ import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -124,7 +124,7 @@ public class HeaderView extends Composite {
      * @return top right hand corner widget. Empty when the user is not logged in
      *         controller/presenter
      */
-    private Widget createLoggedInContents(final AccountInfo info) {
+    private Widget createLoggedInContents(final User info) {
         if (info == null) {
             loggedInContentsPanel.setHTML(0, 0, SafeHtmlUtils.EMPTY_SAFE_HTML);
             return loggedInContentsPanel;
@@ -198,7 +198,7 @@ public class HeaderView extends Composite {
         headerMenu.setSelected(page);
     }
 
-    public void setHeaderData(AccountInfo account) {
+    public void setHeaderData(User account) {
         createLoggedInContents(account);
         setNewMessages(account.getNewMessageCount());
     }

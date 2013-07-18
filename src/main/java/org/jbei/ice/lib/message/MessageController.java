@@ -10,12 +10,12 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.AccountType;
-import org.jbei.ice.lib.shared.dto.MessageInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * @author Hector Plahar
@@ -67,8 +67,8 @@ public class MessageController {
         message.setTitle(info.getTitle());
 
         if (info.getAccounts() != null) {
-            for (AccountInfo accountInfo : info.getAccounts()) {
-                Account account = ControllerFactory.getAccountController().getByEmail(accountInfo.getEmail());
+            for (User user : info.getAccounts()) {
+                Account account = ControllerFactory.getAccountController().getByEmail(user.getEmail());
                 if (account == null) {
                     // TODO : send a message to send indicating that the message could not be delivered to recipient
                     continue;

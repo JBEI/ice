@@ -48,23 +48,20 @@ import org.jbei.ice.lib.news.NewsController;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.AccountResults;
-import org.jbei.ice.lib.shared.dto.AccountType;
-import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.MessageInfo;
 import org.jbei.ice.lib.shared.dto.NewsItem;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.shared.dto.autocomplete.AutoCompleteSuggestion;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
@@ -72,13 +69,16 @@ import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.shared.dto.permission.PermissionSuggestion;
 import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
@@ -284,15 +284,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean removeAccountFromGroup(String sessionId, GroupInfo info, AccountInfo accountInfo)
+    public boolean removeAccountFromGroup(String sessionId, GroupInfo info, User user)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        Logger.info(account.getEmail() + ": removing \"" + accountInfo.getEmail() + "\" from group " + info.getId());
+        Logger.info(account.getEmail() + ": removing \"" + user.getEmail() + "\" from group " + info.getId());
         if (info.getType() == null)
             info.setType(GroupType.PRIVATE);
 
         try {
-            ControllerFactory.getAccountController().removeMemberFromGroup(info.getId(), accountInfo.getEmail());
+            ControllerFactory.getAccountController().removeMemberFromGroup(info.getId(), user.getEmail());
             return true;
         } catch (ControllerException ce) {
             return false;
@@ -300,10 +300,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo login(String name, String pass) {
+    public User login(String name, String pass) {
         try {
             AccountController controller = ControllerFactory.getAccountController();
-            AccountInfo info = controller.authenticate(name, pass);
+            User info = controller.authenticate(name, pass);
             if (info == null) {
                 return null;
             }
@@ -374,7 +374,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public String createNewAccount(AccountInfo info, boolean sendEmail) {
+    public String createNewAccount(User info, boolean sendEmail) {
 //        String serverName = getThreadLocalRequest().getServerName();
         try {
             return ControllerFactory.getAccountController().createNewAccount(info, sendEmail);
@@ -385,7 +385,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo retrieveAccount(String email) {
+    public User retrieveAccount(String email) {
         Account account = null;
         AccountController controller = ControllerFactory.getAccountController();
 
@@ -399,7 +399,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo updateAccount(String sid, String email, AccountInfo info) throws AuthenticationException {
+    public User updateAccount(String sid, String email, User info) throws AuthenticationException {
         AccountController controller = ControllerFactory.getAccountController();
         try {
             Account account = retrieveAccountForSid(sid);
@@ -429,14 +429,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo sessionValid(String sid) {
+    public User sessionValid(String sid) {
         AccountController controller = ControllerFactory.getAccountController();
         EntryController entryController = ControllerFactory.getEntryController();
 
         try {
             if (AccountController.isAuthenticated(sid)) {
                 Account account = controller.getAccountBySessionKey(sid);
-                AccountInfo info = Account.toDTO(account);
+                User info = Account.toDTO(account);
                 long entryCount = entryController.getNumberOfOwnerEntries(account, account.getEmail());
                 info.setUserEntryCount(entryCount);
 
@@ -578,7 +578,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<AccountInfo> retrieveAvailableAccounts(String sessionId) throws AuthenticationException {
+    public ArrayList<User> retrieveAvailableAccounts(String sessionId) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
         Logger.info(account.getEmail() + ": retrieving available accounts for group creation");
         GroupController controller = ControllerFactory.getGroupController();
@@ -845,7 +845,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo retrieveProfileInfo(String sid, String userId) throws AuthenticationException {
+    public User retrieveProfileInfo(String sid, String userId) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
@@ -855,12 +855,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            AccountInfo accountInfo = Account.toDTO(account);
+            User user = Account.toDTO(account);
             long visibleEntryCount = entryController.getNumberOfVisibleEntries(account);
-            accountInfo.setVisibleEntryCount(visibleEntryCount);
+            user.setVisibleEntryCount(visibleEntryCount);
             long entryCount = entryController.getNumberOfOwnerEntries(account, account.getEmail());
-            accountInfo.setUserEntryCount(entryCount);
-            return accountInfo;
+            user.setUserEntryCount(entryCount);
+            return user;
         } catch (ControllerException e) {
             return null;
         }
@@ -1082,7 +1082,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<AccountInfo> retrieveGroupMembers(String sessionId, GroupInfo info)
+    public ArrayList<User> retrieveGroupMembers(String sessionId, GroupInfo info)
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
@@ -1106,7 +1106,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<AccountInfo> setGroupMembers(String sessionId, GroupInfo info, ArrayList<AccountInfo> members)
+    public ArrayList<User> setGroupMembers(String sessionId, GroupInfo info, ArrayList<User> members)
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);

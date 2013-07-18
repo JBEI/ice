@@ -1,6 +1,6 @@
 package org.jbei.ice.client.profile.message;
 
-import org.jbei.ice.lib.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;

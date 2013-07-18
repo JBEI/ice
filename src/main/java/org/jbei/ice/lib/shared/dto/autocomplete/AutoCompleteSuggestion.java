@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.shared.dto.autocomplete;
 
-import org.jbei.ice.lib.shared.AutoCompleteField;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.SuggestOracle;

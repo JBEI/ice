@@ -32,19 +32,19 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.AccountType;
-import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.PartSample;
-import org.jbei.ice.lib.shared.dto.Visibility;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.InfoToModelFactory;
@@ -109,11 +109,11 @@ public class BulkUploadController {
         for (BulkUpload draft : results) {
             BulkUploadInfo info = new BulkUploadInfo();
             Account draftAccount = draft.getAccount();
-            AccountInfo accountInfo = new AccountInfo();
-            accountInfo.setEmail(draftAccount.getEmail());
-            accountInfo.setFirstName(draftAccount.getFirstName());
-            accountInfo.setLastName(draftAccount.getLastName());
-            info.setAccount(accountInfo);
+            User user = new User();
+            user.setEmail(draftAccount.getEmail());
+            user.setFirstName(draftAccount.getFirstName());
+            user.setLastName(draftAccount.getLastName());
+            info.setAccount(user);
 
             info.setId(draft.getId());
             info.setLastUpdate(draft.getLastUpdateTime());
@@ -346,11 +346,11 @@ public class BulkUploadController {
             draftInfo.setCount(draft.getContents().size());
 
             // set the account info
-            AccountInfo accountInfo = new AccountInfo();
-            accountInfo.setEmail(draftAccount.getEmail());
-            accountInfo.setFirstName(draftAccount.getFirstName());
-            accountInfo.setLastName(draftAccount.getLastName());
-            draftInfo.setAccount(accountInfo);
+            User user = new User();
+            user.setEmail(draftAccount.getEmail());
+            user.setFirstName(draftAccount.getFirstName());
+            user.setLastName(draftAccount.getLastName());
+            draftInfo.setAccount(user);
             infoArrayList.add(draftInfo);
         }
 
@@ -394,8 +394,8 @@ public class BulkUploadController {
         }
 
         BulkUploadInfo draftInfo = BulkUpload.toDTO(draft);
-        AccountInfo accountInfo = Account.toDTO(draft.getAccount());
-        draftInfo.setAccount(accountInfo);
+        User user = Account.toDTO(draft.getAccount());
+        draftInfo.setAccount(user);
         return draftInfo;
     }
 

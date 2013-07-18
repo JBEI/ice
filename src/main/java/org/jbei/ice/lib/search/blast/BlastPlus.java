@@ -41,7 +41,7 @@ import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.search.BlastProgram;
 import org.jbei.ice.lib.shared.dto.search.BlastQuery;
-import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchResult;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -63,7 +63,7 @@ public class BlastPlus {
     private static final String BLAST_DB_NAME = "ice";
     private static final String DELIMITER = ",";
 
-    public static HashMap<String, SearchResultInfo> runBlast(Account account, BlastQuery query) throws BlastException {
+    public static HashMap<String, SearchResult> runBlast(Account account, BlastQuery query) throws BlastException {
         try {
             String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + query.getBlastProgram().getName();
@@ -107,12 +107,12 @@ public class BlastPlus {
         }
     }
 
-    private static SearchResultInfo parseSequenceIdentifier(String line) {
+    private static SearchResult parseSequenceIdentifier(String line) {
         long id;
         EntryType recordType;
         String name;
         String partNumber;
-        SearchResultInfo info = null;
+        SearchResult info = null;
 
         // new record
         String[] idLineFields = line.substring(1).split(DELIMITER);
@@ -146,7 +146,7 @@ public class BlastPlus {
             view.setPartId(partNumber);
             view.setName(name);
 
-            info = new SearchResultInfo();
+            info = new SearchResult();
             info.setEntryInfo(view);
 
             try {
@@ -161,8 +161,8 @@ public class BlastPlus {
         return info;
     }
 
-    private static HashMap<String, SearchResultInfo> processBlastOutput(String blastOutput, int queryLength) {
-        HashMap<String, SearchResultInfo> hashMap = new HashMap<>();
+    private static HashMap<String, SearchResult> processBlastOutput(String blastOutput, int queryLength) {
+        HashMap<String, SearchResult> hashMap = new HashMap<>();
 
         ArrayList<String> lines = new ArrayList<>(Arrays.asList(blastOutput.split("\n")));
 
@@ -174,7 +174,7 @@ public class BlastPlus {
 
 
             // process alignment details for above match
-            SearchResultInfo info = parseSequenceIdentifier(line.substring(1));
+            SearchResult info = parseSequenceIdentifier(line.substring(1));
             if (info == null)
                 continue;
 
@@ -221,7 +221,7 @@ public class BlastPlus {
                 info.getMatchDetails().add(line);
 
                 String idString = Long.toString(info.getEntryInfo().getId());
-                SearchResultInfo currentResult = hashMap.get(idString);
+                SearchResult currentResult = hashMap.get(idString);
                 // if there is an existing record for same entry with a lower relative score then replace
                 if (currentResult == null)
                     hashMap.put(idString, info);

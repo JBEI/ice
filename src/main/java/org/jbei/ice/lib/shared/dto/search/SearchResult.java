@@ -9,7 +9,7 @@ import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
  *
  * @author Hector Plahar
  */
-public class SearchResultInfo extends HasEntryData implements Comparable<SearchResultInfo> {
+public class SearchResult extends HasEntryData implements Comparable<SearchResult> {
 
     public static final long serialVersionUID = 1l;
 
@@ -28,7 +28,7 @@ public class SearchResultInfo extends HasEntryData implements Comparable<SearchR
     private String webPartnerURL;
     private LinkedList<String> matchDetails;
 
-    public SearchResultInfo() {
+    public SearchResult() {
         matchDetails = new LinkedList<String>();
         eValue = "0";
     }
@@ -58,11 +58,11 @@ public class SearchResultInfo extends HasEntryData implements Comparable<SearchR
     }
 
     @Override
-    public int compareTo(SearchResultInfo searchResultInfo) {
-        if (score == searchResultInfo.getScore())
+    public int compareTo(SearchResult searchResult) {
+        if (score == searchResult.getScore())
             return 0;
 
-        float diff = score - searchResultInfo.getScore();
+        float diff = score - searchResult.getScore();
         return diff < 0.0f ? -1 : 1;
     }
 

@@ -16,11 +16,11 @@ import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.AccountType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.server.ModelToInfoFactory;
 
 /**

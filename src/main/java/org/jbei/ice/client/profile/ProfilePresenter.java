@@ -13,11 +13,11 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.group.UserGroupPresenter;
 import org.jbei.ice.client.profile.message.UserMessagesPresenter;
 import org.jbei.ice.client.profile.preferences.UserPreferencesPresenter;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -39,7 +39,7 @@ public class ProfilePresenter extends AbstractPresenter {
     private UserPreferencesPresenter preferencesPresenter;
     private UserMessagesPresenter messagesPresenter;
     private UserOption currentOption;
-    private AccountInfo currentAccount;
+    private User currentAccount;
     private final UserOption[] availableOptions;
 
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus, IProfileView display,
@@ -88,12 +88,12 @@ public class ProfilePresenter extends AbstractPresenter {
         handlerUserMenuSelection();
     }
 
-    private Callback<AccountInfo> getCallback() {
-        return new Callback<AccountInfo>() {
+    private Callback<User> getCallback() {
+        return new Callback<User>() {
 
             @Override
-            public void onSuccess(AccountInfo accountInfo) {
-                display.setAccountInfo(accountInfo);
+            public void onSuccess(User user) {
+                display.setAccountInfo(user);
             }
 
             @Override
@@ -127,7 +127,7 @@ public class ProfilePresenter extends AbstractPresenter {
         switch (currentOption) {
             case PROFILE:
             default:
-                profilePresenter.setAccountInfo(currentAccount);
+                profilePresenter.setUser(currentAccount);
                 display.show(currentOption, profilePresenter.getView().asWidget());
                 break;
 
@@ -179,15 +179,15 @@ public class ProfilePresenter extends AbstractPresenter {
     }
 
     private void retrieveProfileInfo() {
-        new IceAsyncCallback<AccountInfo>() {
+        new IceAsyncCallback<User>() {
 
             @Override
-            protected void callService(AsyncCallback<AccountInfo> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<User> callback) throws AuthenticationException {
                 service.retrieveProfileInfo(ClientController.sessionId, userId, callback);
             }
 
             @Override
-            public void onSuccess(AccountInfo profileInfo) {
+            public void onSuccess(User profileInfo) {
                 currentAccount = profileInfo;
                 display.setAccountInfo(profileInfo);
                 setViewForOption();

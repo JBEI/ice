@@ -1,6 +1,6 @@
 package org.jbei.ice.client.event;
 
-import org.jbei.ice.lib.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.shared.GwtEvent;
 
@@ -16,9 +16,9 @@ public class LoginEvent extends GwtEvent<ILoginEventHandler> {
     public static final Type<ILoginEventHandler> TYPE = new Type<ILoginEventHandler>();
 
     private final boolean rememberUser;
-    private AccountInfo info;
+    private User info;
 
-    public LoginEvent(AccountInfo info, boolean rememberUser) {
+    public LoginEvent(User info, boolean rememberUser) {
         this.info = info;
         this.rememberUser = rememberUser;
     }
@@ -31,7 +31,7 @@ public class LoginEvent extends GwtEvent<ILoginEventHandler> {
         return this.rememberUser;
     }
 
-    public AccountInfo getAccountInfo() {
+    public User getAccountInfo() {
         return this.info;
     }
 

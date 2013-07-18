@@ -1,4 +1,6 @@
-package org.jbei.ice.lib.shared.dto;
+package org.jbei.ice.lib.shared.dto.user;
+
+import org.jbei.ice.lib.shared.dto.IDTOModel;
 
 /**
  * Type of account managed by the system

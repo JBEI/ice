@@ -11,8 +11,8 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.PanelPresenter;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -74,10 +74,10 @@ public class UserGroupPresenter extends PanelPresenter {
     }
 
     private void addGroupMemberDeleteDelegate() {
-        groupPanel.setDeleteMemberDelegate(new ServiceDelegate<AccountInfo>() {
+        groupPanel.setDeleteMemberDelegate(new ServiceDelegate<User>() {
 
             @Override
-            public void execute(final AccountInfo info) {
+            public void execute(final User info) {
                 new IceAsyncCallback<Boolean>() {
 
                     @Override
@@ -103,15 +103,15 @@ public class UserGroupPresenter extends PanelPresenter {
 
             @Override
             public void execute(final String email) {
-                new IceAsyncCallback<AccountInfo>() {
+                new IceAsyncCallback<User>() {
 
                     @Override
-                    protected void callService(AsyncCallback<AccountInfo> callback) throws AuthenticationException {
+                    protected void callService(AsyncCallback<User> callback) throws AuthenticationException {
                         service.retrieveAccount(email, callback);
                     }
 
                     @Override
-                    public void onSuccess(AccountInfo result) {
+                    public void onSuccess(User result) {
                         groupPanel.addVerifiedAccount(result);
                     }
 
@@ -149,25 +149,25 @@ public class UserGroupPresenter extends PanelPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                final ArrayList<AccountInfo> selectedMembers = groupPanel.getSelectedMembers();
+                final ArrayList<User> selectedMembers = groupPanel.getSelectedMembers();
                 if (selectedMembers.isEmpty())
                     return;
 
                 GWT.log(selectedMembers.size() + " members selected for group " + currentGroup.getLabel());
-                new IceAsyncCallback<ArrayList<AccountInfo>>() {
+                new IceAsyncCallback<ArrayList<User>>() {
 
                     @Override
-                    protected void callService(AsyncCallback<ArrayList<AccountInfo>> callback)
+                    protected void callService(AsyncCallback<ArrayList<User>> callback)
                             throws AuthenticationException {
                         service.setGroupMembers(ClientController.sessionId, currentGroup, selectedMembers, callback);
                     }
 
                     @Override
-                    public void onSuccess(ArrayList<AccountInfo> result) {
-                        Collections.sort(result, new Comparator<AccountInfo>() {
+                    public void onSuccess(ArrayList<User> result) {
+                        Collections.sort(result, new Comparator<User>() {
 
                             @Override
-                            public int compare(AccountInfo o1, AccountInfo o2) {
+                            public int compare(User o1, User o2) {
                                 return o1.getFullName().compareTo(o2.getFullName());
                             }
                         });
@@ -221,18 +221,18 @@ public class UserGroupPresenter extends PanelPresenter {
     }
 
     protected void retrieveGroupMembers(final GroupInfo info) {
-        new IceAsyncCallback<ArrayList<AccountInfo>>() {
+        new IceAsyncCallback<ArrayList<User>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<AccountInfo>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<ArrayList<User>> callback) throws AuthenticationException {
                 service.retrieveGroupMembers(ClientController.sessionId, info, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<AccountInfo> result) {
-                Collections.sort(result, new Comparator<AccountInfo>() {
+            public void onSuccess(ArrayList<User> result) {
+                Collections.sort(result, new Comparator<User>() {
                     @Override
-                    public int compare(AccountInfo o1, AccountInfo o2) {
+                    public int compare(User o1, User o2) {
                         return o1.getFullName().compareTo(o2.getFullName());
                     }
                 });
@@ -247,15 +247,15 @@ public class UserGroupPresenter extends PanelPresenter {
     }
 
     protected void retrieveAvailableAccountsToUser() {
-        new IceAsyncCallback<ArrayList<AccountInfo>>() {
+        new IceAsyncCallback<ArrayList<User>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<AccountInfo>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<ArrayList<User>> callback) throws AuthenticationException {
                 service.retrieveAvailableAccounts(ClientController.sessionId, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<AccountInfo> result) {
+            public void onSuccess(ArrayList<User> result) {
                 groupPanel.setAvailableAccounts(result);
             }
         }.go(eventBus);

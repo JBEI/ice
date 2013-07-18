@@ -1,8 +1,8 @@
 package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 import com.google.gwt.user.client.ui.FlexTable;

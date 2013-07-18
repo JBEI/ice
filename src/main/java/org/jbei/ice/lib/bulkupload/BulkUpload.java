@@ -12,8 +12,8 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
-import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * Saved draft of bulk imports. Encapsulates a list of {@link Entry}s that are created and updated
@@ -146,11 +146,11 @@ public class BulkUpload implements IModel {
         // draft account
         Account draftAccount = draft.getAccount();
         bulkUploadInfo.setName(draft.getName());
-        AccountInfo accountInfo = new AccountInfo();
-        accountInfo.setEmail(draftAccount.getEmail());
-        accountInfo.setFirstName(draftAccount.getFirstName());
-        accountInfo.setLastName(draftAccount.getLastName());
-        bulkUploadInfo.setAccount(accountInfo);
+        User user = new User();
+        user.setEmail(draftAccount.getEmail());
+        user.setFirstName(draftAccount.getFirstName());
+        user.setLastName(draftAccount.getLastName());
+        bulkUploadInfo.setAccount(user);
 
         bulkUploadInfo.setType(EntryAddType.stringToType(draft.getImportType()));
         for (Permission permission : draft.getPermissions()) {

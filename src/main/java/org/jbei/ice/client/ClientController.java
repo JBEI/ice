@@ -22,8 +22,8 @@ import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.search.advanced.SearchView;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -43,7 +43,7 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
 
     private HasWidgets container; // root panel
     public static String sessionId;
-    public static AccountInfo account;
+    public static User account;
     public static String pageViewAttempt;   // page user attempted to view but was sent to the login page
     private static SearchQuery lastQuery;
 
@@ -259,10 +259,10 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
         // check if there is a stored session that is valid
         final String sessionId = Cookies.getCookie(COOKIE_NAME);
         if (sessionId != null) {
-            service.sessionValid(sessionId, new AsyncCallback<AccountInfo>() {
+            service.sessionValid(sessionId, new AsyncCallback<User>() {
 
                 @Override
-                public void onSuccess(AccountInfo result) {
+                public void onSuccess(User result) {
                     if (result != null) {
                         ClientController.account = result;
                         ClientController.sessionId = sessionId;

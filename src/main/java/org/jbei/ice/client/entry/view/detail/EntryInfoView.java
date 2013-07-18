@@ -4,7 +4,7 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
-import org.jbei.ice.lib.shared.dto.ParameterInfo;
+import org.jbei.ice.lib.shared.dto.entry.CustomField;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -141,7 +141,7 @@ public abstract class EntryInfoView<T extends PartData> extends Composite {
         parameters.getFlexCellFormatter().setColSpan(row, 0, 6);
 
         int col = 6;
-        for (ParameterInfo paramInfo : info.getParameters()) {
+        for (CustomField paramInfo : info.getParameters()) {
             if (col > 5) {
                 col = 0;
                 row += 1;

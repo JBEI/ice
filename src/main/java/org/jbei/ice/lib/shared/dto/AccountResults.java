@@ -2,21 +2,23 @@ package org.jbei.ice.lib.shared.dto;
 
 import java.util.LinkedList;
 
+import org.jbei.ice.lib.shared.dto.user.User;
+
 /**
- * Wrapper around a list of account infos
+ * Wrapper around a list of user accounts
  *
  * @author Hector Plahar
  */
 public class AccountResults implements IDTOModel {
 
     private long resultCount;
-    private LinkedList<AccountInfo> infos;
+    private LinkedList<User> infos;
 
     public AccountResults() {
-        infos = new LinkedList<AccountInfo>();
+        infos = new LinkedList<User>();
     }
 
-    public void setResults(LinkedList<AccountInfo> results) {
+    public void setResults(LinkedList<User> results) {
         this.infos.clear();
         if (results == null)
             return;
@@ -35,7 +37,7 @@ public class AccountResults implements IDTOModel {
         return this.resultCount;
     }
 
-    public LinkedList<AccountInfo> getResults() {
+    public LinkedList<User> getResults() {
         return this.infos;
     }
 }

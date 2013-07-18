@@ -21,7 +21,7 @@ import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;

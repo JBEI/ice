@@ -2,8 +2,8 @@ package org.jbei.ice.lib.shared.dto.comment;
 
 import java.util.Date;
 
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.IDTOModel;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * DTO for {@link org.jbei.ice.lib.models.Comment}. Comments are tied to specific entries
@@ -13,7 +13,7 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
  */
 public class UserComment implements IDTOModel {
 
-    private AccountInfo user;
+    private User user;
     private String message;
     private Date commentDate;
     private long entryId;
@@ -25,11 +25,11 @@ public class UserComment implements IDTOModel {
         this.message = message;
     }
 
-    public AccountInfo getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(AccountInfo user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

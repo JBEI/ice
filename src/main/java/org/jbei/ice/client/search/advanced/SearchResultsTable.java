@@ -11,7 +11,7 @@ import org.jbei.ice.client.common.table.cell.SearchRelevanceCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.client.common.table.column.HasEntryPartIdColumn;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchResult;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.Style.Unit;
@@ -24,21 +24,21 @@ import com.google.gwt.user.client.Window;
  *
  * @author Hector Plahar
  */
-public class SearchResultsTable extends HasEntryDataTable<SearchResultInfo> {
+public class SearchResultsTable extends HasEntryDataTable<SearchResult> {
 
     private final EntryTablePager pager;
 
-    public SearchResultsTable(ServiceDelegate<SearchResultInfo> delegate) {
+    public SearchResultsTable(ServiceDelegate<SearchResult> delegate) {
         super(delegate);
         this.pager = new EntryTablePager();
         pager.setDisplay(this);
     }
 
     @Override
-    protected ArrayList<DataTableColumn<SearchResultInfo, ?>> createColumns(ServiceDelegate<SearchResultInfo>
+    protected ArrayList<DataTableColumn<SearchResult, ?>> createColumns(ServiceDelegate<SearchResult>
             delegate) {
 
-        ArrayList<DataTableColumn<SearchResultInfo, ?>> columns = new ArrayList<DataTableColumn<SearchResultInfo, ?>>();
+        ArrayList<DataTableColumn<SearchResult, ?>> columns = new ArrayList<DataTableColumn<SearchResult, ?>>();
 
         // selection column
         columns.add(super.addSelectionColumn());
@@ -64,29 +64,29 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResultInfo> {
         return columns;
     }
 
-    protected DataTableColumn<SearchResultInfo, SearchResultInfo> addPartIdColumn(ServiceDelegate<SearchResultInfo>
+    protected DataTableColumn<SearchResult, SearchResult> addPartIdColumn(ServiceDelegate<SearchResult>
             delegate, boolean sortable, double width, Unit unit) {
-        HasEntryPartIDCell<SearchResultInfo> cell = new HasEntryPartIDCell<SearchResultInfo>(delegate) {
+        HasEntryPartIDCell<SearchResult> cell = new HasEntryPartIDCell<SearchResult>(delegate) {
             @Override
-            protected String getURI(SearchResultInfo value) {
+            protected String getURI(SearchResult value) {
                 return value.getWebPartnerURL();
             }
         };
-        DataTableColumn<SearchResultInfo, SearchResultInfo> partIdColumn =
-                new HasEntryPartIdColumn<SearchResultInfo>(cell);
+        DataTableColumn<SearchResult, SearchResult> partIdColumn =
+                new HasEntryPartIdColumn<SearchResult>(cell);
         this.setColumnWidth(partIdColumn, width, unit);
         partIdColumn.setSortable(sortable);
         this.addColumn(partIdColumn, "Part ID");
         return partIdColumn;
     }
 
-    protected DataTableColumn<SearchResultInfo, SafeHtml> addSummaryColumn() {
-        DataTableColumn<SearchResultInfo, SafeHtml> summaryColumn = new DataTableColumn<SearchResultInfo, SafeHtml>(
+    protected DataTableColumn<SearchResult, SafeHtml> addSummaryColumn() {
+        DataTableColumn<SearchResult, SafeHtml> summaryColumn = new DataTableColumn<SearchResult, SafeHtml>(
                 new SafeHtmlCell(),
                 ColumnField.SUMMARY) {
 
             @Override
-            public SafeHtml getValue(SearchResultInfo object) {
+            public SafeHtml getValue(SearchResult object) {
                 String description = object.getEntryInfo().getShortDescription();
                 if (description == null)
                     return SafeHtmlUtils.EMPTY_SAFE_HTML;
@@ -109,17 +109,17 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResultInfo> {
         return summaryColumn;
     }
 
-    protected DataTableColumn<SearchResultInfo, SearchResultInfo> addOwnerColumn() {
+    protected DataTableColumn<SearchResult, SearchResult> addOwnerColumn() {
 
-        EntryOwnerCell<SearchResultInfo> cell = new EntryOwnerCell<SearchResultInfo>() {
+        EntryOwnerCell<SearchResult> cell = new EntryOwnerCell<SearchResult>() {
 
             @Override
-            public String getOwnerName(SearchResultInfo value) {
+            public String getOwnerName(SearchResult value) {
                 return value.getEntryInfo().getOwner();
             }
 
             @Override
-            public String getOwnerId(SearchResultInfo value) {
+            public String getOwnerId(SearchResult value) {
                 if (value.getEntryInfo().getOwnerId() == 0)
                     return "";
 
@@ -127,12 +127,12 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResultInfo> {
             }
         };
 
-        DataTableColumn<SearchResultInfo, SearchResultInfo> ownerColumn = new DataTableColumn<SearchResultInfo,
-                SearchResultInfo>(
+        DataTableColumn<SearchResult, SearchResult> ownerColumn = new DataTableColumn<SearchResult,
+                SearchResult>(
                 cell, ColumnField.OWNER) {
 
             @Override
-            public SearchResultInfo getValue(SearchResultInfo object) {
+            public SearchResult getValue(SearchResult object) {
                 return object;
             }
         };
@@ -143,11 +143,11 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResultInfo> {
         return ownerColumn;
     }
 
-    protected DataTableColumn<SearchResultInfo, SearchResultInfo> addScoreColumn() {
+    protected DataTableColumn<SearchResult, SearchResult> addScoreColumn() {
 
-        SearchRelevanceCell<SearchResultInfo> cell = new SearchRelevanceCell<SearchResultInfo>() {
+        SearchRelevanceCell<SearchResult> cell = new SearchRelevanceCell<SearchResult>() {
             @Override
-            public String getHTML(SearchResultInfo value) {
+            public String getHTML(SearchResult value) {
                 float maxScore = value.getMaxScore();
                 float score = value.getScore();
 
@@ -177,12 +177,12 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResultInfo> {
             }
         };
 
-        DataTableColumn<SearchResultInfo, SearchResultInfo> scoreColumn = new DataTableColumn<SearchResultInfo,
-                SearchResultInfo>(
+        DataTableColumn<SearchResult, SearchResult> scoreColumn = new DataTableColumn<SearchResult,
+                SearchResult>(
                 cell,
                 ColumnField.RELEVANCE) {
             @Override
-            public SearchResultInfo getValue(SearchResultInfo object) {
+            public SearchResult getValue(SearchResult object) {
                 return object;
             }
         };

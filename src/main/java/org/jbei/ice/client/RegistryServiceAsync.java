@@ -5,30 +5,30 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.AccountResults;
-import org.jbei.ice.lib.shared.dto.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.MessageInfo;
 import org.jbei.ice.lib.shared.dto.NewsItem;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -36,9 +36,9 @@ import com.google.gwt.user.client.ui.SuggestOracle;
 
 public interface RegistryServiceAsync {
 
-    void login(String name, String pass, AsyncCallback<AccountInfo> callback);
+    void login(String name, String pass, AsyncCallback<User> callback);
 
-    void sessionValid(String sid, AsyncCallback<AccountInfo> callback);
+    void sessionValid(String sid, AsyncCallback<User> callback);
 
     void logout(String sessionId, AsyncCallback<Boolean> callback);
 
@@ -71,7 +71,7 @@ public interface RegistryServiceAsync {
     void createSample(String sessionId, SampleStorage sampleStorage, long entryId,
             AsyncCallback<SampleStorage> callback) throws AuthenticationException;
 
-    void retrieveProfileInfo(String sid, String userId, AsyncCallback<AccountInfo> callback)
+    void retrieveProfileInfo(String sid, String userId, AsyncCallback<User> callback)
             throws AuthenticationException;
 
     void retrieveCollections(String sessionId, AsyncCallback<ArrayList<FolderDetails>> callback);
@@ -121,12 +121,12 @@ public interface RegistryServiceAsync {
 
     void getConfigurationSetting(String name, AsyncCallback<String> callback);
 
-    void retrieveAccount(String email, AsyncCallback<AccountInfo> callback);
+    void retrieveAccount(String email, AsyncCallback<User> callback);
 
-    void createNewAccount(AccountInfo info, boolean sendEmail, AsyncCallback<String> callback);
+    void createNewAccount(User info, boolean sendEmail, AsyncCallback<String> callback);
 
-    void updateAccount(String sid, String email, AccountInfo info,
-            AsyncCallback<AccountInfo> callback) throws AuthenticationException;
+    void updateAccount(String sid, String email, User info,
+            AsyncCallback<User> callback) throws AuthenticationException;
 
     void updateAccountPassword(String sid, String email, String password,
             AsyncCallback<Boolean> callback) throws AuthenticationException;
@@ -152,11 +152,11 @@ public interface RegistryServiceAsync {
     void retrieveGroups(String sid, GroupType type, AsyncCallback<ArrayList<GroupInfo>> callback)
             throws AuthenticationException;
 
-    void retrieveGroupMembers(String sessionId, GroupInfo info, AsyncCallback<ArrayList<AccountInfo>> callback)
+    void retrieveGroupMembers(String sessionId, GroupInfo info, AsyncCallback<ArrayList<User>> callback)
             throws AuthenticationException;
 
-    void setGroupMembers(String sessionId, GroupInfo info, ArrayList<AccountInfo> members,
-            AsyncCallback<ArrayList<AccountInfo>> callback) throws AuthenticationException;
+    void setGroupMembers(String sessionId, GroupInfo info, ArrayList<User> members,
+            AsyncCallback<ArrayList<User>> callback) throws AuthenticationException;
 
     void createNewGroup(String sessionId, GroupInfo info,
             AsyncCallback<GroupInfo> callback) throws AuthenticationException;
@@ -191,7 +191,7 @@ public interface RegistryServiceAsync {
     void retrieveAllVisibleEntrys(String sid, FolderDetails details, ColumnField field, boolean asc, int start,
             int limit, AsyncCallback<FolderDetails> async);
 
-    void retrieveAvailableAccounts(String sessionId, AsyncCallback<ArrayList<AccountInfo>> callback);
+    void retrieveAvailableAccounts(String sessionId, AsyncCallback<ArrayList<User>> callback);
 
     void addWebPartner(String sessionId, String partnerName, String partnerUrl, AsyncCallback<Boolean> callback);
 
@@ -223,7 +223,7 @@ public interface RegistryServiceAsync {
 
     void deleteGroup(String sessionId, GroupInfo info, AsyncCallback<GroupInfo> asyncCallback);
 
-    void removeAccountFromGroup(String sessionId, GroupInfo info, AccountInfo account, AsyncCallback<Boolean> callback);
+    void removeAccountFromGroup(String sessionId, GroupInfo info, User account, AsyncCallback<Boolean> callback);
 
     void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites, AsyncCallback<Void> callback);
 

@@ -1,12 +1,13 @@
-package org.jbei.ice.lib.shared.dto;
+package org.jbei.ice.lib.shared.dto.bulkupload;
 
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.shared.dto.IDTOModel;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * Data transfer model for bulk upload
@@ -21,7 +22,7 @@ public class BulkUploadInfo implements IDTOModel {
     private int count;
     private Date created;
     private Date lastUpdate;
-    private AccountInfo account;
+    private User account;
     private ArrayList<PartData> entryList;
     private ArrayList<PreferenceInfo> preferences;
     private ArrayList<PermissionInfo> permissions;
@@ -72,11 +73,11 @@ public class BulkUploadInfo implements IDTOModel {
         this.created = created;
     }
 
-    public AccountInfo getAccount() {
+    public User getAccount() {
         return account;
     }
 
-    public void setAccount(AccountInfo account) {
+    public void setAccount(User account) {
         this.account = account;
     }
 
