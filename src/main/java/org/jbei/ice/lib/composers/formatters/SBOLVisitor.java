@@ -38,7 +38,7 @@ public class SBOLVisitor {
         Entry entry = sequence.getEntry();
 
         // Set required properties
-        String partId = entry.getOnePartNumber().getPartNumber();
+        String partId = entry.getPartNumber();
         String dcUri = sequence.getComponentUri();
         if (dcUri == null) {
             dnaComponent.setURI(URI.create(uriString + "/dc#" + partId));
@@ -48,7 +48,7 @@ public class SBOLVisitor {
             String displayId = dcUri.substring(dcUri.lastIndexOf("#") + 1);
             dnaComponent.setDisplayId(displayId);
         }
-        dnaComponent.setName(entry.getOneName().getName());
+        dnaComponent.setName(entry.getName());
         dnaComponent.setDescription(entry.getShortDescription());
 
         DnaSequence dnaSequence = SBOLFactory.createDnaSequence();

@@ -129,7 +129,7 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
         };
 
         this.addColumn(nameColumn, "Name");
-        nameColumn.setSortable(false);
+        nameColumn.setSortable(true);
         this.setColumnWidth(nameColumn, width, unit);
         return nameColumn;
     }
@@ -151,8 +151,8 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
                 return SafeHtmlUtils
                         .fromSafeConstant("<div style=\"width: "
                                                   + size
-                                                  + "px; white-space: nowrap; overflow: hidden; text-overflow: " +
-                                                  "ellipsis;\" title=\""
+                                                  + "px; white-space: nowrap; overflow: hidden; text-overflow: "
+                                                  + "ellipsis;\" title=\""
                                                   + description.replaceAll("\"", "'") + "\">"
                                                   + description + "</div>");
             }

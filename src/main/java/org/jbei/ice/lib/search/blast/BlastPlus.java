@@ -30,7 +30,6 @@ import java.util.Set;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
@@ -472,13 +471,9 @@ public class BlastPlus {
                 try {
                     String idString = ">" + id;
                     idString += DELIMITER + sequence.getEntry().getRecordType();
-                    String name = sequence.getEntry().getOneName() == null ? "None" : sequence.getEntry().getOneName()
-                                                                                              .getName();
+                    String name = sequence.getEntry().getName() == null ? "None" : sequence.getEntry().getName();
                     idString += DELIMITER + name;
-                    Set<PartNumber> numbers = sequence.getEntry().getPartNumbers();
-                    PartNumber partNumber = numbers == null || numbers.isEmpty() ? null : (PartNumber) numbers
-                            .toArray()[0];
-                    String pNumber = partNumber == null ? "None" : partNumber.getPartNumber();
+                    String pNumber = sequence.getEntry().getPartNumber();
                     idString += DELIMITER + pNumber;
                     idString += "\n";
                     writer.write(idString);

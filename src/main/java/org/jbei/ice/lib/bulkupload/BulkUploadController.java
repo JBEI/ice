@@ -471,14 +471,12 @@ public class BulkUploadController {
                     entryController.createEntry(account, otherEntry, null);
                     // link the plasmid to strain (strain gets updated later on)
                     String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX)
-                            + ":" + otherEntry.getOnePartNumber().getPartNumber() + "|"
-                            + otherEntry.getOnePartNumber().getPartNumber() + "]]";
+                            + ":" + otherEntry.getPartNumber() + "|" + otherEntry.getPartNumber() + "]]";
                     ((Strain) entry).setPlasmids(plasmidPartNumberString);
                 } else {
                     // created plasmid, now create strain and link
                     String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX)
-                            + ":" + entry.getOnePartNumber().getPartNumber() + "|"
-                            + entry.getOnePartNumber().getPartNumber() + "]]";
+                            + ":" + entry.getPartNumber() + "|" + entry.getPartNumber() + "]]";
                     otherEntry = entry;
                     entry = new Strain();
                     entry.setOwner(account.getFullName());

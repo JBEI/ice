@@ -36,7 +36,7 @@ public class CollectionDataTable extends EntryDataTable<PartData> {
         columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(true, 60, Unit.PX));
 
-        DataTableColumn<PartData, PartData> partIdCol = addPartIdColumn(delegate, false, 120, Unit.PX);
+        DataTableColumn<PartData, PartData> partIdCol = addPartIdColumn(delegate, true, 120, Unit.PX);
         columns.add(partIdCol);
         columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(super.addSummaryColumn());

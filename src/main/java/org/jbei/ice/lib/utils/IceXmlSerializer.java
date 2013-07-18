@@ -18,8 +18,6 @@ import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Name;
-import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -102,9 +100,7 @@ public class IceXmlSerializer {
     private static final String PERSON_NAME = "personName";
     private static final String OWNER = "owner";
     private static final String PART_NAME = "partName";
-    private static final String PART_NAMES = "partNames";
     private static final String PART_NUMBER = "partNumber";
-    private static final String PART_NUMBERS = "partNumbers";
     private static final String RECORD_TYPE = "recordType";
     private static final String RECORD_ID = "recordId";
     private static final String INDEX = "index";
@@ -204,17 +200,8 @@ public class IceXmlSerializer {
             entryRoot.add(new DefaultElement(MODIFICATION_TIME_STAMP, iceNamespace)
                                   .addText(simpleDateFormat.format(entry.getCreationTime())));
         }
-        DefaultElement partNumbers = new DefaultElement(PART_NUMBERS, iceNamespace);
-        for (PartNumber partNumber : entry.getPartNumbers()) {
-            partNumbers.add(new DefaultElement(PART_NUMBER, iceNamespace).addText(partNumber.getPartNumber()));
-        }
-        entryRoot.add(partNumbers);
-
-        DefaultElement partNames = new DefaultElement(PART_NAMES, iceNamespace);
-        for (Name name : entry.getNames()) {
-            partNames.add(new DefaultElement(PART_NAME, iceNamespace).addText(name.getName()));
-        }
-        entryRoot.add(partNames);
+        entryRoot.add(new DefaultElement(PART_NUMBER, iceNamespace).addText(entry.getPartNumber()));
+        entryRoot.add(new DefaultElement(PART_NAME, iceNamespace).addText(entry.getName()));
 
         DefaultElement owner = new DefaultElement(OWNER, iceNamespace);
         owner.add(new DefaultElement(PERSON_NAME, iceNamespace).addText(emptyStringify(entry.getOwner())));

@@ -264,7 +264,7 @@ public class SequenceController {
         if (entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.name()))
             circular = ((Plasmid) sequence.getEntry()).getCircular();
         FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence(
-                sequence.getSequence(), entry.getNamesAsString(), circular, features, "", "");
+                sequence.getSequence(), entry.getName(), circular, features, "", "");
         featuredDNASequence.setUri(sequence.getUri());
 
         return featuredDNASequence;

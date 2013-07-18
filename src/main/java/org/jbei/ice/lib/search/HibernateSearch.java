@@ -70,8 +70,7 @@ public class HibernateSearch {
     }
 
     protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, ArrayList<EntryType> entryTypes,
-            BooleanQuery booleanQuery, String term, BioSafetyOption option,
-            HashMap<String, Float> userBoost) {
+            BooleanQuery booleanQuery, String term, BioSafetyOption option, HashMap<String, Float> userBoost) {
         term = cleanQuery(term);
         for (EntryType type : entryTypes) {
             Class<?> clazz = SearchFieldFactory.entryClass(type);

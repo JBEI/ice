@@ -14,9 +14,7 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
-import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
@@ -25,26 +23,12 @@ import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.utils.Utils;
 
-import com.google.common.base.Joiner;
-
 /**
  * Utility class for operating on entries
  *
  * @author Hector Plahar
  */
 public class EntryUtil {
-
-    /**
-     * Generate the comma separated string representation of {@link org.jbei.ice.lib.entry.model.PartNumber}s
-     * associated with
-     * this entry.
-     *
-     * @return Comma separated part numbers.
-     */
-    public static String getPartNumbersAsString(Entry entry) {
-        Joiner joiner = Joiner.on(", ").skipNulls();
-        return joiner.join(entry.getPartNumbers());
-    }
 
     /**
      * Generate a clickable &lt;a&gt; link from the given {@link IceLink}.
@@ -374,18 +358,14 @@ public class EntryUtil {
                         }
 
                         if (strainPlasmidNumber != null) {
-                            for (PartNumber plasmidPartNumber : plasmid.getPartNumbers()) {
-                                if (plasmidPartNumber.getPartNumber().equals(strainPlasmidNumber)) {
-                                    resultStrains.add(strain);
-                                    break;
-                                }
+                            if (plasmid.getPartNumber().equals(strainPlasmidNumber)) {
+                                resultStrains.add(strain);
+                                break;
                             }
                         }
                     } else {
-                        for (PartNumber number : plasmid.getPartNumbers()) {
-                            if (strainPlasmid.equals(number.getPartNumber()))
-                                resultStrains.add(strain);
-                        }
+                        if (strainPlasmid.equals(plasmid.getPartNumber()))
+                            resultStrains.add(strain);
                     }
                 }
             }

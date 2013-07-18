@@ -383,7 +383,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void setEntryHeader(String typeDisplay, String name, String owner, String ownerId, Date creationDate) {
-        String html = "<span style=\"color: #888; letter-spacing: -1px;\">CREATE NEW "
+        String html = "<span style=\"color: #888; letter-spacing: -1px;\">"
                 + typeDisplay.toUpperCase() + "</span> "
                 + name + "<br><span style=\"font-weight: normal; font-size: 10px; text-transform: uppercase; "
                 + "color: #999;\">" + formatDate(creationDate);

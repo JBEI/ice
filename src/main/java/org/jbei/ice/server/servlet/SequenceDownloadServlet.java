@@ -3,7 +3,6 @@ package org.jbei.ice.server.servlet;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.util.UUID;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -19,8 +18,6 @@ import org.jbei.ice.lib.composers.formatters.SBOLFormatter;
 import org.jbei.ice.lib.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Name;
-import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
@@ -148,7 +145,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
     private void getGenbank(HttpServletResponse response, Entry entry) {
         SequenceController sequenceController = ControllerFactory.getSequenceController();
-        GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getNamesAsString());
+        GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
         genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false); // TODO
 
         Sequence sequence;
@@ -206,7 +203,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
         String sequenceString;
         try {
-            FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getNamesAsString());
+            FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getName());
             sequenceString = sequenceController.compose(sequence, formatter);
         } catch (ControllerException e) {
             Logger.error("Failed to generate fasta file for download!", e);
@@ -315,21 +312,12 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     /**
-     * Retrieves the first partnumber of first name of the entry. If one
-     * is not available, a random string is returned
+     * Retrieves the entry name for use as the filename
      *
-     * @param entry entry whose partNumber or name is desired to be used as the filename
+     * @param entry entry whose name is desired to be used as the filename
      * @return string to be used as a filename
      */
     private String getFileName(Entry entry) {
-        Name name = entry.getOneName();
-        if (name != null)
-            return name.getName();
-
-        PartNumber partNumber = entry.getOnePartNumber();
-        if (partNumber != null)
-            return partNumber.getPartNumber();
-
-        return UUID.randomUUID().toString().split("-")[0];
+        return entry.getName();
     }
 }

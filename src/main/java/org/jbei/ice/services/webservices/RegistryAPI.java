@@ -22,7 +22,6 @@ import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
@@ -553,16 +552,8 @@ public class RegistryAPI implements IRegistryAPI {
         }
 
         // Validate name
-        if (entry.getNames() == null || entry.getNames().size() == 0) {
-            throw new ServiceException("Name is mandatory! Expected at least one name.");
-        } else {
-            for (Name name : entry.getNames()) {
-                if (name.getName() == null || name.getName().isEmpty()) {
-                    throw new ServiceException("Name can't be null or empty!");
-                }
-
-                name.setEntry(entry);
-            }
+        if (entry.getName() == null || entry.getName().trim().isEmpty()) {
+            throw new ServiceException("Name is mandatory!");
         }
 
         // Validate selection markers
@@ -945,7 +936,7 @@ public class RegistryAPI implements IRegistryAPI {
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {
-                GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getNamesAsString());
+                GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
                 genbankFormatter.setCircular((sequence.getEntry() instanceof Plasmid) ? ((Plasmid) entry)
                         .getCircular() : false);
 
@@ -986,7 +977,7 @@ public class RegistryAPI implements IRegistryAPI {
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {
-                fastaSequence = sequenceController.compose(sequence, new FastaFormatter(entry.getNamesAsString()));
+                fastaSequence = sequenceController.compose(sequence, new FastaFormatter(entry.getName()));
             }
 
             log("User '" + account.getEmail() + "' pulled generated fasta sequence: '" + entryId + "'");

@@ -12,7 +12,6 @@ import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
@@ -134,12 +133,12 @@ public class InfoToModelFactory {
         if (entry == null || info == null)
             return null;
 
-        Set<Name> names = getNames(info.getName(), entry);
-        entry.setNames(names);
+        entry.setName(info.getName());
         Set<SelectionMarker> markers = getSelectionMarkers(info.getSelectionMarkers(), entry);
         entry.setSelectionMarkers(markers);
         entry.setReferences(info.getReferences());
         entry.setRecordId(info.getRecordId());
+        entry.setPartNumber(info.getPartId());
 
         if (info.getOwnerEmail() != null) {
             entry.setOwner(info.getOwner());
@@ -306,35 +305,6 @@ public class InfoToModelFactory {
         return links;
     }
 
-    private static Set<Name> getNames(String nameStr, Entry entry) {
-        Set<Name> existingNames = entry.getNames();
-        Set<Name> names = new HashSet<>();
-
-        if (existingNames == null)
-            existingNames = new HashSet<>();
-
-        if (nameStr == null)
-            return existingNames;
-
-        String[] items = nameStr.split("\\s*,+\\s*");
-        for (int i = 0; i < items.length; i++) {
-            String item = items[i];
-            Name name;
-
-            if (existingNames.size() > i) {
-                name = (Name) existingNames.toArray()[i];
-            } else {
-                name = new Name();
-                existingNames.add(name);
-            }
-            name.setName(item);
-            name.setEntry(entry);
-            names.add(name);
-        }
-
-        return names;
-    }
-
     /**
      * Updates the entry based on the field that is specified. Mainly created for use by the bulk import auto update
      *
@@ -422,17 +392,11 @@ public class InfoToModelFactory {
 
             case NAME:
             case STRAIN_NAME:
-                HashSet<Name> names = new HashSet<>();
-                Name name = new Name(value, entry);
-                names.add(name);
-                entry.setNames(names);
+                entry.setName(value);
                 break;
 
             case PLASMID_NAME:
-                names = new HashSet<>();
-                name = new Name(value, plasmid);
-                names.add(name);
-                plasmid.setNames(names);
+                plasmid.setName(value);
                 break;
 
             case ALIAS:

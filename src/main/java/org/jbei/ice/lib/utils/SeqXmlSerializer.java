@@ -1,9 +1,8 @@
 package org.jbei.ice.lib.utils;
 
-import org.dom4j.Element;
-import org.dom4j.Namespace;
-import org.dom4j.QName;
-import org.dom4j.tree.DefaultElement;
+import java.util.HashSet;
+import java.util.List;
+
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -16,8 +15,10 @@ import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
-import java.util.HashSet;
-import java.util.List;
+import org.dom4j.Element;
+import org.dom4j.Namespace;
+import org.dom4j.QName;
+import org.dom4j.tree.DefaultElement;
 
 /**
  * SeqXML serializer/deserializer.
@@ -60,10 +61,10 @@ public class SeqXmlSerializer {
         seq.add(seqNamespace);
         seq.add(xsiNamespace);
         seq.addAttribute(new QName("schemaLocation", xsiNamespace),
-                "http://jbei.org/sequence seq.xsd");
+                         "http://jbei.org/sequence seq.xsd");
         Entry entry = sequence.getEntry();
 
-        seq.add(new DefaultElement(NAME, seqNamespace).addText(entry.getNamesAsString()));
+        seq.add(new DefaultElement(NAME, seqNamespace).addText(entry.getName()));
 
         Boolean circular = false;
         if (entry.getRecordType().equals("plasmid")) {
@@ -81,7 +82,7 @@ public class SeqXmlSerializer {
             for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
                 DefaultElement feature = new DefaultElement(FEATURE, seqNamespace);
                 feature.add(new DefaultElement(LABEL, seqNamespace).addText(sequenceFeature
-                        .getName()));
+                                                                                    .getName()));
                 String complement;
                 if (sequenceFeature.getStrand() == -1) {
                     complement = "true";
@@ -118,7 +119,7 @@ public class SeqXmlSerializer {
                 String tempSequence;
                 if (genbankStart > end) {
                     tempSequence = sequence.getSequence().trim()
-                            .substring(genbankStart - 1, sequence.getSequence().length());
+                                           .substring(genbankStart - 1, sequence.getSequence().length());
                     tempSequence += sequence.getSequence().trim().substring(0, end);
                 } else {
                     tempSequence = sequence.getSequence().trim().substring(genbankStart - 1, end);

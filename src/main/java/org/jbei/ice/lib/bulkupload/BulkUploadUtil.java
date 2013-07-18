@@ -141,7 +141,7 @@ public class BulkUploadUtil {
         if (StatusType.displayValueOf(entry.getStatus()).isEmpty())
             return false;
 
-        if (entry.getOneName() == null)
+        if (entry.getName() == null)
             return false;
 
         if (stringIsEmpty(entry.getCreator()))

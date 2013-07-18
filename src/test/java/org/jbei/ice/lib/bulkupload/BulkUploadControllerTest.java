@@ -241,7 +241,7 @@ public class BulkUploadControllerTest {
         EntryController entryController = new EntryController();
         Entry entry = entryController.get(account, autoUpdate.getEntryId());
         Assert.assertNotNull(entry);
-        Assert.assertEquals("JBEI-0001", entry.getNamesAsString());
+        Assert.assertEquals("JBEI-0001", entry.getName());
 
         // check that the bulk upload has been created
         BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
@@ -346,7 +346,7 @@ public class BulkUploadControllerTest {
         EntryFundingSource fundingSource = (EntryFundingSource) entry.getEntryFundingSources().toArray()[0];
         Assert.assertEquals("test", fundingSource.getFundingSource().getPrincipalInvestigator());
         Assert.assertEquals("JBEI", fundingSource.getFundingSource().getFundingSource());
-        Assert.assertEquals("JBEI-0001", entry.getNamesAsString());
+        Assert.assertEquals("JBEI-0001", entry.getName());
     }
 
     @Test

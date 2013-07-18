@@ -140,7 +140,7 @@ public class GroupController {
 
         Group group = new Group();
         group.setLabel(info.getLabel());
-        group.setDescription(info.getDescription());
+        group.setDescription(info.getDescription() == null ? "" : info.getDescription());
         group.setType(info.getType());
         if (info.getType() == GroupType.PRIVATE)
             group.setOwner(account);

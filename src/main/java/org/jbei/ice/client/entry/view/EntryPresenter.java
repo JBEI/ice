@@ -174,7 +174,7 @@ public class EntryPresenter extends AbstractPresenter {
         IEntryFormSubmit newForm = entryAddPresenter.getEntryForm(type, new NewFormCancelHandler());
         this.formSubmit = newForm;
         display.showNewForm(newForm);
-        display.setEntryHeader(newForm.getHeaderDisplay(), "", ClientController.account.getFullName(),
+        display.setEntryHeader("create new " + newForm.getHeaderDisplay(), "", ClientController.account.getFullName(),
                                ClientController.account.getEmail(), (new Date(System.currentTimeMillis())));
         display.getPermissionsWidget().setCanEdit(true);
         currentInfo = newForm.getEntry();

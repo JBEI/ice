@@ -80,6 +80,7 @@ public class ApplicationController {
             case "3.3.0":
                 // upgrade web of registries partners
                 ControllerFactory.getFolderController().upgradeFolders();
+                ControllerFactory.getEntryController().upgradeTo3Point4();
                 break;
         }
     }

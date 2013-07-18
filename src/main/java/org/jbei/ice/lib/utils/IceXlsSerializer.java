@@ -2,7 +2,6 @@ package org.jbei.ice.lib.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -111,11 +110,10 @@ public class IceXlsSerializer {
         SequenceController sequenceController = ControllerFactory.getSequenceController();
         AttachmentController attachmentController = ControllerFactory.getAttachmentController();
 
-        for (Iterator<Entry> iterator = entries.iterator(); iterator.hasNext(); ) {
-            Entry entry = iterator.next();
+        for (Entry entry : entries) {
             stringBuilder.append(escapeCSVValue(entry.getRecordType())).append("\t");
-            stringBuilder.append(escapeCSVValue(EntryUtil.getPartNumbersAsString(entry))).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getNamesAsString())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getPartNumber())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getName())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getOwner())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getCreator())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getAlias())).append("\t");

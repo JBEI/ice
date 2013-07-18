@@ -1,6 +1,7 @@
 package org.jbei.ice.server;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -260,7 +261,7 @@ public class ModelToInfoFactory {
         if (strains != null) {
             for (Strain strain : strains) {
                 data.getStrains()
-                    .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
+                    .put(strain.getId(), strain.getPartNumber());
             }
         }
 
@@ -270,8 +271,8 @@ public class ModelToInfoFactory {
     private static PartData getCommon(Account account, PartData info, Entry entry) {
         info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
-        info.setPartId(EntryUtil.getPartNumbersAsString(entry));
-        info.setName(entry.getNamesAsString());
+        info.setPartId(entry.getPartNumber());
+        info.setName(entry.getName());
         info.setOwner(entry.getOwner());
         info.setOwnerEmail(entry.getOwnerEmail());
         info.setCreator(entry.getCreator());
@@ -302,9 +303,23 @@ public class ModelToInfoFactory {
         info.setSelectionMarkers(entry.getSelectionMarkersAsString());
 
         if (!entry.getEntryFundingSources().isEmpty()) {
-            EntryFundingSource source = entry.getEntryFundingSources().iterator().next();
+            Iterator iterator = entry.getEntryFundingSources().iterator();
+            EntryFundingSource source = (EntryFundingSource) iterator.next();
             info.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
             info.setFundingSource(source.getFundingSource().getFundingSource());
+
+            while (iterator.hasNext()) {
+                String pi = ((EntryFundingSource) iterator.next()).getFundingSource().getPrincipalInvestigator();
+                String fs = ((EntryFundingSource) iterator.next()).getFundingSource().getFundingSource();
+
+                if (pi != null && !pi.trim().isEmpty()) {
+                    info.setPrincipalInvestigator(info.getPrincipalInvestigator() + ", " + pi);
+                }
+
+                if (fs != null && !fs.trim().isEmpty()) {
+                    info.setFundingSource(info.getFundingSource() + ", " + fs);
+                }
+            }
         }
 
         info.setLinks(entry.getLinksAsString());
@@ -354,8 +369,8 @@ public class ModelToInfoFactory {
     private static void getTipViewCommon(PartData view, Entry entry) {
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
-        view.setPartId(EntryUtil.getPartNumbersAsString(entry));
-        view.setName(entry.getNamesAsString());
+        view.setPartId(entry.getPartNumber());
+        view.setName(entry.getName());
         view.setAlias(entry.getAlias());
         view.setCreator(entry.getCreator());
         view.setCreatorEmail(entry.getCreatorEmail());
@@ -396,8 +411,8 @@ public class ModelToInfoFactory {
         view.setType(type);
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
-        view.setPartId(EntryUtil.getPartNumbersAsString(entry));
-        view.setName(entry.getNamesAsString());
+        view.setPartId(entry.getPartNumber());
+        view.setName(entry.getName());
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime());
         view.setStatus(entry.getStatus());
@@ -506,7 +521,7 @@ public class ModelToInfoFactory {
                 Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
                 if (strains != null) {
                     for (Strain strain : strains) {
-                        view.getStrains().put(strain.getId(), strain.getOnePartNumber().getPartNumber());
+                        view.getStrains().put(strain.getId(), strain.getPartNumber());
                     }
                 }
 

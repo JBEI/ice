@@ -23,7 +23,7 @@ public class SearchFieldFactory {
         commonFields.add("owner");
         commonFields.add("ownerEmail");
         commonFields.add("creator");
-        commonFields.add("names.name");
+        commonFields.add("name");
         commonFields.add("alias");
         commonFields.add("creatorEmail");
         commonFields.add("keywords");
@@ -31,7 +31,7 @@ public class SearchFieldFactory {
         commonFields.add("longDescription");
         commonFields.add("intellectualProperty");
         commonFields.add("references");
-        commonFields.add("partNumbers.partNumber");
+        commonFields.add("partNumber");
         commonFields.add("links.link");
         commonFields.add("links.url");
         commonFields.add("selectionMarkers.name");

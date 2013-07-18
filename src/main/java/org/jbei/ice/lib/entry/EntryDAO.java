@@ -48,16 +48,13 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
     @SuppressWarnings("unchecked")
     public HashSet<Long> retrieveStrainsForPlasmid(Plasmid plasmid) throws DAOException {
-        Set<PartNumber> plasmidPartNumbers = plasmid.getPartNumbers();
         Session session = currentSession();
-        HashSet<Long> strainIds = null;
+        HashSet<Long> strainIds;
         try {
-            for (PartNumber plasmidPartNumber : plasmidPartNumbers) {
-                Query query = session
-                        .createQuery("select strain.id from Strain strain where strain.plasmids like :partNumber");
-                query.setString("partNumber", "%" + plasmidPartNumber.getPartNumber() + "%");
-                strainIds = new HashSet<Long>(query.list());
-            }
+            Query query = session
+                    .createQuery("select strain.id from Strain strain where strain.plasmids like :partNumber");
+            query.setString("partNumber", "%" + plasmid.getPartNumber() + "%");
+            strainIds = new HashSet<Long>(query.list());
         } catch (HibernateException e) {
             Logger.error("Could not get strains for plasmid " + e.toString(), e);
             throw new DAOException(e);
@@ -114,8 +111,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
     @SuppressWarnings("unchecked")
     public Set<String> getMatchingPlasmidNames(String token, int limit) throws DAOException {
         try {
-            String qString = "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where " +
-                    "name.name like '%" + token + "%' order by name.name asc";
+            String qString = "select distinct plasmid.name from Plasmid plasmid where plasmid.name " +
+                    "like '%" + token + "%'";
             Query query = currentSession().createQuery(qString);
             if (limit > 0)
                 query.setMaxResults(limit);
@@ -213,25 +210,18 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     public Entry getByPartNumber(String partNumber) throws DAOException {
-        Entry entry = null;
-
         Session session = currentSession();
-
         try {
-            Query query = session.createQuery("from " + PartNumber.class.getName()
-                                                      + " where partNumber = :partNumber");
-            query.setParameter("partNumber", partNumber);
-            Object queryResult = query.uniqueResult();
-
-            if (queryResult != null) {
-                entry = ((PartNumber) queryResult).getEntry();
+            Criteria criteria = session.createCriteria(Entry.class).add(Restrictions.eq("partNumber", partNumber));
+            Object object = criteria.uniqueResult();
+            if (object != null) {
+                return (Entry) object;
             }
+            return null;
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve entry by partNumber: " + partNumber, e);
         }
-
-        return entry;
     }
 
     /**
@@ -242,35 +232,28 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     public Entry getByUniqueName(String name) throws DAOException {
-        Entry entry = null;
         Session session = currentSession();
 
         try {
-            Query query = session.createQuery("from " + Name.class.getName() + " where name = :name");
-            query.setParameter("name", name);
-            List queryResult = query.list();
-            if (queryResult == null) {
+            Criteria criteria = session.createCriteria(Entry.class.getName())
+                                       .add(Restrictions.eq("name", name))
+                                       .add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            List queryResult = criteria.list();
+            if (queryResult == null || queryResult.isEmpty()) {
                 return null;
             }
 
-            for (Object object : queryResult) {
-                Name entryName = ((Name) object);
-                if (entryName.getEntry().getVisibility() == null ||
-                        entryName.getEntry().getVisibility() == Visibility.OK.getValue()) {
-                    if (entry != null) {
-                        String msg = "Duplicate entries found for name " + name;
-                        Logger.error(msg);
-                        throw new DAOException(msg);
-                    }
-                    entry = entryName.getEntry();
-                }
+            if (queryResult.size() > 1) {
+                String msg = "Duplicate entries found for name " + name;
+                Logger.error(msg);
+                throw new DAOException(msg);
             }
+
+            return (Entry) queryResult.get(0);
         } catch (HibernateException e) {
             Logger.error("Failed to retrieve entry by name: " + name, e);
             throw new DAOException("Failed to retrieve entry by name: " + name, e);
         }
-
-        return entry;
     }
 
     /**
@@ -315,6 +298,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
             case STATUS:
                 fieldName = "status";
+                break;
+
+            case PART_ID:
+                fieldName = "partNumber";
+                break;
+
+            case NAME:
+                fieldName = "name";
                 break;
 
             case CREATED:
@@ -408,6 +399,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 fieldName = "status";
                 break;
 
+            case NAME:
+                fieldName = "name";
+                break;
+
+            case PART_ID:
+                fieldName = "partNumber";
+                break;
+
             case CREATED:
             default:
                 fieldName = "creationTime";
@@ -471,13 +470,13 @@ public class EntryDAO extends HibernateRepository<Entry> {
     String generateNextPartNumber(String prefix, String delimiter, String suffix) throws DAOException {
         Session session = currentSession();
         try {
-            String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '"
+            String queryString = "from " + Entry.class.getName() + " where partNumber LIKE '"
                     + prefix + "%' ORDER BY partNumber DESC";
             Query query = session.createQuery(queryString);
             query.setMaxResults(2);
 
-            ArrayList<PartNumber> tempList = new ArrayList<PartNumber>(query.list());
-            PartNumber entryPartNumber = null;
+            ArrayList<Entry> tempList = new ArrayList<Entry>(query.list());
+            Entry entryPartNumber = null;
             if (tempList.size() > 0) {
                 entryPartNumber = tempList.get(0);
             }
@@ -525,6 +524,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
                     fieldName = "status";
                     break;
 
+                case PART_ID:
+                    fieldName = "partNumber";
+                    break;
+
+                case NAME:
+                    fieldName = "name";
+                    break;
+
                 case CREATED:
                 default:
                     fieldName = "creationTime";
@@ -563,6 +570,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
                 case STATUS:
                     fieldName = "status";
+                    break;
+
+                case NAME:
+                    fieldName = "name";
+                    break;
+
+                case PART_ID:
+                    fieldName = "partNumber";
                     break;
 
                 case CREATED:
@@ -705,10 +720,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
         hql = "delete from " + Link.class.getName() + " where entry=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
 
-        // delete from names
-        hql = "delete from " + Name.class.getName() + " where entry=:entry";
-        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
-
         // delete from selection markers
         hql = "delete from " + SelectionMarker.class.getName() + " where entry=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
@@ -717,15 +728,54 @@ public class EntryDAO extends HibernateRepository<Entry> {
         hql = "delete from " + EntryFundingSource.class.getName() + " where entry=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
 
-        // delete from part_number
-        hql = "delete from " + PartNumber.class.getName() + " where entry=:entry";
-        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
-
-        //delete from permission
+        // delete from permission
         hql = "delete from " + Permission.class.getName() + " where entry=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
 
         // finally delete actual entry
         delete(entry);
+    }
+
+    public void upgradeNamesAndPartNumbers(String partNumberPrefix) throws DAOException {
+        Session session = currentSession();
+        int i = 0;
+
+        Query query = session.createQuery("from " + PartNumber.class.getName());
+        Iterator iterator = query.iterate();
+        while (iterator.hasNext()) {
+            PartNumber number = (PartNumber) iterator.next();
+            Entry entry = number.getEntry();
+            if (entry.getPartNumber() == null || entry.getPartNumber().isEmpty()) {
+                entry.setPartNumber(number.getPartNumber());
+            } else {
+                if (number.getPartNumber().startsWith(partNumberPrefix))
+                    entry.setPartNumber(number.getPartNumber());
+            }
+            session.update(entry);
+            i += 1;
+            if (i % 20 == 0) {
+                Logger.info(Long.toString(i));
+                session.flush();
+                session.clear();
+            }
+        }
+
+        // upgrade names
+        query = session.createQuery("from " + Name.class.getName());
+        iterator = query.iterate();
+        while (iterator.hasNext()) {
+            Name name = (Name) iterator.next();
+            Entry entry = name.getEntry();
+            if (entry.getName() == null || entry.getName().isEmpty()) {
+                entry.setName(name.getName());
+            }
+            session.update(entry);
+            i += 1;
+            if (i % 20 == 0) {
+                Logger.info(Long.toString(i));
+                session.flush();
+                session.clear();
+            }
+        }
     }
 }
