@@ -17,8 +17,6 @@ import org.jbei.ice.lib.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Name;
-import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -68,25 +66,41 @@ public class EntryController {
     public Set<String> getMatchingAutoCompleteField(AutoCompleteField field, String token, int limit)
             throws ControllerException {
         try {
+            Set<String> results;
             switch (field) {
                 case SELECTION_MARKERS:
-                    return dao.getMatchingSelectionMarkers(token, limit);
+                    results = dao.getMatchingSelectionMarkers(token, limit);
+                    break;
 
                 case ORIGIN_OF_REPLICATION:
-                    return dao.getMatchingOriginOfReplication(token, limit);
+                    results = dao.getMatchingOriginOfReplication(token, limit);
+                    break;
 
                 case PROMOTERS:
-                    return dao.getMatchingPromoters(token, limit);
+                    results = dao.getMatchingPromoters(token, limit);
+                    break;
 
                 case REPLICATES_IN:
-                    return dao.getMatchingReplicatesIn(token, limit);
+                    results = dao.getMatchingReplicatesIn(token, limit);
+                    break;
 
                 case PLASMID_NAME:
-                    return dao.getMatchingPlasmidNames(token, limit);
+                    results = dao.getMatchingPlasmidNames(token, limit);
+                    break;
 
                 default:
-                    return new HashSet<>();
+                    results = new HashSet<>();
             }
+
+            // process to remove commas
+            HashSet<String> individualResults = new HashSet<>();
+            for (String result : results) {
+                for (String split : result.split(",")) {
+                    if (split.contains(token))
+                        individualResults.add(split);
+                }
+            }
+            return individualResults;
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
@@ -124,7 +138,7 @@ public class EntryController {
         plasmid = createEntry(account, plasmid, permissions);
         results.add(plasmid);
         String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX) + ":"
-                + plasmid.getOnePartNumber().getPartNumber() + "|" + plasmid.getOneName().getName() + "]]";
+                + plasmid.getPartNumber() + "|" + plasmid.getName() + "]]";
         ((Strain) strain).setPlasmids(plasmidPartNumberString);
         strain = createEntry(account, strain, permissions);
         results.add(strain);
@@ -148,8 +162,26 @@ public class EntryController {
         }
     }
 
+    /**
+     * creates entry and assigns read permissions to all public groups that user creating the entry is a member of
+     *
+     * @param account account for user creating entry
+     * @param entry   entry being created
+     * @return created entry
+     * @throws ControllerException on exception creating the entry
+     */
     public Entry createEntry(Account account, Entry entry) throws ControllerException {
-        return createEntry(account, entry, null);
+        ArrayList<PermissionInfo> permissions = new ArrayList<>();
+        for (Group group : ControllerFactory.getGroupController().getAllPublicGroupsForAccount(account)) {
+            PermissionInfo permissionInfo = new PermissionInfo();
+            permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
+            permissionInfo.setArticle(PermissionInfo.Article.GROUP);
+            permissionInfo.setArticleId(group.getId());
+            permissionInfo.setDisplay(group.getLabel());
+            permissions.add(permissionInfo);
+        }
+
+        return createEntry(account, entry, permissions);
     }
 
     /**
@@ -166,13 +198,7 @@ public class EntryController {
      */
     public Entry createEntry(Account account, Entry entry, ArrayList<PermissionInfo> permissions)
             throws ControllerException {
-        PartNumber partNumber = new PartNumber();
-        String nextPart = getNextPartNumber();
-        partNumber.setPartNumber(nextPart);
-        entry.getPartNumbers().add(partNumber);
-
-        partNumber.setEntry(entry);
-
+        entry.setPartNumber(getNextPartNumber());
         entry.setRecordId(Utils.generateUUID());
         entry.setVersionId(entry.getRecordId());
         entry.setCreationTime(Calendar.getInstance().getTime());
@@ -189,18 +215,6 @@ public class EntryController {
         if (entry.getLinks() != null) {
             for (Link link : entry.getLinks()) {
                 link.setEntry(entry);
-            }
-        }
-
-        if (entry.getNames() != null) {
-            for (Name name : entry.getNames()) {
-                name.setEntry(entry);
-            }
-        }
-
-        if (entry.getPartNumbers() != null) {
-            for (PartNumber pNumber : entry.getPartNumbers()) {
-                pNumber.setEntry(entry);
             }
         }
 
@@ -230,18 +244,6 @@ public class EntryController {
             }
         }
 
-        // retrieve all public groups that this user is a part of an assign read permissions to those groups
-        // for this entry
-//        for (Group group : ControllerFactory.getGroupController().getAllPublicGroupsForAccount(account)) {
-//            PermissionInfo permissionInfo = new PermissionInfo();
-//            permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
-//            permissionInfo.setTypeId(entry.getId());
-//            permissionInfo.setArticle(PermissionInfo.Article.GROUP);
-//            permissionInfo.setArticleId(group.getId());
-//            permissionInfo.setDisplay(group.getLabel());
-//            permissionsController.addPermission(account, permissionInfo);
-//        }
-
         if (sequenceController.hasSequence(entry.getId())) {
             ApplicationController.scheduleBlastIndexRebuildTask(true);
         }
@@ -251,12 +253,7 @@ public class EntryController {
 
     public Entry recordEntry(Entry entry, ArrayList<PermissionInfo> permissions) throws ControllerException {
         entry.setId(0);
-        PartNumber partNumber = new PartNumber();
-        String nextPart = getNextPartNumber();
-        partNumber.setPartNumber(nextPart);
-        entry.getPartNumbers().add(partNumber);
-
-        partNumber.setEntry(entry);
+        entry.setPartNumber(getNextPartNumber());
 
         if (entry.getRecordId() == null) {
             entry.setRecordId(Utils.generateUUID());
@@ -281,18 +278,6 @@ public class EntryController {
         if (entry.getLinks() != null) {
             for (Link link : entry.getLinks()) {
                 link.setEntry(entry);
-            }
-        }
-
-        if (entry.getNames() != null) {
-            for (Name name : entry.getNames()) {
-                name.setEntry(entry);
-            }
-        }
-
-        if (entry.getPartNumbers() != null) {
-            for (PartNumber pNumber : entry.getPartNumbers()) {
-                pNumber.setEntry(entry);
             }
         }
 
@@ -884,11 +869,11 @@ public class EntryController {
                 .append("https://").append(site)
                 .append("/#page=profile;id=").append(account.getId()).append(";s=profile)")
                 .append(" for entry ")
-                .append(entry.getOnePartNumber().getPartNumber())
+                .append(entry.getPartNumber())
                 .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
                 .append(". \n\nThe requested form is ")
                 .append(form);
-            return Emailer.send(email, ("Sample request for " + entry.getOnePartNumber().getPartNumber()),
+            return Emailer.send(email, ("Sample request for " + entry.getPartNumber()),
                                 body.toString());
         } catch (DAOException | ControllerException e) {
             Logger.error(e);
@@ -912,13 +897,12 @@ public class EntryController {
             body.append("A problem notification was sent by ")
                 .append(account.getFullName())
                 .append(" for entry ")
-                .append(entry.getOnePartNumber().getPartNumber())
+                .append(entry.getPartNumber())
                 .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
                 .append("\n\nMessage:\n\n")
                 .append(msg)
                 .append("\n\n");
-            boolean success = Emailer.send(email, ("Problem alert for " + entry.getOnePartNumber().getPartNumber()),
-                                           body.toString());
+            boolean success = Emailer.send(email, ("Problem alert for " + entry.getPartNumber()), body.toString());
             if (success) {
                 Comment comment = new Comment(entry, account, msg);
                 comment = commentDAO.save(comment);
@@ -942,5 +926,19 @@ public class EntryController {
             return false;
 
         return permissionsController.hasWritePermission(account, entry);
+    }
+
+    public void upgradeTo3Point4() throws ControllerException {
+        try {
+            Logger.info("Upgrading entries....please wait");
+            String prefix = ControllerFactory.getConfigurationController()
+                                             .getConfiguration(ConfigurationKey.PART_NUMBER_PREFIX).getValue();
+            dao.upgradeNamesAndPartNumbers(prefix);
+            Logger.info("Entry upgrade complete");
+        } catch (DAOException e) {
+            Logger.error(e);
+        }
+
+
     }
 }

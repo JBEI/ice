@@ -14,7 +14,9 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
@@ -104,6 +106,26 @@ public class EntryControllerTest {
         strain = controller.createEntry(account, strain, null);
         Assert.assertNotNull(strain);
         Assert.assertTrue(strain.getId() > 0);
+
+        // create a public group
+        GroupController groupController = new GroupController();
+        Account admin = AccountCreator.createTestAccount("testCreateEntryAdmin", true);
+        GroupInfo info = new GroupInfo();
+        info.setLabel("public group");
+        info.setType(GroupType.PUBLIC);
+        info.getMembers().add(Account.toDTO(account));
+        info = groupController.createGroup(admin, info);
+        Assert.assertNotNull(info);
+        Assert.assertTrue(info.getId() > 0);
+
+        Entry part = new Part();
+        part = controller.createEntry(account, part);
+        Assert.assertNotNull(part);
+        PermissionsController permissionsController = new PermissionsController();
+        Group group = groupController.getGroupById(info.getId());
+        HashSet<Group> groups = new HashSet<>();
+        groups.add(group);
+        Assert.assertTrue(permissionsController.groupHasReadPermission(groups, part));
     }
 
     @Test
@@ -152,7 +174,7 @@ public class EntryControllerTest {
 
         Entry plasmid = InfoToModelFactory.infoToEntry(data);
         plasmid = controller.createEntry(creator, plasmid);
-        String partNumber = plasmid.getOnePartNumber().getPartNumber();
+        String partNumber = plasmid.getPartNumber();
         PartData result = controller.getByPartNumber(creator, partNumber);
         Assert.assertNotNull(result);
         Assert.assertEquals(EntryType.PLASMID, result.getType());
@@ -227,11 +249,11 @@ public class EntryControllerTest {
 
         Entry plasmid = InfoToModelFactory.infoToEntry(data);
         plasmid = controller.createEntry(creator, plasmid);
-        String name = plasmid.getOneName().getName();
+        String name = plasmid.getName();
         PartData result = controller.getByUniqueName(creator, name);
         Assert.assertNotNull(result);
         Assert.assertEquals(EntryType.PLASMID, result.getType());
-        String partNumber = plasmid.getOnePartNumber().getPartNumber();
+        String partNumber = plasmid.getPartNumber();
         result = controller.getByUniqueName(creator, partNumber);
         Assert.assertNull(result);
     }
