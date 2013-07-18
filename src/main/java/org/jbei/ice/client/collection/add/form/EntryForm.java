@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
+import org.jbei.ice.client.collection.add.form.CustomFieldPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.lib.shared.BioSafetyOption;
@@ -44,7 +44,7 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
     protected TextArea ip;
 
     private final T entryInfo;
-    private ParametersPanel parametersPanel;
+    private CustomFieldPanel customFieldPanel;
     private TextArea notesText;
 
     private HandlerRegistration submitRegistration;
@@ -216,21 +216,13 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
     }
 
     protected Widget createParametersWidget() {
-        FlexTable parameters = new FlexTable();
-        parameters.setCellPadding(0);
-        parameters.setCellSpacing(3);
-        parameters.setWidth("100%");
-
-        parameters.setWidget(0, 0, new Label("Parameters"));
-        parameters.getFlexCellFormatter().setStyleName(0, 0, "entry_add_sub_header");
-        parameters.getFlexCellFormatter().setColSpan(0, 0, 6);
-        parameters.setWidget(1, 0, new Label(""));
-        parameters.getFlexCellFormatter().setHeight(1, 0, "10px");
-        parameters.getFlexCellFormatter().setColSpan(1, 0, 6);
-
-        parametersPanel = new ParametersPanel(parameters, 2);
-
-        return parameters;
+        VerticalPanel panel = new VerticalPanel();
+        customFieldPanel = new CustomFieldPanel();
+        customFieldPanel.setFields(entryInfo.getCustomFields());
+        panel.add(customFieldPanel);
+        panel.add(new HTML("&nbsp;"));
+        panel.add(customFieldPanel.getFieldButton());
+        return panel;
     }
 
     protected TextBox createStandardTextBox(String width, int length) {
@@ -301,7 +293,7 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         }
 
         // parameters
-        LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
+        LinkedHashMap<Integer, Parameter> map = customFieldPanel.getParameterMap();
 
         for (Integer key : map.keySet()) {
             Parameter parameter = map.get(key);
@@ -342,7 +334,7 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
 
         // parameters
         ArrayList<CustomField> parameters = new ArrayList<CustomField>();
-        LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
+        LinkedHashMap<Integer, Parameter> map = customFieldPanel.getParameterMap();
 
         for (Integer key : map.keySet()) {
             Parameter parameter = map.get(key);
@@ -353,7 +345,7 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
                 parameters.add(new CustomField(name, value));
             }
         }
-        this.entryInfo.setParameters(parameters);
+        this.entryInfo.setCustomFields(parameters);
 
         this.entryInfo.setShortDescription(summary.getText());
         this.entryInfo.setLongDescription(this.notesText.getText());

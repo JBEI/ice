@@ -12,7 +12,7 @@ import org.jbei.ice.client.collection.add.EntryFormFactory;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.view.ViewFactory;
-import org.jbei.ice.client.entry.view.detail.EntryInfoView;
+import org.jbei.ice.client.entry.view.detail.EntryDataView;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanel;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.handler.HasAttachmentDeleteHandler;
@@ -70,8 +70,8 @@ public class EntryView extends Composite implements IEntryView {
 
     // menu
     private EntryViewMenu menu;
-    private final HashMap<EntryType, EntryInfoView> viewCache;
-    private EntryInfoView currentView;
+    private final HashMap<EntryType, EntryDataView> viewCache;
+    private EntryDataView currentView;
 
     public EntryView(Delegate<Long> retrieveSequenceTracesDelegate) {
         permissions = new PermissionsWidget();
@@ -108,7 +108,7 @@ public class EntryView extends Composite implements IEntryView {
 
         loadingWidget = new EntryLoadingWidget();
         entryAction.setVisible(false);
-        viewCache = new HashMap<EntryType, EntryInfoView>();
+        viewCache = new HashMap<EntryType, EntryDataView>();
     }
 
     @Override

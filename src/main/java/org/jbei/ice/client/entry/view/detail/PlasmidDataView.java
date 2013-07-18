@@ -15,9 +15,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Hector Plahar
  */
 
-public class PlasmidInfoView extends EntryInfoView<PlasmidData> {
+public class PlasmidDataView extends EntryDataView<PlasmidData> {
 
-    public PlasmidInfoView(PlasmidData data) {
+    public PlasmidDataView(PlasmidData data) {
         super(data);
     }
 

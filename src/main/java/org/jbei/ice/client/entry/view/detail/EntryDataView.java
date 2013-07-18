@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @param <T> Specific type of entry info to be shown by the view
  * @author Hector Plahar
  */
-public abstract class EntryInfoView<T extends PartData> extends Composite {
+public abstract class EntryDataView<T extends PartData> extends Composite {
 
     private final FlexTable table;
     protected T info;
@@ -32,7 +32,7 @@ public abstract class EntryInfoView<T extends PartData> extends Composite {
 
     private SequenceViewPanel sequencePanel;
 
-    public EntryInfoView(T info) {
+    public EntryDataView(T info) {
         this.info = info;
 
         table = new FlexTable();
@@ -122,42 +122,12 @@ public abstract class EntryInfoView<T extends PartData> extends Composite {
     }
 
     protected void showParameters() {
-        if (info.getParameters() == null || info.getParameters().isEmpty())
+        if (info.getCustomFields() == null || info.getCustomFields().isEmpty())
             return;
 
-        FlexTable parameters = new FlexTable();
-        parameters.setCellPadding(0);
-        parameters.setCellSpacing(0);
-        parameters.setWidth("100%");
-
-        int row = 0;
-        parameters.setWidget(row, 0, new Label("Parameters"));
-        parameters.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
-        parameters.getFlexCellFormatter().setColSpan(row, 0, 6);
-
-        row += 1;
-        parameters.setWidget(row, 0, new Label(""));
-        parameters.getFlexCellFormatter().setHeight(row, 0, "10px");
-        parameters.getFlexCellFormatter().setColSpan(row, 0, 6);
-
-        int col = 6;
-        for (CustomField paramInfo : info.getParameters()) {
-            if (col > 5) {
-                col = 0;
-                row += 1;
-            }
-
-            parameters.setWidget(row, col, new HTML("<b class=\"font-80em color_444\">"
-                                                            + paramInfo.getName() + "</b>"));
-            parameters.getFlexCellFormatter().setWidth(row, col, "170px");
-            col += 1;
-            parameters.setWidget(row, col, new HTML("<span class=\"font-80em\">" + paramInfo.getValue() + "</span>"));
-            col += 1;
+        for (CustomField field : info.getCustomFields()) {
+            addLongField(field.getName(), field.getValue());
         }
-
-        table.setWidget(currentRow, 0, parameters);
-        table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
-        currentRow += 1;
     }
 
     public void createSequenceView() {

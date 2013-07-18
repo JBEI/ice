@@ -242,11 +242,11 @@ public class PartData implements IDTOModel {
         this.sequenceAnalysis = analyses;
     }
 
-    public ArrayList<CustomField> getParameters() {
+    public ArrayList<CustomField> getCustomFields() {
         return this.parameters;
     }
 
-    public void setParameters(ArrayList<CustomField> parameters) {
+    public void setCustomFields(ArrayList<CustomField> parameters) {
         this.parameters = parameters;
     }
 

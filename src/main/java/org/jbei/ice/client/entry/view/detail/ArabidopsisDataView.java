@@ -3,9 +3,9 @@ package org.jbei.ice.client.entry.view.detail;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 
-public class ArabidopsisInfoView extends EntryInfoView<ArabidopsisSeedData> {
+public class ArabidopsisDataView extends EntryDataView<ArabidopsisSeedData> {
 
-    public ArabidopsisInfoView(ArabidopsisSeedData data) {
+    public ArabidopsisDataView(ArabidopsisSeedData data) {
         super(data);
     }
 

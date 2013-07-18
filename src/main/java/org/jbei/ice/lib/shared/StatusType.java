@@ -6,7 +6,9 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
 
 public enum StatusType implements IDTOModel {
 
-    COMPLETE("Complete"), IN_PROGRESS("In Progress"), PLANNED("Planned");
+    COMPLETE("Complete"),
+    IN_PROGRESS("In Progress"),
+    PLANNED("Planned");
 
     private String displayName;
 

@@ -20,7 +20,6 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.BioSafetyOption;
-import org.jbei.ice.lib.shared.dto.ParameterType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.shared.dto.entry.CustomField;
@@ -168,7 +167,7 @@ public class InfoToModelFactory {
         entry.setKeywords(info.getKeywords());
 
         // parameters 
-        List<Parameter> parameters = getParameters(info.getParameters(), entry);
+        List<Parameter> parameters = getParameters(info.getCustomFields(), entry);
         entry.setParameters(parameters);
         return entry;
     }
@@ -181,8 +180,6 @@ public class InfoToModelFactory {
 
         for (CustomField info : infos) {
             Parameter param = new Parameter();
-            ParameterType type = ParameterType.valueOf(info.getType().name());
-            param.setParameterType(type);
             param.setEntry(entry);
             param.setKey(info.getName());
             param.setValue(info.getValue());

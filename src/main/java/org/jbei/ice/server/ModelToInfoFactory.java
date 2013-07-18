@@ -28,7 +28,6 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.shared.dto.ParameterType;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
@@ -330,11 +329,10 @@ public class ModelToInfoFactory {
                 CustomField paramInfo = new CustomField();
                 paramInfo.setName(parameter.getKey());
                 paramInfo.setValue(parameter.getValue());
-                paramInfo.setType(ParameterType.valueOf(parameter.getParameterType().name()));
                 params.add(paramInfo);
             }
         }
-        info.setParameters(params);
+        info.setCustomFields(params);
 
         // get visibility
         info.setVisibility(Visibility.valueToEnum(entry.getVisibility()));

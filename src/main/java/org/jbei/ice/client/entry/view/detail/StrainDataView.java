@@ -8,9 +8,9 @@ import org.jbei.ice.lib.shared.dto.entry.StrainData;
  * @author Hector Plahar
  */
 
-public class StrainInfoView extends EntryInfoView<StrainData> {
+public class StrainDataView extends EntryDataView<StrainData> {
 
-    public StrainInfoView(StrainData data) {
+    public StrainDataView(StrainData data) {
         super(data);
     }
 
