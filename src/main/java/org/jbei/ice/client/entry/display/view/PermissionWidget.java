@@ -235,14 +235,16 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
         int row = readList.getRowCount();
         String iconStyle;
         String display;
+        String permissionName = item.getDisplay().length() <= 22 ? item.getDisplay() :
+                item.getDisplay().substring(0, 18) + "...";
 
         if (item.getArticle() == PermissionInfo.Article.GROUP) {
             iconStyle = FAIconType.GROUP.getStyleName() + " permission_group";
-            display = item.getDisplay();
+            display = permissionName;
         } else {
             iconStyle = FAIconType.USER.getStyleName() + " permission_user";
             display = "<a href=\"#" + Page.PROFILE.getLink() + ";id="
-                    + item.getArticleId() + "\">" + item.getDisplay() + "</a>";
+                    + item.getArticleId() + "\">" + permissionName + "</a>";
         }
 
         readList.setHTML(row, 0, "<i class=\"font-85em " + iconStyle + "\"></i> " + display);
@@ -281,8 +283,8 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
 
     @Override
     public void resetPermissionDisplay() {
-//        readListDataProvider.refresh();
-//        writeListDataProvider.refresh();
+        writeList.removeAllRows();
+        readList.removeAllRows();
     }
 
     @Override

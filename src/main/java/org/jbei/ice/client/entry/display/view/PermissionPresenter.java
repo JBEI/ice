@@ -139,8 +139,6 @@ public class PermissionPresenter {
                 addReadItem(info, deleteHandler);
             }
         }
-
-        // todo : if no permissions to display, add "Private"
     }
 
     public void setCanEdit(boolean canEdit) {
