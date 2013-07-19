@@ -11,7 +11,7 @@ import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEventHandler;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.EntryAddType;

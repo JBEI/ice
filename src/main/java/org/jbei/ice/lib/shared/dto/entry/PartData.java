@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;

@@ -534,4 +534,18 @@ public class PermissionsController {
             Logger.error(e);
         }
     }
+
+    public ArrayList<PermissionInfo> getDefaultPermissions(Account account) throws ControllerException {
+        ArrayList<PermissionInfo> permissions = new ArrayList<>();
+        for (Group group : ControllerFactory.getGroupController().getAllPublicGroupsForAccount(account)) {
+            PermissionInfo permissionInfo = new PermissionInfo();
+            permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
+            permissionInfo.setArticle(PermissionInfo.Article.GROUP);
+            permissionInfo.setArticleId(group.getId());
+            permissionInfo.setDisplay(group.getLabel());
+            permissions.add(permissionInfo);
+        }
+
+        return permissions;
+    }
 }

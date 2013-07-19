@@ -171,16 +171,7 @@ public class EntryController {
      * @throws ControllerException on exception creating the entry
      */
     public Entry createEntry(Account account, Entry entry) throws ControllerException {
-        ArrayList<PermissionInfo> permissions = new ArrayList<>();
-        for (Group group : ControllerFactory.getGroupController().getAllPublicGroupsForAccount(account)) {
-            PermissionInfo permissionInfo = new PermissionInfo();
-            permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
-            permissionInfo.setArticle(PermissionInfo.Article.GROUP);
-            permissionInfo.setArticleId(group.getId());
-            permissionInfo.setDisplay(group.getLabel());
-            permissions.add(permissionInfo);
-        }
-
+        ArrayList<PermissionInfo> permissions = permissionsController.getDefaultPermissions(account);
         return createEntry(account, entry, permissions);
     }
 

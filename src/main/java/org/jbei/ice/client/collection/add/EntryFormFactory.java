@@ -13,6 +13,11 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
+/**
+ * Factory class for returning the appropriate form for the type of part being created
+ *
+ * @author Hector Plahar
+ */
 public class EntryFormFactory {
     /**
      * creates a new form based on specific types of entries.

@@ -2,7 +2,7 @@ package org.jbei.ice.client.bulkupload.model;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;

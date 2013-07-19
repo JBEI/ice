@@ -11,7 +11,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.widget.ShareCollectionWidget;
 import org.jbei.ice.client.common.util.ImageUtil;
-import org.jbei.ice.client.entry.view.handler.ReadBoxSelectionHandler;
+import org.jbei.ice.client.entry.display.handler.ReadBoxSelectionHandler;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 

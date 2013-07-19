@@ -11,13 +11,14 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
-import org.jbei.ice.client.entry.view.EntryPresenter;
-import org.jbei.ice.client.entry.view.view.AttachmentItem;
+import org.jbei.ice.client.entry.display.EntryPresenter;
+import org.jbei.ice.client.entry.display.view.AttachmentItem;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -42,8 +43,9 @@ public class EntryAddPresenter {
     private final EntryPresenter entryPresenter;
     private EntryAddType currentType;
     public HashMap<PreferenceKey, String> preferences;
+    private ArrayList<PermissionInfo> permissionInfos;
 
-    public EntryAddPresenter(CollectionsPresenter presenter, EntryPresenter entryPresenter,
+    public EntryAddPresenter(CollectionsPresenter presenter, final EntryPresenter entryPresenter,
             RegistryServiceAsync service, HandlerManager eventBus) {
         this.service = service;
         this.eventBus = eventBus;
@@ -70,6 +72,25 @@ public class EntryAddPresenter {
 
                 IEntryFormSubmit formSubmit = formsCache.get(currentType);
                 formSubmit.setPreferences(result);
+            }
+        }.go(eventBus);
+
+        // retrieve default permissions
+        new IceAsyncCallback<ArrayList<PermissionInfo>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<PermissionInfo>> callback)
+                    throws AuthenticationException {
+                EntryAddPresenter.this.service.retrieveDefaultPermissions(ClientController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<PermissionInfo> result) {
+                if (currentType == null || !formsCache.containsKey(currentType))
+                    return;
+
+                permissionInfos = result;
+                entryPresenter.setDefaultPermissions(permissionInfos);
             }
         }.go(eventBus);
     }
@@ -177,7 +198,7 @@ public class EntryAddPresenter {
      * To create a new entry/form, add the type to {@link EntryAddType} and create a new form here
      *
      * @param type          EntryType
-     * @param cancelHandler Clickhandler for handling press of the cancel create button
+     * @param cancelHandler Click handler for handling press of the cancel create button
      * @return form specific to type
      */
 
@@ -239,5 +260,11 @@ public class EntryAddPresenter {
 
     public HashMap<PreferenceKey, String> getPreferences() {
         return preferences;
+    }
+
+    public ArrayList<PermissionInfo> getDefaultPermissions() {
+        if (permissionInfos == null)
+            return new ArrayList<PermissionInfo>();
+        return this.permissionInfos;
     }
 }

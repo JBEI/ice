@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
+import org.jbei.ice.client.entry.display.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.StatusType;

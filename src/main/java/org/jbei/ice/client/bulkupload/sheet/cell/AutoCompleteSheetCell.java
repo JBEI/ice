@@ -2,7 +2,7 @@ package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
+import org.jbei.ice.client.entry.display.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 
 import com.google.gwt.event.dom.client.BlurEvent;

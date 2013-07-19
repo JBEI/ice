@@ -3,7 +3,7 @@ package org.jbei.ice.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
@@ -207,6 +207,9 @@ public interface RegistryServiceAsync {
 
     void retrieveUserPreferences(String sid, ArrayList<PreferenceKey> keys,
             AsyncCallback<HashMap<PreferenceKey, String>> async) throws AuthenticationException;
+
+    void retrieveDefaultPermissions(String sid, AsyncCallback<ArrayList<PermissionInfo>> callback)
+            throws AuthenticationException;
 
     void retrieveUserSearchPreferences(String sid, AsyncCallback<HashMap<String, String>> async)
             throws AuthenticationException;

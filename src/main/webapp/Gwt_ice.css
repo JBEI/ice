@@ -42,6 +42,10 @@ body {
     font-size: 1.1em;
 }
 
+.font-12em {
+    font-size: 1.2em;
+}
+
 .font-90em {
     font-size: 0.90em;
 }
@@ -206,13 +210,6 @@ body {
     color: #FFF;
     border: 1px solid #222;
     box-shadow: 0 0 1px 0 #ddd;
-}
-
-.permission_input_suggest {
-    border: 1px solid #ccc;
-    font-size: 11px;
-    color: #555;
-    margin-left: 0;
 }
 
 .input_box_error {
@@ -703,11 +700,6 @@ a.cell_mouseover:hover {
     width: 180px;
     border-bottom: 1px solid #e1e1e1;
     margin-top: 8px;
-}
-
-.permissions_display {
-    width: 180px;
-    border-bottom: 1px solid #c1c1c1;
 }
 
 .edit_permissions_label {
@@ -2163,6 +2155,57 @@ td.selected i.font-awesome {
     border-bottom: 1px solid #CCC;
     font-size: 1.4em;
     padding-bottom: 4px;
+}
+
+.permission_tab_active {
+    font-size: 0.75em;
+    border-left: 1px solid #e1e1e1;
+    padding: 5px;
+    color: #444;
+    font-weight: bold;
+}
+
+.permission_tab_inactive {
+    font-size: 0.75em;
+    color: #0082C0;
+    border-left: 1px solid #e1e1e1;
+    border-bottom: 1px solid #e1e1e1;
+    padding: 5px;
+    cursor: pointer;
+    background-color: #f1f1f1;
+}
+
+.permission_list {
+    font-family: Arial, sans-serif;
+    font-size: 0.73em;
+    padding: 5px;
+    width: 100%;
+}
+
+.permission_footer {
+    background-color: #f1f1f1;
+    padding: 5px;
+}
+
+.permission_footer_link {
+    font-size: 0.70em;
+    cursor: pointer;
+    color: #888;
+}
+
+.permission_group {
+    color: #bf984c;
+}
+
+.permission_user {
+    color: #657B83;
+}
+
+.permission_input_suggest {
+    border: 1px solid #ccc;
+    font-size: 12px;
+    color: #555;
+    margin-left: 0;
 }
 
 

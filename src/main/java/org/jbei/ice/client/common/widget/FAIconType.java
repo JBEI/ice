@@ -182,6 +182,7 @@ public enum FAIconType {
     SEARCH("icon-search"),
     SHARE("icon-share"),
     SHARE_ALT("icon-share-alt"),
+    SHIELD("icon-shield"),
     SHOPPING_CART("icon-shopping-cart"),
     SIGN_BLANK("icon-sign-blank"),
     SIGNAL("icon-signal"),

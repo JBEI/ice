@@ -6,8 +6,8 @@ import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
-import org.jbei.ice.client.entry.view.view.PermissionsPresenter;
-import org.jbei.ice.client.entry.view.view.PermissionsWidget;
+import org.jbei.ice.client.entry.display.view.PermissionsPresenter;
+import org.jbei.ice.client.entry.display.view.PermissionsWidget;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;

@@ -25,7 +25,7 @@ import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.EntrySelectionModel;
 import org.jbei.ice.client.common.table.EntryTablePager;
-import org.jbei.ice.client.entry.view.EntryPresenter;
+import org.jbei.ice.client.entry.display.EntryPresenter;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.event.ShowEntryListEventHandler;

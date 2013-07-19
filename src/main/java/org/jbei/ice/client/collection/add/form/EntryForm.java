@@ -7,7 +7,8 @@ import java.util.LinkedHashMap;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.collection.add.form.CustomFieldPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
+import org.jbei.ice.client.entry.display.detail.SequenceViewPanel;
+import org.jbei.ice.client.entry.display.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
@@ -45,6 +46,7 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
 
     private final T entryInfo;
     private CustomFieldPanel customFieldPanel;
+    private SequenceViewPanel sequencePanel;
     private TextArea notesText;
 
     private HandlerRegistration submitRegistration;
@@ -110,9 +112,10 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         layout.setCellSpacing(0);
 
         layout.setWidget(0, 0, createGeneralWidget());
-        layout.setWidget(1, 0, createParametersWidget());
-        layout.setWidget(2, 0, createNotesWidget());
-        layout.setWidget(3, 0, createSubmitCancelButtons());
+        layout.setWidget(1, 0, createCustomFieldsWidget());
+        layout.setWidget(2, 0, createSequenceUploadWidget());
+        layout.setWidget(3, 0, createNotesWidget());
+        layout.setWidget(4, 0, createSubmitCancelButtons());
     }
 
     protected abstract Widget createGeneralWidget();
@@ -215,7 +218,7 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         return layout;
     }
 
-    protected Widget createParametersWidget() {
+    protected Widget createCustomFieldsWidget() {
         VerticalPanel panel = new VerticalPanel();
         customFieldPanel = new CustomFieldPanel();
         customFieldPanel.setFields(entryInfo.getCustomFields());
@@ -223,6 +226,11 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         panel.add(new HTML("&nbsp;"));
         panel.add(customFieldPanel.getFieldButton());
         return panel;
+    }
+
+    protected Widget createSequenceUploadWidget() {
+        sequencePanel = new SequenceViewPanel(this.entryInfo);
+        return sequencePanel;
     }
 
     protected TextBox createStandardTextBox(String width, int length) {

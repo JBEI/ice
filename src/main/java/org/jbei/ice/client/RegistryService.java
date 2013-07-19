@@ -3,7 +3,7 @@ package org.jbei.ice.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
@@ -219,4 +219,6 @@ public interface RegistryService extends RemoteService {
     UserComment alertToEntryProblem(String sid, long entryID, String details) throws AuthenticationException;
 
     boolean setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException;
+
+    ArrayList<PermissionInfo> retrieveDefaultPermissions(String sid) throws AuthenticationException;
 }

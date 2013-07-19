@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.client.RegistryService;
-import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -140,6 +140,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Account account = retrieveAccountForSid(sid);
         try {
             return controller.retrieveAccountPreferences(account, keys);
+        } catch (ControllerException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public ArrayList<PermissionInfo> retrieveDefaultPermissions(String sid) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            return ControllerFactory.getPermissionController().getDefaultPermissions(account);
         } catch (ControllerException e) {
             return null;
         }
