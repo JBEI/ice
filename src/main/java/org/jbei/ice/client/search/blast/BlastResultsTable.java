@@ -176,7 +176,7 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResult> {
                     }
                 };
         col.setSortable(false);
-        this.addColumn(col, "Hits Distribution");
+        this.addColumn(col, "Hits Alignment");
         this.setColumnWidth(col, 120, Unit.PX);
         return col;
     }

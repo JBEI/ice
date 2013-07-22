@@ -49,7 +49,7 @@ public enum EntryField implements IDTOModel {
     PLASMID_SEQ_FILENAME("Plasmid Sequence File", false),
     PLASMID_ATT_FILENAME("Plasmid Attachment File", false),
     PLASMID_SELECTION_MARKERS("Plasmid Selection Markers", true),
-    STRAIN_NAME("Strain Number", false),
+    STRAIN_NAME("Strain Name", false),
     STRAIN_ALIAS("Strain Alias", false),
     STRAIN_KEYWORDS("Strain Keywords", true),
     STRAIN_SUMMARY("Strain Summary", true),

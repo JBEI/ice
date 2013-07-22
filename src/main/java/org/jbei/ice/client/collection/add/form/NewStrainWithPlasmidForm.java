@@ -28,7 +28,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private ListBox bioSafety;
 
     // strain fields
-    private TextBox strainNumber;
+    private TextBox strainName;
     private TextBox strainAlias;
     private TextBox strainLinks;
     private TextBox host;
@@ -114,9 +114,9 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         general.setCellSpacing(0);
 
         // name
-        setLabel(true, "Strain Number", general, row, 0);
-        strainNumber = createStandardTextBox("205px");
-        Widget widget = createTextBoxWithHelp(strainNumber, "e.g. JBEI-0001");
+        setLabel(true, "Strain Name", general, row, 0);
+        strainName = createStandardTextBox("205px");
+        Widget widget = createTextBoxWithHelp(strainName, "e.g. JBEI-0001");
         general.setWidget(row, 1, widget);
 
         // PI
@@ -504,11 +504,11 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         FocusWidget invalid = null;
 
         // strain number
-        if (strainNumber.getText().isEmpty()) {
-            strainNumber.setStyleName("input_box_error");
-            invalid = strainNumber;
+        if (strainName.getText().isEmpty()) {
+            strainName.setStyleName("input_box_error");
+            invalid = strainName;
         } else {
-            strainNumber.setStyleName("input_box");
+            strainName.setStyleName("input_box");
         }
 
         // principal Investigator
@@ -612,7 +612,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         plasmid.setBioSafetyLevel(bioSafetyLevel);
 
         // strain fields
-        strain.setName(strainNumber.getText());
+        strain.setName(strainName.getText());
         strain.setAlias(strainAlias.getText());
         strain.setLinks(strainLinks.getText());
         strain.setHost(host.getText());

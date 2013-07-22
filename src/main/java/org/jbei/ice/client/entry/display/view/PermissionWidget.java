@@ -53,13 +53,13 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
         layout.getFlexCellFormatter().setColSpan(0, 0, 2);
 
         final HTMLPanel readLabel = new HTMLPanel(
-                "Read <span style=\"float: right\" id=\"permission_read_add\"></span>");
+                "Can Read <span style=\"float: right\" id=\"permission_read_add\"></span>");
         readLabel.add(addReadPermission, "permission_read_add");
         readLabel.setStyleName("permission_tab_active");
         layout.setWidget(1, 0, readLabel);
 
         final HTMLPanel writeLabel = new HTMLPanel(
-                "Write <span style=\"float: right\" id=\"permission_write_add\"></span>");
+                "Can Edit <span style=\"float: right\" id=\"permission_write_add\"></span>");
         writeLabel.add(addWritePermission, "permission_write_add");
         writeLabel.setStyleName("permission_tab_inactive");
         layout.setWidget(1, 1, writeLabel);
@@ -132,7 +132,7 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
         addWritePermission.addStyleName("edit_icon");
         addWritePermission.addStyleName("font-12em");
 
-        makePublic = new HTML("<i class=\"" + FAIconType.GLOBE.getStyleName() + "\"></i> Enable Public Access");
+        makePublic = new HTML("Enable Public Read Access");
         makePublic.setStyleName("permission_footer_link");
 
         readSuggestBox = new SuggestBox(new PermissionSuggestOracle());

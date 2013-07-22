@@ -19,7 +19,7 @@ import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 /**
- * Headers for strain with plasmid sheet
+ * Headers for strain with plasmid bulk upload sheet
  *
  * @author Hector Plahar
  */
@@ -84,7 +84,7 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                 || header == EntryField.CIRCULAR
                 || header == EntryField.PLASMID_BACKBONE
                 || header == EntryField.PLASMID_PROMOTERS
-                || header == EntryField.REPLICATES_IN
+                || header == EntryField.PLASMID_REPLICATES_IN
                 || header == EntryField.PLASMID_ORIGIN_OF_REPLICATION
                 || header == EntryField.PLASMID_KEYWORDS
                 || header == EntryField.PLASMID_SUMMARY
