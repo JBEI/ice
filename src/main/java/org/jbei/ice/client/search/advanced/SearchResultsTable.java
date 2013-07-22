@@ -91,7 +91,7 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResult> {
                 if (description == null)
                     return SafeHtmlUtils.EMPTY_SAFE_HTML;
 
-                int size = (Window.getClientWidth() - 1200);
+                int size = (Window.getClientWidth() - 1020);
                 if (size <= 0)
                     size = 250;
 
