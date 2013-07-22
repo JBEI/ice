@@ -7,6 +7,11 @@ import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.lib.shared.dto.user.User;
 
+/**
+ * Data for Collection menu cells
+ *
+ * @author Hector Plahar
+ */
 public class MenuItem extends OptionSelect {
 
     private long count;

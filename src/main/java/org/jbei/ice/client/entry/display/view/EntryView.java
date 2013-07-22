@@ -74,7 +74,7 @@ public class EntryView extends Composite implements IEntryView {
     private EntryDataView currentView;
 
     public EntryView(Delegate<Long> retrieveSequenceTracesDelegate) {
-        permissions = new PermissionWidget();
+        permissions = new PermissionWidget(true);
         visibility = new VisibilityWidget();
 
         attachmentMenu = new AttachmentListMenu();

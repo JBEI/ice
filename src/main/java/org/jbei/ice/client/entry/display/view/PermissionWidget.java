@@ -37,7 +37,7 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
     private SuggestBox writeSuggestBox;
     private boolean isViewingWriteTab;
 
-    public PermissionWidget() {
+    public PermissionWidget(boolean showHeader) {
         layout = new FlexTable();
         initWidget(layout);
 
@@ -47,10 +47,10 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
         layout.setCellSpacing(0);
         layout.addStyleName("entry_attribute");
 
-        layout.setHTML(0, 0, "<i class=\"" + FAIconType.SHIELD.getStyleName()
-                + " font-85em\"></i> &nbsp;Permissions");
+        layout.setHTML(0, 0, "<i class=\"" + FAIconType.SHIELD.getStyleName() + " font-85em\"></i> &nbsp;Permissions");
         layout.getCellFormatter().setStyleName(0, 0, "entry_attributes_sub_header");
         layout.getFlexCellFormatter().setColSpan(0, 0, 2);
+        layout.getRowFormatter().setVisible(0, showHeader);
 
         final HTMLPanel readLabel = new HTMLPanel(
                 "Can Read <span style=\"float: right\" id=\"permission_read_add\"></span>");

@@ -4,10 +4,11 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
-import org.jbei.ice.client.entry.display.view.PermissionsPresenter;
-import org.jbei.ice.client.entry.display.view.PermissionsWidget;
+import org.jbei.ice.client.entry.display.view.PermissionPresenter;
+import org.jbei.ice.client.entry.display.view.PermissionWidget;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,12 +31,15 @@ public class ShareCollectionWidget extends Composite {
     private Button close;
     private Icon closeIcon;
     private PopupPanel box;
-    private final PermissionsWidget permissionsWidget;
+    private final PermissionWidget permissionsWidget;
     private final Callback<PermissionInfo> addCallback;
     private final Callback<PermissionInfo> removeCallback;
     private final Delegate<PermissionInfo> deleteDelegate;
+    private int userShareCount;
+    private int groupShareCount;
 
-    public ShareCollectionWidget(String collectionName, final Delegate<PermissionInfo> delegate) {
+    public ShareCollectionWidget(final CollectionMenu.MenuCell cell, String collectionName,
+            final Delegate<PermissionInfo> delegate) {
         FlexTable layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
@@ -54,7 +58,7 @@ public class ShareCollectionWidget extends Composite {
         // set Widgets
         layout.setWidget(0, 0, createHeader());
 
-        permissionsWidget = new PermissionsWidget();
+        permissionsWidget = new PermissionWidget(false);
         permissionsWidget.setWidgetVisibility(true);
         permissionsWidget.getPresenter().setCanEdit(true);
         layout.setWidget(1, 0, permissionsWidget);
@@ -70,6 +74,13 @@ public class ShareCollectionWidget extends Composite {
                 } else if (info.isCanRead()) {
                     permissionsWidget.getPresenter().addReadItem(info, delegate);
                 }
+
+                if (info.getArticle() == PermissionInfo.Article.ACCOUNT)
+                    userShareCount += 1;
+                else
+                    groupShareCount += 1;
+
+                cell.setShared(userShareCount, groupShareCount);
             }
 
             @Override
@@ -81,6 +92,12 @@ public class ShareCollectionWidget extends Composite {
             @Override
             public void onSuccess(PermissionInfo permissionInfo) {
                 permissionsWidget.getPresenter().removeItem(permissionInfo);
+                if (permissionInfo.getArticle() == PermissionInfo.Article.ACCOUNT)
+                    userShareCount -= 1;
+                else
+                    groupShareCount -= 1;
+
+                cell.setShared(userShareCount, groupShareCount);
             }
 
             @Override
@@ -89,7 +106,7 @@ public class ShareCollectionWidget extends Composite {
         };
     }
 
-    public PermissionsPresenter getPermissionsPresenter() {
+    public PermissionPresenter getPermissionsPresenter() {
         return permissionsWidget.getPresenter();
     }
 

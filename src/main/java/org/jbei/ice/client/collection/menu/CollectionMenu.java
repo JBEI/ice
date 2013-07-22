@@ -325,7 +325,7 @@ public class CollectionMenu extends Composite {
         }
     }
 
-    class MenuCell extends Composite implements HasClickHandlers {
+    public class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
         private final MenuItem item;
@@ -343,7 +343,7 @@ public class CollectionMenu extends Composite {
             this.row = row;
             folderId = "right" + item.getId();
             action = new HoverCell();
-            shareCollectionWidget = new ShareCollectionWidget(item.getName(), new Delegate<PermissionInfo>() {
+            shareCollectionWidget = new ShareCollectionWidget(this, item.getName(), new Delegate<PermissionInfo>() {
 
                 @Override
                 public void execute(PermissionInfo info) {
