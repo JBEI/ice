@@ -251,6 +251,6 @@ public abstract class EntryDataView<T extends PartData> extends Composite {
     private Widget createProfileLink(String email, String name) {
         if (email == null || email.isEmpty())
             return new HTML("<i>" + name + "</i>");
-        return new Hyperlink(name, Page.PROFILE.getLink() + ";id=" + email);
+        return new Hyperlink(name, Page.PROFILE.getLink() + ";id=" + email + ";s=profile");
     }
 }
