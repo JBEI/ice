@@ -467,8 +467,7 @@ public class HibernateSearch {
         if (!query.hasBlastQuery())
             return null;
 
-        BlastPlus blast = new BlastPlus();
-        HashMap<String, SearchResult> rids = blast.runBlast(account, query.getBlastQuery());
+        HashMap<String, SearchResult> rids = BlastPlus.runBlast(account, query.getBlastQuery());
         fullTextQuery.enableFullTextFilter("blastFilter").setParameter("recordIds", new HashSet<>(rids.keySet()));
         return rids;
     }

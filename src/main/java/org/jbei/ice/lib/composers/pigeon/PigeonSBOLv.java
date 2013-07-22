@@ -29,7 +29,7 @@ import org.sbolstandard.core.StrandType;
 public class PigeonSBOLv {
 
     private static final String NEWLINE = System.getProperty("line.separator");
-    private static String mPigeonImageIdentifier = "Weyekin output image";
+    private static final String mPigeonImageIdentifier = "Weyekin output image";
     private static final String PIGEON_URL = "http://cidar1.bu.edu:5801/pigeon1.php";
     private static final String PIGEON_URL2 = "http://cidar1.bu.edu:5801/pigeon.php";
     private static final HashMap<String, String> map = new HashMap<>();

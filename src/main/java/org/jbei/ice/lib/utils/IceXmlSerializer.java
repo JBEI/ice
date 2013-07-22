@@ -103,7 +103,6 @@ public class IceXmlSerializer {
     private static final String PART_NUMBER = "partNumber";
     private static final String RECORD_TYPE = "recordType";
     private static final String RECORD_ID = "recordId";
-    private static final String INDEX = "index";
 
     public static final Namespace iceNamespace = new Namespace("ice", "http://jbei.org/ice");
     public static final Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -167,7 +166,6 @@ public class IceXmlSerializer {
         for (int index = 0; index < entries.size(); index++) {
             Logger.debug("Serialize to XML " + entries.get(index).getRecordId());
             Element entryElement = toEntryElement(account, entries.get(index), sequences.get(index));
-            entryElement.addAttribute(INDEX, Integer.toString(index));
             root.add(entryElement);
         }
 
