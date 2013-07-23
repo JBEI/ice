@@ -5,6 +5,7 @@ import org.jbei.ice.client.common.widget.Icon;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
@@ -66,6 +67,10 @@ public class SearchCompositeBox extends Composite {
 
     public Element getTextBoxElement() {
         return box.getElement();
+    }
+
+    public void setFocusHandler(FocusHandler handler) {
+        box.addFocusHandler(handler);
     }
 
     public void addTextBoxKeyDownHandler(KeyDownHandler keyDownHandler) {

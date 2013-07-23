@@ -35,8 +35,7 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResult> {
     }
 
     @Override
-    protected ArrayList<DataTableColumn<SearchResult, ?>> createColumns(ServiceDelegate<SearchResult>
-            delegate) {
+    protected ArrayList<DataTableColumn<SearchResult, ?>> createColumns(ServiceDelegate<SearchResult> delegate) {
 
         ArrayList<DataTableColumn<SearchResult, ?>> columns = new ArrayList<DataTableColumn<SearchResult, ?>>();
 
@@ -72,8 +71,7 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResult> {
                 return value.getWebPartnerURL();
             }
         };
-        DataTableColumn<SearchResult, SearchResult> partIdColumn =
-                new HasEntryPartIdColumn<SearchResult>(cell);
+        DataTableColumn<SearchResult, SearchResult> partIdColumn = new HasEntryPartIdColumn<SearchResult>(cell);
         this.setColumnWidth(partIdColumn, width, unit);
         partIdColumn.setSortable(sortable);
         this.addColumn(partIdColumn, "Part ID");

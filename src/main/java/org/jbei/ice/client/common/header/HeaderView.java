@@ -12,6 +12,8 @@ import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -176,10 +178,20 @@ public class HeaderView extends Composite {
 
     public void createHandlers() {
         if (this.searchInput != null) {
-            PopupHandler handler = new PopupHandler(widgetAdvanced, this.searchInput.getPullDownAreaElement(), false);
+            final PopupHandler handler = new PopupHandler(widgetAdvanced, this.searchInput.getPullDownAreaElement(),
+                                                          false, searchInput);
             handler.addAutoHidePartner(searchInput.getTextBoxElement());
             handler.setCloseHandler(searchInput.getCloseHandler());
             this.searchInput.setPullDownClickHandler(handler);
+
+            this.searchInput.setFocusHandler(new FocusHandler() {
+                @Override
+                public void onFocus(FocusEvent event) {
+                    if (!widgetAdvanced.isDefaultState()) {
+                        handler.showRelativeTo(searchInput);
+                    }
+                }
+            });
         }
 
         ClickHandler searchHandler = new ClickHandler() {

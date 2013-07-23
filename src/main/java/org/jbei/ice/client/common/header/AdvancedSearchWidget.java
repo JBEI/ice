@@ -1,6 +1,7 @@
 package org.jbei.ice.client.common.header;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.lib.shared.BioSafetyOption;
@@ -134,9 +135,7 @@ public class AdvancedSearchWidget extends Composite {
         EntryType[] types = getSearchEntryType();
         if (types != null && types.length != EntryType.values().length) {
             ArrayList<EntryType> entryTypes = new ArrayList<EntryType>();
-            for (EntryType type : types) {
-                entryTypes.add(type);
-            }
+            Collections.addAll(entryTypes, types);
             query.setEntryTypes(entryTypes);
         }
 
@@ -175,6 +174,16 @@ public class AdvancedSearchWidget extends Composite {
         blastSequence.setText("");
         bioSafetyOptions.setSelectedIndex(0);
         blastProgram.setSelectedIndex(0);
+    }
+
+    public boolean isDefaultState() {
+        return entryTypes.isDefaultState()
+                && !entryWidget.isHasAttachmentChecked()
+                && !entryWidget.isHasSampleChecked()
+                && !entryWidget.isHasSequenceChecked()
+                && blastSequence.getText().trim().isEmpty()
+                && bioSafetyOptions.getSelectedIndex() == 0
+                && blastProgram.getSelectedIndex() == 0;
     }
 
     // meant to be called only once to set the options available for searching
@@ -265,13 +274,13 @@ public class AdvancedSearchWidget extends Composite {
         public ArrayList<String> getSelected() {
             ArrayList<String> selected = new ArrayList<String>();
 
-            if (allCheck.getValue().booleanValue()) {
+            if (allCheck.getValue()) {
                 for (EntryType type : EntryType.values()) {
                     selected.add(type.getName());
                 }
             } else {
                 for (int i = 0; i < EntryType.values().length; i += 1) {
-                    if (typeChecks[i].getValue().booleanValue()) {
+                    if (typeChecks[i].getValue()) {
                         selected.add(EntryType.values()[i].getName());
                     }
                 }
@@ -282,6 +291,10 @@ public class AdvancedSearchWidget extends Composite {
 
         public void reset() {
             allCheck.setValue(true, true);
+        }
+
+        public boolean isDefaultState() {
+            return allCheck.getValue();
         }
 
         private class CheckBoxHandler implements ValueChangeHandler<Boolean> {
@@ -343,15 +356,15 @@ public class AdvancedSearchWidget extends Composite {
         }
 
         public boolean isHasAttachmentChecked() {
-            return hasAttachmentCheck.getValue().booleanValue();
+            return hasAttachmentCheck.getValue();
         }
 
         public boolean isHasSampleChecked() {
-            return hasSampleCheck.getValue().booleanValue();
+            return hasSampleCheck.getValue();
         }
 
         public boolean isHasSequenceChecked() {
-            return hasSequenceCheck.getValue().booleanValue();
+            return hasSequenceCheck.getValue();
         }
 
         public void reset() {

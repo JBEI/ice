@@ -12,8 +12,14 @@ public class PopupHandler implements ClickHandler {
 
     private final PopupPanel popup;
     private HandlerRegistration closeHandlerRegistration;
+    private final Widget relativeTo;
 
     public PopupHandler(Widget widget, Element autoHide, boolean enableGlass) {
+        this(widget, autoHide, enableGlass, null);
+    }
+
+    public PopupHandler(Widget widget, Element autoHide, boolean enableGlass, Widget relativeTo) {
+        this.relativeTo = relativeTo;
         this.popup = new PopupPanel();
         this.popup.setStyleName("add_to_popup");
         this.popup.setAutoHideEnabled(true);
@@ -37,10 +43,19 @@ public class PopupHandler implements ClickHandler {
         popup.show();
     }
 
+    public void showRelativeTo(Widget widget) {
+        if (!popup.isShowing()) {
+            popup.showRelativeTo(widget);
+        }
+    }
+
     @Override
     public void onClick(ClickEvent event) {
         if (!popup.isShowing()) {
-            popup.showRelativeTo((Widget) event.getSource());
+            if (relativeTo == null)
+                popup.showRelativeTo((Widget) event.getSource());
+            else
+                popup.showRelativeTo(relativeTo);
         } else {
             popup.hide();
         }
