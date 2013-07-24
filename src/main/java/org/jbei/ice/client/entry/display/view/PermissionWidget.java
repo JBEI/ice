@@ -61,6 +61,7 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
         final HTMLPanel writeLabel = new HTMLPanel(
                 "Can Edit <span style=\"float: right\" id=\"permission_write_add\"></span>");
         writeLabel.add(addWritePermission, "permission_write_add");
+        addWritePermission.setVisible(false);
         writeLabel.setStyleName("permission_tab_inactive");
         layout.setWidget(1, 1, writeLabel);
 
