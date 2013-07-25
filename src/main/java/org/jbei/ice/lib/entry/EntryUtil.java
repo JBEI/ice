@@ -3,8 +3,6 @@ package org.jbei.ice.lib.entry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,14 +10,17 @@ import java.util.regex.Pattern;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
+import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -230,17 +231,12 @@ public class EntryUtil {
                 }
 
                 if (partNumber != null) {
-                    try {
-                        PartData entry = entryController.getByPartNumber(account, partNumber);
+                    boolean entryExists = entryController.entryPartNumberExists(account, partNumber);
 
-                        if (entry != null) {
-                            jbeiLinks.add(new IceLink(partNumber, descriptive));
-                            starts.add(basicWikiLinkMatcher.start());
-                            ends.add(basicWikiLinkMatcher.end());
-                        }
-                    } catch (PermissionException pe) {
-                        Logger.warn(account.getEmail() + ": No permissions for part_number " + partNumber);
-                        return text;
+                    if (entryExists) {
+                        jbeiLinks.add(new IceLink(partNumber, descriptive));
+                        starts.add(basicWikiLinkMatcher.start());
+                        ends.add(basicWikiLinkMatcher.end());
                     }
                 }
             }
@@ -303,77 +299,31 @@ public class EntryUtil {
         }
     }
 
-    /**
-     * Retrieve the {@link org.jbei.ice.lib.entry.model.Strain} objects associated with the given {@link
-     * org.jbei.ice.lib.entry.model.Plasmid}.
-     * <p/>
-     * Strain objects have a field "plasmids", which is maybe wiki text of plasmids that the strain
-     * may harbor. However, since plasmids can be harbored in multiple strains, the reverse lookup
-     * must be computed in order to find which strains harbor a plasmid. And since it is possible to
-     * import/export strains separately from plasmids, it is possible that even though the strain
-     * claims to have a plasmid, that plasmid may not be in this system, but some other. So, in
-     * order to find out which strains actually harbor the given plasmid, we must query the strains
-     * table for the plasmid, parse the wiki text, and check that those plasmids actually exist
-     * before being certain that strain actually harbors this plasmid.
-     *
-     * @param plasmid plasmid whose associated strains are being retrieved
-     * @return LinkedHashSet of Strain objects.
-     */
-    public static LinkedHashSet<Strain> getStrainsForPlasmid(Plasmid plasmid) {
-        LinkedHashSet<Strain> resultStrains = new LinkedHashSet<>();
-        EntryController entryController = ControllerFactory.getEntryController();
-        String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
+    public static Entry createEntryFromType(EntryType type, String name, String email) {
+        Entry entry;
 
-        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLink + ":.*?\\]\\]");
-        Pattern partNumberPattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\]\\]");
-        Pattern descriptivePattern = Pattern.compile("\\[\\[" + wikiLink + ":(.*)\\|(.*)\\]\\]");
+        switch (type) {
+            case PLASMID:
+                entry = new Plasmid();
+                break;
+            case STRAIN:
+                entry = new Strain();
+                break;
+            case PART:
+                entry = new Part();
+                break;
+            case ARABIDOPSIS:
+                entry = new ArabidopsisSeed();
+                break;
 
-        AccountController accountController = ControllerFactory.getAccountController();
-        HashSet<Long> strainIds;
-
-        Account account;
-        try {
-            // TODO : temp measure till utils manager is also converted
-            strainIds = entryController.retrieveStrainsForPlasmid(plasmid);
-            account = accountController.getSystemAccount();
-            if (strainIds == null)
+            default:
                 return null;
-
-            for (long strainId : strainIds) {
-                Strain strain = (Strain) entryController.get(account, strainId);
-
-                String[] strainPlasmids = strain.getPlasmids().split(",");
-                for (String strainPlasmid : strainPlasmids) {
-                    strainPlasmid = strainPlasmid.trim();
-                    Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(strainPlasmid);
-                    String strainPlasmidNumber = null;
-                    if (basicWikiLinkMatcher.matches()) {
-                        Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher.group());
-                        Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher.group());
-
-                        if (descriptivePatternMatcher.find()) {
-                            strainPlasmidNumber = descriptivePatternMatcher.group(1).trim();
-                        } else if (partNumberMatcher.find()) {
-                            strainPlasmidNumber = partNumberMatcher.group(1).trim();
-                        }
-
-                        if (strainPlasmidNumber != null) {
-                            if (plasmid.getPartNumber().equals(strainPlasmidNumber)) {
-                                resultStrains.add(strain);
-                                break;
-                            }
-                        }
-                    } else {
-                        if (strainPlasmid.equals(plasmid.getPartNumber()))
-                            resultStrains.add(strain);
-                    }
-                }
-            }
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
         }
 
-        return resultStrains;
+        entry.setOwner(name);
+        entry.setOwnerEmail(email);
+        entry.setCreator(name);
+        entry.setCreatorEmail(email);
+        return entry;
     }
 }

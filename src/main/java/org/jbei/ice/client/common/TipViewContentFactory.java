@@ -99,11 +99,11 @@ public class TipViewContentFactory {
         addField(table, 5, 2, "Replicates In", view.getReplicatesIn(), "135px", "230px");
 
         String strains = "";
-        for (Long id : view.getStrains().keySet())
-            strains += (view.getStrains().get(id) + ", ");
-
-        if (view.getStrains().keySet().size() > 0)
-            strains = strains.substring(0, strains.lastIndexOf(", "));
+        for (int i = 0; i < view.getLinkedParts().size(); i += 1) {
+            if (i > 0)
+                strains += ", ";
+            strains += view.getLinkedParts().get(i).getPartId();
+        }
         addField(table, 6, 2, "Strains", strains, "135px", "230px");
         addField(table, 7, 2, "Funding Source", view.getFundingSource(), "135px", "230px");
         return 8;
@@ -114,9 +114,15 @@ public class TipViewContentFactory {
 
         // second column
         addField(table, 1, 2, "Selection Markers", view.getSelectionMarkers(), "135px", "230px");
-        addField(table, 2, 2, "Host", view.getLinkifiedHost(), "125px", "200px");
+        addField(table, 2, 2, "Host", view.getHost(), "125px", "200px");
         addField(table, 3, 2, "Genotype/Phenotype", view.getGenotypePhenotype(), "135px", "230px");
-        addField(table, 4, 2, "Plasmids", view.getLinkifiedPlasmids(), "135px", "230px");
+        String value = "";
+        for (int i = 0; i < view.getLinkedParts().size(); i += 1) {
+            if (i > 0)
+                value += ", ";
+            value += view.getLinkedParts().get(i).getPartId();
+        }
+        addField(table, 4, 2, "Plasmids", value, "135px", "230px");
         addField(table, 5, 2, "Funding Source", view.getFundingSource(), "135px", "230px");
         return 6;
     }
@@ -166,7 +172,7 @@ public class TipViewContentFactory {
         addField(table, 2, 0, "Alias", entry.getAlias(), "115px", "170px");
         addField(table, 3, 0, "Creator", entry.getCreator(), "115px", "170px");
         addField(table, 4, 0, "Owner", entry.getOwner(), "115px", "170px");
-        addField(table, 5, 0, "Links", entry.getLinkifiedLinks(), "115px", "170px");
+        addField(table, 5, 0, "Links", entry.getLinks(), "115px", "170px");
         addField(table, 6, 0, "Modified", generateDate(entry.getModificationTime()), "115px", "170px");
         addField(table, 7, 0, "Keywords", entry.getKeywords(), "115px", "170px");
         addField(table, 8, 0, "References", entry.getReferences(), "115px", "170px");

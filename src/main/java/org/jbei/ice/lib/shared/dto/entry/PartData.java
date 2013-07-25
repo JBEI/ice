@@ -26,7 +26,6 @@ public class PartData implements IDTOModel {
     private String keywords;
     private String status;
     private String shortDescription;
-    private String linkifiedShortDescription;
     private String longDescription;
     private String references;
     private Date creationTime;
@@ -35,7 +34,6 @@ public class PartData implements IDTOModel {
     private String intellectualProperty;
     private String partId;
     private String links; // comma separated list of links
-    private String linkifiedLinks;
     private String principalInvestigator;
     private String selectionMarkers;
     private String fundingSource;
@@ -52,6 +50,8 @@ public class PartData implements IDTOModel {
     private ArrayList<PermissionInfo> permissions;
     private ArrayList<UserComment> comments;
     private String sbolVisualURL;
+    private boolean publicRead;
+    private ArrayList<PartData> linkedParts;
 
     private PartData info; // typically used with strain with plasmid
 
@@ -64,6 +64,7 @@ public class PartData implements IDTOModel {
         sampleStorage = new ArrayList<SampleStorage>();
         permissions = new ArrayList<PermissionInfo>();
         comments = new ArrayList<UserComment>();
+        linkedParts = new ArrayList<PartData>();
     }
 
     public String getRecordId() {
@@ -324,22 +325,6 @@ public class PartData implements IDTOModel {
         this.canEdit = canEdit;
     }
 
-    public String getLinkifiedLinks() {
-        return linkifiedLinks;
-    }
-
-    public void setLinkifiedLinks(String linkifiedLinks) {
-        this.linkifiedLinks = linkifiedLinks;
-    }
-
-    public String getLinkifiedShortDescription() {
-        return linkifiedShortDescription;
-    }
-
-    public void setLinkifiedShortDescription(String linkifiedShortDescription) {
-        this.linkifiedShortDescription = linkifiedShortDescription;
-    }
-
     public Visibility getVisibility() {
         return visible;
     }
@@ -399,5 +384,20 @@ public class PartData implements IDTOModel {
 
     public void setSbolVisualURL(String sbolVisualURL) {
         this.sbolVisualURL = sbolVisualURL;
+    }
+
+    public boolean isPublicRead() {
+        return publicRead;
+    }
+
+    public void setPublicRead(boolean publicRead) {
+        this.publicRead = publicRead;
+    }
+
+    /**
+     * @return the list of parts that this part links to.
+     */
+    public ArrayList<PartData> getLinkedParts() {
+        return linkedParts;
     }
 }

@@ -29,24 +29,26 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
     private final SequenceFileDownload sequenceDownload;
     private final SequenceFileUpload sequenceUpload;
-    private final PartData info;
+    private final PartData partData;
     private final FlexTable layout;
     private HTMLPanel headerPanel;
     private final SequenceViewPanelPresenter presenter;
     private DeleteSequenceHandler deleteHandler;
+    private final boolean isEditMode;
 
-    public SequenceViewPanel(PartData info) {
-        this.info = info;
+    public SequenceViewPanel(PartData partData, boolean isEdit) {
+        isEditMode = isEdit;
+        this.partData = partData;
         layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
         layout.setWidth("100%");
         initWidget(layout);
 
-        sequenceDownload = new SequenceFileDownload(info.getId(), info.isHasOriginalSequence());
+        sequenceDownload = new SequenceFileDownload(partData.getId(), partData.isHasOriginalSequence());
         sequenceDownload.asWidget().addStyleName("display-inline");
 
-        sequenceUpload = new SequenceFileUpload(info.getId());
+        sequenceUpload = new SequenceFileUpload(partData.getId());
         sequenceUpload.asWidget().addStyleName("display-inline");
 
         layout.setWidget(0, 0, createSequenceHeader());
@@ -56,10 +58,36 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         layout.getFlexCellFormatter().setHeight(1, 0, "10px");
         layout.getFlexCellFormatter().setColSpan(1, 0, 6);
 
-        // sbol visual
+        displaySBOLVisual();
+
+        this.presenter = new SequenceViewPanelPresenter(this);
+    }
+
+    protected void displaySBOLVisual() {
+        if (isEditMode) {
+            layout.getFlexCellFormatter().setVisible(2, 0, false);
+            Label upload = new Label("Upload");
+            upload.setStyleName("footer_feedback_widget");
+            upload.addStyleName("display-inline");
+
+            Label paste = new Label("paste");
+            paste.setStyleName("footer_feedback_widget");
+            paste.addStyleName("display-inline");
+
+            String html = "<span class=\"font-80em\" style=\"color: #999\"><span id=\"upload_link\"></span>"
+                    + " or <span id=\"paste_sequence_link\"></span> sequence information</span>";
+            HTMLPanel panel = new HTMLPanel(html);
+            panel.add(upload, "upload_link");
+            panel.add(paste, "paste_sequence_link");
+
+            layout.setWidget(3, 0, panel);
+            layout.getFlexCellFormatter().setHeight(3, 0, "20px");
+            return;
+        }
+
         String imgUrl = "";
-        if (info.isHasSequence() && info.getSbolVisualURL() != null) {
-            imgUrl = "<img height=\"170px\" src=\"" + info.getSbolVisualURL() + "\" /><br>";
+        if (partData.isHasSequence() && partData.getSbolVisualURL() != null) {
+            imgUrl = "<img height=\"170px\" src=\"" + partData.getSbolVisualURL() + "\" /><br>";
         }
 
         ScrollPanel panel = new ScrollPanel();
@@ -74,7 +102,10 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
         updateSequenceContents();
         html.setWidth(layout.getOffsetWidth() + "px");
-        this.presenter = new SequenceViewPanelPresenter(this);
+    }
+
+    public SequenceViewPanel(PartData info) {
+        this(info, false);
     }
 
     @Override
@@ -87,8 +118,8 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         updateSequenceHeaders();
     }
 
-    public PartData getInfo() {
-        return this.info;
+    public PartData getPartData() {
+        return this.partData;
     }
 
     @Override
@@ -103,9 +134,9 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     @Override
     public void updateSequenceContents() {
         // check if there is a sequence 
-        if (info.isHasSequence()) {
+        if (partData.isHasSequence()) {
             Flash.Parameters param = new Flash.Parameters();
-            param.setEntryId(info.getRecordId());
+            param.setEntryId(partData.getRecordId());
             param.setSessiondId(ClientController.sessionId);
             param.setSwfPath("vv/VectorViewer.swf");
             param.setMovieName("VectorViewer.swf");
@@ -127,12 +158,13 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
                 + "SEQUENCE</span><div style=\"float: right\"><span id=\"delete_sequence_link\"></span>"
                 + "<span id=\"sequence_link\"></span>"
                 + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
-                + " <span id=\"sequence_options\"></span>";
+                + "<span id=\"sequence_options\"></span>";
 
-        if (info.isHasSequence()) {
-            html += " <span style=\"color: #262626; font-size: 0.75em;\">|</span>"
-                    + " <span id=\"sbol_visual\"></span></div>";
+        if (partData.isHasSequence()) {
+            html += " <span style=\"color: #262626; font-size: 0.75em;\">|</span> <span id=\"sbol_visual\"></span>";
         }
+
+        html += "</div>";
 
         headerPanel = new HTMLPanel(html);
         headerPanel.setStyleName("entry_sequence_sub_header");
@@ -144,7 +176,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     public void updateSequenceHeaders() {
         headerPanel.clear();
 
-        if (info.isHasSequence()) {
+        if (partData.isHasSequence()) {
             // delete, open in vector editor, download
             Label label = new Label("Open");
             label.addClickHandler(new SequenceHeaderHandler());
@@ -153,23 +185,27 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             headerPanel.add(sequenceDownload.asWidget(), "sequence_options");
             if (deleteHandler != null)
                 showSequenceDeleteLink(deleteHandler);
-            // sbol visual
-            final Label sbVisual = new Label("Hide Pigeon Image");
-            sbVisual.setStyleName("open_sequence_sub_link");
-            sbVisual.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    if (layout.getFlexCellFormatter().isVisible(2, 0)) {
-                        sbVisual.setText("Show Pigeon Image");
-                        layout.getFlexCellFormatter().setVisible(2, 0, false);
-                    } else {
-                        sbVisual.setText("Hide Pigeon Image");
-                        layout.getFlexCellFormatter().setVisible(2, 0, true);
+
+            // show sbol visual only if not in edit mode
+            if (!isEditMode) {
+                // sbol visual
+                final Label sbVisual = new Label("Hide Pigeon Image");
+                sbVisual.setStyleName("open_sequence_sub_link");
+                sbVisual.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        if (layout.getFlexCellFormatter().isVisible(2, 0)) {
+                            sbVisual.setText("Show Pigeon Image");
+                            layout.getFlexCellFormatter().setVisible(2, 0, false);
+                        } else {
+                            sbVisual.setText("Hide Pigeon Image");
+                            layout.getFlexCellFormatter().setVisible(2, 0, true);
+                        }
                     }
-                }
-            });
-            headerPanel.add(sbVisual, "sbol_visual");
-        } else {
+                });
+                headerPanel.add(sbVisual, "sbol_visual");
+            }
+        } else if (!isEditMode) {
             Label label = new Label("Create New");
             label.addClickHandler(new SequenceHeaderHandler());
             label.setStyleName("open_sequence_sub_link");
@@ -185,8 +221,8 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
     @Override
     public void setHasSequence(boolean hasSequence) {
-        this.info.setHasSequence(hasSequence);
-        this.info.setHasOriginalSequence(hasSequence);
+        this.partData.setHasSequence(hasSequence);
+        this.partData.setHasOriginalSequence(hasSequence);
     }
 
     @Override
@@ -208,9 +244,9 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         @Override
         public void onClick(ClickEvent event) {
             String url = GWT.getHostPageBaseURL();
-            url += "static/swf/ve/VectorEditor.swf?entryId=" + info.getRecordId() + "&sessionId="
+            url += "static/swf/ve/VectorEditor.swf?entryId=" + partData.getRecordId() + "&sessionId="
                     + ClientController.sessionId;
-            Window.open(url, info.getName(), "");
+            Window.open(url, partData.getName(), "");
         }
     }
 }

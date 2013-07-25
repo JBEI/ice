@@ -7,6 +7,8 @@ import org.jbei.ice.lib.shared.StatusType;
 import org.jbei.ice.lib.shared.dto.entry.CustomField;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
@@ -64,7 +66,7 @@ public abstract class EntryDataView<T extends PartData> extends Composite {
 
     public void setInfo(T info) {
         this.info = info;
-        table.clear();
+        table.removeAllRows();
         currentCol = 0;
         currentRow = 0;
         initView();
@@ -114,11 +116,30 @@ public abstract class EntryDataView<T extends PartData> extends Composite {
      * Adds fields that are long (span an entire row)
      */
     protected void addCommonLongFields() {
-        addLongField("Links", info.getLinkifiedLinks());
+        addLongField("Links", createLinks(info.getLinks()));
         addLongField("Keywords", info.getKeywords());
-        addLongField("Summary", info.getLinkifiedShortDescription());
+        addLongField("Summary", info.getShortDescription());
         addLongField("References", info.getReferences());
         addLongField("Intellectual Property", info.getIntellectualProperty());
+    }
+
+    private String createLinks(String input) {
+        if (input == null || input.trim().isEmpty())
+            return "";
+        String regex = "[-a-zA-Z0-9@:%_\\+.~#?&//=]{2,256}\\.[a-z]{2,4}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)?";
+        RegExp regExp = RegExp.compile(regex, "gi");
+        MatchResult result = regExp.exec(input);
+        int i = 0;
+        String links = "";
+        while (result != null) {
+            String url = result.getGroup(0);
+            if (i > 0)
+                links += ", ";
+            links += "<a href=\"" + url + "\" target=\"_blank\">" + url + "</a>";
+            result = regExp.exec(input);
+            i += 1;
+        }
+        return links;
     }
 
     protected void showParameters() {

@@ -140,15 +140,18 @@ public class HeaderView extends Composite {
         loggedInContentsPanel.setHTML(0, 1, "");
 
         // pipe
-        HTML pipe3 = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
-        pipe3.addStyleName("color_eee");
-        loggedInContentsPanel.setWidget(0, 2, pipe3);
+        loggedInContentsPanel.setHTML(0, 2, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
 
         // logout link
         loggedInContentsPanel.setWidget(0, 3, new Icon(FAIconType.SIGNOUT));
         loggedInContentsPanel.setWidget(0, 4, new HTML("&nbsp;"));
         Hyperlink logout = new Hyperlink("Log Out", Page.LOGOUT.getLink());
         loggedInContentsPanel.setWidget(0, 5, logout);
+        loggedInContentsPanel.setHTML(0, 6, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
+        loggedInContentsPanel.setHTML(0, 7,
+                                      "<a href=\"https://public-registry.jbei.org/help.htm target=\"_blank\" " +
+                                              "\">Help</a>");
+
         return loggedInContentsPanel;
     }
 
@@ -158,7 +161,7 @@ public class HeaderView extends Composite {
             return;
         }
 
-        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #EEE\">|</span>&nbsp;&nbsp;"
+        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #969696\">|</span>&nbsp;&nbsp;"
                                                  + "<span class=\"badge\">" + newMessageCount + "</span>");
         String title = "You have " + newMessageCount + " new message";
         title += newMessageCount != 1 ? "s" : "";

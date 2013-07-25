@@ -135,8 +135,6 @@ public class EntryView extends Composite implements IEntryView {
         generalHeaderPanel.setWidget(0, 0, contextPager.getGoBack());
         generalHeaderPanel.setHTML(0, 1, "&nbsp;");
         generalHeaderPanel.setWidget(0, 2, entryAction);
-//        generalHeaderPanel.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
-//        generalHeaderPanel.getFlexCellFormatter().setStyleName(0, 2, "entry_general_info_header");
 
         mainContent.setWidget(0, 0, generalHeaderPanel);
         mainContent.getCellFormatter().setHeight(0, 0, "30px");

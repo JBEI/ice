@@ -17,8 +17,8 @@ public class StrainDataView extends EntryDataView<StrainData> {
     @Override
     protected void addShortFieldValues() {
         addShortField("Genotype/Phenotype", info.getGenotypePhenotype());
-        addShortField("Host", info.getLinkifiedHost());
-        addShortField("Plasmids", info.getLinkifiedPlasmids());
+        addShortField("Host", info.getHost());
+        addShortField("Plasmids", new LinkedEntriesWidget(info.getLinkedParts()));
     }
 
     @Override

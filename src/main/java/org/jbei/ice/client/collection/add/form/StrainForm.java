@@ -3,6 +3,8 @@ package org.jbei.ice.client.collection.add.form;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 import com.google.gwt.user.client.ui.FlexTable;
@@ -11,6 +13,11 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Form for creating new Strain record
+ *
+ * @author Hector Plahar
+ */
 public class StrainForm extends EntryForm<StrainData> {
 
     private TextBox host;
@@ -23,7 +30,13 @@ public class StrainForm extends EntryForm<StrainData> {
 
         host.setText(strainData.getHost());
         genPhen.setText(strainData.getGenotypePhenotype());
-        plasmids.setText(strainData.getPlasmids());
+        String plasmidString = "";
+        for (int i = 0; i < strainData.getLinkedParts().size(); i += 1) {
+            if (i > 0)
+                plasmidString += ", ";
+            plasmidString += strainData.getLinkedParts().get(i);
+        }
+        plasmids.setText(plasmidString);
         markers.setText(strainData.getSelectionMarkers());
     }
 
@@ -149,10 +162,16 @@ public class StrainForm extends EntryForm<StrainData> {
         super.populateEntries();
 
         StrainData strain = super.getEntryInfo();
-        strain.setHost(host.getText());
-        strain.setGenotypePhenotype(genPhen.getText());
-        strain.setPlasmids(((MultipleTextBox) plasmids.getValueBox()).getWholeText());
-        String selectionMarkers = ((MultipleTextBox) markers.getValueBox()).getWholeText();
+        strain.setHost(this.host.getText());
+        strain.setGenotypePhenotype(this.genPhen.getText());
+        String plasmidString = ((MultipleTextBox) this.plasmids.getValueBox()).getWholeText();
+        for (String plasmid : plasmidString.split(",")) {
+            PartData data = new PartData();
+            data.setType(EntryType.PLASMID);
+            data.setPartId(plasmid.trim());
+            strain.getLinkedParts().add(data);
+        }
+        String selectionMarkers = ((MultipleTextBox) this.markers.getValueBox()).getWholeText();
         strain.setSelectionMarkers(selectionMarkers);
     }
 

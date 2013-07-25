@@ -216,6 +216,11 @@ public class Entry implements IModel {
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents")
     private Set<Folder> folders = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+    @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
+               inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
+    private Set<Entry> linkedEntries = new HashSet<>();
+
     public Entry() {
         setStatus("Complete");
         longDescriptionType = "text";
@@ -503,21 +508,6 @@ public class Entry implements IModel {
         return Objects.hashCode(getId(), getRecordId());
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null)
-            return false;
-
-        if (getClass() != obj.getClass())
-            return false;
-
-        final Entry other = (Entry) obj;
-
-        return Objects.equal(this.recordId, other.getRecordId())
-                && Objects.equal(this.recordType, other.getRecordType())
-                && Objects.equal(this.getId(), other.getId());
-    }
-
     public Set<Folder> getFolders() {
         return folders;
     }
@@ -540,5 +530,24 @@ public class Entry implements IModel {
 
     public void setPartNumber(String partNumber) {
         this.partNumber = partNumber;
+    }
+
+    public Set<Entry> getLinkedEntries() {
+        return linkedEntries;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null)
+            return false;
+
+        if (getClass() != obj.getClass())
+            return false;
+
+        final Entry other = (Entry) obj;
+
+        return Objects.equal(this.recordId, other.getRecordId())
+                && Objects.equal(this.recordType, other.getRecordType())
+                && Objects.equal(this.getId(), other.getId());
     }
 }

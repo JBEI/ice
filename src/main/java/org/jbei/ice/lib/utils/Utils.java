@@ -35,7 +35,7 @@ public class Utils {
      * @return Joined string.
      */
     public static String join(String delimiter, Collection<?> s) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         Iterator<?> iter = s.iterator();
         while (iter.hasNext()) {
             Object item = iter.next();
@@ -60,22 +60,20 @@ public class Utils {
      * @throws UnsupportedEncodingException
      */
     public static String getHexString(byte[] bytes) throws UnsupportedEncodingException {
-
         byte[] HEX_CHAR_TABLE = {(byte) '0', (byte) '1', (byte) '2', (byte) '3', (byte) '4',
                 (byte) '5', (byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'a', (byte) 'b',
                 (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f'
         };
-        {
-            byte[] hex = new byte[2 * bytes.length];
-            int index = 0;
 
-            for (byte b : bytes) {
-                int v = b & 0xFF;
-                hex[index++] = HEX_CHAR_TABLE[v >>> 4];
-                hex[index++] = HEX_CHAR_TABLE[v & 0xF];
-            }
-            return new String(hex, "ASCII");
+        byte[] hex = new byte[2 * bytes.length];
+        int index = 0;
+
+        for (byte b : bytes) {
+            int v = b & 0xFF;
+            hex[index++] = HEX_CHAR_TABLE[v >>> 4];
+            hex[index++] = HEX_CHAR_TABLE[v & 0xF];
         }
+        return new String(hex, "ASCII");
     }
 
     /**
@@ -128,10 +126,8 @@ public class Utils {
             digest.update(string.getBytes("UTF-8"));
             byte[] hashed = digest.digest();
             result = Utils.getHexString(hashed);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            Logger.error(e);
         }
 
         return result;

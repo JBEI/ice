@@ -162,7 +162,6 @@ public class EntryPresenter extends AbstractPresenter {
 
     public void setCurrentContext(EntryContext context) {
         this.currentContext = context;
-        // todo : clear all data that is currently being displayed
     }
 
     public void showCurrentEntryView() {
@@ -170,8 +169,12 @@ public class EntryPresenter extends AbstractPresenter {
         retrieveEntryDetails();
     }
 
-    public void showCreateEntry(EntryAddType type) {
-        IEntryFormSubmit newForm = entryAddPresenter.getEntryForm(type, new NewFormCancelHandler());
+    public void showCreateEntry(EntryAddType addType) {
+        IEntryFormSubmit newForm = entryAddPresenter.getEntryForm(addType, new NewFormCancelHandler());
+        SequenceViewPanelPresenter sequencePresenter = newForm.getSequenceViewPanelPresenter();
+        UploadPasteSequenceHandler handler = new UploadPasteSequenceHandler(service, eventBus, sequencePresenter);
+        sequencePresenter.addSequencePasteHandler(handler);
+
         this.formSubmit = newForm;
         display.showNewForm(newForm);
         display.setEntryHeader("create new " + newForm.getHeaderDisplay(), "", ClientController.account.getFullName(),
@@ -419,12 +422,9 @@ public class EntryPresenter extends AbstractPresenter {
                 ServiceDelegate<PartSample> delegate = model.createDeleteSampleHandler();
                 SequenceViewPanelPresenter sequencePresenter = display.setEntryInfoForView(currentInfo, delegate);
                 display.getPermissionsWidget().setPermissionData(result.getPermissions(), new DeletePermission());
-                UploadPasteSequenceHandler handler = new UploadPasteSequenceHandler(service,
-                                                                                    eventBus, sequencePresenter);
+                UploadPasteSequenceHandler handler = new UploadPasteSequenceHandler(service, eventBus,
+                                                                                    sequencePresenter);
                 sequencePresenter.addSequencePasteHandler(handler);
-
-//                SequenceFileUploadHandler uploadHandler = new SequenceFileUploadHandler(sequencePresenter, service,
-//                                                                                        eventBus);
                 sequencePresenter.addSequenceFileUploadHandler(new IUploader.OnFinishUploaderHandler() {
 
                     @Override

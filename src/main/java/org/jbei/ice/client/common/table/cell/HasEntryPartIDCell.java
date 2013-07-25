@@ -15,6 +15,9 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
+ * Cell for partId columns for use by tables that render data
+ * objects that HAS A {@link org.jbei.ice.lib.shared.dto.entry.PartData}
+ *
  * @author Hector Plahar
  */
 

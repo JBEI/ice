@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Hector Plahar
  */
-
 public class PlasmidForm extends EntryForm<PlasmidData> {
 
     private CheckBox circular;

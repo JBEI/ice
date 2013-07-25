@@ -375,7 +375,7 @@ body {
 
 .entry_add_notes_input {
     width: 640px;
-    height: 200px;
+    height: 150px;
     background: none repeat scroll 0 0 #FFFFFF;
     border: 1px solid #BBBBBB;
 }
@@ -432,7 +432,7 @@ body {
     border: 1px solid #BBBBBB;
 }
 
-/* style for the number in the menu e.g. Sample   8*/
+/* style for the number in the menu e.g. Sample  8*/
 .menu_count {
     color: #999;
     float: right;

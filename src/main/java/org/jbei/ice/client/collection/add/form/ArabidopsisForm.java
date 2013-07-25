@@ -17,6 +17,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
+/**
+ * Form for creating a new Arabidopsis Seed record
+ *
+ * @author Hector Plahar
+ */
 public class ArabidopsisForm extends EntryForm<ArabidopsisSeedData> {
 
     private ListBox generation;

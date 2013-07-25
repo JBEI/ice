@@ -6,6 +6,11 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Form for creating new generic part record
+ *
+ * @author Hector Plahar
+ */
 public class PartForm extends EntryForm<PartData> {
 
     public PartForm(PartData partInfo) {

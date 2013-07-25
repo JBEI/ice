@@ -35,8 +35,7 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResult> {
     }
 
     @Override
-    protected ArrayList<DataTableColumn<SearchResult, ?>> createColumns(ServiceDelegate<SearchResult>
-            delegate) {
+    protected ArrayList<DataTableColumn<SearchResult, ?>> createColumns(ServiceDelegate<SearchResult> delegate) {
         ArrayList<DataTableColumn<SearchResult, ?>> columns = new ArrayList<DataTableColumn<SearchResult, ?>>();
         columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(false));

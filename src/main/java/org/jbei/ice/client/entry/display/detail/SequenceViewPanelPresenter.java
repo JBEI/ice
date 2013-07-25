@@ -6,9 +6,15 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import com.google.gwt.event.dom.client.ClickHandler;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
+/**
+ * Presenter for {@link SequenceViewPanel}
+ *
+ * @author Hector Plahar
+ */
 public class SequenceViewPanelPresenter {
 
     public interface ISequenceView {
+
         void addSubmitSequencePasteHandler(ClickHandler handler);
 
         void updateSequenceContents();
@@ -17,7 +23,7 @@ public class SequenceViewPanelPresenter {
 
         String getSequence();
 
-        PartData getInfo();
+        PartData getPartData();
 
         void setHasSequence(boolean hasSequence);
 
@@ -53,8 +59,8 @@ public class SequenceViewPanelPresenter {
         return view.getSequence();
     }
 
-    public PartData getEntry() {
-        return view.getInfo();
+    public PartData getPartData() {
+        return view.getPartData();
     }
 
     public void setHasSequence(boolean result) {
@@ -63,7 +69,7 @@ public class SequenceViewPanelPresenter {
 
     public void setIsCanEdit(boolean canEdit, DeleteSequenceHandler deleteHandler) {
         this.canEdit = canEdit;
-        if (canEdit && view.getInfo().isHasSequence())
+        if (canEdit && view.getPartData().isHasSequence())
             view.showSequenceDeleteLink(deleteHandler);
     }
 

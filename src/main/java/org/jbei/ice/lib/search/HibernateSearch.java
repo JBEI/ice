@@ -71,7 +71,6 @@ public class HibernateSearch {
 
     protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, ArrayList<EntryType> entryTypes,
             BooleanQuery booleanQuery, String term, BioSafetyOption option, HashMap<String, Float> userBoost) {
-        term = cleanQuery(term);
         for (EntryType type : entryTypes) {
             Class<?> clazz = SearchFieldFactory.entryClass(type);
 
@@ -332,8 +331,8 @@ public class HibernateSearch {
 
         // generate queries for terms
         while (terms.hasNext()) {
-            String term = terms.next();
-            if (StandardAnalyzer.STOP_WORDS_SET.contains(term))
+            String term = cleanQuery(terms.next());
+            if (term.trim().isEmpty() || StandardAnalyzer.STOP_WORDS_SET.contains(term))
                 continue;
 
             BioSafetyOption safetyOption = searchQuery.getBioSafetyOption();
@@ -556,6 +555,8 @@ public class HibernateSearch {
         cleanedQuery = cleanedQuery.replace(":", " ");
         cleanedQuery = cleanedQuery.replace(";", " ");
         cleanedQuery = cleanedQuery.replace("\\", " ");
+        cleanedQuery = cleanedQuery.replace("/", " ");
+        cleanedQuery = cleanedQuery.replace("!", " ");
         cleanedQuery = cleanedQuery.replace("[", "\\[");
         cleanedQuery = cleanedQuery.replace("]", "\\]");
         cleanedQuery = cleanedQuery.replace("{", "\\{");

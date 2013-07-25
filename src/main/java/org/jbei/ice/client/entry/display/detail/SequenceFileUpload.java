@@ -51,7 +51,6 @@ class SequenceFileUpload implements IsWidget, IView {
     private final PasteSequenceWidget pasteSequenceWidget;
     private final UploadSequenceFileWidget fileUploadWidget;
     private final PopupHandler popupHandler;
-    private final SequenceFileUploadPresenter presenter;
 
     public SequenceFileUpload(final long entryId) {
         SequenceFileUploadResource.INSTANCE.cellListStyle().ensureInjected();
@@ -76,15 +75,11 @@ class SequenceFileUpload implements IsWidget, IView {
         options.setSelectionModel(optionSelection);
         pasteSequenceWidget = new PasteSequenceWidget();
         fileUploadWidget = new UploadSequenceFileWidget(entryId);
-        presenter = new SequenceFileUploadPresenter(this);
+        new SequenceFileUploadPresenter(this);
     }
 
     public void setFileUploadWidgetFinishHandler(OnFinishUploaderHandler handler) {
         this.fileUploadWidget.setFinishHandler(handler);
-    }
-
-    public SequenceFileUploadPresenter getPresenter() {
-        return this.presenter;
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.display.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.EntryAddType;
@@ -662,5 +663,10 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     @Override
     public String getHeaderDisplay() {
         return EntryAddType.STRAIN_WITH_PLASMID.getDisplay();
+    }
+
+    @Override
+    public SequenceViewPanelPresenter getSequenceViewPanelPresenter() {
+        return null;  // TODO
     }
 }

@@ -16,11 +16,10 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
@@ -434,28 +433,10 @@ public class BulkUploadController {
 
         // if entry is null, create entry
         if (entry == null) {
-            switch (autoUpdate.getType()) {
-                case PLASMID:
-                    entry = new Plasmid();
-                    break;
-                case STRAIN:
-                    entry = new Strain();
-                    break;
-                case PART:
-                    entry = new Part();
-                    break;
-                case ARABIDOPSIS:
-                    entry = new ArabidopsisSeed();
-                    break;
+            entry = EntryUtil.createEntryFromType(autoUpdate.getType(), account.getFullName(), account.getEmail());
+            if (entry == null)
+                throw new ControllerException("Don't know what to do with entry type");
 
-                default:
-                    throw new ControllerException("Don't know what to do with entry type");
-            }
-
-            entry.setOwner(account.getFullName());
-            entry.setOwnerEmail(account.getEmail());
-            entry.setCreator(account.getFullName());
-            entry.setCreatorEmail(account.getEmail());
             entry = entryController.createEntry(account, entry, null);
 
             // creates strain/plasmid at the same time for strain with plasmid

@@ -36,6 +36,7 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
     private SuggestBox readSuggestBox;
     private SuggestBox writeSuggestBox;
     private boolean isViewingWriteTab;
+    private boolean canAdd;
 
     public PermissionWidget(boolean showHeader) {
         layout = new FlexTable();
@@ -93,8 +94,8 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
                 }
 
                 layout.getRowFormatter().setVisible(4, !isViewingWriteTab);
-                addWritePermission.setVisible(isViewingWriteTab);
-                addReadPermission.setVisible(!isViewingWriteTab);
+                addWritePermission.setVisible(isViewingWriteTab && canAdd);
+                addReadPermission.setVisible(!isViewingWriteTab && canAdd);
             }
         });
 
@@ -156,8 +157,7 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
      * @param canAdd allow permissions edit
      */
     public void canAddPermission(boolean canAdd) {
-        addReadPermission.setVisible(canAdd);
-        addWritePermission.setVisible(canAdd);
+        this.canAdd = canAdd;
     }
 
     public PermissionPresenter getPresenter() {

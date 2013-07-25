@@ -7,6 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -26,6 +28,7 @@ import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.utils.Utils;
@@ -442,7 +445,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      */
     @SuppressWarnings("unchecked")
     public LinkedList<Entry> getEntriesByIdSet(List<Long> ids) throws DAOException {
-        if (ids.size() == 0) {
+        if (ids == null || ids.isEmpty()) {
             return new LinkedList<>();
         }
 
@@ -736,6 +739,52 @@ public class EntryDAO extends HibernateRepository<Entry> {
         delete(entry);
     }
 
+    /**
+     * Converts the wiki link method for strain with plasmid to actual relationships between the entries
+     *
+     * @throws DAOException
+     */
+    public void upgradeLinks() throws DAOException {
+        Session session = currentSession();
+        Query query = session.createQuery("from " + Strain.class.getName());
+        Iterator iterator = query.iterate();
+        int i = 0;
+        String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
+
+        while (iterator.hasNext()) {
+            Strain strain = (Strain) iterator.next();
+            if (strain.getPlasmids() == null)
+                continue;
+
+            Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLink + ":.*?\\]\\]");
+
+            String plasmid = strain.getPlasmids().trim();
+            if (plasmid.isEmpty() || !plasmid.contains(":") || !plasmid.contains("|"))
+                continue;
+
+            Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(plasmid);
+            while (basicWikiLinkMatcher.find()) {
+                String partNumber = basicWikiLinkMatcher.group().trim();
+                partNumber = partNumber.split(":")[1];
+                Entry entry = getByPartNumber(partNumber.split("\\|")[0]);
+                if (entry == null)
+                    continue;
+                strain.getLinkedEntries().add(entry);
+            }
+
+            if (strain.getLinkedEntries().size() == 0)
+                continue;
+
+            session.update(strain);
+            i += 1;
+            if (i % 20 == 0) {
+                Logger.info(Long.toString(i));
+                session.flush();
+                session.clear();
+            }
+        }
+    }
+
     public void upgradeNamesAndPartNumbers(String partNumberPrefix) throws DAOException {
         Session session = currentSession();
         int i = 0;
@@ -777,5 +826,31 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 session.clear();
             }
         }
+    }
+
+    /**
+     * links are stored in a join table in the form [entry_id, linked_entry_id] which is defined as
+     * <code>
+     *
+     * @throws DAOException
+     * @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+     * @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
+     * inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
+     * private Set<Entry> linkedEntries = new HashSet<>();
+     * </code>
+     * Ideally we want another field such as
+     * <code>
+     * @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+     * @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)},
+     * inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
+     * private Set<Entry> reverseLinkedEntries = new HashSet<>();
+     * </code>
+     * to keep track of the inverse relationship but dues to laziness I resort to this method which returns
+     * entries involved in the inverse relationship with the specified entry
+     */
+    public LinkedList<Entry> getReverseLinkedEntries(long entryId) throws DAOException {
+        String sql = "select entry_id from entry_entry where linked_entry_id=" + entryId;
+        List list = currentSession().createSQLQuery(sql).list();
+        return getEntriesByIdSet(new ArrayList<Long>(list));
     }
 }

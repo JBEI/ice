@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.shared.dto.entry;
 
-import java.util.HashMap;
-
 public class PlasmidData extends PartData {
 
     private String backbone;
@@ -9,11 +7,9 @@ public class PlasmidData extends PartData {
     private String promoters;
     private Boolean circular;
     private String replicatesIn;
-    private HashMap<Long, String> strains; // id -> partNumber
 
     public PlasmidData() {
         super(EntryType.PLASMID);
-        setStrains(new HashMap<Long, String>());
     }
 
     public String getBackbone() {
@@ -46,14 +42,6 @@ public class PlasmidData extends PartData {
 
     public void setCircular(Boolean circular) {
         this.circular = circular;
-    }
-
-    public HashMap<Long, String> getStrains() {
-        return strains;
-    }
-
-    public void setStrains(HashMap<Long, String> strains) {
-        this.strains = strains;
     }
 
     public String getReplicatesIn() {

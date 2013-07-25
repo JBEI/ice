@@ -13,6 +13,11 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+/**
+ * Handler for pasting sequence as part of entry creation or edit
+ *
+ * @author Hector Plahar
+ */
 public class UploadPasteSequenceHandler implements ClickHandler {
 
     private SequenceViewPanelPresenter presenter;
@@ -29,25 +34,29 @@ public class UploadPasteSequenceHandler implements ClickHandler {
     @Override
     public void onClick(ClickEvent event) {
         final String sequence = presenter.getSequence();
-        final PartData info = presenter.getEntry();
+        final PartData info = presenter.getPartData();
 
-        new IceAsyncCallback<Boolean>() {
+        new IceAsyncCallback<PartData>() {
 
             @Override
-            protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                service.saveSequence(ClientController.sessionId, info.getId(), sequence, callback);
+            protected void callService(AsyncCallback<PartData> callback) throws AuthenticationException {
+                service.saveSequence(ClientController.sessionId, info, sequence, callback);
             }
 
             @Override
-            public void onSuccess(Boolean result) {
-                presenter.setHasSequence(result);
-                if (result) {
-                    presenter.getEntry().setHasSequence(true);
-                    presenter.getEntry().setHasOriginalSequence(true);
-                    presenter.updateSequenceView();
-                } else {
+            public void onSuccess(PartData result) {
+                boolean hasSequence = result != null;
+                presenter.setHasSequence(hasSequence);
+                if (!hasSequence) {
                     Window.alert("Could not save sequence");
+                    return;
                 }
+
+                presenter.getPartData().setHasSequence(true);
+                presenter.getPartData().setHasOriginalSequence(true);
+                presenter.getPartData().setId(result.getId());
+                presenter.getPartData().setRecordId(result.getRecordId());
+                presenter.updateSequenceView();
             }
         }.go(eventBus);
     }

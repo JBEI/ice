@@ -8,6 +8,7 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.collection.add.form.CustomFieldPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanel;
+import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.display.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
@@ -56,6 +57,8 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         layout = new FlexTable();
         initWidget(layout);
 
+        this.entryInfo = entryInfo;
+
         initComponents();
 
         this.creator.setText(entryInfo.getCreator());
@@ -99,7 +102,6 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         ip.setText(entryInfo.getIntellectualProperty());
         this.notesText.setText(entryInfo.getLongDescription());
 
-        this.entryInfo = entryInfo;
         this.creator.setText(entryInfo.getCreator());
         this.creatorEmail.setText(entryInfo.getCreatorEmail());
 
@@ -113,7 +115,7 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
 
         layout.setWidget(0, 0, createGeneralWidget());
         layout.setWidget(1, 0, createCustomFieldsWidget());
-        layout.setWidget(2, 0, createSequenceUploadWidget());
+        layout.setWidget(2, 0, sequencePanel);
         layout.setWidget(3, 0, createNotesWidget());
         layout.setWidget(4, 0, createSubmitCancelButtons());
     }
@@ -141,6 +143,8 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         references = createTextArea("640px", "50px");
         ip = createTextArea("640px", "50px");
         notesText = new TextArea();
+
+        sequencePanel = new SequenceViewPanel(this.entryInfo, true);
     }
 
     public T getEntryInfo() {
@@ -226,11 +230,6 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         panel.add(new HTML("&nbsp;"));
         panel.add(customFieldPanel.getFieldButton());
         return panel;
-    }
-
-    protected Widget createSequenceUploadWidget() {
-        sequencePanel = new SequenceViewPanel(this.entryInfo);
-        return sequencePanel;
     }
 
     protected TextBox createStandardTextBox(String width, int length) {
@@ -392,5 +391,10 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
     @Override
     public PartData getEntry() {
         return getEntryInfo();
+    }
+
+    @Override
+    public SequenceViewPanelPresenter getSequenceViewPanelPresenter() {
+        return sequencePanel.getPresenter();
     }
 }

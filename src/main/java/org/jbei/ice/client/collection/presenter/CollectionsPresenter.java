@@ -387,7 +387,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         mode = Mode.ENTRY;
         currentContext = event;
-        if (event.getPartnerUrl() == null)
+        if (event.getPartnerUrl() == null || event.getPartnerUrl().trim().isEmpty())
             History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getId(), false);
         display.enableExportAs(true);
         display.setMainContent(entryViewPresenter.getView().asWidget());

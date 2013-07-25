@@ -114,10 +114,8 @@ public interface RegistryServiceAsync {
     void removePermission(String sessionId, PermissionInfo permissionInfo,
             AsyncCallback<Boolean> callback) throws AuthenticationException;
 
-    void saveSequence(String sessionId, long entry, String sequenceUser, AsyncCallback<Boolean> callback)
+    void saveSequence(String sessionId, PartData part, String sequenceUser, AsyncCallback<PartData> callback)
             throws AuthenticationException;
-
-    void sendFeedback(String email, String msg, AsyncCallback<Boolean> callback);
 
     void getConfigurationSetting(String name, AsyncCallback<String> callback);
 

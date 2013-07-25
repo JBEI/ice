@@ -10,25 +10,36 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
+/**
+ * Factory class for instantiating the different kinds of views for the part types
+ *
+ * @author Hector Plahar
+ */
 public class ViewFactory {
 
-    public static EntryDataView createDetailView(PartData info) {
+    /**
+     * Creates the view for the specified part and displays the data contained in the object
+     *
+     * @param part part object whose details are to be rendered in the view
+     * @return Detail view for part
+     */
+    public static EntryDataView createDetailView(PartData part) {
 
-        switch (info.getType()) {
+        switch (part.getType()) {
 
             case PLASMID:
-                PlasmidData plasmidData = (PlasmidData) info;
+                PlasmidData plasmidData = (PlasmidData) part;
                 return new PlasmidDataView(plasmidData);
 
             case PART:
-                return new PartDataView(info);
+                return new PartDataView(part);
 
             case ARABIDOPSIS:
-                ArabidopsisSeedData seedData = (ArabidopsisSeedData) info;
+                ArabidopsisSeedData seedData = (ArabidopsisSeedData) part;
                 return new ArabidopsisDataView(seedData);
 
             case STRAIN:
-                StrainData strainData = (StrainData) info;
+                StrainData strainData = (StrainData) part;
                 return new StrainDataView(strainData);
 
             default:

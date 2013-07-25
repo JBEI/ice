@@ -6,9 +6,6 @@ public class StrainData extends PartData {
 
     private String host;
     private String genotypePhenotype;
-    private String plasmids;
-    private String linkifiedPlasmids;
-    private String linkifiedHost;
 
     public StrainData() {
         super(EntryType.STRAIN);
@@ -28,29 +25,5 @@ public class StrainData extends PartData {
 
     public void setGenotypePhenotype(String genotypePhenotype) {
         this.genotypePhenotype = genotypePhenotype;
-    }
-
-    public String getPlasmids() {
-        return plasmids;
-    }
-
-    public void setPlasmids(String plasmids) {
-        this.plasmids = plasmids;
-    }
-
-    public String getLinkifiedPlasmids() {
-        return linkifiedPlasmids;
-    }
-
-    public void setLinkifiedPlasmids(String linkifiedPlasmids) {
-        this.linkifiedPlasmids = linkifiedPlasmids;
-    }
-
-    public String getLinkifiedHost() {
-        return linkifiedHost;
-    }
-
-    public void setLinkifiedHost(String linkifiedHost) {
-        this.linkifiedHost = linkifiedHost;
     }
 }

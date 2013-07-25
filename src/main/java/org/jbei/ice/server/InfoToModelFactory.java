@@ -76,7 +76,6 @@ public class InfoToModelFactory {
                 StrainData strainData = (StrainData) info;
                 strain.setHost(strainData.getHost());
                 strain.setGenotypePhenotype(strainData.getGenotypePhenotype());
-                strain.setPlasmids(strainData.getPlasmids());
                 break;
 
             case PART:

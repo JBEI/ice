@@ -1,15 +1,19 @@
 package org.jbei.ice.client.collection.menu;
 
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.Icon;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
-import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
 
 /**
+ * Header widget for the collection menu. Renders the header label and requested icons
+ * such as the quick add icon
+ *
  * @author Hector Plahar
  */
 public class MenuHeader extends Composite {
@@ -17,7 +21,7 @@ public class MenuHeader extends Composite {
     private Icon expandCollapseIcon;    // icon that indicates whether collection has been expanded or collapsed
     private final Label headerLabel;
     private HTML quickAddIcon;
-    private boolean collapsed; // this should be saved
+    private boolean collapsed; // this should be saved in a cookie or something
 
     public MenuHeader(String header, boolean addQuickEdit) {
         expandCollapseIcon = new Icon(FAIconType.FOLDER_OPEN);
@@ -46,7 +50,6 @@ public class MenuHeader extends Composite {
     }
 
     public void addExpandCollapseHandler(final ClickHandler handler) {
-
         ClickHandler newClickHandler = new ClickHandler() {
 
             @Override

@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.controllers.ControllerFactory;
@@ -236,10 +235,7 @@ public class ModelToInfoFactory {
 
         // strain specific
         data.setGenotypePhenotype(strain.getGenotypePhenotype());
-        data.setPlasmids(strain.getPlasmids());
-        data.setLinkifiedPlasmids(EntryUtil.linkifyText(account, data.getPlasmids()));
         data.setHost(strain.getHost());
-        data.setLinkifiedHost(EntryUtil.linkifyText(account, data.getHost()));
         return data;
     }
 
@@ -254,16 +250,6 @@ public class ModelToInfoFactory {
         data.setOriginOfReplication(plasmid.getOriginOfReplication());
         data.setPromoters(plasmid.getPromoters());
         data.setReplicatesIn(plasmid.getReplicatesIn());
-
-        // get strains for plasmid
-        Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
-        if (strains != null) {
-            for (Strain strain : strains) {
-                data.getStrains()
-                    .put(strain.getId(), strain.getPartNumber());
-            }
-        }
-
         return data;
     }
 
@@ -301,6 +287,7 @@ public class ModelToInfoFactory {
         info.setIntellectualProperty(entry.getIntellectualProperty());
         info.setSelectionMarkers(entry.getSelectionMarkersAsString());
 
+        // funding sources
         if (!entry.getEntryFundingSources().isEmpty()) {
             Iterator iterator = entry.getEntryFundingSources().iterator();
             EntryFundingSource source = (EntryFundingSource) iterator.next();
@@ -321,6 +308,17 @@ public class ModelToInfoFactory {
             }
         }
 
+        // linked entries
+        for (Entry linkedEntry : entry.getLinkedEntries()) {
+            PartData data = new PartData();
+            EntryType linkedType = EntryType.nameToType(linkedEntry.getRecordType());
+            data.setType(linkedType);
+            data.setId(linkedEntry.getId());
+            data.setPartId(linkedEntry.getPartNumber());
+            data.setName(linkedEntry.getName());
+            info.getLinkedParts().add(data);
+        }
+
         info.setLinks(entry.getLinksAsString());
         ArrayList<CustomField> params = new ArrayList<>();
 
@@ -339,8 +337,7 @@ public class ModelToInfoFactory {
 
         info.setLongDescription(entry.getLongDescription());
         if (account != null) {
-            String parsedShortDesc = EntryUtil.linkifyText(account, entry.getShortDescription());
-            info.setLinkifiedShortDescription(parsedShortDesc);
+            info.setShortDescription(entry.getShortDescription());
 
             String links = "";
             StringBuilder linkStr = new StringBuilder();
@@ -356,8 +353,7 @@ public class ModelToInfoFactory {
                 if (!links.isEmpty())
                     links = links.substring(0, links.length() - 1);
             }
-            String parsedLinks = EntryUtil.linkifyText(account, links);
-            info.setLinkifiedLinks(parsedLinks);
+            info.setLinks(links);
             String parsedReferences = EntryUtil.linkifyText(account, entry.getReferences());
             info.setReferences(parsedReferences);
         }
@@ -398,6 +394,16 @@ public class ModelToInfoFactory {
             EntryFundingSource source = entry.getEntryFundingSources().iterator().next();
             view.setFundingSource(source.getFundingSource().getFundingSource());
             view.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
+        }
+
+        for (Entry linkedEntry : entry.getLinkedEntries()) {
+            PartData data = new PartData();
+            EntryType linkedType = EntryType.nameToType(linkedEntry.getRecordType());
+            data.setType(linkedType);
+            data.setId(linkedEntry.getId());
+            data.setPartId(linkedEntry.getPartNumber());
+            data.setName(linkedEntry.getName());
+            view.getLinkedParts().add(data);
         }
     }
 
@@ -461,7 +467,7 @@ public class ModelToInfoFactory {
         return view;
     }
 
-    public static PartData createTipView(Account account, Entry entry) {
+    public static PartData createTipView(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         switch (type) {
 
@@ -475,9 +481,6 @@ public class ModelToInfoFactory {
                 Strain strain = (Strain) entry;
                 view.setHost(strain.getHost());
                 view.setGenotypePhenotype(strain.getGenotypePhenotype());
-                view.setLinkifiedHost(EntryUtil.linkifyText(account, strain.getHost()));
-                view.setPlasmids(strain.getPlasmids());
-                view.setLinkifiedPlasmids(EntryUtil.linkifyText(account, strain.getPlasmids()));
                 return view;
             }
 
@@ -514,15 +517,6 @@ public class ModelToInfoFactory {
                 view.setOriginOfReplication(plasmid.getOriginOfReplication());
                 view.setPromoters(plasmid.getPromoters());
                 view.setReplicatesIn(plasmid.getReplicatesIn());
-
-                // get strains for plasmid
-                Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
-                if (strains != null) {
-                    for (Strain strain : strains) {
-                        view.getStrains().put(strain.getId(), strain.getPartNumber());
-                    }
-                }
-
                 return view;
             }
 

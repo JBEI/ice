@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jbei.ice.lib.composers.formatters.SBOLVisitor;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
 
 import org.apache.http.HttpResponse;
@@ -119,7 +120,12 @@ public class PigeonSBOLv {
         }
 
         sb.append("# Arcs").append(NEWLINE);
-        return postToPigeon(sb.toString());
+        long start = System.currentTimeMillis();
+        try {
+            return postToPigeon(sb.toString());
+        } finally {
+            Logger.info("Pigeon: " + (System.currentTimeMillis() - start) + "ms for " + sequence.getEntry().getId());
+        }
     }
 
     public static String generatePigeonScript(Sequence sequence) {

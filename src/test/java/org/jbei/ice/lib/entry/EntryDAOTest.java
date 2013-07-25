@@ -21,7 +21,7 @@ public class EntryDAOTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        HibernateHelper.initializeMock();
+//        HibernateHelper.initializeMock();
     }
 
     @Before
@@ -54,6 +54,7 @@ public class EntryDAOTest {
 
     @Test
     public void testRetrieveStrainsForPlasmid() throws Exception {
+        dao.upgradeLinks();
     }
 
     @Test

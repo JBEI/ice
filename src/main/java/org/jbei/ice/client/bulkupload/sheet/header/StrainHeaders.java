@@ -14,6 +14,8 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 /**
+ * Headers for strain bulk upload in addition to the common part headers.
+ *
  * @author Hector Plahar
  */
 public class StrainHeaders extends PartHeader {
@@ -48,7 +50,12 @@ public class StrainHeaders extends PartHeader {
                 break;
 
             case PLASMIDS:
-                value = strain.getPlasmids();
+                value = "";
+                for (int i = 0; i < strain.getLinkedParts().size(); i += 1) {
+                    if (i > 0)
+                        value += ", ";
+                    value += strain.getLinkedParts().get(i).getPartId();
+                }
                 break;
         }
 

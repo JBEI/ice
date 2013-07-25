@@ -4,6 +4,11 @@ import java.util.Date;
 
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 
+/**
+ * Data transfer object for user account
+ *
+ * @author Hector Plahar
+ */
 public class User implements IDTOModel {
 
     private long id;
