@@ -24,6 +24,7 @@ import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -80,12 +81,10 @@ import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
-import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
-import org.jbei.ice.services.webservices.ServiceException;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
@@ -206,52 +205,58 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites) {
-        Account account;
-        try {
-            account = retrieveAccountForSid(sid);
-            if (!ControllerFactory.getAccountController().isAdministrator(account))
-                return;
+        // TODO
+        // TODO
+        // TODO
+        // TODO
+        // TODO
 
-            Logger.info("Requesting transfer of " + ids.size() + " entries");
-        } catch (AuthenticationException | ControllerException e) {
-            Logger.error(e);
-            return;
-        }
-
-        // retrieve entries
-        EntryController entryController = ControllerFactory.getEntryController();
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
-
-        HashMap<Entry, String> entrySeq = new HashMap<>();
-        for (long id : ids) {
-            try {
-                Entry entry = entryController.get(account, id);
-                Sequence sequence = sequenceController.getByEntry(entry);
-                String sequenceString = null;
-                if (sequence != null) {
-                    sequenceString = sequence.getSequenceUser();
-                    if (sequenceString == null || sequenceString.isEmpty())
-                        sequenceString = sequence.getSequence();
-                }
-                entrySeq.put(entry, sequenceString);
-            } catch (ControllerException e) {
-                Logger.error(e);
-            }
-        }
-
-        for (String url : sites) {
-            IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
-            if (api == null) {
-                Logger.error("Could not retrieve api for " + url + ". Transfer aborted");
-                continue;
-            }
-
-            try {
-                api.transmitEntries(entrySeq);
-            } catch (ServiceException e) {
-                Logger.error(e);
-            }
-        }
+//        Account account;
+//        try {
+//            account = retrieveAccountForSid(sid);
+//            if (!ControllerFactory.getAccountController().isAdministrator(account))
+//                return;
+//
+//            Logger.info("Requesting transfer of " + ids.size() + " entries");
+//        } catch (AuthenticationException | ControllerException e) {
+//            Logger.error(e);
+//            return;
+//        }
+//
+//        // retrieve entries
+//        EntryController entryController = ControllerFactory.getEntryController();
+//        SequenceController sequenceController = ControllerFactory.getSequenceController();
+//
+//        HashMap<Entry, String> entrySeq = new HashMap<>();
+//        for (long id : ids) {
+//            try {
+//                Entry entry = entryController.get(account, id);
+//                Sequence sequence = sequenceController.getByEntry(entry);
+//                String sequenceString = null;
+//                if (sequence != null) {
+//                    sequenceString = sequence.getSequenceUser();
+//                    if (sequenceString == null || sequenceString.isEmpty())
+//                        sequenceString = sequence.getSequence();
+//                }
+//                entrySeq.put(entry, sequenceString);
+//            } catch (ControllerException e) {
+//                Logger.error(e);
+//            }
+//        }
+//
+//        for (String url : sites) {
+//            IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
+//            if (api == null) {
+//                Logger.error("Could not retrieve api for " + url + ". Transfer aborted");
+//                continue;
+//            }
+//
+//            try {
+//                api.transmitEntries(entrySeq);
+//            } catch (ServiceException e) {
+//                Logger.error(e);
+//            }
+//        }
     }
 
     @Override
@@ -1540,23 +1545,23 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean saveSequence(String sessionId, long entryId, String sequenceUser) throws AuthenticationException {
+    public PartData saveSequence(String sessionId, PartData part, String sequenceUser) throws AuthenticationException {
         Account account;
         Entry entry;
         try {
             account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + ": saving sequence for entry " + entryId);
             EntryController entryController = ControllerFactory.getEntryController();
-            entry = entryController.get(account, entryId);
+            entry = entryController.get(account, part.getId());
             if (entry == null) {
-                Logger.error("Could not retrieve entry with id " + entryId);
-                return false;
+                entry = EntryUtil.createEntryFromType(part.getType(), account.getFullName(), account.getEmail());
+                entry = entryController.createEntry(account, entry, null);
             }
         } catch (ControllerException e) {
             Logger.error(e);
-            return false;
+            return null;
         }
 
+        Logger.info(account.getEmail() + ": saving sequence for entry " + entry.getId());
         SequenceController sequenceController = ControllerFactory.getSequenceController();
         IDNASequence dnaSequence = SequenceController.parse(sequenceUser);
 
@@ -1566,28 +1571,24 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                     + "If you believe this is an error, please contact the administrator with your file";
 
             Logger.error(errorMsg);
-            return false;
+            return null;
         }
 
         try {
             Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
             sequence.setSequenceUser(sequenceUser);
             sequence.setEntry(entry);
-            return sequenceController.save(account, sequence) != null;
+            if (sequenceController.save(account, sequence) != null) {
+                part.setId(entry.getId());
+                part.setRecordId(entry.getRecordId());
+                return part;
+            }
         } catch (ControllerException e) {
             Logger.error(e);
         } catch (PermissionException e) {
             Logger.warn(e.getMessage());
         }
-        return false;
-    }
-
-    @Override
-    public boolean sendFeedback(String email, String message) {
-        Emailer.send(email, Utils.getConfigValue(ConfigurationKey.PROJECT_NAME),
-                     "Thank you for sending your feedback.\n\nBest regards,\nRegistry Team");
-        Emailer.send(Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL), "Registry site feedback", message);
-        return true;
+        return null;
     }
 
     @Override

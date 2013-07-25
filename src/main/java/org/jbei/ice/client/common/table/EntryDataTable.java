@@ -71,7 +71,6 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
 
         DataTableColumn<T, Boolean> selectionColumn = new DataTableColumn<T, Boolean>(columnCell,
                                                                                       ColumnField.SELECTION) {
-
             @Override
             public Boolean getValue(T object) {
                 // returns column value from underlying data object (EntryDataView in this instance)
@@ -248,10 +247,7 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
 
         @Override
         public Boolean getValue() {
-            if (selectionModel.isAllSelected())
-                return true;
-
-            return !(selectionModel.getSelectedSet().isEmpty());
+            return selectionModel.isAllSelected() || !(selectionModel.getSelectedSet().isEmpty());
         }
     }
 }

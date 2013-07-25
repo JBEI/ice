@@ -50,10 +50,10 @@ public class DeleteSequenceData {
     private class DeleteCallback extends Callback<Boolean> {
 
         @Override
-        public void onSuccess(Boolean t) {
-            if (t.booleanValue()) {
-                sequencePanelPresenter.getEntry().setHasSequence(false);
-                sequencePanelPresenter.getEntry().setHasOriginalSequence(false);
+        public void onSuccess(Boolean success) {
+            if (success) {
+                sequencePanelPresenter.getPartData().setHasSequence(false);
+                sequencePanelPresenter.getPartData().setHasOriginalSequence(false);
                 sequencePanelPresenter.updateSequenceView();
             } else {
                 Window.alert("There was a problem deleting the sequence");

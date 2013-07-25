@@ -311,12 +311,17 @@ public class EntryController {
 
         try {
             entry = dao.get(id);
+            if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
+                throw new ControllerException(account.getEmail() + ": No read permission for entry " + id);
+            }
+
+            if (entry == null)
+                return null;
+
+            // get reverse for linked entries
+            entry.getLinkedEntries().addAll(dao.getReverseLinkedEntries(id));
         } catch (DAOException e) {
             throw new ControllerException(e);
-        }
-
-        if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
-            throw new ControllerException(account.getEmail() + ": No read permission for entry " + id);
         }
 
         return entry;
@@ -347,13 +352,29 @@ public class EntryController {
         }
 
         return entry;
+    }
 
-//        PartData info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
-//        boolean hasSequence = sequenceController.hasSequence(entry.getId());
-//        info.setHasSequence(hasSequence);
-//        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
-//        info.setHasOriginalSequence(hasOriginalSequence);
-//        return info;
+    public PartData getPartByRecordId(Account account, String recordId) throws ControllerException {
+        Entry entry;
+
+        try {
+            entry = dao.getByRecordId(recordId);
+            if (entry == null)
+                return null;
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        if (!permissionsController.hasReadPermission(account, entry)) {
+            throw new ControllerException("No read permission for part with recordId " + recordId);
+        }
+
+        PartData info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
+        boolean hasSequence = sequenceController.hasSequence(entry.getId());
+        info.setHasSequence(hasSequence);
+        boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
+        info.setHasOriginalSequence(hasOriginalSequence);
+        return info;
     }
 
     public FeaturedDNASequence getPublicSequence(String recordId) throws ControllerException {
@@ -477,6 +498,17 @@ public class EntryController {
             throw new ControllerException("No read permission for entry!");
         }
         return entry;
+    }
+
+    public boolean entryPartNumberExists(Account account, String partNumber) throws ControllerException {
+        Entry entry;
+        try {
+            entry = dao.getByPartNumber(partNumber);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        return entry != null && permissionsController.hasReadPermission(account, entry);
     }
 
     /**
@@ -762,10 +794,10 @@ public class EntryController {
 
     public PartData retrieveEntryTipDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
         try {
-            PartData info = api.getPublicEntryById(entryId);
+            PartData info = api.getPublicPart(entryId);
             boolean hasSequence = api.hasSequence(info.getRecordId());
             info.setHasSequence(hasSequence);
-            boolean hasOriginalSequence = api.hasOriginalSequence(info.getRecordId());
+            boolean hasOriginalSequence = api.hasUploadedSequence(info.getRecordId());
             info.setHasOriginalSequence(hasOriginalSequence);
             return info;
         } catch (ServiceException se) {
@@ -783,15 +815,18 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        return ModelToInfoFactory.createTipView(account, entry);
+        if (!permissionsController.hasReadPermission(account, entry))
+            return null;
+
+        return ModelToInfoFactory.createTipView(entry);
     }
 
     public PartData retrieveEntryDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
         try {
-            PartData info = api.getPublicEntryById(entryId);
+            PartData info = api.getPublicPart(entryId);
             boolean hasSequence = api.hasSequence(info.getRecordId());
             info.setHasSequence(hasSequence);
-            boolean hasOriginalSequence = api.hasOriginalSequence(info.getRecordId());
+            boolean hasOriginalSequence = api.hasUploadedSequence(info.getRecordId());
             info.setHasOriginalSequence(hasOriginalSequence);
             return info;
         } catch (ServiceException e) {
@@ -830,10 +865,7 @@ public class EntryController {
 
         if (hasSequence) {
             Sequence sequence = sequenceController.getByEntry(entry);
-            long start = System.currentTimeMillis();
             URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
-            Logger.info(account.getEmail() + ": Pigeon took " + (System.currentTimeMillis() - start)
-                                + "ms for " + entry.getId());
             if (uri != null) {
                 info.setSbolVisualURL(uri.toString());
             }
@@ -905,31 +937,16 @@ public class EntryController {
         return null;
     }
 
-    public boolean hasWritePermission(Account account, long entryId) throws ControllerException {
-        Entry entry;
-        try {
-            entry = dao.get(entryId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        if (entry == null)
-            return false;
-
-        return permissionsController.hasWritePermission(account, entry);
-    }
-
     public void upgradeTo3Point4() throws ControllerException {
         try {
-            Logger.info("Upgrading entries....please wait");
+            Logger.info("Upgrading entries. This may take several minutes...please wait");
             String prefix = ControllerFactory.getConfigurationController()
                                              .getConfiguration(ConfigurationKey.PART_NUMBER_PREFIX).getValue();
             dao.upgradeNamesAndPartNumbers(prefix);
+            dao.upgradeLinks();
             Logger.info("Entry upgrade complete");
         } catch (DAOException e) {
             Logger.error(e);
         }
-
-
     }
 }
