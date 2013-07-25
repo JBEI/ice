@@ -11,7 +11,6 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.widget.ShareCollectionWidget;
 import org.jbei.ice.client.common.util.ImageUtil;
-import org.jbei.ice.client.entry.display.handler.ReadBoxSelectionHandler;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
@@ -356,33 +355,38 @@ public class CollectionMenu extends Composite {
                 }
             });
 
-            shareCollectionWidget.getPermissionsPresenter().setWriteAddSelectionHandler(new ReadBoxSelectionHandler() {
+            // TODO
+//            shareCollectionWidget.getPermissionsPresenter().setWriteAddSelectionHandler(new ReadBoxSelectionHandler
+// () {
+//
+//                @Override
+//                public void updatePermission(PermissionInfo info) {
+//                    if (permissionInfoDelegate == null)
+//                        return;
+//
+//                    info.setType(PermissionInfo.Type.WRITE_FOLDER);
+//                    info.setTypeId(item.getId());
+//                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
+//                    permissionInfoDelegate.execute(data);
+//                }
+//            });
 
-                @Override
-                public void updatePermission(PermissionInfo info) {
-                    if (permissionInfoDelegate == null)
-                        return;
+//            shareCollectionWidget.getPermissionsPresenter().setPermissionAddSelectionHandler(new
+// ReadBoxSelectionHandler() {
+//
+//                @Override
+//                public void updatePermission(PermissionInfo info) {
+//                    if (permissionInfoDelegate == null)
+//                        return;
+//
+//                    info.setType(PermissionInfo.Type.READ_FOLDER);
+//                    info.setTypeId(item.getId());
+//                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
+//                    permissionInfoDelegate.execute(data);
+//                }
+//            });
 
-                    info.setType(PermissionInfo.Type.WRITE_FOLDER);
-                    info.setTypeId(item.getId());
-                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
-                    permissionInfoDelegate.execute(data);
-                }
-            });
-
-            shareCollectionWidget.getPermissionsPresenter().setReadAddSelectionHandler(new ReadBoxSelectionHandler() {
-
-                @Override
-                public void updatePermission(PermissionInfo info) {
-                    if (permissionInfoDelegate == null)
-                        return;
-
-                    info.setType(PermissionInfo.Type.READ_FOLDER);
-                    info.setTypeId(item.getId());
-                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
-                    permissionInfoDelegate.execute(data);
-                }
-            });
+            // TODO
 
             action.getOptionSelection().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 

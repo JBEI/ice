@@ -2,14 +2,15 @@ package org.jbei.ice.client.entry.display.view;
 
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
+import org.jbei.ice.client.entry.display.handler.ReadBoxSelectionHandler;
 import org.jbei.ice.client.entry.display.model.PermissionSuggestOracle;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -17,7 +18,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.SuggestOracle;
 
 /**
  * Widget for displaying/adding/removing entry permissions
@@ -30,13 +30,11 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
     private final PermissionPresenter presenter;
     private FlexTable readList;
     private FlexTable writeList;
-    private Icon addReadPermission;
-    private Icon addWritePermission;
+    private HTML addReadPermission;
+    private HTML addWritePermission;
     private HTML makePublic;
-    private SuggestBox readSuggestBox;
-    private SuggestBox writeSuggestBox;
+    private SuggestBox permissionSuggestions;
     private boolean isViewingWriteTab;
-    private boolean canAdd;
 
     public PermissionWidget(boolean showHeader) {
         layout = new FlexTable();
@@ -53,56 +51,25 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
         layout.getFlexCellFormatter().setColSpan(0, 0, 2);
         layout.getRowFormatter().setVisible(0, showHeader);
 
-        final HTMLPanel readLabel = new HTMLPanel(
+        HTMLPanel readLabelPanel = new HTMLPanel(
                 "Can Read <span style=\"float: right\" id=\"permission_read_add\"></span>");
-        readLabel.add(addReadPermission, "permission_read_add");
-        readLabel.setStyleName("permission_tab_active");
-        layout.setWidget(1, 0, readLabel);
+        readLabelPanel.add(addReadPermission, "permission_read_add");
+        readLabelPanel.setStyleName("permission_tab_active");
+        layout.setWidget(1, 0, readLabelPanel);
 
-        final HTMLPanel writeLabel = new HTMLPanel(
+        HTMLPanel writeLabelPanel = new HTMLPanel(
                 "Can Edit <span style=\"float: right\" id=\"permission_write_add\"></span>");
-        writeLabel.add(addWritePermission, "permission_write_add");
-        addWritePermission.setVisible(false);
-        writeLabel.setStyleName("permission_tab_inactive");
-        layout.setWidget(1, 1, writeLabel);
+        writeLabelPanel.add(addWritePermission, "permission_write_add");
+        writeLabelPanel.setStyleName("permission_tab_inactive");
+        layout.setWidget(1, 1, writeLabelPanel);
 
-        layout.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                HTMLTable.Cell cell = layout.getCellForEvent(event);
-                if (cell.getRowIndex() != 1)
-                    return;
+        layout.addClickHandler(new LayoutHeaderClickHandler(readLabelPanel, writeLabelPanel));
 
-                if (isViewingWriteTab) {
-                    if (cell.getCellIndex() == 1)
-                        return;
+        // input suggest box for adding permissions
+        createSuggestWidget();
 
-                    // switch to read tab
-                    isViewingWriteTab = false;
-                    readLabel.setStyleName("permission_tab_active");
-                    writeLabel.setStyleName("permission_tab_inactive");
-                    layout.setWidget(3, 0, readList);
-                } else {
-                    if (cell.getCellIndex() == 0)
-                        return;
-
-                    // switch to write tab
-                    isViewingWriteTab = true;
-                    readLabel.setStyleName("permission_tab_inactive");
-                    writeLabel.setStyleName("permission_tab_active");
-                    layout.setWidget(3, 0, writeList);
-                }
-
-                layout.getRowFormatter().setVisible(4, !isViewingWriteTab);
-                addWritePermission.setVisible(isViewingWriteTab && canAdd);
-                addReadPermission.setVisible(!isViewingWriteTab && canAdd);
-            }
-        });
-
-        // placeholder for add input box
-        layout.setHTML(2, 0, "");
-        layout.getFlexCellFormatter().setColSpan(2, 0, 2);
-        layout.getRowFormatter().setVisible(2, false);
+        // handlers for the "+" icon used to show/hide the icons
+        setAddClickHandlers();
 
         // contents go here
         layout.setWidget(3, 0, readList);
@@ -127,37 +94,40 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
         writeList.setCellSpacing(0);
         writeList.setStyleName("permission_list");
 
-        addReadPermission = new Icon(FAIconType.PLUS_SIGN);
+        addReadPermission = new HTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
         addReadPermission.addStyleName("edit_icon");
         addReadPermission.addStyleName("font-12em");
-        addWritePermission = new Icon(FAIconType.PLUS_SIGN);
+
+        addWritePermission = new HTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
         addWritePermission.addStyleName("edit_icon");
         addWritePermission.addStyleName("font-12em");
 
         makePublic = new HTML("Enable Public Read Access");
         makePublic.setStyleName("permission_footer_link");
 
-        readSuggestBox = new SuggestBox(new PermissionSuggestOracle());
-        readSuggestBox.setWidth("150px");
-        readSuggestBox.setStyleName("permission_input_suggest");
-        readSuggestBox.getValueBox().getElement().setAttribute("placeHolder", "Enter user/group name");
-        readSuggestBox.setLimit(7);
-
-        writeSuggestBox = new SuggestBox(new PermissionSuggestOracle());
-        writeSuggestBox.setWidth("150px");
-        writeSuggestBox.setStyleName("permission_input_suggest");
-        writeSuggestBox.getValueBox().getElement().setAttribute("placeHolder", "Enter user/group name");
-        writeSuggestBox.setLimit(7);
+        permissionSuggestions = new SuggestBox(new PermissionSuggestOracle());
+        permissionSuggestions.setWidth("160px");
+        permissionSuggestions.setStyleName("permission_input_suggest");
+        permissionSuggestions.getValueBox().getElement().setAttribute("placeHolder", "Enter user/group name");
+        permissionSuggestions.setLimit(7);
     }
 
-    /**
-     * Adds links that allows user to modify permissions.
-     * User should have write access
-     *
-     * @param canAdd allow permissions edit
-     */
-    public void canAddPermission(boolean canAdd) {
-        this.canAdd = canAdd;
+    protected void createSuggestWidget() {
+        HTML deleteIcon = new HTML("<i class=\"delete_icon " + FAIconType.REMOVE.getStyleName() + "\"></i>");
+        deleteIcon.setStyleName("display-inline");
+        deleteIcon.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                layout.getRowFormatter().setVisible(2, false);
+            }
+        });
+        HTMLPanel permissionAddPanel = new HTMLPanel("<span id=\"p_suggest_box\"></span> "
+                                                             + "<span id=\"suggest_cancel\"></span>");
+        permissionAddPanel.add(permissionSuggestions, "p_suggest_box");
+        permissionAddPanel.add(deleteIcon, "suggest_cancel");
+        layout.setWidget(2, 0, permissionAddPanel);
+        layout.getFlexCellFormatter().setColSpan(2, 0, 2);
+        layout.getRowFormatter().setVisible(2, false);
     }
 
     public PermissionPresenter getPresenter() {
@@ -165,48 +135,69 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
     }
 
     @Override
-    public void setWriteBoxVisibility(boolean visible) {
+    public void setPermissionBoxVisibility(boolean visible) {
         layout.getRowFormatter().setVisible(2, visible);
         if (visible) {
-            writeSuggestBox.setText("");
-            writeSuggestBox.getValueBox().setFocus(true);
-            layout.setWidget(2, 0, writeSuggestBox);
+            permissionSuggestions.setText("");
+            permissionSuggestions.getValueBox().setFocus(true);
         }
     }
 
-    @Override
-    public void setReadBoxVisibility(boolean visible) {
-        layout.getRowFormatter().setVisible(2, visible);
-        if (visible) {
-            readSuggestBox.setText("");
-            readSuggestBox.getValueBox().setFocus(true);
-            layout.setWidget(2, 0, readSuggestBox);
-        }
+    public void setAddClickHandlers() {
+        addReadPermission.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (isViewingWriteTab)
+                    return;
+                layout.getRowFormatter().setVisible(2, (!layout.getRowFormatter().isVisible(2)));
+            }
+        });
+        addWritePermission.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!isViewingWriteTab)
+                    return;
+                layout.getRowFormatter().setVisible(2, (!layout.getRowFormatter().isVisible(2)));
+            }
+        });
     }
 
     @Override
-    public HandlerRegistration addReadBoxSelectionHandler(SelectionHandler<SuggestOracle.Suggestion> handler) {
-        return readSuggestBox.addSelectionHandler(handler);
+    public HandlerRegistration addPermissionBoxSelectionHandler(final ServiceDelegate<PermissionInfo> handler) {
+        return permissionSuggestions.addSelectionHandler(new ReadBoxSelectionHandler() {
+            @Override
+            public void updatePermission(PermissionInfo info) {
+                if (isViewingWriteTab)
+                    info.setType(PermissionInfo.Type.WRITE_ENTRY);
+                else
+                    info.setType(PermissionInfo.Type.READ_ENTRY);
+                handler.execute(info);
+            }
+        });
     }
 
-    @Override
-    public HandlerRegistration addWriteBoxSelectionHandler(SelectionHandler<SuggestOracle.Suggestion> handler) {
-        return writeSuggestBox.addSelectionHandler(handler);
-    }
-
-    @Override
-    public HandlerRegistration setReadAddClickHandler(ClickHandler handler) {
-        return addReadPermission.addClickHandler(handler);
-    }
-
-    @Override
-    public HandlerRegistration setWriteAddClickHandler(ClickHandler handler) {
-        return addWritePermission.addClickHandler(handler);
-    }
 
     @Override
     public void addWriteItem(final PermissionInfo item, final Delegate<PermissionInfo> deleteDelegate) {
-        int row = writeList.getRowCount();
+        addPermissionItem(writeList, item, deleteDelegate);
+        if (isViewingWriteTab)
+            addReadPermission.setHTML("<b>" + readList.getRowCount() + "</b>");
+        else
+            addWritePermission.setHTML("<b>" + writeList.getRowCount() + "</b>");
+    }
+
+    @Override
+    public void addReadItem(final PermissionInfo item, final Delegate<PermissionInfo> deleteDelegate) {
+        addPermissionItem(readList, item, deleteDelegate);
+        if (isViewingWriteTab)
+            addReadPermission.setHTML("<span>" + readList.getRowCount() + "</span>");
+        else
+            addWritePermission.setHTML("<span>" + writeList.getRowCount() + "</span>");
+    }
+
+    protected void addPermissionItem(FlexTable table, final PermissionInfo item,
+            final Delegate<PermissionInfo> deleteDelegate) {
+        int row = table.getRowCount();
         String iconStyle;
         String display;
 
@@ -219,7 +210,8 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
                     + item.getArticleId() + "\">" + item.getDisplay() + "</a>";
         }
 
-        writeList.setHTML(row, 0, "<i class=\"font-85em " + iconStyle + "\"></i> " + display);
+        table.setHTML(row, 0, "<i class=\"" + iconStyle + "\"></i> " + display);
+        table.getCellFormatter().setWidth(row, 0, "160px");
         Icon deleteIcon = new Icon(FAIconType.REMOVE);
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
@@ -228,55 +220,24 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
             }
         });
         deleteIcon.addStyleName("delete_icon");
-        writeList.setWidget(row, 1, deleteIcon);
-    }
-
-    @Override
-    public void addReadItem(final PermissionInfo item, final Delegate<PermissionInfo> deleteDelegate) {
-        int row = readList.getRowCount();
-        String iconStyle;
-        String display;
-        String permissionName = item.getDisplay().length() <= 22 ? item.getDisplay() :
-                item.getDisplay().substring(0, 18) + "...";
-
-        if (item.getArticle() == PermissionInfo.Article.GROUP) {
-            iconStyle = FAIconType.GROUP.getStyleName() + " permission_group";
-            display = permissionName;
-        } else {
-            iconStyle = FAIconType.USER.getStyleName() + " permission_user";
-            display = "<a href=\"#" + Page.PROFILE.getLink() + ";id="
-                    + item.getArticleId() + "\">" + permissionName + "</a>";
-        }
-
-        readList.setHTML(row, 0, "<i class=\"font-85em " + iconStyle + "\"></i> " + display);
-        Icon deleteIcon = new Icon(FAIconType.REMOVE);
-        deleteIcon.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                deleteDelegate.execute(item);
-            }
-        });
-        deleteIcon.addStyleName("delete_icon");
-        readList.setWidget(row, 1, deleteIcon);
+        table.setWidget(row, 1, deleteIcon);
     }
 
     @Override
     public void removeReadItem(PermissionInfo item) {
-        for (int i = 0; i < readList.getRowCount(); i += 1) {
-            String html = readList.getHTML(i, 0);
-            if (html.contains(Page.PROFILE.getLink() + ";id=" + item.getArticleId())) {
-                readList.removeRow(i);
-                break;
-            }
-        }
+        removePermissionItem(readList, item);
     }
 
     @Override
     public void removeWriteItem(PermissionInfo item) {
-        for (int i = 0; i < writeList.getRowCount(); i += 1) {
-            String html = writeList.getHTML(i, 0);
+        removePermissionItem(writeList, item);
+    }
+
+    protected void removePermissionItem(FlexTable table, PermissionInfo item) {
+        for (int i = 0; i < table.getRowCount(); i += 1) {
+            String html = table.getHTML(i, 0);
             if (html.contains(Page.PROFILE.getLink() + ";id=" + item.getArticleId())) {
-                writeList.removeRow(i);
+                table.removeRow(i);
                 break;
             }
         }
@@ -291,5 +252,52 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
     @Override
     public void setWidgetVisibility(boolean visible) {
         this.setVisible(visible);
+    }
+
+    /**
+     * ClickHandler for Permissions header
+     */
+    private class LayoutHeaderClickHandler implements ClickHandler {
+
+        private HTMLPanel readLabelPanel;
+        private HTMLPanel writeLabelPanel;
+
+        public LayoutHeaderClickHandler(HTMLPanel readPanel, HTMLPanel writePanel) {
+            this.readLabelPanel = readPanel;
+            this.writeLabelPanel = writePanel;
+        }
+
+        @Override
+        public void onClick(ClickEvent event) {
+            HTMLTable.Cell cell = layout.getCellForEvent(event);
+            if (cell.getRowIndex() != 1)
+                return;
+
+            if (isViewingWriteTab) {
+                if (cell.getCellIndex() == 1)
+                    return;
+
+                // switch to read tab
+                isViewingWriteTab = false;
+                readLabelPanel.setStyleName("permission_tab_active");
+                writeLabelPanel.setStyleName("permission_tab_inactive");
+                layout.setWidget(3, 0, readList);
+                addWritePermission.setHTML("<span>" + writeList.getRowCount() + "</span>");
+                addReadPermission.setHTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
+            } else {
+                if (cell.getCellIndex() == 0)
+                    return;
+
+                // switch to write tab
+                isViewingWriteTab = true;
+                readLabelPanel.setStyleName("permission_tab_inactive");
+                writeLabelPanel.setStyleName("permission_tab_active");
+                layout.setWidget(3, 0, writeList);
+                addReadPermission.setHTML("<span>" + readList.getRowCount() + "</span>");
+                addWritePermission.setHTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
+            }
+
+            layout.getRowFormatter().setVisible(4, !isViewingWriteTab);
+        }
     }
 }

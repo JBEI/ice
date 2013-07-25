@@ -4,13 +4,10 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.SuggestOracle;
 
 /**
  * @author Hector Plahar
@@ -19,17 +16,9 @@ public class PermissionPresenter {
 
     public interface IPermissionView {
 
-        void setWriteBoxVisibility(boolean visible);
+        void setPermissionBoxVisibility(boolean visible);
 
-        void setReadBoxVisibility(boolean visible);
-
-        HandlerRegistration addReadBoxSelectionHandler(SelectionHandler<SuggestOracle.Suggestion> handler);
-
-        HandlerRegistration addWriteBoxSelectionHandler(SelectionHandler<SuggestOracle.Suggestion> handler);
-
-        HandlerRegistration setReadAddClickHandler(ClickHandler handler);
-
-        HandlerRegistration setWriteAddClickHandler(ClickHandler handler);
+        HandlerRegistration addPermissionBoxSelectionHandler(ServiceDelegate<PermissionInfo> handler);
 
         void addWriteItem(PermissionInfo item, Delegate<PermissionInfo> deleteDelegate);
 
@@ -51,19 +40,13 @@ public class PermissionPresenter {
 
     public PermissionPresenter(final IPermissionView view) {
         this.view = view;
-        this.view.setReadAddClickHandler(new ReadAddHandler());
-        this.view.setWriteAddClickHandler(new WriteAddHandler());
         readList = new ArrayList<PermissionInfo>();
         writeList = new ArrayList<PermissionInfo>();
         this.view.setWidgetVisibility(false);
     }
 
-    public void setReadAddSelectionHandler(SelectionHandler<SuggestOracle.Suggestion> handler) {
-        view.addReadBoxSelectionHandler(handler);
-    }
-
-    public void setWriteAddSelectionHandler(SelectionHandler<SuggestOracle.Suggestion> handler) {
-        view.addWriteBoxSelectionHandler(handler);
+    public void setPermissionAddSelectionHandler(ServiceDelegate<PermissionInfo> delegate) {
+        view.addPermissionBoxSelectionHandler(delegate);
     }
 
     public void removeItem(PermissionInfo info) {
@@ -74,7 +57,7 @@ public class PermissionPresenter {
     }
 
     public void addReadItem(PermissionInfo info, Delegate<PermissionInfo> deleteHandler) {
-        view.setReadBoxVisibility(false);
+        view.setPermissionBoxVisibility(false);
         if (inReadList(info))
             return;
 
@@ -87,7 +70,7 @@ public class PermissionPresenter {
     }
 
     public void addWriteItem(PermissionInfo info, Delegate<PermissionInfo> deleteHandler) {
-        view.setWriteBoxVisibility(false);
+        view.setPermissionBoxVisibility(false);
         if (inWriteList(info))
             return;
 
@@ -144,28 +127,5 @@ public class PermissionPresenter {
     public void setCanEdit(boolean canEdit) {
         this.canEdit = canEdit;
         this.view.setWidgetVisibility(canEdit);
-    }
-
-    // inner classes
-    private class WriteAddHandler implements ClickHandler {
-
-        private boolean visible = false;
-
-        @Override
-        public void onClick(ClickEvent event) {
-            visible = !visible;
-            view.setWriteBoxVisibility(visible);
-        }
-    }
-
-    private class ReadAddHandler implements ClickHandler {
-
-        private boolean visible = false;
-
-        @Override
-        public void onClick(ClickEvent event) {
-            visible = !visible;
-            view.setReadBoxVisibility(visible);
-        }
     }
 }

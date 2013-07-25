@@ -19,7 +19,6 @@ import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.display.handler.HasAttachmentDeleteHandler;
-import org.jbei.ice.client.entry.display.handler.ReadBoxSelectionHandler;
 import org.jbei.ice.client.entry.display.handler.UploadPasteSequenceHandler;
 import org.jbei.ice.client.entry.display.model.FlagEntry;
 import org.jbei.ice.client.entry.display.view.AttachmentItem;
@@ -28,7 +27,6 @@ import org.jbei.ice.client.entry.display.view.EntryView;
 import org.jbei.ice.client.entry.display.view.IEntryView;
 import org.jbei.ice.client.entry.display.view.MenuItem;
 import org.jbei.ice.client.entry.display.view.MenuItem.Menu;
-import org.jbei.ice.client.entry.display.view.PermissionPresenter;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -102,9 +100,7 @@ public class EntryPresenter extends AbstractPresenter {
         });
 
         // PERMISSIONS (handlers for adding read/write)
-        final PermissionPresenter pPresenter = display.getPermissionsWidget();
-        pPresenter.setReadAddSelectionHandler(new PermissionReadBoxHandler(false));
-        pPresenter.setWriteAddSelectionHandler(new PermissionReadBoxHandler(true));
+        display.getPermissionsWidget().setPermissionAddSelectionHandler(new PermissionAddDelegate());
 
         // attachment delete handler
         display.setAttachmentDeleteHandler(new HasAttachmentDeleteHandler() {
@@ -513,21 +509,10 @@ public class EntryPresenter extends AbstractPresenter {
     //
     // inner classes
     //
-    private class PermissionReadBoxHandler extends ReadBoxSelectionHandler {
-
-        private final boolean isWrite;
-
-        public PermissionReadBoxHandler(boolean isWrite) {
-            this.isWrite = isWrite;
-        }
+    private class PermissionAddDelegate implements ServiceDelegate<PermissionInfo> {
 
         @Override
-        public void updatePermission(final PermissionInfo info) {
-            if (isWrite) {
-                info.setType(PermissionInfo.Type.WRITE_ENTRY);
-            } else
-                info.setType(PermissionInfo.Type.READ_ENTRY);
-
+        public void execute(final PermissionInfo info) {
             if (currentInfo.getId() == 0) {
                 currentInfo.getPermissions().add(info);
                 displayPermission(info);
@@ -544,7 +529,7 @@ public class EntryPresenter extends AbstractPresenter {
 
                 @Override
                 public void onSuccess(Boolean result) {
-                    if (result.booleanValue())
+                    if (result)
                         displayPermission(info);
                 }
             }.go(eventBus);
@@ -552,7 +537,7 @@ public class EntryPresenter extends AbstractPresenter {
 
         protected void displayPermission(PermissionInfo info) {
             DeletePermission deletePermission = new DeletePermission();
-            if (isWrite) {
+            if (info.getType() == PermissionInfo.Type.WRITE_ENTRY) {
                 display.getPermissionsWidget().addWriteItem(info, deletePermission);
             } else {
                 display.getPermissionsWidget().addReadItem(info, deletePermission);

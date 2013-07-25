@@ -8,8 +8,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.SuggestOracle;
 
 /**
- * A suggest oracle for making rpc calls for
- * the suggestions
+ * A suggest oracle for making rpc calls for the suggestions
+ *
+ * @author Hector Plahar
  */
 
 public class PermissionSuggestOracle extends SuggestOracle {

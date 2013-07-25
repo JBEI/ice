@@ -279,7 +279,6 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.setWidget(1, 0, currentView);
         SequenceViewPanel sequenceViewPanel = currentView.getSequencePanel();
 
-        this.permissions.canAddPermission(showEdit);
         sequenceViewPanel.getPresenter().setIsCanEdit(showEdit, deleteSequenceHandler);
 
         getPermissionsWidget().setCanEdit(showEdit);
