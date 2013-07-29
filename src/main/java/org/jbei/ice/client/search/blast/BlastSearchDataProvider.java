@@ -41,10 +41,7 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
         // retrieve the first page of results and updateRowData
         final Range range = this.dataTable.getVisibleRange();
         final int rangeStart = 0;
-        int rangeEnd = rangeStart + range.getLength();
-        if (rangeEnd > resultSize)
-            rangeEnd = resultSize;
-
+        int rangeEnd = range.getLength() > resultSize ? range.getLength() : resultSize;
         updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
         dataTable.setPageStart(0);
     }
