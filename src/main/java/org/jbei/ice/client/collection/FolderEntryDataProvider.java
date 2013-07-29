@@ -195,7 +195,7 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
             rangeEnd += range.getLength();
             if (rangeEnd > resultSize)
                 rangeEnd = resultSize;
-            cacheMore(lastSortField, lastSortAsc, rangeStart, rangeEnd);
+            cacheMore(lastSortField, lastSortAsc, rangeStart, 2 * rangeEnd);
         }
     }
 }

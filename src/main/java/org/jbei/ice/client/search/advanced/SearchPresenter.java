@@ -63,8 +63,8 @@ public class SearchPresenter extends AbstractPresenter {
         blastTable = new BlastResultsTable(createContext(false, false, true, contextDelegate));
 
         // hide the results table
-        dataProvider = new SearchDataProvider(table, rpcService, false);
-        webDataProvider = new SearchDataProvider(webResults, rpcService, true);
+        dataProvider = new SearchDataProvider(table, rpcService, eventBus, false);
+        webDataProvider = new SearchDataProvider(webResults, rpcService, eventBus, true);
         blastProvider = new BlastSearchDataProvider(blastTable, rpcService);
         model = new SearchModel(rpcService, eventBus);
         getWebOfRegistrySettings();
