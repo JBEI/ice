@@ -36,7 +36,7 @@ import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
@@ -317,10 +317,10 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                 boolean canRemove = currentFolder.getOwner() != null
                         && ClientController.account.getEmail().equals(currentFolder.getOwner().getEmail());
-                if (!canRemove && currentFolder.getPermissions() != null) {
-                    for (PermissionInfo permissionInfo : currentFolder.getPermissions()) {
+                if (!canRemove && currentFolder.getAccessPermissions() != null) {
+                    for (AccessPermission accessPermission : currentFolder.getAccessPermissions()) {
                         // if you can see the folder then it has been shared with you so we only need to check access
-                        if (permissionInfo.isCanWrite()) {
+                        if (accessPermission.isCanWrite()) {
                             canRemove = true;
                             break;
                         }
@@ -392,9 +392,9 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.enableExportAs(true);
         display.setMainContent(entryViewPresenter.getView().asWidget());
         boolean enable = false;
-        if (currentFolder != null && currentFolder.getPermissions() != null) {
-            for (PermissionInfo permissionInfo : currentFolder.getPermissions()) {
-                if (permissionInfo.isCanWrite()) {
+        if (currentFolder != null && currentFolder.getAccessPermissions() != null) {
+            for (AccessPermission accessPermission : currentFolder.getAccessPermissions()) {
+                if (accessPermission.isCanWrite()) {
                     enable = true;
                     break;
                 }
@@ -650,11 +650,11 @@ public class CollectionsPresenter extends AbstractPresenter {
                     case PUBLIC:
                         systemMenuItems.add(item);
                         if (ClientController.account.isAdmin())
-                            item.setPermissions(folder.getPermissions());
+                            item.setAccessPermissions(folder.getAccessPermissions());
                         break;
 
                     case PRIVATE:
-                        item.setPermissions(folder.getPermissions());
+                        item.setAccessPermissions(folder.getAccessPermissions());
                         userMenuItems.add(item);
                         display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                         break;
@@ -815,31 +815,31 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                     @Override
                     protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        model.getService().removePermission(ClientController.sessionId, data.getInfo(), callback);
+                        model.getService().removePermission(ClientController.sessionId, data.getAccess(), callback);
                     }
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        data.getInfoCallback().onSuccess(data.getInfo());
+                        data.getInfoCallback().onSuccess(data.getAccess());
                     }
                 };
             } else {
-                if (data.getInfo().isCanWrite()) {
-                    data.getInfo().setType(PermissionInfo.Type.WRITE_FOLDER);
-                } else if (data.getInfo().isCanWrite()) {
-                    data.getInfo().setType(PermissionInfo.Type.READ_FOLDER);
+                if (data.getAccess().isCanWrite()) {
+                    data.getAccess().setType(AccessPermission.Type.WRITE_FOLDER);
+                } else if (data.getAccess().isCanWrite()) {
+                    data.getAccess().setType(AccessPermission.Type.READ_FOLDER);
                 }
 
                 asyncCallback = new IceAsyncCallback<Boolean>() {
 
                     @Override
                     protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        model.getService().addPermission(ClientController.sessionId, data.getInfo(), callback);
+                        model.getService().addPermission(ClientController.sessionId, data.getAccess(), callback);
                     }
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        data.getInfoCallback().onSuccess(data.getInfo());
+                        data.getInfoCallback().onSuccess(data.getAccess());
                     }
                 };
             }

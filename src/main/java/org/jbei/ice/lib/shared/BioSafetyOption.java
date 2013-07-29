@@ -2,9 +2,14 @@ package org.jbei.ice.lib.shared;
 
 import java.util.ArrayList;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.lib.shared.dto.IDTOModel;
 
-public enum BioSafetyOption implements IsSerializable {
+/**
+ * BioSafety Option options
+ *
+ * @author Hector Plahar
+ */
+public enum BioSafetyOption implements IDTOModel {
 
     LEVEL_ONE("Level 1", "1"),
     LEVEL_TWO("Level 2", "2");

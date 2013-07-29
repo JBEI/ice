@@ -24,7 +24,7 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import junit.framework.Assert;
@@ -431,69 +431,71 @@ public class BulkUploadControllerTest {
 
         BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull(info);
-        Assert.assertTrue(info.getPermissions().isEmpty());
+        Assert.assertTrue(info.getAccessPermissions().isEmpty());
 
-        ArrayList<PermissionInfo> permissions = new ArrayList<>();
+        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
 
         // add permission for group 2
-        PermissionInfo permissionInfo = new PermissionInfo();
-        permissionInfo.setArticle(PermissionInfo.Article.GROUP);
-        permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
-        permissionInfo.setArticleId(group2.getId());
-        permissions.add(permissionInfo);
+        AccessPermission accessPermission = new AccessPermission();
+        accessPermission.setArticle(AccessPermission.Article.GROUP);
+        accessPermission.setType(AccessPermission.Type.READ_ENTRY);
+        accessPermission.setArticleId(group2.getId());
+        accessPermissions.add(accessPermission);
         long id = controller.updatePermissions(account, autoUpdate.getBulkUploadId(), EntryAddType.PLASMID,
-                                               permissions);
+                                               accessPermissions);
         Assert.assertEquals(autoUpdate.getBulkUploadId(), id);
 
         // verify that permissions have been added
         info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull(info);
-        Assert.assertTrue(info.getPermissions().size() == 1);
+        Assert.assertTrue(info.getAccessPermissions().size() == 1);
 
         // check actual permission
-        permissionInfo = info.getPermissions().get(0);
-        Assert.assertEquals(permissionInfo.getArticleId(), group2.getId());
+        accessPermission = info.getAccessPermissions().get(0);
+        Assert.assertEquals(accessPermission.getArticleId(), group2.getId());
 
         // change permission to group 1
-        permissionInfo = new PermissionInfo();
-        permissionInfo.setArticleId(group1.getId());
-        permissionInfo.setArticle(PermissionInfo.Article.GROUP);
-        permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
-        permissions.clear();
-        permissions.add(permissionInfo);
-        id = controller.updatePermissions(account, autoUpdate.getBulkUploadId(), EntryAddType.PLASMID, permissions);
+        accessPermission = new AccessPermission();
+        accessPermission.setArticleId(group1.getId());
+        accessPermission.setArticle(AccessPermission.Article.GROUP);
+        accessPermission.setType(AccessPermission.Type.READ_ENTRY);
+        accessPermissions.clear();
+        accessPermissions.add(accessPermission);
+        id = controller.updatePermissions(account, autoUpdate.getBulkUploadId(), EntryAddType.PLASMID,
+                                          accessPermissions);
         Assert.assertEquals(autoUpdate.getBulkUploadId(), id);
 
         // verify that permissions have been changed
         info = controller.retrieveById(account, id, 0, 0);
         Assert.assertNotNull(info);
-        Assert.assertTrue(info.getPermissions().size() == 1);
+        Assert.assertTrue(info.getAccessPermissions().size() == 1);
 
         // check actual permission
-        permissionInfo = info.getPermissions().get(0);
-        Assert.assertEquals(permissionInfo.getArticleId(), group1.getId());
+        accessPermission = info.getAccessPermissions().get(0);
+        Assert.assertEquals(accessPermission.getArticleId(), group1.getId());
 
         // change permission to both
-        permissions.clear();
-        PermissionInfo permissionInfo1 = new PermissionInfo();
-        permissionInfo1.setArticle(PermissionInfo.Article.GROUP);
-        permissionInfo1.setArticleId(group1.getId());
-        permissionInfo1.setType(PermissionInfo.Type.READ_ENTRY);
-        permissions.add(permissionInfo1);
+        accessPermissions.clear();
+        AccessPermission accessPermission1 = new AccessPermission();
+        accessPermission1.setArticle(AccessPermission.Article.GROUP);
+        accessPermission1.setArticleId(group1.getId());
+        accessPermission1.setType(AccessPermission.Type.READ_ENTRY);
+        accessPermissions.add(accessPermission1);
 
-        PermissionInfo permissionInfo2 = new PermissionInfo();
-        permissionInfo2.setArticleId(group2.getId());
-        permissionInfo2.setArticle(PermissionInfo.Article.GROUP);
-        permissionInfo2.setType(PermissionInfo.Type.READ_ENTRY);
-        permissions.add(permissionInfo2);
+        AccessPermission accessPermission2 = new AccessPermission();
+        accessPermission2.setArticleId(group2.getId());
+        accessPermission2.setArticle(AccessPermission.Article.GROUP);
+        accessPermission2.setType(AccessPermission.Type.READ_ENTRY);
+        accessPermissions.add(accessPermission2);
 
-        id = controller.updatePermissions(account, autoUpdate.getBulkUploadId(), EntryAddType.PLASMID, permissions);
+        id = controller.updatePermissions(account, autoUpdate.getBulkUploadId(), EntryAddType.PLASMID,
+                                          accessPermissions);
         Assert.assertEquals(autoUpdate.getBulkUploadId(), id);
 
         // verify that permissions have been changed
         info = controller.retrieveById(account, id, 0, 0);
         Assert.assertNotNull(info);
-        Assert.assertTrue(info.getPermissions().size() == 2);
+        Assert.assertTrue(info.getAccessPermissions().size() == 2);
 
         // approve the bulk upload
         Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
@@ -505,11 +507,11 @@ public class BulkUploadControllerTest {
 
         // check the entry permissions to ensure they are correct
         Set<Permission> entryPermissions = entry.getPermissions();
-        for (PermissionInfo permission : permissions) {
+        for (AccessPermission ap : accessPermissions) {
             boolean found = false;
             for (Permission entryPermission : entryPermissions) {
                 if (entryPermission.getGroup() != null
-                        && entryPermission.getGroup().getId() == permission.getArticleId()
+                        && entryPermission.getGroup().getId() == ap.getArticleId()
                         && entryPermission.isCanRead()) {
                     found = true;
                     break;

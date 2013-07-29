@@ -14,7 +14,8 @@ public enum AdminOption {
         "Enable/Disable information sharing and retrieval from other ICE instances"),
     USERS(FAIconType.USER, "Manage Users", "Manage user accounts and privileges"),
     GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members"),
-    SEARCH(FAIconType.SEARCH, "Manage Search", "Rebuild the search indices and change search settings");
+    SEARCH(FAIconType.SEARCH, "Manage Search", "Rebuild the search indices and change search settings"),
+    PARTS(FAIconType.LIST, "Transferred Parts", "Approve/Reject parts transferred from other registries");
 
     private final String display;
     private final FAIconType iconType;

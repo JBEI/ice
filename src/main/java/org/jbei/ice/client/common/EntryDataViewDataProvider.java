@@ -66,6 +66,11 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<PartDa
     public PartData getNext(PartData info) {
         int idx = cachedEntries.indexOf(info);
         int size = cachedEntries.size();
+        if (size - 1 == idx + 1) {
+            // fetch next
+            cacheMore(lastSortField, lastSortAsc, size, 1);
+        }
+
         if (size == idx + 1)
             return null;
         return cachedEntries.get(idx + 1);

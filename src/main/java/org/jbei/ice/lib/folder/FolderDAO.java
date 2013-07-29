@@ -85,31 +85,45 @@ class FolderDAO extends HibernateRepository<Folder> {
     public ArrayList<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit)
             throws DAOException {
         Session session = currentSession();
+
         try {
             Folder folder = get(folderId);
             if (folder == null)
                 throw new DAOException();
 
-            String queryString = " order by";
+            String sortString;
 
             switch (sort) {
                 default:
                 case CREATED:
-                    queryString += " id";
+                    sortString = " id";
                     break;
 
                 case STATUS:
-                    queryString += " status";
+                    sortString = " status";
+                    break;
+
+                case NAME:
+                    sortString = " name";
+                    break;
+
+                case PART_ID:
+                    sortString = " partNumber";
                     break;
 
                 case TYPE:
-                    queryString += " recordType";
+                    sortString = " recordType";
                     break;
             }
 
-            queryString += (asc ? " asc" : " desc");
-            Query query = session.createFilter(folder.getContents(), queryString);
-            List list = query.setFirstResult(start).setMaxResults(limit).list();
+            String ascString = asc ? " asc" : " desc";
+            Query query = session.createQuery("select distinct e from Entry e "
+                                                      + "join e.folders f where f.id = :id order by e."
+                                                      + sortString + ascString);
+            query.setLong("id", folderId);
+            query.setFirstResult(start);
+            query.setMaxResults(limit);
+            List list = query.list();
             return new ArrayList<Entry>(list);
         } catch (HibernateException he) {
             Logger.error(he);

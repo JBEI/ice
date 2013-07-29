@@ -76,7 +76,7 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     /**
-     * Logout out of the ICE SOAP service by deauthenticating the session
+     * Logout out of the ICE SOAP service by de-authenticating the session
      *
      * @param sessionId Session key to log out.
      * @throws ServiceException
@@ -116,7 +116,7 @@ public class RegistryAPI implements IRegistryAPI {
     /**
      * Retrieve a part by its name. Note that the name has to be unique to the part.
      * Names are generally free form fields and so unless your registry instance
-     * enforces uniqueness of names, this call will likely fail due to duplicates
+     * enforces uniqueness of names, this call can fail due to duplicates
      *
      * @param sessionId Session key.
      * @param name      Name of the Entry to retrieve.

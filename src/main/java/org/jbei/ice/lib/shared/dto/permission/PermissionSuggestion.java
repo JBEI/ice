@@ -5,26 +5,26 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
 public class PermissionSuggestion implements IsSerializable, Suggestion {
 
-    private PermissionInfo info;
+    private AccessPermission access;
 
     public PermissionSuggestion() {
     }
 
-    public PermissionSuggestion(PermissionInfo info) {
-        this.info = info;
+    public PermissionSuggestion(AccessPermission access) {
+        this.access = access;
     }
 
-    public PermissionInfo getInfo() {
-        return this.info;
+    public AccessPermission getAccess() {
+        return this.access;
     }
 
     @Override
     public String getDisplayString() {
-        return info.getDisplay();
+        return access.getDisplay();
     }
 
     @Override
     public String getReplacementString() {
-        return info.getDisplay();
+        return access.getDisplay();
     }
 }

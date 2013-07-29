@@ -24,7 +24,7 @@ import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
@@ -98,9 +98,9 @@ public interface RegistryService extends RemoteService {
 
     SuggestOracle.Response getAutoCompleteSuggestion(AutoCompleteField field, Request request);
 
-    boolean addPermission(String sessionId, PermissionInfo permission) throws AuthenticationException;
+    boolean addPermission(String sessionId, AccessPermission accessPermission) throws AuthenticationException;
 
-    boolean removePermission(String sessionId, PermissionInfo permissionInfo) throws AuthenticationException;
+    boolean removePermission(String sessionId, AccessPermission accessPermission) throws AuthenticationException;
 
     PartData saveSequence(String sessionId, PartData data, String sequenceUser) throws AuthenticationException;
 
@@ -200,7 +200,7 @@ public interface RegistryService extends RemoteService {
     ArrayList<GroupInfo> retrieveUserGroups(String sessionId) throws AuthenticationException;
 
     Long updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
-            ArrayList<PermissionInfo> permissions) throws AuthenticationException;
+            ArrayList<AccessPermission> accessPermissions) throws AuthenticationException;
 
     boolean promoteCollection(String sessionId, long id) throws AuthenticationException;
 
@@ -218,5 +218,5 @@ public interface RegistryService extends RemoteService {
 
     boolean setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException;
 
-    ArrayList<PermissionInfo> retrieveDefaultPermissions(String sid) throws AuthenticationException;
+    ArrayList<AccessPermission> retrieveDefaultPermissions(String sid) throws AuthenticationException;
 }

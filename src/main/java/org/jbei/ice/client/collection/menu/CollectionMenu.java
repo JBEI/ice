@@ -12,7 +12,7 @@ import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.widget.ShareCollectionWidget;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -200,14 +200,14 @@ public class CollectionMenu extends Composite {
 
         // display counts of who private folders have been shared with
         // permissions are only set for user private folder. shared folders have owners
-        if (item.getPermissions() != null && !item.getPermissions().isEmpty()) {
-            for (PermissionInfo info : item.getPermissions()) {
-                if (!info.isFolder())
+        if (item.getAccessPermissions() != null && !item.getAccessPermissions().isEmpty()) {
+            for (AccessPermission access : item.getAccessPermissions()) {
+                if (!access.isFolder())
                     continue;
 
-                if (info.getArticle() == PermissionInfo.Article.GROUP)
+                if (access.getArticle() == AccessPermission.Article.GROUP)
                     groupCount += 1;
-                if (info.getArticle() == PermissionInfo.Article.ACCOUNT)
+                if (access.getArticle() == AccessPermission.Article.ACCOUNT)
                     userCount += 1;
             }
         }
@@ -342,14 +342,15 @@ public class CollectionMenu extends Composite {
             this.row = row;
             folderId = "right" + item.getId();
             action = new HoverCell();
-            shareCollectionWidget = new ShareCollectionWidget(this, item.getName(), new Delegate<PermissionInfo>() {
+            shareCollectionWidget = new ShareCollectionWidget(this, item.getName(), new Delegate<AccessPermission>() {
 
                 @Override
-                public void execute(PermissionInfo info) {
+                public void execute(AccessPermission access) {
                     if (permissionInfoDelegate == null)
                         return;
 
-                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getRemoveCallback());
+                    ShareCollectionData data = new ShareCollectionData(access,
+                                                                       shareCollectionWidget.getRemoveCallback());
                     data.setDelete(true);
                     permissionInfoDelegate.execute(data);
                 }
@@ -454,8 +455,8 @@ public class CollectionMenu extends Composite {
             panel.add(action, "submenu_" + folderId);
             panel.add(busyIndicator, "busy_indicator_" + folderId);
 
-            if (!item.hasSubMenu() || (item.getOwner() == null && (item.getPermissions() == null || item
-                    .getPermissions().isEmpty())) || item.getType() == FolderType.PUBLIC)
+            if (!item.hasSubMenu() || (item.getOwner() == null && (item.getAccessPermissions() == null || item
+                    .getAccessPermissions().isEmpty())) || item.getType() == FolderType.PUBLIC)
                 panel.setStyleName("system_collection_user_menu_row");
             else
                 panel.setStyleName("user_collection_user_menu_row");
@@ -525,7 +526,7 @@ public class CollectionMenu extends Composite {
             currentEditSelection = getMenuItem();
             editRow = row;
             editIndex = 0;
-            shareCollectionWidget.showDialog(currentEditSelection.getPermissions());
+            shareCollectionWidget.showDialog(currentEditSelection.getAccessPermissions());
         }
 
         protected void pinAction() {

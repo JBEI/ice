@@ -7,7 +7,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.entry.display.handler.ReadBoxSelectionHandler;
 import org.jbei.ice.client.entry.display.model.PermissionSuggestOracle;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -98,7 +98,7 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
         addReadPermission.addStyleName("edit_icon");
         addReadPermission.addStyleName("font-12em");
 
-        addWritePermission = new HTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
+        addWritePermission = new HTML("<b>0</b>");
         addWritePermission.addStyleName("edit_icon");
         addWritePermission.addStyleName("font-12em");
 
@@ -163,22 +163,21 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
     }
 
     @Override
-    public HandlerRegistration addPermissionBoxSelectionHandler(final ServiceDelegate<PermissionInfo> handler) {
+    public HandlerRegistration addPermissionBoxSelectionHandler(final ServiceDelegate<AccessPermission> handler) {
         return permissionSuggestions.addSelectionHandler(new ReadBoxSelectionHandler() {
             @Override
-            public void updatePermission(PermissionInfo info) {
+            public void updatePermission(AccessPermission access) {
                 if (isViewingWriteTab)
-                    info.setType(PermissionInfo.Type.WRITE_ENTRY);
+                    access.setType(AccessPermission.Type.WRITE_ENTRY);
                 else
-                    info.setType(PermissionInfo.Type.READ_ENTRY);
-                handler.execute(info);
+                    access.setType(AccessPermission.Type.READ_ENTRY);
+                handler.execute(access);
             }
         });
     }
 
-
     @Override
-    public void addWriteItem(final PermissionInfo item, final Delegate<PermissionInfo> deleteDelegate) {
+    public void addWriteItem(final AccessPermission item, final Delegate<AccessPermission> deleteDelegate) {
         addPermissionItem(writeList, item, deleteDelegate);
         if (isViewingWriteTab)
             addReadPermission.setHTML("<b>" + readList.getRowCount() + "</b>");
@@ -187,7 +186,7 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
     }
 
     @Override
-    public void addReadItem(final PermissionInfo item, final Delegate<PermissionInfo> deleteDelegate) {
+    public void addReadItem(final AccessPermission item, final Delegate<AccessPermission> deleteDelegate) {
         addPermissionItem(readList, item, deleteDelegate);
         if (isViewingWriteTab)
             addReadPermission.setHTML("<span>" + readList.getRowCount() + "</span>");
@@ -195,13 +194,13 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
             addWritePermission.setHTML("<span>" + writeList.getRowCount() + "</span>");
     }
 
-    protected void addPermissionItem(FlexTable table, final PermissionInfo item,
-            final Delegate<PermissionInfo> deleteDelegate) {
+    protected void addPermissionItem(FlexTable table, final AccessPermission item,
+            final Delegate<AccessPermission> deleteDelegate) {
         int row = table.getRowCount();
         String iconStyle;
         String display;
 
-        if (item.getArticle() == PermissionInfo.Article.GROUP) {
+        if (item.getArticle() == AccessPermission.Article.GROUP) {
             iconStyle = FAIconType.GROUP.getStyleName() + " permission_group";
             display = item.getDisplay();
         } else {
@@ -224,16 +223,16 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
     }
 
     @Override
-    public void removeReadItem(PermissionInfo item) {
+    public void removeReadItem(AccessPermission item) {
         removePermissionItem(readList, item);
     }
 
     @Override
-    public void removeWriteItem(PermissionInfo item) {
+    public void removeWriteItem(AccessPermission item) {
         removePermissionItem(writeList, item);
     }
 
-    protected void removePermissionItem(FlexTable table, PermissionInfo item) {
+    protected void removePermissionItem(FlexTable table, AccessPermission item) {
         for (int i = 0; i < table.getRowCount(); i += 1) {
             String html = table.getHTML(i, 0);
             if (html.contains(Page.PROFILE.getLink() + ";id=" + item.getArticleId())) {

@@ -1,6 +1,13 @@
 package org.jbei.ice.server.servlet;
 
-import org.apache.commons.io.IOUtils;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -12,13 +19,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Servlet for serving the different kinds of files
@@ -32,6 +33,7 @@ public class FileDownloadServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final String SEQUENCE_TYPE = "sequence";
     private static final String ATTACHMENT_TYPE = "attachment";
+    private static final String SBOL_VISUAL_TYPE = "sbol_visual";
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": attempt to download file");
@@ -60,12 +62,12 @@ public class FileDownloadServlet extends HttpServlet {
             url = url.substring(0, url.indexOf(path));
             response.sendRedirect(url);
             Logger.info(FileDownloadServlet.class.getSimpleName()
-                    + ": authentication failed. Redirecting user to " + url);
+                                + ": authentication failed. Redirecting user to " + url);
             return;
         }
 
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": user = " + account.getEmail()
-                + ", file type = " + type + ", file id = " + fileId);
+                            + ", file type = " + type + ", file id = " + fileId);
 
         File file = null;
 
@@ -73,6 +75,10 @@ public class FileDownloadServlet extends HttpServlet {
             file = getTraceSequenceFile(fileId, response);
         else if (ATTACHMENT_TYPE.equalsIgnoreCase(type))
             file = getAttachmentFile(account, fileId, response);
+        else if (SBOL_VISUAL_TYPE.equalsIgnoreCase(type)) {
+            getSBOLVisualType(account, fileId, response);
+            return;
+        }
 
         // check for null file
         if (file == null) {
@@ -103,6 +109,17 @@ public class FileDownloadServlet extends HttpServlet {
         }
     }
 
+    private void getSBOLVisualType(Account account, String fileId, HttpServletResponse response) {
+        response.setContentType("image/png");
+        File file = new File(fileId);
+        response.setContentLength((int) file.length());
+        try {
+            IOUtils.copy(new FileInputStream(file), response.getOutputStream());
+        } catch (IOException ioe) {
+            Logger.error(ioe);
+        }
+    }
+
     private File getAttachmentFile(Account account, String fileId, HttpServletResponse response) {
         AttachmentController controller = ControllerFactory.getAttachmentController();
         try {
@@ -117,8 +134,7 @@ public class FileDownloadServlet extends HttpServlet {
             Logger.error(ce);
             return null;
         } catch (PermissionException e) {
-            Logger.error("User " + account.getEmail()
-                    + " does not have appropriate permissions to view file");
+            Logger.error("User " + account.getEmail() + " does not have appropriate permissions to view file");
             Logger.error(e);
             return null;
         }

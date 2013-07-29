@@ -50,22 +50,6 @@ import org.hibernate.criterion.Restrictions;
 public class EntryDAO extends HibernateRepository<Entry> {
 
     @SuppressWarnings("unchecked")
-    public HashSet<Long> retrieveStrainsForPlasmid(Plasmid plasmid) throws DAOException {
-        Session session = currentSession();
-        HashSet<Long> strainIds;
-        try {
-            Query query = session
-                    .createQuery("select strain.id from Strain strain where strain.plasmids like :partNumber");
-            query.setString("partNumber", "%" + plasmid.getPartNumber() + "%");
-            strainIds = new HashSet<Long>(query.list());
-        } catch (HibernateException e) {
-            Logger.error("Could not get strains for plasmid " + e.toString(), e);
-            throw new DAOException(e);
-        }
-        return strainIds;
-    }
-
-    @SuppressWarnings("unchecked")
     public LinkedList<Long> getAllEntryIds() throws DAOException {
         Session session = currentSession();
         Criteria c = session.createCriteria(Entry.class).setProjection(Projections.id());
@@ -832,7 +816,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * links are stored in a join table in the form [entry_id, linked_entry_id] which is defined as
      * <code>
      *
-     * @throws DAOException
      * @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
      * @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
      * inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})

@@ -12,14 +12,13 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.server.ModelToInfoFactory;
 
@@ -89,7 +88,7 @@ public class FolderController {
         }
     }
 
-    protected boolean canReadFolderContents(Account account, Folder folder) {
+    protected boolean canReadFolderContents(Account account, Folder folder) throws ControllerException {
         if (folder.getType() == FolderType.PUBLIC)
             return true;
 
@@ -100,35 +99,9 @@ public class FolderController {
             return true;
 
         // now check actual permissions
-        Set<Group> groups = account.getGroups();
-
-        try {
-            ArrayList<PermissionInfo> permissionInfos =
-                    ControllerFactory.getPermissionController().retrieveSetFolderPermission(folder);
-            for (PermissionInfo info : permissionInfos) {
-                switch (info.getArticle()) {
-                    case ACCOUNT:
-                        if (account.getId() == info.getArticleId())
-                            return true;
-                        break;
-
-                    case GROUP:
-                        for (Group group : groups) {
-                            if (group.getId() == info.getArticleId())
-                                return true;
-                        }
-                        break;
-
-                    default:
-                        continue;
-                }
-            }
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return false;
-        }
-
-        return false;
+        Set<Folder> folders = new HashSet<>();
+        folders.add(folder);
+        return ControllerFactory.getPermissionController().groupHasReadPermission(account.getGroups(), folders);
     }
 
     public FolderDetails retrieveFolderContents(Account account, long folderId, ColumnField sort, boolean asc,
@@ -149,7 +122,8 @@ public class FolderController {
             long folderSize = getFolderSize(folderId);
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
-            details.setPermissions(ControllerFactory.getPermissionController().retrieveSetFolderPermission(folder));
+            details.setAccessPermissions(ControllerFactory.getPermissionController().retrieveSetFolderPermission(
+                    folder));
             Account owner = accountController.getByEmail(folder.getOwnerEmail());
             details.setOwner(Account.toDTO(owner));
 
@@ -263,9 +237,9 @@ public class FolderController {
                 details.setDescription(folder.getDescription());
                 details.setType(FolderType.PUBLIC);
                 if (account.getType() == AccountType.ADMIN) {
-                    ArrayList<PermissionInfo> infos = ControllerFactory.getPermissionController().
+                    ArrayList<AccessPermission> accesses = ControllerFactory.getPermissionController().
                             retrieveSetFolderPermission(folder);
-                    details.setPermissions(infos);
+                    details.setAccessPermissions(accesses);
                 }
                 results.add(details);
             }
@@ -280,9 +254,9 @@ public class FolderController {
                     details.setCount(folderSize);
                     details.setType(FolderType.PRIVATE);
                     details.setDescription(folder.getDescription());
-                    ArrayList<PermissionInfo> infos = ControllerFactory.getPermissionController().
+                    ArrayList<AccessPermission> accesses = ControllerFactory.getPermissionController().
                             retrieveSetFolderPermission(folder);
-                    details.setPermissions(infos);
+                    details.setAccessPermissions(accesses);
                     results.add(details);
                 }
             }
@@ -336,12 +310,12 @@ public class FolderController {
             dao.update(folder);
 
             // remove account permissions for this administrator
-            PermissionInfo info = new PermissionInfo();
-            info.setType(PermissionInfo.Type.READ_FOLDER);
-            info.setArticle(PermissionInfo.Article.ACCOUNT);
-            info.setArticleId(account.getId());
-            info.setTypeId(id);
-            ControllerFactory.getPermissionController().removePermission(account, info);
+            AccessPermission access = new AccessPermission();
+            access.setType(AccessPermission.Type.READ_FOLDER);
+            access.setArticle(AccessPermission.Article.ACCOUNT);
+            access.setArticleId(account.getId());
+            access.setTypeId(id);
+            ControllerFactory.getPermissionController().removePermission(account, access);
             return true;
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -389,14 +363,14 @@ public class FolderController {
                 } else {
                     Account account = accountController.getByEmail(owner);
                     if (account != null) {
-                        ArrayList<PermissionInfo> infos = ControllerFactory.getPermissionController().
+                        ArrayList<AccessPermission> accesses = ControllerFactory.getPermissionController().
                                 retrieveSetFolderPermission(folder);
-                        if (infos != null) {
-                            for (PermissionInfo info : infos) {
-                                if (info.isCanRead() || info.isCanWrite()) {
+                        if (accesses != null) {
+                            for (AccessPermission access : accesses) {
+                                if (access.isCanRead() || access.isCanWrite()) {
                                     // skip setting update to shared if the permission is associated with the owner
-                                    if (info.getArticle() == PermissionInfo.Article.ACCOUNT
-                                            && info.getArticleId() == account.getId()) {
+                                    if (access.getArticle() == AccessPermission.Article.ACCOUNT
+                                            && access.getArticleId() == account.getId()) {
                                         folder.setType(FolderType.PRIVATE);
                                         continue;
                                     }

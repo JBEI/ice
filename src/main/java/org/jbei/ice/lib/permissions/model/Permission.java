@@ -15,7 +15,7 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.ClassBridge;
@@ -114,32 +114,32 @@ public class Permission implements IModel {
         this.folder = folder;
     }
 
-    public static PermissionInfo toDTO(Permission permission) {
+    public static AccessPermission toDTO(Permission permission) {
         if (permission == null)
             return null;
 
-        PermissionInfo info = new PermissionInfo();
+        AccessPermission access = new AccessPermission();
         if (permission.getGroup() != null) {
-            info.setArticle(PermissionInfo.Article.GROUP);
-            info.setArticleId(permission.getGroup().getId());
-            info.setDisplay(permission.getGroup().getLabel());
+            access.setArticle(AccessPermission.Article.GROUP);
+            access.setArticleId(permission.getGroup().getId());
+            access.setDisplay(permission.getGroup().getLabel());
         } else {
-            info.setArticle(PermissionInfo.Article.ACCOUNT);
-            info.setArticleId(permission.getAccount().getId());
-            info.setDisplay(permission.getAccount().getFullName());
+            access.setArticle(AccessPermission.Article.ACCOUNT);
+            access.setArticleId(permission.getAccount().getId());
+            access.setDisplay(permission.getAccount().getFullName());
         }
 
-        PermissionInfo.Type type = null;
+        AccessPermission.Type type = null;
         long id = 0;
         if (permission.entry != null) {
-            type = permission.isCanWrite() ? PermissionInfo.Type.WRITE_ENTRY : PermissionInfo.Type.READ_ENTRY;
+            type = permission.isCanWrite() ? AccessPermission.Type.WRITE_ENTRY : AccessPermission.Type.READ_ENTRY;
             id = permission.getEntry().getId();
         } else if (permission.getFolder() != null) {
-            type = permission.isCanWrite() ? PermissionInfo.Type.WRITE_FOLDER : PermissionInfo.Type.READ_FOLDER;
+            type = permission.isCanWrite() ? AccessPermission.Type.WRITE_FOLDER : AccessPermission.Type.READ_FOLDER;
             id = permission.getFolder().getId();
         }
-        info.setType(type);
-        info.setTypeId(id);
-        return info;
+        access.setType(type);
+        access.setTypeId(id);
+        return access;
     }
 }

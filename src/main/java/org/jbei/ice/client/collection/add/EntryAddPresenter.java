@@ -18,7 +18,7 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -43,7 +43,7 @@ public class EntryAddPresenter {
     private final EntryPresenter entryPresenter;
     private EntryAddType currentType;
     public HashMap<PreferenceKey, String> preferences;
-    private ArrayList<PermissionInfo> permissionInfos;
+    private ArrayList<AccessPermission> accessPermissions;
 
     public EntryAddPresenter(CollectionsPresenter presenter, final EntryPresenter entryPresenter,
             RegistryServiceAsync service, HandlerManager eventBus) {
@@ -76,21 +76,21 @@ public class EntryAddPresenter {
         }.go(eventBus);
 
         // retrieve default permissions
-        new IceAsyncCallback<ArrayList<PermissionInfo>>() {
+        new IceAsyncCallback<ArrayList<AccessPermission>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<PermissionInfo>> callback)
+            protected void callService(AsyncCallback<ArrayList<AccessPermission>> callback)
                     throws AuthenticationException {
                 EntryAddPresenter.this.service.retrieveDefaultPermissions(ClientController.sessionId, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<PermissionInfo> result) {
+            public void onSuccess(ArrayList<AccessPermission> result) {
                 if (currentType == null || !formsCache.containsKey(currentType))
                     return;
 
-                permissionInfos = result;
-                entryPresenter.setDefaultPermissions(permissionInfos);
+                accessPermissions = result;
+                entryPresenter.setDefaultPermissions(accessPermissions);
             }
         }.go(eventBus);
     }
@@ -262,9 +262,9 @@ public class EntryAddPresenter {
         return preferences;
     }
 
-    public ArrayList<PermissionInfo> getDefaultPermissions() {
-        if (permissionInfos == null)
-            return new ArrayList<PermissionInfo>();
-        return this.permissionInfos;
+    public ArrayList<AccessPermission> getDefaultPermissions() {
+        if (accessPermissions == null)
+            return new ArrayList<AccessPermission>();
+        return this.accessPermissions;
     }
 }

@@ -1,22 +1,14 @@
 package org.jbei.ice.lib.bulkupload;
 
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.StatusType;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.utils.Utils;
 
 /**
  * Utility class for Bulk Import
@@ -24,41 +16,6 @@ import org.jbei.ice.lib.utils.Utils;
  * @author Hector Plahar
  */
 public class BulkUploadUtil {
-
-    public static Entry getPartNumberForStrainPlasmid(Account account, EntryController controller, String text) {
-        String wikiLinkPrefix = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
-        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLinkPrefix + ":.*?\\]\\]");
-        Pattern partNumberPattern = Pattern.compile("\\[\\[" + wikiLinkPrefix + ":(.*)\\]\\]");
-        Pattern descriptivePattern = Pattern.compile("\\[\\[" + wikiLinkPrefix + ":(.*)\\|(.*)\\]\\]");
-
-        if (text == null) {
-            return null;
-        }
-
-        Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(text);
-
-        while (basicWikiLinkMatcher.find()) {
-            String partNumber = null;
-
-            Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher.group());
-            Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher.group());
-
-            if (descriptivePatternMatcher.find()) {
-                partNumber = descriptivePatternMatcher.group(1).trim();
-            } else if (partNumberMatcher.find()) {
-                partNumber = partNumberMatcher.group(1).trim();
-            }
-
-            if (partNumber != null) {
-                try {
-                    return controller.getEntryByPartNumber(account, partNumber);
-                } catch (ControllerException e) {
-                    Logger.error(e);
-                }
-            }
-        }
-        return null;
-    }
 
     /**
      * Validates the contents of a bulk upload. This is intended for use when it is being submitted for approval.

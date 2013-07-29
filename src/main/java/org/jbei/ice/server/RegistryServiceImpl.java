@@ -72,7 +72,7 @@ import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.permission.PermissionSuggestion;
 import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
@@ -145,7 +145,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<PermissionInfo> retrieveDefaultPermissions(String sid) throws AuthenticationException {
+    public ArrayList<AccessPermission> retrieveDefaultPermissions(String sid) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         try {
             return ControllerFactory.getPermissionController().getDefaultPermissions(account);
@@ -193,11 +193,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public Long updateBulkUploadPermissions(String sid, long id, EntryAddType type,
-            ArrayList<PermissionInfo> permissions) throws AuthenticationException {
+            ArrayList<AccessPermission> accessPermissions) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": updating permissions for bulk upload " + id);
         try {
-            return ControllerFactory.getBulkUploadController().updatePermissions(account, id, type, permissions);
+            return ControllerFactory.getBulkUploadController().updatePermissions(account, id, type, accessPermissions);
         } catch (ControllerException e) {
             return null;
         }
@@ -1169,9 +1169,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (info.getInfo() != null) {
                 Entry enclosed = InfoToModelFactory.infoToEntry(info.getInfo());
-                controller.createStrainWithPlasmid(account, entry, enclosed, info.getPermissions());
+                controller.createStrainWithPlasmid(account, entry, enclosed, info.getAccessPermissions());
             } else
-                entry = controller.createEntry(account, entry, info.getPermissions());
+                entry = controller.createEntry(account, entry, info.getAccessPermissions());
 
             if (sampleMap != null) {
                 for (SampleStorage sampleStorage : sampleMap) {
@@ -1432,21 +1432,21 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             AccountController controller = ControllerFactory.getAccountController();
             Set<Account> accounts = controller.getMatchingAccounts(req.getQuery(), req.getLimit());
             for (Account account : accounts) {
-                PermissionInfo info = new PermissionInfo();
-                info.setDisplay(account.getFullName());
-                info.setArticle(PermissionInfo.Article.ACCOUNT);
-                info.setArticleId(account.getId());
-                PermissionSuggestion object = new PermissionSuggestion(info);
+                AccessPermission access = new AccessPermission();
+                access.setDisplay(account.getFullName());
+                access.setArticle(AccessPermission.Article.ACCOUNT);
+                access.setArticleId(account.getId());
+                PermissionSuggestion object = new PermissionSuggestion(access);
                 suggestions.add(object);
             }
             GroupController groupController = ControllerFactory.getGroupController();
             Set<Group> groups = groupController.getMatchingGroups(req.getQuery(), req.getLimit());
             for (Group group : groups) {
-                PermissionInfo info = new PermissionInfo();
-                info.setDisplay(group.getLabel());
-                info.setArticle(PermissionInfo.Article.GROUP);
-                info.setArticleId(group.getId());
-                PermissionSuggestion object = new PermissionSuggestion(info);
+                AccessPermission access = new AccessPermission();
+                access.setDisplay(group.getLabel());
+                access.setArticle(AccessPermission.Article.GROUP);
+                access.setArticleId(group.getId());
+                PermissionSuggestion object = new PermissionSuggestion(access);
                 suggestions.add(object);
             }
         } catch (ControllerException e) {
@@ -1517,12 +1517,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean addPermission(String sessionId, PermissionInfo permissionInfo) throws AuthenticationException {
+    public boolean addPermission(String sessionId, AccessPermission accessPermission) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + ": adding permissions " + permissionInfo.toString());
+            Logger.info(account.getEmail() + ": adding permissions " + accessPermission.toString());
             PermissionsController permissionController = ControllerFactory.getPermissionController();
-            permissionController.addPermission(account, permissionInfo);
+            permissionController.addPermission(account, accessPermission);
             return true;
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1531,12 +1531,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean removePermission(String sessionId, PermissionInfo permissionInfo) throws AuthenticationException {
+    public boolean removePermission(String sessionId, AccessPermission accessPermission)
+            throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + ": removing permissions " + permissionInfo.toString());
+            Logger.info(account.getEmail() + ": removing permissions " + accessPermission.toString());
             PermissionsController permissionController = ControllerFactory.getPermissionController();
-            permissionController.removePermission(account, permissionInfo);
+            permissionController.removePermission(account, accessPermission);
             return true;
         } catch (ControllerException e) {
             Logger.error(e);

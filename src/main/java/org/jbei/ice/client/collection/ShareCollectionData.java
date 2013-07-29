@@ -1,7 +1,7 @@
 package org.jbei.ice.client.collection;
 
 import org.jbei.ice.client.Callback;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 /**
  * Used to transmit messages back and forth between the share collection widget
@@ -10,20 +10,20 @@ import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
  */
 public class ShareCollectionData {
 
-    private PermissionInfo info;
-    private final Callback<PermissionInfo> infoCallback;
+    private AccessPermission access;
+    private final Callback<AccessPermission> infoCallback;
     private boolean isDelete;
 
-    public ShareCollectionData(PermissionInfo info, Callback<PermissionInfo> callback) {
-        this.info = info;
+    public ShareCollectionData(AccessPermission access, Callback<AccessPermission> callback) {
+        this.access = access;
         this.infoCallback = callback;
     }
 
-    public PermissionInfo getInfo() {
-        return info;
+    public AccessPermission getAccess() {
+        return access;
     }
 
-    public Callback<PermissionInfo> getInfoCallback() {
+    public Callback<AccessPermission> getInfoCallback() {
         return infoCallback;
     }
 

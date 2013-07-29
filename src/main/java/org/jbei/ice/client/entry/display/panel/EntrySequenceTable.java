@@ -181,6 +181,8 @@ public class EntrySequenceTable extends Composite {
     }
 
     public void setData(ArrayList<SequenceAnalysisInfo> data) {
+        if (data == null)
+            return;
         dataProvider.setList(data);
         table.setRowCount(data.size(), true);
         pager.setVisible(data.size() > 0);

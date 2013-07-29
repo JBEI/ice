@@ -87,7 +87,8 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
         String imgUrl = "";
         if (partData.isHasSequence() && partData.getSbolVisualURL() != null) {
-            imgUrl = "<img height=\"170px\" src=\"" + partData.getSbolVisualURL() + "\" /><br>";
+            imgUrl = "<img height=\"170px\" src=\"/download?type=sbol_visual&id=" + partData.getSbolVisualURL()
+                    + "\" /><br>";
         }
 
         ScrollPanel panel = new ScrollPanel();
@@ -141,7 +142,6 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             param.setSwfPath("vv/VectorViewer.swf");
             param.setMovieName("VectorViewer.swf");
             Flash flash = new Flash(param);
-            GWT.log(flash.asWidget().getOffsetWidth() + "px");
             layout.setWidget(3, 0, flash);
             layout.getFlexCellFormatter().setHeight(3, 0, "600px");
         } else {

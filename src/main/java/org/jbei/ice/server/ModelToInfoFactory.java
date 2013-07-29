@@ -2,16 +2,12 @@ package org.jbei.ice.server;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
@@ -22,12 +18,10 @@ import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.Generation;
@@ -44,15 +38,13 @@ import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.lib.shared.dto.entry.PartData}
- * data
- * transfer objects
+ * data transfer objects
  *
  * @author Hector Plahar
  */
 public class ModelToInfoFactory {
 
-    public static PartData getInfo(Account account, Entry entry, List<Attachment> attachments,
-            Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences) {
+    public static PartData getInfo(Entry entry) {
         PartData info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
@@ -60,19 +52,19 @@ public class ModelToInfoFactory {
 
         switch (type) {
             case PLASMID:
-                info = plasmidInfo(account, entry);
+                info = plasmidInfo(entry);
                 break;
 
             case STRAIN:
-                info = strainInfo(account, (Strain) entry);
+                info = strainInfo(entry);
                 break;
 
             case ARABIDOPSIS:
-                info = seedInfo(account, entry);
+                info = seedInfo(entry);
                 break;
 
             case PART:
-                info = partInfo(account, entry);
+                info = partInfo(entry);
                 break;
 
             default:
@@ -80,50 +72,45 @@ public class ModelToInfoFactory {
                 return null;
         }
 
-        // get attachments
-        ArrayList<AttachmentInfo> attachmentInfos = getAttachments(attachments);
-        info.setAttachments(attachmentInfos);
-        info.setHasAttachment(!attachmentInfos.isEmpty());
-
         // get samples
-        ArrayList<SampleStorage> samplesList = new ArrayList<>();
-        if (samples != null) {
-            for (Map.Entry<Sample, LinkedList<Storage>> sample : samples.entrySet()) {
-                PartSample key = getSampleInfo(sample.getKey());
-                Storage storage = sample.getKey().getStorage();
-                if (storage != null) {
-                    key.setLocationId(String.valueOf(storage.getId()));
-                    key.setLocation(storage.getIndex());
-                }
-
-                SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(sample.getValue()));
-                samplesList.add(sampleStorage);
-            }
-        }
-        info.setSampleMap(samplesList);
-        info.setHasSample(!samplesList.isEmpty());
+//        ArrayList<SampleStorage> samplesList = new ArrayList<>();
+//        if (samples != null) {
+//            for (Map.Entry<Sample, LinkedList<Storage>> sample : samples.entrySet()) {
+//                PartSample key = getSampleInfo(sample.getKey());
+//                Storage storage = sample.getKey().getStorage();
+//                if (storage != null) {
+//                    key.setLocationId(String.valueOf(storage.getId()));
+//                    key.setLocation(storage.getIndex());
+//                }
+//
+//                SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(sample.getValue()));
+//                samplesList.add(sampleStorage);
+//            }
+//        }
+//        info.setSampleMap(samplesList);
+//        info.setHasSample(!samplesList.isEmpty());
 
         // get trace sequences 
-        ArrayList<SequenceAnalysisInfo> analysisInfo = getSequenceAnalysis(sequences);
-        info.setSequenceAnalysis(analysisInfo);
+//        ArrayList<SequenceAnalysisInfo> analysisInfo = getSequenceAnalysis(sequences);
+//        info.setSequenceAnalysis(analysisInfo);
 
         return info;
     }
 
-    private static LinkedList<StorageInfo> getStorageListInfo(LinkedList<Storage> storageList) {
-        LinkedList<StorageInfo> info = new LinkedList<>();
+//    private static LinkedList<StorageInfo> getStorageListInfo(LinkedList<Storage> storageList) {
+//        LinkedList<StorageInfo> info = new LinkedList<>();
+//
+//        if (storageList == null)
+//            return info;
+//
+//        for (Storage storage : storageList) {
+//            info.add(getStorageInfo(storage));
+//        }
+//
+//        return info;
+//    }
 
-        if (storageList == null)
-            return info;
-
-        for (Storage storage : storageList) {
-            info.add(getStorageInfo(storage));
-        }
-
-        return info;
-    }
-
-    private static ArrayList<AttachmentInfo> getAttachments(List<Attachment> attachments) {
+    public static ArrayList<AttachmentInfo> getAttachments(List<Attachment> attachments) {
         ArrayList<AttachmentInfo> infos = new ArrayList<>();
         if (attachments == null)
             return infos;
@@ -140,24 +127,24 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static PartSample getSampleInfo(Sample sample) {
-        PartSample part = new PartSample();
-        if (sample == null)
-            return part;
-
-        part.setSampleId(Long.toString(sample.getId()));
-        part.setCreationTime(sample.getCreationTime());
-        part.setLabel(sample.getLabel());
-        part.setNotes(sample.getNotes());
-        part.setDepositor(sample.getDepositor());
-
-        Storage storage = sample.getStorage(); // specific storage to this sample. e.g. Tube
-        if (storage != null) {
-            part.setLocationId(String.valueOf(storage.getId()));
-            part.setLocation(storage.getIndex());
-        }
-        return part;
-    }
+//    private static PartSample getSampleInfo(Sample sample) {
+//        PartSample part = new PartSample();
+//        if (sample == null)
+//            return part;
+//
+//        part.setSampleId(Long.toString(sample.getId()));
+//        part.setCreationTime(sample.getCreationTime());
+//        part.setLabel(sample.getLabel());
+//        part.setNotes(sample.getNotes());
+//        part.setDepositor(sample.getDepositor());
+//
+//        Storage storage = sample.getStorage(); // specific storage to this sample. e.g. Tube
+//        if (storage != null) {
+//            part.setLocationId(String.valueOf(storage.getId()));
+//            part.setLocation(storage.getIndex());
+//        }
+//        return part;
+//    }
 
     public static StorageInfo getStorageInfo(Storage storage) {
         StorageInfo info = new StorageInfo();
@@ -199,14 +186,14 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static PartData partInfo(Account account, Entry entry) {
+    private static PartData partInfo(Entry entry) {
         PartData info = new PartData();
-        return getCommon(account, info, entry);
+        return getCommon(info, entry);
     }
 
-    private static ArabidopsisSeedData seedInfo(Account account, Entry entry) {
+    private static ArabidopsisSeedData seedInfo(Entry entry) {
         ArabidopsisSeedData data = new ArabidopsisSeedData();
-        data = (ArabidopsisSeedData) getCommon(account, data, entry);
+        data = (ArabidopsisSeedData) getCommon(data, entry);
 
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -229,19 +216,20 @@ public class ModelToInfoFactory {
         return data;
     }
 
-    private static StrainData strainInfo(Account account, Strain strain) {
+    private static StrainData strainInfo(Entry entry) {
         StrainData data = new StrainData();
-        data = (StrainData) getCommon(account, data, strain);
+        data = (StrainData) getCommon(data, entry);
 
         // strain specific
+        Strain strain = (Strain) entry;
         data.setGenotypePhenotype(strain.getGenotypePhenotype());
         data.setHost(strain.getHost());
         return data;
     }
 
-    private static PlasmidData plasmidInfo(Account account, Entry entry) {
+    private static PlasmidData plasmidInfo(Entry entry) {
         PlasmidData data = new PlasmidData();
-        data = (PlasmidData) getCommon(account, data, entry);
+        data = (PlasmidData) getCommon(data, entry);
         Plasmid plasmid = (Plasmid) entry;
 
         // plasmid specific fields
@@ -253,7 +241,7 @@ public class ModelToInfoFactory {
         return data;
     }
 
-    private static PartData getCommon(Account account, PartData info, Entry entry) {
+    private static PartData getCommon(PartData info, Entry entry) {
         info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
         info.setPartId(entry.getPartNumber());
@@ -267,7 +255,7 @@ public class ModelToInfoFactory {
         try {
             long ownerId = accountController.getAccountId(entry.getOwnerEmail());
             info.setOwnerId(ownerId);
-            if (entry.getCreatorEmail() != null) {
+            if (entry.getCreatorEmail() != null && !entry.getCreatorEmail().isEmpty()) {
                 long creatorId = accountController.getAccountId(entry.getCreatorEmail());
                 info.setCreatorId(creatorId);
             }
@@ -336,27 +324,24 @@ public class ModelToInfoFactory {
         info.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 
         info.setLongDescription(entry.getLongDescription());
-        if (account != null) {
-            info.setShortDescription(entry.getShortDescription());
+        info.setShortDescription(entry.getShortDescription());
 
-            String links = "";
-            StringBuilder linkStr = new StringBuilder();
-            if (entry.getLinks() != null) {
-                for (Link link : entry.getLinks()) {
-                    if (link.getLink() != null && !link.getLink().isEmpty()) {
-                        linkStr.append(link.getLink()).append(", ");
-                    } else if (link.getUrl() != null && !link.getUrl().isEmpty())
-                        linkStr.append(link.getUrl()).append(", ");
-                }
-
-                links = linkStr.toString();
-                if (!links.isEmpty())
-                    links = links.substring(0, links.length() - 1);
+        String links = "";
+        StringBuilder linkStr = new StringBuilder();
+        if (entry.getLinks() != null) {
+            for (Link link : entry.getLinks()) {
+                if (link.getLink() != null && !link.getLink().isEmpty()) {
+                    linkStr.append(link.getLink()).append(", ");
+                } else if (link.getUrl() != null && !link.getUrl().isEmpty())
+                    linkStr.append(link.getUrl()).append(", ");
             }
-            info.setLinks(links);
-            String parsedReferences = EntryUtil.linkifyText(account, entry.getReferences());
-            info.setReferences(parsedReferences);
+
+            links = linkStr.toString();
+            if (!links.isEmpty())
+                links = links.substring(0, links.length() - 1);
         }
+        info.setLinks(links);
+        info.setReferences(entry.getReferences());
         return info;
     }
 

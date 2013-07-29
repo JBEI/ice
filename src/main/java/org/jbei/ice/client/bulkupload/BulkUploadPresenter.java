@@ -30,7 +30,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -106,19 +106,19 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
                     @Override
                     protected void callService(AsyncCallback<Long> callback) throws AuthenticationException {
-                        ArrayList<PermissionInfo> infos = new ArrayList<PermissionInfo>();
+                        ArrayList<AccessPermission> accesses = new ArrayList<AccessPermission>();
                         for (GroupInfo select : selected) {
                             if (select.getId() == 0) {
                                 continue;
                             }
-                            PermissionInfo permissionInfo = new PermissionInfo();
-                            permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
-                            permissionInfo.setArticle(PermissionInfo.Article.GROUP);
-                            permissionInfo.setArticleId(select.getId());
-                            infos.add(permissionInfo);
+                            AccessPermission accessPermission = new AccessPermission();
+                            accessPermission.setType(AccessPermission.Type.READ_ENTRY);
+                            accessPermission.setArticle(AccessPermission.Article.GROUP);
+                            accessPermission.setArticleId(select.getId());
+                            accesses.add(accessPermission);
                         }
                         service.updateBulkUploadPermissions(ClientController.sessionId, currentInput.getId(),
-                                                            currentInput.getImportType(), infos, callback);
+                                                            currentInput.getImportType(), accesses, callback);
                     }
 
                     @Override
@@ -499,11 +499,11 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
                     // bulk upload permissions
                     ArrayList<OptionSelect> groups = new ArrayList<OptionSelect>();
-                    for (PermissionInfo permissionInfo : info.getPermissions()) {
-                        if (permissionInfo.getArticle() != PermissionInfo.Article.GROUP)
+                    for (AccessPermission accessPermission : info.getAccessPermissions()) {
+                        if (accessPermission.getArticle() != AccessPermission.Article.GROUP)
                             continue;
 
-                        groups.add(new OptionSelect(permissionInfo.getArticleId(), permissionInfo.getDisplay()));
+                        groups.add(new OptionSelect(accessPermission.getArticleId(), accessPermission.getDisplay()));
                     }
                     view.setSelectedPermissionGroups(groups);
 

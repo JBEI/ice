@@ -18,12 +18,10 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.bulkupload.BulkUploadUtil;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -194,11 +192,8 @@ public class FileUploadServlet extends UploadAction {
                 boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
                         && type == EntryType.PLASMID);
                 entry = entryController.get(account, Long.decode(entryId));
-                if (isStrainWithPlasmidPlasmid) {
-                    String plasmid = ((Strain) entry).getPlasmids();
-                    entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account,
-                                                                         ControllerFactory.getEntryController(),
-                                                                         plasmid);
+                if (isStrainWithPlasmidPlasmid && !entry.getLinkedEntries().isEmpty()) {
+                    entry = (Entry) entry.getLinkedEntries().toArray()[0];
                 }
             } catch (NumberFormatException | ControllerException e) {
                 Logger.error(e);
@@ -251,10 +246,8 @@ public class FileUploadServlet extends UploadAction {
             boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
                     && type == EntryType.PLASMID);
             Entry entry = ControllerFactory.getEntryController().get(account, update.getEntryId());
-            if (isStrainWithPlasmidPlasmid) {
-                String plasmid = ((Strain) entry).getPlasmids();
-                entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account, ControllerFactory.getEntryController(),
-                                                                     plasmid);
+            if (isStrainWithPlasmidPlasmid && !entry.getLinkedEntries().isEmpty()) {
+                entry = (Entry) entry.getLinkedEntries().toArray()[0];
             }
 
             if (isSequence) {

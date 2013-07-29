@@ -154,7 +154,7 @@ public class BulkUpload implements IModel {
 
         bulkUploadInfo.setType(EntryAddType.stringToType(draft.getImportType()));
         for (Permission permission : draft.getPermissions()) {
-            bulkUploadInfo.getPermissions().add(Permission.toDTO(permission));
+            bulkUploadInfo.getAccessPermissions().add(Permission.toDTO(permission));
         }
         return bulkUploadInfo;
     }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
@@ -15,7 +15,7 @@ import org.jbei.ice.lib.shared.dto.user.User;
 public class MenuItem extends OptionSelect {
 
     private long count;
-    private ArrayList<PermissionInfo> permissions;
+    private ArrayList<AccessPermission> accessPermissions;
     private User owner;
     private FolderType type;
 
@@ -36,12 +36,12 @@ public class MenuItem extends OptionSelect {
         this.count = count;
     }
 
-    public void setPermissions(ArrayList<PermissionInfo> permissions) {
-        this.permissions = permissions;
+    public void setAccessPermissions(ArrayList<AccessPermission> accessPermissions) {
+        this.accessPermissions = accessPermissions;
     }
 
-    public ArrayList<PermissionInfo> getPermissions() {
-        return permissions;
+    public ArrayList<AccessPermission> getAccessPermissions() {
+        return accessPermissions;
     }
 
     public User getOwner() {

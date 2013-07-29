@@ -1,12 +1,14 @@
 package org.jbei.ice.lib.permissions;
 
-import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.AccountCreator;
+import org.jbei.ice.lib.EntryCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
-import junit.framework.Assert;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,38 +38,82 @@ public class PermissionsControllerTest {
 
     @Test
     public void testAddPermission() throws Exception {
-        String email = "testAddPermission@TESTER.org";
-        String email2 = "testAddPermissionOther@TESTER.org";
+        Account account = AccountCreator.createTestAccount("testAddPermission", false);
+        Account account2 = AccountCreator.createTestAccount("testAddPermission2", false);
+        Account account3 = AccountCreator.createTestAccount("testAddPermission3", false);
+        Strain strain = EntryCreator.createTestStrain(account);
+        AccessPermission access = new AccessPermission(AccessPermission.Article.ACCOUNT, account2.getId(),
+                                                       AccessPermission.Type.READ_ENTRY, strain.getId(),
+                                                       account.getFullName());
 
-        AccountController accountController = new AccountController();
-        User info = new User();
-        info.setFirstName("Ter");
-        info.setLastName("TEST");
-        info.setEmail(email);
-        String pass = accountController.createNewAccount(info, false);
-        Assert.assertNotNull(pass);
+        // requesting access for self. expected to fail
+        boolean failed = false;
+        try {
+            controller.addPermission(account2, access);
+        } catch (Exception e) {
+            failed = true;
+        }
+        Assert.assertTrue(failed);
 
-        User info2 = new User();
-        info2.setFirstName("T");
-        info2.setLastName("TEST");
-        info2.setEmail(email2);
-        accountController.createNewAccount(info2, false);
-        Account account = accountController.getByEmail(email);
-        Assert.assertNotNull(account);
-        Account otherAccount = accountController.getByEmail(email2);
-        Assert.assertNotNull(otherAccount);
+        // strain owner requesting read permission
+        Assert.assertNotNull(controller.addPermission(account, access));
+
+        // account with read permission requesting for another; expected to fail
+        failed = false;
+        try {
+            controller.addPermission(account2, new AccessPermission(AccessPermission.Article.ACCOUNT,
+                                                                    account3.getId(),
+                                                                    AccessPermission.Type.READ_ENTRY,
+                                                                    strain.getId(),
+                                                                    account.getFullName()));
+        } catch (Exception e) {
+            failed = true;
+        }
+        Assert.assertTrue(failed);
+
+        // account with read permission requesting write for self (should fail)
+        failed = false;
+        try {
+            controller.addPermission(account2, new AccessPermission(AccessPermission.Article.ACCOUNT,
+                                                                    account2.getId(),
+                                                                    AccessPermission.Type.READ_ENTRY,
+                                                                    strain.getId(),
+                                                                    account.getFullName()));
+        } catch (Exception e) {
+            failed = true;
+        }
+        Assert.assertTrue(failed);
+
+        // owner gives write permission to account3, who then gives write permission to account 2
+        Assert.assertNotNull(controller.addPermission(account, new AccessPermission(AccessPermission.Article.ACCOUNT,
+                                                                                    account3.getId(),
+                                                                                    AccessPermission.Type.WRITE_ENTRY,
+                                                                                    strain.getId(),
+                                                                                    account.getFullName())));
+        Assert.assertNotNull(controller.addPermission(account3, new AccessPermission(AccessPermission.Article.ACCOUNT,
+                                                                                     account2.getId(),
+                                                                                     AccessPermission.Type.WRITE_ENTRY,
+                                                                                     strain.getId(),
+                                                                                     account.getFullName())));
     }
 
     @Test
     public void testRemovePermission() throws Exception {
-    }
+        Account account = AccountCreator.createTestAccount("testRemovePermission", false);
+        Account account2 = AccountCreator.createTestAccount("testRemovePermission2", false);
 
-    @Test
-    public void testSetReadGroup() throws Exception {
-    }
+        Strain strain = EntryCreator.createTestStrain(account);
 
-    @Test
-    public void testSetWriteGroup() throws Exception {
+        // read permission for account2
+        AccessPermission access = new AccessPermission(AccessPermission.Article.ACCOUNT, account2.getId(),
+                                                       AccessPermission.Type.READ_ENTRY, strain.getId(),
+                                                       account.getFullName());
+        Assert.assertNotNull(controller.addPermission(account, access));
+        Assert.assertTrue(controller.accountHasReadPermission(account2, strain));
+
+        // remove just added permission
+        controller.removePermission(account, access);
+        Assert.assertFalse(controller.accountHasReadPermission(account2, strain));
     }
 
     @Test

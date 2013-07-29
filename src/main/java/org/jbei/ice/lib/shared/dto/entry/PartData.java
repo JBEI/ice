@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 @XmlRootElement
 public class PartData implements IDTOModel {
@@ -47,7 +47,7 @@ public class PartData implements IDTOModel {
     private ArrayList<CustomField> parameters;
     private boolean canEdit; // whether current user that requested this entry info has write privs
     private Visibility visible;
-    private ArrayList<PermissionInfo> permissions;
+    private ArrayList<AccessPermission> accessPermissions;
     private ArrayList<UserComment> comments;
     private String sbolVisualURL;
     private boolean publicRead;
@@ -62,7 +62,7 @@ public class PartData implements IDTOModel {
     public PartData(EntryType type) {
         this.type = type;
         sampleStorage = new ArrayList<SampleStorage>();
-        permissions = new ArrayList<PermissionInfo>();
+        accessPermissions = new ArrayList<AccessPermission>();
         comments = new ArrayList<UserComment>();
         linkedParts = new ArrayList<PartData>();
     }
@@ -357,13 +357,13 @@ public class PartData implements IDTOModel {
         this.creatorId = creatorId;
     }
 
-    public ArrayList<PermissionInfo> getPermissions() {
-        return permissions;
+    public ArrayList<AccessPermission> getAccessPermissions() {
+        return accessPermissions;
     }
 
-    public void setPermissions(ArrayList<PermissionInfo> permissions) {
-        this.permissions.clear();
-        this.permissions.addAll(permissions);
+    public void setAccessPermissions(ArrayList<AccessPermission> accessPermissions) {
+        this.accessPermissions.clear();
+        this.accessPermissions.addAll(accessPermissions);
     }
 
     public boolean isHasOriginalSequence() {

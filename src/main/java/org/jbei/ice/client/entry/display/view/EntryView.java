@@ -274,7 +274,8 @@ public class EntryView extends Composite implements IEntryView {
 
         deleteSequenceHandler.setEntryId(info.getId());
         currentView.getSequencePanel().setDeleteHandler(deleteSequenceHandler);
-        entryAction.setVisible(showEdit);
+        entryAction.setVisible(true);
+        entryAction.showEdit(showEdit);
 
         mainContent.setWidget(1, 0, currentView);
         SequenceViewPanel sequenceViewPanel = currentView.getSequencePanel();

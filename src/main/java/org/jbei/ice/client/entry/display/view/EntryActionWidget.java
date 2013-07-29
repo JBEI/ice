@@ -182,12 +182,10 @@ public class EntryActionWidget extends Composite {
         this.delegate = delegate;
     }
 
-    @Override
-    public void setVisible(boolean visible) {
-        edit.setVisible(visible);
-        pipe1.setVisible(visible);
-        delete.setVisible(visible);
-        pipe2.setVisible(visible);
-        flag.setVisible(visible);
+    public void showEdit(boolean showEdit) {
+        edit.setVisible(showEdit);
+        pipe1.setVisible(showEdit);
+        delete.setVisible(showEdit);
+        pipe2.setVisible(showEdit);
     }
 }

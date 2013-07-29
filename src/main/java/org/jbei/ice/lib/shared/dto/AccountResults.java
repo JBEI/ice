@@ -18,14 +18,6 @@ public class AccountResults implements IDTOModel {
         infos = new LinkedList<User>();
     }
 
-    public void setResults(LinkedList<User> results) {
-        this.infos.clear();
-        if (results == null)
-            return;
-
-        this.infos.addAll(results);
-    }
-
     public void setResultCount(long count) {
         this.resultCount = count;
     }

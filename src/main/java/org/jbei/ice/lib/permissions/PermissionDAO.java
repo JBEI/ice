@@ -39,19 +39,27 @@ class PermissionDAO extends HibernateRepository<Permission> {
         try {
             Session session = currentSession();
             Criteria criteria = session.createCriteria(Permission.class)
-                                       .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
-                                       .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)));
+                                       .add(Restrictions.eq("canWrite", canWrite))
+                                       .add(Restrictions.eq("canRead", canRead));
 
-            if (group != null)
+            if (group == null)
+                criteria.add(Restrictions.isNull("group"));
+            else
                 criteria.add(Restrictions.eq("group", group));
 
-            if (folder != null)
+            if (folder == null)
+                criteria.add(Restrictions.isNull("folder"));
+            else
                 criteria.add(Restrictions.eq("folder", folder));
 
-            if (account != null)
+            if (account == null)
+                criteria.add(Restrictions.isNull("account"));
+            else
                 criteria.add(Restrictions.eq("account", account));
 
-            if (entry != null)
+            if (entry == null)
+                criteria.add(Restrictions.isNull("entry"));
+            else
                 criteria.add(Restrictions.eq("entry", entry));
 
             criteria.setProjection(Projections.rowCount());
@@ -72,16 +80,24 @@ class PermissionDAO extends HibernateRepository<Permission> {
                                        .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
                                        .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)));
 
-            if (groups != null && !groups.isEmpty())
+            if (groups == null || groups.isEmpty())
+                criteria.add(Restrictions.isNull("group"));
+            else
                 criteria.add(Restrictions.in("group", groups));
 
-            if (folders != null && !folders.isEmpty())
+            if (folders == null || folders.isEmpty())
+                criteria.add(Restrictions.isNull("folder"));
+            else
                 criteria.add(Restrictions.in("folder", folders));
 
-            if (account != null)
+            if (account == null)
+                criteria.add(Restrictions.isNull("account"));
+            else
                 criteria.add(Restrictions.eq("account", account));
 
-            if (entry != null)
+            if (entry == null)
+                criteria.add(Restrictions.isNull("entry"));
+            else
                 criteria.add(Restrictions.eq("entry", entry));
 
             criteria.setProjection(Projections.rowCount());
@@ -101,16 +117,24 @@ class PermissionDAO extends HibernateRepository<Permission> {
                                        .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
                                        .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)));
 
-            if (group != null)
+            if (group == null)
+                criteria.add(Restrictions.isNull("group"));
+            else
                 criteria.add(Restrictions.eq("group", group));
 
-            if (folder != null)
+            if (folder == null)
+                criteria.add(Restrictions.isNull("folder"));
+            else
                 criteria.add(Restrictions.eq("folder", folder));
 
-            if (account != null)
+            if (account == null)
+                criteria.add(Restrictions.isNull("account"));
+            else
                 criteria.add(Restrictions.eq("account", account));
 
-            if (entry != null)
+            if (entry == null)
+                criteria.add(Restrictions.isNull("entry"));
+            else
                 criteria.add(Restrictions.eq("entry", entry));
 
             return (Permission) criteria.uniqueResult();

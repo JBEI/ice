@@ -28,7 +28,7 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
         pager = view.getPager();
     }
 
-    private void retrieveAllVisibleEntrys(ColumnField field, boolean asc, final int start, final int factor,
+    private void retrieveAllVisibleParts(ColumnField field, boolean asc, final int start, final int factor,
             final boolean reset) {
         service.retrieveAllVisibleEntrys(
                 ClientController.sessionId, details, field, asc, start, factor,
@@ -43,13 +43,6 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                     public void onSuccess(FolderDetails result) {
                         details = result;
                         if (result == null) {
-                            resetLoading();
-                            return;
-                        }
-
-                        if (resultSize == (start + factor)) {
-                            // we are showing the last page so do not cache at all
-                            updateRowData(start, result.getEntries());
                             resetLoading();
                             return;
                         }
@@ -84,13 +77,6 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                             return;
                         }
 
-                        if (resultSize == (start + factor)) {
-                            // we are showing the last page so do not cache at all
-                            updateRowData(start, result.getEntries());
-                            resetLoading();
-                            return;
-                        }
-
                         if (reset)
                             setFolderData(details, false);
                         else
@@ -120,13 +106,6 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                             return;
                         }
 
-                        if (resultSize == (start + factor)) {
-                            // we are showing the last page so do not cache at all
-                            updateRowData(start, result.getEntries());
-                            resetLoading();
-                            return;
-                        }
-
                         if (reset)
                             setFolderData(details, false);
                         else
@@ -150,25 +129,19 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
             return;
         }
 
-        boolean loadingEnabled = false;
         if (!reset && resultSize != (start + factor)) {
             pager.setLoading();
-            loadingEnabled = true;
         }
 
         switch ((int) details.getId()) {
             case -1:
-                retrieveAllVisibleEntrys(field, asc, start, factor, reset);
+                retrieveAllVisibleParts(field, asc, start, factor, reset);
                 break;
             case 0:
                 retrieveUserEntrys(field, asc, start, factor, reset);
                 break;
             default:
                 retrieveEntriesForFolder(field, asc, start, factor, reset);
-        }
-
-        if (loadingEnabled) {
-
         }
     }
 

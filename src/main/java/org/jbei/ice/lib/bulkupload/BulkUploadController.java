@@ -37,10 +37,11 @@ import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import org.jbei.ice.lib.shared.dto.user.User;
@@ -185,7 +186,10 @@ public class BulkUploadController {
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
             boolean hasSequence = sequenceController.hasSequence(entry.getId());
             boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
-            PartData info = ModelToInfoFactory.getInfo(account, entry, attachments, null, null);
+            PartData info = ModelToInfoFactory.getInfo(entry);
+            ArrayList<AttachmentInfo> attachmentInfos = ModelToInfoFactory.getAttachments(attachments);
+            info.setAttachments(attachmentInfos);
+            info.setHasAttachment(!attachmentInfos.isEmpty());
             info.setHasSequence(hasSequence);
             info.setHasOriginalSequence(hasOriginalSequence);
 
@@ -193,32 +197,33 @@ public class BulkUploadController {
             Set<Permission> entryPermissions = entry.getPermissions();
             if (entryPermissions != null && !entryPermissions.isEmpty()) {
                 for (Permission permission : entryPermissions) {
-                    info.getPermissions().add(Permission.toDTO(permission));
+                    info.getAccessPermissions().add(Permission.toDTO(permission));
                 }
             }
 
             // this conditional statement makes sure that plasmids are ignored if we are dealing
             // with strain with plasmid
             if (type == EntryAddType.STRAIN_WITH_PLASMID) {
-                if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getName())) {
+                if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getName()) &&
+                        !entry.getLinkedEntries().isEmpty()) {
                     // get plasmids
-                    String plasmids = ((Strain) entry).getPlasmids();
-                    Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController, plasmids);
-                    if (plasmid != null) {
-                        attachments = attachmentController.getByEntry(account, plasmid);
-                        hasSequence = sequenceController.hasSequence(plasmid.getId());
-                        hasOriginalSequence = sequenceController.hasOriginalSequence(plasmid.getId());
-                        PartData plasmidInfo = ModelToInfoFactory.getInfo(account, plasmid, attachments, null, null);
-                        plasmidInfo.setHasSequence(hasSequence);
-                        plasmidInfo.setHasOriginalSequence(hasOriginalSequence);
-                        Set<Permission> permissions = plasmid.getPermissions();
-                        if (permissions != null && !permissions.isEmpty()) {
-                            for (Permission permission : permissions) {
-                                plasmidInfo.getPermissions().add(Permission.toDTO(permission));
-                            }
+                    Entry plasmid = (Entry) entry.getLinkedEntries().toArray()[0];
+                    attachments = attachmentController.getByEntry(account, plasmid);
+                    hasSequence = sequenceController.hasSequence(plasmid.getId());
+                    hasOriginalSequence = sequenceController.hasOriginalSequence(plasmid.getId());
+                    PartData plasmidInfo = ModelToInfoFactory.getInfo(plasmid);
+                    ArrayList<AttachmentInfo> partAttachments = ModelToInfoFactory.getAttachments(attachments);
+                    info.setAttachments(partAttachments);
+                    info.setHasAttachment(!partAttachments.isEmpty());
+                    plasmidInfo.setHasSequence(hasSequence);
+                    plasmidInfo.setHasOriginalSequence(hasOriginalSequence);
+                    Set<Permission> permissions = plasmid.getPermissions();
+                    if (permissions != null && !permissions.isEmpty()) {
+                        for (Permission permission : permissions) {
+                            plasmidInfo.getAccessPermissions().add(Permission.toDTO(permission));
                         }
-                        info.setInfo(plasmidInfo);
                     }
+                    info.setInfo(plasmidInfo);
                 } else
                     continue;
             }
@@ -451,20 +456,16 @@ public class BulkUploadController {
                     otherEntry.setVisibility(Visibility.DRAFT.getValue());
                     entryController.createEntry(account, otherEntry, null);
                     // link the plasmid to strain (strain gets updated later on)
-                    String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX)
-                            + ":" + otherEntry.getPartNumber() + "|" + otherEntry.getPartNumber() + "]]";
-                    ((Strain) entry).setPlasmids(plasmidPartNumberString);
+                    entry.getLinkedEntries().add(otherEntry);
                 } else {
                     // created plasmid, now create strain and link
-                    String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX)
-                            + ":" + entry.getPartNumber() + "|" + entry.getPartNumber() + "]]";
                     otherEntry = entry;
                     entry = new Strain();
                     entry.setOwner(account.getFullName());
                     entry.setOwnerEmail(account.getEmail());
                     entry.setCreator(account.getFullName());
                     entry.setCreatorEmail(account.getEmail());
-                    ((Strain) entry).setPlasmids(plasmidPartNumberString);
+                    entry.getLinkedEntries().add(otherEntry);
                     entry.setVisibility(Visibility.DRAFT.getValue());
                     entryController.createEntry(account, entry, null);
                 }
@@ -474,9 +475,8 @@ public class BulkUploadController {
             draft.getContents().add(entry);
         } else {
             // entry not null (fetch plasmid for strain) if this is a strain with plasmid
-            if (addType == EntryAddType.STRAIN_WITH_PLASMID) {
-                String plasmid = ((Strain) entry).getPlasmids();
-                otherEntry = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController, plasmid);
+            if (addType == EntryAddType.STRAIN_WITH_PLASMID && !entry.getLinkedEntries().isEmpty()) {
+                otherEntry = (Entry) entry.getLinkedEntries().toArray()[0];
             }
         }
 
@@ -576,10 +576,9 @@ public class BulkUploadController {
                     entry.setVisibility(Visibility.PENDING.getValue());
                     entryController.update(account, entry);
 
-                    if (isStrainWithPlasmid && entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getName())) {
-                        String plasmids = ((Strain) entry).getPlasmids();
-                        Entry plasmid = BulkUploadUtil.getPartNumberForStrainPlasmid(account, entryController,
-                                                                                     plasmids);
+                    if (isStrainWithPlasmid && entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getName())
+                            && !entry.getLinkedEntries().isEmpty()) {
+                        Entry plasmid = (Entry) entry.getLinkedEntries().toArray()[0];
                         plasmid.setVisibility(Visibility.PENDING.getValue());
                         entryController.update(account, plasmid);
                     }
@@ -655,12 +654,12 @@ public class BulkUploadController {
 
             // set permissions
             for (Permission permission : bulkUpload.getPermissions()) {
-                PermissionInfo info = new PermissionInfo();
-                info.setType(PermissionInfo.Type.READ_ENTRY);
-                info.setTypeId(entry.getId());
-                info.setArticleId(permission.getGroup().getId());
-                info.setArticle(PermissionInfo.Article.GROUP);
-                Permission entryPermission = ControllerFactory.getPermissionController().addPermission(account, info);
+                AccessPermission access = new AccessPermission();
+                access.setType(AccessPermission.Type.READ_ENTRY);
+                access.setTypeId(entry.getId());
+                access.setArticleId(permission.getGroup().getId());
+                access.setArticle(AccessPermission.Article.GROUP);
+                Permission entryPermission = ControllerFactory.getPermissionController().addPermission(account, access);
                 entry.getPermissions().add(entryPermission);
             }
             entryController.update(account, entry);
@@ -698,7 +697,7 @@ public class BulkUploadController {
     }
 
     public Long updatePermissions(Account account, long bulkUploadId, EntryAddType addType,
-            ArrayList<PermissionInfo> permissions) throws ControllerException {
+            ArrayList<AccessPermission> accessPermissions) throws ControllerException {
         BulkUpload upload;
 
         try {
@@ -716,8 +715,8 @@ public class BulkUploadController {
             upload.getPermissions().clear();
 
             // update permissions
-            for (PermissionInfo info : permissions) {
-                Group group = ControllerFactory.getGroupController().getGroupById(info.getArticleId());
+            for (AccessPermission access : accessPermissions) {
+                Group group = ControllerFactory.getGroupController().getGroupById(access.getArticleId());
                 if (group == null)
                     continue;
 
@@ -726,7 +725,7 @@ public class BulkUploadController {
                 // article is not unique to each permission, but the combination will be unique
                 // currently, permissions for bulk upload is restricted to read permissions by groups
                 for (Permission permission : existingPermissions) {
-                    if (permission.getGroup().getId() == info.getArticleId()) {
+                    if (permission.getGroup().getId() == access.getArticleId()) {
                         upload.getPermissions().add(permission);
                         break;
                     }
@@ -737,7 +736,7 @@ public class BulkUploadController {
                     continue;
 
                 // new permission
-                Permission permission = ControllerFactory.getPermissionController().recordPermission(info);
+                Permission permission = ControllerFactory.getPermissionController().recordPermission(access);
                 upload.getPermissions().add(permission);
             }
 

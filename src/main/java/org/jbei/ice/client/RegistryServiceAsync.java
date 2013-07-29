@@ -24,7 +24,7 @@ import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
@@ -108,10 +108,10 @@ public interface RegistryServiceAsync {
 
     void deleteFolder(String sessionId, long folderId, AsyncCallback<FolderDetails> callback);
 
-    void addPermission(String sessionId, PermissionInfo permission,
+    void addPermission(String sessionId, AccessPermission accessPermission,
             AsyncCallback<Boolean> callback) throws AuthenticationException;
 
-    void removePermission(String sessionId, PermissionInfo permissionInfo,
+    void removePermission(String sessionId, AccessPermission accessPermission,
             AsyncCallback<Boolean> callback) throws AuthenticationException;
 
     void saveSequence(String sessionId, PartData part, String sequenceUser, AsyncCallback<PartData> callback)
@@ -200,13 +200,13 @@ public interface RegistryServiceAsync {
             AsyncCallback<Long> callback) throws AuthenticationException;
 
     void updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
-            ArrayList<PermissionInfo> permissions, AsyncCallback<Long> callback)
+            ArrayList<AccessPermission> accessPermissions, AsyncCallback<Long> callback)
             throws AuthenticationException;
 
     void retrieveUserPreferences(String sid, ArrayList<PreferenceKey> keys,
             AsyncCallback<HashMap<PreferenceKey, String>> async) throws AuthenticationException;
 
-    void retrieveDefaultPermissions(String sid, AsyncCallback<ArrayList<PermissionInfo>> callback)
+    void retrieveDefaultPermissions(String sid, AsyncCallback<ArrayList<AccessPermission>> callback)
             throws AuthenticationException;
 
     void retrieveUserSearchPreferences(String sid, AsyncCallback<HashMap<String, String>> async)

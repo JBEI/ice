@@ -1,5 +1,7 @@
 package org.jbei.ice.services.blazeds;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -187,6 +189,12 @@ public class RegistryAMFAPI extends BaseService {
                 return false;
             }
 
+            Sequence existing = sequenceController.getByEntry(entry);
+            if (existing != null) {
+                File sbolVisualPath = Paths.get(existing.getFwdHash() + ".png").toFile();
+                if (sbolVisualPath.exists())
+                    sbolVisualPath.delete();
+            }
             Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
             sequence.setEntry(entry);
             sequenceController.update(account, sequence);
@@ -214,7 +222,7 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         EntryController entryController = ControllerFactory.getEntryController();
-        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
 
         Entry entry;
         List<TraceSequence> traces;
@@ -264,15 +272,9 @@ public class RegistryAMFAPI extends BaseService {
 
         try {
             result = ControllerFactory.getSequenceController().compose(sequence, genbankFormatter);
-
             logInfo(account.getEmail() + " generated and fetched genbank sequence");
-        } catch (ControllerException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return result;
         } catch (Exception e) {
             Logger.error(getLoggerPrefix(), e);
-
             return result;
         }
 

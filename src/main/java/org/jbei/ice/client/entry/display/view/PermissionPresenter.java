@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 
@@ -18,15 +18,15 @@ public class PermissionPresenter {
 
         void setPermissionBoxVisibility(boolean visible);
 
-        HandlerRegistration addPermissionBoxSelectionHandler(ServiceDelegate<PermissionInfo> handler);
+        HandlerRegistration addPermissionBoxSelectionHandler(ServiceDelegate<AccessPermission> handler);
 
-        void addWriteItem(PermissionInfo item, Delegate<PermissionInfo> deleteDelegate);
+        void addWriteItem(AccessPermission item, Delegate<AccessPermission> deleteDelegate);
 
-        void addReadItem(PermissionInfo item, Delegate<PermissionInfo> deleteDelegate);
+        void addReadItem(AccessPermission item, Delegate<AccessPermission> deleteDelegate);
 
-        void removeReadItem(PermissionInfo item);
+        void removeReadItem(AccessPermission item);
 
-        void removeWriteItem(PermissionInfo item);
+        void removeWriteItem(AccessPermission item);
 
         void resetPermissionDisplay();
 
@@ -35,64 +35,66 @@ public class PermissionPresenter {
 
     private final IPermissionView view;
     private boolean canEdit;
-    private final ArrayList<PermissionInfo> readList; // list of read permissions (includes groups)
-    private final ArrayList<PermissionInfo> writeList; // list of write permissions (includes groups)
+    private final ArrayList<AccessPermission> readList; // list of read permissions (includes groups)
+    private final ArrayList<AccessPermission> writeList; // list of write permissions (includes groups)
 
     public PermissionPresenter(final IPermissionView view) {
         this.view = view;
-        readList = new ArrayList<PermissionInfo>();
-        writeList = new ArrayList<PermissionInfo>();
+        readList = new ArrayList<AccessPermission>();
+        writeList = new ArrayList<AccessPermission>();
         this.view.setWidgetVisibility(false);
     }
 
-    public void setPermissionAddSelectionHandler(ServiceDelegate<PermissionInfo> delegate) {
+    public void setPermissionAddSelectionHandler(ServiceDelegate<AccessPermission> delegate) {
         view.addPermissionBoxSelectionHandler(delegate);
     }
 
-    public void removeItem(PermissionInfo info) {
-        if (info.isCanRead())
-            view.removeReadItem(info);
-        else if (info.isCanWrite())
-            view.removeWriteItem(info);
+    public void removeItem(AccessPermission access) {
+        if (access.isCanRead())
+            view.removeReadItem(access);
+        else if (access.isCanWrite())
+            view.removeWriteItem(access);
     }
 
-    public void addReadItem(PermissionInfo info, Delegate<PermissionInfo> deleteHandler) {
+    public void addReadItem(AccessPermission access, Delegate<AccessPermission> deleteHandler) {
         view.setPermissionBoxVisibility(false);
-        if (inReadList(info))
+        if (inReadList(access))
             return;
 
-        readList.add(info);
+        readList.add(access);
         if (!canEdit) {
-            view.addReadItem(info, null);
+            view.addReadItem(access, null);
             return;
         }
-        view.addReadItem(info, deleteHandler);
+        view.addReadItem(access, deleteHandler);
     }
 
-    public void addWriteItem(PermissionInfo info, Delegate<PermissionInfo> deleteHandler) {
+    public void addWriteItem(AccessPermission access, Delegate<AccessPermission> deleteHandler) {
         view.setPermissionBoxVisibility(false);
-        if (inWriteList(info))
+        if (inWriteList(access))
             return;
 
-        writeList.add(info);
+        writeList.add(access);
         if (!canEdit) {
-            view.addWriteItem(info, null);
+            view.addWriteItem(access, null);
             return;
         }
-        view.addWriteItem(info, deleteHandler);
+        view.addWriteItem(access, deleteHandler);
     }
 
-    private boolean inWriteList(PermissionInfo info) {
-        for (PermissionInfo permission : writeList) {
-            if (info.getArticleId() == permission.getArticleId() && info.getType() == permission.getType())
+    private boolean inWriteList(AccessPermission access) {
+        for (AccessPermission accessPermission : writeList) {
+            if (access.getArticleId() == accessPermission.getArticleId() && access.getType() == accessPermission
+                    .getType())
                 return true;
         }
         return false;
     }
 
-    private boolean inReadList(PermissionInfo info) {
-        for (PermissionInfo permission : readList) {
-            if (info.getArticleId() == permission.getArticleId() && info.getType() == permission.getType())
+    private boolean inReadList(AccessPermission access) {
+        for (AccessPermission accessPermission : readList) {
+            if (access.getArticleId() == accessPermission.getArticleId() && access.getType() == accessPermission
+                    .getType())
                 return true;
         }
         return false;
@@ -102,24 +104,24 @@ public class PermissionPresenter {
         view.resetPermissionDisplay();
     }
 
-    public void setPermissionData(ArrayList<PermissionInfo> infoList, Delegate<PermissionInfo> deleteHandler) {
-        if (infoList == null)
+    public void setPermissionData(ArrayList<AccessPermission> listAccess, Delegate<AccessPermission> deleteHandler) {
+        if (listAccess == null)
             return;
 
         view.resetPermissionDisplay();
         writeList.clear();
         readList.clear();
 
-        for (PermissionInfo info : infoList) {
+        for (AccessPermission access : listAccess) {
             // skip displaying permissions assigned to self
-            if (info.getArticle() == PermissionInfo.Article.ACCOUNT
-                    && info.getArticleId() == ClientController.account.getId())
+            if (access.getArticle() == AccessPermission.Article.ACCOUNT
+                    && access.getArticleId() == ClientController.account.getId())
                 continue;
 
-            if (info.isCanWrite()) {
-                addWriteItem(info, deleteHandler);
-            } else if (info.isCanRead()) {
-                addReadItem(info, deleteHandler);
+            if (access.isCanWrite()) {
+                addWriteItem(access, deleteHandler);
+            } else if (access.isCanRead()) {
+                addReadItem(access, deleteHandler);
             }
         }
     }

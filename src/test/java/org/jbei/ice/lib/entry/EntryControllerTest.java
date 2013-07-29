@@ -26,7 +26,7 @@ import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.server.InfoToModelFactory;
 
@@ -94,9 +94,7 @@ public class EntryControllerTest {
         Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidData);
         Assert.assertNotNull(plasmid);
 
-        HashSet<Entry> results = controller.createStrainWithPlasmid(account, strain, plasmid, null);
-        Assert.assertNotNull(results);
-        Assert.assertEquals("Strain with plasmid creation returned wrong entry count", 2, results.size());
+        controller.createStrainWithPlasmid(account, strain, plasmid, null);
     }
 
     @Test
@@ -205,13 +203,13 @@ public class EntryControllerTest {
         Assert.assertNotNull(plasmid);
 
         // add Write permission for account
-        ArrayList<PermissionInfo> permissions = new ArrayList<>();
-        PermissionInfo permissionInfo = new PermissionInfo();
-        permissionInfo.setArticle(PermissionInfo.Article.ACCOUNT);
-        permissionInfo.setType(PermissionInfo.Type.WRITE_ENTRY);
-        permissionInfo.setArticleId(account.getId());
-        permissions.add(permissionInfo);
-        plasmid = (Plasmid) controller.createEntry(creator, plasmid, permissions);
+        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
+        AccessPermission accessPermission = new AccessPermission();
+        accessPermission.setArticle(AccessPermission.Article.ACCOUNT);
+        accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
+        accessPermission.setArticleId(account.getId());
+        accessPermissions.add(accessPermission);
+        plasmid = (Plasmid) controller.createEntry(creator, plasmid, accessPermissions);
         Assert.assertNotNull(plasmid);
         Assert.assertTrue(plasmid.getId() > 0);
 
@@ -223,9 +221,9 @@ public class EntryControllerTest {
         data.setCircular(true);
         data.setRecordId(plasmid.getRecordId());
         Entry existing = controller.getByRecordId(account, data.getRecordId());
-        ArrayList<PermissionInfo> p = ControllerFactory.getPermissionController()
-                                                       .retrieveSetEntryPermissions(account, plasmid);
-        data.setPermissions(p);
+        ArrayList<AccessPermission> p = ControllerFactory.getPermissionController()
+                                                         .retrieveSetEntryPermissions(account, plasmid);
+        data.setAccessPermissions(p);
 
         Entry entry = InfoToModelFactory.infoToEntry(data, existing);
         Entry updated = controller.update(account, entry);
@@ -321,12 +319,12 @@ public class EntryControllerTest {
         ArrayList<User> members = new ArrayList<>();
         members.add(Account.toDTO(account1));
         Assert.assertNotNull(groupController.setGroupMembers(account1, newGroup, members));
-        PermissionInfo permission = new PermissionInfo();
-        permission.setArticle(PermissionInfo.Article.GROUP);
-        permission.setArticleId(newGroup.getId());
-        permission.setType(PermissionInfo.Type.READ_ENTRY);
-        permission.setTypeId(plasmid.getId());
-        ControllerFactory.getPermissionController().addPermission(account1, permission);
+        AccessPermission accessPermission = new AccessPermission();
+        accessPermission.setArticle(AccessPermission.Article.GROUP);
+        accessPermission.setArticleId(newGroup.getId());
+        accessPermission.setType(AccessPermission.Type.READ_ENTRY);
+        accessPermission.setTypeId(plasmid.getId());
+        ControllerFactory.getPermissionController().addPermission(account1, accessPermission);
 
         count = controller.getNumberOfVisibleEntries(account1);
         Assert.assertEquals(1, count);
@@ -356,12 +354,12 @@ public class EntryControllerTest {
             Assert.assertNotNull(controller.createEntry(account, entry));
 
             if (i % 2 == 0) {
-                PermissionInfo permissionInfo = new PermissionInfo();
-                permissionInfo.setArticle(PermissionInfo.Article.GROUP);
-                permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
-                permissionInfo.setTypeId(entry.getId());
-                permissionInfo.setArticleId(info.getId());
-                ControllerFactory.getPermissionController().addPermission(account, permissionInfo);
+                AccessPermission accessPermission = new AccessPermission();
+                accessPermission.setArticle(AccessPermission.Article.GROUP);
+                accessPermission.setType(AccessPermission.Type.READ_ENTRY);
+                accessPermission.setTypeId(entry.getId());
+                accessPermission.setArticleId(info.getId());
+                ControllerFactory.getPermissionController().addPermission(account, accessPermission);
             }
         }
 

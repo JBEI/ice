@@ -9,7 +9,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.entry.display.view.PermissionPresenter;
 import org.jbei.ice.client.entry.display.view.PermissionWidget;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -32,14 +32,14 @@ public class ShareCollectionWidget extends Composite {
     private Icon closeIcon;
     private PopupPanel box;
     private final PermissionWidget permissionsWidget;
-    private final Callback<PermissionInfo> addCallback;
-    private final Callback<PermissionInfo> removeCallback;
-    private final Delegate<PermissionInfo> deleteDelegate;
+    private final Callback<AccessPermission> addCallback;
+    private final Callback<AccessPermission> removeCallback;
+    private final Delegate<AccessPermission> deleteDelegate;
     private int userShareCount;
     private int groupShareCount;
 
     public ShareCollectionWidget(final CollectionMenu.MenuCell cell, String collectionName,
-            final Delegate<PermissionInfo> delegate) {
+            final Delegate<AccessPermission> delegate) {
         FlexTable layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
@@ -66,16 +66,16 @@ public class ShareCollectionWidget extends Composite {
         layout.setWidget(2, 0, close);
         layout.getFlexCellFormatter().setHorizontalAlignment(2, 0, HasAlignment.ALIGN_RIGHT);
 
-        addCallback = new Callback<PermissionInfo>() {
+        addCallback = new Callback<AccessPermission>() {
             @Override
-            public void onSuccess(PermissionInfo info) {
-                if (info.isCanWrite()) {
-                    permissionsWidget.getPresenter().addWriteItem(info, delegate);
-                } else if (info.isCanRead()) {
-                    permissionsWidget.getPresenter().addReadItem(info, delegate);
+            public void onSuccess(AccessPermission access) {
+                if (access.isCanWrite()) {
+                    permissionsWidget.getPresenter().addWriteItem(access, delegate);
+                } else if (access.isCanRead()) {
+                    permissionsWidget.getPresenter().addReadItem(access, delegate);
                 }
 
-                if (info.getArticle() == PermissionInfo.Article.ACCOUNT)
+                if (access.getArticle() == AccessPermission.Article.ACCOUNT)
                     userShareCount += 1;
                 else
                     groupShareCount += 1;
@@ -88,11 +88,11 @@ public class ShareCollectionWidget extends Composite {
             }
         };
 
-        removeCallback = new Callback<PermissionInfo>() {
+        removeCallback = new Callback<AccessPermission>() {
             @Override
-            public void onSuccess(PermissionInfo permissionInfo) {
-                permissionsWidget.getPresenter().removeItem(permissionInfo);
-                if (permissionInfo.getArticle() == PermissionInfo.Article.ACCOUNT)
+            public void onSuccess(AccessPermission accessPermission) {
+                permissionsWidget.getPresenter().removeItem(accessPermission);
+                if (accessPermission.getArticle() == AccessPermission.Article.ACCOUNT)
                     userShareCount -= 1;
                 else
                     groupShareCount -= 1;
@@ -110,11 +110,11 @@ public class ShareCollectionWidget extends Composite {
         return permissionsWidget.getPresenter();
     }
 
-    public Callback<PermissionInfo> getAddCallback() {
+    public Callback<AccessPermission> getAddCallback() {
         return this.addCallback;
     }
 
-    public Callback<PermissionInfo> getRemoveCallback() {
+    public Callback<AccessPermission> getRemoveCallback() {
         return this.removeCallback;
     }
 
@@ -151,8 +151,8 @@ public class ShareCollectionWidget extends Composite {
         box.setWidget(this);
     }
 
-    public void showDialog(ArrayList<PermissionInfo> permissions) {
-        permissionsWidget.getPresenter().setPermissionData(permissions, deleteDelegate);
+    public void showDialog(ArrayList<AccessPermission> accessPermissions) {
+        permissionsWidget.getPresenter().setPermissionData(accessPermissions, deleteDelegate);
         box.center();
     }
 }

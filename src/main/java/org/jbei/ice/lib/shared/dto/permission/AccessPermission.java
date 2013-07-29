@@ -2,7 +2,7 @@ package org.jbei.ice.lib.shared.dto.permission;
 
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 
-public class PermissionInfo implements IDTOModel {
+public class AccessPermission implements IDTOModel {
 
     private Type type;
     private Article article;
@@ -10,10 +10,10 @@ public class PermissionInfo implements IDTOModel {
     private long articleId;   // id for article being acted on (group or account)
     private String display;   // account or group name
 
-    public PermissionInfo() {
+    public AccessPermission() {
     }
 
-    public PermissionInfo(Article article, long articleId, Type type, long typeId, String display) {
+    public AccessPermission(Article article, long articleId, Type type, long typeId, String display) {
         this.article = article;
         this.type = type;
         this.typeId = typeId;
@@ -91,12 +91,12 @@ public class PermissionInfo implements IDTOModel {
         return typeName + " (" + typeId + ") for " + article.name() + "(" + articleId + ")";
     }
 
-    public boolean equals(PermissionInfo info) {
-        return info != null
-                && info.getType() == type
-                && info.getTypeId() == typeId
-                && info.getArticle() == article
-                && info.getArticleId() == articleId
-                && info.getDisplay().equalsIgnoreCase(display);
+    public boolean equals(AccessPermission access) {
+        return access != null
+                && access.getType() == type
+                && access.getTypeId() == typeId
+                && access.getArticle() == article
+                && access.getArticleId() == articleId
+                && access.getDisplay().equalsIgnoreCase(display);
     }
 }

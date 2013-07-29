@@ -1,6 +1,9 @@
 package org.jbei.ice.lib.entry;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -17,8 +20,6 @@ import org.jbei.ice.lib.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
@@ -34,13 +35,15 @@ import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.ServiceException;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * ABI to manipulate {@link org.jbei.ice.lib.entry.model.Entry}s.
@@ -129,20 +132,19 @@ public class EntryController {
         }
     }
 
-    public HashSet<Entry> createStrainWithPlasmid(Account account, Entry strain, Entry plasmid,
-            ArrayList<PermissionInfo> permissions) throws ControllerException {
+    public void createStrainWithPlasmid(Account account, Entry strain, Entry plasmid,
+            ArrayList<AccessPermission> accessPermissions) throws ControllerException {
         if (strain == null || plasmid == null)
             throw new ControllerException("Cannot create null entries");
 
-        HashSet<Entry> results = new HashSet<>();
-        plasmid = createEntry(account, plasmid, permissions);
-        results.add(plasmid);
-        String plasmidPartNumberString = "[[" + Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX) + ":"
-                + plasmid.getPartNumber() + "|" + plasmid.getName() + "]]";
-        ((Strain) strain).setPlasmids(plasmidPartNumberString);
-        strain = createEntry(account, strain, permissions);
-        results.add(strain);
-        return results;
+        plasmid = createEntry(account, plasmid, accessPermissions);
+        strain = createEntry(account, strain, accessPermissions);
+        strain.getLinkedEntries().add(plasmid);
+        try {
+            dao.update(strain);
+        } catch (DAOException de) {
+            Logger.error(de);
+        }
     }
 
     /**
@@ -171,8 +173,8 @@ public class EntryController {
      * @throws ControllerException on exception creating the entry
      */
     public Entry createEntry(Account account, Entry entry) throws ControllerException {
-        ArrayList<PermissionInfo> permissions = permissionsController.getDefaultPermissions(account);
-        return createEntry(account, entry, permissions);
+        ArrayList<AccessPermission> accessPermissions = permissionsController.getDefaultPermissions(account);
+        return createEntry(account, entry, accessPermissions);
     }
 
     /**
@@ -181,13 +183,13 @@ public class EntryController {
      * Generates a new Part Number, the record id (UUID), version id, and timestamps.
      * Optionally set the record globally visible or schedule an index rebuild.
      *
-     * @param account     account of user creating entry
-     * @param entry       entry record being created
-     * @param permissions list of permissions to associate with created entry
+     * @param account           account of user creating entry
+     * @param entry             entry record being created
+     * @param accessPermissions list of permissions to associate with created entry
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
-    public Entry createEntry(Account account, Entry entry, ArrayList<PermissionInfo> permissions)
+    public Entry createEntry(Account account, Entry entry, ArrayList<AccessPermission> accessPermissions)
             throws ControllerException {
         entry.setPartNumber(getNextPartNumber());
         entry.setRecordId(Utils.generateUUID());
@@ -224,14 +226,15 @@ public class EntryController {
         }
 
         // add write permissions for owner
-        PermissionInfo info = new PermissionInfo(PermissionInfo.Article.ACCOUNT, account.getId(),
-                                                 PermissionInfo.Type.WRITE_ENTRY, entry.getId(), account.getFullName());
-        permissionsController.addPermission(account, info);
+        AccessPermission access = new AccessPermission(AccessPermission.Article.ACCOUNT, account.getId(),
+                                                       AccessPermission.Type.WRITE_ENTRY, entry.getId(),
+                                                       account.getFullName());
+        permissionsController.addPermission(account, access);
 
-        if (permissions != null) {
-            for (PermissionInfo permissionInfo : permissions) {
-                permissionInfo.setTypeId(entry.getId());
-                permissionsController.addPermission(account, permissionInfo);
+        if (accessPermissions != null) {
+            for (AccessPermission accessPermission : accessPermissions) {
+                accessPermission.setTypeId(entry.getId());
+                permissionsController.addPermission(account, accessPermission);
             }
         }
 
@@ -242,41 +245,9 @@ public class EntryController {
         return entry;
     }
 
-    public Entry recordEntry(Entry entry, ArrayList<PermissionInfo> permissions) throws ControllerException {
+    public Entry recordEntry(Entry entry, ArrayList<AccessPermission> accessPermissions) throws ControllerException {
         entry.setId(0);
         entry.setPartNumber(getNextPartNumber());
-
-        if (entry.getRecordId() == null) {
-            entry.setRecordId(Utils.generateUUID());
-            entry.setVersionId(entry.getRecordId());
-        }
-
-        if (entry.getVersionId() == null) {
-            entry.setVersionId(entry.getRecordId());
-        }
-
-        if (entry.getCreationTime() == null) {
-            entry.setCreationTime(Calendar.getInstance().getTime());
-            entry.setModificationTime(entry.getCreationTime());
-        }
-
-        if (entry.getSelectionMarkers() != null) {
-            for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
-                selectionMarker.setEntry(entry);
-            }
-        }
-
-        if (entry.getLinks() != null) {
-            for (Link link : entry.getLinks()) {
-                link.setEntry(entry);
-            }
-        }
-
-        if (entry.getStatus() == null)
-            entry.setStatus("");
-
-        if (entry.getBioSafetyLevel() == null)
-            entry.setBioSafetyLevel(0);
 
         try {
             entry = dao.saveEntry(entry);
@@ -284,10 +255,10 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        if (permissions != null) {
-            for (PermissionInfo permissionInfo : permissions) {
-                permissionInfo.setTypeId(entry.getId());
-                permissionsController.addPermission(accountController.getSystemAccount(), permissionInfo);
+        if (accessPermissions != null) {
+            for (AccessPermission accessPermission : accessPermissions) {
+                accessPermission.setTypeId(entry.getId());
+                permissionsController.addPermission(accountController.getSystemAccount(), accessPermission);
             }
         }
 
@@ -369,7 +340,7 @@ public class EntryController {
             throw new ControllerException("No read permission for part with recordId " + recordId);
         }
 
-        PartData info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -414,7 +385,7 @@ public class EntryController {
             throw new ControllerException(errMsg);
         }
 
-        PartData info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -440,7 +411,7 @@ public class EntryController {
             throw new ControllerException(errMsg);
         }
 
-        PartData info = ModelToInfoFactory.getInfo(null, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -474,30 +445,12 @@ public class EntryController {
             throw new PermissionException("No read permission for entry!");
         }
 
-        PartData info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
         info.setHasOriginalSequence(hasOriginalSequence);
         return info;
-    }
-
-    //TODO hack for BulkUploadUtil that needs Entry Object.
-    public Entry getEntryByPartNumber(Account account, String partNumber) throws ControllerException {
-        Entry entry;
-        try {
-            entry = dao.getByPartNumber(partNumber);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        if (entry == null)
-            return null;
-
-        if (!permissionsController.hasReadPermission(account, entry)) {
-            throw new ControllerException("No read permission for entry!");
-        }
-        return entry;
     }
 
     public boolean entryPartNumberExists(Account account, String partNumber) throws ControllerException {
@@ -536,7 +489,7 @@ public class EntryController {
             throw new PermissionException("No read permission for entry!");
         }
 
-        PartData info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -773,14 +726,6 @@ public class EntryController {
         }
     }
 
-    public HashSet<Long> retrieveStrainsForPlasmid(Plasmid plasmid) throws ControllerException {
-        try {
-            return dao.retrieveStrainsForPlasmid(plasmid);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
     public UserComment addCommentToEntry(Account account, UserComment userComment) throws ControllerException {
         Entry entry = get(account, userComment.getEntryId());
         Comment comment = new Comment(entry, account, userComment.getMessage());
@@ -837,7 +782,7 @@ public class EntryController {
 
     public PartData retrieveEntryDetails(Account account, long entryId) throws ControllerException {
         Entry entry = get(account, entryId);
-        PartData info = ModelToInfoFactory.getInfo(account, entry, null, null, null);
+        PartData info = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
@@ -855,9 +800,10 @@ public class EntryController {
         // viewing permissions is restricted to users who have write access
         if (info.isCanEdit()) {
             try {
-                ArrayList<PermissionInfo> permissions = permissionsController.retrieveSetEntryPermissions(account,
-                                                                                                          entry);
-                info.setPermissions(permissions);
+                ArrayList<AccessPermission> accessPermissions = permissionsController.retrieveSetEntryPermissions(
+                        account,
+                        entry);
+                info.setAccessPermissions(accessPermissions);
             } catch (PermissionException e) {
                 Logger.error(e);
             }
@@ -865,9 +811,18 @@ public class EntryController {
 
         if (hasSequence) {
             Sequence sequence = sequenceController.getByEntry(entry);
-            URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
-            if (uri != null) {
-                info.setSbolVisualURL(uri.toString());
+            if (Paths.get(sequence.getFwdHash() + ".png").toFile().exists()) {
+                info.setSbolVisualURL(sequence.getFwdHash() + ".png");
+            } else {
+                URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
+                if (uri != null) {
+                    try {
+                        IOUtils.copy(uri.toURL().openStream(), new FileOutputStream(sequence.getFwdHash() + ".png"));
+                        info.setSbolVisualURL(sequence.getFwdHash() + ".png");
+                    } catch (IOException e) {
+                        Logger.error(e);
+                    }
+                }
             }
         }
 

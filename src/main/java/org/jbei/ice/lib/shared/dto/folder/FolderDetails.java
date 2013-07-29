@@ -5,7 +5,7 @@ import java.util.LinkedList;
 
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
@@ -23,7 +23,7 @@ public class FolderDetails implements IDTOModel {
     private LinkedList<PartData> entries = new LinkedList<PartData>();
     private FolderType type;
     private User owner;    // owner or person sharing this folder
-    private ArrayList<PermissionInfo> permissions;
+    private ArrayList<AccessPermission> accessPermissions;
 
     public FolderDetails() {
     }
@@ -89,11 +89,11 @@ public class FolderDetails implements IDTOModel {
         this.owner = owner;
     }
 
-    public ArrayList<PermissionInfo> getPermissions() {
-        return permissions;
+    public ArrayList<AccessPermission> getAccessPermissions() {
+        return accessPermissions;
     }
 
-    public void setPermissions(ArrayList<PermissionInfo> permissions) {
-        this.permissions = permissions;
+    public void setAccessPermissions(ArrayList<AccessPermission> accessPermissions) {
+        this.accessPermissions = accessPermissions;
     }
 }

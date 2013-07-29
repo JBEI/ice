@@ -35,7 +35,7 @@ import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
-import org.jbei.ice.lib.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -183,8 +183,8 @@ public class EntryPresenter extends AbstractPresenter {
         currentInfo = newForm.getEntry();
     }
 
-    public void setDefaultPermissions(ArrayList<PermissionInfo> permissions) {
-        display.getPermissionsWidget().setPermissionData(permissions, new DeletePermission());
+    public void setDefaultPermissions(ArrayList<AccessPermission> accessPermissions) {
+        display.getPermissionsWidget().setPermissionData(accessPermissions, new DeletePermission());
     }
 
     protected void setContextNavData() {
@@ -417,7 +417,7 @@ public class EntryPresenter extends AbstractPresenter {
                 // permission (order is important here)
                 ServiceDelegate<PartSample> delegate = model.createDeleteSampleHandler();
                 SequenceViewPanelPresenter sequencePresenter = display.setEntryInfoForView(currentInfo, delegate);
-                display.getPermissionsWidget().setPermissionData(result.getPermissions(), new DeletePermission());
+                display.getPermissionsWidget().setPermissionData(result.getAccessPermissions(), new DeletePermission());
                 UploadPasteSequenceHandler handler = new UploadPasteSequenceHandler(service, eventBus,
                                                                                     sequencePresenter);
                 sequencePresenter.addSequencePasteHandler(handler);
@@ -509,49 +509,49 @@ public class EntryPresenter extends AbstractPresenter {
     //
     // inner classes
     //
-    private class PermissionAddDelegate implements ServiceDelegate<PermissionInfo> {
+    private class PermissionAddDelegate implements ServiceDelegate<AccessPermission> {
 
         @Override
-        public void execute(final PermissionInfo info) {
+        public void execute(final AccessPermission access) {
             if (currentInfo.getId() == 0) {
-                currentInfo.getPermissions().add(info);
-                displayPermission(info);
+                currentInfo.getAccessPermissions().add(access);
+                displayPermission(access);
                 return;
             }
 
-            info.setTypeId(currentInfo.getId());
+            access.setTypeId(currentInfo.getId());
             new IceAsyncCallback<Boolean>() {
 
                 @Override
                 protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                    service.addPermission(ClientController.sessionId, info, callback);
+                    service.addPermission(ClientController.sessionId, access, callback);
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
                     if (result)
-                        displayPermission(info);
+                        displayPermission(access);
                 }
             }.go(eventBus);
         }
 
-        protected void displayPermission(PermissionInfo info) {
+        protected void displayPermission(AccessPermission access) {
             DeletePermission deletePermission = new DeletePermission();
-            if (info.getType() == PermissionInfo.Type.WRITE_ENTRY) {
-                display.getPermissionsWidget().addWriteItem(info, deletePermission);
+            if (access.getType() == AccessPermission.Type.WRITE_ENTRY) {
+                display.getPermissionsWidget().addWriteItem(access, deletePermission);
             } else {
-                display.getPermissionsWidget().addReadItem(info, deletePermission);
+                display.getPermissionsWidget().addReadItem(access, deletePermission);
             }
         }
     }
 
-    private class DeletePermission implements Delegate<PermissionInfo> {
+    private class DeletePermission implements Delegate<AccessPermission> {
 
         @Override
-        public void execute(final PermissionInfo info) {
-            if (info.getTypeId() == 0) {
-                currentInfo.getPermissions().remove(info);
-                display.getPermissionsWidget().removeItem(info);
+        public void execute(final AccessPermission access) {
+            if (access.getTypeId() == 0) {
+                currentInfo.getAccessPermissions().remove(access);
+                display.getPermissionsWidget().removeItem(access);
                 return;
             }
 
@@ -559,12 +559,12 @@ public class EntryPresenter extends AbstractPresenter {
 
                 @Override
                 protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                    service.removePermission(ClientController.sessionId, info, callback);
+                    service.removePermission(ClientController.sessionId, access, callback);
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
-                    display.getPermissionsWidget().removeItem(info);
+                    display.getPermissionsWidget().removeItem(access);
                 }
             }.go(eventBus);
         }
