@@ -6,16 +6,13 @@ import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
-import org.jbei.ice.client.entry.display.view.PermissionPresenter;
-import org.jbei.ice.client.entry.display.view.PermissionWidget;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -25,20 +22,19 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Hector Plahar
  */
-public class ShareCollectionWidget extends Composite {
+public class ShareCollectionDialog extends Composite {
 
     private final String collectionName;
-    private Button close;
-    private Icon closeIcon;
+    private HTML close;
     private PopupPanel box;
-    private final PermissionWidget permissionsWidget;
+    private final CollectionPermissionWidget permissionsWidget;
     private final Callback<AccessPermission> addCallback;
     private final Callback<AccessPermission> removeCallback;
     private final Delegate<AccessPermission> deleteDelegate;
     private int userShareCount;
     private int groupShareCount;
 
-    public ShareCollectionWidget(final CollectionMenu.MenuCell cell, String collectionName,
+    public ShareCollectionDialog(final CollectionMenu.MenuCell cell, String collectionName,
             final Delegate<AccessPermission> delegate) {
         FlexTable layout = new FlexTable();
         layout.setCellPadding(0);
@@ -58,21 +54,17 @@ public class ShareCollectionWidget extends Composite {
         // set Widgets
         layout.setWidget(0, 0, createHeader());
 
-        permissionsWidget = new PermissionWidget(false);
-        permissionsWidget.setWidgetVisibility(true);
-        permissionsWidget.getPresenter().setCanEdit(true);
+        permissionsWidget = new CollectionPermissionWidget();
+        permissionsWidget.setVisible(true);
         layout.setWidget(1, 0, permissionsWidget);
-
-        layout.setWidget(2, 0, close);
-        layout.getFlexCellFormatter().setHorizontalAlignment(2, 0, HasAlignment.ALIGN_RIGHT);
 
         addCallback = new Callback<AccessPermission>() {
             @Override
             public void onSuccess(AccessPermission access) {
                 if (access.isCanWrite()) {
-                    permissionsWidget.getPresenter().addWriteItem(access, delegate);
+                    permissionsWidget.addWriteItem(access, delegate);
                 } else if (access.isCanRead()) {
-                    permissionsWidget.getPresenter().addReadItem(access, delegate);
+                    permissionsWidget.addReadItem(access, delegate);
                 }
 
                 if (access.getArticle() == AccessPermission.Article.ACCOUNT)
@@ -91,7 +83,7 @@ public class ShareCollectionWidget extends Composite {
         removeCallback = new Callback<AccessPermission>() {
             @Override
             public void onSuccess(AccessPermission accessPermission) {
-                permissionsWidget.getPresenter().removeItem(accessPermission);
+                permissionsWidget.removeItem(accessPermission);
                 if (accessPermission.getArticle() == AccessPermission.Article.ACCOUNT)
                     userShareCount -= 1;
                 else
@@ -104,10 +96,6 @@ public class ShareCollectionWidget extends Composite {
             public void onFailure() {
             }
         };
-    }
-
-    public PermissionPresenter getPermissionsPresenter() {
-        return permissionsWidget.getPresenter();
     }
 
     public Callback<AccessPermission> getAddCallback() {
@@ -124,8 +112,12 @@ public class ShareCollectionWidget extends Composite {
         table.setCellPadding(0);
         table.setCellSpacing(0);
 
-        table.setHTML(0, 0, "Share <b><i>" + collectionName + "</b></i>");
-        table.setWidget(0, 1, closeIcon);
+        String shareHTML = "<b class=\"font-85em\" style=\"color: #c1c1c1\">SHARE</b> "
+                + "<b font-style=\"italic\">" + collectionName + "</b> "
+                + "<b class=\"font-85em\" style=\"color: #c1c1c1\">COLLECTION</b>";
+
+        table.setHTML(0, 0, shareHTML);
+        table.setWidget(0, 1, close);
         table.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_RIGHT);
         return table;
     }
@@ -138,9 +130,9 @@ public class ShareCollectionWidget extends Composite {
             }
         };
 
-        close = new Button("<i class=\"" + FAIconType.REMOVE.getStyleName() + "\"></i> Close");
-        closeIcon = new Icon(FAIconType.REMOVE);
-        closeIcon.addClickHandler(closeHandler);
+        close = new HTML("<i class=\"" + FAIconType.REMOVE_SIGN.getStyleName() + "\"></i> Close");
+        close.setStyleName("opacity_hover");
+        close.addStyleName("font-75em");
         close.addClickHandler(closeHandler);
 
         box = new PopupPanel();
@@ -152,7 +144,7 @@ public class ShareCollectionWidget extends Composite {
     }
 
     public void showDialog(ArrayList<AccessPermission> accessPermissions) {
-        permissionsWidget.getPresenter().setPermissionData(accessPermissions, deleteDelegate);
+        permissionsWidget.setPermissionData(accessPermissions, deleteDelegate);
         box.center();
     }
 }

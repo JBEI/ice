@@ -55,7 +55,7 @@ public class EntryView extends Composite implements IEntryView {
     private EntryActionWidget entryAction;
 
     // permissions
-    private final PermissionWidget permissions;
+    private final PartPermissionWidget permissions;
 
     // visibility
     private final VisibilityWidget visibility;
@@ -74,7 +74,7 @@ public class EntryView extends Composite implements IEntryView {
     private EntryDataView currentView;
 
     public EntryView(Delegate<Long> retrieveSequenceTracesDelegate) {
-        permissions = new PermissionWidget(true);
+        permissions = new PartPermissionWidget();
         visibility = new VisibilityWidget();
 
         attachmentMenu = new AttachmentListMenu();
@@ -286,7 +286,8 @@ public class EntryView extends Composite implements IEntryView {
         getVisibilityWidget().setVisibility(info.getVisibility());
 
         String ownerId = info.getOwnerId() == 0 ? null : Long.toString(info.getOwnerId());
-        setEntryHeader(info.getType().getDisplay(), info.getName(), info.getOwner(), ownerId, info.getCreationTime());
+        setEntryHeader(info.getType().getDisplay(), info.getName(), info.getOwner(), ownerId,
+                       new Date(info.getCreationTime()));
 
         // attachments
         ArrayList<AttachmentInfo> attachments = info.getAttachments();

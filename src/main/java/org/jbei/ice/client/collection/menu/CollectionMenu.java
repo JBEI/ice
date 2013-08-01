@@ -9,7 +9,7 @@ import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.ShareCollectionData;
-import org.jbei.ice.client.collection.widget.ShareCollectionWidget;
+import org.jbei.ice.client.collection.widget.ShareCollectionDialog;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
@@ -333,7 +333,7 @@ public class CollectionMenu extends Composite {
         private final HoverCell action;
         private final String folderId;
         private final Widget busyIndicator;
-        private ShareCollectionWidget shareCollectionWidget;
+        private ShareCollectionDialog shareCollectionDialog;
         private final HTML shared;
         private final int row;
 
@@ -342,7 +342,7 @@ public class CollectionMenu extends Composite {
             this.row = row;
             folderId = "right" + item.getId();
             action = new HoverCell();
-            shareCollectionWidget = new ShareCollectionWidget(this, item.getName(), new Delegate<AccessPermission>() {
+            shareCollectionDialog = new ShareCollectionDialog(this, item.getName(), new Delegate<AccessPermission>() {
 
                 @Override
                 public void execute(AccessPermission access) {
@@ -350,7 +350,7 @@ public class CollectionMenu extends Composite {
                         return;
 
                     ShareCollectionData data = new ShareCollectionData(access,
-                                                                       shareCollectionWidget.getRemoveCallback());
+                                                                       shareCollectionDialog.getRemoveCallback());
                     data.setDelete(true);
                     permissionInfoDelegate.execute(data);
                 }
@@ -526,7 +526,7 @@ public class CollectionMenu extends Composite {
             currentEditSelection = getMenuItem();
             editRow = row;
             editIndex = 0;
-            shareCollectionWidget.showDialog(currentEditSelection.getAccessPermissions());
+            shareCollectionDialog.showDialog(currentEditSelection.getAccessPermissions());
         }
 
         protected void pinAction() {

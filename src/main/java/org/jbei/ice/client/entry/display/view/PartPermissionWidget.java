@@ -20,11 +20,11 @@ import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.SuggestBox;
 
 /**
- * Widget for displaying/adding/removing entry permissions
+ * Widget for displaying/adding/removing part permissions
  *
  * @author Hector Plahar
  */
-public class PermissionWidget extends Composite implements PermissionPresenter.IPermissionView {
+public class PartPermissionWidget extends Composite implements PermissionPresenter.IPermissionView {
 
     private FlexTable layout;
     private final PermissionPresenter presenter;
@@ -36,7 +36,7 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
     private SuggestBox permissionSuggestions;
     private boolean isViewingWriteTab;
 
-    public PermissionWidget(boolean showHeader) {
+    public PartPermissionWidget() {
         layout = new FlexTable();
         initWidget(layout);
 
@@ -49,7 +49,6 @@ public class PermissionWidget extends Composite implements PermissionPresenter.I
         layout.setHTML(0, 0, "<i class=\"" + FAIconType.SHIELD.getStyleName() + " font-85em\"></i> &nbsp;Permissions");
         layout.getCellFormatter().setStyleName(0, 0, "entry_attributes_sub_header");
         layout.getFlexCellFormatter().setColSpan(0, 0, 2);
-        layout.getRowFormatter().setVisible(0, showHeader);
 
         HTMLPanel readLabelPanel = new HTMLPanel(
                 "Can Read <span style=\"float: right\" id=\"permission_read_add\"></span>");
