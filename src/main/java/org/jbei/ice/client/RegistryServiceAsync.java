@@ -25,6 +25,7 @@ import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.search.IndexType;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
@@ -241,7 +242,7 @@ public interface RegistryServiceAsync {
 
     void markMessageRead(String sessionId, long id, AsyncCallback<Integer> async);
 
-    void rebuildSearchIndex(String sessionId, AsyncCallback<Boolean> callback);
+    void rebuildSearchIndex(String sessionId, IndexType type, AsyncCallback<Boolean> callback);
 
     void sendComment(String sid, UserComment comment, AsyncCallback<UserComment> callback);
 

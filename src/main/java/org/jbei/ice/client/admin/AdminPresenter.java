@@ -9,7 +9,6 @@ import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.group.GroupPresenter;
 import org.jbei.ice.client.admin.part.AdminTransferredPartPresenter;
-import org.jbei.ice.client.admin.search.AdminSearchPresenter;
 import org.jbei.ice.client.admin.setting.SystemSettingPresenter;
 import org.jbei.ice.client.admin.user.UserPresenter;
 import org.jbei.ice.client.admin.web.WebOfRegistriesPresenter;
@@ -37,7 +36,6 @@ public class AdminPresenter extends AbstractPresenter {
     private GroupPresenter groupPresenter;
     private UserPresenter userPresenter;
     private SystemSettingPresenter systemSettingPresenter;
-    private AdminSearchPresenter searchPresenter;
     private AdminTransferredPartPresenter partPresenter;
     private WebOfRegistriesPresenter webPresenter;
 
@@ -91,12 +89,6 @@ public class AdminPresenter extends AbstractPresenter {
                 retrieveUsers();
                 break;
 
-            case SEARCH:
-                if (searchPresenter == null)
-                    searchPresenter = new AdminSearchPresenter(service, eventBus);
-                retrieveSearchSettings();
-                break;
-
             case PARTS:
                 if (partPresenter == null)
                     partPresenter = new AdminTransferredPartPresenter(service, eventBus);
@@ -141,26 +133,6 @@ public class AdminPresenter extends AbstractPresenter {
 
                 systemSettingPresenter.setData(settings);
                 view.show(currentOption, systemSettingPresenter.getView().asWidget());
-            }
-        }.go(eventBus);
-    }
-
-    // SEARCH
-    private void retrieveSearchSettings() {
-        new IceAsyncCallback<HashMap<String, String>>() {
-
-            @Override
-            protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
-                service.retrieveSystemSettings(ClientController.sessionId, callback);
-            }
-
-            @Override
-            public void onSuccess(HashMap<String, String> result) {
-                if (result == null || currentOption != AdminOption.SEARCH)
-                    return;
-
-                searchPresenter.setData(result);
-                view.show(currentOption, searchPresenter.getView().asWidget());
             }
         }.go(eventBus);
     }

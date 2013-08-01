@@ -3,6 +3,8 @@ package org.jbei.ice.lib.shared.dto.search;
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 
 /**
+ * Blast query. Program type defaults to blastn
+ *
  * @author Hector Plahar
  */
 public class BlastQuery implements IDTOModel {
@@ -14,6 +16,7 @@ public class BlastQuery implements IDTOModel {
 
     // required no arg constructor
     public BlastQuery() {
+        blastProgram = BlastProgram.BLAST_N;
     }
 
     public BlastQuery(BlastProgram program, String sequence) {

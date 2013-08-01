@@ -13,15 +13,12 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,6 +42,7 @@ import org.jbei.ice.lib.shared.dto.search.SearchResult;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.biojava.bio.seq.DNATools;
@@ -62,6 +60,7 @@ public class BlastPlus {
     private static final String BLAST_DB_FOLDER = "blast";
     private static final String BLAST_DB_NAME = "ice";
     private static final String DELIMITER = ",";
+    private static final String LOCK_FILE_NAME = "write.lock";
 
     public static HashMap<String, SearchResult> runBlast(Account account, BlastQuery query) throws BlastException {
         try {
@@ -172,7 +171,6 @@ public class BlastPlus {
             if (line.trim().isEmpty() || !line.startsWith(">"))
                 continue;
 
-
             // process alignment details for above match
             SearchResult info = parseSequenceIdentifier(line.substring(1));
             if (info == null)
@@ -194,7 +192,7 @@ public class BlastPlus {
                     break;
                 }
 
-                // bit score and evalue
+                // bit score and e-value
                 // eg. Score = 3131 bits (1695),  Expect = 0.0
                 if (line.contains("Score")) {
                     String[] split = line.split("=");
@@ -237,24 +235,26 @@ public class BlastPlus {
     }
 
     private static boolean blastDatabaseExists() {
-        Path path = FileSystems.getDefault().getPath(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                                                     BLAST_DB_FOLDER, BLAST_DB_NAME + ".nsq");
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        Path path = FileSystems.getDefault().getPath(dataDir, BLAST_DB_FOLDER, BLAST_DB_NAME + ".nsq");
         return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
     }
 
     public static void rebuildDatabase(boolean force) throws BlastException {
-        final Path blastFolder = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), BLAST_DB_FOLDER);
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        final Path blastFolder = Paths.get(dataDir, BLAST_DB_FOLDER);
+        File lockFile = Paths.get(blastFolder.toString(), LOCK_FILE_NAME).toFile();
 
         try {
             if (!Files.exists(blastFolder))
                 Files.createDirectories(blastFolder);
 
             if (!force && blastDatabaseExists()) {
-                Logger.info("Blast database exists");
+                Logger.info("Blast database found in " + blastFolder.toString());
                 return;
             }
 
-            FileOutputStream fos = new FileOutputStream(blastFolder.toString() + File.separator + "write.lock");
+            FileOutputStream fos = new FileOutputStream(lockFile);
             try (FileLock lock = fos.getChannel().tryLock()) {
                 if (lock == null)
                     return;
@@ -263,10 +263,11 @@ public class BlastPlus {
                 Logger.info("Blast database rebuild complete");
             }
         } catch (OverlappingFileLockException l) {
-            Logger.warn("Could not obtain lock file for blast at " + blastFolder + File.separator + "write.lock");
+            Logger.warn("Could not obtain lock file for blast at " + blastFolder.toString());
         } catch (IOException eio) {
             throw new BlastException(eio);
         }
+        FileUtils.deleteQuietly(lockFile);
     }
 
     /**
@@ -333,49 +334,48 @@ public class BlastPlus {
         return output.toString();
     }
 
-
     /**
      * Build the blast database.
      * <p/>
-     * First dump the sequences from the sql database into a fasta file, than create the blast
+     * <p/>First dump the sequences from the sql database into a fasta file, than create the blast
      * database by calling formatBlastDb.
-     * <p/>
-     * It creates a new database in a separate directory, and if successful, replaces the existing
-     * directory with the new one.
      *
      * @throws BlastException
      */
     private static void rebuildSequenceDatabase() throws BlastException {
-        final String blastDb = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY) + File.separator + BLAST_DB_FOLDER;
-        Path newFastaFileDirPath = Paths.get(blastDb + ".new");
-        deleteDirectoryIfExists(newFastaFileDirPath);
-        try {
-            Files.createDirectory(newFastaFileDirPath);
-            Path fastaFilePath = Paths.get(newFastaFileDirPath.toString(), "bigfastafile");
-            try (BufferedWriter write = Files.newBufferedWriter(fastaFilePath, Charset.defaultCharset(),
-                                                                StandardOpenOption.CREATE_NEW)) {
-                writeBigFastaFile(write);
-            }
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        final Path blastDb = Paths.get(dataDir, BLAST_DB_FOLDER);
 
-            formatBlastDb(newFastaFileDirPath.toFile(), fastaFilePath.toString(), blastDb);
-            renameBlastDb(newFastaFileDirPath.toFile(), blastDb);
+        Path newFastaFile = Paths.get(blastDb.toString(), "bigfastafile.new");
+        try (BufferedWriter write = Files.newBufferedWriter(newFastaFile, Charset.defaultCharset(),
+                                                            StandardOpenOption.CREATE_NEW)) {
+            writeBigFastaFile(write);
         } catch (IOException ioe) {
             throw new BlastException(ioe);
         }
+
+        formatBlastDb(blastDb);
+        try {
+            Path fastaFile = Paths.get(dataDir, BLAST_DB_FOLDER, "bigfastafile");
+            Files.move(newFastaFile, fastaFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ioe) {
+            Logger.error(ioe);
+        }
     }
 
-    private static void formatBlastDb(File fastaFileDir, String fastaFileName, String blastDb) throws BlastException {
+    private static void formatBlastDb(Path blastDb) throws BlastException {
         ArrayList<String> commands = new ArrayList<>();
-        String makeBlast = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator + "makeblastdb";
+        String makeBlastDbCmd = Utils.getConfigValue(
+                ConfigurationKey.BLAST_INSTALL_DIR) + File.separator + "makeblastdb";
 
-        commands.add(makeBlast);
+        commands.add(makeBlastDbCmd);
         commands.add("-dbtype nucl");
         commands.add("-in");
-        commands.add(fastaFileName);
+        commands.add("bigfastafile.new");
         commands.add("-logfile");
-        commands.add(blastDb + ".log");
+        commands.add(BLAST_DB_NAME + ".log");
         commands.add("-out");
-        commands.add(blastDb + File.separator + "ice");
+        commands.add(BLAST_DB_NAME);
 //        commands.add("-title");
 //        commands.add("ICE Blast DB");
         String commandString = Utils.join(" ", commands);
@@ -384,7 +384,7 @@ public class BlastPlus {
         Runtime runTime = Runtime.getRuntime();
 
         try {
-            Process process = runTime.exec(commandString, new String[0], fastaFileDir);
+            Process process = runTime.exec(commandString, new String[0], blastDb.toFile());
             InputStream blastOutputStream = process.getInputStream();
             InputStream blastErrorStream = process.getErrorStream();
 
@@ -404,24 +404,10 @@ public class BlastPlus {
                 throw new IOException("Could not make blast db");
             }
         } catch (InterruptedException e) {
-            throw new BlastException("Could not run makeblastdb", e);
+            throw new BlastException("Could not run makeblastdb [BlastDBPath is " + blastDb.toString() + "]", e);
         } catch (IOException e) {
             throw new BlastException(e);
         }
-    }
-
-    private static void renameBlastDb(File newBigFastaFileDir, String baseBlastDirName)
-            throws IOException, BlastException {
-        Path oldBlast = Paths.get(baseBlastDirName + ".old");
-        deleteDirectoryIfExists(oldBlast);
-
-        Path currentBlastPath = Paths.get(baseBlastDirName);
-        if (Files.exists(currentBlastPath) && Files.isDirectory(currentBlastPath)) {
-            Files.walkFileTree(currentBlastPath, new CopyDirVisitor(currentBlastPath, oldBlast));
-        }
-
-        Path newBigFastaPath = Paths.get(newBigFastaFileDir.toURI());
-        Files.walkFileTree(newBigFastaPath, new CopyDirVisitor(newBigFastaPath, currentBlastPath));
     }
 
     /**
@@ -482,60 +468,6 @@ public class BlastPlus {
                     throw new BlastException(e);
                 }
             }
-        }
-    }
-
-    private static void deleteDirectoryIfExists(Path path) throws BlastException {
-        if (Files.exists(path)) {
-            try {
-                Files.walkFileTree(path, new DeleteDirVisitor());
-            } catch (IOException e) {
-                throw new BlastException(e);
-            }
-        }
-    }
-
-    public static class DeleteDirVisitor extends SimpleFileVisitor<Path> {
-
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-            Files.delete(file);
-            return FileVisitResult.CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-            if (exc == null) {
-                Files.delete(dir);
-                return FileVisitResult.CONTINUE;
-            }
-            throw exc;
-        }
-    }
-
-    public static class CopyDirVisitor extends SimpleFileVisitor<Path> {
-
-        private final Path source;
-        private final Path dest;
-
-        public CopyDirVisitor(Path source, Path dest) {
-            this.source = source;
-            this.dest = dest;
-        }
-
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-            Files.copy(file, dest.resolve(source.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
-            return FileVisitResult.CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-            Path targetPath = dest.resolve(source.relativize(dir));
-            if (!Files.exists(targetPath)) {
-                Files.createDirectory(targetPath);
-            }
-            return FileVisitResult.CONTINUE;
         }
     }
 

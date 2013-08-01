@@ -4,10 +4,17 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.IAdminPanel;
+import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.search.IndexType;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -17,17 +24,58 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class SystemSettingPanel extends Composite implements IAdminPanel {
 
-    private final FlexTable layout;
+    private FlexTable layout;
     private ServiceDelegate<RowData> serviceDelegate;
+    private Button reIndex;
+    private Button blastReIndex;
 
     public SystemSettingPanel() {
-        layout = new FlexTable();
+        initComponents();
+        layout.setHTML(0, 0, "&nbsp;");
+        HTMLPanel panel = new HTMLPanel("<span id=\"rebuild_indexes\"></span>&nbsp;<span id=\"rebuild_blast\"></span>");
+        panel.add(reIndex, "rebuild_indexes");
+        panel.add(blastReIndex, "rebuild_blast");
+        layout.setWidget(1, 0, panel);
         initWidget(layout);
     }
 
+    protected void initComponents() {
+        layout = new FlexTable();
+//        layout.setWidth("100%");
+        reIndex = new Button("<i class=\"blue " + FAIconType.REFRESH.getStyleName() + "\"></i>&nbsp; Rebuild Indexes");
+        blastReIndex = new Button("<i class=\"blue " + FAIconType.REFRESH.getStyleName()
+                                          + "\"></i>&nbsp; Rebuild BLAST<sup>®</sup>");
+    }
+
+    public void setRebuildIndexesHandler(final ServiceDelegate<IndexType> delegate) {
+        reIndex.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!Window.confirm(
+                        "This action will cause search results to be incomplete until rebuilding is done. Continue?"))
+                    return;
+
+                delegate.execute(IndexType.LUCENE);
+            }
+        });
+
+        blastReIndex.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!Window.confirm(
+                        "This action will cause search results to be incomplete until rebuilding is done. Continue?"))
+                    return;
+
+                delegate.execute(IndexType.BLAST);
+            }
+        });
+    }
+
     public void setData(HashMap<String, String> settings) {
-        layout.clear();
-        int row = 0;
+        for (int i = 2; i < layout.getRowCount(); i += 1)
+            layout.removeRow(i);
+
+        int row = 2;
 
         // general settings
         layout.setWidget(row, 0, createGeneralSettingPanel(settings));
@@ -45,7 +93,6 @@ public class SystemSettingPanel extends Composite implements IAdminPanel {
     private Widget createGeneralSettingPanel(HashMap<String, String> settings) {
         return new SettingPanel(settings, "General Settings", serviceDelegate,
                                 ConfigurationKey.PROFILE_EDIT_ALLOWED,
-//                                ConfigurationKey.WIKILINK_PREFIX,
                                 ConfigurationKey.PART_NUMBER_DELIMITER,
                                 ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX,
                                 ConfigurationKey.PART_NUMBER_PREFIX,
@@ -54,7 +101,7 @@ public class SystemSettingPanel extends Composite implements IAdminPanel {
                                 ConfigurationKey.NEW_REGISTRATION_ALLOWED,
                                 ConfigurationKey.DATA_DIRECTORY,
                                 ConfigurationKey.TEMPORARY_DIRECTORY,
-                                ConfigurationKey.DATABASE_SCHEMA_VERSION);
+                                ConfigurationKey.BLAST_INSTALL_DIR);
     }
 
     private Widget createEmailSettingsPanel(HashMap<String, String> settings) {

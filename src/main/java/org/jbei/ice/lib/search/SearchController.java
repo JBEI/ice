@@ -12,10 +12,12 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.search.IndexType;
 import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResult;
@@ -134,20 +136,25 @@ public class SearchController {
         }
     }
 
-    public boolean rebuildIndexes(Account account) {
+    public boolean rebuildIndexes(Account account, IndexType type) {
         Logger.info(account.getEmail() + ": rebuilding search indexes");
         if (account.getType() != AccountType.ADMIN) {
             Logger.warn(account.getEmail() + " does not have privileges to complete action");
             return false;
         }
 
-        try {
-            dao.reIndexInbackground();
-            return true;
-        } catch (DAOException e) {
-            Logger.error(e);
+        if (type == IndexType.LUCENE)
+            IceExecutorService.getInstance().runTask(new RebuildLuceneIndexTask());
+        else if (type == IndexType.BLAST) {
+            try {
+                BlastPlus.rebuildDatabase(true);
+            } catch (BlastException e) {
+                Logger.error(e);
+                return false;
+            }
+        } else
             return false;
-        }
+        return true;
     }
 
     public void initHibernateSearch() throws ControllerException {
