@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -29,7 +30,6 @@ import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 
@@ -37,6 +37,7 @@ import gwtupload.server.UploadAction;
 import gwtupload.server.exceptions.UploadActionException;
 import gwtupload.shared.UConsts;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -213,7 +214,7 @@ public class FileUploadServlet extends UploadAction {
                             try {
                                 attachmentController.delete(account, attachment);
                             } catch (PermissionException e) {
-                                continue;
+                                Logger.warn(e.getMessage());
                             }
                         }
                     }
@@ -378,30 +379,26 @@ public class FileUploadServlet extends UploadAction {
             Logger.error(e);
         }
 
-        try (FileInputStream inputStream = new FileInputStream(file)) {
+        try {
             if (entry != null) {
-                try {
-                    Attachment attachment = new Attachment();
-                    attachment.setEntry(entry);
-                    attachment.setDescription(desc);
-                    attachment.setFileName(filename);
-                    AttachmentController attachmentController = ControllerFactory.getAttachmentController();
-                    Attachment saved = attachmentController.save(account, attachment, inputStream);
-                    if (saved != null)
-                        return saved.getFileId();
-                } catch (ControllerException e) {
-                    Logger.error(e);
-                }
+                Attachment attachment = new Attachment();
+                attachment.setEntry(entry);
+                attachment.setDescription(desc);
+                attachment.setFileName(filename);
+                AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+                Attachment saved = attachmentController.save(account, attachment, new FileInputStream(file));
+                if (saved != null)
+                    return saved.getFileId();
             } else {
                 // upload file. return file id
                 String fileId = Utils.generateUUID();
-                File attDir = new File(Utils.getConfigValue(ConfigurationKey.ATTACHMENTS_DIRECTORY));
-                FileUtils.writeFile(attDir, fileId, inputStream);
+                File attachmentFile = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
+                                                AttachmentController.attachmentDirName, fileId).toFile();
+                FileUtils.copyFile(file, attachmentFile);
                 return fileId;
             }
-        } catch (IOException e) {
+        } catch (ControllerException | IOException e) {
             Logger.error(e);
-            return null;
         }
 
         return null;

@@ -57,7 +57,6 @@ public class AdminSearchPresenter extends AdminPanelPresenter {
 
     public void setData(HashMap<String, String> settings) {
         SettingPanel settingPanel = new SettingPanel(settings, "Search Settings", serviceDelegate,
-                                                     ConfigurationKey.BLAST_DIR,
                                                      ConfigurationKey.BLAST_INSTALL_DIR);
         panel.setSearchSetting(settingPanel);
     }

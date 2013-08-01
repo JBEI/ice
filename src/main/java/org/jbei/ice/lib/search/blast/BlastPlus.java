@@ -59,7 +59,7 @@ import org.biojava.bio.symbol.SymbolList;
  */
 public class BlastPlus {
 
-    private static final String BLAST_DB_FOLDER = "ice_blast";
+    private static final String BLAST_DB_FOLDER = "blast";
     private static final String BLAST_DB_NAME = "ice";
     private static final String DELIMITER = ",";
 
@@ -67,8 +67,8 @@ public class BlastPlus {
         try {
             String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + query.getBlastProgram().getName();
-            String blastDb = Utils.getConfigValue(ConfigurationKey.BLAST_DIR) + File.separator + BLAST_DB_FOLDER
-                    + File.separator + BLAST_DB_NAME;
+            String blastDb = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), BLAST_DB_FOLDER,
+                                       BLAST_DB_NAME).toString();
             String blastCommand = (command + " -db " + blastDb);
             Logger.info("Blast: " + blastCommand);
             Process process = Runtime.getRuntime().exec(blastCommand);
@@ -237,24 +237,24 @@ public class BlastPlus {
     }
 
     private static boolean blastDatabaseExists() {
-        String blastDb = Utils.getConfigValue(ConfigurationKey.BLAST_DIR) + File.separator + BLAST_DB_FOLDER;
-        Path path = FileSystems.getDefault().getPath(blastDb + File.separator + BLAST_DB_NAME + ".nsq");
+        Path path = FileSystems.getDefault().getPath(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
+                                                     BLAST_DB_FOLDER, BLAST_DB_NAME + ".nsq");
         return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
     }
 
     public static void rebuildDatabase(boolean force) throws BlastException {
-        final String blastFolder = Utils.getConfigValue(ConfigurationKey.BLAST_DIR) + File.separator + BLAST_DB_FOLDER;
+        final Path blastFolder = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), BLAST_DB_FOLDER);
 
         try {
-            if (!Files.exists(Paths.get(blastFolder)))
-                Files.createDirectories(Paths.get(blastFolder));
+            if (!Files.exists(blastFolder))
+                Files.createDirectories(blastFolder);
 
             if (!force && blastDatabaseExists()) {
                 Logger.info("Blast database exists");
                 return;
             }
 
-            FileOutputStream fos = new FileOutputStream(blastFolder + File.separator + "write.lock");
+            FileOutputStream fos = new FileOutputStream(blastFolder.toString() + File.separator + "write.lock");
             try (FileLock lock = fos.getChannel().tryLock()) {
                 if (lock == null)
                     return;
@@ -346,7 +346,7 @@ public class BlastPlus {
      * @throws BlastException
      */
     private static void rebuildSequenceDatabase() throws BlastException {
-        final String blastDb = Utils.getConfigValue(ConfigurationKey.BLAST_DIR) + File.separator + BLAST_DB_FOLDER;
+        final String blastDb = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY) + File.separator + BLAST_DB_FOLDER;
         Path newFastaFileDirPath = Paths.get(blastDb + ".new");
         deleteDirectoryIfExists(newFastaFileDirPath);
         try {

@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.entry;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -984,16 +985,20 @@ public class EntryController {
         }
 
         // retrieve cached pigeon image or generate and cache
+        String tmpDir = ControllerFactory.getConfigurationController()
+                                         .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         if (hasSequence) {
             Sequence sequence = sequenceController.getByEntry(entry);
-            if (Paths.get(sequence.getFwdHash() + ".png").toFile().exists()) {
-                partData.setSbolVisualURL(sequence.getFwdHash() + ".png");
+            String hash = sequence.getFwdHash();
+            if (Paths.get(tmpDir, hash + ".png").toFile().exists()) {
+                partData.setSbolVisualURL(hash + ".png");
             } else {
                 URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
                 if (uri != null) {
                     try {
-                        IOUtils.copy(uri.toURL().openStream(), new FileOutputStream(sequence.getFwdHash() + ".png"));
-                        partData.setSbolVisualURL(sequence.getFwdHash() + ".png");
+                        IOUtils.copy(uri.toURL().openStream(),
+                                     new FileOutputStream(tmpDir + File.separatorChar + hash + ".png"));
+                        partData.setSbolVisualURL(hash + ".png");
                     } catch (IOException e) {
                         Logger.error(e);
                     }

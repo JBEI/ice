@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 
@@ -42,15 +43,12 @@ public class SequenceAnalysisController {
 
     private final TraceSequenceDAO traceDao;
     private final PermissionsController permissionsController;
-    private final File traceSequenceFileDir;
+
+    public static final String tracesDirName = "traces";
 
     public SequenceAnalysisController() {
         traceDao = new TraceSequenceDAO();
         permissionsController = new PermissionsController();
-        String tracesDir = Utils.getConfigValue(ConfigurationKey.TRACE_FILES_DIRECTORY);
-        if (tracesDir == null)
-            tracesDir = "/tmp/traces";
-        traceSequenceFileDir = new File(tracesDir);
     }
 
     /**
@@ -83,9 +81,10 @@ public class SequenceAnalysisController {
         }
 
         TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence, date);
+        File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
 
         try {
-            return traceDao.create(traceSequenceFileDir, traceSequence, inputStream);
+            return traceDao.create(tracesDir, traceSequence, inputStream);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -127,7 +126,8 @@ public class SequenceAnalysisController {
         }
 
         try {
-            traceDao.delete(traceSequenceFileDir, traceSequence);
+            File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
+            traceDao.delete(tracesDir, traceSequence);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -230,12 +230,8 @@ public class SequenceAnalysisController {
      * @throws ControllerException
      */
     public File getFile(TraceSequence traceSequence) throws ControllerException {
-
-        try {
-            return TraceSequenceDAO.getFile(traceSequenceFileDir, traceSequence);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName,
+                         traceSequence.getFileId()).toFile();
     }
 
     /**

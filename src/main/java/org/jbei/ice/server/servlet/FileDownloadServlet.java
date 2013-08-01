@@ -3,6 +3,7 @@ package org.jbei.ice.server.servlet;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
 import org.apache.commons.io.IOUtils;
 
@@ -76,7 +78,7 @@ public class FileDownloadServlet extends HttpServlet {
         else if (ATTACHMENT_TYPE.equalsIgnoreCase(type))
             file = getAttachmentFile(account, fileId, response);
         else if (SBOL_VISUAL_TYPE.equalsIgnoreCase(type)) {
-            getSBOLVisualType(account, fileId, response);
+            getSBOLVisualType(fileId, response);
             return;
         }
 
@@ -100,8 +102,7 @@ public class FileDownloadServlet extends HttpServlet {
                 return null;
 
             response.setHeader("Content-Disposition", "attachment;filename=" + sequence.getFilename());
-            File file = controller.getFile(sequence);
-            return file;
+            return controller.getFile(sequence);
         } catch (ControllerException ce) {
             Logger.error("Error retrieving sequence trace file with id " + fileId + ". Details...");
             Logger.error(ce);
@@ -109,9 +110,18 @@ public class FileDownloadServlet extends HttpServlet {
         }
     }
 
-    private void getSBOLVisualType(Account account, String fileId, HttpServletResponse response) {
+    private void getSBOLVisualType(String fileId, HttpServletResponse response) {
         response.setContentType("image/png");
-        File file = new File(fileId);
+        String tmpDir;
+        try {
+            tmpDir = ControllerFactory.getConfigurationController().getPropertyValue(
+                    ConfigurationKey.TEMPORARY_DIRECTORY);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return;
+        }
+
+        File file = Paths.get(tmpDir, fileId).toFile();
         response.setContentLength((int) file.length());
         try {
             IOUtils.copy(new FileInputStream(file), response.getOutputStream());

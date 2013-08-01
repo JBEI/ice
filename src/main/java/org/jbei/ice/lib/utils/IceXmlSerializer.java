@@ -11,7 +11,6 @@ import java.util.TimeZone;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
@@ -20,14 +19,13 @@ import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -375,15 +373,14 @@ public class IceXmlSerializer {
      * @throws UtilityException
      */
     private static Element getExperimentElement(Entry entry) throws UtilityException {
-        String traceFilePath = Utils.getConfigValue(ConfigurationKey.TRACE_FILES_DIRECTORY);
-
+        SequenceAnalysisController controller = ControllerFactory.getSequenceAnalysisController();
         Element result = null;
         DefaultElement expElement = new DefaultElement(EXP, expNamespace);
         DefaultElement tracesElement = new DefaultElement(SEQUENCE_TRACES, expNamespace);
         List<TraceSequence> traces;
         try {
-            traces = TraceSequenceDAO.getByEntry(entry);
-        } catch (DAOException e) {
+            traces = controller.getTraceSequences(entry);
+        } catch (ControllerException e) {
             throw new UtilityException(e);
         }
 
@@ -394,15 +391,26 @@ public class IceXmlSerializer {
                 File traceFile;
                 String traceString;
                 try {
-                    traceFile = TraceSequenceDAO.getFile(new File(traceFilePath), trace);
-                    traceString = SerializationUtils
-                            .serializeBytesToBase64String(org.apache.commons.io.FileUtils
-                                                                               .readFileToByteArray(traceFile));
-                } catch (DAOException e) {
-                    // skip this one
-                    Logger.error("Could not read trace file " + trace.getFileId());
-                    continue;
-                } catch (IOException e) {
+                    traceFile = controller.getFile(trace);
+                    traceString = SerializationUtils.serializeBytesToBase64String(org.apache.commons.io.FileUtils
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                       .readFileToByteArray(
+                                                                                                               traceFile));
+                } catch (IOException | ControllerException e) {
                     // skip this one
                     Logger.error("Could not serialize trace file " + trace.getFileId());
                     continue;

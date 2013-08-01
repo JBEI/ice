@@ -52,8 +52,7 @@ public class SystemSettingPanel extends Composite implements IAdminPanel {
                                 ConfigurationKey.PASSWORD_CHANGE_ALLOWED,
                                 ConfigurationKey.PROJECT_NAME,
                                 ConfigurationKey.NEW_REGISTRATION_ALLOWED,
-                                ConfigurationKey.ATTACHMENTS_DIRECTORY,
-                                ConfigurationKey.TRACE_FILES_DIRECTORY,
+                                ConfigurationKey.DATA_DIRECTORY,
                                 ConfigurationKey.TEMPORARY_DIRECTORY,
                                 ConfigurationKey.DATABASE_SCHEMA_VERSION);
     }

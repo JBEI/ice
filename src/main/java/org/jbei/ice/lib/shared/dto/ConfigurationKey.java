@@ -19,8 +19,6 @@ public enum ConfigurationKey implements IDTOModel {
     DATABASE_SCHEMA_VERSION("", "", false),
     TEMPORARY_DIRECTORY("/tmp", "temp directory", true),
     DATA_DIRECTORY("data", "data directory", true),
-    ATTACHMENTS_DIRECTORY("data/attachments", "attachment directory", true),
-    TRACE_FILES_DIRECTORY("data/traces", "sequence trace file directory", true),
 
     SITE_SECRET("Site Secret", "", false),
     // deprecated. use the user account salt instead.
@@ -39,7 +37,6 @@ public enum ConfigurationKey implements IDTOModel {
     WIKILINK_PREFIX("jbei", "Wikilink Prefix", true),
 
     BLAST_INSTALL_DIR("blast-2.2.26/bin", "Blast installation", true),
-    BLAST_DIR("data", "Blast database location", true),
 
     NEW_REGISTRATION_ALLOWED("NO", "Allow user registration", true),
     PASSWORD_CHANGE_ALLOWED("YES", "allow password change", true),

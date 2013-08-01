@@ -1875,32 +1875,6 @@ td.datePickerMonth {
     width: 240px;
 }
 
-/* the panel itself  */
-.gwt-TabLayoutPanel {
-
-}
-
-/* the tab bar element  */
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabs {
-    font-size: 0.9em;
-}
-
-/* an individual tab */
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab {
-
-}
-
-/* an element nested in each tab (useful for styling)  */
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabInner {
-
-}
-
-/* applied to all child content widgets  */
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
-    border: 1px solid #cecece;
-    padding: 8px;
-}
-
 .profile_header {
     font-size: 0.85em;
     padding: 10px;
@@ -1988,6 +1962,7 @@ td.datePickerMonth {
     width: 180px;
     color: #0082C0;
     font-size: 0.80em;
+    background-color: #f1f1f1;
 }
 
 .profile_menu:hover, .entry_detail_submenu:hover {
@@ -2001,9 +1976,10 @@ td.datePickerMonth {
 }
 
 .entry_detail_submenu td:hover {
-    background-color: #f2f2f2;
+    background-color: #fcfcfc;
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
+    color: #9EC068;
 }
 
 .profile_menu .selected {
@@ -2035,6 +2011,7 @@ td.selected i.font-awesome {
     font-weight: bold;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
+    background-color: #fff;
 }
 
 .profile_menu td {
@@ -2174,6 +2151,11 @@ td.selected i.font-awesome {
     padding: 5px;
     cursor: pointer;
     background-color: #f1f1f1;
+}
+
+.permission_tab_inactive:hover {
+    color: #9EC068;
+    background-color: #fcfcfc;
 }
 
 .permission_list {
