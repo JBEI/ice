@@ -173,7 +173,7 @@ public class TipViewContentFactory {
         addField(table, 3, 0, "Creator", entry.getCreator(), "115px", "170px");
         addField(table, 4, 0, "Owner", entry.getOwner(), "115px", "170px");
         addField(table, 5, 0, "Links", entry.getLinks(), "115px", "170px");
-        addField(table, 6, 0, "Modified", generateDate(entry.getModificationTime()), "115px", "170px");
+        addField(table, 6, 0, "Modified", generateDate(new Date(entry.getModificationTime())), "115px", "170px");
         addField(table, 7, 0, "Keywords", entry.getKeywords(), "115px", "170px");
         addField(table, 8, 0, "References", entry.getReferences(), "115px", "170px");
         addField(table, 9, 0, "Bio Safety", "Level " + entry.getBioSafetyLevel(), "115px", "170px");

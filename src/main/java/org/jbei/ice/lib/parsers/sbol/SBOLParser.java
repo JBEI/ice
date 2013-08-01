@@ -1,5 +1,12 @@
 package org.jbei.ice.lib.parsers.sbol;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.jbei.ice.lib.composers.formatters.IceSequenceOntology;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -7,15 +14,15 @@ import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
-import org.sbolstandard.core.*;
-import org.sbolstandard.core.util.SBOLBaseVisitor;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import org.sbolstandard.core.DnaComponent;
+import org.sbolstandard.core.SBOLDocument;
+import org.sbolstandard.core.SBOLFactory;
+import org.sbolstandard.core.SBOLRootObject;
+import org.sbolstandard.core.SBOLValidationException;
+import org.sbolstandard.core.SequenceAnnotation;
+import org.sbolstandard.core.StrandType;
+import org.sbolstandard.core.util.SBOLBaseVisitor;
 
 /**
  * Parse SBOL (v 1.1) files that are imported by the user
@@ -43,9 +50,12 @@ public class SBOLParser extends AbstractParser {
             SBOLDocument document = SBOLFactory.read(new ByteArrayInputStream(textSequence.getBytes()));
             Visitor visitor = new Visitor();
 
-            // walk top level objects
+            // walk top level object
             for (SBOLRootObject rootObject : document.getContents()) {
                 rootObject.accept(visitor);
+
+                //TODO : ideal case is to create another entry and link to this one for each top level object
+                break;
             }
 
             return visitor.featuredDNASequence;
@@ -77,7 +87,6 @@ public class SBOLParser extends AbstractParser {
 
             List<SequenceAnnotation> annotations = component.getAnnotations();
             if (!annotations.isEmpty()) {
-
                 Collections.sort(annotations, new Comparator<SequenceAnnotation>() {
                     @Override
                     public int compare(SequenceAnnotation o1, SequenceAnnotation o2) {

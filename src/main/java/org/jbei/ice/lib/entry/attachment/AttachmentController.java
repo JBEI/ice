@@ -12,6 +12,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -67,15 +68,18 @@ public class AttachmentController {
     }
 
     /**
-     * Save attachment to the database and the disk.
+     * Save attachment to the database and the disk. Entry has to be a transferred entry (Visibility of 2)
+     * or the account must have write permissions to it
      *
-     * @param attachment
+     * @param account     account for user making request. Can be null if method is called as a result of a transfer
+     * @param attachment  attachment
      * @param inputStream The data stream of the file.
      * @return Saved attachment.
      * @throws ControllerException
      */
     public Attachment save(Account account, Attachment attachment, InputStream inputStream) throws ControllerException {
-        if (!hasWritePermission(account, attachment)) {
+        if (attachment.getEntry().getVisibility() != Visibility.TRANSFERRED.getValue() &&
+                !hasWritePermission(account, attachment)) {
             throw new ControllerException("No permissions to save attachment!");
         }
 

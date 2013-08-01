@@ -24,7 +24,6 @@ import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.EntrySelectionModel;
-import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.entry.display.EntryPresenter;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
@@ -134,7 +133,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         this.deleteHandler = new DeleteItemHandler(model.getService(), model.getEventBus(), display);
 
         // initialize all parameters
-        this.collectionsDataTable = new CollectionDataTable(new EntryTablePager(), createDelegate());
+        this.collectionsDataTable = new CollectionDataTable(createDelegate());
 
         this.folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, model.getService());
 

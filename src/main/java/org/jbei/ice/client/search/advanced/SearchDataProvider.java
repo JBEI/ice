@@ -132,7 +132,7 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
 
         // retrieve the first page of results and updateRowData
         final int rangeStart = 0;
-        int rangeEnd = range.getLength() > resultSize ? range.getLength() : resultSize;
+        int rangeEnd = range.getLength() > resultSize ? resultSize : range.getLength();
         updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
         dataTable.setPageStart(0);
     }

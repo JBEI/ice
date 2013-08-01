@@ -193,7 +193,7 @@ public interface RegistryService extends RemoteService {
     Long updateBulkUploadPreference(String sid, long bulkUploadId, EntryAddType addType, PreferenceInfo info)
             throws AuthenticationException;
 
-    void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites);
+    void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites) throws AuthenticationException;
 
     boolean deleteSample(String sessionId, PartSample part) throws AuthenticationException;
 
@@ -219,4 +219,6 @@ public interface RegistryService extends RemoteService {
     boolean setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException;
 
     ArrayList<AccessPermission> retrieveDefaultPermissions(String sid) throws AuthenticationException;
+
+    ArrayList<PartData> retrieveTransferredParts(String sessionId) throws AuthenticationException;
 }

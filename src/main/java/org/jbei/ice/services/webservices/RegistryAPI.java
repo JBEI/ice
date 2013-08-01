@@ -35,6 +35,7 @@ import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.PartTransfer;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 
 /**
@@ -1089,56 +1090,17 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     @Override
-    public boolean transmitEntries(@WebParam(name = "entrySequenceMap") HashMap<PartData, String> entrySequenceMap)
+    public boolean uploadParts(@WebParam(name = "partnerId") String partnerId,
+            @WebParam(name = "parts") ArrayList<PartTransfer> parts)
             throws ServiceException {
-//        Logger.info("Registry API: transmit entries");
-//        ConfigurationController configurationController = ControllerFactory.getConfigurationController();
-//        boolean isWebEnabled;
-//        try {
-//            String value = configurationController.getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-//            isWebEnabled = value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true");
-//        } catch (ControllerException ce) {
-//            throw new ServiceException(ce);
-//        }
-//
-//        if (!isWebEnabled)
+//        WoRController controller = ControllerFactory.getWebController();
+//        if( !controller.isWebEnabled() || !controller.isValidWebPartner(partnerId))
 //            return false;
-//
-//        EntryController controller = ControllerFactory.getEntryController();
-//        SequenceController sequenceController = ControllerFactory.getSequenceController();
-//
-//        // process entries
-//        for (Map.Entry<Entry, String> mapEntry : entrySequenceMap.entrySet()) {
-//            Entry entry = mapEntry.getKey();
-//
-//            try {
-//                entry = controller.recordEntry(entry, null);
-//            } catch (ControllerException e) {
-//                Logger.error(e);
-//                continue;
-//            }
-//
-//            String sequenceString = mapEntry.getValue();
-//            if (sequenceString != null) {
-//                IDNASequence dnaSequence = SequenceController.parse(sequenceString);
-//                if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
-//                    Logger.error("Couldn't parse sequence file!");
-//                }
-//
-//                try {
-//                    Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-//                    sequence.setSequenceUser(sequenceString);
-//                    sequence.setEntry(entry);
-//                    sequenceController.saveSequence(sequence);
-//                } catch (ControllerException e) {
-//                    Logger.error(e);
-//                }
-//            }
-//        }
+        // tODO : temporarily disabled the checked
 
-        // TODO
-
-        return true;
+        Logger.info("Registry API: transmit entries from ");
+        EntryController entryController = ControllerFactory.getEntryController();
+        return entryController.recordParts(parts);
     }
 
     /**

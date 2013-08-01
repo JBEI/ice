@@ -22,11 +22,10 @@ public class CollectionDataTable extends EntryDataTable<PartData> {
 
     private final EntryTablePager pager;
 
-    public CollectionDataTable(EntryTablePager pager, ServiceDelegate<PartData> delegate) {
+    public CollectionDataTable(ServiceDelegate<PartData> delegate) {
         super(delegate);
-        this.pager = pager;
-        if (pager != null)
-            pager.setDisplay(this);
+        this.pager = new EntryTablePager();
+        pager.setDisplay(this);
     }
 
     @Override

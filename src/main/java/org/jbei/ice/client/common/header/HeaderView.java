@@ -148,9 +148,8 @@ public class HeaderView extends Composite {
         Hyperlink logout = new Hyperlink("Log Out", Page.LOGOUT.getLink());
         loggedInContentsPanel.setWidget(0, 5, logout);
         loggedInContentsPanel.setHTML(0, 6, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
-        loggedInContentsPanel.setHTML(0, 7,
-                                      "<a href=\"https://public-registry.jbei.org/help.htm target=\"_blank\" " +
-                                              "\">Help</a>");
+        loggedInContentsPanel.setHTML(0, 7, "<a href=\"https://public-registry.jbei.org/help.htm \"target=_blank\">"
+                + "Help</a>");
 
         return loggedInContentsPanel;
     }

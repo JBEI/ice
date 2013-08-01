@@ -1,5 +1,6 @@
 package org.jbei.ice.client.common.table;
 
+import java.sql.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -218,7 +219,7 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
             @Override
             public String getValue(PartData object) {
                 DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("MMM d, yyyy");
-                return dateTimeFormat.format(object.getCreationTime());
+                return dateTimeFormat.format(new Date(object.getCreationTime()));
             }
         };
 

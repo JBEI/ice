@@ -9,6 +9,7 @@ import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.services.webservices.ServiceException;
@@ -25,6 +26,26 @@ public class WoRController {
 
     public WoRController() {
         dao = new RemotePartnerDAO();
+    }
+
+    public boolean isWebEnabled() {
+        try {
+            String value = ControllerFactory.getConfigurationController().getPropertyValue(
+                    ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
+            return "yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
+        } catch (ControllerException e) {
+            return false;
+        }
+    }
+
+    /**
+     * @param partnerId unique identifier for web partner
+     * @return true if partner identified by the id is determined to be a valid
+     *         web of registries partner for part transfer
+     */
+    public boolean isValidWebPartner(String partnerId) {
+        RemotePartner partner = dao.getByUrl(partnerId);
+        return partner != null && partner.getPartnerStatus() == RemotePartnerStatus.APPROVED;
     }
 
     public WebOfRegistries getRegistryPartners() throws ControllerException {

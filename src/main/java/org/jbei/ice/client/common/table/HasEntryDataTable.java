@@ -1,5 +1,6 @@
 package org.jbei.ice.client.common.table;
 
+import java.sql.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -213,7 +214,7 @@ public abstract class HasEntryDataTable<T extends HasEntryData> extends DataTabl
             public String getValue(HasEntryData object) {
 
                 DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
-                String value = format.format(object.getEntryInfo().getCreationTime());
+                String value = format.format(new Date(object.getEntryInfo().getCreationTime()));
                 if (value.length() >= 13)
                     value = (value.substring(0, 9) + "...");
                 return value;

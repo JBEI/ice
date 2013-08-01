@@ -124,6 +124,25 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<PartDa
         }
     }
 
+    public void reset() {
+        this.cachedEntries.clear();
+        this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
+
+        // reset sort
+        if (lastSortField == null) {
+            lastSortAsc = false;
+            lastSortField = ColumnField.CREATED;
+
+            this.table.getColumnSortList().clear();
+            DataTableColumn<PartData, ?> defaultSortField = this.table.getColumn(lastSortField);
+
+            if (defaultSortField != null) {
+                ColumnSortList.ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
+                this.table.getColumnSortList().push(info);
+            }
+        }
+    }
+
     /**
      * Determines if the sort params have changed and therefore warrants a
      * call to retrieve new data based on those params.

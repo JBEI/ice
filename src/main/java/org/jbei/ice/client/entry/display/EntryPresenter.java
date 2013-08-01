@@ -70,7 +70,8 @@ public class EntryPresenter extends AbstractPresenter {
         this.currentContext = context;
         this.model = new EntryModel(service, this.display, eventBus);
         display.getMenu().setSelectionHandler(new MenuSelectionHandler());
-        entryAddPresenter = new EntryAddPresenter(collectionsPresenter, EntryPresenter.this, service, eventBus);
+        if (collectionsPresenter != null)
+            entryAddPresenter = new EntryAddPresenter(collectionsPresenter, EntryPresenter.this, service, eventBus);
 
         setContextNavHandlers();
         showCurrentEntryView();
@@ -95,7 +96,8 @@ public class EntryPresenter extends AbstractPresenter {
 
                 formUpdate.addCancelHandler(new UpdateFormCancelHandler());
                 formUpdate.addSubmitHandler(new UpdateFormSubmitHandler(formUpdate));
-                formUpdate.setPreferences(entryAddPresenter.getPreferences());
+                if (entryAddPresenter != null)
+                    formUpdate.setPreferences(entryAddPresenter.getPreferences());
             }
         });
 

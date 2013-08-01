@@ -84,7 +84,9 @@ public class SheetPresenter {
             Collections.sort(info.getEntryList(), new Comparator<PartData>() {
                 @Override
                 public int compare(PartData o1, PartData o2) {
-                    return o1.getCreationTime().compareTo(o2.getCreationTime());
+                    long x = o1.getCreationTime();
+                    long y = o2.getCreationTime();
+                    return (x < y) ? -1 : ((x == y) ? 0 : 1);
                 }
             });
             for (int i = 0; i < info.getEntryList().size(); i += 1) {

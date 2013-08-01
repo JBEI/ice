@@ -296,7 +296,6 @@ public class BulkUploadController {
             Storage storage = sample.getStorage();
 
             while (storage != null) {
-
                 if (storage.getStorageType() == Storage.StorageType.SCHEME) {
                     partSample.setLocationId(storage.getId() + "");
                     partSample.setLocation(storage.getName());

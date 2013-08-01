@@ -20,7 +20,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
- * Panel Presenter for admin search  management
+ * Panel Presenter for admin search management
  *
  * @author Hector Plahar
  */

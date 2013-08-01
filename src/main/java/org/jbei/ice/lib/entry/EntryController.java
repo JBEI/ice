@@ -10,7 +10,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -18,29 +22,44 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.attachment.Attachment;
+import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Comment;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
+import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.PartAttachment;
+import org.jbei.ice.lib.vo.PartTransfer;
+import org.jbei.ice.server.InfoToModelFactory;
 import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.services.webservices.IRegistryAPI;
+import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.services.webservices.ServiceException;
 
 import org.apache.commons.io.IOUtils;
@@ -217,8 +236,6 @@ public class EntryController {
         if (entry.getBioSafetyLevel() == null)
             entry.setBioSafetyLevel(0);
 
-        entry.setModificationTime(entry.getCreationTime());
-
         try {
             entry = dao.saveEntry(entry);
         } catch (DAOException e) {
@@ -245,28 +262,146 @@ public class EntryController {
         return entry;
     }
 
-    public Entry recordEntry(Entry entry, ArrayList<AccessPermission> accessPermissions) throws ControllerException {
-        entry.setId(0);
-        entry.setPartNumber(getNextPartNumber());
+    public void transferEntries(Account account, ArrayList<Long> ids, ArrayList<String> sites)
+            throws ControllerException {
+        if (!ControllerFactory.getAccountController().isAdministrator(account))
+            return;
 
-        try {
-            entry = dao.saveEntry(entry);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        Logger.info(account.getEmail() + ": requesting transfer of " + ids.size() + " entries");
 
-        if (accessPermissions != null) {
-            for (AccessPermission accessPermission : accessPermissions) {
-                accessPermission.setTypeId(entry.getId());
-                permissionsController.addPermission(accountController.getSystemAccount(), accessPermission);
+        // retrieve entries
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
+        AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+        ArrayList<PartTransfer> parts = new ArrayList<>();
+
+        for (long id : ids) {
+            try {
+                PartData partData;
+                String sequenceString = null;
+                PartTransfer part = new PartTransfer();
+
+                try {
+                    Entry entry = dao.get(id);
+                    partData = ModelToInfoFactory.getInfo(entry);
+                    part.setPart(partData);
+                    Sequence sequence = sequenceController.getByEntry(entry);
+
+                    // this uses the uploaded file which contains the annotations. If there is none (or created with
+                    // vector editor) then the raw sequence is sent
+                    if (sequence != null) {
+                        sequenceString = sequence.getSequenceUser();
+                        if (sequenceString == null || sequenceString.isEmpty())
+                            sequenceString = sequence.getSequence();
+                    }
+
+                    part.setSequenceString(sequenceString);
+
+                    if (attachmentController.hasAttachment(entry)) {
+                        ArrayList<PartAttachment> attachments = new ArrayList<>();
+                        for (Attachment attachment : attachmentController.getByEntry(account, entry)) {
+                            PartAttachment partAttachment = new PartAttachment();
+                            partAttachment.setName(attachment.getFileName());
+                            partAttachment.setDescription(attachment.getDescription());
+
+                            DataSource source = new FileDataSource(attachmentController.getFile(account, attachment));
+                            partAttachment.setAttachmentData(new DataHandler(source));
+                            attachments.add(partAttachment);
+                        }
+                        part.setAttachments(attachments);
+                    }
+
+                } catch (DAOException | PermissionException e) {
+                    Logger.error(e);
+                    continue;
+                }
+
+                parts.add(part);
+            } catch (ControllerException e) {
+                Logger.error(e);
             }
         }
 
-        if (sequenceController.hasSequence(entry.getId())) {
-            ApplicationController.scheduleBlastIndexRebuildTask(true);
+        String siteUrl = ControllerFactory.getConfigurationController().getPropertyValue(ConfigurationKey.URI_PREFIX);
+
+        for (String url : sites) {
+            IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
+            if (api == null) {
+                Logger.error("Could not retrieve api for " + url + ". Transfer aborted");
+                continue;
+            }
+
+            try {
+                api.uploadParts(siteUrl, parts);
+            } catch (ServiceException e) {
+                Logger.error(e);
+            }
+        }
+    }
+
+    public boolean recordParts(ArrayList<PartTransfer> parts) {
+        if (parts == null)
+            return false;
+
+        try {
+            for (PartTransfer part : parts) {
+                Entry entry = InfoToModelFactory.infoToEntry(part.getPart());
+                entry.setVisibility(Visibility.TRANSFERRED.getValue());
+                entry.setPartNumber(getNextPartNumber());
+                if (entry.getRecordId() == null)
+                    entry.setRecordId(Utils.generateUUID());
+
+                if (entry.getVersionId() == null)
+                    entry.setVersionId(entry.getRecordId());
+
+                try {
+                    entry = dao.saveEntry(entry);
+                } catch (DAOException e) {
+                    Logger.error(e);
+                    continue;
+                }
+
+                // check attachments
+                if (part.getAttachments() != null && !part.getAttachments().isEmpty()) {
+                    for (PartAttachment partAttachment : part.getAttachments()) {
+                        DataHandler handler = partAttachment.getAttachmentData();
+                        Attachment attachment = new Attachment();
+                        attachment.setEntry(entry);
+                        attachment.setDescription(partAttachment.getDescription());
+                        attachment.setFileName(partAttachment.getName());
+                        AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+                        try {
+                            attachmentController.save(null, attachment, handler.getInputStream());
+                        } catch (IOException e) {
+                            Logger.error(e);
+                        }
+                    }
+                }
+
+                // check sequence
+                String sequenceString = part.getSequenceString();
+                if (sequenceString != null) {
+                    IDNASequence dnaSequence = SequenceController.parse(sequenceString);
+                    if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
+                        Logger.error("Couldn't parse sequence file!");
+                    }
+
+                    try {
+                        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+                        sequence.setSequenceUser(sequenceString);
+                        sequence.setEntry(entry);
+                        sequenceController.saveSequence(sequence);
+                        ApplicationController.scheduleBlastIndexRebuildTask(true);
+                    } catch (ControllerException e) {
+                        Logger.error(e);
+                    }
+                }
+            }
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
         }
 
-        return entry;
+        return true;
     }
 
     /**
@@ -451,17 +586,6 @@ public class EntryController {
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
         info.setHasOriginalSequence(hasOriginalSequence);
         return info;
-    }
-
-    public boolean entryPartNumberExists(Account account, String partNumber) throws ControllerException {
-        Entry entry;
-        try {
-            entry = dao.getByPartNumber(partNumber);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return entry != null && permissionsController.hasReadPermission(account, entry);
     }
 
     /**
@@ -782,43 +906,94 @@ public class EntryController {
 
     public PartData retrieveEntryDetails(Account account, long entryId) throws ControllerException {
         Entry entry = get(account, entryId);
-        PartData info = ModelToInfoFactory.getInfo(entry);
+        if (entry == null)
+            return null;
+
+        PartData partData = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
-        info.setHasSequence(hasSequence);
+        partData.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
-        info.setHasOriginalSequence(hasOriginalSequence);
+        partData.setHasOriginalSequence(hasOriginalSequence);
+
+        // attachments
+        ArrayList<Attachment> attachments = ControllerFactory.getAttachmentController().getByEntry(account, entry);
+        ArrayList<AttachmentInfo> attachmentInfos = ModelToInfoFactory.getAttachments(attachments);
+        partData.setAttachments(attachmentInfos);
+        partData.setHasAttachment(!attachmentInfos.isEmpty());
+
+        // samples
+        ArrayList<Sample> samples = ControllerFactory.getSampleController().getSamples(entry);
+        ArrayList<SampleStorage> sampleStorages = new ArrayList<>();
+        if (samples != null && !samples.isEmpty()) {
+            for (Sample sample : samples) {
+                SampleStorage sampleStorage = new SampleStorage();
+
+                // convert sample to info
+                PartSample partSample = new PartSample();
+                partSample.setCreationTime(sample.getCreationTime());
+                partSample.setLabel(sample.getLabel());
+                partSample.setNotes(sample.getNotes());
+                partSample.setDepositor(sample.getDepositor());
+                sampleStorage.setPartSample(partSample);
+
+                // convert sample to info
+                Storage storage = sample.getStorage();
+
+                while (storage != null) {
+                    if (storage.getStorageType() == Storage.StorageType.SCHEME) {
+                        partSample.setLocationId(storage.getId() + "");
+                        partSample.setLocation(storage.getName());
+                        break;
+                    }
+
+                    sampleStorage.getStorageList().add(ModelToInfoFactory.getStorageInfo(storage));
+                    storage = storage.getParent();
+                }
+                sampleStorages.add(sampleStorage);
+            }
+        }
+        partData.setSampleMap(sampleStorages);
+
+        // sequence analysis
+        try {
+            List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
+            partData.setSequenceAnalysis(ModelToInfoFactory.getSequenceAnalysis(sequences));
+        } catch (DAOException de) {
+            Logger.warn(de.getMessage());
+        }
 
         // comments
         ArrayList<Comment> comments = commentDAO.retrieveComments(entry);
         for (Comment comment : comments) {
-            info.getComments().add(Comment.toDTO(comment));
+            partData.getComments().add(Comment.toDTO(comment));
         }
 
         // permissions
-        info.setCanEdit(permissionsController.hasWritePermission(account, entry));
+        partData.setCanEdit(permissionsController.hasWritePermission(account, entry));
 
         // viewing permissions is restricted to users who have write access
-        if (info.isCanEdit()) {
+        if (partData.isCanEdit()) {
             try {
                 ArrayList<AccessPermission> accessPermissions = permissionsController.retrieveSetEntryPermissions(
                         account,
                         entry);
-                info.setAccessPermissions(accessPermissions);
+                partData.setAccessPermissions(accessPermissions);
             } catch (PermissionException e) {
                 Logger.error(e);
             }
         }
 
+        // retrieve cached pigeon image or generate and cache
         if (hasSequence) {
             Sequence sequence = sequenceController.getByEntry(entry);
             if (Paths.get(sequence.getFwdHash() + ".png").toFile().exists()) {
-                info.setSbolVisualURL(sequence.getFwdHash() + ".png");
+                partData.setSbolVisualURL(sequence.getFwdHash() + ".png");
             } else {
                 URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
                 if (uri != null) {
                     try {
                         IOUtils.copy(uri.toURL().openStream(), new FileOutputStream(sequence.getFwdHash() + ".png"));
-                        info.setSbolVisualURL(sequence.getFwdHash() + ".png");
+                        partData.setSbolVisualURL(sequence.getFwdHash() + ".png");
                     } catch (IOException e) {
                         Logger.error(e);
                     }
@@ -826,7 +1001,7 @@ public class EntryController {
             }
         }
 
-        return info;
+        return partData;
     }
 
     public boolean requestSample(Account account, long entryID, String form) {
@@ -902,6 +1077,25 @@ public class EntryController {
             Logger.info("Entry upgrade complete");
         } catch (DAOException e) {
             Logger.error(e);
+        }
+    }
+
+    public ArrayList<PartData> getTransferredParts(Account account) throws ControllerException {
+        if (account.getType() != AccountType.ADMIN)
+            return null;
+
+        try {
+            Set<Entry> entries = dao.retrieveTransferredEntries();
+            if (entries == null)
+                return null;
+
+            ArrayList<PartData> data = new ArrayList<>();
+            for (Entry entry : entries) {
+                data.add(ModelToInfoFactory.createTableViewData(entry, false));
+            }
+            return data;
+        } catch (DAOException e) {
+            throw new ControllerException(e);
         }
     }
 }

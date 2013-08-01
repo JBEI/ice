@@ -5,12 +5,9 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntryTablePager;
-import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 
-import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.Range;
@@ -146,23 +143,8 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
     }
 
     public void reset() {
-        this.cachedEntries.clear();
+        super.reset();
         details = null;
-        this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
-
-        // reset sort
-        if (lastSortField == null) {
-            lastSortAsc = false;
-            lastSortField = ColumnField.CREATED;
-
-            this.table.getColumnSortList().clear();
-            DataTableColumn<PartData, ?> defaultSortField = this.table.getColumn(lastSortField);
-
-            if (defaultSortField != null) {
-                ColumnSortList.ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
-                this.table.getColumnSortList().push(info);
-            }
-        }
     }
 
     public void setFolderData(FolderDetails details, boolean resetSort) {

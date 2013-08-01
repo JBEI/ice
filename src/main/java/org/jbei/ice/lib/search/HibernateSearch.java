@@ -539,11 +539,20 @@ public class HibernateSearch {
         Iterator<Object> iterator = result.iterator();
         HashSet<String> recordIds = new HashSet<>();
         while (iterator.hasNext()) {
-            Attachment attachment = (Attachment) iterator.next();
-            if (attachment.getEntry() == null)
+            Object object = iterator.next();
+            Entry entry = null;
+            if (clazz == Attachment.class) {
+                entry = ((Attachment) object).getEntry();
+            } else if (clazz == Sequence.class) {
+                entry = ((Sequence) object).getEntry();
+            } else if (clazz == Sample.class) {
+                entry = ((Sample) object).getEntry();
+            }
+
+            if (entry == null)
                 continue;
 
-            recordIds.add(attachment.getEntry().getRecordId());
+            recordIds.add(entry.getRecordId());
         }
         return recordIds;
     }

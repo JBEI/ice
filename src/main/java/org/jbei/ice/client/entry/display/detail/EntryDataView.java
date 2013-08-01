@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.display.detail;
 
+import java.util.Date;
+
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.BioSafetyOption;
@@ -109,7 +111,7 @@ public abstract class EntryDataView<T extends PartData> extends Composite {
         String bioSafety = (info.getBioSafetyLevel() == null || info.getBioSafetyLevel() <= 0) ? "" :
                 BioSafetyOption.enumValue(info.getBioSafetyLevel()).getValue();
         addShortField("Bio Safety Level", bioSafety);
-        addShortField("Modified", DateUtilities.formatDate(info.getModificationTime()));
+        addShortField("Modified", DateUtilities.formatDate(new Date(info.getModificationTime())));
     }
 
     /**

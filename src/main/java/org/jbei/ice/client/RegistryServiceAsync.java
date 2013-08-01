@@ -226,7 +226,8 @@ public interface RegistryServiceAsync {
 
     void removeAccountFromGroup(String sessionId, GroupInfo info, User account, AsyncCallback<Boolean> callback);
 
-    void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites, AsyncCallback<Void> callback);
+    void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites, AsyncCallback<Void> callback)
+            throws AuthenticationException;
 
     void deleteSample(String sessionId, PartSample part, AsyncCallback<Boolean> async);
 
@@ -249,5 +250,8 @@ public interface RegistryServiceAsync {
     void alertToEntryProblem(String sid, long entryID, String details, AsyncCallback<UserComment> callback);
 
     void setEnableWebOfRegistries(String sessionId, boolean value, AsyncCallback<Boolean> callback)
+            throws AuthenticationException;
+
+    void retrieveTransferredParts(String sessionId, AsyncCallback<ArrayList<PartData>> callback)
             throws AuthenticationException;
 }

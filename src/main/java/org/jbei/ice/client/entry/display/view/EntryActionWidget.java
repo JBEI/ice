@@ -75,6 +75,10 @@ public class EntryActionWidget extends Composite {
         flag = new HTML("<i class=\"" + FAIconType.WARNING_SIGN.getStyleName()
                                 + "\"></i> <span class=\"font-80em\">Alert</span>");
         flag.setStyleName("flag_icon");
+
+        String samplePanelHTML = "<b class=\"font-75em\" style=\"vertical-align: top\">Affected Samples</b> &nbsp;"
+                + "<span  id=\"sample_selection\"></span>";
+        samplePanel = new HTMLPanel(samplePanelHTML);
     }
 
     protected void addFlagClickHandler() {
@@ -87,9 +91,6 @@ public class EntryActionWidget extends Composite {
                 area.setCharacterWidth(70);
                 area.setVisibleLines(4);
 
-                String html = "<b class=\"font-75em\" style=\"vertical-align: top\">Affected Samples</b> &nbsp;"
-                        + "<span  id=\"sample_selection\"></span>";
-                samplePanel = new HTMLPanel(html);
                 samplePanel.add(sampleOptions, "sample_selection");
 
                 dialogLayout = new FlexTable();

@@ -1,7 +1,6 @@
 package org.jbei.ice.services.webservices;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -13,6 +12,7 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.PartTransfer;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 
 /**
@@ -131,7 +131,8 @@ public interface IRegistryAPI {
      * WARNING
      * This is experimental and should not be used under any circumstances by third party applications
      */
-    boolean transmitEntries(@WebParam(name = "entrySequenceMap") HashMap<PartData, String> entrySequenceMap)
+    boolean uploadParts(@WebParam(name = "partnerId") String partnerId, @WebParam(
+            name = "parts") ArrayList<PartTransfer> parts)
             throws ServiceException;
 
     PartData retrieveStrainForSampleBarcode(@WebParam(name = "sessionId") String sessionId,

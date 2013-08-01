@@ -35,13 +35,13 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
 //        });
 
         results.addAll(data);
-        resultSize = data.size();  // todo : need a blastResult object as a wrapper
+        resultSize = data.size();  // TODO : need a blastResult object as a wrapper
         updateRowCount(resultSize, true);
 
         // retrieve the first page of results and updateRowData
         final Range range = this.dataTable.getVisibleRange();
         final int rangeStart = 0;
-        int rangeEnd = range.getLength() > resultSize ? range.getLength() : resultSize;
+        int rangeEnd = range.getLength() > resultSize ? resultSize : range.getLength();
         updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
         dataTable.setPageStart(0);
     }
