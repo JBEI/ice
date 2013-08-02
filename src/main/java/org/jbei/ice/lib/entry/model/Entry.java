@@ -31,11 +31,6 @@ import org.jbei.ice.lib.entry.model.Parameter;
  * Entry class represent the unique handle for each record in the system. It provides the common fields, such as the
  * recordId (uuid), timestamps, owner and creator information, etc.
  * <p/>
- * Many of the fields accept mediawiki style linking tags. For example, "[[jbei:JBx_000001|Descriptive Name]]" will
- * automatically generate a clickable link to the part JBx_000001 with text "Descriptive Name". The wiki link prefix
- * (jbei:) in this case can be configured in the configuration file. In the future, links to other registries can be
- * specified via the configuration, similar to other mediawiki links.
- * <p/>
  * Description of Entry fields:
  * <p/>
  * <ul> <li><b>id:</b> database id of an entry.</li> <li><b>recordId:</b> 36 character globally unique identifier.
