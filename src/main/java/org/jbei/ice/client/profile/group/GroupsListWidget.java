@@ -9,8 +9,8 @@ import org.jbei.ice.client.admin.group.GroupMembersWidget;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.profile.group.widget.CreateGroupCell;
 import org.jbei.ice.client.profile.group.widget.EditGroupCell;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -37,10 +37,10 @@ public class GroupsListWidget extends Composite {
     private final GroupAddMembersWidget addMembersWidget;
     private final GroupAddMembersWidget createGroupMembersWidget;
     private final CreateGroupCell newGroupCell;
-    private ServiceDelegate<GroupInfo> deleteGroupDelegate;
-    private ServiceDelegate<GroupInfo> editGroupDelegate;
+    private ServiceDelegate<UserGroup> deleteGroupDelegate;
+    private ServiceDelegate<UserGroup> editGroupDelegate;
     private ServiceDelegate<String> emailVerifierDelegate;
-    private ServiceDelegate<GroupInfo> retrieveMembersDelegate;
+    private ServiceDelegate<UserGroup> retrieveMembersDelegate;
     private Mode mode;
 
     public GroupsListWidget() {
@@ -133,7 +133,7 @@ public class GroupsListWidget extends Composite {
             createGroupMembersWidget.addVerifiedMember(user);
     }
 
-    public void setDeleteGroupDelegate(ServiceDelegate<GroupInfo> deleteGroupDelegate) {
+    public void setDeleteGroupDelegate(ServiceDelegate<UserGroup> deleteGroupDelegate) {
         this.deleteGroupDelegate = deleteGroupDelegate;
     }
 
@@ -141,7 +141,7 @@ public class GroupsListWidget extends Composite {
         groupMembers.setDeleteMemberDelegate(deleteGroupMemberDelegate);
     }
 
-    public void setEditGroupDelegate(ServiceDelegate<GroupInfo> editGroupDelegate) {
+    public void setEditGroupDelegate(ServiceDelegate<UserGroup> editGroupDelegate) {
         this.editGroupDelegate = editGroupDelegate;
     }
 
@@ -189,7 +189,7 @@ public class GroupsListWidget extends Composite {
         createGroupMembersWidget.setSaveHandler(handler);
     }
 
-    public GroupInfo getGroupSelection(ClickEvent event) {
+    public UserGroup getGroupSelection(ClickEvent event) {
         if (newGroupCell.isVisible())
             return null;
 
@@ -205,7 +205,7 @@ public class GroupsListWidget extends Composite {
         Widget widget = groupList.getWidget(cell.getRowIndex(), cell.getCellIndex());
         if (!(widget instanceof Cell))
             return null;
-        return ((Cell) widget).getInfo();
+        return ((Cell) widget).getUser();
     }
 
     public void setAvailableAccounts(ArrayList<User> available) {
@@ -220,7 +220,7 @@ public class GroupsListWidget extends Composite {
         addMembersWidget.setAvailableAccounts(available);
     }
 
-    public void setGroupMembers(GroupInfo info, ArrayList<User> members) {
+    public void setGroupMembers(UserGroup user, ArrayList<User> members) {
         if (mode == null || mode == Mode.VIEW_GROUP_LIST || mode == Mode.VIEW_GROUP_MEMBERS) {
             groupMembers.setMemberList(members);
             groupMembers.setVisible(true);
@@ -235,8 +235,8 @@ public class GroupsListWidget extends Composite {
 
                 Cell cell = (Cell) widget;
 
-                if (info.getId() == cell.getInfo().getId()) {
-                    cell.updateGroupCount(info.getMemberCount());
+                if (user.getId() == cell.getUser().getId()) {
+                    cell.updateGroupCount(user.getMemberCount());
                     return;
                 }
             }
@@ -245,7 +245,7 @@ public class GroupsListWidget extends Composite {
         }
     }
 
-    public void setSelectionHandler(ServiceDelegate<GroupInfo> delegate) {
+    public void setSelectionHandler(ServiceDelegate<UserGroup> delegate) {
         if (delegate == null)
             return;
 
@@ -255,13 +255,13 @@ public class GroupsListWidget extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 mode = Mode.VIEW_GROUP_MEMBERS;
-                GroupInfo info = getGroupSelection(event);
-                retrieveMembersDelegate.execute(info);
+                UserGroup user = getGroupSelection(event);
+                retrieveMembersDelegate.execute(user);
             }
         });
     }
 
-    public void setGroupList(ArrayList<GroupInfo> list) {
+    public void setGroupList(ArrayList<UserGroup> list) {
         groupMembers.setMemberList(new ArrayList<User>());  // reset
         groupMembers.setVisible(false);
 
@@ -272,23 +272,23 @@ public class GroupsListWidget extends Composite {
         }
     }
 
-    public void addGroup(GroupInfo info) {
+    public void addGroup(UserGroup user) {
         groupMembers.setMemberList(new ArrayList<User>());  // reset
         groupMembers.setVisible(false);
 
-        Cell cell = new Cell(info);
+        Cell cell = new Cell(user);
         int row = groupList.getRowCount();
         groupList.setWidget(row, 0, cell);
         groupList.getFlexCellFormatter().setStyleName(row, 0, "group_info_td");
     }
 
-    public void removeGroup(GroupInfo info) {
+    public void removeGroup(UserGroup user) {
         for (int i = 0; i < groupList.getRowCount(); i += 1) {
             Widget widget = groupList.getWidget(i, 0);
             if (!(widget instanceof Cell))
                 continue;
 
-            if (info.getId() == ((Cell) widget).getInfo().getId()) {
+            if (user.getId() == ((Cell) widget).getUser().getId()) {
                 groupList.removeRow(i);
                 return;
             }
@@ -314,23 +314,23 @@ public class GroupsListWidget extends Composite {
         }
     }
 
-    public GroupInfo getNewGroup(GroupType type) {
-        GroupInfo info = new GroupInfo();
+    public UserGroup getNewGroup(GroupType type) {
+        UserGroup user = new UserGroup();
         if (!newGroupCell.validate())
             return null;
 
-        info.setType(type);
-        info.setDescription(newGroupCell.getGroupDescription());
-        info.setLabel(newGroupCell.getGroupName());
-        info.setMembers(createGroupMembersWidget.getSelectedMembers());
-        return info;
+        user.setType(type);
+        user.setDescription(newGroupCell.getGroupDescription());
+        user.setLabel(newGroupCell.getGroupName());
+        user.setMembers(createGroupMembersWidget.getSelectedMembers());
+        return user;
     }
 
     public void setVerifyUserEmailDelegate(ServiceDelegate<String> serviceDelegate) {
         emailVerifierDelegate = serviceDelegate;
     }
 
-    public void removeGroupMember(GroupInfo group, User info) {
+    public void removeGroupMember(UserGroup userGroup, User info) {
         for (int i = 0; i < groupList.getRowCount(); i += 1) {
             Widget widget = groupList.getWidget(i, 0);
             if (!(widget instanceof Cell))
@@ -338,8 +338,8 @@ public class GroupsListWidget extends Composite {
 
             Cell groupCell = (Cell) widget;
 
-            if (group.getId() == groupCell.getInfo().getId()) {
-                groupCell.updateGroupCount(group.getMemberCount());
+            if (userGroup.getId() == groupCell.getUser().getId()) {
+                groupCell.updateGroupCount(userGroup.getMemberCount());
                 groupMembers.removeMember(info);
                 return;
             }
@@ -355,26 +355,26 @@ public class GroupsListWidget extends Composite {
 
     private class Cell extends Composite {
 
-        private final GroupInfo info;
+        private final UserGroup user;
         private final HTML addUser;
         private final HTML editGroup;
         private final HTML deleteGroup;
         private FlexTable panel;
 
-        public Cell(GroupInfo info) {
-            this.info = info;
+        public Cell(UserGroup user) {
+            this.user = user;
             panel = new FlexTable();
             panel.setWidth("100%");
             panel.setCellPadding(0);
             panel.setCellSpacing(0);
 
             initWidget(panel);
-            String desc = info.getDescription().isEmpty() ? "No description" : info.getDescription();
+            String desc = user.getDescription().isEmpty() ? "No description" : user.getDescription();
 
             HTMLPanel htmlPanel = new HTMLPanel(
-                    "<span id=\"" + info.getUuid() + "\"></span> <b>" + info.getLabel() + "</b>"
+                    "<span id=\"" + user.getUuid() + "\"></span> <b>" + user.getLabel() + "</b>"
                             + "<br><span style=\"color: #777; font-size: 10px; top: -5px; position: relative;\">"
-                            + desc + " | <b style=\"color: #222\">" + info.getMemberCount() + "</b> members</span>");
+                            + desc + " | <b style=\"color: #222\">" + user.getMemberCount() + "</b> members</span>");
             this.panel.setWidget(0, 0, htmlPanel);
             this.panel.getFlexCellFormatter().setWidth(0, 0, "300px");
 
@@ -413,17 +413,17 @@ public class GroupsListWidget extends Composite {
         }
 
         public void updateGroupCount(long newCount) {
-            info.setMemberCount(newCount);
-            String desc = info.getDescription().isEmpty() ? "No description" : info.getDescription();
+            user.setMemberCount(newCount);
+            String desc = user.getDescription().isEmpty() ? "No description" : user.getDescription();
             HTMLPanel htmlPanel = new HTMLPanel(
-                    "<span id=\"" + info.getUuid() + "\"></span> <b>" + info.getLabel() + "</b>"
+                    "<span id=\"" + user.getUuid() + "\"></span> <b>" + user.getLabel() + "</b>"
                             + "<br><span style=\"color: #777; font-size: 10px; top: -5px; position: relative;\">"
-                            + desc + " | <b style=\"color: #222\">" + info.getMemberCount() + "</b> members</span>");
+                            + desc + " | <b style=\"color: #222\">" + user.getMemberCount() + "</b> members</span>");
             this.panel.setWidget(0, 0, htmlPanel);
         }
 
-        public GroupInfo getInfo() {
-            return info;
+        public UserGroup getUser() {
+            return user;
         }
 
         protected void setClickHandlers() {
@@ -442,7 +442,7 @@ public class GroupsListWidget extends Composite {
                     // get current cell
                     final Cell widget = (Cell) groupList.getWidget(cell.getRowIndex(), cell.getCellIndex());
                     // retrieve the existing group members
-                    retrieveMembersDelegate.execute(widget.getInfo());
+                    retrieveMembersDelegate.execute(widget.getUser());
                     // highlight current selection and hide all others
                     setSelected(cell.getRowIndex(), false);
                     // hide ??
@@ -468,7 +468,7 @@ public class GroupsListWidget extends Composite {
 
                     layout.getFlexCellFormatter().setVisible(0, 1, false);
                     final Cell widget = (Cell) groupList.getWidget(cell.getRowIndex(), cell.getCellIndex());
-                    final EditGroupCell editGroupCell = new EditGroupCell(widget.getInfo());
+                    final EditGroupCell editGroupCell = new EditGroupCell(widget.getUser());
                     groupList.setWidget(cell.getRowIndex(), cell.getCellIndex(), editGroupCell);
 
                     editGroupCell.addCancelHandler(new ClickHandler() {
@@ -512,7 +512,7 @@ public class GroupsListWidget extends Composite {
                     if (!Window.confirm("This action cannot be undone. Continue?"))
                         return;
 
-                    deleteGroupDelegate.execute(widget.getInfo());
+                    deleteGroupDelegate.execute(widget.getUser());
                 }
             });
         }

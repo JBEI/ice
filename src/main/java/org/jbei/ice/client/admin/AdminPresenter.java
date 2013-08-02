@@ -15,8 +15,8 @@ import org.jbei.ice.client.admin.web.WebOfRegistriesPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -99,15 +99,15 @@ public class AdminPresenter extends AbstractPresenter {
 
     // GROUPS
     private void retrieveGroups() {
-        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+        new IceAsyncCallback<ArrayList<UserGroup>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<ArrayList<UserGroup>> callback) throws AuthenticationException {
                 service.retrieveGroups(ClientController.sessionId, GroupType.PUBLIC, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<GroupInfo> result) {
+            public void onSuccess(ArrayList<UserGroup> result) {
                 if (result == null || currentOption != AdminOption.GROUPS)
                     return;
 

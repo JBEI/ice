@@ -11,7 +11,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.PanelPresenter;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.core.shared.GWT;
@@ -26,7 +26,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class UserGroupPresenter extends PanelPresenter {
 
     private final UserGroupPanel groupPanel;
-    private GroupInfo currentGroup;
+    private UserGroup currentUserGroup;
 
     public UserGroupPresenter(final RegistryServiceAsync service, HandlerManager eventBus) {
         super(service, eventBus);
@@ -48,24 +48,24 @@ public class UserGroupPresenter extends PanelPresenter {
         return groupPanel;
     }
 
-    public void setGroups(ArrayList<GroupInfo> result) {
+    public void setGroups(ArrayList<UserGroup> result) {
         groupPanel.displayGroups(result);
     }
 
     public void addGroupDeleteDelegate() {
-        groupPanel.setDeleteGroupDelegate(new ServiceDelegate<GroupInfo>() {
+        groupPanel.setDeleteGroupDelegate(new ServiceDelegate<UserGroup>() {
 
             @Override
-            public void execute(final GroupInfo groupInfo) {
-                new IceAsyncCallback<GroupInfo>() {
+            public void execute(final UserGroup userGroup) {
+                new IceAsyncCallback<UserGroup>() {
 
                     @Override
-                    protected void callService(AsyncCallback<GroupInfo> callback) throws AuthenticationException {
-                        service.deleteGroup(ClientController.sessionId, groupInfo, callback);
+                    protected void callService(AsyncCallback<UserGroup> callback) throws AuthenticationException {
+                        service.deleteGroup(ClientController.sessionId, userGroup, callback);
                     }
 
                     @Override
-                    public void onSuccess(GroupInfo result) {
+                    public void onSuccess(UserGroup result) {
                         groupPanel.removeGroup(result);
                     }
                 }.go(eventBus);
@@ -82,14 +82,14 @@ public class UserGroupPresenter extends PanelPresenter {
 
                     @Override
                     protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        service.removeAccountFromGroup(ClientController.sessionId, currentGroup, info, callback);
+                        service.removeAccountFromGroup(ClientController.sessionId, currentUserGroup, info, callback);
                     }
 
                     @Override
                     public void onSuccess(Boolean result) {
                         if (result.booleanValue()) {
-                            currentGroup.setMemberCount(currentGroup.getMemberCount() - 1);
-                            groupPanel.removeGroupMember(currentGroup, info);
+                            currentUserGroup.setMemberCount(currentUserGroup.getMemberCount() - 1);
+                            groupPanel.removeGroupMember(currentUserGroup, info);
                         }
                         // else show error msg
                     }
@@ -125,19 +125,19 @@ public class UserGroupPresenter extends PanelPresenter {
     }
 
     private void addGroupUpdateDelegate() {
-        groupPanel.setUpdateGroupDelegate(new ServiceDelegate<GroupInfo>() {
+        groupPanel.setUpdateGroupDelegate(new ServiceDelegate<UserGroup>() {
 
             @Override
-            public void execute(final GroupInfo groupInfo) {
-                new IceAsyncCallback<GroupInfo>() {
+            public void execute(final UserGroup userGroup) {
+                new IceAsyncCallback<UserGroup>() {
 
                     @Override
-                    protected void callService(AsyncCallback<GroupInfo> callback) throws AuthenticationException {
-                        service.updateGroup(ClientController.sessionId, groupInfo, callback);
+                    protected void callService(AsyncCallback<UserGroup> callback) throws AuthenticationException {
+                        service.updateGroup(ClientController.sessionId, userGroup, callback);
                     }
 
                     @Override
-                    public void onSuccess(GroupInfo result) {
+                    public void onSuccess(UserGroup result) {
                     }
                 }.go(eventBus);
             }
@@ -153,13 +153,14 @@ public class UserGroupPresenter extends PanelPresenter {
                 if (selectedMembers.isEmpty())
                     return;
 
-                GWT.log(selectedMembers.size() + " members selected for group " + currentGroup.getLabel());
+                GWT.log(selectedMembers.size() + " members selected for group " + currentUserGroup.getLabel());
                 new IceAsyncCallback<ArrayList<User>>() {
 
                     @Override
                     protected void callService(AsyncCallback<ArrayList<User>> callback)
                             throws AuthenticationException {
-                        service.setGroupMembers(ClientController.sessionId, currentGroup, selectedMembers, callback);
+                        service.setGroupMembers(ClientController.sessionId, currentUserGroup, selectedMembers,
+                                                callback);
                     }
 
                     @Override
@@ -171,8 +172,8 @@ public class UserGroupPresenter extends PanelPresenter {
                                 return o1.getFullName().compareTo(o2.getFullName());
                             }
                         });
-                        currentGroup.setMembers(result);
-                        groupPanel.setGroupMembers(currentGroup, result);
+                        currentUserGroup.setMembers(result);
+                        groupPanel.setGroupMembers(currentUserGroup, result);
                     }
                 }.go(eventBus);
             }
@@ -184,20 +185,20 @@ public class UserGroupPresenter extends PanelPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                final GroupInfo info = groupPanel.getNewGroup();
-                if (info == null)
+                final UserGroup user = groupPanel.getNewGroup();
+                if (user == null)
                     return;
 
                 // save new group
-                new IceAsyncCallback<GroupInfo>() {
+                new IceAsyncCallback<UserGroup>() {
 
                     @Override
-                    protected void callService(AsyncCallback<GroupInfo> callback) throws AuthenticationException {
-                        service.createNewGroup(ClientController.sessionId, info, callback);
+                    protected void callService(AsyncCallback<UserGroup> callback) throws AuthenticationException {
+                        service.createNewGroup(ClientController.sessionId, user, callback);
                     }
 
                     @Override
-                    public void onSuccess(GroupInfo result) {
+                    public void onSuccess(UserGroup result) {
                         groupPanel.addGroupDisplay(result);
                         groupPanel.setCreateGroupVisibility(false);
                     }
@@ -207,25 +208,25 @@ public class UserGroupPresenter extends PanelPresenter {
     }
 
     private void addGroupSelectionHandler() {
-        this.groupPanel.setGroupSelectionHandler(new ServiceDelegate<GroupInfo>() {
+        this.groupPanel.setGroupSelectionHandler(new ServiceDelegate<UserGroup>() {
 
             @Override
-            public void execute(GroupInfo groupInfo) {
-                if (groupInfo == null)
+            public void execute(UserGroup userGroup) {
+                if (userGroup == null)
                     return;
 
-                currentGroup = groupInfo;
-                retrieveGroupMembers(groupInfo);
+                currentUserGroup = userGroup;
+                retrieveGroupMembers(userGroup);
             }
         });
     }
 
-    protected void retrieveGroupMembers(final GroupInfo info) {
+    protected void retrieveGroupMembers(final UserGroup user) {
         new IceAsyncCallback<ArrayList<User>>() {
 
             @Override
             protected void callService(AsyncCallback<ArrayList<User>> callback) throws AuthenticationException {
-                service.retrieveGroupMembers(ClientController.sessionId, info, callback);
+                service.retrieveGroupMembers(ClientController.sessionId, user, callback);
             }
 
             @Override
@@ -237,11 +238,11 @@ public class UserGroupPresenter extends PanelPresenter {
                     }
                 });
 
-                if (!currentGroup.getUuid().equalsIgnoreCase(info.getUuid()))
+                if (!currentUserGroup.getUuid().equalsIgnoreCase(user.getUuid()))
                     return;
 
-                currentGroup.setMembers(result);
-                groupPanel.setGroupMembers(currentGroup, result);
+                currentUserGroup.setMembers(result);
+                groupPanel.setGroupMembers(currentUserGroup, result);
             }
         }.go(eventBus);
     }

@@ -10,8 +10,8 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.user.AccountType;
@@ -57,7 +57,7 @@ public class MessageController {
      * @throws ControllerException
      */
     public void sendMessage(Account sender, MessageInfo info) throws ControllerException {
-        if (info == null || info.getAccounts().isEmpty() && info.getGroups().isEmpty())
+        if (info == null || info.getAccounts().isEmpty() && info.getUserGroups().isEmpty())
             throw new ControllerException("Cannot send message");
 
         Message message = new Message();
@@ -77,9 +77,9 @@ public class MessageController {
             }
         }
 
-        if (info.getGroups() != null) {
-            for (GroupInfo groupInfo : info.getGroups()) {
-                Group group = ControllerFactory.getGroupController().getGroupById(groupInfo.getId());
+        if (info.getUserGroups() != null) {
+            for (UserGroup userGroup : info.getUserGroups()) {
+                Group group = ControllerFactory.getGroupController().getGroupById(userGroup.getId());
                 if (group == null) {
                     continue; // TODO : send message to sender
                 }

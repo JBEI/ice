@@ -20,8 +20,8 @@ import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
@@ -129,7 +129,7 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<BulkUploadInfo> retrieveDraftsPendingVerification(String sid) throws AuthenticationException;
 
-    ArrayList<GroupInfo> retrieveGroups(String sid, GroupType type) throws AuthenticationException;
+    ArrayList<UserGroup> retrieveGroups(String sid, GroupType type) throws AuthenticationException;
 
     boolean deleteEntryAttachment(String sid, String fileId) throws AuthenticationException;
 
@@ -145,14 +145,14 @@ public interface RegistryService extends RemoteService {
 
     HashMap<String, String> retrieveSystemSettings(String sid) throws AuthenticationException;
 
-    ArrayList<User> retrieveGroupMembers(String sessionId, GroupInfo info) throws AuthenticationException;
+    ArrayList<User> retrieveGroupMembers(String sessionId, UserGroup user) throws AuthenticationException;
 
-    ArrayList<User> setGroupMembers(String sessionId, GroupInfo info, ArrayList<User> members)
+    ArrayList<User> setGroupMembers(String sessionId, UserGroup user, ArrayList<User> members)
             throws AuthenticationException;
 
     Boolean setConfigurationSetting(String sid, ConfigurationKey key, String value);
 
-    GroupInfo createNewGroup(String sessionId, GroupInfo info) throws AuthenticationException;
+    UserGroup createNewGroup(String sessionId, UserGroup user) throws AuthenticationException;
 
     boolean revertedSubmittedBulkUpload(String sid, long uploadId) throws AuthenticationException;
 
@@ -182,11 +182,11 @@ public interface RegistryService extends RemoteService {
 
     boolean setBulkUploadDraftName(String sid, long id, String draftName) throws AuthenticationException;
 
-    GroupInfo updateGroup(String sessionId, GroupInfo info) throws AuthenticationException;
+    UserGroup updateGroup(String sessionId, UserGroup user) throws AuthenticationException;
 
-    GroupInfo deleteGroup(String sessionId, GroupInfo info) throws AuthenticationException;
+    UserGroup deleteGroup(String sessionId, UserGroup user) throws AuthenticationException;
 
-    boolean removeAccountFromGroup(String sid, GroupInfo info, User account) throws AuthenticationException;
+    boolean removeAccountFromGroup(String sid, UserGroup user, User account) throws AuthenticationException;
 
     BulkUploadAutoUpdate autoUpdateBulkUpload(String sid, BulkUploadAutoUpdate wrapper, EntryAddType addType)
             throws AuthenticationException;
@@ -198,7 +198,7 @@ public interface RegistryService extends RemoteService {
 
     boolean deleteSample(String sessionId, PartSample part) throws AuthenticationException;
 
-    ArrayList<GroupInfo> retrieveUserGroups(String sessionId) throws AuthenticationException;
+    ArrayList<UserGroup> retrieveUserGroups(String sessionId) throws AuthenticationException;
 
     Long updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
             ArrayList<AccessPermission> accessPermissions) throws AuthenticationException;

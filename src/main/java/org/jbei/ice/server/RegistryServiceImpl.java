@@ -68,8 +68,8 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
@@ -216,46 +216,46 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public GroupInfo createNewGroup(String sessionId, GroupInfo info) throws AuthenticationException {
+    public UserGroup createNewGroup(String sessionId, UserGroup user) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
-            return ControllerFactory.getGroupController().createGroup(account, info);
+            return ControllerFactory.getGroupController().createGroup(account, user);
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public GroupInfo updateGroup(String sessionId, GroupInfo info) throws AuthenticationException {
+    public UserGroup updateGroup(String sessionId, UserGroup user) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        Logger.info(account.getEmail() + ": updating group " + info.getId());
-        if (info.getType() == null)
-            info.setType(GroupType.PRIVATE);
+        Logger.info(account.getEmail() + ": updating group " + user.getId());
+        if (user.getType() == null)
+            user.setType(GroupType.PRIVATE);
 
         try {
-            return ControllerFactory.getGroupController().updateGroup(account, info);
+            return ControllerFactory.getGroupController().updateGroup(account, user);
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public GroupInfo deleteGroup(String sessionId, GroupInfo info) throws AuthenticationException {
+    public UserGroup deleteGroup(String sessionId, UserGroup user) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        Logger.info(account.getEmail() + ": deleting group " + info.getId());
+        Logger.info(account.getEmail() + ": deleting group " + user.getId());
         GroupController controller = ControllerFactory.getGroupController();
-        if (info.getType() == null)
-            info.setType(GroupType.PRIVATE);
+        if (user.getType() == null)
+            user.setType(GroupType.PRIVATE);
 
         try {
-            return controller.deleteGroup(account, info);
+            return controller.deleteGroup(account, user);
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public boolean removeAccountFromGroup(String sessionId, GroupInfo info, User user)
+    public boolean removeAccountFromGroup(String sessionId, UserGroup info, User user)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
         Logger.info(account.getEmail() + ": removing \"" + user.getEmail() + "\" from group " + info.getId());
@@ -1056,20 +1056,20 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<User> retrieveGroupMembers(String sessionId, GroupInfo info)
+    public ArrayList<User> retrieveGroupMembers(String sessionId, UserGroup user)
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + " retrieving members for group " + info.getLabel());
+            Logger.info(account.getEmail() + " retrieving members for group " + user.getLabel());
             GroupController controller = ControllerFactory.getGroupController();
-            return controller.retrieveGroupMembers(info.getUuid());
+            return controller.retrieveGroupMembers(user.getUuid());
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public ArrayList<GroupInfo> retrieveUserGroups(String sessionId) throws AuthenticationException {
+    public ArrayList<UserGroup> retrieveUserGroups(String sessionId) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": retrieving user groups");
@@ -1080,13 +1080,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<User> setGroupMembers(String sessionId, GroupInfo info, ArrayList<User> members)
+    public ArrayList<User> setGroupMembers(String sessionId, UserGroup user, ArrayList<User> members)
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + ": adding " + members.size() + " members to group " + info.getId());
+            Logger.info(account.getEmail() + ": adding " + members.size() + " members to group " + user.getId());
             GroupController groupController = ControllerFactory.getGroupController();
-            return groupController.setGroupMembers(account, info, members);
+            return groupController.setGroupMembers(account, user, members);
         } catch (ControllerException ce) {
             return null;
         }
@@ -1561,7 +1561,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<GroupInfo> retrieveGroups(String sid, GroupType type) throws AuthenticationException {
+    public ArrayList<UserGroup> retrieveGroups(String sid, GroupType type) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": retrieving " + type.toString() + " groups");
         GroupController controller = ControllerFactory.getGroupController();

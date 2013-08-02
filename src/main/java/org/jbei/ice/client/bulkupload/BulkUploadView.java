@@ -22,7 +22,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -192,7 +192,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setPermissionDelegate(ServiceDelegate<Set<GroupInfo>> handler) {
+    public void setPermissionDelegate(ServiceDelegate<Set<UserGroup>> handler) {
         selection.setPermissionUpdateDelegate(handler);
     }
 
@@ -220,8 +220,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setPermissionGroups(ArrayList<GroupInfo> groups) {
-        selection.setData(groups);
+    public void setPermissionGroups(ArrayList<UserGroup> userGroups) {
+        selection.setData(userGroups);
     }
 
     @Override

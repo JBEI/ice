@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.profile.group.GroupsListWidget;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -71,11 +71,11 @@ public abstract class GroupPanel extends Composite {
         groupsWidget.setDeleteGroupMemberDelegate(deleteDelegate);
     }
 
-    public void setDeleteGroupDelegate(ServiceDelegate<GroupInfo> deleteGroupDelegate) {
+    public void setDeleteGroupDelegate(ServiceDelegate<UserGroup> deleteGroupDelegate) {
         groupsWidget.setDeleteGroupDelegate(deleteGroupDelegate);
     }
 
-    public void setUpdateGroupDelegate(ServiceDelegate<GroupInfo> updateGroupDelegate) {
+    public void setUpdateGroupDelegate(ServiceDelegate<UserGroup> updateGroupDelegate) {
         groupsWidget.setEditGroupDelegate(updateGroupDelegate);
     }
 
@@ -87,31 +87,31 @@ public abstract class GroupPanel extends Composite {
         return groupsWidget.getSelectedMembers();
     }
 
-    public void displayGroups(ArrayList<GroupInfo> list) {
+    public void displayGroups(ArrayList<UserGroup> list) {
         groupsWidget.setGroupList(list);
     }
 
-    public void addGroupDisplay(GroupInfo info) {
-        groupsWidget.addGroup(info);
+    public void addGroupDisplay(UserGroup user) {
+        groupsWidget.addGroup(user);
     }
 
-    public void removeGroup(GroupInfo info) {
-        groupsWidget.removeGroup(info);
+    public void removeGroup(UserGroup user) {
+        groupsWidget.removeGroup(user);
     }
 
-    public void setGroupSelectionHandler(ServiceDelegate<GroupInfo> handler) {
+    public void setGroupSelectionHandler(ServiceDelegate<UserGroup> handler) {
         groupsWidget.setSelectionHandler(handler);
     }
 
-    public void setGroupMembers(GroupInfo group, ArrayList<User> list) {
-        groupsWidget.setGroupMembers(group, list);
+    public void setGroupMembers(UserGroup userGroup, ArrayList<User> list) {
+        groupsWidget.setGroupMembers(userGroup, list);
     }
 
     public void setAvailableAccounts(ArrayList<User> result) {
         groupsWidget.setAvailableAccounts(result);
     }
 
-    public abstract GroupInfo getNewGroup();
+    public abstract UserGroup getNewGroup();
 
     public void setVerifyRegisteredUserDelegate(ServiceDelegate<String> serviceDelegate) {
         groupsWidget.setVerifyUserEmailDelegate(serviceDelegate);
@@ -122,7 +122,7 @@ public abstract class GroupPanel extends Composite {
         groupsWidget.addVerifiedAccount(info);
     }
 
-    public void removeGroupMember(GroupInfo group, User info) {
-        groupsWidget.removeGroupMember(group, info);
+    public void removeGroupMember(UserGroup userGroup, User info) {
+        groupsWidget.removeGroupMember(userGroup, info);
     }
 }

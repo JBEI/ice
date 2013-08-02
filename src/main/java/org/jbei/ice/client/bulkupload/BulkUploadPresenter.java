@@ -29,7 +29,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
@@ -57,7 +57,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>();
     private ServiceDelegate<BulkUploadAutoUpdate> autoUpdateDelegate;
     private ServiceDelegate<PreferenceInfo> updatePreferenceDelegate;
-    private ServiceDelegate<Set<GroupInfo>> updatePermissionDelegate;
+    private ServiceDelegate<Set<UserGroup>> updatePermissionDelegate;
 
     public BulkUploadPresenter(RegistryServiceAsync service, HandlerManager eventBus, final IBulkUploadView display) {
         super(service, eventBus);
@@ -99,15 +99,15 @@ public class BulkUploadPresenter extends AbstractPresenter {
      * Initializes delegate for updating bulk upload permissions
      */
     protected void createPermissionDelegate() {
-        updatePermissionDelegate = new ServiceDelegate<Set<GroupInfo>>() {
+        updatePermissionDelegate = new ServiceDelegate<Set<UserGroup>>() {
             @Override
-            public void execute(final Set<GroupInfo> selected) {
+            public void execute(final Set<UserGroup> selected) {
                 new IceAsyncCallback<Long>() {
 
                     @Override
                     protected void callService(AsyncCallback<Long> callback) throws AuthenticationException {
                         ArrayList<AccessPermission> accesses = new ArrayList<AccessPermission>();
-                        for (GroupInfo select : selected) {
+                        for (UserGroup select : selected) {
                             if (select.getId() == 0) {
                                 continue;
                             }
@@ -355,15 +355,15 @@ public class BulkUploadPresenter extends AbstractPresenter {
      * Retrieves groups for assigning read access to the bulk upload
      */
     private void retrieveGroups() {
-        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+        new IceAsyncCallback<ArrayList<UserGroup>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<ArrayList<UserGroup>> callback) throws AuthenticationException {
                 service.retrieveUserGroups(ClientController.sessionId, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<GroupInfo> result) {
+            public void onSuccess(ArrayList<UserGroup> result) {
                 view.setPermissionGroups(result);
             }
         }.go(eventBus);

@@ -24,8 +24,8 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.server.InfoToModelFactory;
@@ -108,19 +108,19 @@ public class EntryControllerTest {
         // create a public group
         GroupController groupController = new GroupController();
         Account admin = AccountCreator.createTestAccount("testCreateEntryAdmin", true);
-        GroupInfo info = new GroupInfo();
-        info.setLabel("public group");
-        info.setType(GroupType.PUBLIC);
-        info.getMembers().add(Account.toDTO(account));
-        info = groupController.createGroup(admin, info);
-        Assert.assertNotNull(info);
-        Assert.assertTrue(info.getId() > 0);
+        UserGroup user = new UserGroup();
+        user.setLabel("public group");
+        user.setType(GroupType.PUBLIC);
+        user.getMembers().add(Account.toDTO(account));
+        user = groupController.createGroup(admin, user);
+        Assert.assertNotNull(user);
+        Assert.assertTrue(user.getId() > 0);
 
         Entry part = new Part();
         part = controller.createEntry(account, part);
         Assert.assertNotNull(part);
         PermissionsController permissionsController = new PermissionsController();
-        Group group = groupController.getGroupById(info.getId());
+        Group group = groupController.getGroupById(user.getId());
         HashSet<Group> groups = new HashSet<>();
         groups.add(group);
         Assert.assertTrue(permissionsController.groupHasReadPermission(groups, part));
@@ -309,19 +309,19 @@ public class EntryControllerTest {
 
         // add account 1 to group
         GroupController groupController = ControllerFactory.getGroupController();
-        GroupInfo newGroup = new GroupInfo();
-        newGroup.setLabel("test Group");
-        newGroup.setDescription("test Group");
-        newGroup.setType(GroupType.PRIVATE);
-        newGroup = groupController.createGroup(account1, newGroup);
-        Assert.assertNotNull(newGroup);
-        Assert.assertTrue(newGroup.getId() > 0);
+        UserGroup newUserGroup = new UserGroup();
+        newUserGroup.setLabel("test Group");
+        newUserGroup.setDescription("test Group");
+        newUserGroup.setType(GroupType.PRIVATE);
+        newUserGroup = groupController.createGroup(account1, newUserGroup);
+        Assert.assertNotNull(newUserGroup);
+        Assert.assertTrue(newUserGroup.getId() > 0);
         ArrayList<User> members = new ArrayList<>();
         members.add(Account.toDTO(account1));
-        Assert.assertNotNull(groupController.setGroupMembers(account1, newGroup, members));
+        Assert.assertNotNull(groupController.setGroupMembers(account1, newUserGroup, members));
         AccessPermission accessPermission = new AccessPermission();
         accessPermission.setArticle(AccessPermission.Article.GROUP);
-        accessPermission.setArticleId(newGroup.getId());
+        accessPermission.setArticleId(newUserGroup.getId());
         accessPermission.setType(AccessPermission.Type.READ_ENTRY);
         accessPermission.setTypeId(plasmid.getId());
         ControllerFactory.getPermissionController().addPermission(account1, accessPermission);
@@ -336,13 +336,13 @@ public class EntryControllerTest {
     @Test
     public void retrieveVisibleEntries() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetNumberOfVisibleEntries", false);
-        GroupInfo info = new GroupInfo();
-        info.setLabel("test");
-        info.setDescription("test");
-        info.setType(GroupType.PRIVATE);
-        info.getMembers().add(Account.toDTO(account));
-        info = ControllerFactory.getGroupController().createGroup(account, info);
-        Assert.assertNotNull(info);
+        UserGroup user = new UserGroup();
+        user.setLabel("test");
+        user.setDescription("test");
+        user.setType(GroupType.PRIVATE);
+        user.getMembers().add(Account.toDTO(account));
+        user = ControllerFactory.getGroupController().createGroup(account, user);
+        Assert.assertNotNull(user);
 
         // when user belongs to a group with permissions for entry account already has
         // access then the bug manifests
@@ -358,7 +358,7 @@ public class EntryControllerTest {
                 accessPermission.setArticle(AccessPermission.Article.GROUP);
                 accessPermission.setType(AccessPermission.Type.READ_ENTRY);
                 accessPermission.setTypeId(entry.getId());
-                accessPermission.setArticleId(info.getId());
+                accessPermission.setArticleId(user.getId());
                 ControllerFactory.getPermissionController().addPermission(account, accessPermission);
             }
         }

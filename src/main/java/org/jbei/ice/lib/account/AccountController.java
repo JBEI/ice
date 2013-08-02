@@ -21,10 +21,10 @@ import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.session.PersistentSessionDataWrapper;
-import org.jbei.ice.lib.shared.dto.AccountInfo;
 import org.jbei.ice.lib.shared.dto.AccountResults;
-import org.jbei.ice.lib.shared.dto.AccountType;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
@@ -116,17 +116,17 @@ public class AccountController {
      * validates the account dto to ensure that the fields required (especially by the database)
      * are present
      *
-     * @param accountInfo account dto for validation
+     * @param user account dto for validation
      * @throws ControllerException if validation fails
      */
-    private void validateRequiredAccountFields(AccountInfo accountInfo) throws ControllerException {
-        if (accountInfo.getFirstName() == null || accountInfo.getFirstName().trim().isEmpty())
+    private void validateRequiredAccountFields(User user) throws ControllerException {
+        if (user.getFirstName() == null || user.getFirstName().trim().isEmpty())
             throw new ControllerException("Account first name is required");
 
-        if (accountInfo.getLastName() == null || accountInfo.getLastName().trim().isEmpty())
+        if (user.getLastName() == null || user.getLastName().trim().isEmpty())
             throw new ControllerException("Account last name is required");
 
-        if (accountInfo.getEmail() == null || accountInfo.getEmail().trim().isEmpty()) {
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
             throw new ControllerException("Cannot create account without user id");
         }
     }
@@ -140,7 +140,7 @@ public class AccountController {
      * @return generated password
      * @throws ControllerException in the event email is already assigned to another user or is empty
      */
-    public String createNewAccount(AccountInfo info, boolean sendEmail) throws ControllerException {
+    public String createNewAccount(User info, boolean sendEmail) throws ControllerException {
         // validate fields required by the database
         validateRequiredAccountFields(info);
 
@@ -433,18 +433,18 @@ public class AccountController {
      *
      * @param login
      * @param password
-     * @return {@link AccountInfo}
+     * @return {@link org.jbei.ice.lib.shared.dto.user.User}
      * @throws InvalidCredentialsException
      * @throws ControllerException
      */
-    public AccountInfo authenticate(String login, String password)
+    public User authenticate(String login, String password)
             throws InvalidCredentialsException, ControllerException {
         SessionData sessionData = authenticate(login, password, "");
         if (sessionData == null)
             return null;
 
         Account account = sessionData.getAccount();
-        AccountInfo info = Account.toDTO(account);
+        User info = Account.toDTO(account);
         if (info == null)
             return info;
 
@@ -541,9 +541,9 @@ public class AccountController {
         }
     }
 
-    public Set<Account> getMatchingAccounts(String query, int limit) throws ControllerException {
+    public Set<Account> getMatchingAccounts(Account account, String query, int limit) throws ControllerException {
         try {
-            return dao.getMatchingAccounts(query, limit);
+            return dao.getMatchingAccounts(account, query, limit);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -560,9 +560,9 @@ public class AccountController {
             EntryController entryController = ControllerFactory.getEntryController();
             LinkedList<Account> accounts = dao.retrieveAccounts(start, limit);
 
-            ArrayList<AccountInfo> infos = new ArrayList<>();
+            ArrayList<User> infos = new ArrayList<>();
             for (Account userAccount : accounts) {
-                AccountInfo info = new AccountInfo();
+                User info = new User();
                 long count;
                 try {
                     count = entryController.getNumberOfOwnerEntries(userAccount, userAccount.getEmail());

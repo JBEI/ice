@@ -20,8 +20,8 @@ import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
@@ -149,17 +149,17 @@ public interface RegistryServiceAsync {
     void deleteEntryAttachment(String sid, String fileId, AsyncCallback<Boolean> callback)
             throws AuthenticationException;
 
-    void retrieveGroups(String sid, GroupType type, AsyncCallback<ArrayList<GroupInfo>> callback)
+    void retrieveGroups(String sid, GroupType type, AsyncCallback<ArrayList<UserGroup>> callback)
             throws AuthenticationException;
 
-    void retrieveGroupMembers(String sessionId, GroupInfo info, AsyncCallback<ArrayList<User>> callback)
+    void retrieveGroupMembers(String sessionId, UserGroup user, AsyncCallback<ArrayList<User>> callback)
             throws AuthenticationException;
 
-    void setGroupMembers(String sessionId, GroupInfo info, ArrayList<User> members,
+    void setGroupMembers(String sessionId, UserGroup user, ArrayList<User> members,
             AsyncCallback<ArrayList<User>> callback) throws AuthenticationException;
 
-    void createNewGroup(String sessionId, GroupInfo info,
-            AsyncCallback<GroupInfo> callback) throws AuthenticationException;
+    void createNewGroup(String sessionId, UserGroup user,
+            AsyncCallback<UserGroup> callback) throws AuthenticationException;
 
     void deleteEntry(String sessionId, PartData info, AsyncCallback<ArrayList<FolderDetails>> callback)
             throws AuthenticationException;
@@ -222,18 +222,18 @@ public interface RegistryServiceAsync {
     void setBulkUploadDraftName(String sessionId, long id, String draftName, AsyncCallback<Boolean> callback)
             throws AuthenticationException;
 
-    void updateGroup(String sessionId, GroupInfo info, AsyncCallback<GroupInfo> async);
+    void updateGroup(String sessionId, UserGroup user, AsyncCallback<UserGroup> async);
 
-    void deleteGroup(String sessionId, GroupInfo info, AsyncCallback<GroupInfo> asyncCallback);
+    void deleteGroup(String sessionId, UserGroup user, AsyncCallback<UserGroup> asyncCallback);
 
-    void removeAccountFromGroup(String sessionId, GroupInfo info, User account, AsyncCallback<Boolean> callback);
+    void removeAccountFromGroup(String sessionId, UserGroup user, User account, AsyncCallback<Boolean> callback);
 
     void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites, AsyncCallback<Void> callback)
             throws AuthenticationException;
 
     void deleteSample(String sessionId, PartSample part, AsyncCallback<Boolean> async);
 
-    void retrieveUserGroups(String sessionId, AsyncCallback<ArrayList<GroupInfo>> async);
+    void retrieveUserGroups(String sessionId, AsyncCallback<ArrayList<UserGroup>> async);
 
     void promoteCollection(String sessionId, long id, AsyncCallback<Boolean> async);
 

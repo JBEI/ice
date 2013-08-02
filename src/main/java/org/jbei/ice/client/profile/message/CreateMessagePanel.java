@@ -7,7 +7,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.user.User;
 
@@ -93,9 +93,9 @@ public class CreateMessagePanel extends Composite {
                 // set groups
                 if (recipientWidget.getSelected() != null) {
                     for (OptionSelect select : recipientWidget.getSelected()) {
-                        GroupInfo groupInfo = new GroupInfo();
-                        groupInfo.setId(select.getId());
-                        info.getGroups().add(groupInfo);
+                        UserGroup userGroup = new UserGroup();
+                        userGroup.setId(select.getId());
+                        info.getUserGroups().add(userGroup);
                     }
                 }
 

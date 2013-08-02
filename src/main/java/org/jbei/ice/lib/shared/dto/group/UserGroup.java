@@ -11,20 +11,20 @@ import org.jbei.ice.lib.shared.dto.user.User;
  * @author Hector Plahar
  */
 
-public class GroupInfo implements IDTOModel {
+public class UserGroup implements IDTOModel {
 
     private long id;
     private String uuid;
     private String label;
     private long parentId;
     private String description;
-    private ArrayList<GroupInfo> children;
+    private ArrayList<UserGroup> children;
     private ArrayList<User> members;
     private long memberCount;
     private GroupType type;
 
-    public GroupInfo() {
-        children = new ArrayList<GroupInfo>();
+    public UserGroup() {
+        children = new ArrayList<UserGroup>();
         members = new ArrayList<User>();
     }
 
@@ -68,7 +68,7 @@ public class GroupInfo implements IDTOModel {
         this.id = id;
     }
 
-    public ArrayList<GroupInfo> getChildren() {
+    public ArrayList<UserGroup> getChildren() {
         return this.children;
     }
 

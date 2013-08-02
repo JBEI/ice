@@ -22,8 +22,8 @@ import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
@@ -412,22 +412,22 @@ public class BulkUploadControllerTest {
 
         // create test groups
         GroupController groupController = new GroupController();
-        GroupInfo group1 = new GroupInfo();
-        group1.setType(GroupType.PRIVATE);
-        group1.setDescription("test group");
-        group1.setLabel("test");
-        group1 = groupController.createGroup(account, group1);
-        Assert.assertNotNull(group1);
-        Assert.assertTrue(group1.getId() > 0);
+        UserGroup userGroup1 = new UserGroup();
+        userGroup1.setType(GroupType.PRIVATE);
+        userGroup1.setDescription("test group");
+        userGroup1.setLabel("test");
+        userGroup1 = groupController.createGroup(account, userGroup1);
+        Assert.assertNotNull(userGroup1);
+        Assert.assertTrue(userGroup1.getId() > 0);
 
-        GroupInfo group2 = new GroupInfo();
-        group2.setType(GroupType.PRIVATE);
-        group2.setDescription("test group2");
-        group2.setLabel("test2");
-        group2 = groupController.createGroup(account, group2);
-        Assert.assertNotNull(group2);
-        Assert.assertTrue(group2.getId() > 0);
-        Assert.assertTrue(group2.getId() != group1.getId());
+        UserGroup userGroup2 = new UserGroup();
+        userGroup2.setType(GroupType.PRIVATE);
+        userGroup2.setDescription("test group2");
+        userGroup2.setLabel("test2");
+        userGroup2 = groupController.createGroup(account, userGroup2);
+        Assert.assertNotNull(userGroup2);
+        Assert.assertTrue(userGroup2.getId() > 0);
+        Assert.assertTrue(userGroup2.getId() != userGroup1.getId());
 
         BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull(info);
@@ -439,7 +439,7 @@ public class BulkUploadControllerTest {
         AccessPermission accessPermission = new AccessPermission();
         accessPermission.setArticle(AccessPermission.Article.GROUP);
         accessPermission.setType(AccessPermission.Type.READ_ENTRY);
-        accessPermission.setArticleId(group2.getId());
+        accessPermission.setArticleId(userGroup2.getId());
         accessPermissions.add(accessPermission);
         long id = controller.updatePermissions(account, autoUpdate.getBulkUploadId(), EntryAddType.PLASMID,
                                                accessPermissions);
@@ -452,11 +452,11 @@ public class BulkUploadControllerTest {
 
         // check actual permission
         accessPermission = info.getAccessPermissions().get(0);
-        Assert.assertEquals(accessPermission.getArticleId(), group2.getId());
+        Assert.assertEquals(accessPermission.getArticleId(), userGroup2.getId());
 
         // change permission to group 1
         accessPermission = new AccessPermission();
-        accessPermission.setArticleId(group1.getId());
+        accessPermission.setArticleId(userGroup1.getId());
         accessPermission.setArticle(AccessPermission.Article.GROUP);
         accessPermission.setType(AccessPermission.Type.READ_ENTRY);
         accessPermissions.clear();
@@ -472,18 +472,18 @@ public class BulkUploadControllerTest {
 
         // check actual permission
         accessPermission = info.getAccessPermissions().get(0);
-        Assert.assertEquals(accessPermission.getArticleId(), group1.getId());
+        Assert.assertEquals(accessPermission.getArticleId(), userGroup1.getId());
 
         // change permission to both
         accessPermissions.clear();
         AccessPermission accessPermission1 = new AccessPermission();
         accessPermission1.setArticle(AccessPermission.Article.GROUP);
-        accessPermission1.setArticleId(group1.getId());
+        accessPermission1.setArticleId(userGroup1.getId());
         accessPermission1.setType(AccessPermission.Type.READ_ENTRY);
         accessPermissions.add(accessPermission1);
 
         AccessPermission accessPermission2 = new AccessPermission();
-        accessPermission2.setArticleId(group2.getId());
+        accessPermission2.setArticleId(userGroup2.getId());
         accessPermission2.setArticle(AccessPermission.Article.GROUP);
         accessPermission2.setType(AccessPermission.Type.READ_ENTRY);
         accessPermissions.add(accessPermission2);

@@ -13,8 +13,8 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.group.UserGroupPresenter;
 import org.jbei.ice.client.profile.message.UserMessagesPresenter;
 import org.jbei.ice.client.profile.preferences.UserPreferencesPresenter;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import org.jbei.ice.lib.shared.dto.user.User;
@@ -196,15 +196,15 @@ public class ProfilePresenter extends AbstractPresenter {
     }
 
     private void retrieveGroups() {
-        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+        new IceAsyncCallback<ArrayList<UserGroup>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<ArrayList<UserGroup>> callback) throws AuthenticationException {
                 service.retrieveGroups(ClientController.sessionId, GroupType.PRIVATE, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<GroupInfo> result) {
+            public void onSuccess(ArrayList<UserGroup> result) {
                 if (result == null || currentOption != UserOption.GROUPS)
                     return;
 

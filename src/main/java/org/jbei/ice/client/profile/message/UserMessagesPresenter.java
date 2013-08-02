@@ -13,8 +13,8 @@ import org.jbei.ice.client.common.header.HeaderView;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.PanelPresenter;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 
@@ -38,18 +38,18 @@ public class UserMessagesPresenter extends PanelPresenter {
     }
 
     protected void retrievePrivateGroups() {
-        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+        new IceAsyncCallback<ArrayList<UserGroup>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<ArrayList<UserGroup>> callback) throws AuthenticationException {
                 service.retrieveGroups(ClientController.sessionId, GroupType.PRIVATE, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<GroupInfo> result) {
+            public void onSuccess(ArrayList<UserGroup> result) {
                 List<OptionSelect> options = new ArrayList<OptionSelect>();
-                for (GroupInfo info : result) {
-                    OptionSelect option = new OptionSelect(info.getId(), info.getLabel());
+                for (UserGroup user : result) {
+                    OptionSelect option = new OptionSelect(user.getId(), user.getLabel());
                     options.add(option);
                 }
                 panel.setPrivateGroupOptions(options);

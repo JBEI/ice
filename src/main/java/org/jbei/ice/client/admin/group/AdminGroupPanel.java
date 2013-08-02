@@ -2,8 +2,8 @@ package org.jbei.ice.client.admin.group;
 
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.common.group.GroupPanel;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 
 /**
  * Panel for managing groups. Also acts as the view
@@ -12,7 +12,7 @@ import org.jbei.ice.lib.shared.dto.group.GroupType;
  */
 public class AdminGroupPanel extends GroupPanel implements IAdminPanel {
 
-    public GroupInfo getNewGroup() {
+    public UserGroup getNewGroup() {
         return groupsWidget.getNewGroup(GroupType.PUBLIC);
     }
 }

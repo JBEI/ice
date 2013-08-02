@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.lib.shared.dto.IDTOModel;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
@@ -20,11 +20,11 @@ public class MessageInfo implements IDTOModel {
     private String message;
     private String title;
     private boolean read;
-    private ArrayList<GroupInfo> groups;
+    private ArrayList<UserGroup> userGroups;
     private ArrayList<User> accounts;
 
     public MessageInfo() {
-        groups = new ArrayList<GroupInfo>();
+        userGroups = new ArrayList<UserGroup>();
         accounts = new ArrayList<User>();
     }
 
@@ -76,8 +76,8 @@ public class MessageInfo implements IDTOModel {
         this.read = read;
     }
 
-    public ArrayList<GroupInfo> getGroups() {
-        return groups;
+    public ArrayList<UserGroup> getUserGroups() {
+        return userGroups;
     }
 
     public ArrayList<User> getAccounts() {

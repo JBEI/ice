@@ -6,8 +6,8 @@ import java.util.Set;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.shared.dto.group.GroupInfo;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.user.User;
 
 import junit.framework.Assert;
@@ -42,23 +42,23 @@ public class GroupControllerTest {
     @Test
     public void testGetGroupByUUID() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetGroupByUUID", false);
-        GroupInfo groupInfo = new GroupInfo();
-        groupInfo.setLabel("test Group");
-        groupInfo.setDescription("test");
-        groupInfo = controller.createGroup(account, groupInfo);
-        Assert.assertNotNull(groupInfo);
-        Group group = controller.getGroupByUUID(groupInfo.getUuid());
+        UserGroup userGroup = new UserGroup();
+        userGroup.setLabel("test Group");
+        userGroup.setDescription("test");
+        userGroup = controller.createGroup(account, userGroup);
+        Assert.assertNotNull(userGroup);
+        Group group = controller.getGroupByUUID(userGroup.getUuid());
         Assert.assertNotNull(group);
     }
 
     @Test
     public void testGetGroupById() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetGroupById", false);
-        GroupInfo group1 = new GroupInfo();
-        group1.setDescription("test1");
-        group1.setType(GroupType.PRIVATE);
-        group1.setLabel("label1");
-        long id = controller.createGroup(account, group1).getId();
+        UserGroup userGroup1 = new UserGroup();
+        userGroup1.setDescription("test1");
+        userGroup1.setType(GroupType.PRIVATE);
+        userGroup1.setLabel("label1");
+        long id = controller.createGroup(account, userGroup1).getId();
         Assert.assertNotNull(controller.getGroupById(id));
     }
 
@@ -76,11 +76,11 @@ public class GroupControllerTest {
     @Test
     public void testCreate() throws Exception {
         Account account = AccountCreator.createTestAccount("testCreate", false);
-        GroupInfo groupInfo = new GroupInfo();
-        groupInfo.setLabel("test Group");
-        groupInfo.setDescription("test");
-        groupInfo = controller.createGroup(account, groupInfo);
-        Assert.assertNotNull(groupInfo);
+        UserGroup userGroup = new UserGroup();
+        userGroup.setLabel("test Group");
+        userGroup.setDescription("test");
+        userGroup = controller.createGroup(account, userGroup);
+        Assert.assertNotNull(userGroup);
     }
 
     @Test
@@ -93,18 +93,18 @@ public class GroupControllerTest {
     @Test
     public void testGetMatchingGroups() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetMatchingGroups", false);
-        GroupInfo g1 = new GroupInfo();
+        UserGroup g1 = new UserGroup();
         g1.setDescription("desc");
         g1.setLabel("label");
         Assert.assertNotNull(controller.createGroup(account, g1));
 
-        GroupInfo g2 = new GroupInfo();
+        UserGroup g2 = new UserGroup();
         g2.setDescription("desc");
         g2.setLabel("myg2");
         Assert.assertNotNull(controller.createGroup(account, g2));
 
         Account account2 = AccountCreator.createTestAccount("testGetMatchingGroups2", false);
-        GroupInfo g3 = new GroupInfo();
+        UserGroup g3 = new UserGroup();
         g3.setDescription("desc");
         g3.setLabel("myg3");
         Assert.assertNotNull(controller.createGroup(account2, g3));
@@ -120,23 +120,23 @@ public class GroupControllerTest {
         Account a2 = AccountCreator.createTestAccount("testRetrieveGroupMembers2", false);
         Account a3 = AccountCreator.createTestAccount("testRetrieveGroupMembers3", false);
 
-        GroupInfo info = new GroupInfo();
-        info.setDescription("desc");
-        info.setLabel("label");
-        info.setType(GroupType.PRIVATE);
+        UserGroup user = new UserGroup();
+        user.setDescription("desc");
+        user.setLabel("label");
+        user.setType(GroupType.PRIVATE);
 
         // create group
-        info = controller.createGroup(a1, info);
-        Assert.assertNotNull(info);
+        user = controller.createGroup(a1, user);
+        Assert.assertNotNull(user);
 
         ArrayList<User> infos = new ArrayList<>();
         infos.add(Account.toDTO(a2));
         infos.add(Account.toDTO(a3));
 
-        infos = controller.setGroupMembers(a1, info, infos);
+        infos = controller.setGroupMembers(a1, user, infos);
         Assert.assertNotNull(infos);
         Assert.assertTrue(infos.size() == 2);
-        ArrayList<User> list = controller.retrieveGroupMembers(info.getUuid());
+        ArrayList<User> list = controller.retrieveGroupMembers(user.getUuid());
         Assert.assertNotNull(list);
         Assert.assertEquals(2, list.size());
     }
@@ -147,20 +147,20 @@ public class GroupControllerTest {
         Account a2 = AccountCreator.createTestAccount("testSetGroupMembers2", false);
         Account a3 = AccountCreator.createTestAccount("testSetGroupMembers3", false);
 
-        GroupInfo info = new GroupInfo();
-        info.setDescription("desc");
-        info.setLabel("label");
-        info.setType(GroupType.PRIVATE);
+        UserGroup user = new UserGroup();
+        user.setDescription("desc");
+        user.setLabel("label");
+        user.setType(GroupType.PRIVATE);
 
         // create group
-        info = controller.createGroup(a1, info);
-        Assert.assertNotNull(info);
+        user = controller.createGroup(a1, user);
+        Assert.assertNotNull(user);
 
         ArrayList<User> infos = new ArrayList<>();
         infos.add(Account.toDTO(a2));
         infos.add(Account.toDTO(a3));
 
-        infos = controller.setGroupMembers(a1, info, infos);
+        infos = controller.setGroupMembers(a1, user, infos);
         Assert.assertNotNull(infos);
         Assert.assertTrue(infos.size() == 2);
     }
