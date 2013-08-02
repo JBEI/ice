@@ -222,4 +222,6 @@ public interface RegistryService extends RemoteService {
     ArrayList<AccessPermission> retrieveDefaultPermissions(String sid) throws AuthenticationException;
 
     ArrayList<PartData> retrieveTransferredParts(String sessionId) throws AuthenticationException;
+
+    boolean processTransferredParts(String sid, ArrayList<Long> partIds, boolean accept) throws AuthenticationException;
 }

@@ -2,15 +2,21 @@ package org.jbei.ice.client.admin.part;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.entry.display.EntryPresenter;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * Panel presenter for managing parts that have been transferred from other registries
@@ -23,10 +29,12 @@ public class AdminTransferredPartPresenter extends AdminPanelPresenter {
     private final TransferredPartDataProvider dataProvider;
     private EntryPresenter entryViewPresenter;
 
-    public AdminTransferredPartPresenter(final RegistryServiceAsync service, HandlerManager eventBus) {
+    public AdminTransferredPartPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
         super(service, eventBus);
         panel = new AdminTransferredPartPanel(createDelegate());
         dataProvider = new TransferredPartDataProvider(panel.getDataTable(), service);
+        panel.setApproveClickHandler(new ApproveRejectHandler(true));
+        panel.setRejectClickHandler(new ApproveRejectHandler(false));
     }
 
     private ServiceDelegate<PartData> createDelegate() {
@@ -65,5 +73,31 @@ public class AdminTransferredPartPresenter extends AdminPanelPresenter {
 
     public void setData(ArrayList<PartData> result) {
         dataProvider.setData(result, true);
+    }
+
+    private class ApproveRejectHandler implements ClickHandler {
+
+        private boolean isAccept;
+
+        public ApproveRejectHandler(boolean isAccept) {
+            this.isAccept = isAccept;
+        }
+
+        @Override
+        public void onClick(ClickEvent event) {
+            new IceAsyncCallback<Boolean>() {
+
+                @Override
+                protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                    ArrayList<Long> list = new ArrayList<Long>(panel.getSelectParts());
+                    service.processTransferredParts(ClientController.sessionId, list, isAccept, callback);
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    panel.refresh();
+                }
+            }.go(eventBus);
+        }
     }
 }

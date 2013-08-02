@@ -781,6 +781,22 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    public void setEntryVisibility(ArrayList<Long> partIds, int value) throws DAOException {
+        try {
+            String hql = "update " + Entry.class.getName() + " e set e.visibility = :visibility where e.id in :ids";
+            Session session = currentSession();
+            Query query = session.createQuery(hql);
+            query.setParameterList("ids", partIds);
+            query.setInteger("visibility", value);
+            int updated = query.executeUpdate();
+            if (updated != partIds.size())
+                throw new DAOException("Expected " + partIds.size() + " to be updated by " + updated + " were");
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
     public void upgradeNamesAndPartNumbers(String partNumberPrefix) throws DAOException {
         Session session = currentSession();
         int i = 0;

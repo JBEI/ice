@@ -21,7 +21,7 @@ public class EntryDAOTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-//        HibernateHelper.initializeMock();
+        HibernateHelper.initializeMock();
     }
 
     @Before
@@ -33,6 +33,10 @@ public class EntryDAOTest {
     @After
     public void tearDown() {
         HibernateHelper.rollbackTransaction();
+    }
+
+    @Test
+    public void testSetEntryVisibility() throws Exception {
     }
 
     @Test

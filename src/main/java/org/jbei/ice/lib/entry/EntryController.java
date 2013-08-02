@@ -1103,4 +1103,18 @@ public class EntryController {
             throw new ControllerException(e);
         }
     }
+
+    public boolean processTransferredParts(Account account, ArrayList<Long> partIds, boolean accept)
+            throws ControllerException {
+        if (!accountController.isAdministrator(account))
+            return false;
+
+        Visibility visibility = accept ? Visibility.OK : Visibility.DELETED;
+        try {
+            dao.setEntryVisibility(partIds, visibility.getValue());
+            return true;
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+    }
 }

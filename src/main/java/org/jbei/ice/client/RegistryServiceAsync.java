@@ -255,4 +255,6 @@ public interface RegistryServiceAsync {
 
     void retrieveTransferredParts(String sessionId, AsyncCallback<ArrayList<PartData>> callback)
             throws AuthenticationException;
+
+    void processTransferredParts(String sid, ArrayList<Long> partIds, boolean accept, AsyncCallback<Boolean> async);
 }

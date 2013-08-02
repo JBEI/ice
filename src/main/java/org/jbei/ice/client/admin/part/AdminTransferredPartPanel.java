@@ -1,10 +1,14 @@
 package org.jbei.ice.client.admin.part;
 
+import java.util.Set;
+
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
@@ -46,9 +50,25 @@ public class AdminTransferredPartPanel extends Composite implements IAdminPanel 
         return this.table;
     }
 
+    public void setApproveClickHandler(ClickHandler handler) {
+        approve.addClickHandler(handler);
+    }
+
+    public void setRejectClickHandler(ClickHandler handler) {
+        reject.addClickHandler(handler);
+    }
+
     public void setMainContent(Widget widget) {
         vPanel.clear();
         vPanel.add(new HTML("&nbsp;"));
         vPanel.add(widget);
+    }
+
+    public Set<Long> getSelectParts() {
+        return table.getSelectedEntrySet();
+    }
+
+    public void refresh() {
+        History.fireCurrentHistoryState();
     }
 }
