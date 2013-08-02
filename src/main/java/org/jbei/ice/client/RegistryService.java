@@ -95,7 +95,7 @@ public interface RegistryService extends RemoteService {
     SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId)
             throws AuthenticationException;
 
-    SuggestOracle.Response getPermissionSuggestions(Request req);
+    SuggestOracle.Response getPermissionSuggestions(String sessionId, Request req) throws AuthenticationException;
 
     SuggestOracle.Response getAutoCompleteSuggestion(AutoCompleteField field, Request request);
 

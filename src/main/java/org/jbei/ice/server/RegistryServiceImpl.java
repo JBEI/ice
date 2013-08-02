@@ -74,6 +74,7 @@ import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.permission.PermissionSuggestion;
+import org.jbei.ice.lib.shared.dto.search.IndexType;
 import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
@@ -204,59 +205,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites) {
-        // TODO
-        // TODO
-        // TODO
-        // TODO
-        // TODO
-
-//        Account account;
-//        try {
-//            account = retrieveAccountForSid(sid);
-//            if (!ControllerFactory.getAccountController().isAdministrator(account))
-//                return;
-//
-//            Logger.info("Requesting transfer of " + ids.size() + " entries");
-//        } catch (AuthenticationException | ControllerException e) {
-//            Logger.error(e);
-//            return;
-//        }
-//
-//        // retrieve entries
-//        EntryController entryController = ControllerFactory.getEntryController();
-//        SequenceController sequenceController = ControllerFactory.getSequenceController();
-//
-//        HashMap<Entry, String> entrySeq = new HashMap<>();
-//        for (long id : ids) {
-//            try {
-//                Entry entry = entryController.get(account, id);
-//                Sequence sequence = sequenceController.getByEntry(entry);
-//                String sequenceString = null;
-//                if (sequence != null) {
-//                    sequenceString = sequence.getSequenceUser();
-//                    if (sequenceString == null || sequenceString.isEmpty())
-//                        sequenceString = sequence.getSequence();
-//                }
-//                entrySeq.put(entry, sequenceString);
-//            } catch (ControllerException e) {
-//                Logger.error(e);
-//            }
-//        }
-//
-//        for (String url : sites) {
-//            IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
-//            if (api == null) {
-//                Logger.error("Could not retrieve api for " + url + ". Transfer aborted");
-//                continue;
-//            }
-//
-//            try {
-//                api.transmitEntries(entrySeq);
-//            } catch (ServiceException e) {
-//                Logger.error(e);
-//            }
-//        }
+    public void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            ControllerFactory.getEntryController().transferEntries(account, ids, sites);
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
     }
 
     @Override
@@ -390,7 +346,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public String createNewAccount(User info, boolean sendEmail) {
-//        String serverName = getThreadLocalRequest().getServerName();
         try {
             return ControllerFactory.getAccountController().createNewAccount(info, sendEmail);
         } catch (ControllerException e) {
@@ -866,7 +821,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
             AccountController controller = ControllerFactory.getAccountController();
             EntryController entryController = ControllerFactory.getEntryController();
-            account = controller.get(Long.decode(userId));
+            try {
+                account = controller.get(Long.decode(userId));
+            } catch (NumberFormatException nfe) {
+                return null;
+            }
+
             if (account == null)
                 return null;
 
@@ -1028,7 +988,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (!ControllerFactory.getAccountController().isAdministrator(account))
                 return null;
 
-            Logger.info(account.getEmail() + ": retrieving web of registry system settings");
             return ControllerFactory.getWebController().getRegistryPartners();
         } catch (ControllerException e) {
             return null;
@@ -1233,7 +1192,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             // save attachments
             if (info.getAttachments() != null) {
                 AttachmentController attachmentController = ControllerFactory.getAttachmentController();
-                String attDir = Utils.getConfigValue(ConfigurationKey.ATTACHMENTS_DIRECTORY);
+                String attDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY) + File.separator
+                        + AttachmentController.attachmentDirName;
                 for (AttachmentInfo attachmentInfo : info.getAttachments()) {
                     Attachment attachment = new Attachment();
                     attachment.setEntry(entry);
@@ -1423,24 +1383,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public SuggestOracle.Response getPermissionSuggestions(Request req) {
+    public SuggestOracle.Response getPermissionSuggestions(String sid, Request req) throws AuthenticationException {
         SuggestOracle.Response resp = new SuggestOracle.Response();
         List<Suggestion> suggestions = new ArrayList<>(req.getLimit());
+        Account account = retrieveAccountForSid(sid);
 
         try {
-            // TODO : split tokens if there are spaces. this is for a manager
-            AccountController controller = ControllerFactory.getAccountController();
-            Set<Account> accounts = controller.getMatchingAccounts(req.getQuery(), req.getLimit());
-            for (Account account : accounts) {
-                AccessPermission access = new AccessPermission();
-                access.setDisplay(account.getFullName());
-                access.setArticle(AccessPermission.Article.ACCOUNT);
-                access.setArticleId(account.getId());
-                PermissionSuggestion object = new PermissionSuggestion(access);
-                suggestions.add(object);
-            }
             GroupController groupController = ControllerFactory.getGroupController();
-            Set<Group> groups = groupController.getMatchingGroups(req.getQuery(), req.getLimit());
+            Set<Group> groups = groupController.getMatchingGroups(account, req.getQuery(), req.getLimit());
             for (Group group : groups) {
                 AccessPermission access = new AccessPermission();
                 access.setDisplay(group.getLabel());
@@ -1449,6 +1399,24 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 PermissionSuggestion object = new PermissionSuggestion(access);
                 suggestions.add(object);
             }
+
+            int balance = req.getLimit() - suggestions.size();
+            if (balance == 0) {
+                resp.setSuggestions(suggestions);
+                return resp;
+            }
+
+            AccountController controller = ControllerFactory.getAccountController();
+            Set<Account> accounts = controller.getMatchingAccounts(account, req.getQuery(), balance);
+            for (Account matching : accounts) {
+                AccessPermission access = new AccessPermission();
+                access.setDisplay(matching.getFullName());
+                access.setArticle(AccessPermission.Article.ACCOUNT);
+                access.setArticleId(matching.getId());
+                PermissionSuggestion object = new PermissionSuggestion(access);
+                suggestions.add(object);
+            }
+
         } catch (ControllerException e) {
             Logger.error(e);
         }
@@ -1678,9 +1646,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public Boolean rebuildSearchIndex(String sid) throws AuthenticationException {
+    public Boolean rebuildSearchIndex(String sid, IndexType type) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        return ControllerFactory.getSearchController().rebuildIndexes(account);
+        return ControllerFactory.getSearchController().rebuildIndexes(account, type);
     }
 
     @Override
@@ -1724,6 +1692,29 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             return ControllerFactory.getWebController().setEnable(uri, value);
         } catch (ControllerException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public ArrayList<PartData> retrieveTransferredParts(String sessionId) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        try {
+            return ControllerFactory.getEntryController().getTransferredParts(account);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean processTransferredParts(String sid, ArrayList<Long> partIds, boolean accept)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            return ControllerFactory.getEntryController().processTransferredParts(account, partIds, accept);
+        } catch (ControllerException e) {
+            Logger.error(e);
             return false;
         }
     }

@@ -138,6 +138,9 @@ public class GroupController {
             throw new ControllerException(errMsg);
         }
 
+        if (info.getType() == null)
+            info.setType(GroupType.PRIVATE);
+
         Group group = new Group();
         group.setLabel(info.getLabel());
         group.setDescription(info.getDescription() == null ? "" : info.getDescription());
@@ -253,9 +256,14 @@ public class GroupController {
         return save(publicGroup);
     }
 
-    public Set<Group> getMatchingGroups(String query, int limit) throws ControllerException {
+    public Set<Group> getMatchingGroups(Account account, String query, int limit) throws ControllerException {
         try {
-            return dao.getMatchingGroups(query, limit);
+//            ArrayList<Long>  = new ArrayList<>();
+//            for(Group group : account.getGroups()) {
+//
+//            }
+
+            return dao.getMatchingGroups(account, query, limit);
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);

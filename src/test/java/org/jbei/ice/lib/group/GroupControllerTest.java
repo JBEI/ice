@@ -103,7 +103,13 @@ public class GroupControllerTest {
         g2.setLabel("myg2");
         Assert.assertNotNull(controller.createGroup(account, g2));
 
-        Set<Group> groups = controller.getMatchingGroups("myg", 10);
+        Account account2 = AccountCreator.createTestAccount("testGetMatchingGroups2", false);
+        GroupInfo g3 = new GroupInfo();
+        g3.setDescription("desc");
+        g3.setLabel("myg3");
+        Assert.assertNotNull(controller.createGroup(account2, g3));
+
+        Set<Group> groups = controller.getMatchingGroups(account, "myg", 10);
         Assert.assertNotNull(groups);
         Assert.assertEquals(1, groups.size());
     }

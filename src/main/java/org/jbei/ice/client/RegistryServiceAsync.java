@@ -49,7 +49,8 @@ public interface RegistryServiceAsync {
     void retrieveEntryTipDetails(String sessionId, long id, String url, AsyncCallback<PartData> callback)
             throws AuthenticationException;
 
-    void getPermissionSuggestions(SuggestOracle.Request req, AsyncCallback<SuggestOracle.Response> callback);
+    void getPermissionSuggestions(String sid, SuggestOracle.Request req, AsyncCallback<SuggestOracle.Response> callback)
+            throws AuthenticationException;
 
     void retrieveEntriesForFolder(String sessionId, long folderId, ColumnField sort, boolean asc,
             int start, int limit, AsyncCallback<FolderDetails> callback);

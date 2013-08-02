@@ -37,7 +37,7 @@ class AccountDAO extends HibernateRepository<Account> {
         return super.get(Account.class, id);
     }
 
-    public Set<Account> getMatchingAccounts(String token, int limit) throws DAOException {
+    public Set<Account> getMatchingAccounts(Account account, String token, int limit) throws DAOException {
         Session session = currentSession();
         try {
             token = token.toUpperCase();

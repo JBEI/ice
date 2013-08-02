@@ -1,5 +1,6 @@
 package org.jbei.ice.client.entry.display.model;
 
+import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.RegistryServiceAsync;
 
@@ -12,7 +13,6 @@ import com.google.gwt.user.client.ui.SuggestOracle;
  *
  * @author Hector Plahar
  */
-
 public class PermissionSuggestOracle extends SuggestOracle {
 
     private final RegistryServiceAsync service = GWT.create(RegistryService.class);
@@ -24,17 +24,21 @@ public class PermissionSuggestOracle extends SuggestOracle {
 
     @Override
     public void requestSuggestions(final Request request, final Callback callback) {
-        service.getPermissionSuggestions(request, new AsyncCallback<SuggestOracle.Response>() {
+        try {
+            service.getPermissionSuggestions(ClientController.sessionId, request, new AsyncCallback<Response>() {
 
-            @Override
-            public void onSuccess(Response result) {
-                callback.onSuggestionsReady(request, result);
-            }
+                @Override
+                public void onSuccess(Response result) {
+                    callback.onSuggestionsReady(request, result);
+                }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                callback.onSuggestionsReady(request, new Response());
-            }
-        });
+                @Override
+                public void onFailure(Throwable caught) {
+                    callback.onSuggestionsReady(request, new Response());
+                }
+            });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 }
