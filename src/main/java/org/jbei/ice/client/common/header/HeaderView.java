@@ -5,7 +5,6 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.user.User;
@@ -17,8 +16,10 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -133,8 +134,10 @@ public class HeaderView extends Composite {
         }
 
         // user
-        loggedInContentsPanel.setHTML(0, 0, "<a href=\"#" + Page.PROFILE.getLink() + ";id=" + info.getId()
-                + ";s=profile\">" + info.getEmail() + "</a>");
+        SafeHtml profileHTML = SafeHtmlUtils.fromSafeConstant("<i class=\"color_444 " + FAIconType.GEAR.getStyleName()
+                                                                      + "\"></i> " + info.getEmail());
+        Hyperlink profile = new Hyperlink(profileHTML, Page.PROFILE.getLink() + ";id=" + info.getId() + ";s=profile");
+        loggedInContentsPanel.setWidget(0, 0, profile);
 
         // messages
         loggedInContentsPanel.setHTML(0, 1, "");
@@ -143,13 +146,15 @@ public class HeaderView extends Composite {
         loggedInContentsPanel.setHTML(0, 2, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
 
         // logout link
-        loggedInContentsPanel.setWidget(0, 3, new Icon(FAIconType.SIGNOUT));
-        loggedInContentsPanel.setWidget(0, 4, new HTML("&nbsp;"));
-        Hyperlink logout = new Hyperlink("Log Out", Page.LOGOUT.getLink());
+        SafeHtml html = SafeHtmlUtils.fromSafeConstant("<i class=\"color_444 " + FAIconType.SIGNOUT.getStyleName()
+                                                               + "\"></i> Log Out");
+        Hyperlink logout = new Hyperlink(html, Page.LOGOUT.getLink());
         loggedInContentsPanel.setWidget(0, 5, logout);
         loggedInContentsPanel.setHTML(0, 6, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
-        loggedInContentsPanel.setHTML(0, 7, "<a href=\"https://public-registry.jbei.org/help.htm \"target=_blank\">"
-                + "Help</a>");
+        SafeHtml helpHtml = SafeHtmlUtils.fromSafeConstant("<i class=\"color_444 " + FAIconType.BOOK.getStyleName()
+                                                                   + "\"></i> Help");
+        Anchor anchor = new Anchor(helpHtml, "https://public-registry.jbei.org/help.htm");
+        loggedInContentsPanel.setWidget(0, 7, anchor);
 
         return loggedInContentsPanel;
     }
