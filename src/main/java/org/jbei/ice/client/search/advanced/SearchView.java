@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SearchView extends Composite implements ISearchView {
@@ -44,6 +45,14 @@ public class SearchView extends Composite implements ISearchView {
         // add a break between filters and results
         layout.setWidget(0, 0, tableHeader);
         tableHeader.setVisible(false);
+
+        String noQueryHTML = "<div style=\"line-height: 1px; opacity: 0.7\">"
+                + "<i class=\"icon-exclamation-sign \" style=\"font-size: 9em; color: orange\"></i>"
+                + "<br><h2>NO SEARCH QUERY DETECTED</h2>"
+                + "<h5>PLEASE ENTER SEARCH TERMS AND/OR USE THE FILTERS IN THE DROP DOWN MENU</h5></div>";
+
+        layout.setHTML(1, 0, noQueryHTML);
+        layout.getFlexCellFormatter().setAlignment(1, 0, HasAlignment.ALIGN_CENTER, HasAlignment.ALIGN_MIDDLE);
     }
 
     @Override
