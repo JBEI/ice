@@ -1018,13 +1018,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean isWebOfRegistriesEnabled() {
-        ConfigurationController configurationController = ControllerFactory.getConfigurationController();
-        try {
-            String value = configurationController.getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-            return value.equalsIgnoreCase("yes");
-        } catch (ControllerException e) {
-            return false;
-        }
+        return ControllerFactory.getWebController().isWebEnabled();
     }
 
     @Override

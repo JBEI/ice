@@ -29,7 +29,7 @@ public class SearchView extends Composite implements ISearchView {
         layout.setCellPadding(0);
         initWidget(layout);
 
-        local = new HTML("Local Results");
+        local = new HTML("<i class=\"" + FAIconType.SEARCH.getStyleName() + "\"></i> Local Results");
         local.setStyleName("web_results_header_selected");
         web = new HTML("<i class=\"" + FAIconType.GLOBE.getStyleName()
                                + " opacity_hover\"></i> <a class=\"cell_mouseover\">Search Other Registries</a>");
@@ -46,7 +46,7 @@ public class SearchView extends Composite implements ISearchView {
         layout.setWidget(0, 0, tableHeader);
         tableHeader.setVisible(false);
 
-        String noQueryHTML = "<div style=\"line-height: 1px; opacity: 0.7\">"
+        String noQueryHTML = "<br><br><div style=\"line-height: 1px; opacity: 0.7\">"
                 + "<i class=\"icon-exclamation-sign \" style=\"font-size: 9em; color: orange\"></i>"
                 + "<br><h2>NO SEARCH QUERY DETECTED</h2>"
                 + "<h5>PLEASE ENTER SEARCH TERMS AND/OR USE THE FILTERS IN THE DROP DOWN MENU</h5></div>";
@@ -71,7 +71,7 @@ public class SearchView extends Composite implements ISearchView {
             @Override
             public void onClick(ClickEvent event) {
                 local.setStyleName("web_results_header_selected");
-                local.setHTML("Local Results");
+                local.setHTML("<i class=\"" + FAIconType.SEARCH.getStyleName() + "\"></i> Local Results");
                 web.setStyleName("web_results_header");
                 web.setHTML("<i class=\"" + FAIconType.GLOBE.getStyleName()
                                     + " opacity_hover\"></i> <a class=\"cell_mouseover\">Search Other Registries</a>");
@@ -89,8 +89,7 @@ public class SearchView extends Composite implements ISearchView {
                 local.setHTML("<i class=\"" + FAIconType.SEARCH.getStyleName()
                                       + " opacity_hover\"></i> <a class=\"cell_mouseover\">Search Locally</a>");
                 web.setStyleName("web_results_header_selected");
-                web.setHTML("<i class=\""
-                                    + FAIconType.GLOBE.getStyleName()
+                web.setHTML("<i class=\"" + FAIconType.GLOBE.getStyleName()
                                     + " opacity_hover\"></i> Results From Other Registries");
                 handler.onClick(event);
             }
