@@ -224,4 +224,8 @@ public interface RegistryService extends RemoteService {
     ArrayList<PartData> retrieveTransferredParts(String sessionId) throws AuthenticationException;
 
     boolean processTransferredParts(String sid, ArrayList<Long> partIds, boolean accept) throws AuthenticationException;
+
+    boolean enablePublicReadAccess(String sid, long entryId) throws AuthenticationException;
+
+    boolean disablePublicReadAccess(String sid, long entryId) throws AuthenticationException;
 }

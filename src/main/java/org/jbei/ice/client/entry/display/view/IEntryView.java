@@ -99,4 +99,6 @@ public interface IEntryView {
     void addFlagDelegate(Delegate<FlagEntry> flagEntryDelegate);
 
     void addComment(UserComment comment);
+
+    SequenceViewPanelPresenter getSequenceViewPanel();
 }

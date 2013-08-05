@@ -1074,16 +1074,12 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     @Override
-    public void processWebOfRegistryPartnerInformation(@WebParam(name = "url") String uri,
-            @WebParam(name = "partnerUrl") String name,
-            @WebParam(name = "add") boolean add) throws ServiceException {
-        Logger.info("API: processing web of registry partner " + name + "(" + uri + ")");
+    public void addRegistryPartner(@WebParam(name = "uri") String uri,
+            @WebParam(name = "name") String name) throws ServiceException {
+        Logger.info("API: adding web of registry partner " + name + "(" + uri + ")");
         WoRController controller = ControllerFactory.getWebController();
         try {
-            if (add)
-                controller.addWebPartner(uri, name);
-            else
-                controller.removeWebPartner(uri);
+            controller.addWebPartner(uri, name);
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
         }
@@ -1093,10 +1089,9 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean uploadParts(@WebParam(name = "partnerId") String partnerId,
             @WebParam(name = "parts") ArrayList<PartTransfer> parts)
             throws ServiceException {
-//        WoRController controller = ControllerFactory.getWebController();
-//        if( !controller.isWebEnabled() || !controller.isValidWebPartner(partnerId))
-//            return false;
-        // tODO : temporarily disabled the checked
+        WoRController controller = ControllerFactory.getWebController();
+        if (!controller.isWebEnabled() || !controller.isValidWebPartner(partnerId))
+            return false;
 
         Logger.info("Registry API: transmit entries from ");
         EntryController entryController = ControllerFactory.getEntryController();

@@ -35,12 +35,16 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
     private HTML makePublic;
     private SuggestBox permissionSuggestions;
     private boolean isViewingWriteTab;
+    private final ServiceDelegate<Boolean> removeAddPublicAccess;
+    private boolean publicReadEnabled;
 
-    public PartPermissionWidget() {
+    public PartPermissionWidget(ServiceDelegate<Boolean> removeAddPublicAccess) {
         layout = new FlexTable();
         initWidget(layout);
 
         initComponents();
+
+        this.removeAddPublicAccess = removeAddPublicAccess;
 
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
@@ -67,7 +71,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
         // input suggest box for adding permissions
         createSuggestWidget();
 
-        // handlers for the "+" icon used to show/hide the icons
+        // handlers for the "+" icon used to show/hide the icons as well as make public
         setAddClickHandlers();
 
         // contents go here
@@ -101,7 +105,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
         addWritePermission.addStyleName("edit_icon");
         addWritePermission.addStyleName("font-12em");
 
-        makePublic = new HTML("Enable Public Read Access");
+        makePublic = new HTML("<i class=\"" + FAIconType.GLOBE.getStyleName() + "\"></i> Enable Public Read Access");
         makePublic.setStyleName("permission_footer_link");
 
         permissionSuggestions = new SuggestBox(new PermissionSuggestOracle());
@@ -109,6 +113,19 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
         permissionSuggestions.setStyleName("permission_input_suggest");
         permissionSuggestions.getValueBox().getElement().setAttribute("placeHolder", "Enter user/group name");
         permissionSuggestions.setLimit(7);
+
+        // add read list public read access and hide by default
+        String iconStyle = FAIconType.GLOBE.getStyleName() + " blue";
+        readList.setHTML(0, 0, "<i class=\"" + iconStyle + "\"></i> Public read enabled");
+        Icon deleteIcon = new Icon(FAIconType.REMOVE);
+        deleteIcon.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                removeAddPublicAccess.execute(true);
+            }
+        });
+        deleteIcon.addStyleName("delete_icon");
+        readList.setWidget(0, 1, deleteIcon);
     }
 
     protected void createSuggestWidget() {
@@ -157,6 +174,12 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
                 if (!isViewingWriteTab)
                     return;
                 layout.getRowFormatter().setVisible(2, (!layout.getRowFormatter().isVisible(2)));
+            }
+        });
+        makePublic.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                removeAddPublicAccess.execute(false);
             }
         });
     }
@@ -244,12 +267,20 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
     @Override
     public void resetPermissionDisplay() {
         writeList.removeAllRows();
-        readList.removeAllRows();
+        for (int i = 1; i < readList.getRowCount(); i += 1)
+            readList.removeRow(i);
     }
 
     @Override
     public void setWidgetVisibility(boolean visible) {
         this.setVisible(visible);
+    }
+
+    @Override
+    public void showPublicReadAccess(boolean publicReadAccess) {
+        layout.getFlexCellFormatter().setVisible(4, 0, !publicReadAccess);
+        readList.getRowFormatter().setVisible(0, publicReadAccess);
+        publicReadEnabled = publicReadAccess;
     }
 
     /**
@@ -291,7 +322,8 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
                 readLabelPanel.setStyleName("permission_tab_inactive");
                 writeLabelPanel.setStyleName("permission_tab_active");
                 layout.setWidget(3, 0, writeList);
-                addReadPermission.setHTML("<span>" + readList.getRowCount() + "</span>");
+                int readCount = publicReadEnabled ? readList.getRowCount() : readList.getRowCount() - 1;
+                addReadPermission.setHTML("<span>" + readCount + "</span>");
                 addWritePermission.setHTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
             }
 

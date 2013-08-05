@@ -9,6 +9,11 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.TextArea;
 
+/**
+ * Widget that facilitates associating a sequence with an entry via copy paste
+ *
+ * @author Hector Plahar
+ */
 public class PasteSequenceWidget extends FlexTable {
 
     private Button saveButton;
@@ -18,7 +23,6 @@ public class PasteSequenceWidget extends FlexTable {
     private HandlerRegistration saveRegistration;
 
     public PasteSequenceWidget() {
-
         setWidth("100%");
         setCellPadding(0);
         setCellSpacing(0);

@@ -30,6 +30,8 @@ public class PermissionPresenter {
 
         void resetPermissionDisplay();
 
+        void showPublicReadAccess(boolean publicReadAccess);
+
         void setWidgetVisibility(boolean visible);
     }
 
@@ -129,5 +131,9 @@ public class PermissionPresenter {
     public void setCanEdit(boolean canEdit) {
         this.canEdit = canEdit;
         this.view.setWidgetVisibility(canEdit);
+    }
+
+    public void setPublicReadAccess(boolean publicAccess) {
+        view.showPublicReadAccess(publicAccess);
     }
 }

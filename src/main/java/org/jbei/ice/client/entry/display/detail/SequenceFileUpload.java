@@ -54,7 +54,7 @@ class SequenceFileUpload implements IsWidget, IView {
 
     public SequenceFileUpload(final long entryId) {
         SequenceFileUploadResource.INSTANCE.cellListStyle().ensureInjected();
-        label = new Label("Upload");
+        label = new Label("Add Sequence");
         label.setStyleName(SequenceFileUploadResource.INSTANCE.cellListStyle().downloadStyle());
 
         // renderer for options list

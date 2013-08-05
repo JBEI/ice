@@ -22,7 +22,7 @@ import org.jbei.ice.services.webservices.ServiceException;
 public class WoRController {
 
     private final RemotePartnerDAO dao;
-    public static final String NODE_MASTER = "registry.jbei.org";
+    public static final String NODE_MASTER = "registry-test.jbei.org";
 
     public WoRController() {
         dao = new RemotePartnerDAO();
@@ -135,7 +135,7 @@ public class WoRController {
             }
 
             RegistryAPIServiceClient client = RegistryAPIServiceClient.getInstance();
-            client.getAPIPortForURL(NODE_MASTER).processWebOfRegistryPartnerInformation(url, name, value);
+            client.getAPIPortForURL(NODE_MASTER).addRegistryPartner(url, name);
             return true;
         } catch (ControllerException e) {
             Logger.error(e);

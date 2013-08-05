@@ -359,6 +359,25 @@ public class PermissionsController {
         return folder.getOwnerEmail().equalsIgnoreCase(account.getEmail());
     }
 
+    public boolean enablePublicReadAccess(Account account, long partId) throws ControllerException {
+        AccessPermission permission = new AccessPermission();
+        permission.setType(AccessPermission.Type.READ_ENTRY);
+        permission.setTypeId(partId);
+        permission.setArticle(AccessPermission.Article.GROUP);
+        permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
+        return addPermission(account, permission) != null;
+    }
+
+    public boolean disablePublicReadAccess(Account account, long partId) throws ControllerException {
+        AccessPermission permission = new AccessPermission();
+        permission.setType(AccessPermission.Type.READ_ENTRY);
+        permission.setTypeId(partId);
+        permission.setArticle(AccessPermission.Article.GROUP);
+        permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
+        removePermission(account, permission);
+        return true;
+    }
+
     public Set<Folder> retrievePermissionFolders(Account account) throws ControllerException {
         Set<Group> groups = groupController.getAllGroups(account);
         try {
@@ -428,6 +447,8 @@ public class PermissionsController {
             // read groups
             Set<Group> readGroups = dao.retrieveGroupPermissions(entry, false, true);
             for (Group group : readGroups) {
+                if (group.getUuid().equalsIgnoreCase(GroupController.PUBLIC_GROUP_UUID))
+                    continue;
                 accessPermissions.add(new AccessPermission(AccessPermission.Article.GROUP, group.getId(),
                                                            AccessPermission.Type.READ_ENTRY, entry.getId(),
                                                            group.getLabel()));

@@ -1,6 +1,7 @@
 package org.jbei.ice.client.entry.display.detail;
 
 import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter.ISequenceView;
 import org.jbei.ice.client.entry.display.view.DeleteSequenceHandler;
@@ -29,15 +30,13 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
     private final SequenceFileDownload sequenceDownload;
     private final SequenceFileUpload sequenceUpload;
-    private final PartData partData;
+    private PartData partData;
     private final FlexTable layout;
     private HTMLPanel headerPanel;
     private final SequenceViewPanelPresenter presenter;
     private DeleteSequenceHandler deleteHandler;
-    private final boolean isEditMode;
 
-    public SequenceViewPanel(PartData partData, boolean isEdit) {
-        isEditMode = isEdit;
+    public SequenceViewPanel(PartData partData) {
         this.partData = partData;
         layout = new FlexTable();
         layout.setCellPadding(0);
@@ -58,33 +57,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         layout.getFlexCellFormatter().setHeight(1, 0, "10px");
         layout.getFlexCellFormatter().setColSpan(1, 0, 6);
 
-        displaySBOLVisual();
-
-        this.presenter = new SequenceViewPanelPresenter(this);
-    }
-
-    protected void displaySBOLVisual() {
-        if (isEditMode) {
-            layout.getFlexCellFormatter().setVisible(2, 0, false);
-            Label upload = new Label("Upload");
-            upload.setStyleName("footer_feedback_widget");
-            upload.addStyleName("display-inline");
-
-            Label paste = new Label("paste");
-            paste.setStyleName("footer_feedback_widget");
-            paste.addStyleName("display-inline");
-
-            String html = "<span class=\"font-80em\" style=\"color: #999\"><span id=\"upload_link\"></span>"
-                    + " or <span id=\"paste_sequence_link\"></span> sequence information</span>";
-            HTMLPanel panel = new HTMLPanel(html);
-            panel.add(upload, "upload_link");
-            panel.add(paste, "paste_sequence_link");
-
-            layout.setWidget(3, 0, panel);
-            layout.getFlexCellFormatter().setHeight(3, 0, "20px");
-            return;
-        }
-
+        // SBOL visual
         String imgUrl = "";
         if (partData.isHasSequence() && partData.getSbolVisualURL() != null) {
             imgUrl = "<img height=\"170px\" src=\"/download?type=sbol_visual&id=" + partData.getSbolVisualURL()
@@ -103,10 +76,45 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
         updateSequenceContents();
         html.setWidth(layout.getOffsetWidth() + "px");
+        this.presenter = new SequenceViewPanelPresenter(this);
     }
 
-    public SequenceViewPanel(PartData info) {
-        this(info, false);
+    /**
+     * switches panel to edit mode by hiding elements that are not
+     * necessarily useful like pigeon image view
+     */
+    public void switchToEditMode() {
+        // hide pigeon image
+        layout.getFlexCellFormatter().setVisible(2, 0, false);
+
+        // new header with only the update option
+        String html = "<span style=\"color: #233559; "
+                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">SEQUENCE</span>"
+                + "<div style=\"float: right\">"
+                + "<span id=\"sequence_options\"></span></div>";
+
+        HTMLPanel newHeader = new HTMLPanel(html);
+        newHeader.setStyleName("entry_sequence_sub_header");
+        newHeader.add(sequenceUpload.asWidget(), "sequence_options");
+        layout.setWidget(0, 0, newHeader);
+    }
+
+    public void switchToNewPartMode(PartData partData) {
+        this.partData = partData;
+
+        // new header with only the update option
+        updateSequenceContents();
+
+        // new header with only the update option
+        String html = "<span style=\"color: #233559; "
+                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">SEQUENCE</span>"
+                + "<div style=\"float: right\">"
+                + "<span id=\"sequence_options\"></span></div>";
+
+        HTMLPanel newHeader = new HTMLPanel(html);
+        newHeader.setStyleName("entry_sequence_sub_header");
+        newHeader.add(sequenceUpload.asWidget(), "sequence_options");
+        layout.setWidget(0, 0, newHeader);
     }
 
     @Override
@@ -154,16 +162,15 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
     private Widget createSequenceHeader() {
         String html = "<span style=\"color: #233559; "
-                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">"
-                + "SEQUENCE</span><div style=\"float: right\"><span id=\"delete_sequence_link\"></span>"
+                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">SEQUENCE</span>"
+                + "<div style=\"float: right\"><span id=\"delete_sequence_link\"></span>"
                 + "<span id=\"sequence_link\"></span>"
-                + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
+                + "<span id=\"header_separator_pipe\"></span>"
                 + "<span id=\"sequence_options\"></span>";
 
         if (partData.isHasSequence()) {
             html += " <span style=\"color: #262626; font-size: 0.75em;\">|</span> <span id=\"sbol_visual\"></span>";
         }
-
         html += "</div>";
 
         headerPanel = new HTMLPanel(html);
@@ -178,37 +185,43 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
         if (partData.isHasSequence()) {
             // delete, open in vector editor, download
-            Label label = new Label("Open");
-            label.addClickHandler(new SequenceHeaderHandler());
-            label.setStyleName("open_sequence_sub_link");
-            headerPanel.add(label, "sequence_link");
+            Label openSequenceLabel = new Label("Open");
+            openSequenceLabel.addClickHandler(new SequenceHeaderHandler());
+            openSequenceLabel.setStyleName("open_sequence_sub_link");
+            HTML pipe = new HTML("<span style=\"color: #262626; font-size: 0.75em;\">|</span>");
+            pipe.setStyleName("display-inline");
+
+            headerPanel.add(openSequenceLabel, "sequence_link");
+            headerPanel.add(pipe, "header_separator_pipe");
             headerPanel.add(sequenceDownload.asWidget(), "sequence_options");
             if (deleteHandler != null)
                 showSequenceDeleteLink(deleteHandler);
 
-            // show sbol visual only if not in edit mode
-            if (!isEditMode) {
-                // sbol visual
-                final Label sbVisual = new Label("Hide Pigeon Image");
-                sbVisual.setStyleName("open_sequence_sub_link");
-                sbVisual.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        if (layout.getFlexCellFormatter().isVisible(2, 0)) {
-                            sbVisual.setText("Show Pigeon Image");
-                            layout.getFlexCellFormatter().setVisible(2, 0, false);
-                        } else {
-                            sbVisual.setText("Hide Pigeon Image");
-                            layout.getFlexCellFormatter().setVisible(2, 0, true);
-                        }
+            // sbol visual
+            final Label sbVisual = new Label("Hide Pigeon Image");
+            sbVisual.setStyleName("open_sequence_sub_link");
+            sbVisual.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (layout.getFlexCellFormatter().isVisible(2, 0)) {
+                        sbVisual.setText("Show Pigeon Image");
+                        layout.getFlexCellFormatter().setVisible(2, 0, false);
+                    } else {
+                        sbVisual.setText("Hide Pigeon Image");
+                        layout.getFlexCellFormatter().setVisible(2, 0, true);
                     }
-                });
-                headerPanel.add(sbVisual, "sbol_visual");
-            }
-        } else if (!isEditMode) {
-            Label label = new Label("Create New");
+                }
+            });
+            headerPanel.add(sbVisual, "sbol_visual");
+        } else {
+            // Create New | upload
+            HTML label = new HTML("Create in VectorEditor <i class=\"" + FAIconType.EXTERNAL_LINK.getStyleName()
+                                          + "\"></i>");
             label.addClickHandler(new SequenceHeaderHandler());
             label.setStyleName("open_sequence_sub_link");
+            HTML pipe = new HTML("<span style=\"color: #262626; font-size: 0.75em;\">|</span>");
+            pipe.setStyleName("display-inline");
+            headerPanel.add(pipe, "header_separator_pipe");
             headerPanel.add(label, "sequence_link");
             headerPanel.add(sequenceUpload.asWidget(), "sequence_options");
         }

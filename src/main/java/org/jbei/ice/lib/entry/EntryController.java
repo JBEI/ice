@@ -975,10 +975,10 @@ public class EntryController {
         // viewing permissions is restricted to users who have write access
         if (partData.isCanEdit()) {
             try {
-                ArrayList<AccessPermission> accessPermissions = permissionsController.retrieveSetEntryPermissions(
-                        account,
-                        entry);
+                ArrayList<AccessPermission> accessPermissions =
+                        permissionsController.retrieveSetEntryPermissions(account, entry);
                 partData.setAccessPermissions(accessPermissions);
+                partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
             } catch (PermissionException e) {
                 Logger.error(e);
             }

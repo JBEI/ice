@@ -66,7 +66,8 @@ public class EntryPresenter extends AbstractPresenter {
     public EntryPresenter(final RegistryServiceAsync service, CollectionsPresenter collectionsPresenter,
             final HandlerManager eventBus, EntryContext context) {
         super(service, eventBus);
-        this.display = new EntryView(retrieveEntryTraceSequenceDetailsDelegate());
+        this.display = new EntryView(retrieveEntryTraceSequenceDetailsDelegate(),
+                                     createRemoveAddPublicAccessDelegate());
         this.currentContext = context;
         this.model = new EntryModel(service, this.display, eventBus);
         display.getMenu().setSelectionHandler(new MenuSelectionHandler());
@@ -96,6 +97,7 @@ public class EntryPresenter extends AbstractPresenter {
 
                 formUpdate.addCancelHandler(new UpdateFormCancelHandler());
                 formUpdate.addSubmitHandler(new UpdateFormSubmitHandler(formUpdate));
+                formUpdate.setSequenceViewPanelPresenter(display.getSequenceViewPanel());
                 if (entryAddPresenter != null)
                     formUpdate.setPreferences(entryAddPresenter.getPreferences());
             }
@@ -169,9 +171,6 @@ public class EntryPresenter extends AbstractPresenter {
 
     public void showCreateEntry(EntryAddType addType) {
         IEntryFormSubmit newForm = entryAddPresenter.getEntryForm(addType, new NewFormCancelHandler());
-        SequenceViewPanelPresenter sequencePresenter = newForm.getSequenceViewPanelPresenter();
-        UploadPasteSequenceHandler handler = new UploadPasteSequenceHandler(service, eventBus, sequencePresenter);
-        sequencePresenter.addSequencePasteHandler(handler);
 
         this.formSubmit = newForm;
         display.showNewForm(newForm);
@@ -383,6 +382,32 @@ public class EntryPresenter extends AbstractPresenter {
                     public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
                         display.setSequenceData(result, currentInfo);
                         display.getMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
+                    }
+                }.go(eventBus);
+            }
+        };
+    }
+
+    private ServiceDelegate<Boolean> createRemoveAddPublicAccessDelegate() {
+        return new ServiceDelegate<Boolean>() {
+            @Override
+            public void execute(final Boolean remove) {
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        if (remove)
+                            service.disablePublicReadAccess(ClientController.sessionId, currentInfo.getId(), callback);
+                        else
+                            service.enablePublicReadAccess(ClientController.sessionId, currentInfo.getId(), callback);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        if (!result)
+                            return;
+
+                        display.getPermissionsWidget().setPublicReadAccess(!remove);
                     }
                 }.go(eventBus);
             }

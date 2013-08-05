@@ -161,10 +161,11 @@ public class CollectionsPresenter extends AbstractPresenter {
                 if (type == null)
                     return;
 
-                if (entryViewPresenter == null) { //TODO : when user navigates to another page and returns this is null
+                if (entryViewPresenter == null) {
                     entryViewPresenter = new EntryPresenter(model.getService(), CollectionsPresenter.this,
                                                             model.getEventBus(), null);
                     entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
+                    // TODO : sequence panel is null
                 }
 
                 selectionModel.setSelected(type, false);

@@ -73,8 +73,8 @@ public class EntryView extends Composite implements IEntryView {
     private final HashMap<EntryType, EntryDataView> viewCache;
     private EntryDataView currentView;
 
-    public EntryView(Delegate<Long> retrieveSequenceTracesDelegate) {
-        permissions = new PartPermissionWidget();
+    public EntryView(Delegate<Long> retrieveSequenceTracesDelegate, ServiceDelegate<Boolean> removeAddPublicAccess) {
+        permissions = new PartPermissionWidget(removeAddPublicAccess);
         visibility = new VisibilityWidget();
 
         attachmentMenu = new AttachmentListMenu();
@@ -261,6 +261,11 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
+    public SequenceViewPanelPresenter getSequenceViewPanel() {
+        return currentView.getSequencePanel().getPresenter();
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public SequenceViewPanelPresenter setEntryInfoForView(PartData info, ServiceDelegate<PartSample> handler) {
         boolean showEdit = info.isCanEdit();
@@ -283,6 +288,7 @@ public class EntryView extends Composite implements IEntryView {
         sequenceViewPanel.getPresenter().setIsCanEdit(showEdit, deleteSequenceHandler);
 
         getPermissionsWidget().setCanEdit(showEdit);
+        getPermissionsWidget().setPublicReadAccess(info.isPublicRead());
         getVisibilityWidget().setVisibility(info.getVisibility());
 
         String ownerId = info.getOwnerId() == 0 ? null : Long.toString(info.getOwnerId());

@@ -117,15 +117,13 @@ public interface IRegistryAPI {
     SearchResults runSearch(@WebParam(name = "searchQuery") SearchQuery query) throws ServiceException;
 
     /**
-     * adds or removes a partner from the web of registries. This call is typically used for the node master
-     * who maintains (any maybe curates? the information)
+     * Adds a web of registry partner. The information is then broadcast to all existing partners
      *
-     * @param uri  unique resource identifier for the machine(s) hosting the partner
-     * @param name name of the partner. Should be unique but is not enforced
-     * @param add  whether to add or remove partner
+     * @param uri  unique resource identifier for the partner. typically the domain name
+     * @param name display name for the partner
      * @throws ServiceException
      */
-    void processWebOfRegistryPartnerInformation(String uri, String name, boolean add) throws ServiceException;
+    void addRegistryPartner(String uri, String name) throws ServiceException;
 
     /**
      * WARNING

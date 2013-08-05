@@ -666,7 +666,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     @Override
-    public SequenceViewPanelPresenter getSequenceViewPanelPresenter() {
-        return null;  // TODO
+    public void setSequenceViewPanelPresenter(SequenceViewPanelPresenter presenter) {
+        // TODO
     }
 }

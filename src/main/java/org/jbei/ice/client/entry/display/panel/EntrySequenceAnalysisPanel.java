@@ -115,7 +115,7 @@ public class EntrySequenceAnalysisPanel extends Composite {
 
     public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, PartData info) {
         sequenceTable.setData(data);
-        if (!data.isEmpty()) {
+        if (data != null && !data.isEmpty()) {
             layout.setWidget(2, 0, sequenceTable);
             if (info.isHasSequence()) {
                 Flash.Parameters params = new Flash.Parameters();

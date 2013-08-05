@@ -34,5 +34,5 @@ public interface IEntryFormSubmit {
 
     String getHeaderDisplay();
 
-    SequenceViewPanelPresenter getSequenceViewPanelPresenter();
+    void setSequenceViewPanelPresenter(SequenceViewPanelPresenter panel);
 }

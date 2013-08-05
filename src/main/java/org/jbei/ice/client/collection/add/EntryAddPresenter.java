@@ -12,6 +12,8 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
 import org.jbei.ice.client.entry.display.EntryPresenter;
+import org.jbei.ice.client.entry.display.detail.SequenceViewPanel;
+import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.display.view.AttachmentItem;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -221,6 +223,11 @@ public class EntryAddPresenter {
 
         if (preferences != null)
             form.setPreferences(preferences);
+
+        // create sequence panel
+        SequenceViewPanel panel = new SequenceViewPanel(form.getEntry());
+        SequenceViewPanelPresenter panelPresenter = new SequenceViewPanelPresenter(panel);
+        form.setSequenceViewPanelPresenter(panelPresenter);
 
         form.addSubmitHandler(new ClickHandler() {
 

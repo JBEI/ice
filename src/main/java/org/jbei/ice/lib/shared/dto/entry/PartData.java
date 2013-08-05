@@ -1,15 +1,14 @@
 package org.jbei.ice.lib.shared.dto.entry;
 
 import java.util.ArrayList;
-import java.util.Date;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
-@XmlRootElement
+@XmlSeeAlso({StrainData.class, PlasmidData.class, ArabidopsisSeedData.class})
 public class PartData implements IDTOModel {
 
     private long id;
@@ -28,13 +27,14 @@ public class PartData implements IDTOModel {
     private String shortDescription;
     private String longDescription;
     private String references;
-    private Date creationTime;
-    private Date modificationTime;
+    private long creationTime;
+    private long modificationTime;
     private Integer bioSafetyLevel;
     private String intellectualProperty;
     private String partId;
     private String links; // comma separated list of links
     private String principalInvestigator;
+    private String principalInvestigatorEmail;
     private String selectionMarkers;
     private String fundingSource;
     private boolean hasAttachment;
@@ -65,6 +65,7 @@ public class PartData implements IDTOModel {
         accessPermissions = new ArrayList<AccessPermission>();
         comments = new ArrayList<UserComment>();
         linkedParts = new ArrayList<PartData>();
+        sequenceAnalysis = new ArrayList<SequenceAnalysisInfo>();
     }
 
     public String getRecordId() {
@@ -163,19 +164,25 @@ public class PartData implements IDTOModel {
         this.references = references;
     }
 
-    public Date getCreationTime() {
+    /**
+     * @return number of millisecs since the epoch when part was recorded
+     */
+    public long getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(long creationTime) {
         this.creationTime = creationTime;
     }
 
-    public Date getModificationTime() {
+    /**
+     * @return number of millisecs since epoch when part was updated
+     */
+    public long getModificationTime() {
         return modificationTime;
     }
 
-    public void setModificationTime(Date modificationTime) {
+    public void setModificationTime(long modificationTime) {
         this.modificationTime = modificationTime;
     }
 
@@ -399,5 +406,13 @@ public class PartData implements IDTOModel {
      */
     public ArrayList<PartData> getLinkedParts() {
         return linkedParts;
+    }
+
+    public String getPrincipalInvestigatorEmail() {
+        return principalInvestigatorEmail;
+    }
+
+    public void setPrincipalInvestigatorEmail(String principalInvestigatorEmail) {
+        this.principalInvestigatorEmail = principalInvestigatorEmail;
     }
 }

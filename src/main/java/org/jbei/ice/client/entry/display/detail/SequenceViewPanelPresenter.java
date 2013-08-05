@@ -4,6 +4,7 @@ import org.jbei.ice.client.entry.display.view.DeleteSequenceHandler;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.IsWidget;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
 /**
@@ -32,6 +33,8 @@ public class SequenceViewPanelPresenter {
         void showSequenceDeleteLink(DeleteSequenceHandler deleteHandler);
 
         void setFinishHandler(OnFinishUploaderHandler handler);
+
+        IsWidget asWidget();
     }
 
     private final ISequenceView view;
@@ -61,6 +64,10 @@ public class SequenceViewPanelPresenter {
 
     public PartData getPartData() {
         return view.getPartData();
+    }
+
+    public ISequenceView getView() {
+        return this.view;
     }
 
     public void setHasSequence(boolean result) {

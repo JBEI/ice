@@ -258,4 +258,8 @@ public interface RegistryServiceAsync {
             throws AuthenticationException;
 
     void processTransferredParts(String sid, ArrayList<Long> partIds, boolean accept, AsyncCallback<Boolean> async);
+
+    void disablePublicReadAccess(String sid, long entryId, AsyncCallback<Boolean> async);
+
+    void enablePublicReadAccess(String sid, long entryId, AsyncCallback<Boolean> async);
 }

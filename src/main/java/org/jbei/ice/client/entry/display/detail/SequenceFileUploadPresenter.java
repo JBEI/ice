@@ -59,14 +59,6 @@ public class SequenceFileUploadPresenter {
         }
     }
 
-    public String getPastedSequence() {
-        return this.view.getPastedSequence();
-    }
-
-    public void addSubmitSequenceHandler(ClickHandler handler) {
-        view.addSubmitSequencePasteHandler(handler);
-    }
-
     // upload options for sequence files
     public enum UploadOption {
         FILE("File Upload", "file"), PASTE("Paste Sequence", "paste");
