@@ -10,6 +10,8 @@ import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
+ * Presenter for {@link PartPermissionWidget}
+ *
  * @author Hector Plahar
  */
 public class PermissionPresenter {

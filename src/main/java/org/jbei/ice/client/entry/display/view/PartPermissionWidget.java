@@ -116,7 +116,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
 
         // add read list public read access and hide by default
         String iconStyle = FAIconType.GLOBE.getStyleName() + " blue";
-        readList.setHTML(0, 0, "<i class=\"" + iconStyle + "\"></i> Public read enabled");
+        readList.setHTML(0, 0, "<i class=\"" + iconStyle + "\"></i> Public");
         Icon deleteIcon = new Icon(FAIconType.REMOVE);
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
