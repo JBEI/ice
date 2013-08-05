@@ -241,6 +241,10 @@ public class BlastPlus {
     }
 
     public static void rebuildDatabase(boolean force) throws BlastException {
+        Path blastDir = Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR));
+        if (!Files.exists(blastDir))
+            throw new BlastException("Could not locate Blast installation in " + blastDir.toAbsolutePath().toString());
+
         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         final Path blastFolder = Paths.get(dataDir, BLAST_DB_FOLDER);
         File lockFile = Paths.get(blastFolder.toString(), LOCK_FILE_NAME).toFile();
@@ -250,7 +254,7 @@ public class BlastPlus {
                 Files.createDirectories(blastFolder);
 
             if (!force && blastDatabaseExists()) {
-                Logger.info("Blast database found in " + blastFolder.toString());
+                Logger.info("Blast database found in " + blastFolder.toAbsolutePath().toString());
                 return;
             }
 
@@ -259,7 +263,7 @@ public class BlastPlus {
                 if (lock == null)
                     return;
                 Logger.info("Rebuilding blast database");
-                rebuildSequenceDatabase();
+                rebuildSequenceDatabase(blastDir);
                 Logger.info("Blast database rebuild complete");
             }
         } catch (OverlappingFileLockException l) {
@@ -340,9 +344,10 @@ public class BlastPlus {
      * <p/>First dump the sequences from the sql database into a fasta file, than create the blast
      * database by calling formatBlastDb.
      *
+     * @param blastInstall the installation directory path for blast
      * @throws BlastException
      */
-    private static void rebuildSequenceDatabase() throws BlastException {
+    private static void rebuildSequenceDatabase(Path blastInstall) throws BlastException {
         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         final Path blastDb = Paths.get(dataDir, BLAST_DB_FOLDER);
 
@@ -354,7 +359,7 @@ public class BlastPlus {
             throw new BlastException(ioe);
         }
 
-        formatBlastDb(blastDb);
+        formatBlastDb(blastDb, blastInstall);
         try {
             Path fastaFile = Paths.get(dataDir, BLAST_DB_FOLDER, "bigfastafile");
             Files.move(newFastaFile, fastaFile, StandardCopyOption.REPLACE_EXISTING);
@@ -363,11 +368,9 @@ public class BlastPlus {
         }
     }
 
-    private static void formatBlastDb(Path blastDb) throws BlastException {
+    private static void formatBlastDb(Path blastDb, Path blastInstall) throws BlastException {
         ArrayList<String> commands = new ArrayList<>();
-        String makeBlastDbCmd = Utils.getConfigValue(
-                ConfigurationKey.BLAST_INSTALL_DIR) + File.separator + "makeblastdb";
-
+        String makeBlastDbCmd = blastInstall.toAbsolutePath().toString() + File.separator + "makeblastdb";
         commands.add(makeBlastDbCmd);
         commands.add("-dbtype nucl");
         commands.add("-in");
