@@ -97,6 +97,7 @@ public enum FAIconType {
     FONT("icon-font"),
     FORWARD("icon-forward"),
     FULLSCREEN("icon-fullscreen"),
+    GEAR("icon-gear"),
     GIFT("icon-gift"),
     GITHUB("icon-github"),
     GITHUB_SIGN("icon-github-sign"),
