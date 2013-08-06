@@ -303,7 +303,7 @@ public class UserPanel extends Composite implements IAdminPanel {
         public void showError() {
             String message = "<div style=\"padding: 8px 14px; font-size: 14px; text-shadow: 0 1px 0 #f3f3f3; "
                     + "background-color: #f2dede; border-color: #b94a48; border-radius: 4px;\">"
-                    + "<i style=\"color: #b94a48\" class=\"" + FAIconType.BAN_CIRCLE.getStyleName()
+                    + "<i style=\"color: #b94a48\" class=\"" + FAIconType.WARNING_SIGN.getStyleName()
                     + "\"></i>Error creating account. Try again or contact the site admin.</div>";
 
             int row = inputTable.getRowCount() - 1;

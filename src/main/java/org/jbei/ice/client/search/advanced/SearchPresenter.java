@@ -240,10 +240,8 @@ public class SearchPresenter extends AbstractPresenter {
         }
 
         @Override
-        protected ArrayList<DataTableColumn<SearchResult, ?>> createColumns(ServiceDelegate<SearchResult>
-                delegate) {
-            ArrayList<DataTableColumn<SearchResult, ?>> columns =
-                    new ArrayList<DataTableColumn<SearchResult, ?>>();
+        protected ArrayList<DataTableColumn<SearchResult, ?>> createColumns(ServiceDelegate<SearchResult> delegate) {
+            ArrayList<DataTableColumn<SearchResult, ?>> columns = new ArrayList<DataTableColumn<SearchResult, ?>>();
             columns.add(addScoreColumn());
             columns.add(super.addTypeColumn(true));
             columns.add(addPartIdColumn(delegate, false, 120, com.google.gwt.dom.client.Style.Unit.PX));
@@ -251,6 +249,7 @@ public class SearchPresenter extends AbstractPresenter {
             columns.add(addSummaryColumn());
             columns.add(addWebPartnerName());
             columns.add(addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
+            super.addHasAttachmentColumn();
             super.addHasSequenceColumn();
             columns.add(super.addCreatedColumn(true));
             return columns;
@@ -259,7 +258,7 @@ public class SearchPresenter extends AbstractPresenter {
         protected DataTableColumn<SearchResult, SafeHtml> addWebPartnerName() {
             SafeHtmlCell htmlCell = new SafeHtmlCell();
             DataTableColumn<SearchResult, SafeHtml> partner =
-                    new DataTableColumn<SearchResult, SafeHtml>(htmlCell, ColumnField.ICE_PROJECT) {
+                    new DataTableColumn<SearchResult, SafeHtml>(htmlCell, ColumnField.REGISTRY_NAME) {
 
                         @Override
                         public SafeHtml getValue(SearchResult object) {
@@ -279,13 +278,13 @@ public class SearchPresenter extends AbstractPresenter {
                         }
                     };
 
-            this.addColumn(partner, "Project");
+            this.setColumnWidth(partner, 150, Unit.PX);
+            this.addColumn(partner, "Registry");
             return partner;
         }
 
         @Override
         protected DataTableColumn<SearchResult, SafeHtml> addNameColumn(final double width, Unit unit) {
-
             DataTableColumn<SearchResult, SafeHtml> nameColumn =
                     new DataTableColumn<SearchResult, SafeHtml>(new SafeHtmlCell(), ColumnField.NAME) {
 

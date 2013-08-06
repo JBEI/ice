@@ -63,7 +63,7 @@ public class TransferredPartTable extends EntryDataTable<PartData> {
     protected DataTableColumn<PartData, SafeHtml> addWebPartnerName() {
         SafeHtmlCell htmlCell = new SafeHtmlCell();
         DataTableColumn<PartData, SafeHtml> partner =
-                new DataTableColumn<PartData, SafeHtml>(htmlCell, ColumnField.ICE_PROJECT) {
+                new DataTableColumn<PartData, SafeHtml>(htmlCell, ColumnField.REGISTRY_NAME) {
 
                     @Override
                     public SafeHtml getValue(PartData object) {

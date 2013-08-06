@@ -15,7 +15,7 @@ public enum ColumnField implements IDTOModel {
     CREATED("Created"),
     NAME("Name"),
     SUMMARY("Summary"),
-    ICE_PROJECT("Project ID"),
+    REGISTRY_NAME("Registry Name"),
     OWNER("Owner"),
     STATUS("Status"),
     BIT_SCORE("Bit Score"),
