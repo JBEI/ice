@@ -16,12 +16,6 @@ public class SearchResult extends HasEntryData implements Comparable<SearchResul
     private String eValue;
     private String alignment;
     private int queryLength;
-    private int alignmentLength;
-    private float bitScore;
-
-    private float percentId;
-    private float relativeScore;
-
     private float score;
     private float maxScore;
     private String webPartnerName;
@@ -31,22 +25,6 @@ public class SearchResult extends HasEntryData implements Comparable<SearchResul
     public SearchResult() {
         matchDetails = new LinkedList<String>();
         eValue = "0";
-    }
-
-    public float getRelativeScore() {
-        return relativeScore;
-    }
-
-    public void setRelativeScore(float relativeScore) {
-        this.relativeScore = relativeScore;
-    }
-
-    public float getPercentId() {
-        return percentId;
-    }
-
-    public void setPercentId(float percentId) {
-        this.percentId = percentId;
     }
 
     public float getScore() {
@@ -116,21 +94,5 @@ public class SearchResult extends HasEntryData implements Comparable<SearchResul
 
     public void setQueryLength(int queryLength) {
         this.queryLength = queryLength;
-    }
-
-    public int getAlignmentLength() {
-        return alignmentLength;
-    }
-
-    public void setAlignmentLength(int alignmentLength) {
-        this.alignmentLength = alignmentLength;
-    }
-
-    public float getBitScore() {
-        return bitScore;
-    }
-
-    public void setBitScore(float bitScore) {
-        this.bitScore = bitScore;
     }
 }

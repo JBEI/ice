@@ -1,5 +1,7 @@
 package org.jbei.ice.client.search.blast;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -25,14 +27,12 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
             return;
         }
 
-//        Collections.sort(data, new Comparator<SearchResult>() {
-//            @Override
-//            public int compare(SearchResult o1, SearchResult o2) {
-//                Integer i1 = Integer.valueOf(o1.getAlignmentLength() / o1.getQueryLength() * 100);
-//                Integer i2 = Integer.valueOf(o2.getAlignmentLength() / o2.getQueryLength() * 100);
-//                return i1.compareTo(i2);
-//            }
-//        });
+        Collections.sort(data, new Comparator<SearchResult>() {
+            @Override
+            public int compare(SearchResult o1, SearchResult o2) {
+                return Float.compare(o1.getScore(), o2.getScore());
+            }
+        });
 
         results.addAll(data);
         resultSize = data.size();  // TODO : need a blastResult object as a wrapper

@@ -127,7 +127,17 @@ public class BlastResultsTable extends HasEntryDataTable<SearchResult> {
                 String html = "<table cellpadding=0 cellspacing=0><tr>";
                 int prevStart = 0;
                 String defColor = "#444";
-                String stripColor = "orange";
+                String stripColor = "";
+                // stripe color is based on alignment score
+                if (value.getScore() >= 200f)
+                    stripColor = "orange";
+                else if (value.getScore() < 200f && value.getScore() >= 80)
+                    stripColor = "green";
+                else if (value.getScore() < 80f && value.getScore() >= 50)
+                    stripColor = "blue";
+                else
+                    stripColor = "red";
+
                 int fillEnd = 100;
 
                 // for each stripe
