@@ -1700,13 +1700,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         if (account.getType() != AccountType.ADMIN)
             return false;
 
-        if (value)
-            Logger.info(account.getEmail() + ": joining web of registries");
-        else
-            Logger.info(account.getEmail() + ": dropping membership from web of registries");
         String uri = getThreadLocalRequest().getRequestURL().substring(
                 getThreadLocalRequest().getScheme().length() + 3);
         uri = uri.substring(0, uri.indexOf("/"));
+
+        if (value)
+            Logger.info(account.getEmail() + ": adding " + uri + " to web of registries");
+        else
+            Logger.info(account.getEmail() + ": dropping " + uri + " from web of registries");
         try {
             return ControllerFactory.getWebController().setEnable(uri, value);
         } catch (ControllerException e) {
