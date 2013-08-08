@@ -68,7 +68,7 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<PartDa
         int size = cachedEntries.size();
         if (size - 1 == idx + 1) {
             // fetch next
-            cacheMore(lastSortField, lastSortAsc, size, 1);
+            cacheMore(lastSortField, lastSortAsc, size, size + 1);
         }
 
         if (size == idx + 1)
@@ -174,6 +174,8 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<PartDa
     protected void cacheMore(final ColumnField field, final boolean ascending, int rangeStart, int rangeEnd) {
         GWT.log("Caching [" + rangeStart + " - " + rangeEnd + "]");
         int factor = (rangeEnd - rangeStart);  //  pages in advance
+        if (factor <= 0)
+            return;
         fetchEntryData(field, ascending, rangeStart, factor, false);
     }
 

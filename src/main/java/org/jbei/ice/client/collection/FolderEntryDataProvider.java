@@ -121,7 +121,7 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
     protected void fetchEntryData(ColumnField field, boolean asc, final int start, final int factor,
             final boolean reset) {   // if reset setFolderData() is called instead of adding to cache
 
-        if (!reset && (cachedEntries.size() == resultSize || cachedEntries.size() >= (start + factor))) {
+        if (!reset && cachedEntries.size() >= (start + factor)) {
             updateRowData(start, cachedEntries.subList(start, (start + factor)));
             return;
         }
