@@ -1,73 +1,43 @@
 package org.jbei.ice.client.entry.display.detail;
 
+import org.jbei.ice.client.common.widget.GenericPopup;
+import org.jbei.ice.client.common.widget.ICanReset;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Widget that facilitates associating a sequence with an entry via copy paste
+ * Widget that facilitates associating a sequence with an entry via pasting/entering
+ * the raw sequence
  *
  * @author Hector Plahar
  */
-public class PasteSequenceWidget extends FlexTable {
+public class PasteSequenceWidget implements ICanReset {
 
-    private Button saveButton;
-    private Button cancelButton;
     private TextArea area;
-    private DialogBox box;
     private HandlerRegistration saveRegistration;
+    private final GenericPopup popup;
 
     public PasteSequenceWidget() {
-        setWidth("100%");
-        setCellPadding(0);
-        setCellSpacing(0);
-
         initComponents();
-
-        setWidget(0, 0, area);
-        getFlexCellFormatter().setColSpan(0, 0, 2);
-
-        setWidget(1, 0, saveButton);
-        getCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_RIGHT);
-        setWidget(1, 1, cancelButton);
-        getCellFormatter().setWidth(1, 1, "70px");
+        popup = new GenericPopup(this, "<b class=\"font-95em\">Paste Sequence</b>");
     }
 
     private void initComponents() {
-        saveButton = new Button("Save");
-        cancelButton = new Button("Cancel");
-        cancelButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                area.setText("");
-                box.hide();
-            }
-        });
-
         area = new TextArea();
         area.setStyleName("input_box");
-        area.setWidth("600px");
+        area.setWidth("100%");
         area.setHeight("200px");
-
-        box = new DialogBox();
-        box.setWidth("620px");
-        box.setModal(true);
-        box.setHTML("Paste Sequence");
-        box.setGlassEnabled(true);
-        box.setWidget(this);
     }
 
     public void addSaveHandler(final ClickHandler handler) {
         if (saveRegistration != null)
             saveRegistration.removeHandler();
 
-        saveRegistration = saveButton.addClickHandler(new ClickHandler() {
+        saveRegistration = popup.addSaveButtonHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -87,12 +57,20 @@ public class PasteSequenceWidget extends FlexTable {
     }
 
     public void showDialog() {
-        area.setText("");
-        box.center();
+        popup.showDialog();
     }
 
     public void hideDialog() {
+        popup.hideDialog();
+    }
+
+    @Override
+    public void reset() {
         area.setText("");
-        box.hide();
+    }
+
+    @Override
+    public Widget asWidget() {
+        return area;
     }
 }

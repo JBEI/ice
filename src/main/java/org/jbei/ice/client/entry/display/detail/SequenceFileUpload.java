@@ -5,7 +5,6 @@ import java.util.Arrays;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.client.entry.display.detail.SequenceFileDownload.SequenceFileDownloadResource;
 import org.jbei.ice.client.entry.display.detail.SequenceFileUploadPresenter.IView;
-import org.jbei.ice.client.entry.display.detail.SequenceFileUploadPresenter.UploadOption;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
@@ -19,11 +18,11 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
 /**
- * UI widget that allows users to upload sequence information
- * and associate them with a specified entry (via constructor param).
+ * UI widget that allows users to upload or paste sequence information
+ * and associate them with a specified entry or have a new one created if being used
+ * in a create entry form
  *
  * @author Hector Plahar
  */
@@ -62,7 +61,8 @@ class SequenceFileUpload implements IsWidget, IView {
 
             @Override
             public void render(Context context, UploadOption value, SafeHtmlBuilder sb) {
-                sb.appendHtmlConstant("<span>" + value.toString() + "</span>");
+                sb.appendHtmlConstant("<span class=\"font-85em\"><i class=\"" + value.getIconType().getStyleName()
+                                              + "\"></i> " + value.toString() + "</span>");
             }
         }, SequenceFileDownloadResource.INSTANCE);
 
@@ -78,11 +78,6 @@ class SequenceFileUpload implements IsWidget, IView {
         new SequenceFileUploadPresenter(this);
     }
 
-    public void setFileUploadWidgetFinishHandler(OnFinishUploaderHandler handler) {
-        this.fileUploadWidget.setFinishHandler(handler);
-    }
-
-    @Override
     public void addSubmitSequencePasteHandler(ClickHandler handler) {
         pasteSequenceWidget.addSaveHandler(handler);
     }

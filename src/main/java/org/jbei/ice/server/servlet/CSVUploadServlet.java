@@ -12,11 +12,9 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.utils.Utils;
 
 import au.com.bytecode.opencsv.CSVReader;
 import gwtupload.server.UploadAction;
@@ -27,11 +25,11 @@ import org.apache.commons.fileupload.FileItem;
  * @author Hector Plahar
  */
 public class CSVUploadServlet extends UploadAction {
+
     private static final long serialVersionUID = 1L;
+    private static final String COOKIE_NAME = "jbei_ice_cookie";
 
     private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
-        final String COOKIE_NAME = Utils.getConfigValue(ConfigurationKey.COOKIE_NAME);
-
         for (Cookie cookie : cookies) {
             if (COOKIE_NAME.equals(cookie.getName())) {
                 String sid = cookie.getValue();

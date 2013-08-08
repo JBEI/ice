@@ -9,7 +9,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.SuggestOracle;
 
 /**
- * A suggest oracle for making rpc calls for the suggestions
+ * A suggest oracle for making rpc calls for the permission suggestions.
+ * <p/>
+ * It accepts a request that essentially contains a substring to be
+ * used to find matching user/group name/labels.
  *
  * @author Hector Plahar
  */

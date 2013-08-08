@@ -258,11 +258,6 @@ public class GroupController {
 
     public Set<Group> getMatchingGroups(Account account, String query, int limit) throws ControllerException {
         try {
-//            ArrayList<Long>  = new ArrayList<>();
-//            for(Group group : account.getGroups()) {
-//
-//            }
-
             return dao.getMatchingGroups(account, query, limit);
         } catch (DAOException e) {
             Logger.error(e);

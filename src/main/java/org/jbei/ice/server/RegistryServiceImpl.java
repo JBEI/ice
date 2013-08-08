@@ -66,6 +66,7 @@ import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
@@ -1340,7 +1341,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean updateEntry(String sid, PartData info) throws AuthenticationException {
+    public Long updateEntry(String sid, PartData info) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
 
@@ -1348,14 +1349,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             EntryController controller = ControllerFactory.getEntryController();
             Entry existing = controller.get(account, info.getId());
             Entry entry = InfoToModelFactory.infoToEntry(info, existing);
-            controller.update(account, entry);
-            return true;
+            return controller.update(account, entry).getId();
         } catch (ControllerException e) {
             Logger.error(e);
         } catch (PermissionException ce) {
             Logger.warn(ce.getMessage());
         }
-        return false;
+
+        return null;
     }
 
     @Override
@@ -1539,6 +1540,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             entry = entryController.get(account, part.getId());
             if (entry == null) {
                 entry = EntryUtil.createEntryFromType(part.getType(), account.getFullName(), account.getEmail());
+                entry.setVisibility(Visibility.DRAFT.getValue());
                 entry = entryController.createEntry(account, entry, null);
             }
         } catch (ControllerException e) {

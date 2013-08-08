@@ -92,7 +92,7 @@ public interface RegistryServiceAsync {
     void addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds,
             AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
 
-    void updateEntry(String sid, PartData info, AsyncCallback<Boolean> callback) throws AuthenticationException;
+    void updateEntry(String sid, PartData info, AsyncCallback<Long> callback) throws AuthenticationException;
 
     void retrieveStorageSchemes(String sessionId, EntryType type,
             AsyncCallback<HashMap<PartSample, ArrayList<String>>> callback);

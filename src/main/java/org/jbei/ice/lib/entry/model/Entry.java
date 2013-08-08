@@ -424,6 +424,8 @@ public class Entry implements IModel {
 
     @XmlTransient
     public Date getModificationTime() {
+        if (modificationTime == null)
+            return creationTime;
         return modificationTime;
     }
 

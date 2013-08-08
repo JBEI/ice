@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.display.detail;
 
+import java.util.NoSuchElementException;
+
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Flash;
@@ -19,7 +21,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
 /**
  * Widget that displays the sequence file on the general view
@@ -117,11 +118,6 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         layout.setWidget(0, 0, newHeader);
     }
 
-    @Override
-    public void setFinishHandler(OnFinishUploaderHandler handler) {
-        sequenceUpload.setFileUploadWidgetFinishHandler(handler);
-    }
-
     public void setDeleteHandler(DeleteSequenceHandler handler) {
         this.deleteHandler = handler;
         updateSequenceHeaders();
@@ -212,7 +208,11 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
                     }
                 }
             });
-            headerPanel.add(sbVisual, "sbol_visual");
+            try {
+                headerPanel.add(sbVisual, "sbol_visual");
+            } catch (NoSuchElementException noSuchElementException) {
+                // edit mode
+            }
         } else {
             // Create New | upload
             HTML label = new HTML("Create in VectorEditor <i class=\"" + FAIconType.EXTERNAL_LINK.getStyleName()

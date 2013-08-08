@@ -37,6 +37,8 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
     private boolean isViewingWriteTab;
     private final ServiceDelegate<Boolean> removeAddPublicAccess;
     private boolean publicReadEnabled;
+    private static final String groupIconStyle = FAIconType.GROUP.getStyleName() + " permission_group";
+    private static final String profileIconStyle = FAIconType.USER.getStyleName() + " permission_user";
 
     public PartPermissionWidget(ServiceDelegate<Boolean> removeAddPublicAccess) {
         layout = new FlexTable();
@@ -126,6 +128,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
         });
         deleteIcon.addStyleName("delete_icon");
         readList.setWidget(0, 1, deleteIcon);
+        readList.getRowFormatter().setVisible(0, false);
     }
 
     protected void createSuggestWidget() {
@@ -223,10 +226,10 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
         String display;
 
         if (item.getArticle() == AccessPermission.Article.GROUP) {
-            iconStyle = FAIconType.GROUP.getStyleName() + " permission_group";
+            iconStyle = groupIconStyle;
             display = item.getDisplay();
         } else {
-            iconStyle = FAIconType.USER.getStyleName() + " permission_user";
+            iconStyle = profileIconStyle;
             display = "<a href=\"#" + Page.PROFILE.getLink() + ";id="
                     + item.getArticleId() + "\">" + item.getDisplay() + "</a>";
         }
@@ -246,20 +249,28 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
 
     @Override
     public void removeReadItem(AccessPermission item) {
-        removePermissionItem(readList, item);
+        removePermission(item, readList, 1);
     }
 
     @Override
     public void removeWriteItem(AccessPermission item) {
-        removePermissionItem(writeList, item);
+        removePermission(item, writeList, 0);
     }
 
-    protected void removePermissionItem(FlexTable table, AccessPermission item) {
-        for (int i = 0; i < table.getRowCount(); i += 1) {
+    private void removePermission(AccessPermission item, FlexTable table, int rowStart) {
+        for (int i = rowStart; i < table.getRowCount(); i += 1) {
             String html = table.getHTML(i, 0);
-            if (html.contains(Page.PROFILE.getLink() + ";id=" + item.getArticleId())) {
-                table.removeRow(i);
+            if (item.getArticle() == AccessPermission.Article.GROUP) {
+                if (html.contains(groupIconStyle) & html.contains(item.getDisplay())) {
+                    table.removeRow(i);
+                    break;
+                }
                 break;
+            } else if (item.getArticle() == AccessPermission.Article.ACCOUNT) {
+                if (html.contains(Page.PROFILE.getLink() + ";id=" + item.getArticleId())) {
+                    table.removeRow(i);
+                    break;
+                }
             }
         }
     }
@@ -299,7 +310,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
         @Override
         public void onClick(ClickEvent event) {
             HTMLTable.Cell cell = layout.getCellForEvent(event);
-            if (cell.getRowIndex() != 1)
+            if (cell == null || cell.getRowIndex() != 1)
                 return;
 
             if (isViewingWriteTab) {

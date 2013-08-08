@@ -21,6 +21,7 @@ import org.jbei.ice.lib.utils.Utils;
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 public class SampleController {
+
     private final SampleDAO dao;
     private final PermissionsController permissionsController;
     private final StorageController storageController;
@@ -123,7 +124,7 @@ public class SampleController {
      * @return ArrayList of {@link Sample}s.
      * @throws ControllerException
      */
-    public ArrayList<Sample> getSamples(Entry entry) throws ControllerException {
+    public ArrayList<Sample> getSamples(long entry) throws ControllerException {
         ArrayList<Sample> samples;
         try {
             samples = dao.getSamplesByEntry(entry);

@@ -143,6 +143,14 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         references = createTextArea("640px", "50px");
         ip = createTextArea("640px", "50px");
         notesText = new TextArea();
+
+        sequencePanel = new SequenceViewPanel(entryInfo);
+
+        // are we creating a new part or updating an existing one
+        if (this.entryInfo.getId() > 0)
+            this.sequencePanel.switchToEditMode();
+        else
+            this.sequencePanel.switchToNewPartMode(this.entryInfo);
     }
 
     public T getEntryInfo() {
@@ -259,7 +267,6 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
 
     @Override
     public FocusWidget validateForm() {
-
         FocusWidget invalid = null;
 
         // name
@@ -392,14 +399,7 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
     }
 
     @Override
-    public void setSequenceViewPanelPresenter(SequenceViewPanelPresenter viewPanelPresenter) {
-        this.sequencePanel = (SequenceViewPanel) viewPanelPresenter.getView().asWidget();
-
-        // not entirely sure I am comfortable with this
-        if (this.entryInfo.getId() > 0)
-            this.sequencePanel.switchToEditMode();
-        else
-            this.sequencePanel.switchToNewPartMode(this.entryInfo);
-        layout.setWidget(2, 0, sequencePanel);
+    public SequenceViewPanelPresenter getSequenceViewPresenter() {
+        return sequencePanel.getPresenter();
     }
 }

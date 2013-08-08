@@ -5,7 +5,6 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.IsWidget;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
 
 /**
  * Presenter for {@link SequenceViewPanel}
@@ -32,8 +31,6 @@ public class SequenceViewPanelPresenter {
 
         void showSequenceDeleteLink(DeleteSequenceHandler deleteHandler);
 
-        void setFinishHandler(OnFinishUploaderHandler handler);
-
         IsWidget asWidget();
     }
 
@@ -46,10 +43,6 @@ public class SequenceViewPanelPresenter {
 
     public void addSequencePasteHandler(ClickHandler handler) {
         this.view.addSubmitSequencePasteHandler(handler);
-    }
-
-    public void addSequenceFileUploadHandler(OnFinishUploaderHandler handler) {
-        this.view.setFinishHandler(handler);
     }
 
     public void updateSequenceView() {

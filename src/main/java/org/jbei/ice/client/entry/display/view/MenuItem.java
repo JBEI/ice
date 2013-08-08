@@ -1,5 +1,11 @@
 package org.jbei.ice.client.entry.display.view;
 
+/**
+ * Represents an a menu item for parts. Currently shown on the
+ * right side
+ *
+ * @author Hector Plahar
+ */
 public class MenuItem {
 
     private final Menu menu;

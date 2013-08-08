@@ -96,7 +96,7 @@ public class EntrySamplePanel extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 String msg = "Streak on Agar Plate";
-                if (culture.getValue().booleanValue()) {
+                if (culture.getValue()) {
                     msg = "Liquid Culture";
                 }
                 delegate.execute(new FlagEntry(FlagEntry.FlagOption.REQUEST_SAMPLE, msg));

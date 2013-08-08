@@ -17,18 +17,22 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.view.client.MultiSelectionModel;
 
-public interface IEntryView {
-
-    Widget asWidget();
+/**
+ * Interface to displaying details about a specific part. Also handles the visual elements for
+ * context paging and part edit.
+ *
+ * @author Hector Plahar
+ */
+public interface IEntryView extends IsWidget {
 
     void setEntryHeader(String typeDisplay, String name, String owner, String ownerId, Date creationDate);
 
     void showSequenceView(PartData info);
 
-    IEntryFormSubmit showUpdateForm(PartData info);
+    void showUpdateForm(IEntryFormSubmit form, PartData info);
 
     PermissionPresenter getPermissionsWidget();
 

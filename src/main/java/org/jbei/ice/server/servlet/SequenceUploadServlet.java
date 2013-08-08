@@ -1,8 +1,13 @@
 package org.jbei.ice.server.servlet;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
+import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -12,22 +17,15 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.utils.Utils;
 
-import gwtupload.server.UploadAction;
-import gwtupload.server.exceptions.UploadActionException;
 import org.apache.commons.fileupload.FileItem;
 
-public class SequenceUploadServlet extends UploadAction {
+public class SequenceUploadServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
+    private static final String COOKIE_NAME = "jbei_ice_cookie";
 
-    private Account isLoggedIn(AccountController controller, Cookie[] cookies)
-            throws ControllerException {
-
-        final String COOKIE_NAME = Utils.getConfigValue(ConfigurationKey.COOKIE_NAME);
-
+    private Account isLoggedIn(AccountController controller, Cookie[] cookies) throws ControllerException {
         for (Cookie cookie : cookies) {
             if (COOKIE_NAME.equals(cookie.getName())) {
                 String sid = cookie.getValue();
@@ -43,7 +41,32 @@ public class SequenceUploadServlet extends UploadAction {
     }
 
     @Override
-    public String executeAction(HttpServletRequest request, List<FileItem> sessionFiles) throws UploadActionException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doPost(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        List<FileItem> sessionFiles = (List<FileItem>) req.getSession().getAttribute("FILES");
+        String msg = executeAction(req, sessionFiles);
+        if (msg != null && !msg.trim().isEmpty()) {
+            sendServerResponse(resp, msg);
+        }
+    }
+
+    /**
+     * Writes a response to the client.
+     */
+    protected void sendServerResponse(HttpServletResponse response, String message) throws IOException {
+        response.setContentType("text/html; charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        out.print(message);
+        out.flush();
+        out.close();
+    }
+
+    public String executeAction(HttpServletRequest request, List<FileItem> sessionFiles) {
         Account account;
         AccountController controller = ControllerFactory.getAccountController();
 
@@ -67,9 +90,7 @@ public class SequenceUploadServlet extends UploadAction {
             return "";
         }
 
-        String sequenceUser = request.getParameter("seq");
         String entryId = request.getParameter("eid");
-        String type = request.getParameter("type");
 
         // check entry
         EntryController entryController = ControllerFactory.getEntryController();
@@ -84,22 +105,24 @@ public class SequenceUploadServlet extends UploadAction {
             return "Could not retrieve entry with id " + entryId;
         }
 
-        if ("file".equalsIgnoreCase(type)) {
+        for (FileItem item : sessionFiles) {
+            if (item.isFormField())
+                continue;
 
-            for (FileItem item : sessionFiles) {
-                if (item.isFormField())
-                    continue;
-
-                // get contents of file
-                sequenceUser = item.getString();
-                if (sequenceUser != null && !sequenceUser.isEmpty()) {
-                    removeSessionFileItems(request);
-                    return saveSequence(entry, account, sequenceUser);
-                }
+            // get contents of file
+            String sequenceUser = item.getString();
+            if (sequenceUser != null && !sequenceUser.isEmpty()) {
+                removeSessionFileItems(request);
+                return saveSequence(entry, account, sequenceUser);
             }
+            return saveSequence(entry, account, sequenceUser);
         }
 
-        return saveSequence(entry, account, sequenceUser);
+        return "Error: No file uploaded";
+    }
+
+    protected void removeSessionFileItems(HttpServletRequest request) {
+        request.getSession().removeAttribute("FILES");
     }
 
     private String saveSequence(Entry entry, Account account, String sequenceUser) {

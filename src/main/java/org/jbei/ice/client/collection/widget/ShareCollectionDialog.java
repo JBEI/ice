@@ -26,9 +26,9 @@ public class ShareCollectionDialog extends Composite {
 
     private final String collectionName;
     private HTML close;
+    private HTML cancel;
     private PopupPanel box;
     private final CollectionPermissionWidget permissionsWidget;
-    private final Callback<AccessPermission> addCallback;
     private final Callback<AccessPermission> removeCallback;
     private final Delegate<AccessPermission> deleteDelegate;
     private int userShareCount;
@@ -37,13 +37,13 @@ public class ShareCollectionDialog extends Composite {
     public ShareCollectionDialog(final CollectionMenu.MenuCell cell, String collectionName,
             final Delegate<AccessPermission> delegate) {
         FlexTable layout = new FlexTable();
-        layout.setCellPadding(0);
-        layout.setCellSpacing(0);
+//        layout.setCellPadding(0);
+//        layout.setCellSpacing(0);
         layout.setWidth("100%");
         initWidget(layout);
 
         layout.setStyleName("add_to_popup");
-        layout.addStyleName("pad-4");
+        layout.addStyleName("pad-8");
         layout.addStyleName("bg_white");
 
         this.collectionName = collectionName;
@@ -57,28 +57,6 @@ public class ShareCollectionDialog extends Composite {
         permissionsWidget = new CollectionPermissionWidget();
         permissionsWidget.setVisible(true);
         layout.setWidget(1, 0, permissionsWidget);
-
-        addCallback = new Callback<AccessPermission>() {
-            @Override
-            public void onSuccess(AccessPermission access) {
-                if (access.isCanWrite()) {
-                    permissionsWidget.addWriteItem(access, delegate);
-                } else if (access.isCanRead()) {
-                    permissionsWidget.addReadItem(access, delegate);
-                }
-
-                if (access.getArticle() == AccessPermission.Article.ACCOUNT)
-                    userShareCount += 1;
-                else
-                    groupShareCount += 1;
-
-                cell.setShared(userShareCount, groupShareCount);
-            }
-
-            @Override
-            public void onFailure() {
-            }
-        };
 
         removeCallback = new Callback<AccessPermission>() {
             @Override
@@ -96,10 +74,6 @@ public class ShareCollectionDialog extends Composite {
             public void onFailure() {
             }
         };
-    }
-
-    public Callback<AccessPermission> getAddCallback() {
-        return this.addCallback;
     }
 
     public Callback<AccessPermission> getRemoveCallback() {
@@ -141,6 +115,12 @@ public class ShareCollectionDialog extends Composite {
         box.setGlassEnabled(true);
         box.setGlassStyleName("dialog_box_glass");
         box.setWidget(this);
+
+        cancel = new HTML("Cancel");
+        cancel.setStyleName("display-inline");
+        cancel.addStyleName("footer_feedback_widget");
+        cancel.addStyleName("font-75em");
+        cancel.addClickHandler(closeHandler);
     }
 
     public void showDialog(ArrayList<AccessPermission> accessPermissions) {

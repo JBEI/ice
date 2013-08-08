@@ -270,12 +270,12 @@ public class BulkUploadController {
     }
 
     protected SampleStorage retrieveSampleStorage(Entry entry) {
-        ArrayList<Sample> samples;
+        ArrayList<Sample> samples = null;
         try {
             if (!sampleController.hasSample(entry))
                 return null;
 
-            samples = sampleController.getSamples(entry);
+//            samples = sampleController.getSamples(entry);
         } catch (ControllerException e) {
             return null;
         }

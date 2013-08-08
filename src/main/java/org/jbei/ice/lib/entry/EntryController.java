@@ -724,6 +724,7 @@ public class EntryController {
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
+            entry.setVisibility(Visibility.OK.getValue());
             savedEntry = dao.updateEntry(entry);
 
             if (scheduleRebuild) {
@@ -751,7 +752,7 @@ public class EntryController {
             throw new ControllerException(de);
         }
         boolean schedule = sequenceController.hasSequence(entry.getId());
-//        if (entry.getVisibility() == Visibility.DRAFT.getValue())   TODO
+//        if (entry.getVisibility() == Visibility.DRAFT.getValue()) // TODO
 //            fullDelete(entry, schedule);
 //        else
         delete(account, entry, schedule);
@@ -923,7 +924,7 @@ public class EntryController {
         partData.setHasAttachment(!attachmentInfos.isEmpty());
 
         // samples
-        ArrayList<Sample> samples = ControllerFactory.getSampleController().getSamples(entry);
+        ArrayList<Sample> samples = null; //ControllerFactory.getSampleController().getSamples(entry);
         ArrayList<SampleStorage> sampleStorages = new ArrayList<>();
         if (samples != null && !samples.isEmpty()) {
             for (Sample sample : samples) {

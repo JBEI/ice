@@ -559,15 +559,15 @@ public class RegistryAPI implements IRegistryAPI {
         SampleController sampleController = ControllerFactory.getSampleController();
         EntryController entryController = ControllerFactory.getEntryController();
 
-        try {
-            return sampleController.getSamples(entryController.getByRecordId(account, entryId));
-        } catch (ControllerException e) {
-            Logger.error(e);
-
-            throw new ServiceException("Registry Service Internal Error!");
-        } catch (PermissionException e) {
-            throw new ServiceException("No permissions to view entry");
-        }
+//        try {
+        return null; //sampleController.getSamples(entryController.getByRecordId(account, entryId));
+//        } catch (ControllerException e) {
+//            Logger.error(e);
+//
+//            throw new ServiceException("Registry Service Internal Error!");
+//        } catch (PermissionException e) {
+//            throw new ServiceException("No permissions to view entry");
+//        }
     }
 
     /**

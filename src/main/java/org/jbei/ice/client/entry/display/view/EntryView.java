@@ -8,7 +8,6 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.client.collection.add.EntryFormFactory;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.display.ViewFactory;
@@ -64,7 +63,7 @@ public class EntryView extends Composite implements IEntryView {
     private final PagerWidget contextPager;
     private final EntrySamplePanel samplePanel;
     private final EntryCommentPanel commentPanel;
-    private final EntrySequenceAnalysisPanel sequencePanel;
+    private final EntrySequenceAnalysisPanel sequenceAnalysisPanel;
     private DeleteSequenceHandler deleteSequenceHandler;
     private final EntryLoadingWidget loadingWidget;
 
@@ -95,7 +94,7 @@ public class EntryView extends Composite implements IEntryView {
         samplePanel = new EntrySamplePanel();
 
         // sequence panel
-        sequencePanel = new EntrySequenceAnalysisPanel(retrieveSequenceTracesDelegate);
+        sequenceAnalysisPanel = new EntrySequenceAnalysisPanel(retrieveSequenceTracesDelegate);
 
         // general panel
         initGeneralPanel();
@@ -118,12 +117,12 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public MultiSelectionModel<SequenceAnalysisInfo> getSequenceTableSelectionModel() {
-        return sequencePanel.getSelectionModel();
+        return sequenceAnalysisPanel.getSelectionModel();
     }
 
     @Override
     public void setSequenceDeleteHandler(ClickHandler handler) {
-        sequencePanel.setTraceSequenceDeleteHandler(handler);
+        sequenceAnalysisPanel.setTraceSequenceDeleteHandler(handler);
     }
 
     private void initGeneralPanel() {
@@ -145,18 +144,12 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public IEntryFormSubmit showUpdateForm(PartData info) {
+    public void showUpdateForm(IEntryFormSubmit form, PartData info) {
         if (info.getCreatorEmail() == null || info.getCreatorEmail().isEmpty())
             info.setCreatorEmail(ClientController.account.getEmail());
         if (info.getCreator() == null || info.getCreator().isEmpty())
             info.setCreator(ClientController.account.getFullName());
-
-        IEntryFormSubmit form = EntryFormFactory.updateForm(info);
-        if (form == null)
-            return form;
-
         mainContent.setWidget(1, 0, form.asWidget());
-        return form;
     }
 
     @Override
@@ -167,7 +160,7 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.setWidget(1, 0, form.asWidget());
         permissions.resetPermissionDisplay();
         attachmentMenu.reset();
-        sequencePanel.reset();
+        sequenceAnalysisPanel.reset();
         samplePanel.reset();
         visibility.setVisible(false);
         menu.reset();
@@ -311,7 +304,7 @@ public class EntryView extends Composite implements IEntryView {
         attachmentMenu.setCanEdit(info.isCanEdit());
 
         samplePanel.setData(info.getSampleStorage(), handler);
-        sequencePanel.setSequenceData(info.getSequenceAnalysis(), info);
+        sequenceAnalysisPanel.setSequenceData(info.getSequenceAnalysis(), info);
         commentPanel.setSampleOptions(info.getSampleStorage());
         entryAction.setSampleOptions(info.getSampleStorage());
         return sequenceViewPanel.getPresenter();
@@ -377,8 +370,8 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void showSequenceView(PartData info) {
-        sequencePanel.setCurrentInfo(info);
-        mainContent.setWidget(1, 0, sequencePanel);
+        sequenceAnalysisPanel.setCurrentInfo(info);
+        mainContent.setWidget(1, 0, sequenceAnalysisPanel);
     }
 
     @Override
@@ -450,7 +443,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, PartData info) {
-        sequencePanel.setSequenceData(data, info);
-        mainContent.setWidget(1, 0, sequencePanel);
+        sequenceAnalysisPanel.setSequenceData(data, info);
+        mainContent.setWidget(1, 0, sequenceAnalysisPanel);
     }
 }

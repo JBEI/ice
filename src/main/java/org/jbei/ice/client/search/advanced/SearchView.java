@@ -14,6 +14,11 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * View for search page used for display related to searching
+ *
+ * @author Hector Plahar
+ */
 public class SearchView extends Composite implements ISearchView {
 
     private final FlexTable layout;

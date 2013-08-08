@@ -58,26 +58,4 @@ public class SequenceFileUploadPresenter {
             model.setSelected(selected, false);
         }
     }
-
-    // upload options for sequence files
-    public enum UploadOption {
-        FILE("File Upload", "file"), PASTE("Paste Sequence", "paste");
-
-        private String display;
-        private String type;
-
-        private UploadOption(String display, String type) {
-            this.display = display;
-            this.type = type;
-        }
-
-        @Override
-        public String toString() {
-            return this.display;
-        }
-
-        public String getType() {
-            return this.type;
-        }
-    }
 }

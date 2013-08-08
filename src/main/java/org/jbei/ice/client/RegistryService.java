@@ -84,7 +84,7 @@ public interface RegistryService extends RemoteService {
     FolderDetails removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids)
             throws AuthenticationException;
 
-    boolean updateEntry(String sid, PartData info) throws AuthenticationException;
+    Long updateEntry(String sid, PartData info) throws AuthenticationException;
 
     ArrayList<BulkUploadInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException;
 

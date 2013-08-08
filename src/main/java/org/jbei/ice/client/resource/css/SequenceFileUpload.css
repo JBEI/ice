@@ -38,6 +38,7 @@
 
 .cellListOddItem:hover, .cellListEvenItem:hover {
     background-color: #ededed;
+    color: #0082c0;
 }
 
 .cellListWidget {
@@ -47,5 +48,4 @@
     list-style: none;
     width: 120px;
     font-family: Arial;
-    font-size: 13px;
 }

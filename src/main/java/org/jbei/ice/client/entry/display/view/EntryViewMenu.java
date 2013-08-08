@@ -16,6 +16,11 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Handles menu options for viewing an entry
+ *
+ * @author Hector Plahar
+ */
 public class EntryViewMenu extends Composite implements HasClickHandlers {
 
     private final FlexTable table;
@@ -66,6 +71,18 @@ public class EntryViewMenu extends Composite implements HasClickHandlers {
                 table.getCellFormatter().setStyleName(currentRowSelection, 0, "selected");
             }
         });
+    }
+
+    public void switchToEditMode(boolean performSwitch) {
+        if (performSwitch)
+            table.getCellFormatter().setStyleName(Menu.GENERAL.ordinal(), 0, "selected");
+
+        for (Menu menu : Menu.values()) {
+            if (menu == Menu.GENERAL)
+                continue;
+
+            table.getRowFormatter().setVisible(menu.ordinal(), !performSwitch);
+        }
     }
 
     public Menu getCurrentSelection() {
