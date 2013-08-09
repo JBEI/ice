@@ -74,34 +74,6 @@ public class SampleDAO extends HibernateRepository<Sample> {
         return samples;
     }
 
-    public ArrayList<Sample> getSamplesByEntry(long entry) throws DAOException {
-        ArrayList<Sample> samples = null;
-
-        Session session = currentSession();
-        List list = session.createCriteria(Sample.class).add(Restrictions.eq("entry.id", entry)).list();
-        try {
-//            String queryString = "select from samples where entry_id = " + entry;
-//                    + Sample.class.getName()
-//                    + " as sample where sample.entry.id = :entry order by sample.id desc";
-
-//            Query query = session.createQuery(queryString);
-//
-//            query.setEntity("entry", entry);
-//
-//            @SuppressWarnings("rawtypes")
-//            List list = query.list();
-
-            if (list != null) {
-                samples = (ArrayList<Sample>) list;
-            }
-        } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve sample by entry: " + entry, e);
-        }
-
-        return samples;
-    }
-
-
     /**
      * Retrieve {@link Sample} objects associated with the given {@link Storage} object.
      *

@@ -18,6 +18,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class CollectionsModel {
+
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
 
@@ -112,51 +113,49 @@ public class CollectionsModel {
         }
     }
 
-    public void retrieveAllVisibleEntries(final Callback<FolderDetails> callback, int start, int limit) {
-        FolderDetails details = new FolderDetails(-1, "Available Entries");
-        service.retrieveAllVisibleEntrys(ClientController.sessionId, details, ColumnField.CREATED, false, start,
-                                         limit,
-                                         new AsyncCallback<FolderDetails>() {
+    public void retrieveAllVisibleEntries(final Callback<FolderDetails> callback, final int start, final int limit) {
+        new IceAsyncCallback<FolderDetails>() {
 
-                                             @Override
-                                             public void onSuccess(FolderDetails result) {
-                                                 callback.onSuccess(result);
-                                             }
+            @Override
+            protected void callService(AsyncCallback<FolderDetails> callback) throws AuthenticationException {
+                FolderDetails details = new FolderDetails(-1, "Available Entries");
+                service.retrieveAllVisibleEntrys(ClientController.sessionId, details, ColumnField.CREATED, false, start,
+                                                 limit, callback);
+            }
 
-                                             @Override
-                                             public void onFailure(Throwable caught) {
-                                                 if (caught instanceof AuthenticationException) {
-                                                     ClientController.sessionId = null;
-                                                     History.newItem(Page.LOGIN.getLink());
-                                                     return;
-                                                 }
+            @Override
+            public void onSuccess(FolderDetails result) {
+                callback.onSuccess(result);
+            }
 
-                                                 callback.onFailure();
-                                             }
-                                         });
+            @Override
+            public void serverFailure() {
+                callback.onFailure();
+            }
+        }.go(eventBus);
     }
 
-    public void retrieveEntriesForCurrentUser(final Callback<FolderDetails> callback, int start, int limit) {
-        String id = Long.toString(ClientController.account.getId());
-        service.retrieveUserEntries(ClientController.sessionId, id, ColumnField.CREATED, false, start, limit,
-                                    new AsyncCallback<FolderDetails>() {
+    public void retrieveEntriesForCurrentUser(final Callback<FolderDetails> callback, final int start,
+            final int limit) {
+        new IceAsyncCallback<FolderDetails>() {
 
-                                        @Override
-                                        public void onSuccess(FolderDetails result) {
-                                            callback.onSuccess(result);
-                                        }
+            @Override
+            protected void callService(AsyncCallback<FolderDetails> callback) throws AuthenticationException {
+                String id = Long.toString(ClientController.account.getId());
+                service.retrieveUserEntries(ClientController.sessionId, id, ColumnField.CREATED, false, start, limit,
+                                            callback);
+            }
 
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            if (caught instanceof AuthenticationException) {
-                                                ClientController.sessionId = null;
-                                                History.newItem(Page.LOGIN.getLink());
-                                                return;
-                                            }
+            @Override
+            public void onSuccess(FolderDetails result) {
+                callback.onSuccess(result);
+            }
 
-                                            callback.onFailure();
-                                        }
-                                    });
+            @Override
+            public void serverFailure() {
+                callback.onFailure();
+            }
+        }.go(eventBus);
     }
 
     public void addEntriesToFolder(final ArrayList<Long> destinationFolderIds, final ArrayList<Long> ids,

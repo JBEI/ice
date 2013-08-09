@@ -124,7 +124,7 @@ public class SampleController {
      * @return ArrayList of {@link Sample}s.
      * @throws ControllerException
      */
-    public ArrayList<Sample> getSamples(long entry) throws ControllerException {
+    public ArrayList<Sample> getSamples(Entry entry) throws ControllerException {
         ArrayList<Sample> samples;
         try {
             samples = dao.getSamplesByEntry(entry);

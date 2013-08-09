@@ -82,7 +82,7 @@ public class AccessPermission implements IDTOModel {
     }
 
     public enum Article implements IDTOModel {
-        ACCOUNT, GROUP;
+        ACCOUNT, GROUP
     }
 
     @Override

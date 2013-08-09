@@ -924,7 +924,7 @@ public class EntryController {
         partData.setHasAttachment(!attachmentInfos.isEmpty());
 
         // samples
-        ArrayList<Sample> samples = null; //ControllerFactory.getSampleController().getSamples(entry);
+        ArrayList<Sample> samples = ControllerFactory.getSampleController().getSamples(entry);
         ArrayList<SampleStorage> sampleStorages = new ArrayList<>();
         if (samples != null && !samples.isEmpty()) {
             for (Sample sample : samples) {

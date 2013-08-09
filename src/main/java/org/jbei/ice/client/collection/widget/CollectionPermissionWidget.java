@@ -2,9 +2,11 @@ package org.jbei.ice.client.collection.widget;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.entry.display.handler.ReadBoxSelectionHandler;
@@ -13,6 +15,7 @@ import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -30,39 +33,63 @@ public class CollectionPermissionWidget extends Composite {
 
     private FlexTable readListTable;
     private FlexTable writeListTable;
+    private FlexTable permissionLayout;
     private HTML addReadPermission;
     private HTML addWritePermission;
     private CheckBox makePublic;
     private SuggestBox permissionSuggestions;
+    private Delegate<ShareCollectionData> delegate;
+    private Callback<ShareCollectionData> callback;
+
     private boolean isViewingWriteTab;
     private final ArrayList<AccessPermission> readList;  // list of read permissions (includes groups)
     private final ArrayList<AccessPermission> writeList; // list of write permissions (includes groups)
+    private final CheckBox propagateBox;
+    private boolean isPublicReadEnabled;
+    private final long folderId;
 
-    public CollectionPermissionWidget() {
+    private static final String groupIconStyle = FAIconType.GROUP.getStyleName() + " permission_group";
+    private static final String profileIconStyle = FAIconType.USER.getStyleName() + " permission_user";
+
+    public CollectionPermissionWidget(Delegate<ShareCollectionData> permissionDelegate,
+            Callback<ShareCollectionData> callback, long folderId) {
         FlexTable layout = new FlexTable();
         initWidget(layout);
         readList = new ArrayList<AccessPermission>();
         writeList = new ArrayList<AccessPermission>();
+        this.delegate = permissionDelegate;
+        this.callback = callback;
 
         initComponents();
 
         layout.setWidth("100%");
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
+        this.folderId = folderId;
 
         int row = 0;
-        layout.setHTML(row, 0, "<br><i class=\"" + FAIconType.CHECK_EMPTY.getStyleName()
-                + "\"></i> Propagate permissions to parts <i class=\""
-                + FAIconType.QUESTION_SIGN.getStyleName() + "\"></i>");
-        layout.getFlexCellFormatter().setColSpan(row, 0, 2);
+
+        String html = "<span class=\"font-85em\" style=\"color: #555\">Propagate permissions to parts</span> "
+                + "<i class=\"" + FAIconType.QUESTION_SIGN.getStyleName() + "\"></i>";
+        propagateBox = new CheckBox(SafeHtmlUtils.fromSafeConstant(html));
+        layout.setWidget(row, 0, propagateBox);
 
         row += 1;
-        FlexTable permission = createPermissionWidget();
-        layout.setWidget(row, 0, permission);
-        layout.getFlexCellFormatter().setColSpan(row, 0, 2);
+        permissionLayout = createPermissionWidget();
+        layout.setWidget(row, 0, permissionLayout);
 
         // input suggest box for adding permissions
-        createSuggestWidget(permission);
+        createSuggestWidget();
+    }
+
+    public void reset() {
+        propagateBox.setValue(false);
+        makePublic.setValue(false);
+        readList.clear();
+        writeList.clear();
+        for (int i = 1; i < readListTable.getRowCount(); i += 1)
+            readListTable.removeRow(i);
+        writeListTable.removeAllRows();
     }
 
     protected FlexTable createPermissionWidget() {
@@ -87,8 +114,7 @@ public class CollectionPermissionWidget extends Composite {
 
         permissionLayout.setWidget(0, 1, writeLabelPanel);
         permissionLayout.getCellFormatter().setWidth(0, 1, "50%");
-        LayoutHeaderClickHandler handler = new LayoutHeaderClickHandler(permissionLayout, readLabelPanel,
-                                                                        writeLabelPanel);
+        LayoutHeaderClickHandler handler = new LayoutHeaderClickHandler(readLabelPanel, writeLabelPanel);
         permissionLayout.addClickHandler(handler);
 
         // contents
@@ -121,13 +147,13 @@ public class CollectionPermissionWidget extends Composite {
         return permissionLayout;
     }
 
-    protected void createSuggestWidget(final FlexTable table) {
+    protected void createSuggestWidget() {
         HTML deleteIcon = new HTML("<i class=\"delete_icon " + FAIconType.REMOVE.getStyleName() + "\"></i>");
         deleteIcon.setStyleName("display-inline");
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                table.getRowFormatter().setVisible(1, false);
+                permissionLayout.getRowFormatter().setVisible(1, false);
             }
         });
 
@@ -135,9 +161,21 @@ public class CollectionPermissionWidget extends Composite {
                                                              + "<span id=\"suggest_cancel\"></span>");
         permissionAddPanel.add(permissionSuggestions, "p_suggest_box");
         permissionAddPanel.add(deleteIcon, "suggest_cancel");
-        table.setWidget(1, 0, permissionAddPanel);
-        table.getFlexCellFormatter().setColSpan(1, 0, 2);
-        table.getRowFormatter().setVisible(1, false);
+        permissionLayout.setWidget(1, 0, permissionAddPanel);
+        permissionLayout.getFlexCellFormatter().setColSpan(1, 0, 2);
+        permissionLayout.getRowFormatter().setVisible(1, false);
+    }
+
+    /**
+     * shows/hides footer for "make public" as well as the icon
+     * that indicates the permissions in the read table
+     *
+     * @param publicReadAccess whether to enable or disable public read access
+     */
+    public void showPublicReadAccess(boolean publicReadAccess) {
+        permissionLayout.getFlexCellFormatter().setVisible(3, 0, !publicReadAccess);
+        readListTable.getRowFormatter().setVisible(0, publicReadAccess);
+        isPublicReadEnabled = publicReadAccess;
     }
 
     protected void initComponents() {
@@ -167,52 +205,71 @@ public class CollectionPermissionWidget extends Composite {
         permissionSuggestions.getValueBox().getElement().setAttribute("placeHolder", "Enter user/group name");
         permissionSuggestions.setLimit(7);
 
+        // add read list public read access and hide by default
+        String iconStyle = FAIconType.GLOBE.getStyleName() + " blue";
+        readListTable.setHTML(0, 0, "<i class=\"" + iconStyle + "\"></i> Public");
+        Icon deleteIcon = new Icon(FAIconType.REMOVE);
+        deleteIcon.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showPublicReadAccess(false);
+            }
+        });
+        deleteIcon.addStyleName("delete_icon");
+        readListTable.setWidget(0, 1, deleteIcon);
+        readListTable.getRowFormatter().setVisible(0, false);
 
+        // handler for when user adds a permission on the ui
         permissionSuggestions.addSelectionHandler(new ReadBoxSelectionHandler() {
             @Override
             public void updatePermission(AccessPermission access) {
+                access.setTypeId(folderId);
                 if (isViewingWriteTab) {
-                    access.setType(AccessPermission.Type.WRITE_ENTRY);
+                    access.setType(AccessPermission.Type.WRITE_FOLDER);
                     writeList.add(access);
-                    addWriteItem(access, null);
+                    addWriteItem(access);
                 } else {
-                    access.setType(AccessPermission.Type.READ_ENTRY);
+                    access.setType(AccessPermission.Type.READ_FOLDER);
                     readList.add(access);
-                    addReadItem(access, null);
+                    addReadItem(access);
                 }
+
                 permissionSuggestions.getValueBox().setText("");
                 permissionSuggestions.getValueBox().setFocus(true);
+                ShareCollectionData data = new ShareCollectionData(access, false, callback);
+                delegate.execute(data);
             }
         });
     }
 
-    public void addWriteItem(final AccessPermission item, final Delegate<AccessPermission> deleteDelegate) {
-        addPermissionItem(writeListTable, item, deleteDelegate);
+    public void addWriteItem(final AccessPermission item) {
+        writeList.add(item);
+        addPermissionItem(writeListTable, item);
         if (isViewingWriteTab)
             addReadPermission.setHTML("<b>" + readList.size() + "</b>");
         else
             addWritePermission.setHTML("<b>" + writeList.size() + "</b>");
     }
 
-    public void addReadItem(final AccessPermission item, final Delegate<AccessPermission> deleteDelegate) {
-        addPermissionItem(readListTable, item, deleteDelegate);
+    public void addReadItem(final AccessPermission item) {
+        readList.add(item);
+        addPermissionItem(readListTable, item);
         if (isViewingWriteTab)
             addReadPermission.setHTML("<span>" + readList.size() + "</span>");
         else
             addWritePermission.setHTML("<span>" + writeList.size() + "</span>");
     }
 
-    protected void addPermissionItem(FlexTable table, final AccessPermission item,
-            final Delegate<AccessPermission> deleteDelegate) {
+    protected void addPermissionItem(FlexTable table, final AccessPermission item) {
         int row = table.getRowCount();
         String iconStyle;
         String display;
 
         if (item.getArticle() == AccessPermission.Article.GROUP) {
-            iconStyle = FAIconType.GROUP.getStyleName() + " permission_group";
+            iconStyle = groupIconStyle;
             display = item.getDisplay();
         } else {
-            iconStyle = FAIconType.USER.getStyleName() + " permission_user";
+            iconStyle = profileIconStyle;
             display = "<a href=\"#" + Page.PROFILE.getLink() + ";id="
                     + item.getArticleId() + "\">" + item.getDisplay() + "</a>";
         }
@@ -223,35 +280,47 @@ public class CollectionPermissionWidget extends Composite {
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                deleteDelegate.execute(item);
+                delegate.execute(new ShareCollectionData(item, true, callback));
             }
         });
+
         deleteIcon.addStyleName("delete_icon");
         table.setWidget(row, 1, deleteIcon);
     }
 
     public void removeItem(AccessPermission access) {
-        if (access.isCanRead())
-            removePermissionItem(readListTable, access);
-        else if (access.isCanWrite())
-            removePermissionItem(writeListTable, access);
+        if (access.isCanRead()) {
+            removePermission(access, readListTable, 1);
+            readList.remove(access);
+        } else if (access.isCanWrite()) {
+            removePermission(access, writeListTable, 0);
+            writeList.remove(access);
+        }
     }
 
-    protected void removePermissionItem(FlexTable table, AccessPermission item) {
-        for (int i = 0; i < table.getRowCount(); i += 1) {
+    private void removePermission(AccessPermission item, FlexTable table, int rowStart) {
+        for (int i = rowStart; i < table.getRowCount(); i += 1) {
             String html = table.getHTML(i, 0);
-            if (html.contains(Page.PROFILE.getLink() + ";id=" + item.getArticleId())) {
-                table.removeRow(i);
+            if (item.getArticle() == AccessPermission.Article.GROUP) {
+                if (html.contains(groupIconStyle) & html.contains(item.getDisplay())) {
+                    table.removeRow(i);
+                    break;
+                }
                 break;
+            } else if (item.getArticle() == AccessPermission.Article.ACCOUNT) {
+                if (html.contains(Page.PROFILE.getLink() + ";id=" + item.getArticleId())) {
+                    table.removeRow(i);
+                    break;
+                }
             }
         }
     }
 
-    public void setPermissionData(ArrayList<AccessPermission> listAccess, Delegate<AccessPermission> deleteHandler) {
+    public void setPermissionData(ArrayList<AccessPermission> listAccess) {
         if (listAccess == null)
             return;
 
-        resetPermissionDisplay();
+        reset();
 
         for (AccessPermission access : listAccess) {
             // skip displaying permissions assigned to self
@@ -260,18 +329,11 @@ public class CollectionPermissionWidget extends Composite {
                 continue;
 
             if (access.isCanWrite()) {
-                addWriteItem(access, deleteHandler);
+                addWriteItem(access);
             } else if (access.isCanRead()) {
-                addReadItem(access, deleteHandler);
+                addReadItem(access);
             }
         }
-    }
-
-    public void resetPermissionDisplay() {
-        writeListTable.removeAllRows();
-        readListTable.removeAllRows();
-        writeList.clear();
-        readList.clear();
     }
 
     /**
@@ -281,17 +343,15 @@ public class CollectionPermissionWidget extends Composite {
 
         private HTMLPanel readLabelPanel;
         private HTMLPanel writeLabelPanel;
-        private final FlexTable table;
 
-        public LayoutHeaderClickHandler(FlexTable table, HTMLPanel readPanel, HTMLPanel writePanel) {
+        public LayoutHeaderClickHandler(HTMLPanel readPanel, HTMLPanel writePanel) {
             this.readLabelPanel = readPanel;
             this.writeLabelPanel = writePanel;
-            this.table = table;
         }
 
         @Override
         public void onClick(ClickEvent event) {
-            HTMLTable.Cell cell = table.getCellForEvent(event);
+            HTMLTable.Cell cell = permissionLayout.getCellForEvent(event);
             if (cell.getRowIndex() != 0)
                 return;
 
@@ -303,7 +363,7 @@ public class CollectionPermissionWidget extends Composite {
                 isViewingWriteTab = false;
                 readLabelPanel.setStyleName("permission_tab_active");
                 writeLabelPanel.setStyleName("permission_tab_inactive");
-                table.setWidget(2, 0, readListTable);
+                permissionLayout.setWidget(2, 0, readListTable);
                 addWritePermission.setHTML("<span>" + writeList.size() + "</span>");
                 addReadPermission.setHTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
             } else {
@@ -314,12 +374,13 @@ public class CollectionPermissionWidget extends Composite {
                 isViewingWriteTab = true;
                 readLabelPanel.setStyleName("permission_tab_inactive");
                 writeLabelPanel.setStyleName("permission_tab_active");
-                table.setWidget(2, 0, writeListTable);
-                addReadPermission.setHTML("<span>" + readList.size() + "</span>");
+                permissionLayout.setWidget(2, 0, writeListTable);
+                int readSize = isPublicReadEnabled ? readList.size() + 1 : readList.size();
+                addReadPermission.setHTML("<span>" + readSize + "</span>");
                 addWritePermission.setHTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
             }
 
-            table.getRowFormatter().setVisible(3, !isViewingWriteTab);
+            permissionLayout.getRowFormatter().setVisible(3, !isViewingWriteTab);
         }
     }
 }

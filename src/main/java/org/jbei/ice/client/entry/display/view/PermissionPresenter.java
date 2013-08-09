@@ -39,8 +39,9 @@ public class PermissionPresenter {
 
     private final IPermissionView view;
     private boolean canEdit;
-    private final ArrayList<AccessPermission> readList; // list of read permissions (includes groups)
+    private final ArrayList<AccessPermission> readList;  // list of read permissions (includes groups)
     private final ArrayList<AccessPermission> writeList; // list of write permissions (includes groups)
+    private boolean publicReadEnabled;
 
     public PermissionPresenter(final IPermissionView view) {
         this.view = view;
@@ -137,5 +138,17 @@ public class PermissionPresenter {
 
     public void setPublicReadAccess(boolean publicAccess) {
         view.showPublicReadAccess(publicAccess);
+        publicReadEnabled = publicAccess;
+    }
+
+    public int getReadListCount() {
+        if (publicReadEnabled)
+            return readList.size() + 1;
+        else
+            return readList.size();
+    }
+
+    public int getWriteListCount() {
+        return writeList.size();
     }
 }

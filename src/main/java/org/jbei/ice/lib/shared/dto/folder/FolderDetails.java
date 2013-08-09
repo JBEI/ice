@@ -20,6 +20,7 @@ public class FolderDetails implements IDTOModel {
     private String folderName;
     private long count = -1;
     private String description;
+    private boolean propagatePermission;
     private LinkedList<PartData> entries = new LinkedList<PartData>();
     private FolderType type;
     private User owner;    // owner or person sharing this folder
@@ -95,5 +96,13 @@ public class FolderDetails implements IDTOModel {
 
     public void setAccessPermissions(ArrayList<AccessPermission> accessPermissions) {
         this.accessPermissions = accessPermissions;
+    }
+
+    public boolean isPropagatePermission() {
+        return propagatePermission;
+    }
+
+    public void setPropagatePermission(boolean propagatePermission) {
+        this.propagatePermission = propagatePermission;
     }
 }

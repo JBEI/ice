@@ -220,27 +220,6 @@ public class CollectionMenu extends Composite {
         layout.setWidget(row, 0, cell);
     }
 
-    // currently this is being used for deleted cells only
-    public void updateMenuItem(long id, MenuItem item, IDeleteMenuHandler deleteHandler) {
-        if (item == null)
-            return;
-
-        for (int i = 0; i < layout.getRowCount(); i += 1) {
-            Widget w = layout.getWidget(i, 0);
-            if (!(w instanceof DeletedCell))
-                continue;
-
-            DeletedCell cell = (DeletedCell) w;
-            if (cell.getMenuItem().getId() != id)
-                continue;
-
-            final MenuCell newCell = new MenuCell(item, deleteHandler, i);
-            newCell.addClickHandler(new CellSelectionHandler(selectionModel, newCell));
-            layout.setWidget(i, 0, newCell);
-            break;
-        }
-    }
-
     /**
      * sets the busy indicator where the folder counts are displayed
      * to indicate that some form of update is taking place
@@ -328,7 +307,6 @@ public class CollectionMenu extends Composite {
 
         private final HTMLPanel panel;
         private final MenuItem item;
-
         private Label count;
         private final HoverCell action;
         private final String folderId;
@@ -342,52 +320,7 @@ public class CollectionMenu extends Composite {
             this.row = row;
             folderId = "right" + item.getId();
             action = new HoverCell();
-            shareCollectionDialog = new ShareCollectionDialog(this, item.getName(), new Delegate<AccessPermission>() {
-
-                @Override
-                public void execute(AccessPermission access) {
-                    if (permissionInfoDelegate == null)
-                        return;
-
-                    ShareCollectionData data = new ShareCollectionData(access,
-                                                                       shareCollectionDialog.getRemoveCallback());
-                    data.setDelete(true);
-                    permissionInfoDelegate.execute(data);
-                }
-            });
-
-            // TODO
-//            shareCollectionWidget.getPermissionsPresenter().setWriteAddSelectionHandler(new ReadBoxSelectionHandler
-// () {
-//
-//                @Override
-//                public void updatePermission(PermissionInfo info) {
-//                    if (permissionInfoDelegate == null)
-//                        return;
-//
-//                    info.setType(PermissionInfo.Type.WRITE_FOLDER);
-//                    info.setTypeId(item.getId());
-//                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
-//                    permissionInfoDelegate.execute(data);
-//                }
-//            });
-
-//            shareCollectionWidget.getPermissionsPresenter().setPermissionAddSelectionHandler(new
-// ReadBoxSelectionHandler() {
-//
-//                @Override
-//                public void updatePermission(PermissionInfo info) {
-//                    if (permissionInfoDelegate == null)
-//                        return;
-//
-//                    info.setType(PermissionInfo.Type.READ_FOLDER);
-//                    info.setTypeId(item.getId());
-//                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
-//                    permissionInfoDelegate.execute(data);
-//                }
-//            });
-
-            // TODO
+            shareCollectionDialog = new ShareCollectionDialog(this, item.getName(), permissionInfoDelegate);
 
             action.getOptionSelection().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 

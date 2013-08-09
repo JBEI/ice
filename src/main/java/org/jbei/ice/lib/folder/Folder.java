@@ -54,6 +54,9 @@ public class Folder implements IModel {
     @Enumerated(value = EnumType.STRING)
     private FolderType type;
 
+    @Column(name = "propagate_permissions")
+    private Boolean propagatePermissions;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
                inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
@@ -125,5 +128,13 @@ public class Folder implements IModel {
 
     public void setType(FolderType type) {
         this.type = type;
+    }
+
+    public boolean isPropagatePermissions() {
+        return propagatePermissions != null && propagatePermissions;
+    }
+
+    public void setPropagatePermissions(Boolean propagatePermissions) {
+        this.propagatePermissions = propagatePermissions;
     }
 }

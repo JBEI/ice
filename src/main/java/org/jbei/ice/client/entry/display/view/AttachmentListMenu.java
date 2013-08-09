@@ -30,8 +30,8 @@ import gwtupload.client.IUploader.UploadedInfo;
 import gwtupload.client.SingleUploader;
 
 /**
- * Widget that displays list of entry attachments in the entry detail view. Allows user to download and also upload an
- * attachment
+ * Widget that displays list of entry attachments in the entry detail view.
+ * Allows user to download and also upload an attachment
  *
  * @author Hector Plahar
  */

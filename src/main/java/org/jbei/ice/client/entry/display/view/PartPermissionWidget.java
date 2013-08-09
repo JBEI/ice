@@ -36,7 +36,6 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
     private SuggestBox permissionSuggestions;
     private boolean isViewingWriteTab;
     private final ServiceDelegate<Boolean> removeAddPublicAccess;
-    private boolean publicReadEnabled;
     private static final String groupIconStyle = FAIconType.GROUP.getStyleName() + " permission_group";
     private static final String profileIconStyle = FAIconType.USER.getStyleName() + " permission_user";
 
@@ -205,18 +204,18 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
     public void addWriteItem(final AccessPermission item, final Delegate<AccessPermission> deleteDelegate) {
         addPermissionItem(writeList, item, deleteDelegate);
         if (isViewingWriteTab)
-            addReadPermission.setHTML("<b>" + readList.getRowCount() + "</b>");
+            addReadPermission.setHTML("<b>" + presenter.getReadListCount() + "</b>");
         else
-            addWritePermission.setHTML("<b>" + writeList.getRowCount() + "</b>");
+            addWritePermission.setHTML("<b>" + presenter.getWriteListCount() + "</b>");
     }
 
     @Override
     public void addReadItem(final AccessPermission item, final Delegate<AccessPermission> deleteDelegate) {
         addPermissionItem(readList, item, deleteDelegate);
         if (isViewingWriteTab)
-            addReadPermission.setHTML("<span>" + readList.getRowCount() + "</span>");
+            addReadPermission.setHTML("<span>" + presenter.getReadListCount() + "</span>");
         else
-            addWritePermission.setHTML("<span>" + writeList.getRowCount() + "</span>");
+            addWritePermission.setHTML("<span>" + presenter.getWriteListCount() + "</span>");
     }
 
     protected void addPermissionItem(FlexTable table, final AccessPermission item,
@@ -291,7 +290,6 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
     public void showPublicReadAccess(boolean publicReadAccess) {
         layout.getFlexCellFormatter().setVisible(4, 0, !publicReadAccess);
         readList.getRowFormatter().setVisible(0, publicReadAccess);
-        publicReadEnabled = publicReadAccess;
     }
 
     /**
@@ -333,8 +331,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
                 readLabelPanel.setStyleName("permission_tab_inactive");
                 writeLabelPanel.setStyleName("permission_tab_active");
                 layout.setWidget(3, 0, writeList);
-                int readCount = publicReadEnabled ? readList.getRowCount() : readList.getRowCount() - 1;
-                addReadPermission.setHTML("<span>" + readCount + "</span>");
+                addReadPermission.setHTML("<span>" + presenter.getReadListCount() + "</span>");
                 addWritePermission.setHTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
             }
 

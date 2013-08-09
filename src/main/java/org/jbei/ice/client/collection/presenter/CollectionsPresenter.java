@@ -809,7 +809,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         @Override
         public void execute(final ShareCollectionData data) {
             IceAsyncCallback<Boolean> asyncCallback;
-
             if (data.isDelete()) {
                 asyncCallback = new IceAsyncCallback<Boolean>() {
 
@@ -820,16 +819,10 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        data.getInfoCallback().onSuccess(data.getAccess());
+                        data.getInfoCallback().onSuccess(data);
                     }
                 };
             } else {
-                if (data.getAccess().isCanWrite()) {
-                    data.getAccess().setType(AccessPermission.Type.WRITE_FOLDER);
-                } else if (data.getAccess().isCanWrite()) {
-                    data.getAccess().setType(AccessPermission.Type.READ_FOLDER);
-                }
-
                 asyncCallback = new IceAsyncCallback<Boolean>() {
 
                     @Override
@@ -839,7 +832,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        data.getInfoCallback().onSuccess(data.getAccess());
+                        data.getInfoCallback().onSuccess(data);
                     }
                 };
             }

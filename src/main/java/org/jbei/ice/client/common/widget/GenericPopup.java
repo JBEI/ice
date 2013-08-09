@@ -48,7 +48,6 @@ public class GenericPopup extends Composite {
     }
 
     public void showDialog() {
-        resetWidget.reset();
         box.center();
     }
 

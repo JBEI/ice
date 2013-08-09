@@ -181,7 +181,8 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
         if (partData.isHasSequence()) {
             // delete, open in vector editor, download
-            Label openSequenceLabel = new Label("Open");
+            HTML openSequenceLabel = new HTML("Open in VectorEditor <i class=\""
+                                                      + FAIconType.EXTERNAL_LINK.getStyleName() + "\"></i>");
             openSequenceLabel.addClickHandler(new SequenceHeaderHandler());
             openSequenceLabel.setStyleName("open_sequence_sub_link");
             HTML pipe = new HTML("<span style=\"color: #262626; font-size: 0.75em;\">|</span>");

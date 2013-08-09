@@ -4,127 +4,84 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
-import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.GenericPopup;
+import org.jbei.ice.client.common.widget.ICanReset;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Dialog widget for sharing collections
  *
  * @author Hector Plahar
  */
-public class ShareCollectionDialog extends Composite {
+public class ShareCollectionDialog extends Composite implements ICanReset {
 
-    private final String collectionName;
-    private HTML close;
-    private HTML cancel;
-    private PopupPanel box;
     private final CollectionPermissionWidget permissionsWidget;
-    private final Callback<AccessPermission> removeCallback;
-    private final Delegate<AccessPermission> deleteDelegate;
+
     private int userShareCount;
     private int groupShareCount;
+    private GenericPopup popup;
 
     public ShareCollectionDialog(final CollectionMenu.MenuCell cell, String collectionName,
-            final Delegate<AccessPermission> delegate) {
-        FlexTable layout = new FlexTable();
-//        layout.setCellPadding(0);
-//        layout.setCellSpacing(0);
-        layout.setWidth("100%");
-        initWidget(layout);
+            final Delegate<ShareCollectionData> delegate) {
+        String shareHTML = "<b class=\"font-85em\" style=\"color: #c1c1c1\">SHARE</b> "
+                + "<b font-style=\"italic\">" + collectionName + "</b> "
+                + "<b class=\"font-85em\" style=\"color: #c1c1c1\">COLLECTION</b>";
 
-        layout.setStyleName("add_to_popup");
-        layout.addStyleName("pad-8");
-        layout.addStyleName("bg_white");
+        // callback that updates the menu in real time
+        Callback<ShareCollectionData> callback = new ShareActionCallback(cell);
+        permissionsWidget = new CollectionPermissionWidget(delegate, callback, cell.getMenuItem().getId());
 
-        this.collectionName = collectionName;
-        initComponents();
+        initWidget(permissionsWidget);
+        popup = new GenericPopup(this, shareHTML);
+    }
 
-        this.deleteDelegate = delegate;
+    public void showDialog(ArrayList<AccessPermission> accessPermissions) {
+        permissionsWidget.setPermissionData(accessPermissions);
+        popup.showDialog();
+    }
 
-        // set Widgets
-        layout.setWidget(0, 0, createHeader());
+    @Override
+    public void reset() {
+        permissionsWidget.reset();
+    }
 
-        permissionsWidget = new CollectionPermissionWidget();
-        permissionsWidget.setVisible(true);
-        layout.setWidget(1, 0, permissionsWidget);
+    /**
+     * Call back from server response as that was initiated as a result of user action within
+     * the share collection dialog e.g. add/remove permission
+     */
+    private class ShareActionCallback extends Callback<ShareCollectionData> {
 
-        removeCallback = new Callback<AccessPermission>() {
-            @Override
-            public void onSuccess(AccessPermission accessPermission) {
+        private final CollectionMenu.MenuCell cell;
+
+        public ShareActionCallback(CollectionMenu.MenuCell cell) {
+            this.cell = cell;
+        }
+
+        @Override
+        public void onSuccess(ShareCollectionData data) {
+            AccessPermission accessPermission = data.getAccess();
+
+            if (data.isDelete()) {
                 permissionsWidget.removeItem(accessPermission);
                 if (accessPermission.getArticle() == AccessPermission.Article.ACCOUNT)
                     userShareCount -= 1;
                 else
                     groupShareCount -= 1;
-
-                cell.setShared(userShareCount, groupShareCount);
+            } else {
+                if (accessPermission.getArticle() == AccessPermission.Article.ACCOUNT)
+                    userShareCount += 1;
+                else
+                    groupShareCount += 1;
             }
+            cell.setShared(userShareCount, groupShareCount);
+        }
 
-            @Override
-            public void onFailure() {
-            }
-        };
-    }
-
-    public Callback<AccessPermission> getRemoveCallback() {
-        return this.removeCallback;
-    }
-
-    protected Widget createHeader() {
-        FlexTable table = new FlexTable();
-        table.setWidth("100%");
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-
-        String shareHTML = "<b class=\"font-85em\" style=\"color: #c1c1c1\">SHARE</b> "
-                + "<b font-style=\"italic\">" + collectionName + "</b> "
-                + "<b class=\"font-85em\" style=\"color: #c1c1c1\">COLLECTION</b>";
-
-        table.setHTML(0, 0, shareHTML);
-        table.setWidget(0, 1, close);
-        table.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_RIGHT);
-        return table;
-    }
-
-    protected void initComponents() {
-        ClickHandler closeHandler = new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                box.hide();
-            }
-        };
-
-        close = new HTML("<i class=\"" + FAIconType.REMOVE_SIGN.getStyleName() + "\"></i> Close");
-        close.setStyleName("opacity_hover");
-        close.addStyleName("font-75em");
-        close.addClickHandler(closeHandler);
-
-        box = new PopupPanel();
-        box.setWidth("600px");
-        box.setModal(true);
-        box.setGlassEnabled(true);
-        box.setGlassStyleName("dialog_box_glass");
-        box.setWidget(this);
-
-        cancel = new HTML("Cancel");
-        cancel.setStyleName("display-inline");
-        cancel.addStyleName("footer_feedback_widget");
-        cancel.addStyleName("font-75em");
-        cancel.addClickHandler(closeHandler);
-    }
-
-    public void showDialog(ArrayList<AccessPermission> accessPermissions) {
-        permissionsWidget.setPermissionData(accessPermissions, deleteDelegate);
-        box.center();
+        @Override
+        public void onFailure() {
+        }
     }
 }

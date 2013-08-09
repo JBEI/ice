@@ -133,9 +133,6 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public void setPermissionDelegate(Delegate<ShareCollectionData> delegate) {
         userMenu.setPermissionInfoDelegate(delegate);
-        if (ClientController.account.isAdmin()) {
-            systemMenu.setPermissionInfoDelegate(delegate);
-        }
     }
 
     @Override
