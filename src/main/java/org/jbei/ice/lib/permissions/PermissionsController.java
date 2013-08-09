@@ -74,6 +74,11 @@ public class PermissionsController {
             }
         }
 
+        return addPermission(access, entry, folder);
+    }
+
+
+    protected Permission addPermission(AccessPermission access, Entry entry, Folder folder) throws ControllerException {
         // account or group
         Account account = null;
         Group group = null;
@@ -130,7 +135,10 @@ public class PermissionsController {
             if (!hasWritePermission(requestingAccount, folder))
                 throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + access.toString());
         }
+        removePermission(access, entry, folder);
+    }
 
+    private void removePermission(AccessPermission access, Entry entry, Folder folder) throws ControllerException {
         // account or group
         Account account = null;
         Group group = null;
@@ -571,5 +579,30 @@ public class PermissionsController {
         }
 
         return accessPermissions;
+    }
+
+    public boolean propagateFolderPermissions(Account account, Folder folder, boolean prop) throws ControllerException {
+        if (!accountController.isAdministrator(account) && !account.getEmail().equalsIgnoreCase(folder.getOwnerEmail()))
+            return false;
+
+        // retrieve folder permissions
+        ArrayList<AccessPermission> permissions = retrieveSetFolderPermission(folder);
+
+        // if propagate, add permissions to entries contained in here  // TODO : inefficient for large entries/perms
+        if (prop) {
+            for (Entry entry : folder.getContents()) {
+                for (AccessPermission accessPermission : permissions) {
+                    addPermission(accessPermission, entry, folder);
+                }
+            }
+        } else {
+            // else remove permissions
+            for (Entry entry : folder.getContents()) {
+                for (AccessPermission accessPermission : permissions) {
+                    removePermission(accessPermission, entry, folder);
+                }
+            }
+        }
+        return true;
     }
 }

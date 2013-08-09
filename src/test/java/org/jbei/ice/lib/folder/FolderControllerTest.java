@@ -61,7 +61,7 @@ public class FolderControllerTest {
         Assert.assertEquals(15, parts.size());
 
         // add to folder
-        Folder added = controller.addFolderContents(folder.getId(), new ArrayList<Entry>(parts.values()));
+        Folder added = controller.addFolderContents(account, folder.getId(), new ArrayList<Entry>(parts.values()));
         Assert.assertNotNull(added);
 
         // retrieve (supported sort types created, status, name, part_id, type)

@@ -10,6 +10,8 @@ import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
+import org.jbei.ice.client.collection.model.PropagateOption;
+import org.jbei.ice.client.collection.model.ShareCollectionData;
 import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
@@ -106,7 +108,7 @@ public interface ICollectionView {
 
     void setSharedCollectionsMenuItems(ArrayList<MenuItem> items);
 
-    void setPermissionDelegate(Delegate<ShareCollectionData> delegate);
+    void setMenuDelegates(Delegate<ShareCollectionData> delegate, ServiceDelegate<PropagateOption> propagate);
 
     void addTransferHandler(ClickHandler handler);
 

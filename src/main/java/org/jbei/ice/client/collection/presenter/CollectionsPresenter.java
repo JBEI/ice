@@ -9,14 +9,12 @@ import java.util.Set;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.FolderEntryDataProvider;
 import org.jbei.ice.client.collection.ICollectionView;
-import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.model.CollectionsModel;
@@ -54,6 +52,11 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Presenter for collections
+ *
+ * @author Hector Plahar
+ */
 public class CollectionsPresenter extends AbstractPresenter {
 
     private enum Mode {
@@ -232,7 +235,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.addTransferHandler(new TransferHandler());
 
         // permission delegate for the menu (user)
-        display.setPermissionDelegate(new PermissionDelegate());
+        display.setMenuDelegates(model.createPermissionDelegate(), model.createPropagateDelegate());
 
         // retrieve web of registries settings to set the transfer widget options (admin only)
         setTransferWidgetOptions();
@@ -804,41 +807,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         }
     }
 
-    private class PermissionDelegate implements Delegate<ShareCollectionData> {
-
-        @Override
-        public void execute(final ShareCollectionData data) {
-            IceAsyncCallback<Boolean> asyncCallback;
-            if (data.isDelete()) {
-                asyncCallback = new IceAsyncCallback<Boolean>() {
-
-                    @Override
-                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        model.getService().removePermission(ClientController.sessionId, data.getAccess(), callback);
-                    }
-
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        data.getInfoCallback().onSuccess(data);
-                    }
-                };
-            } else {
-                asyncCallback = new IceAsyncCallback<Boolean>() {
-
-                    @Override
-                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        model.getService().addPermission(ClientController.sessionId, data.getAccess(), callback);
-                    }
-
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        data.getInfoCallback().onSuccess(data);
-                    }
-                };
-            }
-            asyncCallback.go(model.getEventBus());
-        }
-    }
 
     public ICollectionView getView() {
         return display;

@@ -4,9 +4,11 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -257,5 +259,64 @@ public class CollectionsModel {
             public void onNullResult() {
             }
         }.go(eventBus);
+    }
+
+    public Delegate<ShareCollectionData> createPermissionDelegate() {
+        return new Delegate<ShareCollectionData>() {
+
+            @Override
+            public void execute(final ShareCollectionData data) {
+                IceAsyncCallback<Boolean> asyncCallback;
+                if (data.isDelete()) {
+                    asyncCallback = new IceAsyncCallback<Boolean>() {
+
+                        @Override
+                        protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                            service.removePermission(ClientController.sessionId, data.getAccess(), callback);
+                        }
+
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            data.getInfoCallback().onSuccess(data);
+                        }
+                    };
+                } else {
+                    asyncCallback = new IceAsyncCallback<Boolean>() {
+
+                        @Override
+                        protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                            service.addPermission(ClientController.sessionId, data.getAccess(), callback);
+                        }
+
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            data.getInfoCallback().onSuccess(data);
+                        }
+                    };
+                }
+                asyncCallback.go(eventBus);
+            }
+        };
+    }
+
+    public ServiceDelegate<PropagateOption> createPropagateDelegate() {
+        return new ServiceDelegate<PropagateOption>() {
+            @Override
+            public void execute(final PropagateOption propagateOption) {
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        service.setPropagatePermissionForFolder(
+                                ClientController.sessionId, propagateOption.getFolderId(),
+                                propagateOption.isPropagate(), callback);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                    }
+                }.go(eventBus);
+            }
+        };
     }
 }

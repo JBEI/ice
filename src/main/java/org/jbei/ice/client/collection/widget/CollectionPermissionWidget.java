@@ -6,7 +6,9 @@ import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.collection.ShareCollectionData;
+import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.collection.model.PropagateOption;
+import org.jbei.ice.client.collection.model.ShareCollectionData;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.entry.display.handler.ReadBoxSelectionHandler;
@@ -15,6 +17,8 @@ import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
@@ -36,7 +40,7 @@ public class CollectionPermissionWidget extends Composite {
     private FlexTable permissionLayout;
     private HTML addReadPermission;
     private HTML addWritePermission;
-    private CheckBox makePublic;
+    private HTML makePublic;
     private SuggestBox permissionSuggestions;
     private Delegate<ShareCollectionData> delegate;
     private Callback<ShareCollectionData> callback;
@@ -52,8 +56,9 @@ public class CollectionPermissionWidget extends Composite {
     private static final String profileIconStyle = FAIconType.USER.getStyleName() + " permission_user";
 
     public CollectionPermissionWidget(Delegate<ShareCollectionData> permissionDelegate,
-            Callback<ShareCollectionData> callback, long folderId) {
-        FlexTable layout = new FlexTable();
+            final ServiceDelegate<PropagateOption> propagate, Callback<ShareCollectionData> callback,
+            final long folderId) {
+        final FlexTable layout = new FlexTable();
         initWidget(layout);
         readList = new ArrayList<AccessPermission>();
         writeList = new ArrayList<AccessPermission>();
@@ -67,16 +72,42 @@ public class CollectionPermissionWidget extends Composite {
         layout.setCellSpacing(0);
         this.folderId = folderId;
 
-        int row = 0;
-
-        String html = "<span class=\"font-85em\" style=\"color: #555\">Propagate permissions to parts</span> "
-                + "<i class=\"" + FAIconType.QUESTION_SIGN.getStyleName() + "\"></i>";
+        HTMLPanel panel = new HTMLPanel("<span id=\"propagate_checkbox\"></span> <span id=\"propagate_help\"></span>");
+        String html = "<span class=\"font-80em\" style=\"color: #555\">Propagate permissions to parts</span>";
         propagateBox = new CheckBox(SafeHtmlUtils.fromSafeConstant(html));
-        layout.setWidget(row, 0, propagateBox);
+        panel.add(propagateBox, "propagate_checkbox");
+        propagateBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                propagate.execute(new PropagateOption(event.getValue(), folderId));
+            }
+        });
 
-        row += 1;
+        // help icon to show information about what the propagate option does
+        Icon helpIcon = new Icon(FAIconType.QUESTION_SIGN);
+        helpIcon.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                layout.getRowFormatter().setVisible(1, !layout.getRowFormatter().isVisible(1));
+            }
+        });
+        helpIcon.removeStyleName("font-awesome");
+        helpIcon.addStyleName("cursor_pointer");
+        helpIcon.addStyleName("font-80em");
+        panel.add(helpIcon, "propagate_help");
+        layout.setWidget(0, 0, panel);
+
+        // description on what propagating means
+        String propagateDesc = "<p style=\"padding: 6px; border: 1px solid #bce8f1; background-color: #d9edf7;" +
+                "font-size: 0.80em; border-radius: 6px; width: 89%; color: #3a87ad\">" +
+                "Enabling this option allows permissions assigned to the folder to also be" +
+                " set on the individual parts contained in it. This means that when the folder is deleted, the set" +
+                " permissions are maintained at the part level.</p>";
+        layout.setHTML(1, 0, propagateDesc);
+        layout.getRowFormatter().setVisible(1, false);
+
         permissionLayout = createPermissionWidget();
-        layout.setWidget(row, 0, permissionLayout);
+        layout.setWidget(2, 0, permissionLayout);
 
         // input suggest box for adding permissions
         createSuggestWidget();
@@ -84,7 +115,6 @@ public class CollectionPermissionWidget extends Composite {
 
     public void reset() {
         propagateBox.setValue(false);
-        makePublic.setValue(false);
         readList.clear();
         writeList.clear();
         for (int i = 1; i < readListTable.getRowCount(); i += 1)
@@ -197,7 +227,7 @@ public class CollectionPermissionWidget extends Composite {
         addWritePermission.addStyleName("edit_icon");
         addWritePermission.addStyleName("font-14em");
 
-        makePublic = new CheckBox("Enable Public Read Access");
+        makePublic = new HTML("<i class=\"" + FAIconType.GLOBE.getStyleName() + "\"></i> Enable Public Read Access");
         makePublic.setStyleName("permission_footer_link");
 
         permissionSuggestions = new SuggestBox(new PermissionSuggestOracle());
@@ -226,11 +256,9 @@ public class CollectionPermissionWidget extends Composite {
                 access.setTypeId(folderId);
                 if (isViewingWriteTab) {
                     access.setType(AccessPermission.Type.WRITE_FOLDER);
-                    writeList.add(access);
                     addWriteItem(access);
                 } else {
                     access.setType(AccessPermission.Type.READ_FOLDER);
-                    readList.add(access);
                     addReadItem(access);
                 }
 
@@ -243,6 +271,9 @@ public class CollectionPermissionWidget extends Composite {
     }
 
     public void addWriteItem(final AccessPermission item) {
+        if (writeList.contains(item))
+            return;
+
         writeList.add(item);
         addPermissionItem(writeListTable, item);
         if (isViewingWriteTab)
@@ -252,6 +283,9 @@ public class CollectionPermissionWidget extends Composite {
     }
 
     public void addReadItem(final AccessPermission item) {
+        if (readList.contains(item))
+            return;
+
         readList.add(item);
         addPermissionItem(readListTable, item);
         if (isViewingWriteTab)

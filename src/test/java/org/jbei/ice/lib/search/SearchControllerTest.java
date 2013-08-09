@@ -120,7 +120,7 @@ public class SearchControllerTest {
         Assert.assertNotNull(folder);
         ArrayList<Entry> list = new ArrayList<>();
         list.add(entry);
-        Assert.assertNotNull(ControllerFactory.getFolderController().addFolderContents(folder.getId(), list));
+        Assert.assertNotNull(ControllerFactory.getFolderController().addFolderContents(a1, folder.getId(), list));
         List<Folder> folders = ControllerFactory.getFolderController().getFoldersByEntry(entry);
         Assert.assertNotNull(folders);
         Assert.assertEquals(1, folders.size());

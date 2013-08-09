@@ -1,4 +1,4 @@
-package org.jbei.ice.client.collection;
+package org.jbei.ice.client.collection.model;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;

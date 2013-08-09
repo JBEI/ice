@@ -8,7 +8,8 @@ import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.client.collection.ShareCollectionData;
+import org.jbei.ice.client.collection.model.PropagateOption;
+import org.jbei.ice.client.collection.model.ShareCollectionData;
 import org.jbei.ice.client.collection.widget.ShareCollectionDialog;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
@@ -54,6 +55,7 @@ public class CollectionMenu extends Composite {
     // quick add
     private QuickAddWidget quickAddWidget;
     private Delegate<ShareCollectionData> permissionInfoDelegate;
+    private ServiceDelegate<PropagateOption> propagate;
 
     public CollectionMenu(boolean addQuickEdit, String header) {
         layout = new FlexTable();
@@ -112,8 +114,9 @@ public class CollectionMenu extends Composite {
         cellHoverOptions = options;
     }
 
-    public void setPermissionInfoDelegate(Delegate<ShareCollectionData> infoDelegate) {
+    public void setDelegates(Delegate<ShareCollectionData> infoDelegate, ServiceDelegate<PropagateOption> propagate) {
         this.permissionInfoDelegate = infoDelegate;
+        this.propagate = propagate;
     }
 
     public void setEmptyCollectionMessage(String msg) {
@@ -320,7 +323,7 @@ public class CollectionMenu extends Composite {
             this.row = row;
             folderId = "right" + item.getId();
             action = new HoverCell();
-            shareCollectionDialog = new ShareCollectionDialog(this, item.getName(), permissionInfoDelegate);
+            shareCollectionDialog = new ShareCollectionDialog(this, item.getName(), permissionInfoDelegate, propagate);
 
             action.getOptionSelection().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 

@@ -168,12 +168,15 @@ public class FolderController {
         }
     }
 
-    public Folder addFolderContents(long id, ArrayList<Entry> entrys) throws ControllerException {
+    public Folder addFolderContents(Account account, long id, ArrayList<Entry> entrys) throws ControllerException {
         try {
             Folder folder = dao.get(id);
             if (folder == null)
                 throw new ControllerException("Could not retrieve folder with id " + id);
-            dao.addFolderContents(folder, entrys);
+            folder = dao.addFolderContents(folder, entrys);
+            if (folder.isPropagatePermissions()) {
+                ControllerFactory.getPermissionController().propagateFolderPermissions(account, folder, true);
+            }
             return folder;
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -388,6 +391,26 @@ public class FolderController {
             Logger.info("Collections upgrade completed");
         } catch (DAOException de) {
             throw new ControllerException(de);
+        }
+    }
+
+    public boolean setPropagatePermissionForFolder(Account account, long folderId, boolean propagate)
+            throws ControllerException {
+        try {
+            Folder folder = dao.get(folderId);
+            if (folder == null)
+                return false;
+
+            if (!accountController.isAdministrator(account) &&
+                    !folder.getOwnerEmail().equalsIgnoreCase(account.getEmail()))
+                return false;
+
+            folder.setPropagatePermissions(Boolean.valueOf(propagate));
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
+            dao.update(folder);
+            return ControllerFactory.getPermissionController().propagateFolderPermissions(account, folder, propagate);
+        } catch (DAOException de) {
+            return false;
         }
     }
 }

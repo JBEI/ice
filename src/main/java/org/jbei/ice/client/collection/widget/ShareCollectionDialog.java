@@ -4,8 +4,10 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
-import org.jbei.ice.client.collection.ShareCollectionData;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
+import org.jbei.ice.client.collection.model.PropagateOption;
+import org.jbei.ice.client.collection.model.ShareCollectionData;
 import org.jbei.ice.client.common.widget.GenericPopup;
 import org.jbei.ice.client.common.widget.ICanReset;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
@@ -26,20 +28,38 @@ public class ShareCollectionDialog extends Composite implements ICanReset {
     private GenericPopup popup;
 
     public ShareCollectionDialog(final CollectionMenu.MenuCell cell, String collectionName,
-            final Delegate<ShareCollectionData> delegate) {
+            Delegate<ShareCollectionData> delegate, ServiceDelegate<PropagateOption> propagate) {
         String shareHTML = "<b class=\"font-85em\" style=\"color: #c1c1c1\">SHARE</b> "
                 + "<b font-style=\"italic\">" + collectionName + "</b> "
                 + "<b class=\"font-85em\" style=\"color: #c1c1c1\">COLLECTION</b>";
 
         // callback that updates the menu in real time
         Callback<ShareCollectionData> callback = new ShareActionCallback(cell);
-        permissionsWidget = new CollectionPermissionWidget(delegate, callback, cell.getMenuItem().getId());
+        permissionsWidget = new CollectionPermissionWidget(delegate, propagate, callback, cell.getMenuItem().getId());
 
         initWidget(permissionsWidget);
         popup = new GenericPopup(this, shareHTML);
     }
 
+    /**
+     * Initializes the share counts used for visual feedback to the user on how
+     * many permissions have been set.
+     * Displays dialog that allows user to update the permissions
+     *
+     * @param accessPermissions list of currently set permissions for folder
+     */
     public void showDialog(ArrayList<AccessPermission> accessPermissions) {
+        userShareCount = 0;
+        groupShareCount = 0;
+
+        if (accessPermissions != null) {
+            for (AccessPermission permission : accessPermissions) {
+                if (permission.getArticle() == AccessPermission.Article.GROUP)
+                    groupShareCount += 1;
+                else if (permission.getArticle() == AccessPermission.Article.ACCOUNT)
+                    userShareCount += 1;
+            }
+        }
         permissionsWidget.setPermissionData(accessPermissions);
         popup.showDialog();
     }

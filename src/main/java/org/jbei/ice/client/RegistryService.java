@@ -228,4 +228,7 @@ public interface RegistryService extends RemoteService {
     boolean enablePublicReadAccess(String sid, long entryId) throws AuthenticationException;
 
     boolean disablePublicReadAccess(String sid, long entryId) throws AuthenticationException;
+
+    boolean setPropagatePermissionForFolder(String sid, long folderId, boolean prop)
+            throws AuthenticationException;
 }

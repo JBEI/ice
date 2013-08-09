@@ -93,6 +93,7 @@ import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
+// TODO : use command pattern to split this up
 public class RegistryServiceImpl extends RemoteServiceServlet implements RegistryService {
 
     private static final long serialVersionUID = 1L;
@@ -760,7 +761,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         for (long folderId : destination) {
             try {
-                Folder folder = folderController.addFolderContents(folderId, entrys);
+                Folder folder = folderController.addFolderContents(account, folderId, entrys);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
                 long folderSize = folderController.getFolderSize(folder.getId());
                 details.setCount(folderSize + entryIds.size());
@@ -823,7 +824,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<Entry> entrys = new ArrayList<>(entryController.getEntriesByIdSet(account, entryIds));
             for (long folderId : destination) {
                 long size = folderController.getFolderSize(folderId);
-                Folder folder = folderController.addFolderContents(folderId, entrys);
+                Folder folder = folderController.addFolderContents(account, folderId, entrys);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
                 details.setType(folder.getType());
                 details.setCount(size + entryIds.size());
@@ -1732,6 +1733,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Account account = retrieveAccountForSid(sid);
         try {
             return ControllerFactory.getEntryController().processTransferredParts(account, partIds, accept);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean setPropagatePermissionForFolder(String sid, long folderId, boolean prop)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            return ControllerFactory.getFolderController().setPropagatePermissionForFolder(account, folderId, prop);
         } catch (ControllerException e) {
             Logger.error(e);
             return false;

@@ -8,10 +8,11 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.ICollectionView;
-import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.*;
+import org.jbei.ice.client.collection.model.PropagateOption;
+import org.jbei.ice.client.collection.model.ShareCollectionData;
 import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
@@ -131,8 +132,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void setPermissionDelegate(Delegate<ShareCollectionData> delegate) {
-        userMenu.setPermissionInfoDelegate(delegate);
+    public void setMenuDelegates(Delegate<ShareCollectionData> delegate, ServiceDelegate<PropagateOption> propagate) {
+        userMenu.setDelegates(delegate, propagate);
     }
 
     @Override
