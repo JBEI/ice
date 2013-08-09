@@ -1040,33 +1040,37 @@ public class EntryController {
         }
     }
 
-    // also submits a comment
     public UserComment sendProblemNotification(Account account, long entryId, String msg) {
         try {
             Entry entry = dao.get(entryId);
-            String email = ControllerFactory.getConfigurationController().
-                    getPropertyValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
-            if (entry == null || email == null || email.isEmpty()) {
-                Logger.error("Entry could not be retrieve for id " + entryId + " or bulk uploader email is not set");
+            if (entry == null) {
+                Logger.error("Entry could not be retrieve for id " + entryId);
                 return null;
             }
 
-            String site = ControllerFactory.getConfigurationController().getPropertyValue(ConfigurationKey.URI_PREFIX);
-            StringBuilder body = new StringBuilder();
-            body.append("A problem notification was sent by ")
-                .append(account.getFullName())
-                .append(" for entry ")
-                .append(entry.getPartNumber())
-                .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
-                .append("\n\nMessage:\n\n")
-                .append(msg)
-                .append("\n\n");
-            boolean success = Emailer.send(email, ("Problem alert for " + entry.getPartNumber()), body.toString());
-            if (success) {
-                Comment comment = new Comment(entry, account, msg);
-                comment = commentDAO.save(comment);
-                return Comment.toDTO(comment);
+            Comment comment = new Comment(entry, account, msg);
+            comment = commentDAO.save(comment);
+
+            String email = ControllerFactory.getConfigurationController().
+                    getPropertyValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
+            if (email != null && !email.isEmpty()) {
+                String site = ControllerFactory.getConfigurationController().getPropertyValue(
+                        ConfigurationKey.URI_PREFIX);
+                StringBuilder body = new StringBuilder();
+                body.append("A problem notification was sent by ")
+                    .append(account.getFullName())
+                    .append(" for entry ")
+                    .append(entry.getPartNumber())
+                    .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
+                    .append("\n\nMessage:\n\n")
+                    .append(msg)
+                    .append("\n\n");
+                boolean success = Emailer.send(email, ("Problem alert for " + entry.getPartNumber()), body.toString());
+                if (!success)
+                    Logger.warn("Could not send email for problem notification");
             }
+
+            return Comment.toDTO(comment);
         } catch (DAOException | ControllerException e) {
             Logger.error(e);
         }
