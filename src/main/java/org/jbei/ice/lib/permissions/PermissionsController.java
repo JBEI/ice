@@ -52,31 +52,37 @@ public class PermissionsController {
     }
 
     public Permission addPermission(Account requestingAccount, AccessPermission access) throws ControllerException {
-        Entry entry = null;
-        Folder folder = null;
-
         EntryController entryController = ControllerFactory.getEntryController();
 
         if (access.isEntry()) {
-            entry = entryController.get(requestingAccount, access.getTypeId());
+            Entry entry = entryController.get(requestingAccount, access.getTypeId());
             if (entry == null)
                 throw new ControllerException("Cannot find entry " + access.getTypeId());
 
             // can user modify permissions for entry
             if (!hasWritePermission(requestingAccount, entry))
-                throw new ControllerException(
-                        requestingAccount.getEmail() + " not allowed to add " + access.toString());
-        } else if (access.isFolder()) {
-            folder = folderController.getFolderById(access.getTypeId());
+                throw new ControllerException(requestingAccount.getEmail() + " cannot " + access.toString());
+            return addPermission(access, entry, null);
+        }
+
+        if (access.isFolder()) {
+            Folder folder = folderController.getFolderById(access.getTypeId());
             if (!hasWritePermission(requestingAccount, folder)) {
                 throw new ControllerException(
                         requestingAccount.getEmail() + " not allowed to add " + access.toString());
             }
+
+            // propagate permissions
+            if (folder.isPropagatePermissions()) {
+                for (Entry folderContent : folder.getContents()) {
+                    addPermission(access, folderContent, null);
+                }
+            }
+            return addPermission(access, null, folder);
         }
 
-        return addPermission(access, entry, folder);
+        return null;
     }
-
 
     protected Permission addPermission(AccessPermission access, Entry entry, Folder folder) throws ControllerException {
         // account or group
@@ -117,25 +123,34 @@ public class PermissionsController {
     }
 
     public void removePermission(Account requestingAccount, AccessPermission access) throws ControllerException {
-        Entry entry = null;
-        Folder folder = null;
-
         EntryController entryController = ControllerFactory.getEntryController();
 
         if (access.isEntry()) {
-            entry = entryController.get(requestingAccount, access.getTypeId());
+            Entry entry = entryController.get(requestingAccount, access.getTypeId());
             if (entry == null)
                 throw new ControllerException("Cannot find entry " + access.getTypeId());
 
             // can user modify permissions for entry
             if (!hasWritePermission(requestingAccount, entry))
                 throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + access.toString());
+
+            // remove permission from entry
+            removePermission(access, entry, null);
+
         } else if (access.isFolder()) {
-            folder = folderController.getFolderById(access.getTypeId());
+            Folder folder = folderController.getFolderById(access.getTypeId());
             if (!hasWritePermission(requestingAccount, folder))
                 throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + access.toString());
+
+            // if folder is to be propagated, add removing permission from contained entries
+            if (folder.isPropagatePermissions()) {
+                for (Entry folderContent : folder.getContents()) {
+                    removePermission(access, folderContent, null);
+                }
+            }
+            // remove permission from folder
+            removePermission(access, null, folder);
         }
-        removePermission(access, entry, folder);
     }
 
     private void removePermission(AccessPermission access, Entry entry, Folder folder) throws ControllerException {
@@ -588,18 +603,18 @@ public class PermissionsController {
         // retrieve folder permissions
         ArrayList<AccessPermission> permissions = retrieveSetFolderPermission(folder);
 
-        // if propagate, add permissions to entries contained in here  // TODO : inefficient for large entries/perms
+        // if propagate, add permissions to entries contained in here  //TODO : inefficient for large entries/perms
         if (prop) {
             for (Entry entry : folder.getContents()) {
                 for (AccessPermission accessPermission : permissions) {
-                    addPermission(accessPermission, entry, folder);
+                    addPermission(accessPermission, entry, null);
                 }
             }
         } else {
             // else remove permissions
             for (Entry entry : folder.getContents()) {
                 for (AccessPermission accessPermission : permissions) {
-                    removePermission(accessPermission, entry, folder);
+                    removePermission(accessPermission, entry, null);
                 }
             }
         }
