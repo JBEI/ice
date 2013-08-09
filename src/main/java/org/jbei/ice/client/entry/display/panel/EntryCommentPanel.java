@@ -30,64 +30,44 @@ import com.google.gwt.user.client.ui.TextArea;
 public class EntryCommentPanel extends Composite {
 
     private final FlexTable table;
-    private AddCommentPanel commentArea;
+    private AddCommentPanel addCommentPanel;
     private ServiceDelegate<UserComment> delegate;
     private boolean hasData;
-    private Button addCommentButton;
 
     public EntryCommentPanel() {
         table = new FlexTable();
         initWidget(table);
         table.setWidth("100%");
 
-        addCommentButton = new Button("<i class=\"" + FAIconType.COMMENT_ALT.getStyleName() + "\"></i> Add Comment");
-        commentArea = new AddCommentPanel();
+        Button addCommentButton = new Button(
+                "<i class=\"" + FAIconType.COMMENTS.getStyleName() + "\"></i> Add Comment");
+        addCommentPanel = new AddCommentPanel();
+        addCommentPanel.setCancelHandler(new ShowHidePanelAddHandler());
 
-        addCommentButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                table.getFlexCellFormatter().setVisible(2, 0, true);
-                if (!hasData) {
-                    table.getFlexCellFormatter().setVisible(3, 0, false);
-                }
-            }
-        });
+        addCommentButton.addClickHandler(new ShowHidePanelAddHandler());
 
         table.setWidget(0, 0, addCommentButton);
-        table.setHTML(1, 0, "");
-        table.setWidget(2, 0, commentArea);
-        table.getFlexCellFormatter().setVisible(2, 0, false);
-        table.setHTML(3, 0, "<i class=\"font-75em pad-8\">No comments available</i>");
-//        table.setVisible(false);
+        table.getFlexCellFormatter().setStyleName(0, 0, "pad_top");
 
-        setCancelHandler();
+        table.setWidget(1, 0, addCommentPanel);
+        table.getFlexCellFormatter().setVisible(1, 0, false);
+
+        table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No comments available</i>");
+
         setSubmitHandler();
     }
 
     public void setSampleOptions(ArrayList<SampleStorage> sampleOptions) {
-        commentArea.setSampleOptions(sampleOptions);
-    }
-
-    protected void setCancelHandler() {
-        commentArea.setCancelHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                commentArea.reset();
-                table.getFlexCellFormatter().setVisible(2, 0, false);
-                if (!hasData) {
-                    table.getFlexCellFormatter().setVisible(3, 0, true);
-                }
-            }
-        });
+        addCommentPanel.setSampleOptions(sampleOptions);
     }
 
     protected void setSubmitHandler() {
-        commentArea.setSubmitHandler(new ClickHandler() {
+        addCommentPanel.setSubmitHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (delegate == null)
                     return;
-                delegate.execute(commentArea.getUserComment());
+                delegate.execute(addCommentPanel.getUserComment());
             }
         });
     }
@@ -99,12 +79,7 @@ public class EntryCommentPanel extends Composite {
     public void setData(ArrayList<UserComment> data) {
         hasData = data != null && !data.isEmpty();
         if (!hasData) {
-            table.clear();
-            table.setWidget(0, 0, addCommentButton);
-            table.setHTML(1, 0, "");
-            table.setWidget(2, 0, commentArea);
-            table.getFlexCellFormatter().setVisible(2, 0, false);
-            table.setHTML(3, 0, "<i class=\"font-75em pad-8\">No comments available</i>");
+            table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No comments available</i>");
             return;
         }
 
@@ -115,7 +90,7 @@ public class EntryCommentPanel extends Composite {
             }
         });
 
-        int row = 3;
+        int row = 2;
 
         for (UserComment comment : data) {
             // display comment
@@ -162,6 +137,18 @@ public class EntryCommentPanel extends Composite {
 
         table.setWidget(row, 0, commentTable);
         table.getFlexCellFormatter().setStyleName(row, 0, "pad-left-40");
+    }
+
+    // inner classes
+    private class ShowHidePanelAddHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            table.getFlexCellFormatter().setVisible(1, 0, true);
+            if (!hasData) {
+                table.getFlexCellFormatter().setVisible(2, 0, false);
+            }
+        }
     }
 
     protected class AddCommentPanel extends Composite {
