@@ -405,7 +405,7 @@ public class FolderController {
                     !folder.getOwnerEmail().equalsIgnoreCase(account.getEmail()))
                 return false;
 
-            folder.setPropagatePermissions(Boolean.valueOf(propagate));
+            folder.setPropagatePermissions(propagate);
             folder.setModificationTime(new Date(System.currentTimeMillis()));
             dao.update(folder);
             return ControllerFactory.getPermissionController().propagateFolderPermissions(account, folder, propagate);

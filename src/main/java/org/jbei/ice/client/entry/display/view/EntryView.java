@@ -254,11 +254,6 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public SequenceViewPanelPresenter getSequenceViewPanel() {
-        return currentView.getSequencePanel().getPresenter();
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     public SequenceViewPanelPresenter setEntryInfoForView(PartData info, ServiceDelegate<PartSample> handler) {
         boolean showEdit = info.isCanEdit();

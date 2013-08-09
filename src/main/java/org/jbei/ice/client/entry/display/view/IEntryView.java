@@ -103,6 +103,4 @@ public interface IEntryView extends IsWidget {
     void addFlagDelegate(Delegate<FlagEntry> flagEntryDelegate);
 
     void addComment(UserComment comment);
-
-    SequenceViewPanelPresenter getSequenceViewPanel();
 }
