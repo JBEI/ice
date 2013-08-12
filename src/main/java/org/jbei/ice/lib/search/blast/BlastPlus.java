@@ -19,10 +19,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -352,6 +354,22 @@ public class BlastPlus {
         final Path blastDb = Paths.get(dataDir, BLAST_DB_FOLDER);
 
         Path newFastaFile = Paths.get(blastDb.toString(), "bigfastafile.new");
+
+        // check if file exists
+        if (Files.exists(newFastaFile)) {
+            try {
+                BasicFileAttributes attr = Files.readAttributes(newFastaFile, BasicFileAttributes.class);
+                long hoursSinceCreation = attr.creationTime().to(TimeUnit.HOURS);
+                if (hoursSinceCreation > 1)
+                    Files.delete(newFastaFile);
+                else
+                    return;
+            } catch (IOException ioe) {
+                Logger.error(ioe);
+                return;
+            }
+        }
+
         try (BufferedWriter write = Files.newBufferedWriter(newFastaFile, Charset.defaultCharset(),
                                                             StandardOpenOption.CREATE_NEW)) {
             writeBigFastaFile(write);
