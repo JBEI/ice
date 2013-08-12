@@ -177,18 +177,6 @@ false or 0, means don't use slow uploads  -->
         <url-pattern>/sequence_upload</url-pattern>
     </servlet-mapping>
 
-    <!-- csv upload -->
-    <servlet>
-        <servlet-name>CSVUploadServlet</servlet-name>
-        <servlet-class>org.jbei.ice.server.servlet.CSVUploadServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>CSVUploadServlet</servlet-name>
-        <url-pattern>/csv_upload</url-pattern>
-    </servlet-mapping>
-
-
     <welcome-file-list>
         <welcome-file>Gwt_ice.html</welcome-file>
     </welcome-file-list>

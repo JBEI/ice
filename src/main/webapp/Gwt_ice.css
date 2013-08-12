@@ -591,39 +591,12 @@ a.cell_mouseover:hover {
     font-size: 0.63em;
 }
 
-.entry_attachment_submit_button {
-    background-color: #f3f3f3;
-    border: 1px solid #ccc;
-    padding: 4px;
-    font-weight: bold;
-    color: #666;
-    font-family: Arial, serif;
-    font-size: 0.7em;
-    box-shadow: 0 0 1px 0 #ddd;
-    border-radius: 2px;
-    cursor: pointer;
-    float: right;
-}
-
-.entry_attachment_submit_button:hover {
-    background-color: #f1f2f3;
-    border: 1px solid #999;
-    padding: 4px;
-    font-weight: bold;
-    color: #333;
-    font-family: Arial, serif;
-    font-size: 0.7em;
-    box-shadow: 0 0 1px 1px #ddd;
-    border-radius: 2px;
-    cursor: pointer;
-}
-
 .attachment_description_input {
     border: 1px solid #ccc;
     width: 170px;
     padding: 5px;
     color: #777;
-    font-size: 0.95em;
+    font-size: 0.75em;
     font-family: Helvetica, Arial, serif;
 }
 

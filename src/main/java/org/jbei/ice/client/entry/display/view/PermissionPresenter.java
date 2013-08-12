@@ -55,10 +55,13 @@ public class PermissionPresenter {
     }
 
     public void removeItem(AccessPermission access) {
-        if (access.isCanRead())
+        if (access.isCanRead()) {
             view.removeReadItem(access);
-        else if (access.isCanWrite())
+            readList.remove(access);
+        } else if (access.isCanWrite()) {
             view.removeWriteItem(access);
+            writeList.remove(access);
+        }
     }
 
     public void addReadItem(AccessPermission access, Delegate<AccessPermission> deleteHandler) {

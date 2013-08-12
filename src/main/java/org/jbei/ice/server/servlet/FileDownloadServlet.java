@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,7 +45,7 @@ public class FileDownloadServlet extends HttpServlet {
         Account account;
 
         try {
-            account = isLoggedIn(request.getCookies());
+            account = ServletUtils.isLoggedIn(request.getCookies());
             if (account == null) {
                 if (!AccountController.isAuthenticated(sid))
                     return;
@@ -148,22 +147,5 @@ public class FileDownloadServlet extends HttpServlet {
             Logger.error(e);
             return null;
         }
-    }
-
-    private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
-        for (Cookie cookie : cookies) {
-            if ("gd-ice".equals(cookie.getName())) {
-                String sid = cookie.getValue();
-                if (sid == null || sid.isEmpty())
-                    return null;
-
-                if (!AccountController.isAuthenticated(sid))
-                    return null;
-
-                AccountController controller = ControllerFactory.getAccountController();
-                return controller.getAccountBySessionKey(sid);
-            }
-        }
-        return null;
     }
 }

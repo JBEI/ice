@@ -82,7 +82,7 @@ public class EntrySequenceAnalysisPanel extends Composite {
         layout.setWidth("100%");
         layout.setWidget(0, 0, traceHeaderPanel);
         layout.setWidget(1, 0, uploadPanel);
-        layout.setHTML(2, 0, "<i class=\"font-75em\">No sequence trace file available.</i>");
+        layout.setHTML(2, 0, "<i class=\"font-75em\" style=\"color: #999\">No sequence trace files available.</i>");
     }
 
     public void setCurrentInfo(PartData info) {
@@ -129,7 +129,7 @@ public class EntrySequenceAnalysisPanel extends Composite {
                 layout.getFlexCellFormatter().setHeight(3, 0, "600px");
             }
         } else {
-            layout.setHTML(2, 0, "<i class=\"font-75em\">No sequence trace file available</i>");
+            layout.setHTML(2, 0, "<i class=\"font-75em\" style=\"color: #999\">No sequence trace files available</i>");
             if (layout.getRowCount() > 3) {
                 for (int j = 3; j < layout.getRowCount(); j += 1)
                     layout.removeRow(j);

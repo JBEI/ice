@@ -22,6 +22,8 @@ public class AttachmentListMenuPresenter {
 
         HandlerRegistration addQuickAddHandler(ClickHandler handler);
 
+        void setCancelHandler(ClickHandler handler);
+
         void addMenuItem(AttachmentItem item, int itemCount);
     }
 
@@ -51,6 +53,13 @@ public class AttachmentListMenuPresenter {
                 view.switchAttachmentAddButton();
             }
         });
+
+        this.view.setCancelHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                view.switchAttachmentAddButton();
+            }
+        });
     }
 
     public void addAttachmentItem(AttachmentItem item) {
@@ -69,8 +78,7 @@ public class AttachmentListMenuPresenter {
 
     /**
      * @param item attachment item in the cell being clicked on
-     * @return Clickhandler for each cell in the attachment list menu
-     *         to download
+     * @return Click Handler for each cell in the attachment list menu to download
      */
     public ClickHandler getCellClickHandler(final AttachmentItem item) {
         return new ClickHandler() {
