@@ -19,7 +19,6 @@
         <property name="hibernate.c3p0.timeout">300</property>
         <property name="hibernate.c3p0.max_statements">50</property>
         <property name="hibernate.c3p0.idle_test_period">100</property>
-        <property name="hibernate.c3p0.unreturnedConnectionTimeout">300</property>
         <property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">true</property>
         <property name="hibernate.c3p0.acquireRetryAttempts">0</property>
         <!-- wait 30secs before attempting to acquire db connection after a failed attempt -->
@@ -95,6 +94,6 @@
         <mapping class="org.jbei.ice.lib.permissions.model.Permission"/>
         <mapping class="org.jbei.ice.lib.message.Message"/>
         <mapping class="org.jbei.ice.lib.account.model.Preference"/>
-        <mapping class="org.jbei.ice.lib.net.model.RemotePartner"/>
+        <mapping class="org.jbei.ice.lib.net.RemotePartner"/>
     </session-factory>
 </hibernate-configuration>
