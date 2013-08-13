@@ -34,7 +34,7 @@
     </filter-mapping>
     <filter-mapping>
         <filter-name>IceFilter</filter-name>
-        <url-pattern>*.gupld</url-pattern>
+        <url-pattern>/upload</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>IceFilter</filter-name>
@@ -47,14 +47,6 @@
     <filter-mapping>
         <filter-name>IceFilter</filter-name>
         <url-pattern>/sequence</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>IceFilter</filter-name>
-        <url-pattern>/sequence_upload</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>IceFilter</filter-name>
-        <url-pattern>/csv_upload</url-pattern>
     </filter-mapping>
 
     <!-- BlazeDS -->
@@ -77,20 +69,6 @@
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>WEB-INF/cxf/beans.xml</param-value>
-    </context-param>
-
-    <!-- file upload -->
-    <context-param>
-        <!-- max size of the upload request -->
-        <param-name>maxSize</param-name>
-        <param-value>3145728</param-value>
-    </context-param>
-    <context-param>
-        <!-- Useful in development mode to slow down the uploads in fast networks.
-Put the number of milliseconds to sleep in each block received in the server.
-false or 0, means don't use slow uploads  -->
-        <param-name>slowUploads</param-name>
-        <param-value>0</param-value>
     </context-param>
 
     <listener>
@@ -130,7 +108,7 @@ false or 0, means don't use slow uploads  -->
 
     <servlet-mapping>
         <servlet-name>FileUploadServlet</servlet-name>
-        <url-pattern>*.gupld</url-pattern>
+        <url-pattern>/upload</url-pattern>
     </servlet-mapping>
 
     <!--  file download -->
@@ -164,17 +142,6 @@ false or 0, means don't use slow uploads  -->
     <servlet-mapping>
         <servlet-name>SequenceDownloadServlet</servlet-name>
         <url-pattern>/sequence</url-pattern>
-    </servlet-mapping>
-
-    <!--  sequence upload -->
-    <servlet>
-        <servlet-name>SequenceUploadServlet</servlet-name>
-        <servlet-class>org.jbei.ice.server.servlet.SequenceUploadServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>SequenceUploadServlet</servlet-name>
-        <url-pattern>/sequence_upload</url-pattern>
     </servlet-mapping>
 
     <welcome-file-list>

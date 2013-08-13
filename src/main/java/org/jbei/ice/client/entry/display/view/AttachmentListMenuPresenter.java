@@ -24,12 +24,11 @@ public class AttachmentListMenuPresenter {
 
         void setCancelHandler(ClickHandler handler);
 
-        void addMenuItem(AttachmentItem item, int itemCount);
+        void addMenuItem(AttachmentItem item);
     }
 
     private final IAttachmentListMenuView view;
     private HandlerRegistration quickAddHandler;
-    private int itemCount;
     private final ArrayList<AttachmentItem> list;
 
     public AttachmentListMenuPresenter(IAttachmentListMenuView view) {
@@ -67,13 +66,11 @@ public class AttachmentListMenuPresenter {
             return;
 
         list.add(item);
-        view.addMenuItem(item, itemCount);
-        itemCount += 1;
+        view.addMenuItem(item);
     }
 
     public void reset() {
         list.clear();
-        itemCount = 0;
     }
 
     /**

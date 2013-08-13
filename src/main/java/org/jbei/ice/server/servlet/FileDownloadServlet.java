@@ -45,7 +45,7 @@ public class FileDownloadServlet extends HttpServlet {
         Account account;
 
         try {
-            account = ServletUtils.isLoggedIn(request.getCookies());
+            account = ServletHelper.isLoggedIn(request.getCookies());
             if (account == null) {
                 if (!AccountController.isAuthenticated(sid))
                     return;

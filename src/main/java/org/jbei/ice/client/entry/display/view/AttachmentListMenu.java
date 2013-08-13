@@ -150,15 +150,8 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
     }
 
     @Override
-    public void addMenuItem(AttachmentItem item, int itemCount) {
-        int row;
-        if (itemCount == 0) {
-            row = 2;
-            layout.getCellFormatter().removeStyleName(2, 0, "font-75em");
-            layout.getCellFormatter().removeStyleName(2, 0, "pad-6");
-        } else
-            row = layout.getRowCount();
-
+    public void addMenuItem(AttachmentItem item) {
+        int row = layout.getRowCount();
         final MenuCell cell = new MenuCell(item);
         cell.setDownloadHandler(presenter.getCellClickHandler(item));
         cell.addDeleteHandler(presenter.getDeleteClickHandler(handler, item));
@@ -175,7 +168,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
         final FormPanel panel = new FormPanel();
         panel.setWidth("180px");
-        panel.setAction("/servlet.gupld?&type=attachment&sid=" + ClientController.sessionId);
+        panel.setAction("/upload?type=attachment&sid=" + ClientController.sessionId);
         panel.setEncoding(FormPanel.ENCODING_MULTIPART);
         panel.setMethod(FormPanel.METHOD_POST);
 

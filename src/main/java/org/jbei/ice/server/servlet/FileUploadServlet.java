@@ -61,10 +61,11 @@ public class FileUploadServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String SEQUENCE_TYPE = "sequence";
+    private static final String TRACE_SEQUENCE = "trace_sequence";
     private static final String ATTACHMENT_TYPE = "attachment";
     private static final String BULK_UPLOAD_FILE_TYPE = "bulk_file_upload";
     private static final String BULK_CSV_UPLOAD = "bulk_csv";
+    private static final String SEQUENCE = "sequence";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -85,7 +86,7 @@ public class FileUploadServlet extends HttpServlet {
         Account account;
 
         try {
-            account = ServletUtils.isLoggedIn(request.getCookies());
+            account = ServletHelper.isLoggedIn(request.getCookies());
             if (account == null) {
                 if (!AccountController.isAuthenticated(sid))
                     return;
@@ -120,13 +121,14 @@ public class FileUploadServlet extends HttpServlet {
                 String fileName = filePath.substring(filePath.lastIndexOf(File.pathSeparatorChar) + 1);
                 File file = new File(tmpDir, fileName);
                 Streams.copy(fileItemStream.openStream(), new FileOutputStream(file), true);
+                long entryIdl = Long.decode(entryId);
 
                 switch (type) {
                     case ATTACHMENT_TYPE:
                         result = uploadAttachment(account, file, entryId, desc, fileName);
                         break;
 
-                    case SEQUENCE_TYPE:
+                    case TRACE_SEQUENCE:
                         try {
                             result = uploadSequenceTraceFile(file, entryId, account, fileName);
                         } catch (IOException e) {
@@ -136,13 +138,17 @@ public class FileUploadServlet extends HttpServlet {
 
                     case BULK_UPLOAD_FILE_TYPE:
                         Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
-                        long entryIdl = Long.decode(entryId);
+
                         result = uploadBulkUploadFile(account, file, bulkUploadId, entryIdl, fileName, isSequence,
                                                       entryType, entryAddType);
                         break;
 
                     case BULK_CSV_UPLOAD:
                         uploadCSV(request, file);
+                        break;
+
+                    case SEQUENCE:
+                        result = ServletHelper.uploadSequence(account, entryIdl, file);
                         break;
 
                     default:

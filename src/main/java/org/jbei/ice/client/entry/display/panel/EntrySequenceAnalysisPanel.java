@@ -9,21 +9,22 @@ import org.jbei.ice.client.entry.display.view.SequenceAnalysisHeaderPanel;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
-import gwtupload.client.IUploadStatus;
-import gwtupload.client.IUploader;
-import gwtupload.client.SingleUploader;
 
 /**
+ * Panel that handles display and upload of trace sequence files
+ *
  * @author Hector Plahar
  */
 public class EntrySequenceAnalysisPanel extends Composite {
@@ -31,10 +32,7 @@ public class EntrySequenceAnalysisPanel extends Composite {
     private final FlexTable layout;
     private final EntrySequenceTable sequenceTable;
     private final SequenceAnalysisHeaderPanel traceHeaderPanel;
-    private SingleUploader sequenceUploader;
-    private HTML sequenceAddCancelButton;
     private Widget uploadPanel;
-    private HandlerRegistration sequenceUploadFinish;
     private PartData currentInfo;
     private final Delegate<Long> retrieveSequenceTracesDelegate;
 
@@ -45,36 +43,16 @@ public class EntrySequenceAnalysisPanel extends Composite {
 
         sequenceTable = new EntrySequenceTable();
         traceHeaderPanel = new SequenceAnalysisHeaderPanel(sequenceTable.getSelectionModel());
-
         uploadPanel = createSequenceUploadPanel();
-        uploadPanel.setVisible(false);
-
-        sequenceAddCancelButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                uploadPanel.setVisible(false);
-            }
-        });
 
         traceHeaderPanel.setTraceUploadHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                uploadPanel.setVisible(!uploadPanel.isVisible());
-            }
-        });
-
-        sequenceUploader.addOnStartUploadHandler(new IUploader.OnStartUploaderHandler() {
-            @Override
-            public void onStart(IUploader uploader) {
-                String servletPath = "servlet.gupld?eid=" + currentInfo.getId()
-                        + "&type=sequence&sid=" + ClientController.sessionId;
-                uploader.setServletPath(servletPath);
+                layout.getRowFormatter().setVisible(1, !layout.getRowFormatter().isVisible(1));
             }
         });
 
         initLayout();
-        setSequenceFinishUploadHandler();
     }
 
     protected void initLayout() {
@@ -83,6 +61,7 @@ public class EntrySequenceAnalysisPanel extends Composite {
         layout.setWidget(0, 0, traceHeaderPanel);
         layout.setWidget(1, 0, uploadPanel);
         layout.setHTML(2, 0, "<i class=\"font-75em\" style=\"color: #999\">No sequence trace files available.</i>");
+        layout.getRowFormatter().setVisible(1, false);
     }
 
     public void setCurrentInfo(PartData info) {
@@ -141,33 +120,6 @@ public class EntrySequenceAnalysisPanel extends Composite {
         traceHeaderPanel.setDeleteHandler(handler);
     }
 
-    protected void setSequenceFinishUploadHandler() {
-        if (sequenceUploadFinish != null)
-            sequenceUploadFinish.removeHandler();
-
-        sequenceUploadFinish = sequenceUploader.addOnFinishUploadHandler(new IUploader.OnFinishUploaderHandler() {
-            @Override
-            public void onFinish(IUploader uploader) {
-                if (uploader.getStatus() == IUploadStatus.Status.SUCCESS) {
-                    IUploader.UploadedInfo info = uploader.getServerInfo();
-                    if (!info.message.isEmpty())
-                        Window.alert(info.message);
-                    else
-                        retrieveSequenceTracesDelegate.execute(currentInfo.getId());
-                } else {
-                    IUploader.UploadedInfo info = uploader.getServerInfo();
-                    if (uploader.getStatus() == IUploadStatus.Status.ERROR) {
-                        Window.alert("There was a problem uploading your file.\n\n"
-                                             + "Please contact your administrator if this problem persists");
-                    } else if (!info.message.isEmpty())
-                        Window.alert(info.message);
-                }
-                uploader.reset();
-                uploadPanel.setVisible(false);
-            }
-        });
-    }
-
     public void reset() {
         sequenceTable.reset();
         currentInfo = null;
@@ -175,30 +127,49 @@ public class EntrySequenceAnalysisPanel extends Composite {
     }
 
     private Widget createSequenceUploadPanel() {
-        sequenceUploader = new SingleUploader();
-        sequenceUploader.setAutoSubmit(true);
-        sequenceUploader.addOnStartUploadHandler(new IUploader.OnStartUploaderHandler() {
+        final FormPanel formPanel = new FormPanel();
+        formPanel.setAction("/upload?sid=" + ClientController.sessionId + "&type=trace_sequence");
+        formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+        formPanel.setMethod(FormPanel.METHOD_POST);
 
+        final FileUpload sequenceUploader = new FileUpload();
+        sequenceUploader.setName("uploadFormElement");
+        formPanel.add(sequenceUploader);
+
+        formPanel.addSubmitHandler(new FormPanel.SubmitHandler() {
             @Override
-            public void onStart(IUploader uploader) {
-                uploader.setServletPath(uploader.getServletPath() + "?eid=" + currentInfo.getId()
-                                                + "&type=sequence&sid=" + ClientController.sessionId);
+            public void onSubmit(FormPanel.SubmitEvent event) {
+                if (formPanel.getAction().contains("eid="))
+                    return;
+                formPanel.setAction(formPanel.getAction() + "&eid=" + currentInfo.getId());
             }
         });
 
-        sequenceAddCancelButton = new HTML("Cancel");
-        sequenceAddCancelButton.setStyleName("footer_feedback_widget");
-        sequenceAddCancelButton.addStyleName("font-70em");
-        sequenceAddCancelButton.addStyleName("display-inline");
+        sequenceUploader.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                if (sequenceUploader.getFilename().isEmpty())
+                    return;
 
-        String html = "<div style=\"outline:none; padding: 4px; background-color: #f3f3f3\">"
-                + "<span id=\"upload\"></span><span style=\"color: #777; font-size: 10px;\">"
-                + "Fasta, GenBank, or ABI formats, optionally in zip file.</span>"
-                + "<span style=\"padding-left: 20px;\" id=\"upload_cancel\"></span></div>";
+                formPanel.submit();
+            }
+        });
 
-        HTMLPanel panel = new HTMLPanel(html);
-        panel.add(sequenceUploader, "upload");
-        panel.add(sequenceAddCancelButton, "upload_cancel");
+        formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+            @Override
+            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                retrieveSequenceTracesDelegate.execute(currentInfo.getId());
+                formPanel.reset();
+                layout.getRowFormatter().setVisible(1, false);
+            }
+        });
+
+        HTML html = new HTML("Upload Fasta, GenBank, or ABI formats, optionally in a zip file");
+        html.setStyleName("information");
+
+        VerticalPanel panel = new VerticalPanel();
+        panel.add(html);
+        panel.add(formPanel);
         return panel;
     }
 }

@@ -2171,5 +2171,14 @@ td.selected i.font-awesome {
     border: 1px solid #ccc;
 }
 
+.information {
+    padding: 6px;
+    border: 1px solid #bce8f1;
+    background-color: #d9edf7;
+    font-size: 0.80em;
+    border-radius: 6px;
+    color: #3a87ad;
+}
+
 
 

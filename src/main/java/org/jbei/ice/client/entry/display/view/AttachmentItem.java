@@ -3,7 +3,7 @@ package org.jbei.ice.client.entry.display.view;
 import org.jbei.ice.client.collection.view.OptionSelect;
 
 /**
- * item representing an entry attachment
+ * Item representing an entry attachment
  *
  * @author Hector Plahar
  */

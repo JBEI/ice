@@ -19,7 +19,6 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
  *
  * @author Hector Plahar
  */
-
 public class SequenceAnalysisHeaderPanel extends Composite {
 
     private final MultiSelectionModel<SequenceAnalysisInfo> selection;

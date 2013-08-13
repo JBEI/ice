@@ -45,7 +45,7 @@ public class UploadSequenceFileWidget extends Composite implements ICanReset {
         feedback.setVisible(false);
 
         final FormPanel formPanel = new FormPanel();
-        formPanel.setAction("/sequence_upload?eid=" + entryId + "&sid=" + ClientController.sessionId);
+        formPanel.setAction("/upload?sid=" + ClientController.sessionId + "&type=sequence");
         formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         formPanel.setMethod(FormPanel.METHOD_POST);
 
@@ -56,6 +56,13 @@ public class UploadSequenceFileWidget extends Composite implements ICanReset {
         popup.addSaveButtonHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 formPanel.submit();
+            }
+        });
+
+        formPanel.addSubmitHandler(new FormPanel.SubmitHandler() {
+            @Override
+            public void onSubmit(FormPanel.SubmitEvent event) {
+                formPanel.setAction(formPanel.getAction() + "&eid=" + entryId);
             }
         });
 

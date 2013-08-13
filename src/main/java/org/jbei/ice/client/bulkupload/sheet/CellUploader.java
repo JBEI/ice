@@ -73,7 +73,7 @@ public class CellUploader implements IsWidget {
             public void onStart(IUploader uploader) {
                 currentId = delegate.getEntryIdForRow(row);
                 long bid = delegate.getBulkUploadId();
-                uploader.setServletPath("servlet.gupld?type=bulk_file_upload&is_sequence="
+                uploader.setServletPath("/upload?type=bulk_file_upload&is_sequence="
                                                 + Boolean.toString(sequenceUpload)
                                                 + "&sid=" + ClientController.sessionId + "&eid=" + currentId
                                                 + "&bid=" + bid + "&entry_type=" + typeName
