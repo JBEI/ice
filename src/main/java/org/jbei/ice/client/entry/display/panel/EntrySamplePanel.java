@@ -58,9 +58,7 @@ public class EntrySamplePanel extends Composite {
         panel.add(addSample, "add_sample");
         panel.add(requestSample, "request_sample");
 
-        table.setWidget(0, 0, panel);
-        table.setHTML(1, 0, "");
-        table.setHTML(2, 0, "<i class=\"font-75em pad-8\">No Samples Available</i>");
+        reset();
         setAddRequestSampleHandler();
     }
 
@@ -112,8 +110,10 @@ public class EntrySamplePanel extends Composite {
     public void reset() {
         table.removeAllRows();
         table.setWidget(0, 0, panel);
+        table.getFlexCellFormatter().setStyleName(0, 0, "pad_top");
+
         table.setHTML(1, 0, "");
-        table.setHTML(2, 0, "<i class=\"font-75em pad-8\">No Samples Available</i>");
+        table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No samples availabe</i>");
     }
 
     public void setSampleOptions(SampleLocation options) {
@@ -146,8 +146,14 @@ public class EntrySamplePanel extends Composite {
     public void setData(ArrayList<SampleStorage> data, ServiceDelegate<PartSample> deleteHandler) {
         table.removeAllRows();
         table.setWidget(0, 0, panel);
+        table.getFlexCellFormatter().setStyleName(0, 0, "pad_top");
+
         table.setHTML(1, 0, "");
         requestSample.setVisible(!data.isEmpty());
+        if (data.isEmpty()) {
+            table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No samples availabe</i>");
+            return;
+        }
 
         Collections.sort(data, new Comparator<SampleStorage>() {
             @Override
