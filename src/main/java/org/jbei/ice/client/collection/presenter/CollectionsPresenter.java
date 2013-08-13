@@ -45,7 +45,6 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -341,7 +340,6 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                StringBuilder builder = new StringBuilder();
                 Set<Long> selected = new HashSet<Long>();
                 ExportAsOption option = display.getExportAsModel().getSelectedObject();
                 if (option == null)
@@ -366,12 +364,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     return;
                 }
 
-                for (long id : selected) {
-                    builder.append(id).append(", ");
-                }
-
-                Window.Location.replace("/export?type=" + option.name() + "&entries=" + builder.toString());
-
+                model.exportParts(new ArrayList<Long>(selected), option);
                 // clear selected
                 display.getExportAsModel().setSelected(option, false);
             }

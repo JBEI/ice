@@ -3,13 +3,10 @@ package org.jbei.ice.server;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
@@ -83,6 +80,9 @@ import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
+import org.jbei.ice.lib.utils.IceXlsSerializer;
+import org.jbei.ice.lib.utils.IceXmlSerializer;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.services.webservices.IRegistryAPI;
@@ -92,6 +92,7 @@ import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import org.apache.commons.io.FileUtils;
 
 // TODO : use command pattern to split this up
 public class RegistryServiceImpl extends RemoteServiceServlet implements RegistryService {
@@ -1748,6 +1749,48 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         } catch (ControllerException e) {
             Logger.error(e);
             return false;
+        }
+    }
+
+    @Override
+    public String exportParts(String sid, ArrayList<Long> partIds, String export) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        EntryController entryController = ControllerFactory.getEntryController();
+        Set<String> typeSet = new HashSet<>();
+        LinkedList<Entry> entries = new LinkedList<>();
+
+        try {
+            for (long id : partIds) {
+                Entry entry = entryController.get(account, id);
+                if (entry == null)
+                    continue;
+
+                typeSet.add(entry.getRecordType().toUpperCase());
+                entries.add(entry);
+            }
+
+            String tempDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+            String fileName = UUID.randomUUID().toString();
+            String data;
+
+            // actual export
+            switch (export.toLowerCase()) {
+                case "xml":
+                    fileName = fileName + ".xml";
+                    data = IceXmlSerializer.serializeToJbeiXml(account, entries);
+                    break;
+                case "excel":
+                default:
+                    fileName = fileName + ".csv";
+                    data = IceXlsSerializer.serialize(entries, new TreeSet<>(typeSet));
+                    break;
+            }
+            File file = Files.createFile(Paths.get(tempDir, fileName)).toFile();
+            FileUtils.writeStringToFile(file, data);
+            return fileName;
+        } catch (ControllerException | IOException | UtilityException ce) {
+            Logger.error(ce);
+            return null;
         }
     }
 }

@@ -231,4 +231,6 @@ public interface RegistryService extends RemoteService {
 
     boolean setPropagatePermissionForFolder(String sid, long folderId, boolean prop)
             throws AuthenticationException;
+
+    String exportParts(String sid, ArrayList<Long> partIds, String export) throws AuthenticationException;
 }

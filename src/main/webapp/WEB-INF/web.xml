@@ -42,10 +42,6 @@
     </filter-mapping>
     <filter-mapping>
         <filter-name>IceFilter</filter-name>
-        <url-pattern>/export</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>IceFilter</filter-name>
         <url-pattern>/sequence</url-pattern>
     </filter-mapping>
 
@@ -120,17 +116,6 @@
     <servlet-mapping>
         <servlet-name>FileDownloadServlet</servlet-name>
         <url-pattern>/download</url-pattern>
-    </servlet-mapping>
-
-    <!--  export as [file format] servlet -->
-    <servlet>
-        <servlet-name>EntryExportServlet</servlet-name>
-        <servlet-class>org.jbei.ice.server.servlet.EntryExportServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>EntryExportServlet</servlet-name>
-        <url-pattern>/export</url-pattern>
     </servlet-mapping>
 
     <!--  sequence download -->

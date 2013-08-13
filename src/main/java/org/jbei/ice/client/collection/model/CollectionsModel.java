@@ -9,6 +9,7 @@ import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -17,6 +18,7 @@ import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class CollectionsModel {
@@ -318,5 +320,21 @@ public class CollectionsModel {
                 }.go(eventBus);
             }
         };
+    }
+
+    public void exportParts(final ArrayList<Long> partIds, final ExportAsOption option) {
+        new IceAsyncCallback<String>() {
+
+            @Override
+            protected void callService(AsyncCallback<String> callback) throws AuthenticationException {
+                service.exportParts(ClientController.sessionId, partIds, option.toString(), callback);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                Window.Location.replace("/download?id=" + result + "&type=tmp");
+            }
+        }.go(eventBus);
+
     }
 }
