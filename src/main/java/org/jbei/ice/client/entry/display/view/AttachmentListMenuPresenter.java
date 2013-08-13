@@ -24,7 +24,7 @@ public class AttachmentListMenuPresenter {
 
         void setCancelHandler(ClickHandler handler);
 
-        void addMenuItem(AttachmentItem item);
+        void addMenuItem(AttachmentItem item, int itemCount);
     }
 
     private final IAttachmentListMenuView view;
@@ -66,7 +66,7 @@ public class AttachmentListMenuPresenter {
             return;
 
         list.add(item);
-        view.addMenuItem(item);
+        view.addMenuItem(item, list.size() - 1);
     }
 
     public void reset() {

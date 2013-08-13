@@ -83,8 +83,16 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
 
     public void setUser(User info) {
         this.user = info;
-        table.setHTML(1, 0, "<br><span style=\"padding: 10px 0 0 3px; font-size: 0.90em; color: #444\"> "
-                + info.getDescription() + "</span>");
+        String html;
+        if (info.getDescription() == null || info.getDescription().isEmpty()) {
+            html = "<i style=\"color: #999; font-size: 0.85em\">No profile description provided.";
+        } else {
+            html = "<span style=\"padding: 10px 0 0 3px; font-size: 0.90em; color: #444\">"
+                    + info.getDescription() + "</span>";
+        }
+
+        table.setHTML(1, 0, html);
+        table.getFlexCellFormatter().setStyleName(1, 0, "pad_top");
         sendMessage.setVisible(!info.getEmail().equalsIgnoreCase(ClientController.account.getEmail()));
     }
 
