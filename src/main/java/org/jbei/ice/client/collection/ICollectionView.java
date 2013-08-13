@@ -120,5 +120,7 @@ public interface ICollectionView {
 
     void setDemotionDelegate(ServiceDelegate<MenuItem> delegate);
 
+    void setPublicAccessDelegate(ServiceDelegate<Boolean> delegate);
+
     void addQuickAddHandler(ClickHandler handler);
 }

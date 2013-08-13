@@ -690,6 +690,19 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public boolean enableOrDisableFolderPublicAccess(String sid, long folderId, boolean isEnable)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            PermissionsController controller = ControllerFactory.getPermissionController();
+            return controller.enableOrDisableFolderPublicAccess(account, folderId, isEnable);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return false;
+        }
+    }
+
+    @Override
     public PartData retrieveEntryTipDetails(String sid, long entryId, String url) throws AuthenticationException {
         EntryController controller = ControllerFactory.getEntryController();
         Account account = retrieveAccountForSid(sid);

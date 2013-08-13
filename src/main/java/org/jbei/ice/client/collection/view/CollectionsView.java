@@ -256,6 +256,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
+    public void setPublicAccessDelegate(ServiceDelegate<Boolean> delegate) {
+        this.userMenu.setRemoveAddPublicAccessDelegate(delegate);
+    }
+
+    @Override
     public void setCurrentMenuSelection(long id) {
         this.userMenu.setSelection(id);
         this.systemMenu.setSelection(id);

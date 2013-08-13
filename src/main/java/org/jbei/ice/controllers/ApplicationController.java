@@ -74,6 +74,8 @@ public class ApplicationController {
                 ControllerFactory.getPermissionController().upgradePermissions();
                 initializeHibernateSearch();
                 ControllerFactory.getConfigurationController().upgradeConfiguration();
+                ControllerFactory.getFolderController().upgradeFolders();
+                ControllerFactory.getEntryController().upgradeTo3Point4();
                 break;
 
             // upgrade from 3.3 to 3.4

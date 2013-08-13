@@ -1571,146 +1571,6 @@ td.datePickerMonth {
     border: 1px solid #F1F1F1;
 }
 
-/* MENU BAR*/
-.gwt-MenuBar {
-}
-
-.gwt-MenuBar-horizontal {
-    color: #999;
-}
-
-.gwt-MenuBar-vertical {
-
-}
-
-.gwt-MenuBar .gwt-MenuItem {
-    background-color: #FFF;
-    width: 150px;
-}
-
-.gwt-MenuBar .gwt-MenuItem-selected {
-
-}
-
-.GWTUpld {
-    font-size: 12px;
-}
-
-.GWTUpld form, .GWTUpld .upld-form-elements {
-    padding: 0;
-    vertical-align: top;
-}
-
-.GWTUpld .upld-status {
-    font-family: Arial, serif;
-    font-size: 12px;
-    font-weight: bold;
-    padding-left: 2px;
-}
-
-.GWTUpld .upld-status div.cancel {
-    background: url(static/images/cancel-upld.gif) no-repeat;
-    width: 12px;
-    height: 12px;
-    cursor: pointer;
-    margin-top: 1px;
-}
-
-* html .GWTUpld .upld-status div.cancel {
-    width: 14px;
-    height: 10px;
-    margin-top: 2px;
-}
-
-.GWTUpld .upld-status div.cancel:hover {
-    cursor: pointer;
-}
-
-.GWTUpld .upld-status .filename {
-    overflow: hidden;
-    white-space: nowrap;
-    height: 100%;
-}
-
-.upld-status .status {
-    padding-left: 8px;
-    white-space: nowrap;
-    height: 100%;
-}
-
-.upld-status .status-success {
-    color: green;
-}
-
-.upld-status .status-error, .upld-status .status-canceled {
-    color: red;
-}
-
-.prgbar-back {
-    background: #ffffff none repeat scroll 0 0;
-    border: 1px solid #999999;
-    height: 12px;
-    overflow: hidden;
-    padding: 1px;
-    width: 170px;
-}
-
-* html  .prgbar-back {
-    height: 12px;
-    margin-top: 2px;
-}
-
-.prgbar-done {
-    background: #d4e4ff none repeat scroll 0 0;
-    font-size: 0;
-    height: 100%;
-    float: left;
-}
-
-.prgbar-msg {
-    position: absolute;
-    z-index: 9;
-    font-size: 9px;
-    font-weight: normal;
-    margin-left: 3px;
-}
-
-* html  .prgbar-msg {
-    top: 0;
-    left: 4px;
-}
-
-.gwt-PopupPanel .GWTUpld {
-    border: 2px groove #F6A828;
-    padding: 10px;
-    background: #bf984c;
-    border-radius: 6px;
-}
-
-.GWTUpld .DecoratedFileUpload {
-    margin-right: 5px;
-}
-
-.GWTUpld .DecoratedFileUpload .gwt-Button, .GWTUpld .DecoratedFileUpload .gwt-Anchor, .GWTUpld .DecoratedFileUpload .gwt-Label {
-    white-space: nowrap;
-    font-size: 10px;
-}
-
-.GWTUpld .gwt-Button, .GWTUpld .gwt-FileUpload {
-    font-size: 10px;
-    min-height: 15px;
-}
-
-.GWTUpld .DecoratedFileUpload .gwt-Anchor, .GWTUpld .DecoratedFileUpload .gw-Label {
-    color: blue;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.GWTUpld .gwt-Button:HOVER, .GWTUpld .DecoratedFileUpload .gwt-Button-over, .GWTUpld .DecoratedFileUpload .gwt-Anchor-over, .GWTUpld .DecoratedFileUpload .gwt-Label-over {
-    color: #af6b29;
-}
-
 .undo_delete_name_row {
     border-right: 1px solid #F2F2F2;
     border-top: 1px solid #F2F2F2;
@@ -2173,11 +2033,10 @@ td.selected i.font-awesome {
 
 .information {
     padding: 6px;
-    border: 1px solid #bce8f1;
-    background-color: #d9edf7;
+    background-color: #f0f9ff;
     font-size: 0.80em;
-    border-radius: 6px;
-    color: #3a87ad;
+    border-radius: 2px;
+    color: #bf984c;
 }
 
 

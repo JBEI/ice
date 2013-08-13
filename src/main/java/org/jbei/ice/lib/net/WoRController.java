@@ -11,6 +11,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.services.webservices.ServiceException;
 
@@ -22,7 +23,6 @@ import org.jbei.ice.services.webservices.ServiceException;
 public class WoRController {
 
     private final RemotePartnerDAO dao;
-    public static final String NODE_MASTER = "registry-test.jbei.org";
 
     public WoRController() {
         dao = new RemotePartnerDAO();
@@ -124,10 +124,13 @@ public class WoRController {
      */
     public boolean setEnable(String url, boolean value) throws ControllerException {
         ConfigurationController controller = ControllerFactory.getConfigurationController();
+        String NODE_MASTER = Utils.getConfigValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER);
+
         try {
             controller.setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, Boolean.toString(value));
             controller.setPropertyValue(ConfigurationKey.URI_PREFIX, url);
             String name = controller.getConfiguration(ConfigurationKey.PROJECT_NAME).getValue();
+
             if (name == null || name.trim().isEmpty()
                     || (name.equals(ConfigurationKey.PROJECT_NAME.getDefaultValue())
                     && !NODE_MASTER.equalsIgnoreCase(url))) {

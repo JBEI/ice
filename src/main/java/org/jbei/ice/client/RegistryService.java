@@ -233,4 +233,7 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     String exportParts(String sid, ArrayList<Long> partIds, String export) throws AuthenticationException;
+
+    boolean enableOrDisableFolderPublicAccess(String sid, long folderId, boolean isEnable)
+            throws AuthenticationException;
 }

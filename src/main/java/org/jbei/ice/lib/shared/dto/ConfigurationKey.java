@@ -40,7 +40,8 @@ public enum ConfigurationKey implements IDTOModel {
     NEW_REGISTRATION_ALLOWED("NO", "Allow user registration", true),
     PASSWORD_CHANGE_ALLOWED("YES", "allow password change", true),
     PROFILE_EDIT_ALLOWED("YES", "Allow Profile Edit", true),
-    JOIN_WEB_OF_REGISTRIES("NO", "Join Web of Registries", true);
+    JOIN_WEB_OF_REGISTRIES("NO", "Join Web of Registries", true),
+    WEB_OF_REGISTRIES_MASTER("registry.jbei.org", "", false);
 
     private String displayName;
     private String defaultValue;

@@ -241,6 +241,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         setPromotionDelegate();
         setDemotionDelegate();
+        setPublicAccessDelegate();
     }
 
     private void setTransferWidgetOptions() {
@@ -302,6 +303,29 @@ public class CollectionsPresenter extends AbstractPresenter {
                     @Override
                     public void onSuccess(Boolean result) {
                         History.newItem(Page.COLLECTIONS.getLink());
+                    }
+                }.go(eventBus);
+            }
+        });
+    }
+
+    private void setPublicAccessDelegate() {
+        display.setPublicAccessDelegate(new ServiceDelegate<Boolean>() {
+            @Override
+            public void execute(final Boolean enable) {
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        service.enableOrDisableFolderPublicAccess(ClientController.sessionId, currentFolder.getId(),
+                                                                  enable, callback);
+                        currentFolder.getId();
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        //TODO : view assumes call will success and so has already accounted for it in feedback
+                        //TODO : to the user
                     }
                 }.go(eventBus);
             }

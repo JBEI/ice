@@ -266,4 +266,7 @@ public interface RegistryServiceAsync {
     void setPropagatePermissionForFolder(String sid, long folderId, boolean prop, AsyncCallback<Boolean> async);
 
     void exportParts(String sid, ArrayList<Long> partIds, String export, AsyncCallback<String> asyncCallback);
+
+    void enableOrDisableFolderPublicAccess(String sid, long folderId, boolean isEnable, AsyncCallback<Boolean> async)
+            throws AuthenticationException;
 }

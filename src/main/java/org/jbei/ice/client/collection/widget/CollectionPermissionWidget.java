@@ -44,6 +44,7 @@ public class CollectionPermissionWidget extends Composite {
     private SuggestBox permissionSuggestions;
     private Delegate<ShareCollectionData> delegate;
     private Callback<ShareCollectionData> callback;
+    private ServiceDelegate<Boolean> publicAccessDelegate;
 
     private boolean isViewingWriteTab;
     private final ArrayList<AccessPermission> readList;  // list of read permissions (includes groups)
@@ -108,9 +109,16 @@ public class CollectionPermissionWidget extends Composite {
 
         permissionLayout = createPermissionWidget();
         layout.setWidget(2, 0, permissionLayout);
+        permissionLayout.getRowFormatter().setVisible(3, false);
 
         // input suggest box for adding permissions
         createSuggestWidget();
+        setMakePublicHandler();
+    }
+
+    public void setPublicAccessDelegate(ServiceDelegate<Boolean> delegate) {
+        publicAccessDelegate = delegate;
+        permissionLayout.getRowFormatter().setVisible(3, (publicAccessDelegate != null));
     }
 
     public void reset() {
@@ -120,6 +128,19 @@ public class CollectionPermissionWidget extends Composite {
         for (int i = 1; i < readListTable.getRowCount(); i += 1)
             readListTable.removeRow(i);
         writeListTable.removeAllRows();
+    }
+
+    protected void setMakePublicHandler() {
+        makePublic.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                boolean visible = permissionLayout.getRowFormatter().isVisible(3);
+                if (!visible)
+                    return;
+
+                enablePublicAccess(true);
+            }
+        });
     }
 
     protected FlexTable createPermissionWidget() {
@@ -202,10 +223,11 @@ public class CollectionPermissionWidget extends Composite {
      *
      * @param publicReadAccess whether to enable or disable public read access
      */
-    public void showPublicReadAccess(boolean publicReadAccess) {
+    protected void enablePublicAccess(boolean publicReadAccess) {
         permissionLayout.getFlexCellFormatter().setVisible(3, 0, !publicReadAccess);
         readListTable.getRowFormatter().setVisible(0, publicReadAccess);
         isPublicReadEnabled = publicReadAccess;
+        publicAccessDelegate.execute(publicReadAccess);
     }
 
     protected void initComponents() {
@@ -242,7 +264,7 @@ public class CollectionPermissionWidget extends Composite {
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                showPublicReadAccess(false);
+                enablePublicAccess(false);
             }
         });
         deleteIcon.addStyleName("delete_icon");

@@ -401,6 +401,33 @@ public class PermissionsController {
         return true;
     }
 
+    public boolean enableOrDisableFolderPublicAccess(Account account, long folderId, boolean isEnable)
+            throws ControllerException {
+        Folder folder = folderController.getFolderById(folderId);
+        if (folder == null)
+            return false;
+
+        if (!hasWritePermission(account, folder))
+            throw new ControllerException(account.getEmail() + " cannot modify folder " + folder.getId());
+
+        // propagate permissions
+        if (folder.isPropagatePermissions()) {
+            for (Entry folderContent : folder.getContents()) {
+                if (isEnable)
+                    enablePublicReadAccess(account, folderContent.getId());
+                else
+                    disablePublicReadAccess(account, folderContent.getId());
+            }
+        }
+
+        AccessPermission access = new AccessPermission();
+        access.setArticle(AccessPermission.Article.GROUP);
+        access.setArticleId(folder.getId());
+        access.setType(AccessPermission.Type.READ_FOLDER);
+        access.setTypeId(folderId);
+        return addPermission(access, null, folder) != null;
+    }
+
     public Set<Folder> retrievePermissionFolders(Account account) throws ControllerException {
         Set<Group> groups = groupController.getAllGroups(account);
         try {

@@ -363,7 +363,6 @@ public class Entry implements IModel {
     public void setLinks(Set<Link> inputLinks) {
         if (inputLinks == null) {
             links.clear();
-
             return;
         }
 

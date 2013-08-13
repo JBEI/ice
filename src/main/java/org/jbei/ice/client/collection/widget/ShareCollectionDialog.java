@@ -41,6 +41,10 @@ public class ShareCollectionDialog extends Composite implements ICanReset {
         popup = new GenericPopup(this, shareHTML);
     }
 
+    public void setPublicAccessDelegate(ServiceDelegate<Boolean> delegate) {
+        permissionsWidget.setPublicAccessDelegate(delegate);
+    }
+
     /**
      * Initializes the share counts used for visual feedback to the user on how
      * many permissions have been set.

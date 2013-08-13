@@ -51,6 +51,7 @@ public class CollectionMenu extends Composite {
     private List<HoverOption> cellHoverOptions;
     private ServiceDelegate<MenuItem> promotionDelegate;
     private ServiceDelegate<MenuItem> demotionDelegate;
+    private ServiceDelegate<Boolean> publicDelegate;
 
     // quick add
     private QuickAddWidget quickAddWidget;
@@ -108,6 +109,10 @@ public class CollectionMenu extends Composite {
 
     public void setDemotionDelegate(ServiceDelegate<MenuItem> serviceDelegate) {
         this.demotionDelegate = serviceDelegate;
+    }
+
+    public void setRemoveAddPublicAccessDelegate(ServiceDelegate<Boolean> serviceDelegate) {
+        this.publicDelegate = serviceDelegate;
     }
 
     public void setCellHoverOptions(List<HoverOption> options) {
@@ -324,6 +329,7 @@ public class CollectionMenu extends Composite {
             folderId = "right" + item.getId();
             action = new HoverCell();
             shareCollectionDialog = new ShareCollectionDialog(this, item.getName(), permissionInfoDelegate, propagate);
+            shareCollectionDialog.setPublicAccessDelegate(publicDelegate);
 
             action.getOptionSelection().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
