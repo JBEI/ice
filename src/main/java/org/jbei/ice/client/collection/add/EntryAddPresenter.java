@@ -183,6 +183,8 @@ public class EntryAddPresenter {
                     count += 1;
 
                 ClientController.account.setUserEntryCount(ClientController.account.getUserEntryCount() + count);
+                ClientController.account.setVisibleEntryCount(ClientController.account.getVisibleEntryCount() + count);
+
                 formsCache.clear();
                 presenter.getView().setBusyIndicator(list, false);
                 History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + result.toString());

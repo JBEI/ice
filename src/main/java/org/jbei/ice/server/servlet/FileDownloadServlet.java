@@ -115,15 +115,7 @@ public class FileDownloadServlet extends HttpServlet {
 
     private void getSBOLVisualType(String fileId, HttpServletResponse response) {
         response.setContentType("image/png");
-        String tmpDir;
-        try {
-            tmpDir = ControllerFactory.getConfigurationController().getPropertyValue(
-                    ConfigurationKey.TEMPORARY_DIRECTORY);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return;
-        }
-
+        String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         File file = Paths.get(tmpDir, fileId).toFile();
         response.setContentLength((int) file.length());
         try {
