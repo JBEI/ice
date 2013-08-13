@@ -96,9 +96,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<String> getMatchingPlasmidNames(String token, int limit) throws DAOException {
+    public Set<String> getMatchingPlasmidPartNumbers(String token, int limit) throws DAOException {
         try {
-            String qString = "select distinct plasmid.name from Plasmid plasmid where plasmid.name " +
+            String qString = "select distinct plasmid.partNumber from Plasmid plasmid where plasmid.partNumber " +
                     "like '%" + token + "%'";
             Query query = currentSession().createQuery(qString);
             if (limit > 0)
@@ -848,7 +848,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
      * inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
      * private Set<Entry> linkedEntries = new HashSet<>();
-     * </code>
+     * </code><p>
      * Ideally we want another field such as
      * <code>
      * @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
@@ -856,7 +856,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
      * private Set<Entry> reverseLinkedEntries = new HashSet<>();
      * </code>
-     * to keep track of the inverse relationship but dues to laziness I resort to this method which returns
+     * to keep track of the inverse relationship but due to laziness I resort to this method which returns
      * entries involved in the inverse relationship with the specified entry
      */
     public LinkedList<Entry> getReverseLinkedEntries(long entryId) throws DAOException {

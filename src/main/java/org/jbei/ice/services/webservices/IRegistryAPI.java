@@ -27,9 +27,6 @@ public interface IRegistryAPI {
 
     boolean isAuthenticated(@WebParam(name = "sessionId") String sessionId) throws ServiceException;
 
-//    boolean isAdministrator(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "login") String login)
-//            throws SessionException, ServiceException;
-
     PartData getPartByUniqueName(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "name") String name)
             throws ServiceException;
 

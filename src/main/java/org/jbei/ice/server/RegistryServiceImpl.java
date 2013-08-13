@@ -1346,19 +1346,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public Long updateEntry(String sid, PartData info) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-
             Logger.info(account.getEmail() + ": updating entry " + info.getId());
-            EntryController controller = ControllerFactory.getEntryController();
-            Entry existing = controller.get(account, info.getId());
-            Entry entry = InfoToModelFactory.infoToEntry(info, existing);
-            return controller.update(account, entry).getId();
+            return ControllerFactory.getEntryController().updatePart(account, info);
         } catch (ControllerException e) {
             Logger.error(e);
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
+            return null;
         }
-
-        return null;
     }
 
     @Override

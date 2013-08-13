@@ -99,7 +99,8 @@ public class StrainForm extends EntryForm<StrainData> {
         // host strain
         row += 1;
         setLabel(false, "Parent Strain", general, row, 0);
-        general.setWidget(row, 1, host);
+        widget = createTextBoxWithHelp(host, "Part number");
+        general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
         // links
@@ -126,7 +127,7 @@ public class StrainForm extends EntryForm<StrainData> {
         // plasmids 
         row += 1;
         setLabel(false, "Plasmids", general, row, 0);
-        widget = createTextBoxWithHelp(plasmids, "Comma separated");
+        widget = createTextBoxWithHelp(plasmids, "Comma separated part numbers");
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 

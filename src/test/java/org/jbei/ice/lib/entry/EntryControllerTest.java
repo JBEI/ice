@@ -226,8 +226,7 @@ public class EntryControllerTest {
         data.setAccessPermissions(p);
 
         Entry entry = InfoToModelFactory.infoToEntry(data, existing);
-        Entry updated = controller.update(account, entry);
-        Assert.assertNotNull(updated);
+        controller.update(account, entry);
     }
 
     @Test

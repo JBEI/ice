@@ -108,7 +108,7 @@ public class EntryController {
                     break;
 
                 case PLASMID_NAME:
-                    results = dao.getMatchingPlasmidNames(token, limit);
+                    results = dao.getMatchingPlasmidPartNumbers(token, limit);
                     break;
 
                 default:
@@ -710,7 +710,45 @@ public class EntryController {
         }
     }
 
-    public Entry update(Account account, Entry entry) throws ControllerException, PermissionException {
+    public long updatePart(Account account, PartData part) throws ControllerException {
+        Entry existing = get(account, part.getId());
+        Entry entry = InfoToModelFactory.infoToEntry(part, existing);
+        if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
+            for (PartData data : part.getLinkedParts()) {
+                try {
+                    Entry linked = dao.getByPartNumber(data.getPartId());
+                    if (linked == null)
+                        continue;
+
+                    if (!permissionsController.hasReadPermission(account, entry)) {
+                        continue;
+                    }
+
+                    entry.getLinkedEntries().add(linked);
+                } catch (DAOException e) {
+                    Logger.error(e);
+                }
+            }
+        }
+
+        boolean scheduleRebuild = sequenceController.hasSequence(entry.getId());
+
+        try {
+            entry.setModificationTime(Calendar.getInstance().getTime());
+            entry.setVisibility(Visibility.OK.getValue());
+            dao.updateEntry(entry);
+
+            if (scheduleRebuild) {
+                ApplicationController.scheduleBlastIndexRebuildTask(true);
+            }
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        return entry.getId();
+    }
+
+    public void update(Account account, Entry entry) throws ControllerException, PermissionException {
         if (entry == null) {
             throw new ControllerException("Failed to update null entry!");
         }
@@ -720,12 +758,11 @@ public class EntryController {
         }
 
         boolean scheduleRebuild = sequenceController.hasSequence(entry.getId());
-        Entry savedEntry;
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
             entry.setVisibility(Visibility.OK.getValue());
-            savedEntry = dao.updateEntry(entry);
+            dao.updateEntry(entry);
 
             if (scheduleRebuild) {
                 ApplicationController.scheduleBlastIndexRebuildTask(true);
@@ -733,8 +770,6 @@ public class EntryController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
-        return savedEntry;
     }
 
     /**
