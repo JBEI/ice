@@ -76,6 +76,7 @@ public class WoRController {
             return null;
 
         addRegistryPartner(partnerUrl, partnerName);
+
         WebOfRegistries partners = getRegistryPartners();
         String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
         String myName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
@@ -83,7 +84,12 @@ public class WoRController {
         thisPartner.setUrl(myURL);
         thisPartner.setName(myName);
         thisPartner.setStatus(RemotePartnerStatus.APPROVED);
-        partners.getPartners().add(thisPartner);
+
+        ArrayList<RegistryPartner> partnerArrayList = partners.getPartners();
+        partnerArrayList.add(thisPartner);
+
+        partners.setPartners(partnerArrayList);
+        Logger.info("Returning partners of size " + partnerArrayList.size());
         return partners;
     }
 
