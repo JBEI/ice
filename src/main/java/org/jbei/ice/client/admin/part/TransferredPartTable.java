@@ -18,6 +18,9 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 /**
+ * Table for showing list of parts that have been transferred and are awaiting approval/rejection
+ * by this site's administrator
+ *
  * @author Hector Plahar
  */
 public class TransferredPartTable extends EntryDataTable<PartData> {
@@ -40,7 +43,7 @@ public class TransferredPartTable extends EntryDataTable<PartData> {
         columns.add(partIdCol);
         columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(super.addSummaryColumn());
-        columns.add((addWebPartnerName()));
+//        columns.add((addWebPartnerName()));
         columns.add(super.addStatusColumn());
         super.addHasAttachmentColumn();
         super.addHasSampleColumn();

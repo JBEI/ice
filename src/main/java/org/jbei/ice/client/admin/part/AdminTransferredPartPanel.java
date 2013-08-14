@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.IAdminPanel;
-import org.jbei.ice.client.common.table.DataTable;
+import org.jbei.ice.client.common.table.EntryDataTable;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -35,18 +35,11 @@ public class AdminTransferredPartPanel extends Composite implements IAdminPanel 
 
         vPanel = new VerticalPanel();
         vPanel.setWidth("100%");
-        vPanel.add(new HTML("&nbsp;"));
-        HTMLPanel panel = new HTMLPanel("<span id=\"approve_button\"></span><span id=\"reject_button\"></span>");
-        panel.add(approve, "approve_button");
-        panel.add(reject, "reject_button");
-        vPanel.add(panel);
-        vPanel.add(new HTML("&nbsp;"));
-        vPanel.add(table);
-        vPanel.add(table.getPager());
+        initView();
         initWidget(vPanel);
     }
 
-    public DataTable<PartData> getDataTable() {
+    public EntryDataTable<PartData> getDataTable() {
         return this.table;
     }
 
@@ -61,11 +54,36 @@ public class AdminTransferredPartPanel extends Composite implements IAdminPanel 
     public void setMainContent(Widget widget) {
         vPanel.clear();
         vPanel.add(new HTML("&nbsp;"));
+        HTMLPanel panel = new HTMLPanel("<span id=\"approve_button\"></span><span id=\"reject_button\"></span>");
+        panel.add(approve, "approve_button");
+        panel.add(reject, "reject_button");
+        vPanel.add(panel);
+        vPanel.add(new HTML("&nbsp;"));
         vPanel.add(widget);
     }
 
     public Set<Long> getSelectParts() {
         return table.getSelectedEntrySet();
+    }
+
+    public void setEnableApproveReject(boolean enable) {
+        approve.setEnabled(enable);
+        reject.setEnabled(enable);
+    }
+
+    public void initView() {
+        vPanel.clear();
+        vPanel.add(new HTML("&nbsp;"));
+        HTMLPanel panel = new HTMLPanel("<span id=\"approve_button\"></span><span id=\"reject_button\"></span>");
+        panel.add(approve, "approve_button");
+        panel.add(reject, "reject_button");
+        vPanel.add(panel);
+        vPanel.add(new HTML("&nbsp;"));
+        vPanel.add(table);
+        vPanel.add(table.getPager());
+
+        approve.setEnabled(false);
+        reject.setEnabled(false);
     }
 
     public void refresh() {

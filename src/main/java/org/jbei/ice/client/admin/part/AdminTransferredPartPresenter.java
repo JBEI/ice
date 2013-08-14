@@ -10,6 +10,8 @@ import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.entry.display.EntryPresenter;
+import org.jbei.ice.client.event.ShowEntryListEvent;
+import org.jbei.ice.client.event.ShowEntryListEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
@@ -17,6 +19,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * Panel presenter for managing parts that have been transferred from other registries
@@ -28,6 +31,8 @@ public class AdminTransferredPartPresenter extends AdminPanelPresenter {
     private final AdminTransferredPartPanel panel;
     private final TransferredPartDataProvider dataProvider;
     private EntryPresenter entryViewPresenter;
+    private boolean isViewingEntry;
+    private long currentId;
 
     public AdminTransferredPartPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
         super(service, eventBus);
@@ -35,22 +40,41 @@ public class AdminTransferredPartPresenter extends AdminPanelPresenter {
         dataProvider = new TransferredPartDataProvider(panel.getDataTable(), service);
         panel.setApproveClickHandler(new ApproveRejectHandler(true));
         panel.setRejectClickHandler(new ApproveRejectHandler(false));
+
+        eventBus.addHandler(ShowEntryListEvent.TYPE, new ShowEntryListEventHandler() {
+            @Override
+            public void onEntryListContextAvailable(ShowEntryListEvent event) {
+                isViewingEntry = false;
+                panel.initView();
+            }
+        });
+
+        panel.getDataTable().getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                boolean hasSelection = (panel.getDataTable().getSelectionModel().getSelectedSet().size() > 0);
+                panel.setEnableApproveReject(hasSelection);
+            }
+        });
     }
 
     private ServiceDelegate<PartData> createDelegate() {
         return new ServiceDelegate<PartData>() {
             @Override
             public void execute(PartData entryInfo) {
+                isViewingEntry = true;
+                currentId = entryInfo.getId();
+                panel.setEnableApproveReject(isViewingEntry);
                 EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
                 context.setNav(dataProvider);
-                context.setId(entryInfo.getId());
+                context.setId(currentId);
                 context.setRecordId(entryInfo.getRecordId());
                 showEntryView(context);
             }
         };
     }
 
-    public void showEntryView(EntryContext event) {
+    private void showEntryView(EntryContext event) {
         if (entryViewPresenter == null) {
             entryViewPresenter = new EntryPresenter(this.service, null, this.eventBus, event);
 //            entryViewPresenter.setDeleteHandler(new DeleteEntryHandler()); // TODO
@@ -75,6 +99,10 @@ public class AdminTransferredPartPresenter extends AdminPanelPresenter {
         dataProvider.setData(result, true);
     }
 
+    /**
+     * Handler for making service calls to the server to approve or
+     * reject tranferred parts
+     */
     private class ApproveRejectHandler implements ClickHandler {
 
         private boolean isAccept;
@@ -89,7 +117,13 @@ public class AdminTransferredPartPresenter extends AdminPanelPresenter {
 
                 @Override
                 protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                    ArrayList<Long> list = new ArrayList<Long>(panel.getSelectParts());
+                    ArrayList<Long> list = new ArrayList<Long>();
+                    if (isViewingEntry) {
+                        list.add(currentId);
+                    } else {
+                        list.addAll(panel.getSelectParts());
+                    }
+
                     service.processTransferredParts(ClientController.sessionId, list, isAccept, callback);
                 }
 
