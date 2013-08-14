@@ -12,6 +12,8 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
  */
 public class SearchResults implements IDTOModel {
 
+    private static final long serialVersionUID = 1l;
+
     private long resultCount;
     private LinkedList<SearchResult> results;
     private SearchQuery query;

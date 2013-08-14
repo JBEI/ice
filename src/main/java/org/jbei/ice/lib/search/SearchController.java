@@ -68,6 +68,9 @@ public class SearchController {
                     results = api.runSearch(query);
                 else {
                     SearchResults tmpResults = api.runSearch(query);
+                    if (tmpResults.getResultCount() == 0)
+                        continue;
+
                     results.getResults().addAll(tmpResults.getResults());
                     results.setResultCount(results.getResultCount() + tmpResults.getResultCount());
                 }
