@@ -11,6 +11,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.PartTransfer;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
@@ -120,12 +121,8 @@ public interface IRegistryAPI {
      * @param name display name for the partner
      * @throws ServiceException
      */
-    void addRegistryPartner(String uri, String name) throws ServiceException;
+    WebOfRegistries setRegistryPartnerAdd(String uri, String name, boolean add) throws ServiceException;
 
-    /**
-     * WARNING
-     * This is experimental and should not be used under any circumstances by third party applications
-     */
     boolean uploadParts(@WebParam(name = "partnerId") String partnerId, @WebParam(
             name = "parts") ArrayList<PartTransfer> parts)
             throws ServiceException;

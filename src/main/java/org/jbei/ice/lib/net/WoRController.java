@@ -9,9 +9,11 @@ import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
 import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.services.webservices.ServiceException;
 
@@ -69,33 +71,45 @@ public class WoRController {
         return webOfRegistries;
     }
 
-    public void addWebPartner(String partnerUrl, String partnerName) throws ControllerException {
+    public WebOfRegistries addWebPartner(String partnerUrl, String partnerName) throws ControllerException {
         if (partnerUrl == null || partnerUrl.trim().isEmpty())
-            return;
+            return null;
 
-        RemotePartner partner = dao.getByUrl(partnerUrl);
+        addRegistryPartner(partnerUrl, partnerName);
+        WebOfRegistries partners = getRegistryPartners();
+        String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+        String myName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
+        RegistryPartner thisPartner = new RegistryPartner();
+        thisPartner.setUrl(myURL);
+        thisPartner.setName(myName);
+        thisPartner.setStatus(RemotePartnerStatus.APPROVED);
+        partners.getPartners().add(thisPartner);
+        return partners;
+    }
+
+    private void addRegistryPartner(String url, String name) throws ControllerException {
+        RemotePartner partner = dao.getByUrl(url);
         if (partner != null) {
-            partner.setName(partnerName);
+            partner.setName(name);
             try {
                 dao.update(partner);
-                return;
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
-        }
+        } else {
+            if (name == null || name.trim().isEmpty())
+                name = url;
 
-        if (partnerName == null || partnerName.trim().isEmpty())
-            partnerName = partnerUrl;
-
-        partner = new RemotePartner();
-        partner.setUrl(partnerUrl);
-        partner.setName(partnerName);
-        partner.setAdded(new Date());
-        partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
-        try {
-            dao.save(partner);
-        } catch (DAOException de) {
-            throw new ControllerException(de);
+            partner = new RemotePartner();
+            partner.setUrl(url);
+            partner.setName(name);
+            partner.setAdded(new Date());
+            partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
+            try {
+                dao.save(partner);
+            } catch (DAOException de) {
+                throw new ControllerException(de);
+            }
         }
     }
 
@@ -131,17 +145,28 @@ public class WoRController {
         try {
             controller.setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, Boolean.toString(value));
             controller.setPropertyValue(ConfigurationKey.URI_PREFIX, url);
-            String name = controller.getConfiguration(ConfigurationKey.PROJECT_NAME).getValue();
 
-            if (name == null || name.trim().isEmpty()
-                    || (name.equals(ConfigurationKey.PROJECT_NAME.getDefaultValue())
-                    && !NODE_MASTER.equalsIgnoreCase(url))) {
+            if (NODE_MASTER.equalsIgnoreCase(url))
+                return true;
+
+            String name = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
+
+            if (name.trim().isEmpty()) {
                 name = url;
             }
 
             RegistryAPIServiceClient client = RegistryAPIServiceClient.getInstance();
-            client.getAPIPortForURL(NODE_MASTER).addRegistryPartner(url, name);
+            IRegistryAPI api = client.getAPIPortForURL(NODE_MASTER);
+            WebOfRegistries wor = api.setRegistryPartnerAdd(url, name, value);
+            if (!value)
+                return true;
+
+            // set values
+            for (RegistryPartner partner : wor.getPartners()) {
+                addRegistryPartner(partner.getUrl(), partner.getName());
+            }
             return true;
+
         } catch (ControllerException e) {
             Logger.error(e);
             return false;

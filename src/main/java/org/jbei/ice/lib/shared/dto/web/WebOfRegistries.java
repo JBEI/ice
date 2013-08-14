@@ -11,6 +11,8 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
  */
 public class WebOfRegistries implements IDTOModel {
 
+    private static final long serialVersionUID = 1l;
+
     private boolean webEnabled;
     private ArrayList<RegistryPartner> partners;
 

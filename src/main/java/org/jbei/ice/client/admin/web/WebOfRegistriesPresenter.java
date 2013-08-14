@@ -16,6 +16,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
+ * Presenter for the web of registry panel
+ *
  * @author Hector Plahar
  */
 public class WebOfRegistriesPresenter extends AdminPanelPresenter {
@@ -44,15 +46,17 @@ public class WebOfRegistriesPresenter extends AdminPanelPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
+            final boolean enable = panel.isToggled();
             new IceAsyncCallback<Boolean>() {
 
                 @Override
                 protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                    service.setEnableWebOfRegistries(ClientController.sessionId, panel.isToggled(), callback);
+                    service.setEnableWebOfRegistries(ClientController.sessionId, enable, callback);
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
+                    // TODO : if success, if enabled, retrieve data for the table
                     if (!result) {
                         Window.alert("There was a problem processing your request");
                     }

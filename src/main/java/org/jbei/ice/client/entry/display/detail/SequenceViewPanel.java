@@ -215,16 +215,18 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
                 // edit mode
             }
         } else {
-            // Create New | upload
-            HTML label = new HTML("Create in VectorEditor <i class=\"" + FAIconType.EXTERNAL_LINK.getStyleName()
-                                          + "\"></i>");
-            label.addClickHandler(new SequenceHeaderHandler());
-            label.setStyleName("open_sequence_sub_link");
-            HTML pipe = new HTML("<span style=\"color: #262626; font-size: 0.75em;\">|</span>");
-            pipe.setStyleName("display-inline");
-            headerPanel.add(pipe, "header_separator_pipe");
-            headerPanel.add(label, "sequence_link");
-            headerPanel.add(sequenceUpload.asWidget(), "sequence_options");
+            if (partData.isCanEdit()) {
+                // Create New | upload
+                HTML label = new HTML("Create in VectorEditor <i class=\"" + FAIconType.EXTERNAL_LINK.getStyleName()
+                                              + "\"></i>");
+                label.addClickHandler(new SequenceHeaderHandler());
+                label.setStyleName("open_sequence_sub_link");
+                HTML pipe = new HTML("<span style=\"color: #262626; font-size: 0.75em;\">|</span>");
+                pipe.setStyleName("display-inline");
+                headerPanel.add(pipe, "header_separator_pipe");
+                headerPanel.add(label, "sequence_link");
+                headerPanel.add(sequenceUpload.asWidget(), "sequence_options");
+            }
         }
     }
 

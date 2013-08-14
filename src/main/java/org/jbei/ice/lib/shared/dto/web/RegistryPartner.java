@@ -9,6 +9,8 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
  */
 public class RegistryPartner implements IDTOModel {
 
+    private static final long serialVersionUID = 1l;
+
     private long id;
     private RemotePartnerStatus status;
     private String name;

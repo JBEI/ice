@@ -65,8 +65,7 @@ public class EntryPresenter extends AbstractPresenter {
     public EntryPresenter(final RegistryServiceAsync service, CollectionsPresenter collectionsPresenter,
             final HandlerManager eventBus, EntryContext context) {
         super(service, eventBus);
-        this.display = new EntryView(retrieveEntryTraceSequenceDetailsDelegate(),
-                                     createRemoveAddPublicAccessDelegate());
+        this.display = new EntryView(retrieveEntryTraceSequenceDetailsDelegate(), removeAddPublicAccessDelegate());
         this.currentContext = context;
         this.model = new EntryModel(service, this.display, eventBus);
         display.getMenu().setSelectionHandler(new MenuSelectionHandler());
@@ -393,7 +392,7 @@ public class EntryPresenter extends AbstractPresenter {
         };
     }
 
-    private ServiceDelegate<Boolean> createRemoveAddPublicAccessDelegate() {
+    private ServiceDelegate<Boolean> removeAddPublicAccessDelegate() {
         return new ServiceDelegate<Boolean>() {
             @Override
             public void execute(final Boolean remove) {
@@ -465,6 +464,9 @@ public class EntryPresenter extends AbstractPresenter {
                 display.getMenu().updateMenuCount(MenuItem.Menu.SEQ_ANALYSIS, result.getSequenceAnalysis().size());
                 display.getMenu().updateMenuCount(MenuItem.Menu.SAMPLES, result.getSampleStorage().size());
                 display.getMenu().updateMenuCount(Menu.COMMENTS, result.getComments().size());
+
+                // show/hide sample button
+                display.setUserCanEdit(currentPart.isCanEdit());
 
                 handleMenuSelection(menu);
             }

@@ -53,6 +53,7 @@ public class EntrySamplePanel extends Composite {
         table.setWidth("100%");
 
         addSample = new Button("Add Sample");
+        addSample.setVisible(false);
         requestSample = new Button("Request Sample");
         panel = new HTMLPanel("<span id=\"add_sample\"></span>&nbsp;<span id=\"request_sample\"></span>");
         panel.add(addSample, "add_sample");
@@ -66,6 +67,7 @@ public class EntrySamplePanel extends Composite {
         if (handlerRegistration != null)
             handlerRegistration.removeHandler();
         handlerRegistration = addSample.addClickHandler(handler);
+        addSample.setVisible(true);
     }
 
     private void setAddRequestSampleHandler() {
@@ -215,6 +217,10 @@ public class EntrySamplePanel extends Composite {
                 return info.getDisplay();
         }
         return "";
+    }
+
+    public void setAddSampleVisibility(boolean visible) {
+        addSample.setVisible(visible);
     }
 
     private static class GenericStoragePanel extends Composite {

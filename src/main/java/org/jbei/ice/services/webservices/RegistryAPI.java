@@ -32,6 +32,7 @@ import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -46,8 +47,8 @@ import org.jbei.ice.lib.vo.SequenceTraceFile;
 @WebService(targetNamespace = "https://api.registry.jbei.org/")
 public class RegistryAPI implements IRegistryAPI {
     /**
-     * Login to the ICE SOAP service, with the given login and password. Returns a session key for
-     * future authentication.
+     * Login to the ICE SOAP service, with the given login and password. Returns a session key that is intended
+     * to be used for restricted access calls
      *
      * @param login    Login.
      * @param password Password.
@@ -94,7 +95,7 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     /**
-     * Check if the session key is still authenticated.
+     * Check if the session key is still valid.
      *
      * @param sessionId Session key to check.
      * @return True if still authenticated, false otherwise
@@ -117,7 +118,8 @@ public class RegistryAPI implements IRegistryAPI {
     /**
      * Retrieve a part by its name. Note that the name has to be unique to the part.
      * Names are generally free form fields and so unless your registry instance
-     * enforces uniqueness of names, this call can fail due to duplicates
+     * enforces uniqueness of names, this call can fail if there are multiple parts with
+     * the same name
      *
      * @param sessionId Session key.
      * @param name      Name of the Entry to retrieve.
@@ -137,6 +139,13 @@ public class RegistryAPI implements IRegistryAPI {
         }
     }
 
+    /**
+     * Determines if a referenced part has a sample associated with it
+     *
+     * @param recordId universally unique identifier for the part
+     * @return true if the part referenced by the record id has a sequence associated with it, false otherwise
+     * @throws ServiceException
+     */
     @Override
     public boolean hasSequence(@WebParam(name = "entryId") String recordId) throws ServiceException {
         try {
@@ -148,6 +157,14 @@ public class RegistryAPI implements IRegistryAPI {
         }
     }
 
+    /**
+     * Determines if a part has a sequence associated with it that was uploaded by the user as
+     * opposed to creating one using vector editor
+     *
+     * @param recordId universally unique identifier for
+     * @return true if an uploaded sequence is found associated with part, false otherwise
+     * @throws ServiceException
+     */
     @Override
     public boolean hasUploadedSequence(@WebParam(name = "recordId") String recordId) throws ServiceException {
         try {
@@ -160,7 +177,7 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     /**
-     * Retrieve a part by its recordId.
+     * Retrieve a part by its recordId, which is a universally unique identifier for the part.
      *
      * @param sessionId Session key. Must be associated with an authenticated session
      * @param recordId  recordId of the Entry.
@@ -182,6 +199,14 @@ public class RegistryAPI implements IRegistryAPI {
         }
     }
 
+    /**
+     * Retrieves a public part by its local unique identifier. The part must have public access
+     * permission enabled for it
+     *
+     * @param entryId local unique identifier that is
+     * @return part referenced by identifier if available and has public access permission, null otherwise
+     * @throws ServiceException
+     */
     @Override
     public PartData getPublicPart(@WebParam(name = "entryId") long entryId) throws ServiceException {
         log("getByEntryId" + entryId);
@@ -194,8 +219,7 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     /**
-     * Retrieve a part by its part number. PartNumbers are unique (like recordIds) within
-     * single registry instances.
+     * Retrieve a part by its part number. PartNumbers are unique within single registry instances.
      *
      * @param sessionId  Session key.
      * @param partNumber Part number of the desired part.
@@ -223,10 +247,11 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     /**
-     * Delete the part specified by the entry id  from the server.
+     * Delete the part specified by the entry id from the server.
      *
-     * @param sessionId Session key.
-     * @param entryId   unique identifier of the Entry.
+     * @param sessionId Session key.user referenced by this key must be the owner of the part of have
+     *                  administrative privileges on this server
+     * @param entryId   unique identifier of the part.
      * @throws SessionException
      * @throws ServiceException
      */
@@ -1074,12 +1099,17 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     @Override
-    public void addRegistryPartner(@WebParam(name = "uri") String uri,
-            @WebParam(name = "name") String name) throws ServiceException {
-        Logger.info("API: adding web of registry partner " + name + "(" + uri + ")");
-        WoRController controller = ControllerFactory.getWebController();
+    public WebOfRegistries setRegistryPartnerAdd(@WebParam(name = "uri") String uri,
+            @WebParam(name = "name") String name, @WebParam(name = "add") boolean add) throws ServiceException {
         try {
-            controller.addWebPartner(uri, name);
+            if (add) {
+                Logger.info("API: adding web of registry partner " + name + "(" + uri + ")");
+                return ControllerFactory.getWebController().addWebPartner(uri, name);
+            } else {
+                Logger.info("API: removing web of registry partner " + name + "(" + uri + ")");
+                ControllerFactory.getWebController().removeWebPartner(uri);
+                return null;
+            }
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
         }
@@ -1087,8 +1117,7 @@ public class RegistryAPI implements IRegistryAPI {
 
     @Override
     public boolean uploadParts(@WebParam(name = "partnerId") String partnerId,
-            @WebParam(name = "parts") ArrayList<PartTransfer> parts)
-            throws ServiceException {
+            @WebParam(name = "parts") ArrayList<PartTransfer> parts) throws ServiceException {
         WoRController controller = ControllerFactory.getWebController();
         if (!controller.isWebEnabled() || !controller.isValidWebPartner(partnerId))
             return false;

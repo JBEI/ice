@@ -72,8 +72,7 @@ public class SearchPresenter extends AbstractPresenter {
     }
 
     private ServiceDelegate<SearchResult> createContext(final boolean search, final boolean web,
-            final boolean blast,
-            final ServiceDelegate<EntryContext> contextDelegate) {
+            final boolean blast, final ServiceDelegate<EntryContext> contextDelegate) {
         return new ServiceDelegate<SearchResult>() {
             @Override
             public void execute(SearchResult searchResult) {
@@ -233,6 +232,9 @@ public class SearchPresenter extends AbstractPresenter {
         }
     }
 
+    /**
+     * Results table for showing information on search results from a web of registry search
+     */
     private class WebResultsTable extends SearchResultsTable {
 
         public WebResultsTable(ServiceDelegate<SearchResult> delegate) {
@@ -272,8 +274,7 @@ public class SearchPresenter extends AbstractPresenter {
 
                             String name = (projectName == null || projectName.isEmpty()) ? projectURI : projectName;
                             return SafeHtmlUtils.fromSafeConstant(
-                                    "<a target=\"_blank\" href=\"" + projectURI + "\">" + name
-                                            + "</a>&nbsp;<i class=\""
+                                    "<a target=\"_blank\" href=\"" + projectURI + "\">" + name + "</a>&nbsp;<i class=\""
                                             + FAIconType.EXTERNAL_LINK.getStyleName() + " opacity_hover\"></i>");
                         }
                     };

@@ -69,6 +69,7 @@ public class EntrySequenceAnalysisPanel extends Composite {
         if (info == null)
             return;
 
+        traceHeaderPanel.setUserCanEdit(info.isCanEdit());
         boolean hasSequence = info.isHasSequence();
         boolean hasSequenceFiles = info.getSequenceAnalysis() != null && !info.getSequenceAnalysis().isEmpty();
 

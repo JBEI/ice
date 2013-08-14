@@ -1033,6 +1033,27 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public boolean setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        if (account.getType() != AccountType.ADMIN)
+            return false;
+
+        String uri = getThreadLocalRequest().getRequestURL().substring(
+                getThreadLocalRequest().getScheme().length() + 3);
+        uri = uri.substring(0, uri.indexOf("/"));
+
+        if (value)
+            Logger.info(account.getEmail() + ": adding " + uri + " to web of registries");
+        else
+            Logger.info(account.getEmail() + ": dropping " + uri + " from web of registries");
+        try {
+            return ControllerFactory.getWebController().setEnable(uri, value);
+        } catch (ControllerException e) {
+            return false;
+        }
+    }
+
+    @Override
     public boolean isWebOfRegistriesEnabled() {
         return ControllerFactory.getWebController().isWebEnabled();
     }
@@ -1703,27 +1724,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException {
-        Account account = retrieveAccountForSid(sessionId);
-        if (account.getType() != AccountType.ADMIN)
-            return false;
-
-        String uri = getThreadLocalRequest().getRequestURL().substring(
-                getThreadLocalRequest().getScheme().length() + 3);
-        uri = uri.substring(0, uri.indexOf("/"));
-
-        if (value)
-            Logger.info(account.getEmail() + ": adding " + uri + " to web of registries");
-        else
-            Logger.info(account.getEmail() + ": dropping " + uri + " from web of registries");
-        try {
-            return ControllerFactory.getWebController().setEnable(uri, value);
-        } catch (ControllerException e) {
-            return false;
-        }
-    }
-
-    @Override
     public ArrayList<PartData> retrieveTransferredParts(String sessionId) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
         try {
@@ -1738,6 +1738,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public boolean processTransferredParts(String sid, ArrayList<Long> partIds, boolean accept)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
+        if (partIds == null || partIds.isEmpty())
+            return false;
+
         try {
             return ControllerFactory.getEntryController().processTransferredParts(account, partIds, accept);
         } catch (ControllerException e) {

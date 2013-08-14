@@ -44,6 +44,7 @@ public class SequenceAnalysisHeaderPanel extends Composite {
         // upload button
         upload = new Button("<i class=\"" + FAIconType.UPLOAD_ALT.getStyleName() + "\"></i> Upload File(s)");
         panel.add(upload, "trace_file_upload");
+        upload.setVisible(false);
         this.setStyleName("pad_top");
     }
 
@@ -54,7 +55,6 @@ public class SequenceAnalysisHeaderPanel extends Composite {
             public void onSelectionChange(SelectionChangeEvent event) {
                 int count = selection.getSelectedSet().size();
                 delete.setEnabled(count > 0);
-                delete.setVisible(registration != null);
             }
         });
     }
@@ -65,6 +65,17 @@ public class SequenceAnalysisHeaderPanel extends Composite {
         uploadRegistration = upload.addClickHandler(handler);
     }
 
+    public void setUserCanEdit(boolean canEdit) {
+        delete.setVisible(canEdit);
+        upload.setVisible(canEdit);
+    }
+
+    /**
+     * Sets the trace sequence delete handler. This is expected to be called if the user is allowed to edit
+     * the part the trace sequences are associated with.
+     *
+     * @param handler handler for deleting trace sequences
+     */
     public void setDeleteHandler(final ClickHandler handler) {
         if (registration != null)
             registration.removeHandler();
@@ -80,6 +91,5 @@ public class SequenceAnalysisHeaderPanel extends Composite {
                 }
             }
         });
-        delete.setVisible(true);
     }
 }

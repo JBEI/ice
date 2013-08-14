@@ -38,6 +38,8 @@ public interface IEntryView extends IsWidget {
 
     void addSampleButtonHandler(ClickHandler handler);
 
+    void setUserCanEdit(boolean isVisible);
+
     void addGeneralEditButtonHandler(ClickHandler clickHandler);
 
     void showSampleView();
