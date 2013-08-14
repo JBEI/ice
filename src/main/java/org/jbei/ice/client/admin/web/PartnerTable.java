@@ -47,8 +47,8 @@ public class PartnerTable extends CellTable<RegistryPartner> {
     protected void createColumns() {
         createNameColumn();
         createURLColumn();
-        createFetchColumn();
-        createSentToColumn();
+//        createFetchColumn();
+//        createSentToColumn();
         createStatusColumn();
         createActionColumn();
     }

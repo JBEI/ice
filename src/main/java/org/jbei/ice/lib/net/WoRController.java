@@ -78,6 +78,7 @@ public class WoRController {
             partner.setName(partnerName);
             try {
                 dao.update(partner);
+                return;
             } catch (DAOException e) {
                 throw new ControllerException(e);
             }
@@ -91,7 +92,7 @@ public class WoRController {
         partner.setName(partnerName);
         partner.setAdded(new Date());
         try {
-            dao.update(partner);
+            dao.save(partner);
         } catch (DAOException de) {
             throw new ControllerException(de);
         }

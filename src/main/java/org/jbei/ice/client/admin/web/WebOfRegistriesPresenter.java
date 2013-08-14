@@ -37,6 +37,9 @@ public class WebOfRegistriesPresenter extends AdminPanelPresenter {
         return panel;
     }
 
+    /**
+     * Handler for the join web of registries button
+     */
     private class JoinBoxChangeHandler implements ClickHandler {
 
         @Override
