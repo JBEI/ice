@@ -3,7 +3,6 @@ package org.jbei.ice.client.collection.widget;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
@@ -379,11 +378,6 @@ public class CollectionPermissionWidget extends Composite {
         reset();
 
         for (AccessPermission access : listAccess) {
-            // skip displaying permissions assigned to self
-            if (access.getArticle() == AccessPermission.Article.ACCOUNT
-                    && access.getArticleId() == ClientController.account.getId())
-                continue;
-
             if (access.isCanWrite()) {
                 addWriteItem(access);
             } else if (access.isCanRead()) {
