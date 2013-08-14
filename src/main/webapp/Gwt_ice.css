@@ -718,12 +718,10 @@ a.cell_mouseover:hover {
 /* HEADER MENU */
 ul#indented {
     list-style: none;
-    text-transform: uppercase;
-    font-size: 14px;
+    font-size: 15px;
     font-family: Helvetica, sans-serif;
-    font-weight: bolder;
     position: relative;
-    top: -17px;
+    top: -22px;
 }
 
 ul#indented li {
@@ -732,19 +730,17 @@ ul#indented li {
 
 ul#indented li a {
     margin-right: 50px;
-    /*color: #fff;*/
     text-decoration: none;
-    color: #555;
+    color: #a1a0a0;
 }
 
 ul#indented li a.selected {
     text-decoration: none;
-    color: #3a6aad;
+    color: #222;
 }
 
 ul#indented li a:hover {
-    color: #3a6aad;
-    text-decoration: underline;
+    color: #222;
 }
 
 /* COLLECTIONS */

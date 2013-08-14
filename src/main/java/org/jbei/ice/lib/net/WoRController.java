@@ -91,6 +91,7 @@ public class WoRController {
         partner.setUrl(partnerUrl);
         partner.setName(partnerName);
         partner.setAdded(new Date());
+        partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
         try {
             dao.save(partner);
         } catch (DAOException de) {

@@ -26,7 +26,11 @@ public class SearchResults implements IDTOModel {
     }
 
     public void setResults(LinkedList<SearchResult> results) {
-        this.results = results;
+        if (this.results == null)
+            this.results = new LinkedList<SearchResult>();
+
+        this.results.clear();
+        this.results.addAll(results);
     }
 
     public void setResultCount(long count) {

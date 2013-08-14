@@ -92,6 +92,8 @@ public class PartnerTable extends CellTable<RegistryPartner> {
         Column<RegistryPartner, String> column = new Column<RegistryPartner, String>(new TextCell()) {
             @Override
             public String getValue(RegistryPartner object) {
+                if (object.getStatus() == null)
+                    return "";
                 return object.getStatus().toString();
             }
         };
