@@ -137,6 +137,8 @@ public class InfoToModelFactory {
         entry.setReferences(info.getReferences());
         entry.setRecordId(info.getRecordId());
         entry.setPartNumber(info.getPartId());
+        entry.setCreationTime(new Date(info.getCreationTime()));
+        entry.setModificationTime(new Date(info.getModificationTime()));
 
         if (info.getOwnerEmail() != null) {
             entry.setOwner(info.getOwner());

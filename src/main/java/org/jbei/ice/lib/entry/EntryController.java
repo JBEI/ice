@@ -310,7 +310,6 @@ public class EntryController {
                         }
                         part.setAttachments(attachments);
                     }
-
                 } catch (DAOException | PermissionException e) {
                     Logger.error(e);
                     continue;

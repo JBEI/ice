@@ -11,6 +11,8 @@ import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 @XmlSeeAlso({StrainData.class, PlasmidData.class, ArabidopsisSeedData.class})
 public class PartData implements IDTOModel {
 
+    private static final long serialVersionUID = 1l;
+
     private long id;
     private String recordId;
     private String name;
