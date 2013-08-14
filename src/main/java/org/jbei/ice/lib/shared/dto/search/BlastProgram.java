@@ -2,6 +2,11 @@ package org.jbei.ice.lib.shared.dto.search;
 
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 
+/**
+ * Types of blast programs that this system supports for nucleotide search
+ *
+ * @author Hector Plahar
+ */
 public enum BlastProgram implements IDTOModel {
 
     BLAST_N("blastn", "Nucleotide Search (blastn)"),
@@ -24,17 +29,5 @@ public enum BlastProgram implements IDTOModel {
 
     public String getDetails() {
         return this.details;
-    }
-
-    public static BlastProgram filterValueOf(String value) {
-        try {
-            return BlastProgram.valueOf(value);
-        } catch (IllegalArgumentException iae) {
-            for (BlastProgram program : BlastProgram.values()) {
-                if (program.getName().equalsIgnoreCase(value))
-                    return program;
-            }
-            return null;
-        }
     }
 }
