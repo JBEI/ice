@@ -19,6 +19,7 @@ import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.bulkupload.model.BulkUploadModel;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
+import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.Sheet;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.event.FeedbackEvent;
@@ -27,6 +28,7 @@ import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
@@ -58,6 +60,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private ServiceDelegate<BulkUploadAutoUpdate> autoUpdateDelegate;
     private ServiceDelegate<PreferenceInfo> updatePreferenceDelegate;
     private ServiceDelegate<Set<UserGroup>> updatePermissionDelegate;
+    private ServiceDelegate<HashMap<Long, SheetCellData>> fileDelete;
 
     public BulkUploadPresenter(RegistryServiceAsync service, HandlerManager eventBus, final IBulkUploadView display) {
         super(service, eventBus);
@@ -91,6 +94,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
         enableAutoUpdate();
         createPreferenceDelegate();
         createPermissionDelegate();
+        createFileDeleteDelegate();
 
         view.setPermissionDelegate(updatePermissionDelegate);
     }
@@ -126,6 +130,35 @@ public class BulkUploadPresenter extends AbstractPresenter {
                         currentInput.setId(result);
                     }
                 }.go(eventBus);
+            }
+        };
+    }
+
+    protected void createFileDeleteDelegate() {
+        fileDelete = new ServiceDelegate<HashMap<Long, SheetCellData>>() {
+            @Override
+            public void execute(HashMap<Long, SheetCellData> map) {
+                Map.Entry<Long, SheetCellData> datum = (Map.Entry<Long, SheetCellData>) map.entrySet().toArray()[0];
+                final long entryId = datum.getKey();
+                final SheetCellData sheetCellData = datum.getValue();
+                final EntryField field = sheetCellData.getTypeHeader();
+
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        if (field == EntryField.SEQ_FILENAME || field.toString().contains("Sequence File")) {
+                            service.removeSequence(ClientController.sessionId, entryId, callback);
+                        } else if (field == EntryField.ATT_FILENAME || field.toString().contains("Attachment File")) {
+                            service.deleteEntryAttachment(ClientController.sessionId, sheetCellData.getId(), callback);
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                    }
+                }.go(eventBus);
+
             }
         };
     }
@@ -249,6 +282,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     // otherwise create a new sheet and retrieve associated data
                     Sheet sheet = new Sheet(selection, updatePreferenceDelegate);
                     sheet.setAutoUpdateDelegate(autoUpdateDelegate);
+                    sheet.setDeleteEntryFileDelegate(fileDelete);
                     currentInput = new NewBulkInput(selection, sheet);
                     sheetCache.put(selection, currentInput);
                     model.retrieveStorageSchemes(selection, currentInput, null);
@@ -491,6 +525,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     PartData firstEntry = info.getEntryList().isEmpty() ? null : info.getEntryList().get(0);
                     Sheet sheet = new Sheet(info.getType(), updatePreferenceDelegate, info);
                     sheet.setAutoUpdateDelegate(autoUpdateDelegate);
+                    sheet.setDeleteEntryFileDelegate(fileDelete);
                     currentInput = new NewBulkInput(info.getType(), sheet);
                     currentInput.setId(info.getId());
 //                    if (firstEntry != null) {

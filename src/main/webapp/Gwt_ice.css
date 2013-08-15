@@ -254,25 +254,6 @@ body {
     opacity: 1;
 }
 
-.x-delete {
-    font-size: 10px;
-    font-family: Arial, sans-serif;
-    color: #CC3333;
-    font-weight: bold;
-    padding: 0 5px;
-}
-
-.x-delete:hover {
-    font-size: 10px;
-    font-family: Arial, sans-serif;
-    border-radius: 1em 1em 1em 1em;
-    color: #ffffff;
-    padding: 0 5px;
-    font-weight: bold;
-    background-color: #CC3333;
-    cursor: pointer;
-}
-
 .entry_add_parameter {
     text-align: right;
     padding-right: 10px;
@@ -543,7 +524,6 @@ a.cell_mouseover:hover {
     border-top: 1px solid #ccc;
     width: 130px;
     height: 19px;
-    font-size: 0.75em;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;

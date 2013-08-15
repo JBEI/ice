@@ -9,6 +9,10 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 
 /**
+ * Widget used for the cell. Each cell is essentially a css style label.
+ * This widget contains all the elements for interactivity and is what is placed
+ * in the position of each cell that a user is interacting with
+ *
  * @author Hector Plahar
  */
 public class CellWidget extends Composite {
@@ -16,7 +20,7 @@ public class CellWidget extends Composite {
     private final FocusPanel panel;
     private final HTML widget;
     private final HTML corner;
-    private final int tabIndex;
+    private int tabIndex;
     private String display;
     private final String value;
     private int row;
@@ -30,6 +34,7 @@ public class CellWidget extends Composite {
 
     public CellWidget(String value, int tabIndex) {
         widget = new HTML();
+        widget.setStyleName("font-75em");
         corner = new HTML("");
         corner.setVisible(false);
         HTMLPanel htmlPanel = new HTMLPanel("<span id=\"cell_widget_" + tabIndex + "\"></span><span id=\"cell_widget_"
@@ -50,14 +55,14 @@ public class CellWidget extends Composite {
 
     public void setValue(String value) {
         display = value;
-        String title = value;
 
         if (value.length() > 19)
             display = (value.substring(0, 16) + "...");
 
-        widget.setTitle(title);
+        widget.setTitle(value);
         widget.setText(display);
-        widget.setStyleName("cell");
+        widget.addStyleName("cell");
+        widget.removeStyleName("cell_focus");
         corner.setHTML("<div style=\"position: relative; width: 5px; height: 5px; background-color: "
                                + "#0082C0; top: -5px; right: -124px; border: 2px solid white; cursor: crosshair\">"
                                + "</div>");
@@ -67,7 +72,8 @@ public class CellWidget extends Composite {
         panel.addFocusHandler(new FocusHandler() {
             @Override
             public void onFocus(FocusEvent event) {
-                widget.setStyleName("cell_focus");
+                widget.addStyleName("cell_focus");
+                widget.removeStyleName("cell");
                 corner.setVisible(false); // TODO change to true to enable corner
             }
         });
@@ -75,8 +81,10 @@ public class CellWidget extends Composite {
         panel.addBlurHandler(new BlurHandler() {
             @Override
             public void onBlur(BlurEvent event) {
-                widget.setStyleName("cell"); // todo : if focus is switch to another application (e.g. IDE)
-                // TODO : this is called also. need to check if focus is on another cell
+                //TODO : if focus is switch to another application (e.g. IDE)
+                //TODO : this is called also. need to check if focus is on another cell
+                widget.addStyleName("cell");
+                widget.removeStyleName("cell_focus");
                 widget.setText(display);
                 corner.setVisible(false);
             }
@@ -107,6 +115,10 @@ public class CellWidget extends Composite {
 
     public int getTabIndex() {
         return this.tabIndex;
+    }
+
+    public void setTabIndex(int index) {
+        this.tabIndex = index;
     }
 
     public int getRow() {

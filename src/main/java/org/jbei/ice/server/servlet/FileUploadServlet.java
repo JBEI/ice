@@ -203,7 +203,6 @@ public class FileUploadServlet extends HttpServlet {
             }
 
             // associate with entry
-
             AttachmentController attachmentController = ControllerFactory.getAttachmentController();
 
             boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
@@ -233,9 +232,9 @@ public class FileUploadServlet extends HttpServlet {
                     attachment.setEntry(entry);
                     attachment.setDescription("");
                     attachment.setFileName(saveName);
-                    Attachment saved = attachmentController.save(account, attachment, inputStream);
-                    if (saved != null)
-                        return saved.getFileId();
+                    attachment = attachmentController.save(account, attachment, inputStream);
+                    if (attachment != null)
+                        return attachment.getFileId() + ", " + saveName;
                     return "";
                 } catch (ControllerException e) {
                     Logger.error(e);

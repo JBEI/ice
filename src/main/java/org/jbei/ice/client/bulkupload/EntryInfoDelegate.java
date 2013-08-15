@@ -1,5 +1,6 @@
 package org.jbei.ice.client.bulkupload;
 
+import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 /**
@@ -18,4 +19,6 @@ public interface EntryInfoDelegate {
     void callBackForLockedColumns(int row, long bulkUploadId, long entryId, EntryType type);
 
     long getBulkUploadId();
+
+    void deleteUploadedFile(long entryId, SheetCellData data);
 }

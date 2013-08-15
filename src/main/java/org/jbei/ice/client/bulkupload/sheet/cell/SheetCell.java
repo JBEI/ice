@@ -40,7 +40,8 @@ public abstract class SheetCell {
     public abstract String setDataForRow(int row);
 
     /**
-     * Give focus to the widget that is wrapped by this cell
+     * Give focus to the widget that is wrapped by this cell. This is typically called
+     * when the user is editing a cel (e.g. starts to type)
      *
      * @param row index of row for focus
      */
@@ -49,8 +50,7 @@ public abstract class SheetCell {
     /**
      * This is meant to be overridden in subclasses that have input boxes with multi suggestions
      *
-     * @return true if there are multiple suggestions that are presented to the user on input, false
-     *         otherwise
+     * @return true if there are multiple suggestions that are presented to the user on input, false otherwise
      */
     public boolean hasMultiSuggestions() {
         return false;
@@ -88,7 +88,8 @@ public abstract class SheetCell {
     }
 
     public SheetCellData removeDataForRow(int row) {
-        GWT.log("Removing data for row " + row);
+        SheetCellData data = rowValues.get(row);
+        GWT.log("Removing " + data + " for row " + row);
         return rowValues.remove(row);
     }
 

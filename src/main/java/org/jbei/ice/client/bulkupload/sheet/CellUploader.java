@@ -29,20 +29,22 @@ public class CellUploader extends Composite {
     private long currentId;
     private final FormPanel formPanel;
     private FileUpload fileUpload;
+    private int currentRow;
+    private boolean sequenceUpload;
     private HandlerRegistration registration;
 
-    public CellUploader(final boolean sequenceUpload, final int row, final EntryInfoDelegate delegate,
-            final EntryAddType addType, final EntryType type) {
-        fileUploadImg = new HTML("<i class=\"" + FAIconType.UPLOAD.getStyleName() + "\"></i>");
+    public CellUploader(final EntryInfoDelegate delegate, final EntryAddType addType, final EntryType type) {
+        fileUploadImg = new HTML("<i class=\"" + FAIconType.UPLOAD_ALT.getStyleName() + "\"></i>");
         fileUploadImg.addStyleName("cursor_pointer");
         fileUploadImg.addStyleName("opacity_hover");
+        fileUploadImg.addStyleName("font-75em");
 
         panel = new HorizontalPanel();
-        panel.add(fileUploadImg);
         panel.setWidth("100%");
         initWidget(panel);
 
-        formPanel = fileUploadPanel(row, delegate, sequenceUpload, type.name(), addType.name());
+        panel.add(fileUploadImg);
+        formPanel = fileUploadPanel(delegate, type.name(), addType.name());
         panel.add(formPanel);
 
         fileUploadImg.addClickHandler(new ClickHandler() {
@@ -57,8 +59,8 @@ public class CellUploader extends Composite {
         element.click();
     }-*/;
 
-    protected FormPanel fileUploadPanel(final int row, final EntryInfoDelegate delegate,
-            final boolean sequenceUpload, final String typeName, final String addTypeName) {
+    protected FormPanel fileUploadPanel(final EntryInfoDelegate delegate, final String typeName,
+            final String addTypeName) {
         final FormPanel formPanel = new FormPanel();
         formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         formPanel.setMethod(FormPanel.METHOD_POST);
@@ -81,7 +83,7 @@ public class CellUploader extends Composite {
         formPanel.addSubmitHandler(new FormPanel.SubmitHandler() {
             @Override
             public void onSubmit(FormPanel.SubmitEvent event) {
-                currentId = delegate.getEntryIdForRow(row);
+                currentId = delegate.getEntryIdForRow(currentRow);
                 long bid = delegate.getBulkUploadId();
                 formPanel.setAction("/upload?type=bulk_file_upload&is_sequence="
                                             + Boolean.toString(sequenceUpload)
@@ -111,20 +113,34 @@ public class CellUploader extends Composite {
 
     public void setPanelWidget(final Widget widget) {
         panel.clear();
+        panel.add(fileUploadImg);
         panel.add(formPanel);
         panel.add(widget);
     }
 
     public void resetPanelWidget() {
         panel.clear();
+        panel.add(fileUploadImg);
         panel.add(formPanel);
     }
 
-    public void reset() {
+    public void resetForm() {
         formPanel.reset();
     }
 
     public HorizontalPanel getPanel() {
         return this.panel;
+    }
+
+    public void setCurrentRow(int currentRow) {
+        this.currentRow = currentRow;
+    }
+
+    public int getCurrentRow() {
+        return this.currentRow;
+    }
+
+    public void setSequenceUpload(boolean sequenceUpload) {
+        this.sequenceUpload = sequenceUpload;
     }
 }

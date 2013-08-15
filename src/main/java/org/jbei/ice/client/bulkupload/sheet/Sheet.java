@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet;
 
+import java.util.HashMap;
+
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.SheetPresenter;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
@@ -326,6 +328,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     public void setAutoUpdateDelegate(ServiceDelegate<BulkUploadAutoUpdate> delegate) {
         presenter.setAutoUpdateDelegate(delegate);
+    }
+
+    public void setDeleteEntryFileDelegate(ServiceDelegate<HashMap<Long, SheetCellData>> delegate) {
+        presenter.setDeleteEntryFileDelegate(delegate);
     }
 
     @Override

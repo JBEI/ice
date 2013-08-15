@@ -30,6 +30,11 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+/**
+ * Presenter for the bulk upload sheet view
+ *
+ * @author Hector Plahar
+ */
 public class SheetPresenter {
 
     /**
@@ -66,6 +71,7 @@ public class SheetPresenter {
     private String currentSampleLocationId;
     private final HashMap<Integer, BitSet> rowBitSet;
     private ServiceDelegate<BulkUploadAutoUpdate> autoUpdateDelegate;
+    private ServiceDelegate<HashMap<Long, SheetCellData>> fileDelete;
     private final ServiceDelegate<PreferenceInfo> serviceDelegate;
     private final HashMap<Integer, PartData> rowInfoMap;
     private static final HashMap<EntryAddType, SheetModel<? extends PartData>> sheetModelCache =
@@ -167,6 +173,13 @@ public class SheetPresenter {
                     return 0;
                 return currentInfo.getId();
             }
+
+            @Override
+            public void deleteUploadedFile(long entryId, SheetCellData data) {
+                HashMap<Long, SheetCellData> map = new HashMap<Long, SheetCellData>();
+                map.put(entryId, data);
+                fileDelete.execute(map);
+            }
         };
     }
 
@@ -255,6 +268,10 @@ public class SheetPresenter {
 
     public void setAutoUpdateDelegate(ServiceDelegate<BulkUploadAutoUpdate> delegate) {
         autoUpdateDelegate = delegate;
+    }
+
+    public void setDeleteEntryFileDelegate(ServiceDelegate<HashMap<Long, SheetCellData>> delegate) {
+        this.fileDelete = delegate;
     }
 
     /**
