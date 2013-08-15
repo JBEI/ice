@@ -12,11 +12,10 @@ import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import gwtupload.client.IUploadStatus;
-import gwtupload.client.IUploader;
 
 /**
  * Sheet Cell for file inputs. Since multiple file uploads should be allowed concurrently,
@@ -173,7 +172,7 @@ public class FileInputCell extends SheetCell {
         }
     }
 
-    private class FileFinishHandler implements IUploader.OnFinishUploaderHandler {
+    private class FileFinishHandler implements FormPanel.SubmitCompleteHandler {
 
         private final CellUploader cellUploader;
         private final int row;
@@ -184,80 +183,74 @@ public class FileInputCell extends SheetCell {
         }
 
         @Override
-        public void onFinish(IUploader uploader) {
-            if (uploader.getStatus() == IUploadStatus.Status.SUCCESS) {
-                IUploader.UploadedInfo info = uploader.getServerInfo();
-                String message = info.message;
-                if (message == null || message.isEmpty() || message.startsWith("Error")) {
-                    Window.alert("Could not save file");
-                    return;
-                }
-
-                String fileId = null;
-                if (cellUploader.getCurrentId() == 0) {
-                    try {
-                        String[] split = message.split(",");
-                        if (split.length < 2) {
-                            Window.alert("Problem uploading file");
-                            return;
-                        }
-
-                        long bulkUploadId = Long.decode(split[0]);
-                        long entryId = Long.decode(split[1]);
-                        fileId = split[2];
-                        delegate.callBackForLockedColumns(row, bulkUploadId, entryId, entryType);
-                    } catch (NumberFormatException nfe) {
-                        if (message.startsWith("Error"))
-                            Window.alert(message);
-                    }
-                } else {
-                    fileId = message;
-                }
-
-                SheetCellData datum = new SheetCellData();
-                datum.setId(fileId);
-                datum.setValue(info.name);
-                setWidgetValue(row, datum);
-                String name = info.name;
-                if (name != null && name.length() > 13)
-                    name = (name.substring(0, 10) + "...");
-
-                Label label = new Label(name);
-                label.setStyleName("display-inline");
-                label.addStyleName("font-85em");
-
-                final Label delete = new Label("x");
-                delete.setStyleName("x-delete");
-
-                cellUploader.getPanel().addDomHandler(new MouseOverHandler() {
-                    @Override
-                    public void onMouseOver(MouseOverEvent event) {
-                        delete.setVisible(true);
-                    }
-                }, MouseOverEvent.getType());
-
-                cellUploader.getPanel().addDomHandler(new MouseOutHandler() {
-                    @Override
-                    public void onMouseOut(MouseOutEvent event) {
-                        delete.setVisible(false);
-                    }
-                }, MouseOutEvent.getType());
-
-                String html = "<span><span id=\"name_link\"></span> <span id=\"delete_link\"></span></span>";
-                HTMLPanel panel = new HTMLPanel(html);
-
-                delete.addStyleName("display-inline");
-                delete.setVisible(false);
-                panel.add(label, "name_link");
-                panel.add(delete, "delete_link");
-                delete.addClickHandler(new DeleteFileClickHandler(cellUploader, row));
-
-                cellUploader.setPanelWidget(panel);
-                cellUploader.reset();
-
-            } else {
-                Window.alert("Error uploading file");
+        public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+            String message = event.getResults();
+            if (message == null || message.isEmpty() || message.startsWith("Error")) {
+                Window.alert("Could not save file");
+                return;
             }
+
+            String fileId = null;
+            if (cellUploader.getCurrentId() == 0) {
+                try {
+                    String[] split = message.split(",");
+                    if (split.length < 2) {
+                        Window.alert("Problem uploading file");
+                        return;
+                    }
+
+                    long bulkUploadId = Long.decode(split[0]);
+                    long entryId = Long.decode(split[1]);
+                    fileId = split[2];
+                    delegate.callBackForLockedColumns(row, bulkUploadId, entryId, entryType);
+                } catch (NumberFormatException nfe) {
+                    if (message.startsWith("Error"))
+                        Window.alert(message);
+                }
+            } else {
+                fileId = message;
+            }
+
+            SheetCellData datum = new SheetCellData();
+            datum.setId(fileId);
+            datum.setValue(message);
+            setWidgetValue(row, datum);
+            String name = message;
+            if (name != null && name.length() > 13)
+                name = (name.substring(0, 10) + "...");
+
+            Label label = new Label(name);
+            label.setStyleName("display-inline");
+            label.addStyleName("font-85em");
+
+            final Label delete = new Label("x");
+            delete.setStyleName("x-delete");
+
+            cellUploader.getPanel().addDomHandler(new MouseOverHandler() {
+                @Override
+                public void onMouseOver(MouseOverEvent event) {
+                    delete.setVisible(true);
+                }
+            }, MouseOverEvent.getType());
+
+            cellUploader.getPanel().addDomHandler(new MouseOutHandler() {
+                @Override
+                public void onMouseOut(MouseOutEvent event) {
+                    delete.setVisible(false);
+                }
+            }, MouseOutEvent.getType());
+
+            String html = "<span><span id=\"name_link\"></span> <span id=\"delete_link\"></span></span>";
+            HTMLPanel panel = new HTMLPanel(html);
+
+            delete.addStyleName("display-inline");
+            delete.setVisible(false);
+            panel.add(label, "name_link");
+            panel.add(delete, "delete_link");
+            delete.addClickHandler(new DeleteFileClickHandler(cellUploader, row));
+
+            cellUploader.setPanelWidget(panel);
+            cellUploader.reset();
         }
     }
 

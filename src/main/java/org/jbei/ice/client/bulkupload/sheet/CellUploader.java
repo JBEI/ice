@@ -6,30 +6,30 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import gwtupload.client.IFileInput;
-import gwtupload.client.IUploadStatus;
-import gwtupload.client.IUploader;
-import gwtupload.client.SingleUploader;
 
 /**
  * @author Hector Plahar
  */
-public class CellUploader implements IsWidget {
+public class CellUploader extends Composite {
 
-    private final SingleUploader uploader;
     private HTML fileUploadImg;
     private HorizontalPanel panel;
-    private HandlerRegistration finishUploadRegistration;
     private long currentId;
-    private HandlerRegistration startUpRegistration;
+    private final FormPanel formPanel;
+    private FileUpload fileUpload;
+    private HandlerRegistration registration;
 
     public CellUploader(final boolean sequenceUpload, final int row, final EntryInfoDelegate delegate,
             final EntryAddType addType, final EntryType type) {
@@ -38,52 +38,60 @@ public class CellUploader implements IsWidget {
         fileUploadImg.addStyleName("opacity_hover");
 
         panel = new HorizontalPanel();
+        panel.add(fileUploadImg);
         panel.setWidth("100%");
+        initWidget(panel);
 
-        final FileUploadStatus uploaderStatus = new FileUploadStatus();
-        uploader = new SingleUploader(IFileInput.FileInputType.CUSTOM.with(fileUploadImg), uploaderStatus) {
+        formPanel = fileUploadPanel(row, delegate, sequenceUpload, type.name(), addType.name());
+        panel.add(formPanel);
+
+        fileUploadImg.addClickHandler(new ClickHandler() {
             @Override
-            public Panel getUploaderPanel() {
-                return panel;
-            }
-        };
-
-        uploader.setAutoSubmit(true);
-        IUploader.OnStartUploaderHandler handler = createStartUpHandler(row, delegate,
-                                                                        sequenceUpload, type.name(), addType.name());
-        if (startUpRegistration != null)
-            startUpRegistration.removeHandler();
-        startUpRegistration = uploader.addOnStartUploadHandler(handler);
-
-        uploader.addOnCancelUploadHandler(new IUploader.OnCancelUploaderHandler() {
-
-            @Override
-            public void onCancel(IUploader uploader) {
-                uploader.cancel();
-                uploader.reset();
+            public void onClick(ClickEvent event) {
+                fileClick(fileUpload.getElement());
             }
         });
     }
 
-    protected IUploader.OnStartUploaderHandler createStartUpHandler(final int row, final EntryInfoDelegate delegate,
-            final boolean sequenceUpload, final String typeName, final String addTypeName) {
-        return new IUploader.OnStartUploaderHandler() {
+    native void fileClick(Element element) /*-{
+        element.click();
+    }-*/;
 
+    protected FormPanel fileUploadPanel(final int row, final EntryInfoDelegate delegate,
+            final boolean sequenceUpload, final String typeName, final String addTypeName) {
+        final FormPanel formPanel = new FormPanel();
+        formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+        formPanel.setMethod(FormPanel.METHOD_POST);
+
+        fileUpload = new FileUpload();
+        fileUpload.setName("uploadFormElement");
+        fileUpload.setVisible(false);
+        formPanel.add(fileUpload);
+
+        fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onStart(IUploader uploader) {
+            public void onChange(ChangeEvent event) {
+                if (fileUpload.getFilename() == null || fileUpload.getFilename().isEmpty())
+                    return;
+
+                formPanel.submit();
+            }
+        });
+
+        formPanel.addSubmitHandler(new FormPanel.SubmitHandler() {
+            @Override
+            public void onSubmit(FormPanel.SubmitEvent event) {
                 currentId = delegate.getEntryIdForRow(row);
                 long bid = delegate.getBulkUploadId();
-                uploader.setServletPath("/upload?type=bulk_file_upload&is_sequence="
-                                                + Boolean.toString(sequenceUpload)
-                                                + "&sid=" + ClientController.sessionId + "&eid=" + currentId
-                                                + "&bid=" + bid + "&entry_type=" + typeName
-                                                + "&entry_add_type=" + addTypeName);
+                formPanel.setAction("/upload?type=bulk_file_upload&is_sequence="
+                                            + Boolean.toString(sequenceUpload)
+                                            + "&sid=" + ClientController.sessionId + "&eid=" + currentId
+                                            + "&bid=" + bid + "&entry_type=" + typeName
+                                            + "&entry_add_type=" + addTypeName);
             }
-        };
-    }
+        });
 
-    public IUploadStatus.Status getStatus() {
-        return uploader.getStatus();
+        return formPanel;
     }
 
     public long getCurrentId() {
@@ -91,34 +99,29 @@ public class CellUploader implements IsWidget {
     }
 
     public void submitClick() {
-        DomEvent.fireNativeEvent(Document.get().createClickEvent(0, 0, 0, 0, 0, false, false, false, false),
-                                 fileUploadImg);
+        fileClick(fileUploadImg.getElement());
     }
 
-    public void addOnFinishUploadHandler(IUploader.OnFinishUploaderHandler onFinishUploaderHandler) {
-        if (finishUploadRegistration != null)
-            finishUploadRegistration.removeHandler();
-        finishUploadRegistration = uploader.addOnFinishUploadHandler(onFinishUploaderHandler);
-    }
+    public void addOnFinishUploadHandler(FormPanel.SubmitCompleteHandler handler) {
+        if (registration != null)
+            registration.removeHandler();
 
-    @Override
-    public Widget asWidget() {
-        return uploader.getWidget();
+        registration = formPanel.addSubmitCompleteHandler(handler);
     }
 
     public void setPanelWidget(final Widget widget) {
         panel.clear();
-        panel.add(uploader.getForm());
+        panel.add(formPanel);
         panel.add(widget);
     }
 
     public void resetPanelWidget() {
         panel.clear();
-        panel.add(uploader.getForm());
+        panel.add(formPanel);
     }
 
     public void reset() {
-        uploader.reset();
+        formPanel.reset();
     }
 
     public HorizontalPanel getPanel() {

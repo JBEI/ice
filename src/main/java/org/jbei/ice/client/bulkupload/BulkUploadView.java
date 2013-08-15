@@ -12,7 +12,6 @@ import org.jbei.ice.client.bulkupload.widget.CreatorWidget;
 import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
 import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkupload.widget.SavedDraftsMenu;
-import org.jbei.ice.client.bulkupload.widget.UploadCSV;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.AbstractLayout;
@@ -62,7 +61,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private HTML reset;
     private SaveDraftInput draftInput;
     private PermissionsSelection selection;
-    private UploadCSV uploadCSV;
     private HTML updating;
     private HTML uploadName;
     private String lastUpdated;
@@ -106,7 +104,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         updating.addStyleName("relative_top_3");
         updating.setVisible(false);
         selection = new PermissionsSelection();
-        uploadCSV = new UploadCSV();
         creator = new CreatorWidget(ClientController.account.getFullName(), ClientController.account.getEmail());
 
         uploadName = new HTML();
@@ -185,7 +182,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                     updating.setHTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">Updated: "
                                              + lastUpdated + "</span>");
                     updating.setVisible(true);
-                    return;
                 }
             }
         });
@@ -341,7 +337,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         panel.setCellSpacing(0);
         panel.setWidth("100%");
         sheet = bulkImport;
-        uploadCSV.setType(sheet.getImportType());
         feedback.setVisible(false);
         panel.setWidget(0, 0, feedback);
         Widget widget;
