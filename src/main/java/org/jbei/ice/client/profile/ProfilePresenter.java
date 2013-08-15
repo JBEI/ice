@@ -10,6 +10,7 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.profile.entry.ProfilePartsPresenter;
 import org.jbei.ice.client.profile.group.UserGroupPresenter;
 import org.jbei.ice.client.profile.message.UserMessagesPresenter;
 import org.jbei.ice.client.profile.preferences.UserPreferencesPresenter;
@@ -32,12 +33,12 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 public class ProfilePresenter extends AbstractPresenter {
 
     private final IProfileView display;
-    //    private final CollectionDataTable collectionsDataTable;
     private final String userId;
     private UserProfilePresenter profilePresenter;
     private UserGroupPresenter groupPresenter;
     private UserPreferencesPresenter preferencesPresenter;
     private UserMessagesPresenter messagesPresenter;
+    private ProfilePartsPresenter userParts;
     private UserOption currentOption;
     private User currentAccount;
     private final UserOption[] availableOptions;
@@ -54,36 +55,13 @@ public class ProfilePresenter extends AbstractPresenter {
         if ((ClientController.account.getId() + "").equals(this.userId))
             availableOptions = UserOption.values();
         else
-            availableOptions = new UserOption[]{UserOption.PROFILE};
+            availableOptions = new UserOption[]{UserOption.PROFILE, UserOption.ENTRIES};
 
         display.setMenuOptions(availableOptions);
         UserOption option = UserOption.urlToOption(selection);
         display.setMenuSelection(option);
         currentOption = option;
 
-//        this.collectionsDataTable = new CollectionDataTable(new EntryTablePager(), null);
-
-//        {
-//
-//            @Override
-//            protected ArrayList<DataTableColumn<PartData, ?>> createColumns() {
-//                ArrayList<DataTableColumn<PartData, ?>> columns = new ArrayList<DataTableColumn<PartData, ?>>();
-//                columns.add(super.addTypeColumn(true, 60, com.google.gwt.dom.client.Style.Unit.PX));
-//                DataTableColumn<PartData, PartData> partIdCol = addPartIdColumn(false, 120,
-//                        com.google.gwt.dom.client.Style.Unit.PX);
-//                columns.add(partIdCol);
-//                columns.add(super.addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
-//                columns.add(super.addSummaryColumn());
-//                columns.add(super.addStatusColumn());
-//                super.addHasAttachmentColumn();
-//                super.addHasSampleColumn();
-//                super.addHasSequenceColumn();
-//                columns.add(super.addCreatedColumn());
-//                return columns;
-//            }
-//        };
-
-//        this.folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, service);
         retrieveProfileInfo();
         handlerUserMenuSelection();
     }
@@ -153,9 +131,9 @@ public class ProfilePresenter extends AbstractPresenter {
                 retrieveMessages();
                 break;
 
-//            case ENTRIES:
-//                retrieveUserEntries();
-//                break;
+            case ENTRIES:
+                retrieveUserEntries();
+                break;
         }
     }
 
@@ -212,6 +190,13 @@ public class ProfilePresenter extends AbstractPresenter {
                 display.show(currentOption, groupPresenter.getView().asWidget());
             }
         }.go(eventBus);
+    }
+
+    private void retrieveUserEntries() {
+        if (userParts == null)
+            userParts = new ProfilePartsPresenter(service, eventBus);
+        userParts.retrieveUserParts(userId);
+        display.show(currentOption, userParts.getView().asWidget());
     }
 
     private void retrievePreferences(final ArrayList<PreferenceKey> keys) {

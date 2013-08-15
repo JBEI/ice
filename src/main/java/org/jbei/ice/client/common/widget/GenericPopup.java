@@ -27,13 +27,13 @@ public class GenericPopup extends Composite {
     private ICanReset resetWidget;
     private HTML cancel;
 
-    public GenericPopup(ICanReset widget, String title) {
+    public GenericPopup(ICanReset widget, String title, String width) {
         layout = new FlexTable();
         initWidget(layout);
         this.resetWidget = widget;
 
         // initialise components used in this widget
-        initComponents();
+        initComponents(width);
 
         layout.setWidget(0, 0, createHeader(title));
         layout.setWidget(1, 0, resetWidget.asWidget());
@@ -47,6 +47,10 @@ public class GenericPopup extends Composite {
         layout.getRowFormatter().setVisible(2, false);
     }
 
+    public GenericPopup(ICanReset widget, String title) {
+        this(widget, title, "600px");
+    }
+
     public void showDialog() {
         box.center();
     }
@@ -56,7 +60,7 @@ public class GenericPopup extends Composite {
         box.hide();
     }
 
-    protected void initComponents() {
+    protected void initComponents(String width) {
         layout.setWidth("100%");
         layout.setStyleName("add_to_popup");
         layout.addStyleName("pad-8");
@@ -75,7 +79,7 @@ public class GenericPopup extends Composite {
         close.addClickHandler(closeHandler);
 
         box = new PopupPanel();
-        box.setWidth("600px");
+        box.setWidth(width);
         box.setModal(true);
         box.setGlassEnabled(true);
         box.setGlassStyleName("dialog_box_glass");
