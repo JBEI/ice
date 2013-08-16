@@ -2,6 +2,8 @@ package org.jbei.ice.lib.entry.sequence;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -9,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.composers.formatters.FormatterException;
@@ -26,6 +29,7 @@ import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
@@ -148,6 +152,14 @@ public class SequenceController {
             Sequence oldSequence = getByEntry(entry);
 
             if (oldSequence != null) {
+                String tmpDir = ControllerFactory.getConfigurationController()
+                                                 .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+                String hash = oldSequence.getFwdHash();
+                try {
+                    Files.deleteIfExists(Paths.get(tmpDir, hash + ".png"));
+                } catch (IOException e) {
+                    Logger.warn(e.getMessage());
+                }
                 oldSequence.setSequenceUser(sequence.getSequenceUser());
                 oldSequence.setSequence(sequence.getSequence());
                 oldSequence.setFwdHash(sequence.getFwdHash());
