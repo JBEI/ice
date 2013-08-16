@@ -12,7 +12,7 @@ public class RegistryPartner implements IDTOModel {
     private static final long serialVersionUID = 1l;
 
     private long id;
-    private RemotePartnerStatus status;
+    private String status;
     private String name;
     private String url;
     private String apiKey;
@@ -30,11 +30,11 @@ public class RegistryPartner implements IDTOModel {
         this.id = id;
     }
 
-    public RemotePartnerStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(RemotePartnerStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
@@ -80,6 +80,6 @@ public class RegistryPartner implements IDTOModel {
 
     @Override
     public String toString() {
-        return name + "(" + url + "); status = " + status.toString() + "; apiKey = " + apiKey;
+        return name + "(" + url + "); status = " + status + "; apiKey = " + apiKey;
     }
 }

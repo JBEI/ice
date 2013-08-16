@@ -77,8 +77,11 @@ public class WoRController {
             throw new ControllerException(de);
         }
 
+        ArrayList<RegistryPartner> registryPartners = new ArrayList<>();
         for (RemotePartner partner : partners)
-            webOfRegistries.getPartners().add(RemotePartner.toDTO(partner));
+            registryPartners.add(RemotePartner.toDTO(partner));
+
+        webOfRegistries.setPartners(registryPartners);
 
         return webOfRegistries;
     }
@@ -103,10 +106,11 @@ public class WoRController {
         RegistryPartner thisPartner = new RegistryPartner();
         thisPartner.setUrl(myURL);
         thisPartner.setName(myName);
-        thisPartner.setStatus(RemotePartnerStatus.APPROVED);
+        thisPartner.setStatus(RemotePartnerStatus.APPROVED.name());
 
-        ArrayList<RegistryPartner> partnerArrayList = partners.getPartners();
+        ArrayList<RegistryPartner> partnerArrayList = new ArrayList<>(partners.getPartners());
         partnerArrayList.add(thisPartner);
+        partners.setPartners(partnerArrayList);
 
         Logger.info("Returning partners of size " + partnerArrayList.size());
         return partners;
@@ -122,6 +126,10 @@ public class WoRController {
 
         if (partner != null) {
             partner.setName(name);
+            if (partner.getAuthenticationToken() == null) {
+                partner.setAuthenticationToken(UUID.randomUUID().toString());
+                partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
+            }
             try {
                 dao.update(partner);
             } catch (DAOException e) {
@@ -201,7 +209,7 @@ public class WoRController {
             RegistryAPIServiceClient client = RegistryAPIServiceClient.getInstance();
             IRegistryAPI api = client.getAPIPortForURL(NODE_MASTER);
             WebOfRegistries wor = api.setRegistryPartnerAdd(url, name, enable);
-            if (!enable)
+            if (!enable || wor.getPartners().isEmpty())
                 return true;
 
             // set values

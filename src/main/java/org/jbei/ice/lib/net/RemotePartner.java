@@ -146,7 +146,8 @@ public class RemotePartner implements IModel {
         registryPartner.setId(partner.getId());
         registryPartner.setName(partner.getName());
         registryPartner.setUrl(partner.getUrl());
-        registryPartner.setStatus(partner.getPartnerStatus());
+        registryPartner.setStatus(partner.getPartnerStatus() == null
+                                          ? RemotePartnerStatus.APPROVED.name() : partner.getPartnerStatus().name());
         registryPartner.setSent(partner.getSent());
         registryPartner.setFetched(partner.getFetched());
         registryPartner.setApiKey(partner.getApiKey());

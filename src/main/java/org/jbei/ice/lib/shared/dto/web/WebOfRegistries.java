@@ -17,7 +17,6 @@ public class WebOfRegistries implements IDTOModel {
     private ArrayList<RegistryPartner> partners;
 
     public WebOfRegistries() {
-        partners = new ArrayList<RegistryPartner>();
     }
 
     public boolean isWebEnabled() {
@@ -30,5 +29,13 @@ public class WebOfRegistries implements IDTOModel {
 
     public ArrayList<RegistryPartner> getPartners() {
         return partners;
+    }
+
+    public void setPartners(ArrayList<RegistryPartner> list) {
+        if (this.partners == null)
+            partners = new ArrayList<RegistryPartner>();
+
+        this.partners.clear();
+        this.partners.addAll(list);
     }
 }

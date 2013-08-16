@@ -55,7 +55,7 @@ public class ActionCell extends AbstractCell<RegistryPartner> {
 
     @Override
     public void render(Context context, RegistryPartner value, SafeHtmlBuilder sb) {
-        if (value.getStatus() == RemotePartnerStatus.APPROVED)
+        if (value.getStatus().equals(RemotePartnerStatus.APPROVED.name()))
             sb.append(html);
         else
             sb.append(SafeHtmlUtils.EMPTY_SAFE_HTML);
