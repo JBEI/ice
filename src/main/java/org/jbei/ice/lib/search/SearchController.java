@@ -61,13 +61,23 @@ public class SearchController {
             }
 
             IRegistryAPI api = service.getPort(name, IRegistryAPI.class);
-            Logger.info("Retrieved API proxy for " + name.getNamespaceURI());
+            String url = name.getNamespaceURI();
+            Logger.info("Retrieved API proxy for " + url);
+
+            String apiKey;
+            try {
+                apiKey = ControllerFactory.getWebController().getApiKey(url);
+                if (apiKey == null)
+                    continue;
+            } catch (ControllerException e) {
+                continue;
+            }
 
             try {
                 if (results == null)
-                    results = api.runSearch(query);
+                    results = api.runSearch(url, apiKey, query);
                 else {
-                    SearchResults tmpResults = api.runSearch(query);
+                    SearchResults tmpResults = api.runSearch(url, apiKey, query);
                     if (tmpResults.getResultCount() == 0)
                         continue;
 

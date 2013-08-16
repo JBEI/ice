@@ -35,6 +35,12 @@ import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.SuggestOracle;
 
+/**
+ * Part of the GWT RPC interface definition.
+ * Asynchronous interface to the ICE Registry service, to be called by the client
+ *
+ * @author Hector Plahar
+ */
 public interface RegistryServiceAsync {
 
     void login(String name, String pass, AsyncCallback<User> callback);

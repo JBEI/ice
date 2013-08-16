@@ -35,12 +35,17 @@ class RemotePartnerDAO extends HibernateRepository<RemotePartner> {
      * @param url partner url to retrieve by
      * @return partner is found, null otherwise
      */
-    public RemotePartner getByUrl(String url) {
-        Object object = currentSession().createCriteria(RemotePartner.class.getName())
-                .add(Restrictions.eq("url", url)).uniqueResult();
-        if (object == null)
-            return null;
+    public RemotePartner getByUrl(String url) throws DAOException {
+        try {
+            Object object = currentSession().createCriteria(RemotePartner.class.getName())
+                    .add(Restrictions.eq("url", url)).uniqueResult();
+            if (object == null)
+                return null;
 
-        return (RemotePartner) object;
+            return (RemotePartner) object;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 }

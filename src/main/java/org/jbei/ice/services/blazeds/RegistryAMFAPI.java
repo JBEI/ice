@@ -1,6 +1,6 @@
 package org.jbei.ice.services.blazeds;
 
-import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -191,9 +191,7 @@ public class RegistryAMFAPI extends BaseService {
 
             Sequence existing = sequenceController.getByEntry(entry);
             if (existing != null) {
-                File sbolVisualPath = Paths.get(existing.getFwdHash() + ".png").toFile();
-                if (sbolVisualPath.exists())
-                    sbolVisualPath.delete();
+                Files.deleteIfExists(Paths.get(existing.getFwdHash() + ".png"));
             }
             Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
             sequence.setEntry(entry);

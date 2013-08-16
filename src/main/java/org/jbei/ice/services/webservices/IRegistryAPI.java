@@ -112,16 +112,11 @@ public interface IRegistryAPI {
     void deleteTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException;
 
-    SearchResults runSearch(@WebParam(name = "searchQuery") SearchQuery query) throws ServiceException;
+    SearchResults runSearch(@WebParam(name = "uri") String uri, @WebParam(name = "apiKey") String apiKey,
+            @WebParam(name = "searchQuery") SearchQuery query) throws ServiceException;
 
-    /**
-     * Adds a web of registry partner. The information is then broadcast to all existing partners
-     *
-     * @param uri  unique resource identifier for the partner. typically the domain name
-     * @param name display name for the partner
-     * @throws ServiceException
-     */
-    WebOfRegistries setRegistryPartnerAdd(String uri, String name, boolean add) throws ServiceException;
+    WebOfRegistries setRegistryPartnerAdd(@WebParam(name = "uri") String uri, @WebParam(name = "name") String name,
+            @WebParam(name = "add") boolean add) throws ServiceException;
 
     boolean uploadParts(@WebParam(name = "partnerId") String partnerId, @WebParam(
             name = "parts") ArrayList<PartTransfer> parts)
@@ -129,4 +124,20 @@ public interface IRegistryAPI {
 
     PartData retrieveStrainForSampleBarcode(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException;
+
+    /**
+     * Obtains an api key that is to be used for all communications with registry instance.
+     * Contacts the instance at <code>url</code> to verify the authentication key before
+     * generating the key and saving as a partner (if it is not already one)
+     *
+     * @param url               unique identifier for registry instance
+     * @param name              display name for registry instance
+     * @param authenticationKey api key generated for this server instance
+     * @return generated api key for the
+     */
+    String requestAPIKey(@WebParam(name = "url") String url, @WebParam(name = "name") String name,
+            @WebParam(name = "authenticationKey") String authenticationKey) throws ServiceException;
+
+    boolean isValidApiKey(@WebParam(name = "url") String url, @WebParam(name = "apiKey") String apiKey)
+            throws ServiceException;
 }

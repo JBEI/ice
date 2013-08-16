@@ -1088,10 +1088,15 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     @Override
-    public SearchResults runSearch(@WebParam(name = "searchQuery") SearchQuery query) throws ServiceException {
-        Logger.info("Registry API: web search");
-        SearchController controller = ControllerFactory.getSearchController();
+    public SearchResults runSearch(@WebParam(name = "uri") String uri, @WebParam(name = "apiKey") String apiKey,
+            @WebParam(name = "searchQuery") SearchQuery query) throws ServiceException {
         try {
+            if (!ControllerFactory.getWebController().isValidApiKey(uri, apiKey))
+                return null;
+
+            Logger.info("Registry API: web search");
+            SearchController controller = ControllerFactory.getSearchController();
+
             return controller.runLocalSearch(null, query, true);
         } catch (ControllerException e) {
             throw new ServiceException(e);
@@ -1119,12 +1124,47 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean uploadParts(@WebParam(name = "partnerId") String partnerId,
             @WebParam(name = "parts") ArrayList<PartTransfer> parts) throws ServiceException {
         WoRController controller = ControllerFactory.getWebController();
-        if (!controller.isWebEnabled() || !controller.isValidWebPartner(partnerId))
-            return false;
+        try {
+            if (!controller.isWebEnabled() || !controller.isValidWebPartner(partnerId))
+                return false;
+        } catch (ControllerException e) {
+            throw new ServiceException("Could not validate");
+        }
 
         Logger.info("Registry API: transmit entries from ");
         EntryController entryController = ControllerFactory.getEntryController();
         return entryController.recordParts(parts);
+    }
+
+    @Override
+    public String requestAPIKey(@WebParam(name = "url") String url, @WebParam(name = "name") String name,
+            @WebParam(name = "authenticationKey") String authenticationKey) throws ServiceException {
+        IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
+
+        // check the authentication key just received before sending one in kind
+        boolean isValid = api.isValidApiKey(url, authenticationKey);
+        if (!isValid) {
+            Logger.error("authentication key (" + authenticationKey + ") received from (" + url
+                                 + ") could not be verified");
+            return null;
+        }
+
+        // is valid. create a record if one does not exist , save authKey as apiKey and generate authentication token
+        try {
+            return ControllerFactory.getWebController().requestApiKeyForNewPartner(url, name, authenticationKey);
+        } catch (ControllerException e) {
+            throw new ServiceException("Could not generate api key");
+        }
+    }
+
+    @Override
+    public boolean isValidApiKey(@WebParam(name = "url") String url, @WebParam(name = "apiKey") String apiKey)
+            throws ServiceException {
+        try {
+            return ControllerFactory.getWebController().isValidApiKey(url, apiKey);
+        } catch (ControllerException e) {
+            throw new ServiceException("Could not verify api key");
+        }
     }
 
     /**

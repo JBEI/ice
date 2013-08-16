@@ -31,9 +31,4 @@ public class WebOfRegistries implements IDTOModel {
     public ArrayList<RegistryPartner> getPartners() {
         return partners;
     }
-
-    public void setPartners(ArrayList<RegistryPartner> partners) {
-        this.partners.clear();
-        this.partners.addAll(partners);
-    }
 }

@@ -15,6 +15,7 @@ public class RegistryPartner implements IDTOModel {
     private RemotePartnerStatus status;
     private String name;
     private String url;
+    private String apiKey;
     private long sent;
     private long fetched;
 
@@ -67,5 +68,18 @@ public class RegistryPartner implements IDTOModel {
 
     public void setFetched(long fetched) {
         this.fetched = fetched;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    @Override
+    public String toString() {
+        return name + "(" + url + "); status = " + status.toString() + "; apiKey = " + apiKey;
     }
 }
