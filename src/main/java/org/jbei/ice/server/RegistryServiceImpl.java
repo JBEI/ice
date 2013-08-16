@@ -79,6 +79,7 @@ import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.IceXlsSerializer;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
@@ -1033,10 +1034,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException {
+    public ArrayList<RegistryPartner> setEnableWebOfRegistries(String sessionId, boolean value)
+            throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
         if (account.getType() != AccountType.ADMIN)
-            return false;
+            return null;
 
         String uri = getThreadLocalRequest().getRequestURL().substring(
                 getThreadLocalRequest().getScheme().length() + 3);
@@ -1049,7 +1051,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             return ControllerFactory.getWebController().setEnable(uri, value);
         } catch (ControllerException e) {
-            return false;
+            return null;
         }
     }
 

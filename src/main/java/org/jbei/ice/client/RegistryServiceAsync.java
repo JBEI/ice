@@ -30,6 +30,7 @@ import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -257,7 +258,7 @@ public interface RegistryServiceAsync {
 
     void alertToEntryProblem(String sid, long entryID, String details, AsyncCallback<UserComment> callback);
 
-    void setEnableWebOfRegistries(String sessionId, boolean value, AsyncCallback<Boolean> callback)
+    void setEnableWebOfRegistries(String sessionId, boolean value, AsyncCallback<ArrayList<RegistryPartner>> callback)
             throws AuthenticationException;
 
     void retrieveTransferredParts(String sessionId, AsyncCallback<ArrayList<PartData>> callback)

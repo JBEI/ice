@@ -187,9 +187,11 @@ public class WoRController {
      *
      * @param url    this site's url
      * @param enable if true, enables WoR; disables it otherwise
-     * @return true if operation is successful, false otherwise
+     * @return list of received partners if WoR functionality is being enabled, is successful and
+     *         this is not the master node, otherwise it just returns an empty list, or null in the event of an
+     *         exeption
      */
-    public boolean setEnable(String url, boolean enable) throws ControllerException {
+    public ArrayList<RegistryPartner> setEnable(String url, boolean enable) throws ControllerException {
         ConfigurationController controller = ControllerFactory.getConfigurationController();
         String NODE_MASTER = Utils.getConfigValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER);
 
@@ -198,7 +200,7 @@ public class WoRController {
             controller.setPropertyValue(ConfigurationKey.URI_PREFIX, url);
 
             if (NODE_MASTER.equalsIgnoreCase(url))
-                return true;
+                return new ArrayList<>();
 
             // use url if name is empty
             String name = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
@@ -209,8 +211,8 @@ public class WoRController {
             RegistryAPIServiceClient client = RegistryAPIServiceClient.getInstance();
             IRegistryAPI api = client.getAPIPortForURL(NODE_MASTER);
             WebOfRegistries wor = api.setRegistryPartnerAdd(url, name, enable);
-            if (!enable || wor.getPartners().isEmpty())
-                return true;
+            if (!enable)
+                return new ArrayList<>();
 
             // set values
             Iterator<RegistryPartner> iterator = wor.getPartners().iterator();
@@ -225,14 +227,10 @@ public class WoRController {
 
             WebOfRegistriesContactTask contactTask = new WebOfRegistriesContactTask(wor.getPartners());
             IceExecutorService.getInstance().runTask(contactTask);
-            return true;
-
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return false;
+            return wor.getPartners();
         } catch (ServiceException e) {
             Logger.warn("Error contacting master node to remove this server from web of registries");
-            return true;
+            return null;
         }
     }
 
@@ -273,7 +271,7 @@ public class WoRController {
      * @throws ControllerException
      */
     public String getApiKey(String url) throws ControllerException {
-        RemotePartner partner = null;
+        RemotePartner partner;
         try {
             partner = dao.getByUrl(url);
         } catch (DAOException e) {

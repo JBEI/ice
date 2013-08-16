@@ -6,10 +6,11 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.executor.Task;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
-import org.jbei.ice.services.webservices.ServiceException;
 
 /**
  * Task to contact other registry instances that are in the web of registries
@@ -30,7 +31,9 @@ public class WebOfRegistriesContactTask extends Task {
         if (partners == null || partners.isEmpty())
             return;
 
-        // it is expected that all partners in this task should already be stored
+        String myUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+
+        // it is expected that all partners in this task should already be stored but missing an api key
         WoRController controller = ControllerFactory.getWebController();
         for (RegistryPartner partner : partners) {
             String url = partner.getUrl();
@@ -47,15 +50,15 @@ public class WebOfRegistriesContactTask extends Task {
                 }
 
                 // request api key
-                String apiKey = null;
+                String apiKey;
                 try {
-                    apiKey = api.requestAPIKey(url, name, token);
-                } catch (ServiceException e) {
-                    Logger.error(e);
-                }
-
-                if (apiKey == null) {
-                    Logger.error("Registry partner " + url + " responded with null api key");
+                    apiKey = api.requestAPIKey(myUrl, name, token);
+                    if (apiKey == null) {
+                        Logger.error("Registry partner " + url + " responded with null api key");
+                        continue;
+                    }
+                } catch (Throwable e) {
+                    Logger.warn("Could not obtain API KEY for server " + url + ": " + e.getMessage());
                     continue;
                 }
 

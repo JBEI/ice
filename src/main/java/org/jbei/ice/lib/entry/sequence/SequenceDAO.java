@@ -1,5 +1,8 @@
 package org.jbei.ice.lib.entry.sequence;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -130,14 +133,22 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     /**
      * Delete the given {@link Sequence} object in the database.
      *
-     * @param sequence sequence to delete
+     * @param sequence          sequence to delete
+     * @param pigeonImageFolder path of the image folder where the pigeon images are cached
      * @throws DAOException
      */
-    public void deleteSequence(Sequence sequence) throws DAOException {
+    public void deleteSequence(Sequence sequence, String pigeonImageFolder) throws DAOException {
+        String sequenceHash = sequence.getFwdHash();
         sequence.setEntry(null);
         sequence.getSequenceFeatures();
         super.delete(sequence);
         currentSession().flush();
+
+        try {
+            Files.deleteIfExists(Paths.get(pigeonImageFolder, sequenceHash + ".png"));
+        } catch (IOException e) {
+            Logger.error(e);
+        }
     }
 
     /**

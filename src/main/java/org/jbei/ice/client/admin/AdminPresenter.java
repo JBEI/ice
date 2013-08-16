@@ -74,7 +74,7 @@ public class AdminPresenter extends AbstractPresenter {
             case WEB:
                 if (webPresenter == null)
                     webPresenter = new WebOfRegistriesPresenter(service, eventBus);
-                retrieveWebOfRegistriesSettings();
+                retrieveWebOfRegistryPartners();
                 break;
 
             case GROUPS:
@@ -138,7 +138,7 @@ public class AdminPresenter extends AbstractPresenter {
     }
 
     // WEB OF REGISTRIES
-    private void retrieveWebOfRegistriesSettings() {
+    private void retrieveWebOfRegistryPartners() {
         new IceAsyncCallback<WebOfRegistries>() {
 
             @Override

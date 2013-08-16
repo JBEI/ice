@@ -60,10 +60,7 @@ public class SearchController {
                 continue;
             }
 
-            IRegistryAPI api = service.getPort(name, IRegistryAPI.class);
             String url = name.getNamespaceURI();
-            Logger.info("Retrieved API proxy for " + url);
-
             String apiKey;
             try {
                 apiKey = ControllerFactory.getWebController().getApiKey(url);
@@ -74,6 +71,7 @@ public class SearchController {
             }
 
             try {
+                IRegistryAPI api = service.getPort(name, IRegistryAPI.class);
                 if (results == null)
                     results = api.runSearch(url, apiKey, query);
                 else {

@@ -192,7 +192,9 @@ public class SequenceController {
         }
 
         try {
-            dao.deleteSequence(sequence);
+            String tmpDir = ControllerFactory.getConfigurationController()
+                                             .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+            dao.deleteSequence(sequence, tmpDir);
             ApplicationController.scheduleBlastIndexRebuildTask(true);
         } catch (DAOException e) {
             throw new ControllerException(e);

@@ -30,6 +30,7 @@ import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -39,6 +40,8 @@ import com.google.gwt.user.client.ui.SuggestOracle.Request;
 
 /**
  * The client side stub for the RPC service.
+ *
+ * @author Hector Plahar
  */
 @RemoteServiceRelativePath("ice")
 public interface RegistryService extends RemoteService {
@@ -217,7 +220,7 @@ public interface RegistryService extends RemoteService {
 
     UserComment alertToEntryProblem(String sid, long entryID, String details) throws AuthenticationException;
 
-    boolean setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException;
+    ArrayList<RegistryPartner> setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException;
 
     ArrayList<AccessPermission> retrieveDefaultPermissions(String sid) throws AuthenticationException;
 

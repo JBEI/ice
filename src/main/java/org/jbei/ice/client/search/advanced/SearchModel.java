@@ -46,10 +46,12 @@ public class SearchModel {
             public void serverFailure() {
                 callback.onFailure();
             }
-        }.go(eventBus);
-    }
 
-    public HandlerManager getEventBus() {
-        return eventBus;
+            @Override
+            public void onNullResult() {
+                super.onNullResult();
+                callback.onFailure();
+            }
+        }.go(eventBus);
     }
 }

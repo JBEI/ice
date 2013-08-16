@@ -34,6 +34,7 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         layout.setWidth("600px");
         layout.setCellPadding(1);
         layout.setCellSpacing(0);
+        layout.setStyleName("pad_top");
         initWidget(layout);
 
         joinToggle = new Button("<i class=\"blue " + FAIconType.GLOBE.getStyleName() + "\"></i>" +
@@ -46,15 +47,13 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
 
     public void setData(WebOfRegistries settings) {
         layout.clear();
-        layout.setHTML(0, 0, "&nbsp;");
-        layout.setWidget(1, 0, joinToggle);
+        layout.setWidget(0, 0, joinToggle);
 
         partnerPanel = createRegistryPartnerPanel(settings.getPartners());
         toggled = settings.isWebEnabled();
         toggle();
         partnerPanel.setVisible(settings.isWebEnabled());
-        layout.setHTML(2, 0, "&nbsp;");
-        layout.setWidget(3, 0, partnerPanel);
+        layout.setWidget(1, 0, partnerPanel);
     }
 
     public void addJoinBoxHandler(final ClickHandler handler) {

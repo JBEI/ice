@@ -1,5 +1,7 @@
 package org.jbei.ice.client.admin.web;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -7,6 +9,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -47,19 +50,29 @@ public class WebOfRegistriesPresenter extends AdminPanelPresenter {
         @Override
         public void onClick(ClickEvent event) {
             final boolean enable = panel.isToggled();
-            new IceAsyncCallback<Boolean>() {
+            new IceAsyncCallback<ArrayList<RegistryPartner>>() {
 
                 @Override
-                protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                protected void callService(AsyncCallback<ArrayList<RegistryPartner>> callback)
+                        throws AuthenticationException {
                     service.setEnableWebOfRegistries(ClientController.sessionId, enable, callback);
                 }
 
                 @Override
-                public void onSuccess(Boolean result) {
-                    // TODO : if success, if enabled, retrieve data for the table
-                    if (!result) {
+                public void onSuccess(ArrayList<RegistryPartner> result) {
+                    if (result == null) {
                         Window.alert("There was a problem processing your request");
+                        return;
                     }
+
+                    if (!enable)
+                        return;
+
+                    // only display values if enabling
+                    WebOfRegistries web = new WebOfRegistries();
+                    web.setWebEnabled(enable);
+                    web.setPartners(result);
+                    panel.setData(web);
                 }
             }.go(eventBus);
         }
