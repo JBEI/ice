@@ -237,11 +237,13 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
         Assert.assertTrue(autoUpdate.getLastUpdate() != null);
 
-        // check that the entry has been created
+        // check that the entry has been created and has visibility of draft
         EntryController entryController = new EntryController();
         Entry entry = entryController.get(account, autoUpdate.getEntryId());
         Assert.assertNotNull(entry);
         Assert.assertEquals("JBEI-0001", entry.getName());
+        Assert.assertTrue(entry.getVisibility().equals(Integer.valueOf(Visibility.DRAFT.getValue())));
+
 
         // check that the bulk upload has been created
         BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
@@ -270,7 +272,7 @@ public class BulkUploadControllerTest {
         info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 10);
         Assert.assertNotNull(info);
         Assert.assertTrue(info.getEntryList().size() == 1);
-        Assert.assertTrue(info.getEntryList().get(0).getVisibility() == Visibility.PENDING);
+        Assert.assertTrue(info.getEntryList().get(0).getVisibility().equals(Visibility.PENDING));
 
         // check the data associated with it
         PartData entryInfo = info.getEntryList().get(0);

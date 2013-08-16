@@ -760,7 +760,8 @@ public class EntryController {
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
-            entry.setVisibility(Visibility.OK.getValue());
+            if (entry.getVisibility() == null)
+                entry.setVisibility(Visibility.OK.getValue());
             dao.updateEntry(entry);
 
             if (scheduleRebuild) {
