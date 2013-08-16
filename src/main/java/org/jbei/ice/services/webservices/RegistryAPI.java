@@ -27,6 +27,7 @@ import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.SearchController;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
@@ -34,6 +35,7 @@ import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.SerializationUtils;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.PartTransfer;
@@ -1142,7 +1144,8 @@ public class RegistryAPI implements IRegistryAPI {
         IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
 
         // check the authentication key just received before sending one in kind
-        boolean isValid = api.isValidApiKey(url, authenticationKey);
+        String myUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+        boolean isValid = api.isValidApiKey(myUrl, authenticationKey);
         if (!isValid) {
             Logger.error("authentication key (" + authenticationKey + ") received from (" + url
                                  + ") could not be verified");

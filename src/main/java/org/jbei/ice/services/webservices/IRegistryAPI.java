@@ -130,7 +130,7 @@ public interface IRegistryAPI {
      * Contacts the instance at <code>url</code> to verify the authentication key before
      * generating the key and saving as a partner (if it is not already one)
      *
-     * @param url               unique identifier for registry instance
+     * @param url               unique identifier for registry instance requesting the api key
      * @param name              display name for registry instance
      * @param authenticationKey api key generated for this server instance
      * @return generated api key for the

@@ -36,34 +36,32 @@ public class WebOfRegistriesContactTask extends Task {
         // it is expected that all partners in this task should already be stored but missing an api key
         WoRController controller = ControllerFactory.getWebController();
         for (RegistryPartner partner : partners) {
-            String url = partner.getUrl();
-            String name = partner.getName();
-            IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
+            IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(partner.getUrl());
             if (api == null)
                 continue;
 
             try {
-                String token = controller.getAuthenticationKey(url);
+                String token = controller.getAuthenticationKey(partner.getUrl());
                 if (token == null) {
-                    Logger.error("Registry partner " + url + " not recognized. Skipping");
+                    Logger.error("Registry partner " + partner.getUrl() + " not recognized. Skipping");
                     continue;
                 }
 
                 // request api key
                 String apiKey;
                 try {
-                    apiKey = api.requestAPIKey(myUrl, name, token);
+                    apiKey = api.requestAPIKey(myUrl, partner.getName(), token);
                     if (apiKey == null) {
-                        Logger.error("Registry partner " + url + " responded with null api key");
+                        Logger.error("Registry partner " + partner.getUrl() + " responded with null api key");
                         continue;
                     }
                 } catch (Throwable e) {
-                    Logger.warn("Could not obtain API KEY for server " + url + ": " + e.getMessage());
+                    Logger.warn("Could not obtain API KEY for server " + partner.getUrl() + ": " + e.getMessage());
                     continue;
                 }
 
                 // save the api key
-                controller.setApiKeyForPartner(url, apiKey);
+                controller.setApiKeyForPartner(partner.getUrl(), apiKey);
             } catch (ControllerException ce) {
                 Logger.error(ce);
             }

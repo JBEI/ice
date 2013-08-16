@@ -250,7 +250,7 @@ public class WoRController {
 
             String token = partner.getAuthenticationToken();
             if (token != null && !token.isEmpty())
-                return partner.getAuthenticationToken();
+                return token;
 
             // generate authentication token
             token = UUID.randomUUID().toString();
