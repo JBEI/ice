@@ -148,7 +148,7 @@ public class GroupPresenter extends AdminPanelPresenter {
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        if (result.booleanValue()) {
+                        if (result) {
                             currentUserGroupSelection.setMemberCount(currentUserGroupSelection.getMemberCount() - 1);
                             view.removeGroupMember(currentUserGroupSelection, info);
                         }

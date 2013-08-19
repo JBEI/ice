@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.executor.IceExecutorService;
@@ -334,6 +335,25 @@ public class WoRController {
             return partner.getAuthenticationToken();
         } catch (DAOException ce) {
             throw new ControllerException(ce);
+        }
+    }
+
+    public RegistryPartner setPartnerStatus(Account account, String url, RemotePartnerStatus status)
+            throws ControllerException {
+        if (!ControllerFactory.getAccountController().isAdministrator(account))
+            return null;
+
+        Logger.info(account.getEmail() + ": setting partner (" + url + ") status to " + status.toString());
+        try {
+            RemotePartner partner = dao.getByUrl(url);
+            if (partner == null)
+                return null;
+
+            partner.setPartnerStatus(status);
+            partner = dao.update(partner);
+            return RemotePartner.toDTO(partner);
+        } catch (DAOException de) {
+            throw new ControllerException(de);
         }
     }
 }

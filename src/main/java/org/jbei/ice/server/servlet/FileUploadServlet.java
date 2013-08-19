@@ -393,14 +393,14 @@ public class FileUploadServlet extends HttpServlet {
                 AttachmentController attachmentController = ControllerFactory.getAttachmentController();
                 Attachment saved = attachmentController.save(account, attachment, new FileInputStream(file));
                 if (saved != null)
-                    return saved.getFileId();
+                    return saved.getFileId() + "," + filename;
             } else {
                 // upload file. return file id
                 String fileId = Utils.generateUUID();
                 File attachmentFile = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
                                                 AttachmentController.attachmentDirName, fileId).toFile();
                 FileUtils.copyFile(file, attachmentFile);
-                return fileId;
+                return fileId + "," + filename;
             }
         } catch (ControllerException | IOException | NumberFormatException e) {
             Logger.error(e);

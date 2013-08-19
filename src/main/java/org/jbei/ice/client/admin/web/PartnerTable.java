@@ -2,6 +2,7 @@ package org.jbei.ice.client.admin.web;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -30,12 +31,14 @@ public class PartnerTable extends CellTable<RegistryPartner> {
     }
 
     private ListDataProvider<RegistryPartner> dataProvider;
+    private ServiceDelegate<RegistryPartner> statusDelegate;
 
-    public PartnerTable() {
+    public PartnerTable(ServiceDelegate<RegistryPartner> statusDelegate) {
         super(15, TableResources.INSTANCE);
 
         dataProvider = new ListDataProvider<RegistryPartner>();
         dataProvider.addDataDisplay(this);
+        this.statusDelegate = statusDelegate;
 
         Label empty = new Label();
         empty.setText("No registry partners available");
@@ -94,7 +97,7 @@ public class PartnerTable extends CellTable<RegistryPartner> {
             public String getValue(RegistryPartner object) {
                 if (object.getStatus() == null)
                     return "";
-                return object.getStatus().toString();
+                return object.getStatus();
             }
         };
 
@@ -130,7 +133,7 @@ public class PartnerTable extends CellTable<RegistryPartner> {
     }
 
     protected void createActionColumn() {
-        ActionCell cell = new ActionCell(null);
+        ActionCell cell = new ActionCell(statusDelegate);
         Column<RegistryPartner, RegistryPartner> column = new Column<RegistryPartner, RegistryPartner>(cell) {
             @Override
             public RegistryPartner getValue(RegistryPartner object) {
@@ -145,5 +148,23 @@ public class PartnerTable extends CellTable<RegistryPartner> {
 
     public void setData(ArrayList<RegistryPartner> data) {
         this.dataProvider.setList(data);
+    }
+
+    public void updateRow(RegistryPartner partner) {
+        if (dataProvider.getList().isEmpty()) {
+            dataProvider.getList().add(partner);
+            return;
+        }
+
+        int i = 0;
+        for (RegistryPartner registryPartner : dataProvider.getList()) {
+            if (partner.getId() == registryPartner.getId()
+                    && partner.getUrl().equalsIgnoreCase(registryPartner.getUrl())) {
+                dataProvider.getList().remove(i);
+                dataProvider.getList().add(i, registryPartner);
+                break;
+            }
+            i += 1;
+        }
     }
 }

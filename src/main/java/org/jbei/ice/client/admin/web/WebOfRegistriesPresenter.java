@@ -10,6 +10,7 @@ import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -26,20 +27,52 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class WebOfRegistriesPresenter extends AdminPanelPresenter {
 
     private final WebOfRegistriesPanel panel;
+    private final ServiceDelegate<RegistryPartner> setStatusDelegate;
 
-    public WebOfRegistriesPresenter(final RegistryServiceAsync service, HandlerManager eventBus) {
+    public WebOfRegistriesPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
         super(service, eventBus);
+        setStatusDelegate = createSetStatusDelegate(service, eventBus);
         panel = new WebOfRegistriesPanel(new AddPartnerDelegate());
         panel.addJoinBoxHandler(new JoinBoxChangeHandler());
     }
 
     public void setData(WebOfRegistries settings) {
-        panel.setData(settings);
+        panel.setData(settings, setStatusDelegate);
     }
 
     @Override
     public IAdminPanel getView() {
         return panel;
+    }
+
+    public ServiceDelegate<RegistryPartner> createSetStatusDelegate(final RegistryServiceAsync service,
+            final HandlerManager eventBus) {
+        return new ServiceDelegate<RegistryPartner>() {
+            @Override
+            public void execute(final RegistryPartner registryPartner) {
+                RemotePartnerStatus status = RemotePartnerStatus.valueOf(registryPartner.getStatus());
+                if (status == RemotePartnerStatus.APPROVED)
+                    status = RemotePartnerStatus.BLOCKED;
+                else
+                    status = RemotePartnerStatus.APPROVED;
+                registryPartner.setStatus(status.name());
+
+                new IceAsyncCallback<RegistryPartner>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<RegistryPartner> callback) throws AuthenticationException {
+                        service.setRegistryPartnerStatus(ClientController.sessionId, registryPartner, callback);
+                    }
+
+                    @Override
+                    public void onSuccess(RegistryPartner result) {
+                        if (result == null)
+                            return;
+                        panel.updateRow(result);
+                    }
+                }.go(eventBus);
+            }
+        };
     }
 
     /**
@@ -72,7 +105,7 @@ public class WebOfRegistriesPresenter extends AdminPanelPresenter {
                     WebOfRegistries web = new WebOfRegistries();
                     web.setWebEnabled(enable);
                     web.setPartners(result);
-                    panel.setData(web);
+                    panel.setData(web, setStatusDelegate);
                 }
             }.go(eventBus);
         }

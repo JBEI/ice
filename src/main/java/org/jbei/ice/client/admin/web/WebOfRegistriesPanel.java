@@ -17,6 +17,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
+ * View panel for display ui elements and interaction with the Web of registries admin section
+ *
  * @author Hector Plahar
  */
 public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
@@ -28,6 +30,7 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
     private Button joinToggle;
     private boolean toggled;
     private ArrayList<String> partnersList;
+    private PartnerTable partnerTable;
 
     public WebOfRegistriesPanel(ServiceDelegate<String> partnerDelegate) {
         layout = new FlexTable();
@@ -45,15 +48,19 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         this.partnersList = new ArrayList<String>();
     }
 
-    public void setData(WebOfRegistries settings) {
+    public void setData(WebOfRegistries settings, ServiceDelegate<RegistryPartner> partnerStatusDelegate) {
         layout.clear();
         layout.setWidget(0, 0, joinToggle);
 
-        partnerPanel = createRegistryPartnerPanel(settings.getPartners());
+        partnerPanel = createRegistryPartnerPanel(settings.getPartners(), partnerStatusDelegate);
         toggled = settings.isWebEnabled();
         toggle();
         partnerPanel.setVisible(settings.isWebEnabled());
         layout.setWidget(1, 0, partnerPanel);
+    }
+
+    public void updateRow(RegistryPartner partner) {
+        partnerTable.updateRow(partner);
     }
 
     public void addJoinBoxHandler(final ClickHandler handler) {
@@ -94,7 +101,8 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         partnersList.add(partner);
     }
 
-    private FlexTable createRegistryPartnerPanel(ArrayList<RegistryPartner> partners) {
+    private FlexTable createRegistryPartnerPanel(ArrayList<RegistryPartner> partners,
+            ServiceDelegate<RegistryPartner> partnerStatusDelegate) {
         HTMLPanel headerPanel = new HTMLPanel(
                 "<span style=\"color: #233559; "
                         + "font-weight: bold; font-style: italic; font-size: 0.80em; text-transform: uppercase\">"
@@ -104,7 +112,7 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
 
         addPartnerPanel = new HTMLPanel("<span id=\"add_partner_input\"></span><span id=\"add_partner_submit\"></span>"
                                                 + "<span id=\"add_partner_cancel\"></span>");
-        PartnerTable partnerTable = new PartnerTable();
+        partnerTable = new PartnerTable(partnerStatusDelegate);
         final TextBox addInput = new TextBox();
         addInput.getElement().setAttribute("placeholder", "e.g. public-registry.jbei.org");
         addInput.setStyleName("input_box");

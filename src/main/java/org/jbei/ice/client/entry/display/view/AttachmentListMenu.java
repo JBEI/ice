@@ -17,6 +17,7 @@ import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 /**
@@ -200,19 +201,23 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         panel.addSubmitHandler(new FormPanel.SubmitHandler() {
             @Override
             public void onSubmit(FormPanel.SubmitEvent event) {
-                panel.setAction(panel.getAction() + "&eid=" + entryId);
+                panel.setAction(panel.getAction() + "&eid=" + entryId + "&desc=" + attachmentDescription);
             }
         });
 
         panel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                String fileId = event.getResults();
+                String[] split = event.getResults().split(",");
+                if (split.length < 2) {
+                    Window.alert("Error uploading file");
+                    return;
+                }
                 switchAttachmentAddButton();
                 String attDesc = attachmentDescription.getText().trim();
                 int rowCount = layout.getRowCount();
-                AttachmentItem item = new AttachmentItem(rowCount + 1, fileUpload.getFilename(), attDesc);
-                item.setFileId(fileId);
+                AttachmentItem item = new AttachmentItem(rowCount + 1, split[1], attDesc);
+                item.setFileId(split[0]);
                 presenter.addAttachmentItem(item);
                 attachmentDescription.setVisible(true);
                 panel.reset();

@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Panel for displaying the entry parameters. Also maintains
@@ -56,7 +57,7 @@ public class CustomFieldPanel extends Composite {
     }
 
     private void addRow() {
-        Parameter param = new Parameter(new RemoveParameterHandler(row));
+        Parameter param = new Parameter(row, new RemoveParameterHandler(row));
         table.setWidget(row, 0, param);
         map.put(row, param);
         row += 1;
@@ -67,7 +68,7 @@ public class CustomFieldPanel extends Composite {
             return;
 
         for (CustomField field : customFields) {
-            Parameter param = new Parameter(new RemoveParameterHandler(row));
+            Parameter param = new Parameter(row, new RemoveParameterHandler(row));
             param.setName(field.getName());
             param.setValue(field.getValue());
             table.setWidget(row, 0, param);
@@ -86,8 +87,18 @@ public class CustomFieldPanel extends Composite {
 
         @Override
         public void onClick(ClickEvent event) {
-            table.removeRow(row);
-            map.remove(row);
+            for (int i = 0; i < table.getRowCount(); i += 1) {
+                Widget widget = table.getWidget(i, 0);
+                if (!(widget instanceof Parameter))
+                    continue;
+                Parameter parameter = (Parameter) widget;
+                if (parameter.getId() != row)
+                    continue;
+
+                table.removeRow(i);
+                map.remove(row);
+                break;
+            }
         }
     }
 
@@ -98,9 +109,11 @@ public class CustomFieldPanel extends Composite {
         private FlexTable panel;
         private HTML nameLabel;
         private Icon iconRemove;
+        private final int id;
 
-        public Parameter(ClickHandler handler) {
+        public Parameter(int id, ClickHandler handler) {
             initComponents();
+            this.id = id;
             panel = new FlexTable();
             panel.setCellPadding(0);
             panel.setCellSpacing(0);
@@ -122,8 +135,8 @@ public class CustomFieldPanel extends Composite {
             initHandlers();
         }
 
-        public Parameter(String name, String value, ClickHandler handler) {
-            this(handler);
+        public Parameter(int id, String name, String value, ClickHandler handler) {
+            this(id, handler);
 
             this.name.setText(name);
             this.value.setText(value);
@@ -132,6 +145,10 @@ public class CustomFieldPanel extends Composite {
                     "class=\"required\">*</span></span>";
             nameLabel.setHTML(html);
             panel.setWidget(0, 0, nameLabel);
+        }
+
+        public int getId() {
+            return this.id;
         }
 
         protected void initHandlers() {

@@ -13,7 +13,6 @@ import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 
@@ -27,13 +26,19 @@ public class ActionCell extends AbstractCell<RegistryPartner> {
 
     private final ServiceDelegate<RegistryPartner> delegate;
     private final SafeHtml html;
+    private final SafeHtml approveHtml;
 
     public ActionCell(ServiceDelegate<RegistryPartner> delegate) {
         super(BrowserEvents.CLICK, BrowserEvents.KEYDOWN);
         this.delegate = delegate;
         this.html = new SafeHtmlBuilder().appendHtmlConstant(
-                "<button type=\"button\" class=\"delete_icon\">"
+                "<button type=\"button\" title=\"Block\" class=\"delete_icon\">"
                         + "<i class=\"" + FAIconType.BAN_CIRCLE.getStyleName()
+                        + "\">").appendHtmlConstant("</i></button>").toSafeHtml();
+
+        this.approveHtml = new SafeHtmlBuilder().appendHtmlConstant(
+                "<button type=\"button\" title=\"Approve\" class=\"add_icon\">"
+                        + "<i class=\"" + FAIconType.CHECK.getStyleName()
                         + "\">").appendHtmlConstant("</i></button>").toSafeHtml();
     }
 
@@ -58,7 +63,7 @@ public class ActionCell extends AbstractCell<RegistryPartner> {
         if (value.getStatus().equals(RemotePartnerStatus.APPROVED.name()))
             sb.append(html);
         else
-            sb.append(SafeHtmlUtils.EMPTY_SAFE_HTML);
+            sb.append(approveHtml);
     }
 
     @Override

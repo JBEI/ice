@@ -276,4 +276,7 @@ public interface RegistryServiceAsync {
 
     void enableOrDisableFolderPublicAccess(String sid, long folderId, boolean isEnable, AsyncCallback<Boolean> async)
             throws AuthenticationException;
+
+    void setRegistryPartnerStatus(String sid, RegistryPartner partner, AsyncCallback<RegistryPartner> async) throws
+            AuthenticationException;
 }

@@ -239,4 +239,6 @@ public interface RegistryService extends RemoteService {
 
     boolean enableOrDisableFolderPublicAccess(String sid, long folderId, boolean isEnable)
             throws AuthenticationException;
+
+    RegistryPartner setRegistryPartnerStatus(String sid, RegistryPartner partner) throws AuthenticationException;
 }

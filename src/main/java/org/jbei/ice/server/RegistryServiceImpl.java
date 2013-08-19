@@ -80,6 +80,7 @@ import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.IceXlsSerializer;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
@@ -1801,6 +1802,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return fileName;
         } catch (ControllerException | IOException | UtilityException ce) {
             Logger.error(ce);
+            return null;
+        }
+    }
+
+    @Override
+    public RegistryPartner setRegistryPartnerStatus(String sid, RegistryPartner partner)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        RemotePartnerStatus status = RemotePartnerStatus.valueOf(partner.getStatus());
+        try {
+            return ControllerFactory.getWebController().setPartnerStatus(account, partner.getUrl(), status);
+        } catch (ControllerException e) {
             return null;
         }
     }
