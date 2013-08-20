@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.menu;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -51,7 +52,7 @@ public class CollectionMenu extends Composite {
     private List<HoverOption> cellHoverOptions;
     private ServiceDelegate<MenuItem> promotionDelegate;
     private ServiceDelegate<MenuItem> demotionDelegate;
-    private ServiceDelegate<Boolean> publicDelegate;
+    private ServiceDelegate<HashMap<Long, Boolean>> publicDelegate;
 
     // quick add
     private QuickAddWidget quickAddWidget;
@@ -111,7 +112,7 @@ public class CollectionMenu extends Composite {
         this.demotionDelegate = serviceDelegate;
     }
 
-    public void setRemoveAddPublicAccessDelegate(ServiceDelegate<Boolean> serviceDelegate) {
+    public void setRemoveAddPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> serviceDelegate) {
         this.publicDelegate = serviceDelegate;
     }
 
@@ -468,7 +469,9 @@ public class CollectionMenu extends Composite {
             currentEditSelection = getMenuItem();
             editRow = row;
             editIndex = 0;
-            shareCollectionDialog.showDialog(currentEditSelection.getAccessPermissions());
+            shareCollectionDialog.showDialog(currentEditSelection.getAccessPermissions(),
+                                             currentEditSelection.isPropagatePermission(),
+                                             currentEditSelection.isPublicReadAccess());
         }
 
         protected void pinAction() {

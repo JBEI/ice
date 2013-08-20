@@ -3,7 +3,9 @@ package org.jbei.ice.client.collection.presenter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
@@ -310,22 +312,23 @@ public class CollectionsPresenter extends AbstractPresenter {
     }
 
     private void setPublicAccessDelegate() {
-        display.setPublicAccessDelegate(new ServiceDelegate<Boolean>() {
+        display.setPublicAccessDelegate(new ServiceDelegate<HashMap<Long, Boolean>>() {
             @Override
-            public void execute(final Boolean enable) {
+            public void execute(final HashMap<Long, Boolean> enable) {
                 new IceAsyncCallback<Boolean>() {
 
                     @Override
                     protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        service.enableOrDisableFolderPublicAccess(ClientController.sessionId, currentFolder.getId(),
-                                                                  enable, callback);
-                        currentFolder.getId();
+                        for (Map.Entry<Long, Boolean> entry : enable.entrySet()) {
+                            service.enableOrDisableFolderPublicAccess(ClientController.sessionId, entry.getKey(),
+                                                                      entry.getValue(), callback);
+                            break;
+                        }
                     }
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        //TODO : view assumes call will success and so has already accounted for it in feedback
-                        //TODO : to the user
+                        //TODO : view assumes call will succeed and so has already accounted for it in feedback to user
                     }
                 }.go(eventBus);
             }
@@ -670,11 +673,12 @@ public class CollectionsPresenter extends AbstractPresenter {
                     case PUBLIC:
                         systemMenuItems.add(item);
                         if (ClientController.account.isAdmin())
-                            item.setAccessPermissions(folder.getAccessPermissions());
+                            item.setAccessPermissions(folder.getAccessPermissions(), folder.isPublicReadAccess());
                         break;
 
                     case PRIVATE:
-                        item.setAccessPermissions(folder.getAccessPermissions());
+                        item.setAccessPermissions(folder.getAccessPermissions(), folder.isPublicReadAccess());
+                        item.setPropagatePermission(folder.isPropagatePermission());
                         userMenuItems.add(item);
                         display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                         break;

@@ -18,6 +18,8 @@ public class MenuItem extends OptionSelect {
     private ArrayList<AccessPermission> accessPermissions;
     private User owner;
     private FolderType type;
+    private boolean propagatePermission;
+    private boolean publicReadAccess;
 
     public MenuItem(long id, String name, long count) {
         super(id, name);
@@ -36,8 +38,13 @@ public class MenuItem extends OptionSelect {
         this.count = count;
     }
 
-    public void setAccessPermissions(ArrayList<AccessPermission> accessPermissions) {
+    public void setAccessPermissions(ArrayList<AccessPermission> accessPermissions, boolean publicReadAccess) {
         this.accessPermissions = accessPermissions;
+        this.publicReadAccess = publicReadAccess;
+    }
+
+    public boolean isPublicReadAccess() {
+        return this.publicReadAccess;
     }
 
     public ArrayList<AccessPermission> getAccessPermissions() {
@@ -58,5 +65,13 @@ public class MenuItem extends OptionSelect {
 
     public void setType(FolderType type) {
         this.type = type;
+    }
+
+    public boolean isPropagatePermission() {
+        return propagatePermission;
+    }
+
+    public void setPropagatePermission(boolean propagatePermission) {
+        this.propagatePermission = propagatePermission;
     }
 }

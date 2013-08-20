@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.widget;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
@@ -41,7 +42,7 @@ public class ShareCollectionDialog extends Composite implements ICanReset {
         popup = new GenericPopup(this, shareHTML);
     }
 
-    public void setPublicAccessDelegate(ServiceDelegate<Boolean> delegate) {
+    public void setPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> delegate) {
         permissionsWidget.setPublicAccessDelegate(delegate);
     }
 
@@ -51,8 +52,10 @@ public class ShareCollectionDialog extends Composite implements ICanReset {
      * Displays dialog that allows user to update the permissions
      *
      * @param accessPermissions list of currently set permissions for folder
+     * @param isPropagated      whether the list of permissions is propagated to the entries
+     * @param isPublic          public access permission or not
      */
-    public void showDialog(ArrayList<AccessPermission> accessPermissions) {
+    public void showDialog(ArrayList<AccessPermission> accessPermissions, boolean isPropagated, boolean isPublic) {
         userShareCount = 0;
         groupShareCount = 0;
 
@@ -64,7 +67,7 @@ public class ShareCollectionDialog extends Composite implements ICanReset {
                     userShareCount += 1;
             }
         }
-        permissionsWidget.setPermissionData(accessPermissions);
+        permissionsWidget.setPermissionData(accessPermissions, isPropagated, isPublic);
         popup.showDialog();
     }
 

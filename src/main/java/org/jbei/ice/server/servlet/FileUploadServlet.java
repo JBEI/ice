@@ -120,6 +120,11 @@ public class FileUploadServlet extends HttpServlet {
                 String filePath = fileItemStream.getName();
                 String fileName = filePath.substring(filePath.lastIndexOf(File.pathSeparatorChar) + 1);
                 File file = new File(tmpDir, fileName);
+                if (file.length() > 3000000l) {
+                    sendServerResponse(response, "Error: File size is too large");
+                    return;
+                }
+
                 Streams.copy(fileItemStream.openStream(), new FileOutputStream(file), true);
                 long entryIdl = Long.decode(entryId);
 

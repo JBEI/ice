@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.widget;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
@@ -43,7 +44,7 @@ public class CollectionPermissionWidget extends Composite {
     private SuggestBox permissionSuggestions;
     private Delegate<ShareCollectionData> delegate;
     private Callback<ShareCollectionData> callback;
-    private ServiceDelegate<Boolean> publicAccessDelegate;
+    private ServiceDelegate<HashMap<Long, Boolean>> publicAccessDelegate;
 
     private boolean isViewingWriteTab;
     private final ArrayList<AccessPermission> readList;  // list of read permissions (includes groups)
@@ -115,7 +116,7 @@ public class CollectionPermissionWidget extends Composite {
         setMakePublicHandler();
     }
 
-    public void setPublicAccessDelegate(ServiceDelegate<Boolean> delegate) {
+    public void setPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> delegate) {
         publicAccessDelegate = delegate;
         permissionLayout.getRowFormatter().setVisible(3, (publicAccessDelegate != null));
     }
@@ -226,7 +227,9 @@ public class CollectionPermissionWidget extends Composite {
         permissionLayout.getFlexCellFormatter().setVisible(3, 0, !publicReadAccess);
         readListTable.getRowFormatter().setVisible(0, publicReadAccess);
         isPublicReadEnabled = publicReadAccess;
-        publicAccessDelegate.execute(publicReadAccess);
+        HashMap<Long, Boolean> map = new HashMap<Long, Boolean>();
+        map.put(folderId, publicReadAccess);
+        publicAccessDelegate.execute(map);
     }
 
     protected void initComponents() {
@@ -371,11 +374,15 @@ public class CollectionPermissionWidget extends Composite {
         }
     }
 
-    public void setPermissionData(ArrayList<AccessPermission> listAccess) {
+    public void setPermissionData(ArrayList<AccessPermission> listAccess, boolean isPropagated, boolean isPublic) {
         if (listAccess == null)
             return;
 
         reset();
+        propagateBox.setValue(isPropagated);
+        permissionLayout.getRowFormatter().setVisible(3, !isPublic);
+        readListTable.getRowFormatter().setVisible(0, isPublic);
+        isPublicReadEnabled = isPublic;
 
         for (AccessPermission access : listAccess) {
             if (access.isCanWrite()) {

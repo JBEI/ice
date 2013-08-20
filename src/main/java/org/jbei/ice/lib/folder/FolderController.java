@@ -14,6 +14,7 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
@@ -117,13 +118,14 @@ public class FolderController {
                 return null;
             }
 
+            PermissionsController controller = ControllerFactory.getPermissionController();
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
             details.setType(folder.getType());
             long folderSize = getFolderSize(folderId);
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
-            details.setAccessPermissions(ControllerFactory.getPermissionController().retrieveSetFolderPermission(
-                    folder));
+            details.setAccessPermissions(controller.retrieveSetFolderPermission(folder, false));
+            details.setPublicReadAccess(controller.isPublicVisible(folder));
             Account owner = accountController.getByEmail(folder.getOwnerEmail());
             details.setOwner(Account.toDTO(owner));
 
@@ -228,6 +230,7 @@ public class FolderController {
 
     public ArrayList<FolderDetails> retrieveFoldersForUser(Account account) throws ControllerException {
         ArrayList<FolderDetails> results = new ArrayList<>();
+        PermissionsController controller = ControllerFactory.getPermissionController();
 
         try {
             // publicly visible collections are owned by the system
@@ -240,10 +243,10 @@ public class FolderController {
                 details.setDescription(folder.getDescription());
                 details.setType(FolderType.PUBLIC);
                 if (account.getType() == AccountType.ADMIN) {
-                    ArrayList<AccessPermission> accesses = ControllerFactory.getPermissionController().
-                            retrieveSetFolderPermission(folder);
+                    ArrayList<AccessPermission> accesses = controller.retrieveSetFolderPermission(folder, false);
                     details.setAccessPermissions(accesses);
                 }
+                details.setPropagatePermission(folder.isPropagatePermissions());
                 results.add(details);
             }
 
@@ -257,9 +260,10 @@ public class FolderController {
                     details.setCount(folderSize);
                     details.setType(FolderType.PRIVATE);
                     details.setDescription(folder.getDescription());
-                    ArrayList<AccessPermission> accesses = ControllerFactory.getPermissionController().
-                            retrieveSetFolderPermission(folder);
+                    ArrayList<AccessPermission> accesses = controller.retrieveSetFolderPermission(folder, false);
                     details.setAccessPermissions(accesses);
+                    details.setPropagatePermission(folder.isPropagatePermissions());
+                    details.setPublicReadAccess(controller.isPublicVisible(folder));
                     results.add(details);
                 }
             }
@@ -280,6 +284,7 @@ public class FolderController {
                     if (owner != null) {
                         details.setOwner(Account.toDTO(owner));
                     }
+                    details.setPropagatePermission(folder.isPropagatePermissions());
                     results.add(details);
                 }
             }
@@ -367,7 +372,7 @@ public class FolderController {
                     Account account = accountController.getByEmail(owner);
                     if (account != null) {
                         ArrayList<AccessPermission> accesses = ControllerFactory.getPermissionController().
-                                retrieveSetFolderPermission(folder);
+                                retrieveSetFolderPermission(folder, false);
                         if (accesses != null) {
                             for (AccessPermission access : accesses) {
                                 if (access.isCanRead() || access.isCanWrite()) {

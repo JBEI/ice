@@ -25,6 +25,7 @@ public class FolderDetails implements IDTOModel {
     private FolderType type;
     private User owner;    // owner or person sharing this folder
     private ArrayList<AccessPermission> accessPermissions;
+    private boolean publicReadAccess;
 
     public FolderDetails() {
     }
@@ -104,5 +105,13 @@ public class FolderDetails implements IDTOModel {
 
     public void setPropagatePermission(boolean propagatePermission) {
         this.propagatePermission = propagatePermission;
+    }
+
+    public boolean isPublicReadAccess() {
+        return publicReadAccess;
+    }
+
+    public void setPublicReadAccess(boolean publicReadAccess) {
+        this.publicReadAccess = publicReadAccess;
     }
 }

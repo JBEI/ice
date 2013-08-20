@@ -295,6 +295,15 @@ public class PermissionsController {
         return groupHasReadPermission(groups, entry);
     }
 
+    public boolean isPublicVisible(Folder folder) throws ControllerException {
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        Set<Group> groups = new HashSet<>();
+        groups.add(publicGroup);
+        Set<Folder> folders = new HashSet<>();
+        folders.add(folder);
+        return groupHasReadPermission(groups, folders);
+    }
+
     public boolean groupHasReadPermission(Set<Group> groups, Set<Folder> folders) throws ControllerException {
         if (groups.isEmpty() || folders.isEmpty())
             return false;
@@ -463,7 +472,9 @@ public class PermissionsController {
     }
 
     /**
-     * retrieves permissions that have been explicitly set for entry
+     * retrieves permissions that have been explicitly set for entry with the
+     * exception of the public group read access. The check for that is a separate
+     * method call
      *
      * @param account user making request
      * @param entry   entry whose permissions are being checked
@@ -519,12 +530,15 @@ public class PermissionsController {
     }
 
     /**
-     * Retrieves permissions that have been explicitly set for the folders
+     * Retrieves permissions that have been explicitly set for the folders with the exception
+     * of the public read permission if specified in the parameter. The call for that is a separate method
      *
-     * @param folder folder whose permissions are being retrieved
+     * @param folder        folder whose permissions are being retrieved
+     * @param includePublic whether to include public access if set
      * @return list of permissions that have been found for the specified folder
      */
-    public ArrayList<AccessPermission> retrieveSetFolderPermission(Folder folder) throws ControllerException {
+    public ArrayList<AccessPermission> retrieveSetFolderPermission(Folder folder, boolean includePublic)
+            throws ControllerException {
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
 
         try {
@@ -547,6 +561,8 @@ public class PermissionsController {
             // read groups
             Set<Group> readGroups = dao.retrieveGroupPermissions(folder, false, true);
             for (Group group : readGroups) {
+                if (!includePublic && group.getUuid().equalsIgnoreCase(GroupController.PUBLIC_GROUP_UUID))
+                    continue;
                 accessPermissions.add(new AccessPermission(AccessPermission.Article.GROUP, group.getId(),
                                                            AccessPermission.Type.READ_FOLDER, folder.getId(),
                                                            group.getLabel()));
@@ -628,7 +644,8 @@ public class PermissionsController {
             return false;
 
         // retrieve folder permissions
-        ArrayList<AccessPermission> permissions = retrieveSetFolderPermission(folder);
+        ArrayList<AccessPermission> permissions = retrieveSetFolderPermission(folder, true);
+//        boolean isPublic = get
 
         // if propagate, add permissions to entries contained in here  //TODO : inefficient for large entries/perms
         if (prop) {
