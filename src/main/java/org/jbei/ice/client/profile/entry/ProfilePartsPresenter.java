@@ -69,6 +69,7 @@ public class ProfilePartsPresenter extends PanelPresenter {
     }
 
     public void retrieveUserParts(String userId) {
+        folderDataProvider.setUserId(userId);
         service.retrieveUserEntries(ClientController.sessionId, userId, ColumnField.CREATED, false, 0,
                                     partsView.getTable().getVisibleRange().getLength(),
                                     new AsyncCallback<FolderDetails>() {

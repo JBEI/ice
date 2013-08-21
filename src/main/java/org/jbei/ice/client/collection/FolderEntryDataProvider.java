@@ -19,6 +19,7 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
 
     private FolderDetails details;
     private final EntryTablePager pager;
+    private String userId;
 
     public FolderEntryDataProvider(CollectionDataTable view, RegistryServiceAsync service) {
         super(view, service);
@@ -62,8 +63,11 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
 
     private void retrieveUserEntrys(ColumnField field, boolean asc, final int start, final int factor,
             final boolean reset) {
+        if (userId == null)
+            userId = Long.toString(ClientController.account.getId());
+
         service.retrieveUserEntries(
-                ClientController.sessionId, ClientController.account.getId() + "", field, asc, start, factor,
+                ClientController.sessionId, userId, field, asc, start, factor,
                 new AsyncCallback<FolderDetails>() {
 
                     @Override
@@ -179,6 +183,10 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                 rangeEnd = resultSize;
             cacheMore(lastSortField, lastSortAsc, rangeStart, 2 * rangeEnd);
         }
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
 
