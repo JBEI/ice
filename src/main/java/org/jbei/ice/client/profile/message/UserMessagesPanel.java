@@ -9,7 +9,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

@@ -1,9 +1,15 @@
 package org.jbei.ice.lib.entry.model;
 
-import org.hibernate.search.annotations.Indexed;
-import org.jbei.ice.shared.dto.entry.EntryType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 
-import javax.persistence.*;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+
+import org.hibernate.search.annotations.Indexed;
 
 /**
  * Store Part specific fields.
@@ -18,7 +24,7 @@ public class Part extends Entry {
     private static final long serialVersionUID = 1L;
 
     public enum AssemblyStandard {
-        RAW;
+        RAW, BIOBRICKA, BIOBRICKB;
     }
 
     @Column(name = "package_format", nullable = false)

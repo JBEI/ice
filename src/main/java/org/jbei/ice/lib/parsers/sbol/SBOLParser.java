@@ -50,9 +50,12 @@ public class SBOLParser extends AbstractParser {
             SBOLDocument document = SBOLFactory.read(new ByteArrayInputStream(textSequence.getBytes()));
             Visitor visitor = new Visitor();
 
-            // walk top level objects
+            // walk top level object
             for (SBOLRootObject rootObject : document.getContents()) {
                 rootObject.accept(visitor);
+
+                //TODO : ideal case is to create another entry and link to this one for each top level object
+                break;
             }
 
             return visitor.featuredDNASequence;
@@ -61,7 +64,7 @@ public class SBOLParser extends AbstractParser {
         }
     }
 
-    private class Visitor extends SBOLBaseVisitor<RuntimeException> {
+    private static class Visitor extends SBOLBaseVisitor<RuntimeException> {
 
         private FeaturedDNASequence featuredDNASequence;
 
@@ -84,11 +87,10 @@ public class SBOLParser extends AbstractParser {
 
             List<SequenceAnnotation> annotations = component.getAnnotations();
             if (!annotations.isEmpty()) {
-
                 Collections.sort(annotations, new Comparator<SequenceAnnotation>() {
                     @Override
                     public int compare(SequenceAnnotation o1, SequenceAnnotation o2) {
-                        if (o1.getBioStart() == o2.getBioStart())
+                        if (o1.getBioStart().intValue() == o2.getBioStart().intValue())
                             return o1.getBioEnd().compareTo(o2.getBioEnd());
                         return o1.getBioStart().compareTo(o2.getBioStart());
                     }

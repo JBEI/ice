@@ -1,13 +1,13 @@
 package org.jbei.ice.lib.entry.filter;
 
-import java.util.HashSet;
-
 import org.apache.lucene.search.FieldCacheTermsFilter;
 import org.apache.lucene.search.Filter;
 import org.hibernate.search.annotations.Factory;
 import org.hibernate.search.annotations.Key;
 import org.hibernate.search.filter.FilterKey;
 import org.hibernate.search.filter.StandardFilterKey;
+
+import java.util.HashSet;
 
 /**
  * @author Hector Plahar
@@ -29,6 +29,6 @@ public class BlastFilterFactory {
     @Factory
     public Filter getFilter() {
         String[] a = new String[]{};
-        return new FieldCacheTermsFilter("recordId", recordIds.toArray(a));
+        return new FieldCacheTermsFilter("id", recordIds.toArray(a));
     }
 }

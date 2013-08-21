@@ -1,6 +1,6 @@
 package org.jbei.ice.client.collection.presenter;
 
-import org.jbei.ice.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 
 import com.google.gwt.view.client.ProvidesKey;
 

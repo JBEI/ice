@@ -8,7 +8,7 @@ import javax.persistence.*;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Analyze;

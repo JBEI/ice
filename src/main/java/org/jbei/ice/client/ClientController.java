@@ -22,7 +22,8 @@ import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.search.advanced.SearchView;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -37,15 +38,14 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
     // cookie times out in three days (current value set in Ice)
     private static final int COOKIE_TIMEOUT = (1000 * 60 * 60 * 24) * 3;
     private static final int DAY_TIMEOUT = (1000 * 60 * 60 * 24);
-    private static final String COOKIE_NAME = "gd-ice"; //TODO: this is set in the backend. does anyone even change it?
+    private static final String COOKIE_NAME = "gd-ice"; // TODO: this is set in the backend. does anyone even change it?
     private static final String COOKIE_PATH = "/";
-    public static String blast;
 
     private HasWidgets container; // root panel
     public static String sessionId;
-    public static AccountInfo account;
-    public static final String URL_SEPARATOR = ";";
+    public static User account;
     public static String pageViewAttempt;   // page user attempted to view but was sent to the login page
+    private static SearchQuery lastQuery;
 
     public ClientController(RegistryServiceAsync service, HandlerManager eventBus) {
         super(service, eventBus);
@@ -77,6 +77,7 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                 account = event.getAccountInfo();
                 HeaderView.getInstance().setHeaderData(account);
                 HeaderView.getInstance().setHeader(Page.COLLECTIONS);
+                HeaderView.getInstance().setQueryDelegate(createServiceDelegate());
 
                 Date expires;
                 if (!event.isRememberUser())
@@ -94,6 +95,20 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
 
         // add log out handler
         this.eventBus.addHandler(LogoutEvent.TYPE, new AppLogoutHandler());
+    }
+
+    private ServiceDelegate<SearchQuery> createServiceDelegate() {
+        return new ServiceDelegate<SearchQuery>() {
+            @Override
+            public void execute(SearchQuery query) {
+                SearchView searchView = new SearchView();
+                CollectionsView collectionsView = new CollectionsView();
+                lastQuery = query;
+                CollectionsPresenter presenter = new CollectionsPresenter(service, eventBus, collectionsView,
+                                                                          searchView, query);
+                presenter.go(container);
+            }
+        };
     }
 
     private void goToMainPage() {
@@ -192,9 +207,11 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                 break;
 
             case QUERY:
+                // this case occurs when the user clicks "back" so the composite search box should be filled
                 SearchView searchView = new SearchView();
                 collectionsView = new CollectionsView();
-                presenter = new CollectionsPresenter(this.service, this.eventBus, collectionsView, searchView);
+                presenter = new CollectionsPresenter(this.service, this.eventBus, collectionsView, searchView,
+                                                     lastQuery);
                 break;
 
             case LOGIN:
@@ -242,10 +259,10 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
         // check if there is a stored session that is valid
         final String sessionId = Cookies.getCookie(COOKIE_NAME);
         if (sessionId != null) {
-            service.sessionValid(sessionId, new AsyncCallback<AccountInfo>() {
+            service.sessionValid(sessionId, new AsyncCallback<User>() {
 
                 @Override
-                public void onSuccess(AccountInfo result) {
+                public void onSuccess(User result) {
                     if (result != null) {
                         ClientController.account = result;
                         ClientController.sessionId = sessionId;
@@ -253,6 +270,7 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                         goToPage(token);
                         HeaderView.getInstance().setHeader(getPage(token));
                         HeaderView.getInstance().setHeaderData(account);
+                        HeaderView.getInstance().setQueryDelegate(createServiceDelegate());
                     } else {
                         ClientController.sessionId = null;
                         ClientController.account = null;

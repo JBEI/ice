@@ -3,7 +3,7 @@ package org.jbei.ice.client.bulkupload.widget;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
@@ -21,9 +21,9 @@ public class SampleSelectionWidget extends Composite {
 
     private final Image sampleImg;
     private final PopupHandler popup;
-    private final CellList<SampleInfo> options;
+    private final CellList<PartSample> options;
     private SampleLocation currentLocation;
-    private final SingleSelectionModel<SampleInfo> optionSelection;
+    private final SingleSelectionModel<PartSample> optionSelection;
 
     interface SampleResource extends CellList.Resources {
 
@@ -43,10 +43,10 @@ public class SampleSelectionWidget extends Composite {
 
         this.setVisible(false);
 
-        options = new CellList<SampleInfo>(new AbstractCell<SampleInfo>() {
+        options = new CellList<PartSample>(new AbstractCell<PartSample>() {
 
             @Override
-            public void render(Context context, SampleInfo value, SafeHtmlBuilder sb) {
+            public void render(Context context, PartSample value, SafeHtmlBuilder sb) {
                 sb.appendHtmlConstant("<span>" + value.getLocation() + "</span>");
             }
         }, SampleResource.INSTANCE);
@@ -55,7 +55,7 @@ public class SampleSelectionWidget extends Composite {
         sampleImg.addClickHandler(popup);
         // TODO : set empty Widget for options
 
-        optionSelection = new SingleSelectionModel<SampleInfo>();
+        optionSelection = new SingleSelectionModel<PartSample>();
         optionSelection.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
             @Override
@@ -79,7 +79,7 @@ public class SampleSelectionWidget extends Composite {
         options.setRowData(location.getLocations());
     }
 
-    public SingleSelectionModel<SampleInfo> getSelectionModel() {
+    public SingleSelectionModel<PartSample> getSelectionModel() {
         return this.optionSelection;
     }
 

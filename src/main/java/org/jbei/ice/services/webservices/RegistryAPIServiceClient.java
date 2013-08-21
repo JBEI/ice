@@ -7,12 +7,15 @@ import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.soap.SOAPBinding;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 /**
+ * Service client for the Registry API. Used to communicate with other ICE Registry Instances
+ *
  * @author Hector Plahar
  */
 @WebServiceClient(name = "RegistryAPIServiceClient", targetNamespace = "https://api.registry.jbei.org/")
@@ -20,29 +23,46 @@ public class RegistryAPIServiceClient {
 
     private static final QName SERVICE_NAME = new QName("https://api.registry.jbei.org/", "RegistryAPIService");
     private static final String QNAME_LOCAL_PART = "RegistryAPIPort";
-    private final Service service;
-    private static final RegistryAPIServiceClient INSTANCE = new RegistryAPIServiceClient();
+    private static final Service service = Service.create(SERVICE_NAME);
     private static final HashSet<String> namespaceURIs = new HashSet<>();
+    private static final RegistryAPIServiceClient INSTANCE = new RegistryAPIServiceClient();
 
     public static RegistryAPIServiceClient getInstance() {
         return INSTANCE;
     }
 
+    /**
+     * Retrieves available ports and maintains in memory
+     */
     private RegistryAPIServiceClient() {
         Logger.info("Creating service client for " + SERVICE_NAME);
-        service = Service.create(SERVICE_NAME);
+
+        try {
+            WebOfRegistries webOfRegistries = ControllerFactory.getWebController().getRegistryPartners();
+            if (webOfRegistries == null)
+                return;
+
+            for (RegistryPartner partner : webOfRegistries.getPartners()) {
+                addPortName(partner.getUrl().trim());
+            }
+        } catch (ControllerException e) {
+            Logger.warn(e.getMessage());
+        }
     }
 
     public void addPortName(String namespaceURI) {
-        if (namespaceURIs.contains(namespaceURI))
+        if (namespaceURI == null || namespaceURI.trim().isEmpty() || namespaceURIs.contains(namespaceURI.trim()))
             return;
 
-        namespaceURIs.add(namespaceURI);
         QName name = new QName(namespaceURI, QNAME_LOCAL_PART);
         service.addPort(name, SOAPBinding.SOAP11HTTP_BINDING, "https://" + namespaceURI + "/api/RegistryAPI");
+        namespaceURIs.add(namespaceURI.trim());
     }
 
     public IRegistryAPI getAPIPortForURL(String namespaceURI) {
+        if (namespaceURI == null || namespaceURI.trim().isEmpty())
+            return null;
+
         addPortName(namespaceURI);
         Iterator<QName> iter = service.getPorts();
         while (iter.hasNext()) {
@@ -58,28 +78,15 @@ public class RegistryAPIServiceClient {
         Iterator<QName> iter = service.getPorts();
         while (iter.hasNext()) {
             QName name = iter.next();
-            if (name.getNamespaceURI().equals(namespaceURI)) {
+            if (name.getNamespaceURI().equalsIgnoreCase(namespaceURI.trim())) {
                 iter.remove();
-                namespaceURIs.remove(namespaceURI);
+                namespaceURIs.remove(namespaceURI.trim());
                 return;
             }
         }
     }
 
-    // TODO : this needs to be handled better
-    public Service getService() {
-        String value = null;
-        try {
-            value = new ConfigurationController().getPropertyValue(ConfigurationKey.WEB_PARTNERS);
-        } catch (ControllerException e) {
-            Logger.warn(e.getMessage());
-        }
-
-        if (value != null) {
-            for (String split : value.split(";"))
-                addPortName(split);
-        }
-
-        return this.service;
+    public static Service getService() {
+        return service;
     }
 }

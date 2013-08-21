@@ -1,26 +1,24 @@
 package org.jbei.ice.client.admin.web;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
+ * View panel for display ui elements and interaction with the Web of registries admin section
+ *
  * @author Hector Plahar
  */
 public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
@@ -29,57 +27,66 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
     private HTMLPanel addPartnerPanel;
     private final FlexTable layout;
     private FlexTable partnerPanel;
-    private ListBox joinBox;
+    private Button joinToggle;
+    private boolean toggled;
     private ArrayList<String> partnersList;
+    private PartnerTable partnerTable;
 
     public WebOfRegistriesPanel(ServiceDelegate<String> partnerDelegate) {
         layout = new FlexTable();
-        layout.setWidth("500px");
+        layout.setWidth("600px");
         layout.setCellPadding(1);
         layout.setCellSpacing(0);
+        layout.setStyleName("pad_top");
         initWidget(layout);
 
-        joinBox = new ListBox();
-        joinBox.addItem("Yes");
-        joinBox.addItem("No");
-        joinBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                partnerPanel.setVisible(joinBox.getSelectedIndex() == 0);
-            }
-        });
+        joinToggle = new Button("<i class=\"blue " + FAIconType.GLOBE.getStyleName() + "\"></i>" +
+                                        "<span class=\"font-85em\">Enable</span>");
+        joinToggle.setStyleName("sub-button");
 
         this.addPartnerDelegate = partnerDelegate;
         this.partnersList = new ArrayList<String>();
     }
 
-    public void setData(HashMap<String, String> settings) {
+    public void setData(WebOfRegistries settings, ServiceDelegate<RegistryPartner> partnerStatusDelegate) {
         layout.clear();
-        layout.setHTML(0, 0, "Join web of registries");
-        layout.getFlexCellFormatter().setWidth(0, 0, "180px");
-        layout.setWidget(0, 1, joinBox);
-        String value = settings.get(ConfigurationKey.JOIN_WEB_OF_REGISTRIES.name());
-        partnerPanel = createRegistryPartnerPanel(settings);
-        if (value == null || value.equalsIgnoreCase("no")) {
-            joinBox.setSelectedIndex(1);
-            partnerPanel.setVisible(false);
-        } else
-            joinBox.setSelectedIndex(0);
+        layout.setWidget(0, 0, joinToggle);
 
-        layout.getFlexCellFormatter().setStyleName(0, 0, "pad_top");
-        layout.getFlexCellFormatter().setStyleName(0, 1, "pad_top");
-
+        partnerPanel = createRegistryPartnerPanel(settings.getPartners(), partnerStatusDelegate);
+        toggled = settings.isWebEnabled();
+        toggle();
+        partnerPanel.setVisible(settings.isWebEnabled());
         layout.setWidget(1, 0, partnerPanel);
-        layout.getFlexCellFormatter().setStyleName(1, 0, "pad_top");
-        layout.getFlexCellFormatter().setColSpan(1, 0, 2);
     }
 
-    public void addJoinBoxHandler(ChangeHandler handler) {
-        joinBox.addChangeHandler(handler);
+    public void updateRow(RegistryPartner partner) {
+        partnerTable.updateRow(partner);
     }
 
-    public String getJoinSelectedValue() {
-        return joinBox.getSelectedIndex() == 0 ? "yes" : "no";
+    public void addJoinBoxHandler(final ClickHandler handler) {
+        joinToggle.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                toggled = !toggled;
+                partnerPanel.setVisible(toggled);
+                toggle();
+                handler.onClick(event);
+            }
+        });
+    }
+
+    private void toggle() {
+        if (toggled) {
+            joinToggle.setHTML("<i class=\"red " + FAIconType.GLOBE.getStyleName() + "\"></i> "
+                                       + "<span class=\"font-90em\">Disable</span>");
+        } else {
+            joinToggle.setHTML("<i class=\"green " + FAIconType.GLOBE.getStyleName() + "\"></i> "
+                                       + "<span class=\"font-90em\">Enable</span>");
+        }
+    }
+
+    public boolean isToggled() {
+        return toggled;
     }
 
     public void addPartner(String partner) {
@@ -94,17 +101,18 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         partnersList.add(partner);
     }
 
-    private FlexTable createRegistryPartnerPanel(HashMap<String, String> settings) {
+    private FlexTable createRegistryPartnerPanel(ArrayList<RegistryPartner> partners,
+            ServiceDelegate<RegistryPartner> partnerStatusDelegate) {
         HTMLPanel headerPanel = new HTMLPanel(
                 "<span style=\"color: #233559; "
                         + "font-weight: bold; font-style: italic; font-size: 0.80em; text-transform: uppercase\">"
-                        + ConfigurationKey.WEB_PARTNERS.toString()
-                        + "</span><span style=\"margin-left: 20px\" id=\"add_partner\"></span>");
+                        + "Registry Partners</span><span style=\"margin-left: 20px\" id=\"add_partner\"></span>");
 
         headerPanel.setStyleName("entry_sequence_sub_header");
 
         addPartnerPanel = new HTMLPanel("<span id=\"add_partner_input\"></span><span id=\"add_partner_submit\"></span>"
                                                 + "<span id=\"add_partner_cancel\"></span>");
+        partnerTable = new PartnerTable(partnerStatusDelegate);
         final TextBox addInput = new TextBox();
         addInput.getElement().setAttribute("placeholder", "e.g. public-registry.jbei.org");
         addInput.setStyleName("input_box");
@@ -139,18 +147,34 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
             }
         });
         addPartnerPanel.add(addPartnerCancel, "add_partner_cancel");
-        HTML addPartnerLabel = new HTML("<i class=\"" + FAIconType.GLOBE.getStyleName()
-                                                + "\"></i><i style=\"vertical-align: text-bottom; font-size: 7px\""
-                                                + "class=\"" + FAIconType.PLUS.getStyleName() + "\"></i>");
-        addPartnerLabel.setStyleName("display-inline");
-        headerPanel.add(addPartnerLabel, "add_partner");
-        addPartnerLabel.addClickHandler(new ClickHandler() {
+//        HTML addPartnerLabel = new HTML("<i class=\"" + FAIconType.GLOBE.getStyleName()
+//                                                + "\"></i><i style=\"vertical-align: text-bottom; font-size: 7px\""
+//                                                + "class=\"" + FAIconType.PLUS.getStyleName() + "\"></i>");
+//        addPartnerLabel.setStyleName("display-inline");
+//        headerPanel.add(addPartnerLabel, "add_partner");
+//        addPartnerLabel.addClickHandler(new ClickHandler() {
+//
+//            @Override
+//            public void onClick(ClickEvent event) {
+//                addPartnerPanel.setVisible(true);
+//            }
+//        });
 
-            @Override
-            public void onClick(ClickEvent event) {
-                addPartnerPanel.setVisible(true);
-            }
-        });
+//        CellList<RemotePartner> list = new CellList<RemotePartner>(new AbstractCell<RemotePartner>() {
+//            @Override
+//            public void render(Context context, RemotePartner value, SafeHtmlBuilder sb) {
+//            }
+//        });
+//
+//        DataGrid<RemotePartner> grid = new DataGrid<RemotePartner>();
+//        grid.setAutoHeaderRefreshDisabled(false);
+//        grid.setEmptyTableWidget(new HTML("No data for you"));
+//        grid.setTableBuilder(new AbstractCellTableBuilder<RemotePartner>() {
+//            @Override
+//            protected void buildRowImpl(RemotePartner rowValue, int absRowIndex) {
+//                //To change body of implemented methods use File | Settings | File Templates.
+//            }
+//        });
 
         FlexTable table = new FlexTable();
         table.setWidth("100%");
@@ -158,21 +182,12 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         table.setCellSpacing(0);
         table.setWidget(0, 0, headerPanel);
         table.setWidget(1, 0, addPartnerPanel);
-        addPartnerPanel.setVisible(false);
+        table.setHTML(2, 0, "&nbsp;");
+        table.setWidget(3, 0, partnerTable);
 
-        // display partners
-        String partners = settings.remove(ConfigurationKey.WEB_PARTNERS.name());
-        if (partners == null || partners.isEmpty()) {
-            table.setHTML(2, 0, "<div style=\"font-size: 0.85em; margin-top: 8px;\">No partners added.</div>");
-        } else {
-            int row = 2;
-            for (String partner : partners.split(";")) {
-                table.setHTML(row, 0, "<span style=\"margin-left: 10px; padding: 3px;\" class=\"font-75em\">"
-                        + partner + "</span>");
-                partnersList.add(partner);
-                row += 1;
-            }
-        }
+        addPartnerPanel.setVisible(false);
+        partnerTable.setData(partners);
+
         return table;
     }
 }

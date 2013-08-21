@@ -3,16 +3,23 @@ package org.jbei.ice.client.collection.menu;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.view.OptionSelect;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.user.User;
 
+/**
+ * Data for Collection menu cells
+ *
+ * @author Hector Plahar
+ */
 public class MenuItem extends OptionSelect {
 
     private long count;
-    private ArrayList<PermissionInfo> permissions;
-    private AccountInfo owner;
-    private FolderShareType shareType;
+    private ArrayList<AccessPermission> accessPermissions;
+    private User owner;
+    private FolderType type;
+    private boolean propagatePermission;
+    private boolean publicReadAccess;
 
     public MenuItem(long id, String name, long count) {
         super(id, name);
@@ -31,27 +38,40 @@ public class MenuItem extends OptionSelect {
         this.count = count;
     }
 
-    public void setPermissions(ArrayList<PermissionInfo> permissions) {
-        this.permissions = permissions;
+    public void setAccessPermissions(ArrayList<AccessPermission> accessPermissions, boolean publicReadAccess) {
+        this.accessPermissions = accessPermissions;
+        this.publicReadAccess = publicReadAccess;
     }
 
-    public ArrayList<PermissionInfo> getPermissions() {
-        return permissions;
+    public boolean isPublicReadAccess() {
+        return this.publicReadAccess;
     }
 
-    public AccountInfo getOwner() {
+    public ArrayList<AccessPermission> getAccessPermissions() {
+        return accessPermissions;
+    }
+
+    public User getOwner() {
         return owner;
     }
 
-    public void setOwner(AccountInfo owner) {
+    public void setOwner(User owner) {
         this.owner = owner;
     }
 
-    public FolderShareType getShareType() {
-        return shareType;
+    public FolderType getType() {
+        return type;
     }
 
-    public void setShareType(FolderShareType shareType) {
-        this.shareType = shareType;
+    public void setType(FolderType type) {
+        this.type = type;
+    }
+
+    public boolean isPropagatePermission() {
+        return propagatePermission;
+    }
+
+    public void setPropagatePermission(boolean propagatePermission) {
+        this.propagatePermission = propagatePermission;
     }
 }

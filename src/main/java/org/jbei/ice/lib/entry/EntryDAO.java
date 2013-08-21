@@ -6,8 +6,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -26,10 +27,11 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.model.Permission;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.Visibility;
-import org.jbei.ice.shared.dto.entry.EntryType;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -48,29 +50,16 @@ import org.hibernate.criterion.Restrictions;
 public class EntryDAO extends HibernateRepository<Entry> {
 
     @SuppressWarnings("unchecked")
-    public HashSet<Long> retrieveStrainsForPlasmid(Plasmid plasmid) throws DAOException {
-        Set<PartNumber> plasmidPartNumbers = plasmid.getPartNumbers();
-        Session session = currentSession();
-        HashSet<Long> strainIds = null;
-        try {
-            for (PartNumber plasmidPartNumber : plasmidPartNumbers) {
-                Query query = session
-                        .createQuery("select strain.id from Strain strain where strain.plasmids like :partNumber");
-                query.setString("partNumber", "%" + plasmidPartNumber.getPartNumber() + "%");
-                strainIds = new HashSet<Long>(query.list());
-            }
-        } catch (HibernateException e) {
-            Logger.error("Could not get strains for plasmid " + e.toString(), e);
-            throw new DAOException(e);
-        }
-        return strainIds;
-    }
-
-    @SuppressWarnings("unchecked")
     public LinkedList<Long> getAllEntryIds() throws DAOException {
         Session session = currentSession();
         Criteria c = session.createCriteria(Entry.class).setProjection(Projections.id());
         return new LinkedList<Long>(c.list());
+    }
+
+    public String getEntrySummary(long id) throws DAOException {
+        return (String) currentSession().createCriteria(Entry.class)
+                .add(Restrictions.eq("id", id))
+                .setProjection(Projections.property("shortDescription")).uniqueResult();
     }
 
     public Set<String> getMatchingSelectionMarkers(String token, int limit) throws DAOException {
@@ -85,6 +74,10 @@ public class EntryDAO extends HibernateRepository<Entry> {
         return getMatchingField("plasmid.promoters", "Plasmid plasmid", token, limit);
     }
 
+    public Set<String> getMatchingReplicatesIn(String token, int limit) throws DAOException {
+        return getMatchingField("plasmid.replicatesIn", "Plasmid plasmid", token, limit);
+    }
+
     @SuppressWarnings("unchecked")
     protected Set<String> getMatchingField(String field, String object, String token, int limit) throws DAOException {
         Session session = currentSession();
@@ -95,8 +88,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Query query = session.createQuery(queryString);
             if (limit > 0)
                 query.setMaxResults(limit);
-            HashSet<String> results = new HashSet<String>(query.list());
-            return results;
+            return new HashSet<String>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -104,16 +96,15 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<String> getMatchingPlasmidNames(String token, int limit) throws DAOException {
+    public Set<String> getMatchingPlasmidPartNumbers(String token, int limit) throws DAOException {
         try {
-            String qString = "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where " +
-                    "name.name like '%" + token + "%' order by name.name asc";
+            String qString = "select distinct plasmid.partNumber from Plasmid plasmid where plasmid.partNumber " +
+                    "like '%" + token + "%'";
             Query query = currentSession().createQuery(qString);
             if (limit > 0)
                 query.setMaxResults(limit);
 
-            HashSet<String> results = new HashSet<String>(query.list());
-            return results;
+            return new HashSet<String>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -206,65 +197,74 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     public Entry getByPartNumber(String partNumber) throws DAOException {
-        Entry entry = null;
-
         Session session = currentSession();
-
         try {
-            Query query = session.createQuery("from " + PartNumber.class.getName()
-                                                      + " where partNumber = :partNumber");
-            query.setParameter("partNumber", partNumber);
-            Object queryResult = query.uniqueResult();
-
-            if (queryResult != null) {
-                entry = ((PartNumber) queryResult).getEntry();
+            Criteria criteria = session.createCriteria(Entry.class).add(Restrictions.eq("partNumber", partNumber));
+            Object object = criteria.uniqueResult();
+            if (object != null) {
+                return (Entry) object;
             }
+            return null;
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve entry by partNumber: " + partNumber, e);
         }
-
-        return entry;
     }
 
     /**
-     * Retrieve an {@link Entry} by it's name.
+     * Retrieve an {@link Entry} by it's name.The name must be unique to the entry
      *
      * @param name name associated with entry
      * @return Entry.
      * @throws DAOException
      */
-    public Entry getByName(String name) throws DAOException {
-        Entry entry;
+    public Entry getByUniqueName(String name) throws DAOException {
         Session session = currentSession();
 
         try {
-            Query query = session.createQuery("from " + Name.class.getName() + " where name = :name");
-            query.setParameter("name", name);
-            Object queryResult = query.uniqueResult();
-            if (queryResult == null) {
+            Criteria criteria = session.createCriteria(Entry.class.getName())
+                                       .add(Restrictions.eq("name", name))
+                                       .add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            List queryResult = criteria.list();
+            if (queryResult == null || queryResult.isEmpty()) {
                 return null;
             }
 
-            entry = ((Name) queryResult).getEntry();
+            if (queryResult.size() > 1) {
+                String msg = "Duplicate entries found for name " + name;
+                Logger.error(msg);
+                throw new DAOException(msg);
+            }
+
+            return (Entry) queryResult.get(0);
         } catch (HibernateException e) {
             Logger.error("Failed to retrieve entry by name: " + name, e);
             throw new DAOException("Failed to retrieve entry by name: " + name, e);
         }
+    }
 
-        return entry;
+    @SuppressWarnings({"unchecked"})
+    public Set<Entry> retrieveTransferredEntries() throws DAOException {
+        try {
+            Session session = currentSession();
+            Criteria criteria = session.createCriteria(Entry.class.getName())
+                                       .add(Restrictions.eq("visibility", Visibility.TRANSFERRED.getValue()));
+            return new HashSet<Entry>(criteria.list());
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException();
+        }
     }
 
     /**
-     * Retrieve the number of {@link Entry Entries} visible to everyone.
+     * Retrieve {@link Entry Entries} visible to everyone.
      *
      * @return Number of visible entries.
      * @throws DAOException
      */
-
     @SuppressWarnings({"unchecked"})
-    public Set<Entry> retrieveVisibleEntries(Account account, Set<Group> groups,
-            ColumnField sortField, boolean asc, int start, int count) throws DAOException {
+    public Set<Entry> retrieveVisibleEntries(Account account, Set<Group> groups, ColumnField sortField, boolean asc,
+            int start, int count) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Permission.class);
 
@@ -273,6 +273,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
         if (account != null) {
             disjunction.add(Restrictions.eq("account", account));
         }
+
+        criteria.add(Restrictions.isNotNull("entry"));
 
         criteria.add(disjunction);
         criteria.add(Restrictions.disjunction()
@@ -283,8 +285,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
         entryC.add(Restrictions.disjunction()
                                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
                                .add(Restrictions.isNull("visibility")));
-        entryC.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
-
         // sort
         if (sortField == null)
             sortField = ColumnField.CREATED;
@@ -299,6 +299,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 fieldName = "status";
                 break;
 
+            case PART_ID:
+                fieldName = "partNumber";
+                break;
+
+            case NAME:
+                fieldName = "name";
+                break;
+
             case CREATED:
             default:
                 fieldName = "id";
@@ -307,14 +315,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
         entryC.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
         Set<Long> set = new HashSet<>();
+        entryC.setProjection(Projections.property("id"));
 
         List permissions = criteria.list();
         Iterator iter = permissions.iterator();
         Set<Entry> result = new LinkedHashSet<>();
         while (iter.hasNext()) {
-            Map map = (Map) iter.next();
-            Entry entry = (Entry) map.get("entry");
-
+            Number id = (Number) iter.next();
+            Entry entry = (Entry) session.get(Entry.class, id.longValue());
             if (set.contains(entry.getId()))
                 continue;
 
@@ -390,6 +398,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 fieldName = "status";
                 break;
 
+            case NAME:
+                fieldName = "name";
+                break;
+
+            case PART_ID:
+                fieldName = "partNumber";
+                break;
+
             case CREATED:
             default:
                 fieldName = "creationTime";
@@ -413,8 +429,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         criteria.add(Restrictions.disjunction()
                                  .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
                                  .add(Restrictions.isNull("visibility")));
-        Long result = (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
-        return result.longValue();
+        return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 
     /**
@@ -426,7 +441,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      */
     @SuppressWarnings("unchecked")
     public LinkedList<Entry> getEntriesByIdSet(List<Long> ids) throws DAOException {
-        if (ids.size() == 0) {
+        if (ids == null || ids.isEmpty()) {
             return new LinkedList<>();
         }
 
@@ -435,8 +450,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
         try {
             Query query = session.createQuery("from " + Entry.class.getName() + " WHERE id in (" + filter + ")");
-            LinkedList<Entry> results = new LinkedList<Entry>(query.list());
-            return results;
+            return new LinkedList<Entry>(query.list());
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entries!", e);
         }
@@ -455,13 +469,13 @@ public class EntryDAO extends HibernateRepository<Entry> {
     String generateNextPartNumber(String prefix, String delimiter, String suffix) throws DAOException {
         Session session = currentSession();
         try {
-            String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '"
+            String queryString = "from " + Entry.class.getName() + " where partNumber LIKE '"
                     + prefix + "%' ORDER BY partNumber DESC";
             Query query = session.createQuery(queryString);
             query.setMaxResults(2);
 
-            ArrayList<PartNumber> tempList = new ArrayList<PartNumber>(query.list());
-            PartNumber entryPartNumber = null;
+            ArrayList<Entry> tempList = new ArrayList<Entry>(query.list());
+            Entry entryPartNumber = null;
             if (tempList.size() > 0) {
                 entryPartNumber = tempList.get(0);
             }
@@ -509,6 +523,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
                     fieldName = "status";
                     break;
 
+                case PART_ID:
+                    fieldName = "partNumber";
+                    break;
+
+                case NAME:
+                    fieldName = "name";
+                    break;
+
                 case CREATED:
                 default:
                     fieldName = "creationTime";
@@ -547,6 +569,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
                 case STATUS:
                     fieldName = "status";
+                    break;
+
+                case NAME:
+                    fieldName = "name";
+                    break;
+
+                case PART_ID:
+                    fieldName = "partNumber";
                     break;
 
                 case CREATED:
@@ -689,10 +719,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
         hql = "delete from " + Link.class.getName() + " where entry=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
 
-        // delete from names
-        hql = "delete from " + Name.class.getName() + " where entry=:entry";
-        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
-
         // delete from selection markers
         hql = "delete from " + SelectionMarker.class.getName() + " where entry=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
@@ -701,15 +727,143 @@ public class EntryDAO extends HibernateRepository<Entry> {
         hql = "delete from " + EntryFundingSource.class.getName() + " where entry=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
 
-        // delete from part_number
-        hql = "delete from " + PartNumber.class.getName() + " where entry=:entry";
-        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
-
-        //delete from permission
+        // delete from permission
         hql = "delete from " + Permission.class.getName() + " where entry=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
 
         // finally delete actual entry
         delete(entry);
+    }
+
+    /**
+     * Converts the wiki link method for strain with plasmid to actual relationships between the entries
+     *
+     * @throws DAOException
+     */
+    public void upgradeLinks() throws DAOException {
+        Session session = currentSession();
+        Query query = session.createQuery("from " + Strain.class.getName());
+        Iterator iterator = query.iterate();
+        int i = 0;
+        String wikiLink = Utils.getConfigValue(ConfigurationKey.WIKILINK_PREFIX);
+
+        while (iterator.hasNext()) {
+            Strain strain = (Strain) iterator.next();
+            if (strain.getPlasmids() == null)
+                continue;
+
+            Pattern basicWikiLinkPattern = Pattern.compile("\\[\\[" + wikiLink + ":.*?\\]\\]");
+
+            String plasmid = strain.getPlasmids().trim();
+            if (plasmid.isEmpty() || !plasmid.contains(":") || !plasmid.contains("|"))
+                continue;
+
+            Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(plasmid);
+            while (basicWikiLinkMatcher.find()) {
+                String partNumber = basicWikiLinkMatcher.group().trim();
+                partNumber = partNumber.split(":")[1];
+                Entry entry = getByPartNumber(partNumber.split("\\|")[0]);
+                if (entry == null)
+                    continue;
+                strain.getLinkedEntries().add(entry);
+            }
+
+            if (strain.getLinkedEntries().size() == 0)
+                continue;
+
+            session.update(strain);
+            i += 1;
+            if (i % 20 == 0) {
+                Logger.info(Long.toString(i));
+                session.flush();
+                session.clear();
+            }
+        }
+    }
+
+    public void setEntryVisibility(ArrayList<Long> partIds, int value) throws DAOException {
+        try {
+            String hql = "update " + Entry.class.getName() + " e set e.visibility = :visibility where e.id in :ids";
+            Session session = currentSession();
+            Query query = session.createQuery(hql);
+            query.setParameterList("ids", partIds);
+            query.setInteger("visibility", value);
+            int updated = query.executeUpdate();
+            if (updated != partIds.size())
+                throw new DAOException("Expected " + partIds.size() + " to be updated by " + updated + " were");
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    public void upgradeNamesAndPartNumbers(String partNumberPrefix) throws DAOException {
+        Session session = currentSession();
+        int i = 0;
+        Logger.info("Upgrading part numbers");
+
+        Query query = session.createQuery("from " + PartNumber.class.getName());
+        Iterator iterator = query.iterate();
+        while (iterator.hasNext()) {
+            PartNumber number = (PartNumber) iterator.next();
+            Entry entry = number.getEntry();
+            if (entry.getPartNumber() == null || entry.getPartNumber().isEmpty()) {
+                entry.setPartNumber(number.getPartNumber());
+            } else {
+                if (number.getPartNumber().startsWith(partNumberPrefix))
+                    entry.setPartNumber(number.getPartNumber());
+            }
+            session.update(entry);
+            i += 1;
+            if (i % 20 == 0) {
+                Logger.info(Long.toString(i));
+                session.flush();
+                session.clear();
+            }
+        }
+
+        Logger.info("Upgrading names");
+        // upgrade names
+        query = session.createQuery("from " + Name.class.getName());
+        iterator = query.iterate();
+        while (iterator.hasNext()) {
+            Name name = (Name) iterator.next();
+            Entry entry = name.getEntry();
+            if (entry.getName() == null || entry.getName().isEmpty()) {
+                entry.setName(name.getName());
+            }
+            session.update(entry);
+            i += 1;
+            if (i % 20 == 0) {
+                Logger.info(Long.toString(i));
+                session.flush();
+                session.clear();
+            }
+        }
+    }
+
+    /**
+     * links are stored in a join table in the form [entry_id, linked_entry_id] which is defined as
+     * <code>
+     *
+     * @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+     * @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
+     * inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
+     * private Set<Entry> linkedEntries = new HashSet<>();
+     * </code><p>
+     * Ideally we want another field such as
+     * <code>
+     * @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+     * @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)},
+     * inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
+     * private Set<Entry> reverseLinkedEntries = new HashSet<>();
+     * </code>
+     * to keep track of the inverse relationship but due to laziness I resort to this method which returns
+     * entries involved in the inverse relationship with the specified entry
+     */
+    public LinkedList<Entry> getReverseLinkedEntries(long entryId) throws DAOException {
+        String sql = "select entry_id from entry_entry where linked_entry_id=" + entryId;
+        List list = currentSession().createSQLQuery(sql).list();
+        return getEntriesByIdSet(new ArrayList<Long>(list));
     }
 }

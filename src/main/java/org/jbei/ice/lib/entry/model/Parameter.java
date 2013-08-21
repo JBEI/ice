@@ -3,7 +3,6 @@ package org.jbei.ice.lib.entry.model;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.shared.dto.ParameterType;
 
 import org.hibernate.search.annotations.ContainedIn;
 
@@ -36,8 +35,7 @@ public class Parameter implements IModel {
     private Entry entry;
 
     @Column(name = "parameter_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ParameterType parameterType;
+    private String parameterType;
 
     @Column(name = "key", length = 255, nullable = false)
     private String key;
@@ -45,20 +43,16 @@ public class Parameter implements IModel {
     @Column(name = "value", length = 4095, nullable = false)
     private String value;
 
+    public Parameter() {
+        parameterType = "";
+    }
+
     public Entry getEntry() {
         return entry;
     }
 
     public void setEntry(Entry entry) {
         this.entry = entry;
-    }
-
-    public ParameterType getParameterType() {
-        return parameterType;
-    }
-
-    public void setParameterType(ParameterType parameterType) {
-        this.parameterType = parameterType;
     }
 
     public String getKey() {

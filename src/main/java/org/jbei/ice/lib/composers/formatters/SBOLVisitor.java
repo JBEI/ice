@@ -11,8 +11,8 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 import org.sbolstandard.core.DnaComponent;
 import org.sbolstandard.core.DnaSequence;
@@ -38,7 +38,7 @@ public class SBOLVisitor {
         Entry entry = sequence.getEntry();
 
         // Set required properties
-        String partId = entry.getOnePartNumber().getPartNumber();
+        String partId = entry.getPartNumber();
         String dcUri = sequence.getComponentUri();
         if (dcUri == null) {
             dnaComponent.setURI(URI.create(uriString + "/dc#" + partId));
@@ -48,7 +48,7 @@ public class SBOLVisitor {
             String displayId = dcUri.substring(dcUri.lastIndexOf("#") + 1);
             dnaComponent.setDisplayId(displayId);
         }
-        dnaComponent.setName(entry.getOneName().getName());
+        dnaComponent.setName(entry.getName());
         dnaComponent.setDescription(entry.getShortDescription());
 
         DnaSequence dnaSequence = SBOLFactory.createDnaSequence();
@@ -70,8 +70,15 @@ public class SBOLVisitor {
         Collections.sort(features, new Comparator<SequenceFeature>() {
             @Override
             public int compare(SequenceFeature o1, SequenceFeature o2) {
-                if (o1.getUniqueGenbankStart() == o2.getUniqueGenbankStart())
+                if (o1.getUniqueGenbankStart() == null || o2.getUniqueGenbankStart() == null)
+                    return 0;
+
+                if (o1.getUniqueGenbankStart().intValue() == o2.getUniqueGenbankStart().intValue()) {
+                    if (o1.getUniqueEnd() == null || o2.getUniqueEnd() == null)
+                        return 0;
+
                     return o1.getUniqueEnd().compareTo(o2.getUniqueEnd());
+                }
                 return o1.getUniqueGenbankStart().compareTo(o2.getUniqueGenbankStart());
             }
         });

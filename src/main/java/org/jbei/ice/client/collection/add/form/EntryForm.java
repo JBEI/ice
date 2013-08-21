@@ -1,32 +1,35 @@
 package org.jbei.ice.client.collection.add.form;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
-import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
-import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.client.entry.view.model.AutoCompleteSuggestOracle;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.StatusType;
-import org.jbei.ice.shared.dto.ParameterInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.collection.add.form.CustomFieldPanel.Parameter;
+import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.client.entry.display.detail.SequenceViewPanel;
+import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.client.entry.display.model.AutoCompleteSuggestOracle;
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.shared.StatusType;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.shared.dto.entry.CustomField;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.*;
 
 /**
  * Parent class for forms used to create single entries
  *
  * @author Hector Plahar
  */
-public abstract class EntryForm<T extends EntryInfo> extends Composite implements IEntryFormSubmit {
+public abstract class EntryForm<T extends PartData> extends Composite implements IEntryFormSubmit {
 
     protected final FlexTable layout;
-    protected Button cancel;
+    protected HTML cancel;
     protected Button submit;
     protected TextBox creator;
     protected TextBox creatorEmail;
@@ -43,7 +46,8 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
     protected TextArea ip;
 
     private final T entryInfo;
-    private ParametersPanel parametersPanel;
+    private CustomFieldPanel customFieldPanel;
+    private SequenceViewPanel sequencePanel;
     private TextArea notesText;
 
     private HandlerRegistration submitRegistration;
@@ -52,6 +56,8 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
     public EntryForm(T entryInfo) {
         layout = new FlexTable();
         initWidget(layout);
+
+        this.entryInfo = entryInfo;
 
         initComponents();
 
@@ -96,7 +102,6 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         ip.setText(entryInfo.getIntellectualProperty());
         this.notesText.setText(entryInfo.getLongDescription());
 
-        this.entryInfo = entryInfo;
         this.creator.setText(entryInfo.getCreator());
         this.creatorEmail.setText(entryInfo.getCreatorEmail());
 
@@ -109,11 +114,10 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         layout.setCellSpacing(0);
 
         layout.setWidget(0, 0, createGeneralWidget());
-        layout.setWidget(1, 0, createParametersWidget());
-//        layout.setWidget(2, 0, createSampleWidget());
-//        layout.setWidget(2, 0, createSequenceWidget());
-        layout.setWidget(2, 0, createNotesWidget());
-        layout.setWidget(3, 0, createSubmitCancelButtons());
+        layout.setWidget(1, 0, createCustomFieldsWidget());
+        layout.setWidget(2, 0, sequencePanel);
+        layout.setWidget(3, 0, createNotesWidget());
+        layout.setWidget(4, 0, createSubmitCancelButtons());
     }
 
     protected abstract Widget createGeneralWidget();
@@ -121,24 +125,32 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
     protected void initComponents() {
         submit = new Button("Submit");
         submit.setStyleName("btn_submit_entry_form");
-        cancel = new Button("Cancel");
-        cancel.setStyleName("btn_reset_entry_form");
-        creator = createStandardTextBox("205px");
-        creatorEmail = createStandardTextBox("205px");
-        name = createStandardTextBox("205px");
-        alias = createStandardTextBox("205px");
-        principalInvestigator = createStandardTextBox("205px");
+        cancel = new HTML("Cancel");
+        cancel.setStyleName("footer_feedback_widget");
+        cancel.addStyleName("font-85em");
+        creator = createStandardTextBox("205px", 125);
+        creatorEmail = createStandardTextBox("205px", 125);
+        name = createStandardTextBox("205px", 125);
+        alias = createStandardTextBox("205px", 125);
+        principalInvestigator = createStandardTextBox("205px", 125);
         summary = createTextArea("640px", "50px");
-//        sampleLocationScheme = new ArrayList<TextBox>();
 
-        fundingSource = createStandardTextBox("205px");
+        fundingSource = createStandardTextBox("205px", 250);
         status = new ListBox();
         bioSafety = new ListBox();
-        links = createStandardTextBox("300px");
-        keywords = createStandardTextBox("640px");
+        links = createStandardTextBox("300px", 500);
+        keywords = createStandardTextBox("640px", 125);
         references = createTextArea("640px", "50px");
         ip = createTextArea("640px", "50px");
         notesText = new TextArea();
+
+        sequencePanel = new SequenceViewPanel(entryInfo);
+
+        // are we creating a new part or updating an existing one
+        if (this.entryInfo.getId() > 0)
+            this.sequencePanel.switchToEditMode();
+        else
+            this.sequencePanel.switchToNewPartMode(this.entryInfo);
     }
 
     public T getEntryInfo() {
@@ -160,10 +172,8 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
     }
 
     protected Widget createTextBoxWithHelp(Widget box, String helpText) {
-        String html = "<span id=\"box_id\"></span><span class=\"help_text\">" + helpText + "</span>";
-        HTMLPanel panel = new HTMLPanel(html);
-        panel.addAndReplaceElement(box, "box_id");
-        return panel;
+        box.getElement().setAttribute("placeHolder", helpText);
+        return box;
     }
 
     protected void setLabel(boolean required, String label, FlexTable layout, int row, int col) {
@@ -212,32 +222,25 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         layout.getCellFormatter().setWidth(0, 0, "160px");
 
         layout.setWidget(0, 1, submit);
-        layout.getFlexCellFormatter().setWidth(0, 1, "100px");
+        layout.getFlexCellFormatter().setWidth(0, 1, "85px");
         layout.setWidget(0, 2, cancel);
 
         return layout;
     }
 
-    protected Widget createParametersWidget() {
-        FlexTable parameters = new FlexTable();
-        parameters.setCellPadding(0);
-        parameters.setCellSpacing(3);
-        parameters.setWidth("100%");
-
-        parameters.setWidget(0, 0, new Label("Parameters"));
-        parameters.getFlexCellFormatter().setStyleName(0, 0, "entry_add_sub_header");
-        parameters.getFlexCellFormatter().setColSpan(0, 0, 6);
-        parameters.setWidget(1, 0, new Label(""));
-        parameters.getFlexCellFormatter().setHeight(1, 0, "10px");
-        parameters.getFlexCellFormatter().setColSpan(1, 0, 6);
-
-        parametersPanel = new ParametersPanel(parameters, 2);
-
-        return parameters;
+    protected Widget createCustomFieldsWidget() {
+        VerticalPanel panel = new VerticalPanel();
+        customFieldPanel = new CustomFieldPanel();
+        customFieldPanel.setFields(entryInfo.getCustomFields());
+        panel.add(customFieldPanel);
+        panel.add(new HTML("&nbsp;"));
+        panel.add(customFieldPanel.getFieldButton());
+        return panel;
     }
 
-    protected TextBox createStandardTextBox(String width) {
+    protected TextBox createStandardTextBox(String width, int length) {
         final TextBox box = new TextBox();
+        box.setMaxLength(length);
         box.setStyleName("input_box");
         box.setWidth(width);
         return box;
@@ -254,7 +257,7 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
     /**
      * @return text input for auto complete data
      */
-    private SuggestBox createSuggestBox(AutoCompleteField field, String width) {
+    protected SuggestBox createSuggestBox(AutoCompleteField field, String width) {
         AutoCompleteSuggestOracle oracle = new AutoCompleteSuggestOracle(field);
         SuggestBox box = new SuggestBox(oracle, new MultipleTextBox());
         box.setStyleName("input_box");
@@ -262,25 +265,8 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         return box;
     }
 
-    public SuggestBox createAutoCompleteForPromoters(String width) {
-        return createSuggestBox(AutoCompleteField.PROMOTERS, width);
-    }
-
-    public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
-        return createSuggestBox(AutoCompleteField.SELECTION_MARKERS, width);
-    }
-
-    public SuggestBox createAutoCompleteForPlasmidNames(String width) {
-        return createSuggestBox(AutoCompleteField.PLASMID_NAME, width);
-    }
-
-    public SuggestBox createAutoCompleteForOriginOfReplication(String width) {
-        return createSuggestBox(AutoCompleteField.ORIGIN_OF_REPLICATION, width);
-    }
-
     @Override
     public FocusWidget validateForm() {
-
         FocusWidget invalid = null;
 
         // name
@@ -319,7 +305,7 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         }
 
         // parameters
-        LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
+        LinkedHashMap<Integer, Parameter> map = customFieldPanel.getParameterMap();
 
         for (Integer key : map.keySet()) {
             Parameter parameter = map.get(key);
@@ -359,8 +345,8 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
         }
 
         // parameters
-        ArrayList<ParameterInfo> parameters = new ArrayList<ParameterInfo>();
-        LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
+        ArrayList<CustomField> parameters = new ArrayList<CustomField>();
+        LinkedHashMap<Integer, Parameter> map = customFieldPanel.getParameterMap();
 
         for (Integer key : map.keySet()) {
             Parameter parameter = map.get(key);
@@ -368,14 +354,13 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
             String value = parameter.getValue();
 
             if (!name.isEmpty() && !value.isEmpty()) {
-                parameters.add(new ParameterInfo(name, value));
+                parameters.add(new CustomField(name, value));
             }
         }
-        this.entryInfo.setParameters(parameters);
+        this.entryInfo.setCustomFields(parameters);
 
         this.entryInfo.setShortDescription(summary.getText());
         this.entryInfo.setLongDescription(this.notesText.getText());
-        this.entryInfo.setLongDescriptionType("text");
 
         entryInfo.setName(name.getText());
         entryInfo.setAlias(this.alias.getText());
@@ -409,7 +394,12 @@ public abstract class EntryForm<T extends EntryInfo> extends Composite implement
     }
 
     @Override
-    public EntryInfo getEntry() {
+    public PartData getEntry() {
         return getEntryInfo();
+    }
+
+    @Override
+    public SequenceViewPanelPresenter getSequenceViewPresenter() {
+        return sequencePanel.getPresenter();
     }
 }

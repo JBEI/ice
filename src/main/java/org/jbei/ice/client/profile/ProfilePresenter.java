@@ -1,30 +1,29 @@
 package org.jbei.ice.client.profile;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
+import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.profile.entry.ProfilePartsPresenter;
+import org.jbei.ice.client.profile.group.UserGroupPresenter;
+import org.jbei.ice.client.profile.message.UserMessagesPresenter;
+import org.jbei.ice.client.profile.preferences.UserPreferencesPresenter;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.message.MessageList;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.User;
+
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import org.jbei.ice.client.*;
-import org.jbei.ice.client.collection.FolderEntryDataProvider;
-import org.jbei.ice.client.collection.table.CollectionDataTable;
-import org.jbei.ice.client.common.table.EntryTablePager;
-import org.jbei.ice.client.common.table.column.DataTableColumn;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
-import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.client.profile.group.UserGroupPresenter;
-import org.jbei.ice.client.profile.message.UserMessagesPresenter;
-import org.jbei.ice.client.profile.preferences.UserPreferencesPresenter;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
-import org.jbei.ice.shared.dto.message.MessageList;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 
 /**
  * Presenter for the profile page
@@ -34,19 +33,18 @@ import java.util.HashMap;
 public class ProfilePresenter extends AbstractPresenter {
 
     private final IProfileView display;
-    private final FolderEntryDataProvider folderDataProvider;
-    private final CollectionDataTable collectionsDataTable;
     private final String userId;
     private UserProfilePresenter profilePresenter;
     private UserGroupPresenter groupPresenter;
     private UserPreferencesPresenter preferencesPresenter;
     private UserMessagesPresenter messagesPresenter;
+    private ProfilePartsPresenter userParts;
     private UserOption currentOption;
-    private AccountInfo currentAccount;
+    private User currentAccount;
     private final UserOption[] availableOptions;
 
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus, IProfileView display,
-                            final String userId, String selection) {
+            final String userId, String selection) {
         super(service, eventBus);
         this.userId = userId;
         this.display = display;
@@ -57,55 +55,23 @@ public class ProfilePresenter extends AbstractPresenter {
         if ((ClientController.account.getId() + "").equals(this.userId))
             availableOptions = UserOption.values();
         else
-            availableOptions = new UserOption[]{UserOption.PROFILE};
+            availableOptions = new UserOption[]{UserOption.PROFILE, UserOption.ENTRIES};
 
         display.setMenuOptions(availableOptions);
         UserOption option = UserOption.urlToOption(selection);
         display.setMenuSelection(option);
         currentOption = option;
 
-        this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
-
-            @Override
-            protected EntryViewEventHandler getHandler() {
-                return new EntryViewEventHandler() {
-                    @Override
-                    public void onEntryView(EntryViewEvent event) {
-                        event.setNavigable(folderDataProvider);
-                        eventBus.fireEvent(event);
-                    }
-                };
-            }
-
-            @Override
-            protected ArrayList<DataTableColumn<EntryInfo, ?>> createColumns() {
-                ArrayList<DataTableColumn<EntryInfo, ?>> columns = new ArrayList<DataTableColumn<EntryInfo, ?>>();
-                columns.add(super.addTypeColumn(true, 60, com.google.gwt.dom.client.Style.Unit.PX));
-                DataTableColumn<EntryInfo, EntryInfo> partIdCol = addPartIdColumn(false, 120,
-                        com.google.gwt.dom.client.Style.Unit.PX);
-                columns.add(partIdCol);
-                columns.add(super.addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
-                columns.add(super.addSummaryColumn());
-                columns.add(super.addStatusColumn());
-                super.addHasAttachmentColumn();
-                super.addHasSampleColumn();
-                super.addHasSequenceColumn();
-                columns.add(super.addCreatedColumn());
-                return columns;
-            }
-        };
-
-        this.folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, service);
         retrieveProfileInfo();
         handlerUserMenuSelection();
     }
 
-    private Callback<AccountInfo> getCallback() {
-        return new Callback<AccountInfo>() {
+    private Callback<User> getCallback() {
+        return new Callback<User>() {
 
             @Override
-            public void onSuccess(AccountInfo accountInfo) {
-                display.setAccountInfo(accountInfo);
+            public void onSuccess(User user) {
+                display.setAccountInfo(user);
             }
 
             @Override
@@ -139,7 +105,7 @@ public class ProfilePresenter extends AbstractPresenter {
         switch (currentOption) {
             case PROFILE:
             default:
-                profilePresenter.setAccountInfo(currentAccount);
+                profilePresenter.setUser(currentAccount);
                 display.show(currentOption, profilePresenter.getView().asWidget());
                 break;
 
@@ -165,9 +131,9 @@ public class ProfilePresenter extends AbstractPresenter {
                 retrieveMessages();
                 break;
 
-//            case ENTRIES:
-//                retrieveUserEntries();
-//                break;
+            case ENTRIES:
+                retrieveUserEntries();
+                break;
         }
     }
 
@@ -191,15 +157,15 @@ public class ProfilePresenter extends AbstractPresenter {
     }
 
     private void retrieveProfileInfo() {
-        new IceAsyncCallback<AccountInfo>() {
+        new IceAsyncCallback<User>() {
 
             @Override
-            protected void callService(AsyncCallback<AccountInfo> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<User> callback) throws AuthenticationException {
                 service.retrieveProfileInfo(ClientController.sessionId, userId, callback);
             }
 
             @Override
-            public void onSuccess(AccountInfo profileInfo) {
+            public void onSuccess(User profileInfo) {
                 currentAccount = profileInfo;
                 display.setAccountInfo(profileInfo);
                 setViewForOption();
@@ -208,15 +174,15 @@ public class ProfilePresenter extends AbstractPresenter {
     }
 
     private void retrieveGroups() {
-        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+        new IceAsyncCallback<ArrayList<UserGroup>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<ArrayList<UserGroup>> callback) throws AuthenticationException {
                 service.retrieveGroups(ClientController.sessionId, GroupType.PRIVATE, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<GroupInfo> result) {
+            public void onSuccess(ArrayList<UserGroup> result) {
                 if (result == null || currentOption != UserOption.GROUPS)
                     return;
 
@@ -224,6 +190,13 @@ public class ProfilePresenter extends AbstractPresenter {
                 display.show(currentOption, groupPresenter.getView().asWidget());
             }
         }.go(eventBus);
+    }
+
+    private void retrieveUserEntries() {
+        if (userParts == null)
+            userParts = new ProfilePartsPresenter(service, eventBus);
+        userParts.retrieveUserParts(userId);
+        display.show(currentOption, userParts.getView().asWidget());
     }
 
     private void retrievePreferences(final ArrayList<PreferenceKey> keys) {

@@ -16,6 +16,12 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Menu which enables exporting selected parts in one of the supported formats.
+ * Currently, these formats are JBEI_XML and CSV
+ *
+ * @author Hector Plahar
+ */
 public class ExportAsMenu implements IsWidget {
 
     interface Style extends CellList.Style {

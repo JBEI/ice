@@ -20,6 +20,8 @@ public class Dialog {
 
     public Dialog(Widget widget, String width, String header) {
         dialogBox = new DialogBox(new Caption());
+        dialogBox.setStyleName("add_to_popup");
+        dialogBox.addStyleName("bg_white");
         dialogBox.setWidth(width);
         dialogBox.setGlassEnabled(true);
         dialogBox.setGlassStyleName("dialog_box_glass");
@@ -43,10 +45,6 @@ public class Dialog {
             }
         });
         dialogBox.setWidget(createWrapperWidget(widget));
-    }
-
-    public Dialog(Widget widget) {
-        this(widget, "500px", null);
     }
 
     public void showDialog(boolean show) {
@@ -84,5 +82,4 @@ public class Dialog {
      */
     private class Caption extends HTML implements DialogBox.Caption {
     }
-
 }

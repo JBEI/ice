@@ -1,5 +1,7 @@
 package org.jbei.ice.services.blazeds;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -70,7 +72,6 @@ public class RegistryAMFAPI extends BaseService {
             return null;
         } catch (PermissionException e) {
             Logger.warn(getLoggerPrefix() + account.getFullName() + " tried to access entry without permissions.");
-
             return null;
         }
     }
@@ -123,22 +124,20 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         EntryController entryController = ControllerFactory.getEntryController();
+        Entry entry;
 
-        Entry entry = null;
         try {
             entry = entryController.getByRecordId(account, entryId);
         } catch (ControllerException e) {
             Logger.error("Failed to get entry!", e);
-
             return null;
         } catch (PermissionException e) {
             Logger.warn(getLoggerPrefix() + account.getFullName() + " tried to access entry without permissions.");
-
             return null;
         }
         // TODO : this is a bit of a hack. basically searching through all partners to see if they have this entry
         if (entry == null) {
-            Service service = RegistryAPIServiceClient.getInstance().getService();
+            Service service = RegistryAPIServiceClient.getService();
             Iterator<QName> ports = service.getPorts();
             while (ports.hasNext()) {
                 QName name = ports.next();
@@ -153,7 +152,6 @@ public class RegistryAMFAPI extends BaseService {
                     }
                 } catch (ServiceException e) {
                     Logger.error(e);
-                    continue;
                 }
             }
         }
@@ -161,7 +159,7 @@ public class RegistryAMFAPI extends BaseService {
 
         try {
             Sequence sequence = ControllerFactory.getSequenceController().getByEntry(entry);
-            return SequenceController.sequenceToDNASequence(sequence);
+            return ControllerFactory.getSequenceController().sequenceToDNASequence(sequence);
         } catch (ControllerException e) {
             Logger.error("Failed to get entry!", e);
             return null;
@@ -191,6 +189,10 @@ public class RegistryAMFAPI extends BaseService {
                 return false;
             }
 
+            Sequence existing = sequenceController.getByEntry(entry);
+            if (existing != null) {
+                Files.deleteIfExists(Paths.get(existing.getFwdHash() + ".png"));
+            }
             Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
             sequence.setEntry(entry);
             sequenceController.update(account, sequence);
@@ -218,7 +220,7 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         EntryController entryController = ControllerFactory.getEntryController();
-        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
 
         Entry entry;
         List<TraceSequence> traces;
@@ -268,15 +270,9 @@ public class RegistryAMFAPI extends BaseService {
 
         try {
             result = ControllerFactory.getSequenceController().compose(sequence, genbankFormatter);
-
             logInfo(account.getEmail() + " generated and fetched genbank sequence");
-        } catch (ControllerException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return result;
         } catch (Exception e) {
             Logger.error(getLoggerPrefix(), e);
-
             return result;
         }
 

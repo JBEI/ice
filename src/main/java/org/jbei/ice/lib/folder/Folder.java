@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.shared.dto.folder.FolderStatus;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -50,8 +50,12 @@ public class Folder implements IModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationTime;
 
-    @Column(name = "status")
-    private FolderStatus status;
+    @Column(name = "type")
+    @Enumerated(value = EnumType.STRING)
+    private FolderType type;
+
+    @Column(name = "propagate_permissions")
+    private Boolean propagatePermissions;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
@@ -59,7 +63,8 @@ public class Folder implements IModel {
     @LazyCollection(LazyCollectionOption.EXTRA)
     private Set<Entry> contents = new LinkedHashSet<>();
 
-    public Folder() {}
+    public Folder() {
+    }
 
     public Folder(String name) {
         this.name = name;
@@ -117,11 +122,19 @@ public class Folder implements IModel {
         this.modificationTime = modificationTime;
     }
 
-    public FolderStatus getStatus() {
-        return status;
+    public FolderType getType() {
+        return type;
     }
 
-    public void setStatus(FolderStatus status) {
-        this.status = status;
+    public void setType(FolderType type) {
+        this.type = type;
+    }
+
+    public boolean isPropagatePermissions() {
+        return propagatePermissions != null && propagatePermissions;
+    }
+
+    public void setPropagatePermissions(Boolean propagatePermissions) {
+        this.propagatePermissions = propagatePermissions;
     }
 }

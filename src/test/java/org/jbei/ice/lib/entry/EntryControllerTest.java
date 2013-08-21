@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
@@ -14,20 +14,21 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.permissions.PermissionsController;
+import org.jbei.ice.lib.shared.dto.comment.UserComment;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.server.InfoToModelFactory;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountType;
-import org.jbei.ice.shared.dto.comment.UserComment;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -46,29 +47,6 @@ public class EntryControllerTest {
         HibernateHelper.initializeMock();
         HibernateHelper.beginTransaction();
         controller = new EntryController();
-    }
-
-    protected Account createTestAccount(String testName, boolean admin) throws Exception {
-        String email = testName + "@TESTER";
-        AccountController accountController = new AccountController();
-        Account account = accountController.getByEmail(email);
-        if (account != null)
-            throw new Exception("duplicate account");
-
-        AccountInfo info = new AccountInfo();
-        info.setFirstName("");
-        info.setLastName("TEST");
-        info.setEmail(email);
-        String pass = accountController.createNewAccount(info, false);
-        Assert.assertNotNull(pass);
-        account = accountController.getByEmail(email);
-        Assert.assertNotNull(account);
-
-        if (admin) {
-            account.setType(AccountType.ADMIN);
-            accountController.save(account);
-        }
-        return account;
     }
 
     @After
@@ -91,48 +69,66 @@ public class EntryControllerTest {
 
     @Test
     public void testCreateStrainWithPlasmid() throws Exception {
-        Account account = createTestAccount("testCreateStrainWithPlasmid", false);
+        Account account = AccountCreator.createTestAccount("testCreateStrainWithPlasmid", false);
         try {
             controller.createStrainWithPlasmid(account, null, null, null);
         } catch (ControllerException ce) {
             // expecting ce
         }
 
-        StrainInfo strainInfo = new StrainInfo();
-        strainInfo.setAlias("testStrainAlias");
-        strainInfo.setBioSafetyLevel(new Integer(1));
-        strainInfo.setGenotypePhenotype("genPhenTest");
-        strainInfo.setHost("testHost");
-        strainInfo.setName("sTrain");
-        Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
+        StrainData strainData = new StrainData();
+        strainData.setAlias("testStrainAlias");
+        strainData.setBioSafetyLevel(1);
+        strainData.setGenotypePhenotype("genPhenTest");
+        strainData.setHost("testHost");
+        strainData.setName("sTrain");
+        Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainData);
         Assert.assertNotNull(strain);
 
-        PlasmidInfo plasmidInfo = new PlasmidInfo();
-        plasmidInfo.setName("pLasmid");
-        plasmidInfo.setCircular(true);
-        plasmidInfo.setOriginOfReplication("repOrigin");
-        plasmidInfo.setPromoters("None");
-        plasmidInfo.setBackbone("backbone");
-        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
+        PlasmidData plasmidData = new PlasmidData();
+        plasmidData.setName("pLasmid");
+        plasmidData.setCircular(true);
+        plasmidData.setOriginOfReplication("repOrigin");
+        plasmidData.setPromoters("None");
+        plasmidData.setBackbone("backbone");
+        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidData);
         Assert.assertNotNull(plasmid);
 
-        HashSet<Entry> results = controller.createStrainWithPlasmid(account, strain, plasmid, null);
-        Assert.assertNotNull(results);
-        Assert.assertEquals("Strain with plasmid creation returned wrong entry count", 2, results.size());
+        controller.createStrainWithPlasmid(account, strain, plasmid, null);
     }
 
     @Test
     public void testCreateEntry() throws Exception {
-        Account account = createTestAccount("testCreateEntry", false);
+        Account account = AccountCreator.createTestAccount("testCreateEntry", false);
         Entry strain = new Strain();
         strain = controller.createEntry(account, strain, null);
         Assert.assertNotNull(strain);
         Assert.assertTrue(strain.getId() > 0);
+
+        // create a public group
+        GroupController groupController = new GroupController();
+        Account admin = AccountCreator.createTestAccount("testCreateEntryAdmin", true);
+        UserGroup user = new UserGroup();
+        user.setLabel("public group");
+        user.setType(GroupType.PUBLIC);
+        user.getMembers().add(Account.toDTO(account));
+        user = groupController.createGroup(admin, user);
+        Assert.assertNotNull(user);
+        Assert.assertTrue(user.getId() > 0);
+
+        Entry part = new Part();
+        part = controller.createEntry(account, part);
+        Assert.assertNotNull(part);
+        PermissionsController permissionsController = new PermissionsController();
+        Group group = groupController.getGroupById(user.getId());
+        HashSet<Group> groups = new HashSet<>();
+        groups.add(group);
+        Assert.assertTrue(permissionsController.groupHasReadPermission(groups, part));
     }
 
     @Test
     public void testGet() throws Exception {
-        Account account = createTestAccount("testGet", false);
+        Account account = AccountCreator.createTestAccount("testGet", false);
         Entry plasmid = new Plasmid();
         plasmid = controller.createEntry(account, plasmid, null);
         Entry ret = controller.get(account, plasmid.getId());
@@ -141,7 +137,7 @@ public class EntryControllerTest {
 
     @Test
     public void testGetByRecordId() throws Exception {
-        Account account = createTestAccount("testGetByRecordId", false);
+        Account account = AccountCreator.createTestAccount("testGetByRecordId", false);
         ArabidopsisSeed seed = new ArabidopsisSeed();
         seed.setEcotype("ecotype");
         seed.setGeneration(ArabidopsisSeed.Generation.M0);
@@ -161,59 +157,59 @@ public class EntryControllerTest {
 
     @Test
     public void testGetByPartNumber() throws Exception {
-        Account creator = createTestAccount("testGetByPartNumber", false);
+        Account creator = AccountCreator.createTestAccount("testGetByPartNumber", false);
 
-        PlasmidInfo info = new PlasmidInfo();
-        info.setType(EntryType.PLASMID);
-        info.setBioSafetyLevel(1);
-        info.setOriginOfReplication("kanamycin");
-        info.setCircular(false);
-        info.setOwnerEmail(info.getCreatorEmail());
-        info.setOwner(info.getCreator());
-        info.setShortDescription("testing");
-        info.setStatus("Complete");
-        info.setName("pSTC100");
+        PlasmidData data = new PlasmidData();
+        data.setType(EntryType.PLASMID);
+        data.setBioSafetyLevel(1);
+        data.setOriginOfReplication("kanamycin");
+        data.setCircular(false);
+        data.setOwnerEmail(data.getCreatorEmail());
+        data.setOwner(data.getCreator());
+        data.setShortDescription("testing");
+        data.setStatus("Complete");
+        data.setName("pSTC100");
 
-        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        Entry plasmid = InfoToModelFactory.infoToEntry(data);
         plasmid = controller.createEntry(creator, plasmid);
-        String partNumber = plasmid.getOnePartNumber().getPartNumber();
-        Entry result = controller.getByPartNumber(creator, partNumber);
+        String partNumber = plasmid.getPartNumber();
+        PartData result = controller.getByPartNumber(creator, partNumber);
         Assert.assertNotNull(result);
-        Assert.assertEquals(EntryType.PLASMID.toString().toLowerCase(), result.getRecordType().toLowerCase());
+        Assert.assertEquals(EntryType.PLASMID, result.getType());
         result = controller.getByPartNumber(creator, "fake");
         Assert.assertNull(result);
     }
 
     @Test
     public void testUpdate() throws Exception {
-        Account creator = createTestAccount("testUpdate1", false);
-        Account account = createTestAccount("testUpdate2", false);
+        Account creator = AccountCreator.createTestAccount("testUpdate1", false);
+        Account account = AccountCreator.createTestAccount("testUpdate2", false);
 
         // create entry
-        PlasmidInfo info = new PlasmidInfo();
-        info.setType(EntryType.PLASMID);
-        info.setBioSafetyLevel(1);
-        info.setCreatorEmail(creator.getEmail());
-        info.setCreator(creator.getFullName());
-        info.setOriginOfReplication("kanamycin");
-        info.setCircular(false);
-        info.setOwnerEmail(info.getCreatorEmail());
-        info.setOwner(info.getCreator());
-        info.setShortDescription("testing");
-        info.setStatus("Complete");
-        info.setName("pSTC100");
+        PlasmidData data = new PlasmidData();
+        data.setType(EntryType.PLASMID);
+        data.setBioSafetyLevel(1);
+        data.setCreatorEmail(creator.getEmail());
+        data.setCreator(creator.getFullName());
+        data.setOriginOfReplication("kanamycin");
+        data.setCircular(false);
+        data.setOwnerEmail(data.getCreatorEmail());
+        data.setOwner(data.getCreator());
+        data.setShortDescription("testing");
+        data.setStatus("Complete");
+        data.setName("pSTC100");
 
-        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(info);
+        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(data);
         Assert.assertNotNull(plasmid);
 
         // add Write permission for account
-        ArrayList<PermissionInfo> permissions = new ArrayList<>();
-        PermissionInfo permissionInfo = new PermissionInfo();
-        permissionInfo.setArticle(PermissionInfo.Article.ACCOUNT);
-        permissionInfo.setType(PermissionInfo.Type.WRITE_ENTRY);
-        permissionInfo.setArticleId(account.getId());
-        permissions.add(permissionInfo);
-        plasmid = (Plasmid) controller.createEntry(creator, plasmid, permissions);
+        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
+        AccessPermission accessPermission = new AccessPermission();
+        accessPermission.setArticle(AccessPermission.Article.ACCOUNT);
+        accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
+        accessPermission.setArticleId(account.getId());
+        accessPermissions.add(accessPermission);
+        plasmid = (Plasmid) controller.createEntry(creator, plasmid, accessPermissions);
         Assert.assertNotNull(plasmid);
         Assert.assertTrue(plasmid.getId() > 0);
 
@@ -222,68 +218,66 @@ public class EntryControllerTest {
 
 
         // update with account
-        info.setCircular(true);
-        info.setRecordId(plasmid.getRecordId());
-        Entry existing = controller.getByRecordId(account, info.getRecordId());
-        ArrayList<PermissionInfo> p = ControllerFactory.getPermissionController()
-                                                       .retrieveSetEntryPermissions(account, plasmid);
-        info.setPermissions(p);
+        data.setCircular(true);
+        data.setRecordId(plasmid.getRecordId());
+        Entry existing = controller.getByRecordId(account, data.getRecordId());
+        ArrayList<AccessPermission> p = ControllerFactory.getPermissionController()
+                                                         .retrieveSetEntryPermissions(account, plasmid);
+        data.setAccessPermissions(p);
 
-        Entry entry = InfoToModelFactory.infoToEntry(info, existing);
-
-        Entry updated = controller.update(account, entry);
-        Assert.assertNotNull(updated);
+        Entry entry = InfoToModelFactory.infoToEntry(data, existing);
+        controller.update(account, entry);
     }
 
     @Test
     public void testGetByName() throws Exception {
-        Account creator = createTestAccount("testGetByName", false);
+        Account creator = AccountCreator.createTestAccount("testGetByName", false);
 
-        PlasmidInfo info = new PlasmidInfo();
-        info.setType(EntryType.PLASMID);
-        info.setBioSafetyLevel(1);
-        info.setOriginOfReplication("kanamycin");
-        info.setCircular(false);
-        info.setOwnerEmail(info.getCreatorEmail());
-        info.setOwner(info.getCreator());
-        info.setShortDescription("testing");
-        info.setStatus("Complete");
-        info.setName("pSTC1000");
+        PlasmidData data = new PlasmidData();
+        data.setType(EntryType.PLASMID);
+        data.setBioSafetyLevel(1);
+        data.setOriginOfReplication("kanamycin");
+        data.setCircular(false);
+        data.setOwnerEmail(data.getCreatorEmail());
+        data.setOwner(data.getCreator());
+        data.setShortDescription("testing");
+        data.setStatus("Complete");
+        data.setName("pSTC1000");
 
-        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        Entry plasmid = InfoToModelFactory.infoToEntry(data);
         plasmid = controller.createEntry(creator, plasmid);
-        String name = plasmid.getOneName().getName();
-        Entry result = controller.getByName(creator, name);
+        String name = plasmid.getName();
+        PartData result = controller.getByUniqueName(creator, name);
         Assert.assertNotNull(result);
-        Assert.assertEquals(EntryType.PLASMID.toString().toLowerCase(), result.getRecordType().toLowerCase());
-        String partNumber = plasmid.getOnePartNumber().getPartNumber();
-        result = controller.getByName(creator, partNumber);
+        Assert.assertEquals(EntryType.PLASMID, result.getType());
+        String partNumber = plasmid.getPartNumber();
+        result = controller.getByUniqueName(creator, partNumber);
         Assert.assertNull(result);
     }
 
     @Test
     public void testAddComment() throws Exception {
-        Account creator = createTestAccount("testAddComment", false);
+        Account creator = AccountCreator.createTestAccount("testAddComment", false);
 
-        PlasmidInfo info = new PlasmidInfo();
-        info.setType(EntryType.PLASMID);
-        info.setBioSafetyLevel(1);
-        info.setOriginOfReplication("kanamycin");
-        info.setCircular(false);
-        info.setOwnerEmail(info.getCreatorEmail());
-        info.setOwner(info.getCreator());
-        info.setShortDescription("testing");
-        info.setStatus("Complete");
-        info.setName("pSTC1005");
+        PlasmidData data = new PlasmidData();
+        data.setType(EntryType.PLASMID);
+        data.setBioSafetyLevel(1);
+        data.setOriginOfReplication("kanamycin");
+        data.setCircular(false);
+        data.setOwnerEmail(data.getCreatorEmail());
+        data.setOwner(data.getCreator());
+        data.setShortDescription("testing");
+        data.setStatus("Complete");
+        data.setName("pSTC1005");
 
-        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        Entry plasmid = InfoToModelFactory.infoToEntry(data);
         plasmid = controller.createEntry(creator, plasmid);
         Assert.assertNotNull(plasmid);
         UserComment comment = new UserComment("This is a test");
         comment.setEntryId(plasmid.getId());
         comment = controller.addCommentToEntry(creator, comment);
         Assert.assertNotNull(comment);
-        EntryInfo entryInfo = controller.retrieveEntryDetails(creator, plasmid);
+        PartData entryInfo = controller.retrieveEntryDetails(creator, plasmid.getId());
         Assert.assertNotNull(entryInfo);
         Assert.assertEquals(1, entryInfo.getComments().size());
     }
@@ -295,18 +289,18 @@ public class EntryControllerTest {
 
     @Test
     public void testGetNumberOfVisibleEntries() throws Exception {
-        Account account1 = createTestAccount("testGetNumberOfVisibleEntries1", false);
-        PlasmidInfo info = new PlasmidInfo();
-        info.setType(EntryType.PLASMID);
-        info.setBioSafetyLevel(1);
-        info.setOriginOfReplication("kanamycin");
-        info.setCircular(false);
-        info.setOwnerEmail(info.getCreatorEmail());
-        info.setOwner(info.getCreator());
-        info.setShortDescription("testing");
-        info.setStatus("Complete");
-        info.setName("pSTC1005123q");
-        Entry plasmid = InfoToModelFactory.infoToEntry(info);
+        Account account1 = AccountCreator.createTestAccount("testGetNumberOfVisibleEntries1", false);
+        PlasmidData data = new PlasmidData();
+        data.setType(EntryType.PLASMID);
+        data.setBioSafetyLevel(1);
+        data.setOriginOfReplication("kanamycin");
+        data.setCircular(false);
+        data.setOwnerEmail(data.getCreatorEmail());
+        data.setOwner(data.getCreator());
+        data.setShortDescription("testing");
+        data.setStatus("Complete");
+        data.setName("pSTC1005123q");
+        Entry plasmid = InfoToModelFactory.infoToEntry(data);
         plasmid = controller.createEntry(account1, plasmid);
         Assert.assertNotNull(plasmid);
         long count = controller.getNumberOfVisibleEntries(account1);
@@ -314,40 +308,40 @@ public class EntryControllerTest {
 
         // add account 1 to group
         GroupController groupController = ControllerFactory.getGroupController();
-        GroupInfo newGroup = new GroupInfo();
-        newGroup.setLabel("test Group");
-        newGroup.setDescription("test Group");
-        newGroup.setType(GroupType.PRIVATE);
-        newGroup = groupController.createGroup(account1, newGroup);
-        Assert.assertNotNull(newGroup);
-        Assert.assertTrue(newGroup.getId() > 0);
-        ArrayList<AccountInfo> members = new ArrayList<>();
+        UserGroup newUserGroup = new UserGroup();
+        newUserGroup.setLabel("test Group");
+        newUserGroup.setDescription("test Group");
+        newUserGroup.setType(GroupType.PRIVATE);
+        newUserGroup = groupController.createGroup(account1, newUserGroup);
+        Assert.assertNotNull(newUserGroup);
+        Assert.assertTrue(newUserGroup.getId() > 0);
+        ArrayList<User> members = new ArrayList<>();
         members.add(Account.toDTO(account1));
-        Assert.assertNotNull(groupController.setGroupMembers(account1, newGroup, members));
-        PermissionInfo permission = new PermissionInfo();
-        permission.setArticle(PermissionInfo.Article.GROUP);
-        permission.setArticleId(newGroup.getId());
-        permission.setType(PermissionInfo.Type.READ_ENTRY);
-        permission.setTypeId(plasmid.getId());
-        ControllerFactory.getPermissionController().addPermission(account1, permission);
+        Assert.assertNotNull(groupController.setGroupMembers(account1, newUserGroup, members));
+        AccessPermission accessPermission = new AccessPermission();
+        accessPermission.setArticle(AccessPermission.Article.GROUP);
+        accessPermission.setArticleId(newUserGroup.getId());
+        accessPermission.setType(AccessPermission.Type.READ_ENTRY);
+        accessPermission.setTypeId(plasmid.getId());
+        ControllerFactory.getPermissionController().addPermission(account1, accessPermission);
 
         count = controller.getNumberOfVisibleEntries(account1);
         Assert.assertEquals(1, count);
 
-        Account account2 = createTestAccount("testGetNumberOfVisibleEntries2", false);
+        Account account2 = AccountCreator.createTestAccount("testGetNumberOfVisibleEntries2", false);
         Assert.assertEquals(0, controller.getNumberOfVisibleEntries(account2));
     }
 
     @Test
     public void retrieveVisibleEntries() throws Exception {
-        Account account = createTestAccount("testGetNumberOfVisibleEntries", false);
-        GroupInfo info = new GroupInfo();
-        info.setLabel("test");
-        info.setDescription("test");
-        info.setType(GroupType.PRIVATE);
-        info.getMembers().add(Account.toDTO(account));
-        info = ControllerFactory.getGroupController().createGroup(account, info);
-        Assert.assertNotNull(info);
+        Account account = AccountCreator.createTestAccount("testGetNumberOfVisibleEntries", false);
+        UserGroup user = new UserGroup();
+        user.setLabel("test");
+        user.setDescription("test");
+        user.setType(GroupType.PRIVATE);
+        user.getMembers().add(Account.toDTO(account));
+        user = ControllerFactory.getGroupController().createGroup(account, user);
+        Assert.assertNotNull(user);
 
         // when user belongs to a group with permissions for entry account already has
         // access then the bug manifests
@@ -359,12 +353,12 @@ public class EntryControllerTest {
             Assert.assertNotNull(controller.createEntry(account, entry));
 
             if (i % 2 == 0) {
-                PermissionInfo permissionInfo = new PermissionInfo();
-                permissionInfo.setArticle(PermissionInfo.Article.GROUP);
-                permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
-                permissionInfo.setTypeId(entry.getId());
-                permissionInfo.setArticleId(info.getId());
-                ControllerFactory.getPermissionController().addPermission(account, permissionInfo);
+                AccessPermission accessPermission = new AccessPermission();
+                accessPermission.setArticle(AccessPermission.Article.GROUP);
+                accessPermission.setType(AccessPermission.Type.READ_ENTRY);
+                accessPermission.setTypeId(entry.getId());
+                accessPermission.setArticleId(user.getId());
+                ControllerFactory.getPermissionController().addPermission(account, accessPermission);
             }
         }
 

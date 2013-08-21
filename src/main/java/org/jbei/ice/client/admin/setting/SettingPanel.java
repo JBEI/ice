@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

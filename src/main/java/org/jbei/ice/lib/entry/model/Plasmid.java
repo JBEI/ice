@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
@@ -18,6 +18,7 @@ import org.hibernate.search.annotations.Indexed;
  * <li><b>originOfReplication: </b>The origin of replication for this plasmid, comma separated.</li>
  * <li><b>promoters: </b>Promoters that are on this plasmid, comma separated.</li>
  * <li><b>circular: </b>True if plasmid is circular.</li>
+ * <li><b>replicatesIn: </b></li>
  * </ul>
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
@@ -44,6 +45,9 @@ public class Plasmid extends Entry {
 
     @Column(name = "circular")
     private Boolean circular;
+
+    @Column(name = "replicates_in")
+    private String replicatesIn;
 
     public Plasmid() {
         super();
@@ -83,5 +87,13 @@ public class Plasmid extends Entry {
         if (circular == null)
             circular = Boolean.TRUE;
         this.circular = circular;
+    }
+
+    public String getReplicatesIn() {
+        return replicatesIn;
+    }
+
+    public void setReplicatesIn(String replicatesIn) {
+        this.replicatesIn = replicatesIn;
     }
 }

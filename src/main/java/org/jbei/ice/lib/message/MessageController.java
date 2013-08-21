@@ -10,12 +10,12 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountType;
-import org.jbei.ice.shared.dto.MessageInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
-import org.jbei.ice.shared.dto.message.MessageList;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
+import org.jbei.ice.lib.shared.dto.message.MessageList;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * @author Hector Plahar
@@ -57,7 +57,7 @@ public class MessageController {
      * @throws ControllerException
      */
     public void sendMessage(Account sender, MessageInfo info) throws ControllerException {
-        if (info == null || info.getAccounts().isEmpty() && info.getGroups().isEmpty())
+        if (info == null || info.getAccounts().isEmpty() && info.getUserGroups().isEmpty())
             throw new ControllerException("Cannot send message");
 
         Message message = new Message();
@@ -67,8 +67,8 @@ public class MessageController {
         message.setTitle(info.getTitle());
 
         if (info.getAccounts() != null) {
-            for (AccountInfo accountInfo : info.getAccounts()) {
-                Account account = ControllerFactory.getAccountController().getByEmail(accountInfo.getEmail());
+            for (User user : info.getAccounts()) {
+                Account account = ControllerFactory.getAccountController().getByEmail(user.getEmail());
                 if (account == null) {
                     // TODO : send a message to send indicating that the message could not be delivered to recipient
                     continue;
@@ -77,9 +77,9 @@ public class MessageController {
             }
         }
 
-        if (info.getGroups() != null) {
-            for (GroupInfo groupInfo : info.getGroups()) {
-                Group group = ControllerFactory.getGroupController().getGroupById(groupInfo.getId());
+        if (info.getUserGroups() != null) {
+            for (UserGroup userGroup : info.getUserGroups()) {
+                Group group = ControllerFactory.getGroupController().getGroupById(userGroup.getId());
                 if (group == null) {
                     continue; // TODO : send message to sender
                 }
@@ -95,9 +95,6 @@ public class MessageController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-    }
-
-    public void deleteMessage(long messageId) throws ControllerException {
     }
 
     public MessageList retrieveMessages(Account requester, Account owner, int start, int count)

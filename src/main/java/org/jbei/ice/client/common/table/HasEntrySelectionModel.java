@@ -1,12 +1,12 @@
 package org.jbei.ice.client.common.table;
 
-import org.jbei.ice.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 
 // TODO : combine this with EntrySelectionModel
-public class HasEntrySelectionModel<T extends HasEntryInfo> extends MultiSelectionModel<T> {
+public class HasEntrySelectionModel<T extends HasEntryData> extends MultiSelectionModel<T> {
     private boolean allSelected;
 
     public HasEntrySelectionModel() {

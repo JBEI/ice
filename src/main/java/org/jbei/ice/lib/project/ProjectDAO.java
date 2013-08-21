@@ -15,9 +15,9 @@ import org.hibernate.Session;
 /**
  * Manager to manipulate {@link Project} objects.
  *
- * @author Zinovii Dmytriv, Timothy Ham
+ * @author Zinovii Dmytriv, Timothy Ham, Hector Plahar
  */
-public class ProjectDAO extends HibernateRepository {
+public class ProjectDAO extends HibernateRepository<Project> {
     /**
      * Save the given {@link Project} object in the database.
      *
@@ -35,7 +35,7 @@ public class ProjectDAO extends HibernateRepository {
         }
 
         try {
-            project = (Project) super.saveOrUpdate(project);
+            project = super.saveOrUpdate(project);
         } catch (DAOException e) {
             throw new DAOException("Failed to save project!", e);
         }
@@ -69,11 +69,8 @@ public class ProjectDAO extends HibernateRepository {
 
         Session session = currentSession();
         try {
-            Query query = session
-                    .createQuery("from " + Project.class.getName() + " where id = :id");
-
+            Query query = session.createQuery("from " + Project.class.getName() + " where id = :id");
             query.setParameter("id", id);
-
             Object queryResult = query.uniqueResult();
 
             if (queryResult != null) {
@@ -98,11 +95,8 @@ public class ProjectDAO extends HibernateRepository {
 
         Session session = currentSession();
         try {
-            Query query = session.createQuery("from " + Project.class.getName()
-                                                      + " where uuid = :uuid");
-
+            Query query = session.createQuery("from " + Project.class.getName() + " where uuid = :uuid");
             query.setParameter("uuid", uuid);
-
             Object queryResult = query.uniqueResult();
 
             if (queryResult != null) {

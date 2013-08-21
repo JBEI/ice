@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
@@ -17,25 +17,25 @@ import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
 // Takes care of retrieving all data page, by page
-public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> implements IHasNavigableData {
+public abstract class EntryDataViewDataProvider extends AsyncDataProvider<PartData> implements IHasNavigableData {
 
     protected int resultSize;
-    protected LinkedList<EntryInfo> cachedEntries;
+    protected LinkedList<PartData> cachedEntries;
     protected final RegistryServiceAsync service;
-    protected final DataTable<EntryInfo> table;
+    protected final DataTable<PartData> table;
     protected ColumnField lastSortField;
     protected boolean lastSortAsc = false;
 
-    public EntryDataViewDataProvider(DataTable<EntryInfo> view, RegistryServiceAsync service) {
+    public EntryDataViewDataProvider(DataTable<PartData> view, RegistryServiceAsync service) {
         this.table = view;
         this.service = service;
-        cachedEntries = new LinkedList<EntryInfo>();
+        cachedEntries = new LinkedList<PartData>();
 
         // connect sorting to async handler
         AsyncHandler columnSortHandler = new AsyncHandler(table);
         table.addColumnSortHandler(columnSortHandler);
 
-        DataTableColumn<EntryInfo, ?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
+        DataTableColumn<PartData, ?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
 
         if (defaultSortField != null) {
             ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
@@ -46,8 +46,8 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
     }
 
     @Override
-    public EntryInfo getCachedData(long entryId, String recordId) {
-        for (EntryInfo info : cachedEntries) {
+    public PartData getCachedData(long entryId, String recordId) {
+        for (PartData info : cachedEntries) {
             if (recordId != null && info.getRecordId().equalsIgnoreCase(recordId))
                 return info;
 
@@ -58,21 +58,26 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
     }
 
     @Override
-    public int indexOfCached(EntryInfo info) {
+    public int indexOfCached(PartData info) {
         return cachedEntries.indexOf(info);
     }
 
     @Override
-    public EntryInfo getNext(EntryInfo info) {
+    public PartData getNext(PartData info) {
         int idx = cachedEntries.indexOf(info);
         int size = cachedEntries.size();
+        if (size - 1 == idx + 1) {
+            // fetch next
+            cacheMore(lastSortField, lastSortAsc, size, size + 1);
+        }
+
         if (size == idx + 1)
             return null;
         return cachedEntries.get(idx + 1);
     }
 
     @Override
-    public EntryInfo getPrev(EntryInfo info) {
+    public PartData getPrev(PartData info) {
         int idx = cachedEntries.indexOf(info);
         if (idx == -1)
             return null;
@@ -86,7 +91,7 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
     }
 
     @Override
-    protected void onRangeChanged(HasData<EntryInfo> display) {
+    protected void onRangeChanged(HasData<PartData> display) {
         if (resultSize == 0)   // display changed its range of interest but no data
             return;
 
@@ -111,8 +116,30 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
         // sort did not change, use data in cache
         updateRowData(rangeStart, cachedEntries.subList(rangeStart, rangeEnd));
 
-        if (rangeEnd == cachedEntries.size()) { // or close enough within some delta, retrieve more
-            cacheMore(lastSortField, lastSortAsc, rangeEnd, rangeEnd + range.getLength());
+        long cacheSize = cachedEntries.size();
+        // if range is close enough to the cache within some delta, cache more entries
+        if (rangeEnd + (2 * range.getLength()) >= cacheSize) {
+            int fetchSize = (2 * range.getLength()) + rangeEnd;
+            cacheMore(lastSortField, lastSortAsc, rangeEnd, fetchSize);
+        }
+    }
+
+    public void reset() {
+        this.cachedEntries.clear();
+        this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
+
+        // reset sort
+        if (lastSortField == null) {
+            lastSortAsc = false;
+            lastSortField = ColumnField.CREATED;
+
+            this.table.getColumnSortList().clear();
+            DataTableColumn<PartData, ?> defaultSortField = this.table.getColumn(lastSortField);
+
+            if (defaultSortField != null) {
+                ColumnSortList.ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
+                this.table.getColumnSortList().push(info);
+            }
         }
     }
 
@@ -147,6 +174,8 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<EntryI
     protected void cacheMore(final ColumnField field, final boolean ascending, int rangeStart, int rangeEnd) {
         GWT.log("Caching [" + rangeStart + " - " + rangeEnd + "]");
         int factor = (rangeEnd - rangeStart);  //  pages in advance
+        if (factor <= 0)
+            return;
         fetchEntryData(field, ascending, rangeStart, factor, false);
     }
 

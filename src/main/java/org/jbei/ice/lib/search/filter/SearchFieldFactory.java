@@ -1,9 +1,13 @@
 package org.jbei.ice.lib.search.filter;
 
-import org.jbei.ice.lib.entry.model.*;
-import org.jbei.ice.shared.dto.entry.EntryType;
-
 import java.util.HashSet;
+
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Part;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 /**
  * @author Hector Plahar
@@ -19,7 +23,7 @@ public class SearchFieldFactory {
         commonFields.add("owner");
         commonFields.add("ownerEmail");
         commonFields.add("creator");
-        commonFields.add("names.name");
+        commonFields.add("name");
         commonFields.add("alias");
         commonFields.add("creatorEmail");
         commonFields.add("keywords");
@@ -27,7 +31,7 @@ public class SearchFieldFactory {
         commonFields.add("longDescription");
         commonFields.add("intellectualProperty");
         commonFields.add("references");
-        commonFields.add("partNumbers.partNumber");
+        commonFields.add("partNumber");
         commonFields.add("links.link");
         commonFields.add("links.url");
         commonFields.add("selectionMarkers.name");
@@ -42,6 +46,7 @@ public class SearchFieldFactory {
         // plasmid fields
         plasmidFields.add("backbone");
         plasmidFields.add("promoters");
+        plasmidFields.add("replicatesIn");
         plasmidFields.add("originOfReplication");
 
         // seed fields

@@ -9,9 +9,9 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
 import org.jbei.ice.client.profile.widget.ProfilePanel;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -24,9 +24,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class UserProfilePresenter extends PanelPresenter {
 
     private final ProfilePanel panel;
-    private AccountInfo accountInfo;
+    private User user;
     private final String userId;
-    private Callback<AccountInfo> callback;
+    private Callback<User> callback;
 
     public UserProfilePresenter(final RegistryServiceAsync service, HandlerManager eventBus, String uid) {
         super(service, eventBus);
@@ -35,13 +35,13 @@ public class UserProfilePresenter extends PanelPresenter {
         userId = uid;
     }
 
-    public void setNameChangeCallback(Callback<AccountInfo> accountInfoCallback) {
+    public void setNameChangeCallback(Callback<User> accountInfoCallback) {
         this.callback = accountInfoCallback;
     }
 
-    public void setAccountInfo(AccountInfo info) {
-        panel.setAccountInfo(info);
-        accountInfo = info;
+    public void setUser(User info) {
+        panel.setUser(info);
+        user = info;
         checkCanEditProfile();
         checkCanChangePassword();
     }
@@ -95,7 +95,7 @@ public class UserProfilePresenter extends PanelPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-            panel.editProfile(accountInfo, new SaveProfileHandler(), new ShowCurrentInfoHandler());
+            panel.editProfile(user, new SaveProfileHandler(), new ShowCurrentInfoHandler());
         }
     }
 
@@ -103,7 +103,7 @@ public class UserProfilePresenter extends PanelPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-            panel.changePasswordPanel(accountInfo, new UpdatePasswordClickHandler(), new ShowCurrentInfoHandler());
+            panel.changePasswordPanel(user, new UpdatePasswordClickHandler(), new ShowCurrentInfoHandler());
         }
     }
 
@@ -111,7 +111,7 @@ public class UserProfilePresenter extends PanelPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-            panel.setAccountInfo(accountInfo);
+            panel.setUser(user);
         }
     }
 
@@ -127,14 +127,14 @@ public class UserProfilePresenter extends PanelPresenter {
 
                 @Override
                 protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                    service.updateAccountPassword(ClientController.sessionId, accountInfo.getEmail(), password,
+                    service.updateAccountPassword(ClientController.sessionId, user.getEmail(), password,
                                                   callback);
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
                     if (result) {
-                        panel.setAccountInfo(accountInfo);
+                        panel.setUser(user);
                     }
                 }
             }.go(eventBus);
@@ -149,27 +149,27 @@ public class UserProfilePresenter extends PanelPresenter {
             if (details == null)
                 return;
 
-            if (!details.getEmail().equals(accountInfo.getEmail())) {
+            if (!details.getEmail().equals(user.getEmail())) {
                 return;
             }
 
-            accountInfo.setDescription(details.getAbout());
-            accountInfo.setFirstName(details.getFirstName());
-            accountInfo.setLastName(details.getLastName());
-            accountInfo.setInitials(details.getInitials());
-            accountInfo.setInstitution(details.getInstitution());
+            user.setDescription(details.getAbout());
+            user.setFirstName(details.getFirstName());
+            user.setLastName(details.getLastName());
+            user.setInitials(details.getInitials());
+            user.setInstitution(details.getInstitution());
 
-            new IceAsyncCallback<AccountInfo>() {
+            new IceAsyncCallback<User>() {
 
                 @Override
-                protected void callService(AsyncCallback<AccountInfo> callback) throws AuthenticationException {
-                    service.updateAccount(ClientController.sessionId, accountInfo.getEmail(), accountInfo, callback);
+                protected void callService(AsyncCallback<User> callback) throws AuthenticationException {
+                    service.updateAccount(ClientController.sessionId, user.getEmail(), user, callback);
                 }
 
                 @Override
-                public void onSuccess(AccountInfo result) {
-                    accountInfo = result;
-                    panel.setAccountInfo(accountInfo);
+                public void onSuccess(User result) {
+                    user = result;
+                    panel.setUser(user);
                     if (callback != null)
                         callback.onSuccess(result);
                 }
@@ -190,7 +190,8 @@ public class UserProfilePresenter extends PanelPresenter {
                 }
 
                 @Override
-                public void onSuccess(Boolean result) {}
+                public void onSuccess(Boolean result) {
+                }
             }.go(eventBus);
         }
     }

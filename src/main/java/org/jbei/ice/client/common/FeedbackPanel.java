@@ -1,8 +1,5 @@
 package org.jbei.ice.client.common;
 
-import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -12,7 +9,15 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.Icon;
 
+/**
+ * Panel for displaying feedback messages to the user. The messages have a timeout of
+ * 25secs after which they are hidden
+ *
+ * @author Hector Plahar
+ */
 public class FeedbackPanel extends Composite {
 
     interface Style extends CssResource {

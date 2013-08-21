@@ -1,20 +1,16 @@
 package org.jbei.ice.lib.authentication.ldap;
 
+import org.jbei.ice.lib.logging.Logger;
+
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.*;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-
-import org.jbei.ice.lib.logging.Logger;
 
 /**
  * Little wrapper for lbl ldap.
@@ -263,7 +259,7 @@ public class LblLdapAuthenticationWrapper {
      *
      * @author Zinovii Dmytriv
      */
-    public class LblLdapAuthenticationWrapperException extends Exception {
+    public static class LblLdapAuthenticationWrapperException extends Exception {
         private static final long serialVersionUID = 1L;
 
         public LblLdapAuthenticationWrapperException(String message, Throwable cause) {

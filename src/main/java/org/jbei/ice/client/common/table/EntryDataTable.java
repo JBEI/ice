@@ -1,14 +1,16 @@
 package org.jbei.ice.client.common.table;
 
+import java.sql.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.cell.EntrySelectionColumnHeaderCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
 import org.jbei.ice.client.common.table.column.ImageColumn;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -34,12 +36,12 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
  * @author Hector Plahar
  */
 
-public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements IHasEntryId {
+public abstract class EntryDataTable<T extends PartData> extends DataTable<T> implements IHasEntryId {
 
     private EntrySelectionModel<T> selectionModel;
 
-    public EntryDataTable() {
-        super();
+    public EntryDataTable(ServiceDelegate<T> delegate) {
+        super(delegate);
     }
 
     @Override
@@ -70,7 +72,6 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
         DataTableColumn<T, Boolean> selectionColumn = new DataTableColumn<T, Boolean>(columnCell,
                                                                                       ColumnField.SELECTION) {
-
             @Override
             public Boolean getValue(T object) {
                 // returns column value from underlying data object (EntryDataView in this instance)
@@ -128,7 +129,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         };
 
         this.addColumn(nameColumn, "Name");
-        nameColumn.setSortable(false);
+        nameColumn.setSortable(true);
         this.setColumnWidth(nameColumn, width, unit);
         return nameColumn;
     }
@@ -150,8 +151,8 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
                 return SafeHtmlUtils
                         .fromSafeConstant("<div style=\"width: "
                                                   + size
-                                                  + "px; white-space: nowrap; overflow: hidden; text-overflow: " +
-                                                  "ellipsis;\" title=\""
+                                                  + "px; white-space: nowrap; overflow: hidden; text-overflow: "
+                                                  + "ellipsis;\" title=\""
                                                   + description.replaceAll("\"", "'") + "\">"
                                                   + description + "</div>");
             }
@@ -184,7 +185,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected void addHasAttachmentColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT) {
-            public boolean showImage(EntryInfo info) {
+            public boolean showImage(PartData info) {
                 return info.isHasAttachment();
             }
         };
@@ -194,7 +195,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected void addHasSampleColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE) {
-            public boolean showImage(EntryInfo info) {
+            public boolean showImage(PartData info) {
                 return info.isHasSample();
             }
         };
@@ -204,7 +205,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected void addHasSequenceColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE) {
-            public boolean showImage(EntryInfo info) {
+            public boolean showImage(PartData info) {
                 return info.isHasSequence();
             }
         };
@@ -216,9 +217,9 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         DataTableColumn<T, String> createdColumn = new DataTableColumn<T, String>(new TextCell(), ColumnField.CREATED) {
 
             @Override
-            public String getValue(EntryInfo object) {
+            public String getValue(PartData object) {
                 DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("MMM d, yyyy");
-                return dateTimeFormat.format(object.getCreationTime());
+                return dateTimeFormat.format(new Date(object.getCreationTime()));
             }
         };
 
@@ -232,7 +233,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     // returns the selected entry set
     public Set<Long> getSelectedEntrySet() {
         Set<Long> entrySet = new HashSet<Long>();
-        for (EntryInfo info : selectionModel.getSelectedSet()) {
+        for (PartData info : selectionModel.getSelectedSet()) {
             entrySet.add(info.getId());
         }
 
@@ -247,10 +248,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
         @Override
         public Boolean getValue() {
-            if (selectionModel.isAllSelected())
-                return true;
-
-            return !(selectionModel.getSelectedSet().isEmpty());
+            return selectionModel.isAllSelected() || !(selectionModel.getSelectedSet().isEmpty());
         }
     }
 }

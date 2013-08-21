@@ -1,21 +1,22 @@
 package org.jbei.ice.client.collection.presenter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.FolderEntryDataProvider;
 import org.jbei.ice.client.collection.ICollectionView;
-import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.model.CollectionsModel;
@@ -23,22 +24,21 @@ import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.EntrySelectionModel;
-import org.jbei.ice.client.common.table.EntryTablePager;
-import org.jbei.ice.client.entry.view.EntryPresenter;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.client.entry.display.EntryPresenter;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.event.ShowEntryListEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.search.advanced.ISearchView;
 import org.jbei.ice.client.search.advanced.SearchPresenter;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -47,17 +47,21 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Presenter for collections
+ *
+ * @author Hector Plahar
+ */
 public class CollectionsPresenter extends AbstractPresenter {
 
     private enum Mode {
-        SEARCH, COLLECTION, ENTRY;
+        SEARCH, COLLECTION, ENTRY
     }
 
     private ICollectionView display;
@@ -73,14 +77,13 @@ public class CollectionsPresenter extends AbstractPresenter {
     private Mode mode = Mode.COLLECTION;
     private EntryContext currentContext; // this can sometimes be null
     private final DeleteItemHandler deleteHandler;
-    private static HandlerRegistration selectionRegistration;
-    private static HandlerRegistration showListRegistration;
-    private static HandlerRegistration showEntryRegistration;
+    private HandlerRegistration selectionRegistration;
+    private HandlerRegistration showListRegistration;
 
     public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, final ICollectionView display,
-            ISearchView searchView) {
+            ISearchView searchView, SearchQuery query) {
         this(service, eventBus, display);
-        search(searchView);
+        search(searchView, query);
     }
 
     // collections for entry view
@@ -105,6 +108,28 @@ public class CollectionsPresenter extends AbstractPresenter {
         retrieveEntriesForFolder(id, null);
     }
 
+    private ServiceDelegate<PartData> createDelegate() {
+        return new ServiceDelegate<PartData>() {
+            @Override
+            public void execute(PartData entryInfo) {
+                EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
+                context.setNav(folderDataProvider);
+                context.setId(entryInfo.getId());
+                context.setRecordId(entryInfo.getRecordId());
+                showEntryView(context);
+            }
+        };
+    }
+
+    private ServiceDelegate<EntryContext> createSearchDelegate() {
+        return new ServiceDelegate<EntryContext>() {
+            @Override
+            public void execute(EntryContext context) {
+                showEntryView(context);
+            }
+        };
+    }
+
     public CollectionsPresenter(RegistryServiceAsync service, HandlerManager eventBus, final ICollectionView display) {
         super(service, eventBus);
         this.display = display;
@@ -112,19 +137,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         this.deleteHandler = new DeleteItemHandler(model.getService(), model.getEventBus(), display);
 
         // initialize all parameters
-        this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
-
-            @Override
-            protected EntryViewEventHandler getHandler() {
-                return new EntryViewEventHandler() {
-                    @Override
-                    public void onEntryView(EntryViewEvent event) {
-                        event.setNavigable(folderDataProvider);
-                        model.getEventBus().fireEvent(event);
-                    }
-                };
-            }
-        };
+        this.collectionsDataTable = new CollectionDataTable(createDelegate());
 
         this.folderDataProvider = new FolderEntryDataProvider(collectionsDataTable, model.getService());
 
@@ -139,9 +152,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         // init text box
         initCreateCollectionHandlers();
 
-        // init entry handler
-        initEntryViewHandler();
-
         // create entry handler
         final SingleSelectionModel<EntryAddType> selectionModel = display.getAddEntrySelectionHandler();
         if (selectionRegistration != null)
@@ -151,15 +161,17 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                if (entryViewPresenter == null) {// TODO : when user navigates to another page and returns this is null
-                    entryViewPresenter = new EntryPresenter(model.getService(), CollectionsPresenter.this,
-                                                            model.getEventBus(), null);
-                    entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
-                }
-
                 EntryAddType type = selectionModel.getSelectedObject();
                 if (type == null)
                     return;
+
+                if (entryViewPresenter == null) {
+                    entryViewPresenter = new EntryPresenter(model.getService(), CollectionsPresenter.this,
+                                                            model.getEventBus(), null);
+                    entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
+                    // TODO : sequence panel is null
+                }
+
                 selectionModel.setSelected(type, false);
                 mode = Mode.ENTRY;
                 display.setMainContent(entryViewPresenter.getView().asWidget());
@@ -224,38 +236,39 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.addTransferHandler(new TransferHandler());
 
         // permission delegate for the menu (user)
-        display.setPermissionDelegate(new PermissionDelegate());
+        display.setMenuDelegates(model.createPermissionDelegate(), model.createPropagateDelegate());
 
-        // retrieve web of registries settings
-        if (ClientController.account.isAdmin()) {
-            model.retrieveWebOfRegistrySettings(new Callback<HashMap<String, String>>() {
-
-                @Override
-                public void onSuccess(HashMap<String, String> result) {
-                    String value = result.get(ConfigurationKey.WEB_PARTNERS.name());
-                    if (value == null)
-                        return;
-
-                    ArrayList<OptionSelect> values = new ArrayList<OptionSelect>();
-                    for (String split : value.split(";")) {
-                        if (split.isEmpty())
-                            continue;
-
-                        OptionSelect select = new OptionSelect(0, split);
-                        values.add(select);
-                    }
-                    display.setTransferOptions(values);
-
-                    // check if it is web enabled and set transfer widget to visible
-                }
-
-                @Override
-                public void onFailure() {}
-            });
-        }
+        // retrieve web of registries settings to set the transfer widget options (admin only)
+        setTransferWidgetOptions();
 
         setPromotionDelegate();
         setDemotionDelegate();
+        setPublicAccessDelegate();
+    }
+
+    private void setTransferWidgetOptions() {
+        if (ClientController.account.isAdmin()) {
+            model.retrieveWebOfRegistryPartners(new Callback<WebOfRegistries>() {
+
+                @Override
+                public void onSuccess(WebOfRegistries result) {
+                    if (result == null)
+                        return;
+
+                    ArrayList<OptionSelect> values = new ArrayList<OptionSelect>();
+                    for (RegistryPartner partner : result.getPartners()) {
+                        OptionSelect select = new OptionSelect(partner.getId(), partner.getUrl());
+                        values.add(select);
+                    }
+
+                    display.setTransferOptions(values);
+                }
+
+                @Override
+                public void onFailure() {
+                }
+            });
+        }
     }
 
     private void setPromotionDelegate() {
@@ -298,21 +311,53 @@ public class CollectionsPresenter extends AbstractPresenter {
         });
     }
 
+    private void setPublicAccessDelegate() {
+        display.setPublicAccessDelegate(new ServiceDelegate<HashMap<Long, Boolean>>() {
+            @Override
+            public void execute(final HashMap<Long, Boolean> enable) {
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        for (Map.Entry<Long, Boolean> entry : enable.entrySet()) {
+                            service.enableOrDisableFolderPublicAccess(ClientController.sessionId, entry.getKey(),
+                                                                      entry.getValue(), callback);
+                            break;
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        //TODO : view assumes call will succeed and so has already accounted for it in feedback to user
+                    }
+                }.go(eventBus);
+            }
+        });
+    }
+
     private void initCollectionTableSelectionHandler() {
-        final EntrySelectionModel<EntryInfo> selectionModel = this.collectionsDataTable.getSelectionModel();
+        final EntrySelectionModel<PartData> selectionModel = this.collectionsDataTable.getSelectionModel();
         this.collectionsDataTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                boolean enable = (selectionModel.getSelectedSet().size() > 0);
-                display.enableExportAs(enable);
+                boolean hasSelection = (selectionModel.getSelectedSet().size() > 0);
+                display.enableExportAs(hasSelection);
 
-                // can user edit current folder?
-                if (!currentFolder.isSystemFolder()) {
-                    display.setSubMenuEnable(enable, enable, enable);
-                } else {
-                    display.setSubMenuEnable(enable, false, false);
+                boolean canRemove = currentFolder.getOwner() != null
+                        && ClientController.account.getEmail().equals(currentFolder.getOwner().getEmail());
+                if (!canRemove && currentFolder.getAccessPermissions() != null) {
+                    for (AccessPermission accessPermission : currentFolder.getAccessPermissions()) {
+                        // if you can see the folder then it has been shared with you so we only need to check access
+                        if (accessPermission.isCanWrite()) {
+                            canRemove = true;
+                            break;
+                        }
+                    }
                 }
+
+                canRemove = (canRemove && hasSelection);
+                display.setCanMove(canRemove);
             }
         });
     }
@@ -322,7 +367,6 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                StringBuilder builder = new StringBuilder();
                 Set<Long> selected = new HashSet<Long>();
                 ExportAsOption option = display.getExportAsModel().getSelectedObject();
                 if (option == null)
@@ -347,12 +391,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     return;
                 }
 
-                for (long id : selected) {
-                    builder.append(id + ", ");
-                }
-
-                Window.Location.replace("/export?type=" + option.name() + "&entries=" + builder.toString());
-
+                model.exportParts(new ArrayList<Long>(selected), option);
                 // clear selected
                 display.getExportAsModel().setSelected(option, false);
             }
@@ -371,40 +410,45 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         mode = Mode.ENTRY;
         currentContext = event;
-        if (event.getPartnerUrl() == null)
+        if (event.getPartnerUrl() == null || event.getPartnerUrl().trim().isEmpty())
             History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getId(), false);
         display.enableExportAs(true);
         display.setMainContent(entryViewPresenter.getView().asWidget());
-        boolean enable;
-        if (currentFolder != null)
-            enable = !currentFolder.isSystemFolder();
-        else
-            enable = false;
+        boolean enable = false;
+        if (currentFolder != null && currentFolder.getAccessPermissions() != null) {
+            for (AccessPermission accessPermission : currentFolder.getAccessPermissions()) {
+                if (accessPermission.isCanWrite()) {
+                    enable = true;
+                    break;
+                }
+            }
+        }
 
-        display.setSubMenuEnable(true, enable, enable);
+        display.setCanMove(enable);
     }
 
-    protected void search(ISearchView searchView) {
+    protected void search(ISearchView searchView, SearchQuery query) {
         if (searchPresenter == null) {
-            searchPresenter = new SearchPresenter(model.getService(), model.getEventBus(), searchView);
+            searchPresenter = new SearchPresenter(model.getService(), model.getEventBus(), searchView,
+                                                  createSearchDelegate());
             searchPresenter.addTableSelectionModelChangeHandler(new Handler() {
 
                 @Override
                 public void onSelectionChange(SelectionChangeEvent event) {
                     boolean enable = (searchPresenter.getResultSelectedSet().size() > 0);
-                    display.setSubMenuEnable(enable, false, false);
+                    display.setCanMove(false);
                     if (ClientController.account.isAdmin())
                         display.enableExportAs(enable);
                 }
             });
         }
 
-        search();
+        search(query);
     }
 
-    public void search() {
+    public void search(SearchQuery query) {
         display.setMainContent(searchPresenter.getView().asWidget());
-        searchPresenter.search();
+        searchPresenter.search(query);
         mode = Mode.SEARCH;
     }
 
@@ -444,22 +488,14 @@ public class CollectionsPresenter extends AbstractPresenter {
                 handle();
             }
         });
-    }
 
-    private void initEntryViewHandler() {
-        if (showEntryRegistration != null)
-            showEntryRegistration.removeHandler();
-        showEntryRegistration = this.eventBus.addHandler(
-                EntryViewEvent.TYPE,
-                new EntryViewEvent.EntryViewEventHandler() {
-                    @Override
-                    public void onEntryView(EntryViewEvent event) {
-                        if (event == null || event.getContext() == null)
-                            return;
-
-                        showEntryView(event.getContext());
-                    }
-                });
+        display.addQuickAddHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                saveCollection(display.getCollectionInputValue());
+                display.hideQuickAddInput();
+            }
+        });
     }
 
     private void handle() {
@@ -484,7 +520,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             @Override
             public void onSuccess(FolderDetails folder) {
                 if (folder == null) {
-                    display.showFeedbackMessage("Error updating collection. Please try again", true);
+                    display.showFeedbackMessage("Error updating collection.", true);
                     return;
                 }
 
@@ -511,7 +547,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                 MenuItem newItem = new MenuItem(folder.getId(), folder.getName(), folder.getCount());
 
-                if (!folder.isSystemFolder())
+                if (folder.getType() == FolderType.PRIVATE)
                     display.addMenuItem(newItem, deleteHandler);
                 else
                     display.addMenuItem(newItem, null);
@@ -529,9 +565,9 @@ public class CollectionsPresenter extends AbstractPresenter {
      * by adding the selection change handlers
      */
     private void initMenus() {
-        final SingleSelectionModel<MenuItem> userModel = display.getMenuModel(FolderShareType.PRIVATE);
-        final SingleSelectionModel<MenuItem> systemModel = display.getMenuModel(FolderShareType.PUBLIC);
-        final SingleSelectionModel<MenuItem> sharedModel = display.getMenuModel(FolderShareType.SHARED);
+        final SingleSelectionModel<MenuItem> userModel = display.getMenuModel(FolderType.PRIVATE);
+        final SingleSelectionModel<MenuItem> systemModel = display.getMenuModel(FolderType.PUBLIC);
+        final SingleSelectionModel<MenuItem> sharedModel = display.getMenuModel(FolderType.SHARED);
 
         userModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
@@ -578,7 +614,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         folderDataProvider.updateRowCount(0, false);
         display.setDataView(collectionsDataTable);
         display.enableExportAs(false);
-        display.setSubMenuEnable(false, false, false);
+        display.setCanMove(false);
         int limit = collectionsDataTable.getVisibleRange().getLength();
 
         model.retrieveEntriesForFolder(id, new Callback<FolderDetails>() {
@@ -622,19 +658,27 @@ public class CollectionsPresenter extends AbstractPresenter {
             ArrayList<MenuItem> systemMenuItems = new ArrayList<MenuItem>();
             ArrayList<MenuItem> sharedMenuItems = new ArrayList<MenuItem>();
 
+            Collections.sort(folders, new Comparator<FolderDetails>() {
+                @Override
+                public int compare(FolderDetails o1, FolderDetails o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
+
             for (FolderDetails folder : folders) {
                 MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder.getCount());
-                item.setShareType(folder.getShareType());
+                item.setType(folder.getType());
 
-                switch (folder.getShareType()) {
+                switch (folder.getType()) {
                     case PUBLIC:
                         systemMenuItems.add(item);
                         if (ClientController.account.isAdmin())
-                            item.setPermissions(folder.getPermissions());
+                            item.setAccessPermissions(folder.getAccessPermissions(), folder.isPublicReadAccess());
                         break;
 
                     case PRIVATE:
-                        item.setPermissions(folder.getPermissions());
+                        item.setAccessPermissions(folder.getAccessPermissions(), folder.isPublicReadAccess());
+                        item.setPropagatePermission(folder.isPropagatePermission());
                         userMenuItems.add(item);
                         display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                         break;
@@ -662,7 +706,8 @@ public class CollectionsPresenter extends AbstractPresenter {
         }
 
         @Override
-        public void onFailure() {}
+        public void onFailure() {
+        }
     }
 
     //inner classes
@@ -673,12 +718,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             switch (mode) {
                 case COLLECTION:
                 default:
-                    if (collectionsDataTable.getSelectionModel().isAllSelected()) {
-                        return null;
-//                        return folderDataProvider.getData();
-                    } else {
-                        return collectionsDataTable.getSelectedEntrySet();
-                    }
+                    return collectionsDataTable.getSelectedEntrySet();
 
                 case SEARCH:
                     return searchPresenter.getEntrySet();
@@ -720,8 +760,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                         @Override
                         public void onSuccess(FolderDetails result) {
                             ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                            MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result.getCount()
-                            );
+                            MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result.getCount());
                             items.add(updateItem);
                             display.updateMenuItemCounts(items);
 
@@ -738,7 +777,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                         }
 
                         @Override
-                        public void onFailure() {}
+                        public void onFailure() {
+                        }
                     });
         }
     }
@@ -747,7 +787,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-            final EntryInfo toDelete = entryViewPresenter.getCurrentInfo();
+            final PartData toDelete = entryViewPresenter.getCurrentInfo();
             if (toDelete == null)
                 return;
 
@@ -761,7 +801,8 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                 @Override
                 public void onSuccess(ArrayList<FolderDetails> result) {
-                    History.newItem(Page.COLLECTIONS.getLink() + ";id=" + currentFolder.getId());
+                    long id = currentFolder == null ? 0 : currentFolder.getId();
+                    History.newItem(Page.COLLECTIONS.getLink() + ";id=" + id);
                     ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
                     FeedbackEvent event = new FeedbackEvent(false, "Entry deleted successfully");
                     model.getEventBus().fireEvent(event);
@@ -773,8 +814,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                     if (currentFolder.getId() == 0) {
                         ClientController.account.setUserEntryCount(ClientController.account.getUserEntryCount() - 1);
-                        MenuItem myItems = new MenuItem(0, "My Entries",
-                                                        ClientController.account.getUserEntryCount());
+                        MenuItem myItems = new MenuItem(0, "My Entries", ClientController.account.getUserEntryCount());
                         menuItems.add(myItems);
                     }
 
@@ -789,48 +829,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         }
     }
 
-    private class PermissionDelegate implements Delegate<ShareCollectionData> {
-
-        @Override
-        public void execute(final ShareCollectionData data) {
-            IceAsyncCallback<Boolean> asyncCallback;
-
-            if (data.isDelete()) {
-                asyncCallback = new IceAsyncCallback<Boolean>() {
-
-                    @Override
-                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        model.getService().removePermission(ClientController.sessionId, data.getInfo(), callback);
-                    }
-
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        data.getInfoCallback().onSuccess(data.getInfo());
-                    }
-                };
-            } else {
-                if (data.getInfo().isCanWrite()) {
-                    data.getInfo().setType(PermissionInfo.Type.WRITE_FOLDER);
-                } else if (data.getInfo().isCanWrite()) {
-                    data.getInfo().setType(PermissionInfo.Type.READ_FOLDER);
-                }
-
-                asyncCallback = new IceAsyncCallback<Boolean>() {
-
-                    @Override
-                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        model.getService().addPermission(ClientController.sessionId, data.getInfo(), callback);
-                    }
-
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        data.getInfoCallback().onSuccess(data.getInfo());
-                    }
-                };
-            }
-            asyncCallback.go(model.getEventBus());
-        }
-    }
 
     public ICollectionView getView() {
         return display;

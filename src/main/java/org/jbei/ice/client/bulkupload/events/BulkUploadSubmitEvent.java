@@ -4,7 +4,7 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class BulkUploadSubmitEvent extends GwtEvent<BulkUploadSubmitEventHandler> {
 
-    public static Type<BulkUploadSubmitEventHandler> TYPE = new Type<BulkUploadSubmitEventHandler>();
+    public static final Type<BulkUploadSubmitEventHandler> TYPE = new Type<BulkUploadSubmitEventHandler>();
     private final boolean success;
 
     public BulkUploadSubmitEvent(boolean success) {

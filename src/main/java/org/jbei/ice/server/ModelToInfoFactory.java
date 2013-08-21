@@ -1,101 +1,120 @@
 package org.jbei.ice.server;
 
-import org.jbei.ice.client.entry.view.model.SampleStorage;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Parameter;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.shared.dto.*;
-import org.jbei.ice.shared.dto.entry.*;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.Generation;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
-
-import java.util.*;
+import org.jbei.ice.lib.shared.dto.PartSample;
+import org.jbei.ice.lib.shared.dto.StorageInfo;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.Generation;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.PlantType;
+import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.shared.dto.entry.CustomField;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
- * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.shared.dto.entry.EntryInfo} data
- * transfer objects
+ * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.lib.shared.dto.entry.PartData}
+ * data transfer objects
  *
  * @author Hector Plahar
  */
 public class ModelToInfoFactory {
 
-    public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
-                                    Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences, boolean hasSequence,
-                                    boolean hasOriginalSequence) {
-        EntryInfo info;
+    public static PartData getInfo(Entry entry) {
+        PartData info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
             return null;
 
         switch (type) {
             case PLASMID:
-                info = plasmidInfo(account, entry);
+                info = plasmidInfo(entry);
                 break;
 
             case STRAIN:
-                info = strainInfo(account, (Strain) entry);
+                info = strainInfo(entry);
                 break;
 
             case ARABIDOPSIS:
-                info = seedInfo(account, entry);
+                info = seedInfo(entry);
                 break;
 
             case PART:
-                info = partInfo(account, entry);
+                info = partInfo(entry);
                 break;
 
             default:
                 Logger.error("Do not know how to handle entry type " + type);
                 return null;
         }
-
-        if (info == null)
-            return info;
-
-        // get attachments
-        ArrayList<AttachmentInfo> attachmentInfos = getAttachments(attachments);
-        info.setAttachments(attachmentInfos);
-        info.setHasAttachment(!attachmentInfos.isEmpty());
-
-        // get samples
-        ArrayList<SampleStorage> samplesList = new ArrayList<>();
-        if (samples != null) {
-            for (Sample sample : samples.keySet()) {
-                SampleInfo key = getSampleInfo(sample);
-                Storage storage = sample.getStorage();
-                if (storage != null) {
-                    key.setLocationId(String.valueOf(storage.getId()));
-                    key.setLocation(storage.getIndex());
-                }
-
-                LinkedList<Storage> storageList = samples.get(sample);
-                SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(storageList));
-                samplesList.add(sampleStorage);
-            }
-        }
-        info.setSampleMap(samplesList);
-        info.setHasSample(!samplesList.isEmpty());
-
-        // get trace sequences 
-        ArrayList<SequenceAnalysisInfo> analysisInfo = getSequenceAnalysis(sequences);
-        info.setSequenceAnalysis(analysisInfo);
-
-        // has sequence (different from trace sequence above)
-        info.setHasSequence(hasSequence);
-        info.setHasOriginalSequence(hasOriginalSequence);
-
         return info;
+    }
+
+    public static ArrayList<SampleStorage> getSamples(Map<Sample, LinkedList<Storage>> samples) {
+        ArrayList<SampleStorage> samplesList = new ArrayList<>();
+        if (samples == null)
+            return samplesList;
+
+        for (Map.Entry<Sample, LinkedList<Storage>> sample : samples.entrySet()) {
+            PartSample key = getSampleInfo(sample.getKey());
+            Storage storage = sample.getKey().getStorage();
+            if (storage != null) {
+                key.setLocationId(String.valueOf(storage.getId()));
+                key.setLocation(storage.getIndex());
+            }
+
+            SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(sample.getValue()));
+            samplesList.add(sampleStorage);
+        }
+        return samplesList;
+    }
+
+    private static PartSample getSampleInfo(Sample sample) {
+        PartSample part = new PartSample();
+        if (sample == null)
+            return part;
+
+        part.setSampleId(Long.toString(sample.getId()));
+        part.setCreationTime(sample.getCreationTime());
+        part.setLabel(sample.getLabel());
+        part.setNotes(sample.getNotes());
+        part.setDepositor(sample.getDepositor());
+
+        Storage storage = sample.getStorage(); // specific storage to this sample. e.g. Tube
+        if (storage != null) {
+            part.setLocationId(String.valueOf(storage.getId()));
+            part.setLocation(storage.getIndex());
+        }
+        return part;
     }
 
     private static LinkedList<StorageInfo> getStorageListInfo(LinkedList<Storage> storageList) {
@@ -111,7 +130,7 @@ public class ModelToInfoFactory {
         return info;
     }
 
-    private static ArrayList<AttachmentInfo> getAttachments(List<Attachment> attachments) {
+    public static ArrayList<AttachmentInfo> getAttachments(List<Attachment> attachments) {
         ArrayList<AttachmentInfo> infos = new ArrayList<>();
         if (attachments == null)
             return infos;
@@ -126,25 +145,6 @@ public class ModelToInfoFactory {
         }
 
         return infos;
-    }
-
-    private static SampleInfo getSampleInfo(Sample sample) {
-        SampleInfo info = new SampleInfo();
-        if (sample == null)
-            return info;
-
-        info.setSampleId(Long.toString(sample.getId()));
-        info.setCreationTime(sample.getCreationTime());
-        info.setLabel(sample.getLabel());
-        info.setNotes(sample.getNotes());
-        info.setDepositor(sample.getDepositor());
-
-        Storage storage = sample.getStorage(); // specific storage to this sample. e.g. Tube
-        if (storage != null) {
-            info.setLocationId(String.valueOf(storage.getId()));
-            info.setLocation(storage.getIndex());
-        }
-        return info;
     }
 
     public static StorageInfo getStorageInfo(Storage storage) {
@@ -168,18 +168,18 @@ public class ModelToInfoFactory {
             SequenceAnalysisInfo info = new SequenceAnalysisInfo();
             info.setCreated(sequence.getCreationTime());
             info.setName(sequence.getFilename());
-            AccountInfo accountInfo = new AccountInfo();
+            User user = new User();
             try {
                 Account account = accountController.getByEmail(sequence.getDepositor());
                 if (account != null) {
-                    accountInfo.setFirstName(account.getFirstName());
-                    accountInfo.setLastName(account.getLastName());
-                    accountInfo.setId(account.getId());
+                    user.setFirstName(account.getFirstName());
+                    user.setLastName(account.getLastName());
+                    user.setId(account.getId());
                 }
             } catch (ControllerException e) {
                 Logger.warn(e.getMessage());
             }
-            info.setDepositor(accountInfo);
+            info.setDepositor(user);
             infos.add(info);
             info.setFileId(sequence.getFileId());
         }
@@ -187,79 +187,66 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static PartInfo partInfo(Account account, Entry entry) {
-        PartInfo info = new PartInfo();
-        return (PartInfo) getCommon(account, info, entry);
+    private static PartData partInfo(Entry entry) {
+        PartData info = new PartData();
+        return getCommon(info, entry);
     }
 
-    private static ArabidopsisSeedInfo seedInfo(Account account, Entry entry) {
-        ArabidopsisSeedInfo info = new ArabidopsisSeedInfo();
-        info = (ArabidopsisSeedInfo) getCommon(account, info, entry);
+    private static ArabidopsisSeedData seedInfo(Entry entry) {
+        ArabidopsisSeedData data = new ArabidopsisSeedData();
+        data = (ArabidopsisSeedData) getCommon(data, entry);
 
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
 
         if (seed.getPlantType() != null && seed.getPlantType() != ArabidopsisSeed.PlantType.NULL) {
             PlantType type = PlantType.valueOf(seed.getPlantType().name());
-            info.setPlantType(type);
+            data.setPlantType(type);
         }
 
         if (seed.getGeneration() != null && seed.getGeneration() != ArabidopsisSeed.Generation.NULL) {
             Generation generation = Generation.valueOf(seed.getGeneration().name());
-            info.setGeneration(generation);
+            data.setGeneration(generation);
         }
-        info.setHomozygosity(seed.getHomozygosity());
-        info.setEcotype(seed.getEcotype());
-        info.setParents(seed.getParents());
-        info.setHarvestDate(seed.getHarvestDate());
-        boolean isSent = seed.isSentToABRC() == null || !seed.isSentToABRC() ? false : true;
-        info.setSentToAbrc(isSent);
-
-        return info;
+        data.setHomozygosity(seed.getHomozygosity());
+        data.setEcotype(seed.getEcotype());
+        data.setParents(seed.getParents());
+        data.setHarvestDate(seed.getHarvestDate());
+        boolean isSent = !(seed.isSentToABRC() == null || !seed.isSentToABRC());
+        data.setSentToAbrc(isSent);
+        return data;
     }
 
-    private static StrainInfo strainInfo(Account account, Strain strain) {
-        StrainInfo info = new StrainInfo();
-        info = (StrainInfo) getCommon(account, info, strain);
+    private static StrainData strainInfo(Entry entry) {
+        StrainData data = new StrainData();
+        data = (StrainData) getCommon(data, entry);
 
         // strain specific
-        info.setGenotypePhenotype(strain.getGenotypePhenotype());
-        info.setPlasmids(strain.getPlasmids());
-        info.setLinkifiedPlasmids(EntryUtil.linkifyText(account, info.getPlasmids()));
-        info.setHost(strain.getHost());
-        info.setLinkifiedHost(EntryUtil.linkifyText(account, info.getHost()));
-        return info;
+        Strain strain = (Strain) entry;
+        data.setGenotypePhenotype(strain.getGenotypePhenotype());
+        data.setHost(strain.getHost());
+        return data;
     }
 
-    private static PlasmidInfo plasmidInfo(Account account, Entry entry) {
-        PlasmidInfo info = new PlasmidInfo();
-        info = (PlasmidInfo) getCommon(account, info, entry);
+    private static PlasmidData plasmidInfo(Entry entry) {
+        PlasmidData data = new PlasmidData();
+        data = (PlasmidData) getCommon(data, entry);
         Plasmid plasmid = (Plasmid) entry;
 
         // plasmid specific fields
-        info.setBackbone(plasmid.getBackbone());
-        info.setCircular(plasmid.getCircular());
-        info.setOriginOfReplication(plasmid.getOriginOfReplication());
-        info.setPromoters(plasmid.getPromoters());
-
-        // get strains for plasmid
-        Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
-        if (strains != null) {
-            for (Strain strain : strains) {
-                info.getStrains()
-                        .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
-            }
-        }
-
-        return info;
+        data.setBackbone(plasmid.getBackbone());
+        data.setCircular(plasmid.getCircular());
+        data.setOriginOfReplication(plasmid.getOriginOfReplication());
+        data.setPromoters(plasmid.getPromoters());
+        data.setReplicatesIn(plasmid.getReplicatesIn());
+        return data;
     }
 
-    private static EntryInfo getCommon(Account account, EntryInfo info, Entry entry) {
+    private static PartData getCommon(PartData info, Entry entry) {
         info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
-        info.setPartId(EntryUtil.getPartNumbersAsString(entry));
-        info.setVersionId(entry.getVersionId());
-        info.setName(entry.getNamesAsString());
+        info.setPartId(entry.getPartNumber());
+        info.setName(entry.getName());
         info.setOwner(entry.getOwner());
         info.setOwnerEmail(entry.getOwnerEmail());
         info.setCreator(entry.getCreator());
@@ -269,109 +256,101 @@ public class ModelToInfoFactory {
         try {
             long ownerId = accountController.getAccountId(entry.getOwnerEmail());
             info.setOwnerId(ownerId);
-            if (entry.getCreatorEmail() != null) {
+            if (entry.getCreatorEmail() != null && !entry.getCreatorEmail().isEmpty()) {
                 long creatorId = accountController.getAccountId(entry.getCreatorEmail());
                 info.setCreatorId(creatorId);
             }
         } catch (ControllerException ce) {
+            Logger.warn(ce.getMessage());
         }
 
         info.setAlias(entry.getAlias());
         info.setKeywords(entry.getKeywords());
         info.setStatus(entry.getStatus());
         info.setShortDescription(entry.getShortDescription());
-        info.setCreationTime(entry.getCreationTime());
-        info.setModificationTime(entry.getModificationTime());
+        info.setCreationTime(entry.getCreationTime().getTime());
+        info.setModificationTime(entry.getModificationTime().getTime());
         info.setBioSafetyLevel(entry.getBioSafetyLevel());
 
         info.setLongDescription(entry.getLongDescription());
-        info.setLongDescriptionType(entry.getLongDescriptionType());
         info.setIntellectualProperty(entry.getIntellectualProperty());
         info.setSelectionMarkers(entry.getSelectionMarkersAsString());
 
+        // funding sources
         if (!entry.getEntryFundingSources().isEmpty()) {
-            EntryFundingSource source = entry.getEntryFundingSources().iterator().next();
+            Iterator iterator = entry.getEntryFundingSources().iterator();
+            EntryFundingSource source = (EntryFundingSource) iterator.next();
             info.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
             info.setFundingSource(source.getFundingSource().getFundingSource());
+
+            while (iterator.hasNext()) {
+                String pi = ((EntryFundingSource) iterator.next()).getFundingSource().getPrincipalInvestigator();
+                String fs = ((EntryFundingSource) iterator.next()).getFundingSource().getFundingSource();
+
+                if (pi != null && !pi.trim().isEmpty()) {
+                    info.setPrincipalInvestigator(info.getPrincipalInvestigator() + ", " + pi);
+                }
+
+                if (fs != null && !fs.trim().isEmpty()) {
+                    info.setFundingSource(info.getFundingSource() + ", " + fs);
+                }
+            }
+        }
+
+        // linked entries
+        for (Entry linkedEntry : entry.getLinkedEntries()) {
+            PartData data = new PartData();
+            EntryType linkedType = EntryType.nameToType(linkedEntry.getRecordType());
+            data.setType(linkedType);
+            data.setId(linkedEntry.getId());
+            data.setPartId(linkedEntry.getPartNumber());
+            data.setName(linkedEntry.getName());
+            info.getLinkedParts().add(data);
         }
 
         info.setLinks(entry.getLinksAsString());
-        ArrayList<ParameterInfo> params = new ArrayList<>();
+        ArrayList<CustomField> params = new ArrayList<>();
 
         if (entry.getParameters() != null) {
             for (Parameter parameter : entry.getParameters()) {
-                ParameterInfo paramInfo = new ParameterInfo();
+                CustomField paramInfo = new CustomField();
                 paramInfo.setName(parameter.getKey());
                 paramInfo.setValue(parameter.getValue());
-                paramInfo.setType(ParameterType.valueOf(parameter.getParameterType().name()));
                 params.add(paramInfo);
             }
         }
-        info.setParameters(params);
+        info.setCustomFields(params);
 
         // get visibility
         info.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 
-        String parsed = EntryUtil.getParsedNotes(entry.getLongDescriptionType());
         info.setLongDescription(entry.getLongDescription());
-        info.setParsedDescription(parsed);
-        if (account != null) {
-            String parsedShortDesc = EntryUtil.linkifyText(account, entry.getShortDescription());
-            info.setLinkifiedShortDescription(parsedShortDesc);
+        info.setShortDescription(entry.getShortDescription());
 
-            String linkStr = "";
-            if (entry.getLinks() != null) {
-                for (Link link : entry.getLinks()) {
-                    if (link.getLink() != null && !link.getLink().isEmpty())
-                        linkStr += (link.getLink() + ", ");
-                    else if (link.getUrl() != null && !link.getUrl().isEmpty())
-                        linkStr += (link.getUrl() + ", ");
-                }
-                if (!linkStr.isEmpty())
-                    linkStr = linkStr.substring(0, linkStr.length() - 1);
+        String links = "";
+        StringBuilder linkStr = new StringBuilder();
+        if (entry.getLinks() != null) {
+            for (Link link : entry.getLinks()) {
+                if (link.getLink() != null && !link.getLink().isEmpty()) {
+                    linkStr.append(link.getLink()).append(", ");
+                } else if (link.getUrl() != null && !link.getUrl().isEmpty())
+                    linkStr.append(link.getUrl()).append(", ");
             }
-            String parsedLinks = EntryUtil.linkifyText(account, linkStr);
-            info.setLinkifiedLinks(parsedLinks);
-            String parsedReferences = EntryUtil.linkifyText(account, entry.getReferences());
-            info.setReferences(parsedReferences);
+
+            links = linkStr.toString();
+            if (!links.isEmpty())
+                links = links.substring(0, links.length() - 1);
         }
+        info.setLinks(links);
+        info.setReferences(entry.getReferences());
         return info;
     }
 
-    public static EntryInfo getSummaryInfo(Entry entry) {
-        EntryInfo info = null;
-        EntryType type = EntryType.nameToType(entry.getRecordType());
-
-        switch (type) {
-            case ARABIDOPSIS:
-                info = new ArabidopsisSeedInfo();
-                break;
-
-            case PART:
-                info = new PartInfo();
-                break;
-
-            case PLASMID:
-                info = new PlasmidInfo();
-                break;
-
-            case STRAIN:
-                info = new StrainInfo();
-                break;
-        }
-
-        info.setId(entry.getId());
-        info.setRecordId(entry.getRecordId());
-        info.setPartId(EntryUtil.getPartNumbersAsString(entry));
-        info.setName(entry.getNamesAsString());
-        return info;
-    }
-
-    private static void getTipViewCommon(EntryInfo view, Entry entry) {
+    private static void getTipViewCommon(PartData view, Entry entry) {
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
-        view.setPartId(EntryUtil.getPartNumbersAsString(entry));
-        view.setName(entry.getNamesAsString());
+        view.setPartId(entry.getPartNumber());
+        view.setName(entry.getName());
         view.setAlias(entry.getAlias());
         view.setCreator(entry.getCreator());
         view.setCreatorEmail(entry.getCreatorEmail());
@@ -389,32 +368,43 @@ public class ModelToInfoFactory {
             if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
                 view.setCreatorId(account1.getId());
         } catch (ControllerException ce) {
+            Logger.warn(ce.getMessage());
         }
 
         view.setKeywords(entry.getKeywords());
         view.setShortDescription(entry.getShortDescription());
-        view.setCreationTime(entry.getCreationTime());
-        view.setModificationTime(entry.getModificationTime());
+        view.setCreationTime(entry.getCreationTime().getTime());
+        view.setModificationTime(entry.getModificationTime().getTime());
         view.setBioSafetyLevel(entry.getBioSafetyLevel());
         if (!entry.getEntryFundingSources().isEmpty()) {
             EntryFundingSource source = entry.getEntryFundingSources().iterator().next();
             view.setFundingSource(source.getFundingSource().getFundingSource());
             view.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
         }
+
+        for (Entry linkedEntry : entry.getLinkedEntries()) {
+            PartData data = new PartData();
+            EntryType linkedType = EntryType.nameToType(linkedEntry.getRecordType());
+            data.setType(linkedType);
+            data.setId(linkedEntry.getId());
+            data.setPartId(linkedEntry.getPartNumber());
+            data.setName(linkedEntry.getName());
+            view.getLinkedParts().add(data);
+        }
     }
 
-    public static EntryInfo createTableViewData(Entry entry, boolean includeOwnerInfo) {
+    public static PartData createTableViewData(Entry entry, boolean includeOwnerInfo) {
         if (entry == null)
             return null;
         EntryType type = EntryType.nameToType(entry.getRecordType());
-        EntryInfo view = new EntryInfo();
+        PartData view = new PartData();
         view.setType(type);
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
-        view.setPartId(EntryUtil.getPartNumbersAsString(entry));
-        view.setName(entry.getNamesAsString());
+        view.setPartId(entry.getPartNumber());
+        view.setName(entry.getName());
         view.setShortDescription(entry.getShortDescription());
-        view.setCreationTime(entry.getCreationTime());
+        view.setCreationTime(entry.getCreationTime().getTime());
         view.setStatus(entry.getStatus());
         if (includeOwnerInfo) {
             view.setOwner(entry.getOwner());
@@ -429,6 +419,7 @@ public class ModelToInfoFactory {
                 if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
                     view.setCreatorId(account1.getId());
             } catch (ControllerException ce) {
+                Logger.warn(ce.getMessage());
             }
         }
 
@@ -453,8 +444,8 @@ public class ModelToInfoFactory {
         // has sequence
         try {
             SequenceController sequenceController = ControllerFactory.getSequenceController();
-            view.setHasSequence(sequenceController.hasSequence(entry));
-            view.setHasOriginalSequence(sequenceController.hasOriginalSequence(entry));
+            view.setHasSequence(sequenceController.hasSequence(entry.getId()));
+            view.setHasOriginalSequence(sequenceController.hasOriginalSequence(entry.getId()));
         } catch (ControllerException e) {
             Logger.error(e);
         }
@@ -462,12 +453,12 @@ public class ModelToInfoFactory {
         return view;
     }
 
-    public static EntryInfo createTipView(Account account, Entry entry) {
+    public static PartData createTipView(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         switch (type) {
 
             case STRAIN: {
-                StrainInfo view = new StrainInfo();
+                StrainData view = new StrainData();
 
                 // common
                 getTipViewCommon(view, entry);
@@ -476,14 +467,11 @@ public class ModelToInfoFactory {
                 Strain strain = (Strain) entry;
                 view.setHost(strain.getHost());
                 view.setGenotypePhenotype(strain.getGenotypePhenotype());
-                view.setLinkifiedHost(EntryUtil.linkifyText(account, strain.getHost()));
-                view.setPlasmids(strain.getPlasmids());
-                view.setLinkifiedPlasmids(EntryUtil.linkifyText(account, strain.getPlasmids()));
                 return view;
             }
 
             case ARABIDOPSIS: {
-                ArabidopsisSeedInfo view = new ArabidopsisSeedInfo();
+                ArabidopsisSeedData view = new ArabidopsisSeedData();
                 getTipViewCommon(view, entry);
 
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -501,28 +489,20 @@ public class ModelToInfoFactory {
             }
 
             case PART: {
-                PartInfo view = new PartInfo();
+                PartData view = new PartData();
                 getTipViewCommon(view, entry);
                 return view;
             }
 
             case PLASMID: {
-                PlasmidInfo view = new PlasmidInfo();
+                PlasmidData view = new PlasmidData();
                 getTipViewCommon(view, entry);
 
                 Plasmid plasmid = (Plasmid) entry;
                 view.setBackbone(plasmid.getBackbone());
                 view.setOriginOfReplication(plasmid.getOriginOfReplication());
                 view.setPromoters(plasmid.getPromoters());
-
-                // get strains for plasmid
-                Set<Strain> strains = EntryUtil.getStrainsForPlasmid(plasmid);
-                if (strains != null) {
-                    for (Strain strain : strains) {
-                        view.getStrains().put(strain.getId(), strain.getOnePartNumber().getPartNumber());
-                    }
-                }
-
+                view.setReplicatesIn(plasmid.getReplicatesIn());
                 return view;
             }
 

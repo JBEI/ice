@@ -29,7 +29,7 @@
     color: #4b4a4a;
     text-shadow: #ddf 1px 1px 0;
     overflow: hidden;
-    background-color: #eaeaea;
+    background-color: #ececec;
     font-size: 0.70em;
     white-space: nowrap;
     border-right: 1px solid #ccc;
@@ -45,8 +45,9 @@
     color: #333;
     font-family: arial;
     overflow: hidden;
-    border-right: 1px solid #ccc;
-    border-top: 1px solid #ccc;
+    border-right: 1px solid #dedede;
+    border-top: 1px solid #dedede;
+    background-color: #fefefe;
 }
 
 .cellTableFirstColumnFooter {

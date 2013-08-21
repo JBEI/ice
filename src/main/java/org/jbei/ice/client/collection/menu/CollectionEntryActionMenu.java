@@ -60,14 +60,12 @@ public class CollectionEntryActionMenu implements IsWidget {
     }
 
     private final FlexTable menuHolder;
-
     private final AddToMenuItem<OptionSelect> add;
     private final Button removeButton;
     private final AddToMenuItem<OptionSelect> move;
-    private final static int WIDTH = 240;
+    private static final int WIDTH = 240;
 
     public CollectionEntryActionMenu() {
-
         this.menuHolder = new FlexTable();
         this.menuHolder.setWidth(WIDTH + "px");
         this.menuHolder.setCellPadding(0);
@@ -120,11 +118,6 @@ public class CollectionEntryActionMenu implements IsWidget {
         this.move.addOption(option);
     }
 
-    public void setOptions(List<OptionSelect> options) {
-        this.add.setOptions(options);
-        this.move.setOptions(options);
-    }
-
     public List<OptionSelect> getSelectedOptions(boolean add) {
         if (add)
             return this.add.getSelectedItems();
@@ -149,9 +142,22 @@ public class CollectionEntryActionMenu implements IsWidget {
         this.removeButton.addClickHandler(handler);
     }
 
-    public void setEnable(boolean enableAddTo, boolean enableRemove, boolean enableMoveTo) {
-        this.add.setEnabled(enableAddTo);
-        this.removeButton.setEnabled(enableRemove);
-        this.move.setEnabled(enableMoveTo);
+    /**
+     * enables or disables the moveTo and remove button. Both actions move entries out of current folder
+     *
+     * @param canMove whether user can move entries out of this folder
+     */
+    public void setCanMove(boolean canMove) {
+        this.removeButton.setEnabled(canMove);
+        this.move.setEnabled(canMove);
+    }
+
+    /**
+     * enables or disables the add button.
+     *
+     * @param canAdd whether user can add current entry to another folder or not
+     */
+    public void setCanAdd(boolean canAdd) {
+        this.add.setEnabled(canAdd);
     }
 }

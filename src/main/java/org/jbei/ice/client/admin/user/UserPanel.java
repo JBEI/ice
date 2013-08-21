@@ -2,7 +2,9 @@ package org.jbei.ice.client.admin.user;
 
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.client.common.widget.GenericPopup;
+import org.jbei.ice.client.common.widget.ICanReset;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -47,8 +49,8 @@ public class UserPanel extends Composite implements IAdminPanel {
         addCreateAccountHandler();
     }
 
-    public AccountInfo getNewUserDetails() {
-        AccountInfo info = new AccountInfo();
+    public User getNewUserDetails() {
+        User info = new User();
         info.setEmail(dialog.getUserId());
         info.setFirstName(dialog.getFirstName());
         info.setLastName(dialog.getLastName());
@@ -86,11 +88,8 @@ public class UserPanel extends Composite implements IAdminPanel {
             dialog.showPassword(result);
     }
 
-    private class RegistrationDialog extends Composite {
+    private class RegistrationDialog extends Composite implements ICanReset {
 
-        private DialogBox box;
-        private Button submit;
-        private Label cancel;
         private TextBox givenName;
         private TextBox familyName;
         private TextBox userId;
@@ -99,6 +98,7 @@ public class UserPanel extends Composite implements IAdminPanel {
         private Label alreadyRegistered;
         private HTMLPanel userIdPanel;
         private FlexTable inputTable;
+        private GenericPopup popup;
 
         public RegistrationDialog() {
             initComponents();
@@ -108,14 +108,12 @@ public class UserPanel extends Composite implements IAdminPanel {
             initWidget(inputTable);
 
             layoutElements();
-            box.setWidget(this);
-
-            // handlers
-            addCancelHandler();
+            String html = "<b>New user registration</b>";
+            popup = new GenericPopup(this, html, "450px");
         }
 
         public void addSubmitHandler(final ClickHandler handler) {
-            submit.addClickHandler(new ClickHandler() {
+            popup.addSaveButtonHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     if (!validates())
@@ -172,12 +170,6 @@ public class UserPanel extends Composite implements IAdminPanel {
         }
 
         private void initComponents() {
-            submit = new Button("Submit");
-            cancel = new Label("Cancel");
-            cancel.setStyleName("footer_feedback_widget");
-            cancel.addStyleName("font-80em");
-            cancel.addStyleName("display-inline");
-
             givenName = createStandardTextBox("205px");
             familyName = createStandardTextBox("205px");
             userId = createStandardTextBox("205px");
@@ -189,13 +181,6 @@ public class UserPanel extends Composite implements IAdminPanel {
             alreadyRegistered.addStyleName("font-70em");
 
             userIdPanel = new HTMLPanel("<span id=\"email_input_box\"></span> <span id=\"email_error_msg\"></span>");
-
-            box = new DialogBox();
-            box.setWidth("380px");
-            box.setModal(true);
-            box.setHTML("Enter registration information for new user");
-            box.setGlassEnabled(true);
-            box.setGlassStyleName("dialog_box_glass");
         }
 
         private void layoutElements() {
@@ -227,16 +212,6 @@ public class UserPanel extends Composite implements IAdminPanel {
             inputTable.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
             inputTable.getFlexCellFormatter().setWidth(row, 0, "100px");
             inputTable.setWidget(row, 1, aboutYourself);
-
-            HTMLPanel buttonPanel = new HTMLPanel(
-                    "<span id=\"submit_button\"></span> <span id=\"registration_cancel_link\"></span>");
-            buttonPanel.add(submit, "submit_button");
-            buttonPanel.add(cancel, "registration_cancel_link");
-
-            row += 1;
-            inputTable.getFlexCellFormatter().setColSpan(row, 0, 2);
-            inputTable.setWidget(row, 0, buttonPanel);
-            inputTable.getCellFormatter().setHorizontalAlignment(row, 0, HasAlignment.ALIGN_CENTER);
         }
 
         private void createLabel(String label, int row, boolean required) {
@@ -249,15 +224,6 @@ public class UserPanel extends Composite implements IAdminPanel {
             inputTable.setHTML(row, 0, html);
             inputTable.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
             inputTable.getFlexCellFormatter().setWidth(row, 0, "100px");
-        }
-
-        protected void addCancelHandler() {
-            cancel.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    box.hide();
-                }
-            });
         }
 
         protected TextBox createStandardTextBox(String width) {
@@ -277,7 +243,7 @@ public class UserPanel extends Composite implements IAdminPanel {
         }
 
         public void showDialog() {
-            box.center();
+            popup.showDialog();
         }
 
         public void showPassword(String password) {
@@ -290,40 +256,29 @@ public class UserPanel extends Composite implements IAdminPanel {
 
             int row = inputTable.getRowCount() - 1;
             inputTable.getFlexCellFormatter().setColSpan(row, 0, 2);
-            cancel.setText("Close");
             inputTable.setHTML(row, 0, message);
-
-            row += 1;
-            inputTable.getFlexCellFormatter().setColSpan(row, 0, 2);
-            cancel.setText("Close");
-            inputTable.setWidget(row, 0, cancel);
-            inputTable.getCellFormatter().setHorizontalAlignment(row, 0, HasAlignment.ALIGN_RIGHT);
         }
 
         public void showError() {
             String message = "<div style=\"padding: 8px 14px; font-size: 14px; text-shadow: 0 1px 0 #f3f3f3; "
                     + "background-color: #f2dede; border-color: #b94a48; border-radius: 4px;\">"
-                    + "<i style=\"color: #b94a48\" class=\"" + FAIconType.BAN_CIRCLE.getStyleName()
+                    + "<i style=\"color: #b94a48\" class=\"" + FAIconType.WARNING_SIGN.getStyleName()
                     + "\"></i>Error creating account. Try again or contact the site admin.</div>";
 
             int row = inputTable.getRowCount() - 1;
             inputTable.getFlexCellFormatter().setColSpan(row, 0, 2);
             inputTable.setHTML(row, 0, message);
-
-            row += 1;
-            HTMLPanel buttonPanel = new HTMLPanel(
-                    "<span id=\"submit_button\"></span> <span id=\"registration_cancel_link\"></span>");
-            buttonPanel.add(submit, "submit_button");
-            buttonPanel.add(cancel, "registration_cancel_link");
-
-            inputTable.getFlexCellFormatter().setColSpan(row, 0, 2);
-            inputTable.setWidget(row, 0, buttonPanel);
-            inputTable.getCellFormatter().setHorizontalAlignment(row, 0, HasAlignment.ALIGN_CENTER);
         }
 
         public void showAlreadyRegisteredEmailAlert() {
             userId.setStyleName("input_box_error");
             userIdPanel.add(alreadyRegistered, "email_error_msg");
+        }
+
+        @Override
+        public void reset() {
+            // TODO
+            //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 }

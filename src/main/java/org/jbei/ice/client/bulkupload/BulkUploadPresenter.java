@@ -19,19 +19,21 @@ import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.bulkupload.model.BulkUploadModel;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
+import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.Sheet;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -57,7 +59,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>();
     private ServiceDelegate<BulkUploadAutoUpdate> autoUpdateDelegate;
     private ServiceDelegate<PreferenceInfo> updatePreferenceDelegate;
-    private ServiceDelegate<Set<GroupInfo>> updatePermissionDelegate;
+    private ServiceDelegate<Set<UserGroup>> updatePermissionDelegate;
+    private ServiceDelegate<HashMap<Long, SheetCellData>> fileDelete;
 
     public BulkUploadPresenter(RegistryServiceAsync service, HandlerManager eventBus, final IBulkUploadView display) {
         super(service, eventBus);
@@ -91,6 +94,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
         enableAutoUpdate();
         createPreferenceDelegate();
         createPermissionDelegate();
+        createFileDeleteDelegate();
 
         view.setPermissionDelegate(updatePermissionDelegate);
     }
@@ -99,26 +103,26 @@ public class BulkUploadPresenter extends AbstractPresenter {
      * Initializes delegate for updating bulk upload permissions
      */
     protected void createPermissionDelegate() {
-        updatePermissionDelegate = new ServiceDelegate<Set<GroupInfo>>() {
+        updatePermissionDelegate = new ServiceDelegate<Set<UserGroup>>() {
             @Override
-            public void execute(final Set<GroupInfo> selected) {
+            public void execute(final Set<UserGroup> selected) {
                 new IceAsyncCallback<Long>() {
 
                     @Override
                     protected void callService(AsyncCallback<Long> callback) throws AuthenticationException {
-                        ArrayList<PermissionInfo> infos = new ArrayList<PermissionInfo>();
-                        for (GroupInfo select : selected) {
+                        ArrayList<AccessPermission> accesses = new ArrayList<AccessPermission>();
+                        for (UserGroup select : selected) {
                             if (select.getId() == 0) {
                                 continue;
                             }
-                            PermissionInfo permissionInfo = new PermissionInfo();
-                            permissionInfo.setType(PermissionInfo.Type.READ_ENTRY);
-                            permissionInfo.setArticle(PermissionInfo.Article.GROUP);
-                            permissionInfo.setArticleId(select.getId());
-                            infos.add(permissionInfo);
+                            AccessPermission accessPermission = new AccessPermission();
+                            accessPermission.setType(AccessPermission.Type.READ_ENTRY);
+                            accessPermission.setArticle(AccessPermission.Article.GROUP);
+                            accessPermission.setArticleId(select.getId());
+                            accesses.add(accessPermission);
                         }
                         service.updateBulkUploadPermissions(ClientController.sessionId, currentInput.getId(),
-                                                            currentInput.getImportType(), infos, callback);
+                                                            currentInput.getImportType(), accesses, callback);
                     }
 
                     @Override
@@ -126,6 +130,35 @@ public class BulkUploadPresenter extends AbstractPresenter {
                         currentInput.setId(result);
                     }
                 }.go(eventBus);
+            }
+        };
+    }
+
+    protected void createFileDeleteDelegate() {
+        fileDelete = new ServiceDelegate<HashMap<Long, SheetCellData>>() {
+            @Override
+            public void execute(HashMap<Long, SheetCellData> map) {
+                Map.Entry<Long, SheetCellData> datum = (Map.Entry<Long, SheetCellData>) map.entrySet().toArray()[0];
+                final long entryId = datum.getKey();
+                final SheetCellData sheetCellData = datum.getValue();
+                final EntryField field = sheetCellData.getTypeHeader();
+
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        if (field == EntryField.SEQ_FILENAME || field.toString().contains("Sequence File")) {
+                            service.removeSequence(ClientController.sessionId, entryId, callback);
+                        } else if (field == EntryField.ATT_FILENAME || field.toString().contains("Attachment File")) {
+                            service.deleteEntryAttachment(ClientController.sessionId, sheetCellData.getId(), callback);
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                    }
+                }.go(eventBus);
+
             }
         };
     }
@@ -249,6 +282,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     // otherwise create a new sheet and retrieve associated data
                     Sheet sheet = new Sheet(selection, updatePreferenceDelegate);
                     sheet.setAutoUpdateDelegate(autoUpdateDelegate);
+                    sheet.setDeleteEntryFileDelegate(fileDelete);
                     currentInput = new NewBulkInput(selection, sheet);
                     sheetCache.put(selection, currentInput);
                     model.retrieveStorageSchemes(selection, currentInput, null);
@@ -355,15 +389,15 @@ public class BulkUploadPresenter extends AbstractPresenter {
      * Retrieves groups for assigning read access to the bulk upload
      */
     private void retrieveGroups() {
-        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+        new IceAsyncCallback<ArrayList<UserGroup>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<ArrayList<UserGroup>> callback) throws AuthenticationException {
                 service.retrieveUserGroups(ClientController.sessionId, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<GroupInfo> result) {
+            public void onSuccess(ArrayList<UserGroup> result) {
                 view.setPermissionGroups(result);
             }
         }.go(eventBus);
@@ -488,9 +522,10 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     }
 
                     BulkUploadInfo info = event.getData().get(0);
-                    EntryInfo firstEntry = info.getEntryList().isEmpty() ? null : info.getEntryList().get(0);
+                    PartData firstEntry = info.getEntryList().isEmpty() ? null : info.getEntryList().get(0);
                     Sheet sheet = new Sheet(info.getType(), updatePreferenceDelegate, info);
                     sheet.setAutoUpdateDelegate(autoUpdateDelegate);
+                    sheet.setDeleteEntryFileDelegate(fileDelete);
                     currentInput = new NewBulkInput(info.getType(), sheet);
                     currentInput.setId(info.getId());
 //                    if (firstEntry != null) {
@@ -499,11 +534,11 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
                     // bulk upload permissions
                     ArrayList<OptionSelect> groups = new ArrayList<OptionSelect>();
-                    for (PermissionInfo permissionInfo : info.getPermissions()) {
-                        if (permissionInfo.getArticle() != PermissionInfo.Article.GROUP)
+                    for (AccessPermission accessPermission : info.getAccessPermissions()) {
+                        if (accessPermission.getArticle() != AccessPermission.Article.GROUP)
                             continue;
 
-                        groups.add(new OptionSelect(permissionInfo.getArticleId(), permissionInfo.getDisplay()));
+                        groups.add(new OptionSelect(accessPermission.getArticleId(), accessPermission.getDisplay()));
                     }
                     view.setSelectedPermissionGroups(groups);
 

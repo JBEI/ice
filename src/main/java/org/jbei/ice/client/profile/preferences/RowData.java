@@ -1,7 +1,7 @@
 package org.jbei.ice.client.profile.preferences;
 
-import org.jbei.ice.shared.dto.search.SearchBoostField;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 /**
  * Wrapper around entry defaults and search settings

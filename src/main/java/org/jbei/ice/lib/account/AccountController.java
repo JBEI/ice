@@ -14,20 +14,20 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.authentication.IAuthentication;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
-import org.jbei.ice.lib.authentication.LocalBackend;
+import org.jbei.ice.lib.authentication.UserIdAuthentication;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.session.PersistentSessionDataWrapper;
+import org.jbei.ice.lib.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountResults;
-import org.jbei.ice.shared.dto.AccountType;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * ABI to manipulate {@link Account} objects.
@@ -113,6 +113,25 @@ public class AccountController {
     }
 
     /**
+     * validates the account dto to ensure that the fields required (especially by the database)
+     * are present
+     *
+     * @param user account dto for validation
+     * @throws ControllerException if validation fails
+     */
+    private void validateRequiredAccountFields(User user) throws ControllerException {
+        if (user.getFirstName() == null || user.getFirstName().trim().isEmpty())
+            throw new ControllerException("Account first name is required");
+
+        if (user.getLastName() == null || user.getLastName().trim().isEmpty())
+            throw new ControllerException("Account last name is required");
+
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            throw new ControllerException("Cannot create account without user id");
+        }
+    }
+
+    /**
      * Creates a new account using the parameters passed. A random password is initially generated ,
      * encrypted and assigned to the account
      *
@@ -121,12 +140,11 @@ public class AccountController {
      * @return generated password
      * @throws ControllerException in the event email is already assigned to another user or is empty
      */
-    public String createNewAccount(AccountInfo info, boolean sendEmail) throws ControllerException {
-        String email = info.getEmail().trim();
-        if (email == null || email.isEmpty()) {
-            throw new ControllerException("Cannot create account without user id");
-        }
+    public String createNewAccount(User info, boolean sendEmail) throws ControllerException {
+        // validate fields required by the database
+        validateRequiredAccountFields(info);
 
+        String email = info.getEmail().trim();
         if (getByEmail(email) != null) {
             throw new ControllerException("Account with id \"" + email + "\" already exists");
         }
@@ -164,7 +182,7 @@ public class AccountController {
         String subject = "Account created successfully";
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("Dear " + info.getEmail() + ", ")
+        stringBuilder.append("Dear ").append(info.getEmail()).append(", ")
                      .append("\n\nThank you for creating a ")
                      .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
                      .append(" account. \nBy accessing ")
@@ -371,13 +389,13 @@ public class AccountController {
         SessionData result = null;
         Account account;
         try {
-            IAuthentication authentication = new LocalBackend();
+            IAuthentication authentication = new UserIdAuthentication();
             account = authentication.authenticate(login, password);
         } catch (AuthenticationException e2) {
             throw new ControllerException(e2);
         } catch (InvalidCredentialsException e) {
             try {
-                Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password bruteforce hacking
+                Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password brute force hacking
             } catch (InterruptedException ie) {
                 throw new ControllerException(ie);
             }
@@ -415,25 +433,24 @@ public class AccountController {
      *
      * @param login
      * @param password
-     * @return {@link AccountInfo}
+     * @return {@link org.jbei.ice.lib.shared.dto.user.User}
      * @throws InvalidCredentialsException
      * @throws ControllerException
      */
-    public AccountInfo authenticate(String login, String password)
-            throws InvalidCredentialsException, ControllerException {
+    public User authenticate(String login, String password) throws InvalidCredentialsException, ControllerException {
         SessionData sessionData = authenticate(login, password, "");
         if (sessionData == null)
             return null;
 
         Account account = sessionData.getAccount();
-        AccountInfo info = Account.toDTO(account);
+        User info = Account.toDTO(account);
         if (info == null)
             return info;
 
         info.setLastLogin(account.getLastLoginTime());
         info.setId(account.getId());
-        boolean isModerator = isAdministrator(account);
-        info.setAdmin(isModerator);
+        boolean isAdmin = isAdministrator(account);
+        info.setAdmin(isAdmin);
         info.setSessionId(sessionData.getSessionKey());
         return info;
     }
@@ -523,9 +540,9 @@ public class AccountController {
         }
     }
 
-    public Set<Account> getMatchingAccounts(String query, int limit) throws ControllerException {
+    public Set<Account> getMatchingAccounts(Account account, String query, int limit) throws ControllerException {
         try {
-            return dao.getMatchingAccounts(query, limit);
+            return dao.getMatchingAccounts(account, query, limit);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -542,9 +559,9 @@ public class AccountController {
             EntryController entryController = ControllerFactory.getEntryController();
             LinkedList<Account> accounts = dao.retrieveAccounts(start, limit);
 
-            ArrayList<AccountInfo> infos = new ArrayList<>();
+            ArrayList<User> infos = new ArrayList<>();
             for (Account userAccount : accounts) {
-                AccountInfo info = new AccountInfo();
+                User info = new User();
                 long count;
                 try {
                     count = entryController.getNumberOfOwnerEntries(userAccount, userAccount.getEmail());

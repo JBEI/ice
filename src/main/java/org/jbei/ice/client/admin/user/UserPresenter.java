@@ -5,8 +5,8 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -38,19 +38,19 @@ public class UserPresenter extends AdminPanelPresenter {
         this.view.setRegistrationHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final AccountInfo newUser = view.getNewUserDetails();
+                final User newUser = view.getNewUserDetails();
                 if (newUser == null || newUser.getEmail().trim().isEmpty())
                     return;
 
-                new IceAsyncCallback<AccountInfo>() {
+                new IceAsyncCallback<User>() {
 
                     @Override
-                    protected void callService(AsyncCallback<AccountInfo> callback) throws AuthenticationException {
+                    protected void callService(AsyncCallback<User> callback) throws AuthenticationException {
                         service.retrieveAccount(newUser.getEmail().trim(), callback);
                     }
 
                     @Override
-                    public void onSuccess(AccountInfo result) {
+                    public void onSuccess(User result) {
                         view.informOfDuplicateRegistrationEmail();
                     }
 
@@ -63,7 +63,7 @@ public class UserPresenter extends AdminPanelPresenter {
         });
     }
 
-    protected void saveNewAccount(final AccountInfo newUser) {
+    protected void saveNewAccount(final User newUser) {
         new IceAsyncCallback<String>() {
 
             @Override

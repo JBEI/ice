@@ -2,7 +2,7 @@ package org.jbei.ice.client.admin.user;
 
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.table.cell.UrlCell;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.EditTextCell;
@@ -24,7 +24,7 @@ import com.google.gwt.view.client.ProvidesKey;
  *
  * @author Hector Plahar
  */
-public class UserTable extends CellTable<AccountInfo> {
+public class UserTable extends CellTable<User> {
 
     protected interface UserTableResources extends Resources {
 
@@ -52,7 +52,7 @@ public class UserTable extends CellTable<AccountInfo> {
      */
     private void setSelectionModel() {
         selectionModel = new UserTableSelectionModel();
-        setSelectionModel(selectionModel, DefaultSelectionEventManager.<AccountInfo>createCheckboxManager());
+        setSelectionModel(selectionModel, DefaultSelectionEventManager.<User>createCheckboxManager());
     }
 
     private void createColumns() {
@@ -70,9 +70,9 @@ public class UserTable extends CellTable<AccountInfo> {
 
     private void createSelectionColumn() {
 
-        Column<AccountInfo, Boolean> checkColumn = new Column<AccountInfo, Boolean>(new CheckboxCell(true, false)) {
+        Column<User, Boolean> checkColumn = new Column<User, Boolean>(new CheckboxCell(true, false)) {
             @Override
-            public Boolean getValue(AccountInfo object) {
+            public Boolean getValue(User object) {
                 return selectionModel.isSelected(object);
             }
         };
@@ -81,24 +81,24 @@ public class UserTable extends CellTable<AccountInfo> {
     }
 
     private void createFirstNameColumn() {
-        Column<AccountInfo, String> firstNameColumn = new Column<AccountInfo, String>(
+        Column<User, String> firstNameColumn = new Column<User, String>(
                 new EditTextCell()) {
             @Override
-            public String getValue(AccountInfo object) {
+            public String getValue(User object) {
                 return object.getFirstName();
             }
         };
 
         firstNameColumn.setSortable(false);
-        //        sortHandler.setComparator(firstNameColumn, new Comparator<AccountInfo>() {
-        //            public int compare(AccountInfo o1, AccountInfo o2) {
+        //        sortHandler.setComparator(firstNameColumn, new Comparator<User>() {
+        //            public int compare(User o1, User o2) {
         //                return o1.getFirstName().compareTo(o2.getFirstName());
         //            }
         //        });
 
         addColumn(firstNameColumn, "First Name");
-        firstNameColumn.setFieldUpdater(new FieldUpdater<AccountInfo, String>() {
-            public void update(int index, AccountInfo object, String value) {
+        firstNameColumn.setFieldUpdater(new FieldUpdater<User, String>() {
+            public void update(int index, User object, String value) {
                 // Called when the user changes the value.
                 object.setFirstName(value);
                 //                ContactDatabase.get().refreshDisplays();
@@ -110,23 +110,23 @@ public class UserTable extends CellTable<AccountInfo> {
 
     private void createLastNameColumn() {
 
-        Column<AccountInfo, String> lastName = new Column<AccountInfo, String>(new EditTextCell()) {
+        Column<User, String> lastName = new Column<User, String>(new EditTextCell()) {
             @Override
-            public String getValue(AccountInfo object) {
+            public String getValue(User object) {
                 return object.getLastName();
             }
         };
 
         lastName.setSortable(false);
-        //        sortHandler.setComparator(firstNameColumn, new Comparator<AccountInfo>() {
-        //            public int compare(AccountInfo o1, AccountInfo o2) {
+        //        sortHandler.setComparator(firstNameColumn, new Comparator<User>() {
+        //            public int compare(User o1, User o2) {
         //                return o1.getFirstName().compareTo(o2.getFirstName());
         //            }
         //        });
 
         addColumn(lastName, "Last Name");
-        lastName.setFieldUpdater(new FieldUpdater<AccountInfo, String>() {
-            public void update(int index, AccountInfo object, String value) {
+        lastName.setFieldUpdater(new FieldUpdater<User, String>() {
+            public void update(int index, User object, String value) {
                 // Called when the user changes the value.
                 object.setLastName(value);
                 //                ContactDatabase.get().refreshDisplays(); // TODO
@@ -137,10 +137,10 @@ public class UserTable extends CellTable<AccountInfo> {
 
     private void createEmailColumn() {
         EmailCell cell = new EmailCell();
-        Column<AccountInfo, AccountInfo> email = new Column<AccountInfo, AccountInfo>(cell) {
+        Column<User, User> email = new Column<User, User>(cell) {
 
             @Override
-            public AccountInfo getValue(AccountInfo object) {
+            public User getValue(User object) {
                 return object;
             }
         };
@@ -149,9 +149,9 @@ public class UserTable extends CellTable<AccountInfo> {
     }
 
     private void createAccountTypeColumn() {
-        Column<AccountInfo, String> accountType = new Column<AccountInfo, String>(new TextCell()) {
+        Column<User, String> accountType = new Column<User, String>(new TextCell()) {
             @Override
-            public String getValue(AccountInfo object) {
+            public String getValue(User object) {
                 return object.getAccountType().toString();
             }
         };
@@ -160,10 +160,10 @@ public class UserTable extends CellTable<AccountInfo> {
     }
 
     private void createEntryCountColumn() {
-        Column<AccountInfo, String> entryCount = new Column<AccountInfo, String>(new TextCell()) {
+        Column<User, String> entryCount = new Column<User, String>(new TextCell()) {
 
             @Override
-            public String getValue(AccountInfo object) {
+            public String getValue(User object) {
                 return object.getUserEntryCount() + "";
             }
         };
@@ -174,15 +174,15 @@ public class UserTable extends CellTable<AccountInfo> {
     //
     // inner classes
     //
-    protected class EmailCell extends UrlCell<AccountInfo> {
+    protected class EmailCell extends UrlCell<User> {
 
         @Override
-        protected String getCellValue(AccountInfo object) {
+        protected String getCellValue(User object) {
             return object.getEmail();
         }
 
         @Override
-        protected void onClick(AccountInfo object) {
+        protected void onClick(User object) {
             History.newItem(Page.PROFILE.getLink() + ";id=" + object.getId() + ";s=profile");
         }
     }
@@ -199,16 +199,16 @@ public class UserTable extends CellTable<AccountInfo> {
         }
     }
 
-    private class UserTableSelectionModel extends MultiSelectionModel<AccountInfo> {
+    private class UserTableSelectionModel extends MultiSelectionModel<User> {
 
         private boolean allSelected;
 
         public UserTableSelectionModel() {
 
-            super(new ProvidesKey<AccountInfo>() {
+            super(new ProvidesKey<User>() {
 
                 @Override
-                public String getKey(AccountInfo item) {
+                public String getKey(User item) {
                     return item.getEmail();
                 }
             });

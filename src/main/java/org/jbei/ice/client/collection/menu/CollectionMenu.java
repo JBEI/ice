@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.menu;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -8,12 +9,12 @@ import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.client.collection.ShareCollectionData;
-import org.jbei.ice.client.collection.widget.ShareCollectionWidget;
+import org.jbei.ice.client.collection.model.PropagateOption;
+import org.jbei.ice.client.collection.model.ShareCollectionData;
+import org.jbei.ice.client.collection.widget.ShareCollectionDialog;
 import org.jbei.ice.client.common.util.ImageUtil;
-import org.jbei.ice.client.entry.view.handler.ReadBoxSelectionHandler;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -51,10 +52,12 @@ public class CollectionMenu extends Composite {
     private List<HoverOption> cellHoverOptions;
     private ServiceDelegate<MenuItem> promotionDelegate;
     private ServiceDelegate<MenuItem> demotionDelegate;
+    private ServiceDelegate<HashMap<Long, Boolean>> publicDelegate;
 
     // quick add
     private QuickAddWidget quickAddWidget;
     private Delegate<ShareCollectionData> permissionInfoDelegate;
+    private ServiceDelegate<PropagateOption> propagate;
 
     public CollectionMenu(boolean addQuickEdit, String header) {
         layout = new FlexTable();
@@ -109,12 +112,17 @@ public class CollectionMenu extends Composite {
         this.demotionDelegate = serviceDelegate;
     }
 
+    public void setRemoveAddPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> serviceDelegate) {
+        this.publicDelegate = serviceDelegate;
+    }
+
     public void setCellHoverOptions(List<HoverOption> options) {
         cellHoverOptions = options;
     }
 
-    public void setPermissionInfoDelegate(Delegate<ShareCollectionData> infoDelegate) {
+    public void setDelegates(Delegate<ShareCollectionData> infoDelegate, ServiceDelegate<PropagateOption> propagate) {
         this.permissionInfoDelegate = infoDelegate;
+        this.propagate = propagate;
     }
 
     public void setEmptyCollectionMessage(String msg) {
@@ -201,14 +209,14 @@ public class CollectionMenu extends Composite {
 
         // display counts of who private folders have been shared with
         // permissions are only set for user private folder. shared folders have owners
-        if (item.getPermissions() != null && !item.getPermissions().isEmpty()) {
-            for (PermissionInfo info : item.getPermissions()) {
-                if (!info.isFolder())
+        if (item.getAccessPermissions() != null && !item.getAccessPermissions().isEmpty()) {
+            for (AccessPermission access : item.getAccessPermissions()) {
+                if (!access.isFolder())
                     continue;
 
-                if (info.getArticle() == PermissionInfo.Article.GROUP)
+                if (access.getArticle() == AccessPermission.Article.GROUP)
                     groupCount += 1;
-                if (info.getArticle() == PermissionInfo.Article.ACCOUNT)
+                if (access.getArticle() == AccessPermission.Article.ACCOUNT)
                     userCount += 1;
             }
         }
@@ -219,27 +227,6 @@ public class CollectionMenu extends Composite {
         cell.setHoverOptions(cellHoverOptions);
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         layout.setWidget(row, 0, cell);
-    }
-
-    // currently this is being used for deleted cells only
-    public void updateMenuItem(long id, MenuItem item, IDeleteMenuHandler deleteHandler) {
-        if (item == null)
-            return;
-
-        for (int i = 0; i < layout.getRowCount(); i += 1) {
-            Widget w = layout.getWidget(i, 0);
-            if (!(w instanceof DeletedCell))
-                continue;
-
-            DeletedCell cell = (DeletedCell) w;
-            if (cell.getMenuItem().getId() != id)
-                continue;
-
-            final MenuCell newCell = new MenuCell(item, deleteHandler, i);
-            newCell.addClickHandler(new CellSelectionHandler(selectionModel, newCell));
-            layout.setWidget(i, 0, newCell);
-            break;
-        }
     }
 
     /**
@@ -304,6 +291,10 @@ public class CollectionMenu extends Composite {
         });
     }
 
+    public void addQuickAddHandler(final ClickHandler handler) {
+        this.quickAddWidget.addQuickAddHandler(handler);
+    }
+
     // inner classes
     class DeleteCallBack extends Callback<MenuItem> {
 
@@ -321,16 +312,15 @@ public class CollectionMenu extends Composite {
         }
     }
 
-    class MenuCell extends Composite implements HasClickHandlers {
+    public class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
         private final MenuItem item;
-
         private Label count;
         private final HoverCell action;
         private final String folderId;
         private final Widget busyIndicator;
-        private ShareCollectionWidget shareCollectionWidget;
+        private ShareCollectionDialog shareCollectionDialog;
         private final HTML shared;
         private final int row;
 
@@ -339,46 +329,8 @@ public class CollectionMenu extends Composite {
             this.row = row;
             folderId = "right" + item.getId();
             action = new HoverCell();
-            shareCollectionWidget = new ShareCollectionWidget(item.getName(), new Delegate<PermissionInfo>() {
-
-                @Override
-                public void execute(PermissionInfo info) {
-                    if (permissionInfoDelegate == null)
-                        return;
-
-                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getRemoveCallback());
-                    data.setDelete(true);
-                    permissionInfoDelegate.execute(data);
-                }
-            });
-
-            shareCollectionWidget.getPermissionsPresenter().setWriteAddSelectionHandler(new ReadBoxSelectionHandler() {
-
-                @Override
-                public void updatePermission(PermissionInfo info) {
-                    if (permissionInfoDelegate == null)
-                        return;
-
-                    info.setType(PermissionInfo.Type.WRITE_FOLDER);
-                    info.setTypeId(item.getId());
-                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
-                    permissionInfoDelegate.execute(data);
-                }
-            });
-
-            shareCollectionWidget.getPermissionsPresenter().setReadAddSelectionHandler(new ReadBoxSelectionHandler() {
-
-                @Override
-                public void updatePermission(PermissionInfo info) {
-                    if (permissionInfoDelegate == null)
-                        return;
-
-                    info.setType(PermissionInfo.Type.READ_FOLDER);
-                    info.setTypeId(item.getId());
-                    ShareCollectionData data = new ShareCollectionData(info, shareCollectionWidget.getAddCallback());
-                    permissionInfoDelegate.execute(data);
-                }
-            });
+            shareCollectionDialog = new ShareCollectionDialog(this, item.getName(), permissionInfoDelegate, propagate);
+            shareCollectionDialog.setPublicAccessDelegate(publicDelegate);
 
             action.getOptionSelection().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
@@ -446,8 +398,8 @@ public class CollectionMenu extends Composite {
             panel.add(action, "submenu_" + folderId);
             panel.add(busyIndicator, "busy_indicator_" + folderId);
 
-            if (!item.hasSubMenu() || (item.getOwner() == null && (item.getPermissions() == null || item
-                    .getPermissions().isEmpty())) || item.getShareType() == FolderShareType.PUBLIC)
+            if (!item.hasSubMenu() || (item.getOwner() == null && (item.getAccessPermissions() == null || item
+                    .getAccessPermissions().isEmpty())) || item.getType() == FolderType.PUBLIC)
                 panel.setStyleName("system_collection_user_menu_row");
             else
                 panel.setStyleName("user_collection_user_menu_row");
@@ -517,7 +469,9 @@ public class CollectionMenu extends Composite {
             currentEditSelection = getMenuItem();
             editRow = row;
             editIndex = 0;
-            shareCollectionWidget.showDialog(currentEditSelection.getPermissions());
+            shareCollectionDialog.showDialog(currentEditSelection.getAccessPermissions(),
+                                             currentEditSelection.isPropagatePermission(),
+                                             currentEditSelection.isPublicReadAccess());
         }
 
         protected void pinAction() {

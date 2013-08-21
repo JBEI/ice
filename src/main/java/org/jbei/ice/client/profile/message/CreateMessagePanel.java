@@ -7,9 +7,9 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.MessageInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -85,17 +85,17 @@ public class CreateMessagePanel extends Composite {
 
                 MessageInfo info = new MessageInfo();
                 for (String email : toBox.getText().split(",")) {
-                    AccountInfo accountInfo = new AccountInfo();
-                    accountInfo.setEmail(email);
-                    info.getAccounts().add(accountInfo);
+                    User user = new User();
+                    user.setEmail(email);
+                    info.getAccounts().add(user);
                 }
 
                 // set groups
                 if (recipientWidget.getSelected() != null) {
                     for (OptionSelect select : recipientWidget.getSelected()) {
-                        GroupInfo groupInfo = new GroupInfo();
-                        groupInfo.setId(select.getId());
-                        info.getGroups().add(groupInfo);
+                        UserGroup userGroup = new UserGroup();
+                        userGroup.setId(select.getId());
+                        info.getUserGroups().add(userGroup);
                     }
                 }
 
@@ -119,7 +119,8 @@ public class CreateMessagePanel extends Composite {
         // to
         toBox = new TextBox();
         toBox.getElement().setAttribute("placeHolder",
-                                        "Enter comma separated list of emails and/or select available group(s)");
+                                        "Enter comma separated list of user ids (emails) and/or select available " +
+                                                "group(s)");
         toBox.setStyleName("input_box");
         toBox.setWidth("500px");
         recipientWidget = new RecipientWidget();
@@ -197,7 +198,8 @@ public class CreateMessagePanel extends Composite {
     /**
      * Caption for the dialog box.
      */
-    private class Caption extends HTML implements DialogBox.Caption {}
+    private class Caption extends HTML implements DialogBox.Caption {
+    }
 
     /**
      * Widget that allows selection of message recipients via clicking "To"

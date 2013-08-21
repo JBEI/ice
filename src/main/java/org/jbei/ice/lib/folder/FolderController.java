@@ -12,16 +12,16 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.server.ModelToInfoFactory;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.AccountType;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
-import org.jbei.ice.shared.dto.folder.FolderStatus;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 /**
  * @author Hector Plahar
@@ -38,7 +38,6 @@ public class FolderController {
 
     public Folder removeFolderContents(Account account, long folderId, ArrayList<Long> entryIds)
             throws ControllerException {
-        Account systemAccount = accountController.getSystemAccount();
         boolean isAdministrator = accountController.isAdministrator(account);
 
         Folder folder;
@@ -48,11 +47,8 @@ public class FolderController {
             throw new ControllerException(e);
         }
 
-        boolean isSystemFolder = (folder.getOwnerEmail().equals(systemAccount.getEmail())
-                || folder.getStatus() == FolderStatus.PINNED);
-
-        if (isSystemFolder && !isAdministrator) {
-            throw new ControllerException("Cannot modify non user folder " + folder.getName());
+        if (folder.getType() == FolderType.PUBLIC && !isAdministrator) {
+            throw new ControllerException(account.getEmail() + ": cannot modify non user folder " + folder.getName());
         }
 
         try {
@@ -63,20 +59,14 @@ public class FolderController {
         return folder;
     }
 
-    public List<Folder> getFoldersByOwner(Account userAccount) throws ControllerException {
-        try {
-            return dao.getFoldersByOwner(userAccount);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    protected List<Folder> getSystemFolders() throws ControllerException {
+    /**
+     * @return folders that are shared with everyone on the site. These are listed under "Collections".
+     * @throws ControllerException
+     */
+    protected List<Folder> getPublicFolders() throws ControllerException {
         Set<Folder> folders = new HashSet<>();
         try {
-            folders.addAll(dao.getFoldersByStatus(FolderStatus.PINNED));
-            Account system = ControllerFactory.getAccountController().getSystemAccount();
-            folders.addAll(dao.getFoldersByOwner(system));
+            folders.addAll(dao.getFoldersByType(FolderType.PUBLIC));
             return new ArrayList<>(folders);
         } catch (DAOException de) {
             throw new ControllerException(de);
@@ -99,23 +89,55 @@ public class FolderController {
         }
     }
 
-    public FolderDetails retrieveFolderContents(long folderId, ColumnField sort, boolean asc,
+    protected boolean canReadFolderContents(Account account, Folder folder) throws ControllerException {
+        if (folder.getType() == FolderType.PUBLIC)
+            return true;
+
+        if (account.getType() == AccountType.ADMIN)
+            return true;
+
+        if (account.getEmail().equals(folder.getOwnerEmail()))
+            return true;
+
+        // now check actual permissions
+        Set<Folder> folders = new HashSet<>();
+        folders.add(folder);
+        PermissionsController controller = ControllerFactory.getPermissionController();
+        if (controller.groupHasReadPermission(account.getGroups(), folders)
+                || controller.groupHasWritePermission(account.getGroups(), folders))
+            return true;
+
+        return controller.accountHasReadPermission(account, folders)
+                || controller.accountHasWritePermission(account, folders);
+    }
+
+    public FolderDetails retrieveFolderContents(Account account, long folderId, ColumnField sort, boolean asc,
             int start, int limit) throws ControllerException {
         try {
             Folder folder = getFolderById(folderId);
             if (folder == null)
                 return null;
 
-            Account system = accountController.getSystemAccount();
-            boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
-            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
+            // should have permission to read folder (folder should be public, you should be an admin, or owner)
+            if (!canReadFolderContents(account, folder)) {
+                Logger.warn(account.getEmail() + ": does not have permissions to read folder " + folder.getId());
+                return null;
+            }
+
+            PermissionsController controller = ControllerFactory.getPermissionController();
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+            details.setType(folder.getType());
             long folderSize = getFolderSize(folderId);
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
+            details.setAccessPermissions(controller.retrieveSetFolderPermission(folder, false));
+            details.setPublicReadAccess(controller.isPublicVisible(folder));
+            Account owner = accountController.getByEmail(folder.getOwnerEmail());
+            details.setOwner(Account.toDTO(owner));
 
             ArrayList<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit);
             for (Entry entry : results) {
-                EntryInfo info = ModelToInfoFactory.createTableViewData(entry, false);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, false);
                 details.getEntries().add(info);
             }
             return details;
@@ -124,38 +146,73 @@ public class FolderController {
         }
     }
 
-    public void delete(Account account, Folder folder) throws ControllerException, PermissionException {
-        PermissionsController controller = ControllerFactory.getPermissionController();
-        if (!controller.hasWritePermission(account, folder))
-            throw new PermissionException("No write permission for folder");
+    public FolderDetails delete(Account account, long folderId) throws ControllerException {
+        Folder folder;
+        try {
+            folder = dao.get(folderId);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        if (folder == null)
+            return null;
+
+        if (account.getType() != AccountType.ADMIN && !folder.getOwnerEmail().equalsIgnoreCase(account.getEmail())) {
+            String errorMsg = account.getEmail() + ": does not have sufficient permissions to delete folder";
+            Logger.warn(errorMsg);
+        }
+
+        FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+        long folderSize = getFolderSize(folderId);
+        details.setCount(folderSize);
+        details.setDescription(folder.getDescription());
 
         try {
             dao.delete(folder);
-            controller.clearFolderPermissions(account, folder);
-        } catch (DAOException e) {
+            ControllerFactory.getPermissionController().clearFolderPermissions(account, folder);
+            return details;
+        } catch (DAOException | PermissionException e) {
             throw new ControllerException(e);
         }
     }
 
-    public Folder addFolderContents(long id, ArrayList<Entry> entrys) throws ControllerException {
+    public Folder addFolderContents(Account account, long id, ArrayList<Entry> entrys) throws ControllerException {
         try {
             Folder folder = dao.get(id);
             if (folder == null)
                 throw new ControllerException("Could not retrieve folder with id " + id);
-            dao.addFolderContents(folder, entrys);
+            folder = dao.addFolderContents(folder, entrys);
+            if (folder.isPropagatePermissions()) {
+                ControllerFactory.getPermissionController().propagateFolderPermissions(account, folder, true);
+            }
             return folder;
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }
 
-    public Folder createNewFolder(String owner, String name, String description) throws ControllerException {
+    public FolderDetails createNewFolder(Account account, String name, String description, ArrayList<Long> contents)
+            throws ControllerException {
         Folder folder = new Folder(name);
-        folder.setOwnerEmail(owner);
+        folder.setOwnerEmail(account.getEmail());
         folder.setDescription(description);
+        folder.setType(FolderType.PRIVATE);
         folder.setCreationTime(new Date(System.currentTimeMillis()));
         try {
-            return dao.save(folder);
+            folder = dao.save(folder);
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+            if (contents != null && !contents.isEmpty()) {
+                ArrayList<Entry> entrys = new ArrayList<>(ControllerFactory.getEntryController().getEntriesByIdSet(
+                        account, contents));
+                dao.addFolderContents(folder, entrys);
+                details.setCount(contents.size());
+            } else {
+                details.setCount(0l);
+            }
+            details.setType(folder.getType());
+            details.setDescription(folder.getDescription());
+
+            return details;
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -179,61 +236,66 @@ public class FolderController {
 
     public ArrayList<FolderDetails> retrieveFoldersForUser(Account account) throws ControllerException {
         ArrayList<FolderDetails> results = new ArrayList<>();
+        PermissionsController controller = ControllerFactory.getPermissionController();
 
-        // publicly visible collections are owned by the system
-        List<Folder> folders = getSystemFolders();
-        for (Folder folder : folders) {
-            long id = folder.getId();
-            FolderDetails details = new FolderDetails(id, folder.getName(), true);
-            long folderSize = getFolderSize(id);
-            details.setCount(folderSize);
-            details.setDescription(folder.getDescription());
-            details.setShareType(FolderShareType.PUBLIC);
-            if (account.getType() == AccountType.ADMIN) {
-                ArrayList<PermissionInfo> infos = ControllerFactory.getPermissionController().
-                        retrieveSetFolderPermission(account, folder);
-                details.setPermissions(infos);
-            }
-            results.add(details);
-        }
-
-        // get user folder
-        List<Folder> userFolders = getFoldersByOwner(account);
-        if (userFolders != null) {
-            for (Folder folder : userFolders) {
+        try {
+            // publicly visible collections are owned by the system
+            List<Folder> folders = getPublicFolders();
+            for (Folder folder : folders) {
                 long id = folder.getId();
-                FolderDetails details = new FolderDetails(id, folder.getName(), false);
-                long folderSize = getFolderSize(id);
-                details.setCount(folderSize);
-                details.setShareType(FolderShareType.PRIVATE);
-                details.setDescription(folder.getDescription());
-                ArrayList<PermissionInfo> infos = ControllerFactory.getPermissionController().
-                        retrieveSetFolderPermission(account, folder);
-                details.setPermissions(infos);
-                results.add(details);
-            }
-        }
-
-        // get folders shared with this user
-        Set<Folder> sharedFolders = ControllerFactory.getPermissionController().retrievePermissionFolders(account);
-        if (sharedFolders != null) {
-            for (Folder folder : sharedFolders) {
-                if (userFolders != null && userFolders.contains(folder))
-                    continue;
-
-                long id = folder.getId();
-                boolean isSystemFolder = (account.getType() != AccountType.ADMIN);
-                FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
-                details.setShareType(FolderShareType.SHARED);
+                FolderDetails details = new FolderDetails(id, folder.getName());
                 long folderSize = getFolderSize(id);
                 details.setCount(folderSize);
                 details.setDescription(folder.getDescription());
-                Account owner = accountController.getByEmail(folder.getOwnerEmail());
-                if (owner != null) {
-                    details.setOwner(Account.toDTO(owner));
+                details.setType(FolderType.PUBLIC);
+                if (account.getType() == AccountType.ADMIN) {
+                    ArrayList<AccessPermission> accesses = controller.retrieveSetFolderPermission(folder, false);
+                    details.setAccessPermissions(accesses);
                 }
+                details.setPropagatePermission(folder.isPropagatePermissions());
                 results.add(details);
             }
+
+            // get user folders
+            List<Folder> userFolders = dao.getFoldersByOwner(account);
+            if (userFolders != null) {
+                for (Folder folder : userFolders) {
+                    long id = folder.getId();
+                    FolderDetails details = new FolderDetails(id, folder.getName());
+                    long folderSize = getFolderSize(id);
+                    details.setCount(folderSize);
+                    details.setType(FolderType.PRIVATE);
+                    details.setDescription(folder.getDescription());
+                    ArrayList<AccessPermission> accesses = controller.retrieveSetFolderPermission(folder, false);
+                    details.setAccessPermissions(accesses);
+                    details.setPropagatePermission(folder.isPropagatePermissions());
+                    details.setPublicReadAccess(controller.isPublicVisible(folder));
+                    results.add(details);
+                }
+            }
+
+            // get folders shared with this user
+            Set<Folder> sharedFolders = ControllerFactory.getPermissionController().retrievePermissionFolders(account);
+            if (sharedFolders != null) {
+                for (Folder folder : sharedFolders) {
+                    if (userFolders != null && userFolders.contains(folder))
+                        continue;
+
+                    FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+                    details.setType(FolderType.SHARED);
+                    long folderSize = getFolderSize(folder.getId());
+                    details.setCount(folderSize);
+                    details.setDescription(folder.getDescription());
+                    Account owner = accountController.getByEmail(folder.getOwnerEmail());
+                    if (owner != null) {
+                        details.setOwner(Account.toDTO(owner));
+                    }
+                    details.setPropagatePermission(folder.isPropagatePermissions());
+                    results.add(details);
+                }
+            }
+        } catch (DAOException de) {
+            throw new ControllerException(de);
         }
 
         return results;
@@ -254,21 +316,20 @@ public class FolderController {
 
         try {
             Folder folder = dao.get(id);
-            if (folder.getOwnerEmail().equalsIgnoreCase(AccountController.SYSTEM_ACCOUNT_EMAIL)
-                    || folder.getStatus() == FolderStatus.PINNED)
+            if (folder.getType() == FolderType.PUBLIC)
                 return true;
 
-            folder.setStatus(FolderStatus.PINNED);
+            folder.setType(FolderType.PUBLIC);
             folder.setModificationTime(new Date(System.currentTimeMillis()));
             dao.update(folder);
 
             // remove account permissions for this administrator
-            PermissionInfo info = new PermissionInfo();
-            info.setType(PermissionInfo.Type.READ_FOLDER);
-            info.setArticle(PermissionInfo.Article.ACCOUNT);
-            info.setArticleId(account.getId());
-            info.setTypeId(id);
-            ControllerFactory.getPermissionController().removePermission(account, info);
+            AccessPermission access = new AccessPermission();
+            access.setType(AccessPermission.Type.READ_FOLDER);
+            access.setArticle(AccessPermission.Article.ACCOUNT);
+            access.setArticleId(account.getId());
+            access.setTypeId(id);
+            ControllerFactory.getPermissionController().removePermission(account, access);
             return true;
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -290,16 +351,77 @@ public class FolderController {
 
         try {
             Folder folder = dao.get(id);
-            if (!folder.getOwnerEmail().equalsIgnoreCase(AccountController.SYSTEM_ACCOUNT_EMAIL)
-                    && folder.getStatus() != FolderStatus.PINNED)
+            if (folder.getType() != FolderType.PUBLIC)
                 return true;
 
-            folder.setStatus(FolderStatus.UNPINNED);
+            folder.setType(FolderType.PRIVATE);
             folder.setModificationTime(new Date(System.currentTimeMillis()));
+            folder.setOwnerEmail(account.getEmail());
             dao.update(folder);
             return true;
         } catch (DAOException e) {
             throw new ControllerException(e);
+        }
+    }
+
+    public void upgradeFolders() throws ControllerException {
+        Logger.info("Upgrading collections...please wait");
+        try {
+            for (long id : dao.getAllFolderIds()) {
+                Folder folder = dao.get(id);
+                String owner = folder.getOwnerEmail();
+                if ("system".equalsIgnoreCase(owner)) {
+                    folder.setOwnerEmail("");
+                    folder.setType(FolderType.PUBLIC);
+                    dao.update(folder);
+                } else {
+                    Account account = accountController.getByEmail(owner);
+                    if (account != null) {
+                        ArrayList<AccessPermission> accesses = ControllerFactory.getPermissionController().
+                                retrieveSetFolderPermission(folder, false);
+                        if (accesses != null) {
+                            for (AccessPermission access : accesses) {
+                                if (access.isCanRead() || access.isCanWrite()) {
+                                    // skip setting update to shared if the permission is associated with the owner
+                                    if (access.getArticle() == AccessPermission.Article.ACCOUNT
+                                            && access.getArticleId() == account.getId()) {
+                                        folder.setType(FolderType.PRIVATE);
+                                        continue;
+                                    }
+
+                                    folder.setType(FolderType.SHARED);
+                                    break;
+                                }
+                            }
+                        } else
+                            folder.setType(FolderType.PRIVATE);
+                        dao.update(folder);
+                    }
+                }
+            }
+            Logger.info("Collections upgrade completed");
+        } catch (DAOException de) {
+            throw new ControllerException(de);
+        }
+    }
+
+    public boolean setPropagatePermissionForFolder(Account account, long folderId, boolean propagate)
+            throws ControllerException {
+        try {
+            Folder folder = dao.get(folderId);
+            if (folder == null)
+                return false;
+
+            if (!accountController.isAdministrator(account) &&
+                    !folder.getOwnerEmail().equalsIgnoreCase(account.getEmail()))
+                return false;
+
+            folder.setPropagatePermissions(propagate);
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
+            dao.update(folder);
+            return ControllerFactory.getPermissionController().propagateFolderPermissions(account, folder, propagate);
+        } catch (DAOException de) {
+            return false;
         }
     }
 }

@@ -1,41 +1,44 @@
 package org.jbei.ice.client.search.advanced;
 
 import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.Utils;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.HasEntryInfo;
-import org.jbei.ice.shared.dto.search.SearchResultInfo;
-import org.jbei.ice.shared.dto.search.SearchResults;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.search.SearchResult;
+import org.jbei.ice.lib.shared.dto.search.SearchResults;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.Range;
 
 /**
  * @author Hector Plahar
  */
-public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResultInfo> {
+public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResult> {
 
     private SearchResults searchResults;
     private final EntryTablePager pager;
     private final boolean webSearch;
+    private final HandlerManager eventBus;
 
-    public SearchDataProvider(SearchResultsTable table, RegistryServiceAsync rpcService, boolean webSearch) {
+    public SearchDataProvider(SearchResultsTable table, RegistryServiceAsync rpcService, HandlerManager eventBus,
+            boolean webSearch) {
         super(table, rpcService, ColumnField.RELEVANCE);
         this.pager = table.getPager();
         this.webSearch = webSearch;
+        this.eventBus = eventBus;
     }
 
     @Override
-    public EntryInfo getCachedData(long id, String recordId) {
-        for (HasEntryInfo result : results) {
-            EntryInfo info = result.getEntryInfo();
+    public PartData getCachedData(long id, String recordId) {
+        for (HasEntryData result : results) {
+            PartData info = result.getEntryInfo();
             if (recordId != null && info.getRecordId().equalsIgnoreCase(recordId))
                 return info;
 
@@ -46,10 +49,10 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
     }
 
     @Override
-    public int indexOfCached(EntryInfo info) {
+    public int indexOfCached(PartData info) {
         for (int i = 0; i < results.size(); i += 1) {
-            SearchResultInfo searchResultInfo = results.get(i);
-            if (searchResultInfo.getEntryInfo().getId() == info.getId())
+            SearchResult searchResult = results.get(i);
+            if (searchResult.getEntryInfo().getId() == info.getId())
                 return i;
         }
         return 0;
@@ -61,7 +64,7 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
     }
 
     @Override
-    public EntryInfo getNext(EntryInfo info) {
+    public PartData getNext(PartData info) {
         int idx = indexOfCached(info);
         if (idx == -1)
             return null;
@@ -69,7 +72,7 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
     }
 
     @Override
-    public EntryInfo getPrev(EntryInfo info) {
+    public PartData getPrev(PartData info) {
         int idx = indexOfCached(info);
         if (idx == -1)
             return null;
@@ -81,39 +84,33 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
         if (!reset)
             pager.setLoading();
 
-        try {
-            searchResults.getQuery().getParameters().setSortField(field);
-            searchResults.getQuery().getParameters().setSortAscending(ascending);
-            searchResults.getQuery().getParameters().setStart(start);
-            searchResults.getQuery().getParameters().setRetrieveCount(factor);
-            service.performSearch(ClientController.sessionId, searchResults.getQuery(), webSearch,
-                                  new AsyncCallback<SearchResults>() {
+        searchResults.getQuery().getParameters().setSortField(field);
+        searchResults.getQuery().getParameters().setSortAscending(ascending);
+        searchResults.getQuery().getParameters().setStart(start);
+        searchResults.getQuery().getParameters().setRetrieveCount(factor);
+        new IceAsyncCallback<SearchResults>() {
 
-                                      @Override
-                                      public void onSuccess(SearchResults success) {
-                                          searchResults = success;
-                                          Utils.showDefaultCursor(null);
-                                          if (success == null)
-                                              return;
+            @Override
+            protected void callService(AsyncCallback<SearchResults> callback) throws AuthenticationException {
+                service.performSearch(ClientController.sessionId, searchResults.getQuery(), webSearch, callback);
+            }
 
-                                          if (reset)
-                                              setSearchData(success);
-                                          else
-                                              results.addAll(success.getResults());
+            @Override
+            public void onSuccess(SearchResults result) {
+                searchResults = result;
+                Utils.showDefaultCursor(null);
+                if (result == null)
+                    return;
 
-                                          pager.determineSetNextEnabled();
-                                          pager.setDefaultHTML();
-                                      }
+                if (reset)
+                    setSearchData(result);
+                else
+                    results.addAll(result.getResults());
 
-                                      @Override
-                                      public void onFailure(Throwable caught) {
-                                          Window.alert("Failed to retrieve results");
-                                          Utils.showDefaultCursor(null);
-                                      }
-                                  });
-        } catch (AuthenticationException e) {
-            GWT.log(e.getMessage(), e);
-        }
+                pager.determineSetNextEnabled();
+                pager.setDefaultHTML();
+            }
+        }.go(eventBus);
     }
 
     public void setSearchData(SearchResults searchResults) {
@@ -135,10 +132,7 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
 
         // retrieve the first page of results and updateRowData
         final int rangeStart = 0;
-        int rangeEnd = rangeStart + range.getLength();
-        if (rangeEnd > resultSize)
-            rangeEnd = resultSize;
-
+        int rangeEnd = range.getLength() > resultSize ? resultSize : range.getLength();
         updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
         dataTable.setPageStart(0);
     }

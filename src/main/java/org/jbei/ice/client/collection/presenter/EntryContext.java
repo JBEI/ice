@@ -55,6 +55,6 @@ public class EntryContext {
     }
 
     public enum Type {
-        SEARCH, COLLECTION, SAMPLES;
+        SEARCH, COLLECTION, SAMPLES
     }
 }

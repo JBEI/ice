@@ -1,12 +1,12 @@
 package org.jbei.ice.client.event;
 
-import org.jbei.ice.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 
 import com.google.gwt.event.shared.GwtEvent;
 
 public class CollectionCreatedEvent extends GwtEvent<CollectionCreatedEventHandler> {
 
-    public static Type<CollectionCreatedEventHandler> TYPE = new Type<CollectionCreatedEventHandler>();
+    public static final Type<CollectionCreatedEventHandler> TYPE = new Type<CollectionCreatedEventHandler>();
     private final FolderDetails folderDetails;
 
     public CollectionCreatedEvent(FolderDetails details) {

@@ -1,6 +1,6 @@
 package org.jbei.ice.client.admin.setting;
 
-import org.jbei.ice.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
 /**
  * @author Hector Plahar

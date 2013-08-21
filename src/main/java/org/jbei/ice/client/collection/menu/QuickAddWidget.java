@@ -1,19 +1,12 @@
 package org.jbei.ice.client.collection.menu;
 
-import org.jbei.ice.client.common.widget.FAIconType;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.TextBox;
+import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.Icon;
 
 /**
  * Widget for adding a new collection
@@ -23,13 +16,14 @@ import com.google.gwt.user.client.ui.TextBox;
 public class QuickAddWidget extends Composite {
 
     private final TextBox quickAddBox;
-    private final Button btnCancel;
+    private final Icon cancel;
+    private final Icon add;
 
     public QuickAddWidget(boolean resetOnFocus) {
         quickAddBox = new TextBox();
         quickAddBox.setStyleName("input_box");
         quickAddBox.getElement().setAttribute("placeholder", "Enter collection name");
-        quickAddBox.setWidth("185px");
+        quickAddBox.setWidth("170px");
         quickAddBox.setMaxLength(35);
 
         if (resetOnFocus) {
@@ -47,15 +41,20 @@ public class QuickAddWidget extends Composite {
         layout.setCellSpacing(0);
         initWidget(layout);
 
-        btnCancel = new Button("<i class=\"" + FAIconType.REMOVE.getStyleName() + "\"></i>");
-        btnCancel.setStyleName("remove_filter");
+        cancel = new Icon(FAIconType.REMOVE);
+        cancel.addStyleName("delete_icon");
+        add = new Icon(FAIconType.OK_SIGN);
+        add.addStyleName("edit_icon");
         addCancelHandler();
 
         layout.setWidget(0, 0, quickAddBox);
-
-        layout.setWidget(0, 1, btnCancel);
-        layout.getFlexCellFormatter().setWidth(0, 1, "30px");
-        layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_RIGHT);
+        layout.setWidget(0, 1, add);
+        layout.setWidget(0, 2, cancel);
+        layout.getFlexCellFormatter().setWidth(0, 0, "180px");
+        layout.getFlexCellFormatter().setWidth(0, 1, "20px");
+        layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_CENTER);
+        layout.getFlexCellFormatter().setWidth(0, 2, "20px");
+        layout.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_CENTER);
     }
 
     protected boolean validate() {
@@ -98,8 +97,21 @@ public class QuickAddWidget extends Composite {
         });
     }
 
-    public void addCancelHandler() {
-        this.btnCancel.addClickHandler(new ClickHandler() {
+    public void addQuickAddHandler(final ClickHandler handler) {
+        add.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!validate())
+                    return;
+
+                quickAddBox.setVisible(false);
+                handler.onClick(event);
+            }
+        });
+    }
+
+    private void addCancelHandler() {
+        this.cancel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 quickAddBox.setStyleName("input_box");

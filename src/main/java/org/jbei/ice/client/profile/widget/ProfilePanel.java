@@ -6,8 +6,8 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.client.profile.ChangePasswordPanel;
 import org.jbei.ice.client.profile.message.CreateMessagePanel;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -30,7 +30,7 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
     private HandlerRegistration changeRegistration;
     private EditProfilePanel editProfilePanel;
     private ChangePasswordPanel changePasswordPanel;
-    private AccountInfo accountInfo;
+    private User user;
     private ServiceDelegate<MessageInfo> delegate;
 
     public ProfilePanel() {
@@ -73,18 +73,26 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
                     return;
 
                 CreateMessagePanel panel = new CreateMessagePanel();
-                if (accountInfo != null)
-                    panel.setTo(accountInfo.getEmail());
+                if (user != null)
+                    panel.setTo(user.getEmail());
                 panel.setSendMessageDelegate(delegate);
                 panel.showDialog(true);
             }
         });
     }
 
-    public void setAccountInfo(AccountInfo info) {
-        this.accountInfo = info;
-        table.setHTML(1, 0, "<br><span style=\"padding: 10px 0 0 3px; font-size: 0.90em; color: #444\"> "
-                + info.getDescription() + "</span>");
+    public void setUser(User info) {
+        this.user = info;
+        String html;
+        if (info.getDescription() == null || info.getDescription().isEmpty()) {
+            html = "<i style=\"color: #999; font-size: 0.85em\">No profile description provided.";
+        } else {
+            html = "<span style=\"padding: 10px 0 0 3px; font-size: 0.90em; color: #444\">"
+                    + info.getDescription() + "</span>";
+        }
+
+        table.setHTML(1, 0, html);
+        table.getFlexCellFormatter().setStyleName(1, 0, "pad_top");
         sendMessage.setVisible(!info.getEmail().equalsIgnoreCase(ClientController.account.getEmail()));
     }
 
@@ -108,7 +116,7 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
         return changePasswordPanel.getPassword();
     }
 
-    public void editProfile(AccountInfo currentInfo, ClickHandler submitHandler, ClickHandler cancelHandler) {
+    public void editProfile(User currentInfo, ClickHandler submitHandler, ClickHandler cancelHandler) {
         RegistrationDetails details = new RegistrationDetails();
         details.setAbout(currentInfo.getDescription());
         details.setFirstName(currentInfo.getFirstName());
@@ -129,7 +137,7 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
         return editProfilePanel.getDetails();
     }
 
-    public void changePasswordPanel(AccountInfo currentInfo, ClickHandler submitHandler, ClickHandler cancelHandler) {
+    public void changePasswordPanel(User currentInfo, ClickHandler submitHandler, ClickHandler cancelHandler) {
         changePasswordPanel = new ChangePasswordPanel(currentInfo.getEmail());
         changePasswordPanel.addSubmitClickHandler(submitHandler);
         changePasswordPanel.addCancelHandler(cancelHandler);

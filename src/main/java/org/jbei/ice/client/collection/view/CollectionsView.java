@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -8,16 +9,17 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.ICollectionView;
-import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.*;
+import org.jbei.ice.client.collection.model.PropagateOption;
+import org.jbei.ice.client.collection.model.ShareCollectionData;
 import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -131,11 +133,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void setPermissionDelegate(Delegate<ShareCollectionData> delegate) {
-        userMenu.setPermissionInfoDelegate(delegate);
-        if (ClientController.account.isAdmin()) {
-            systemMenu.setPermissionInfoDelegate(delegate);
-        }
+    public void setMenuDelegates(Delegate<ShareCollectionData> delegate, ServiceDelegate<PropagateOption> propagate) {
+        userMenu.setDelegates(delegate, propagate);
     }
 
     @Override
@@ -173,8 +172,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void setSubMenuEnable(boolean enableAddTo, boolean enableRemove, boolean enableMoveTo) {
-        subMenu.setEnable(enableAddTo, enableRemove, enableMoveTo);
+    public void setCanMove(boolean enableMove) {
+        subMenu.setCanMove(enableMove);
     }
 
     @Override
@@ -217,6 +216,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
+    public void addQuickAddHandler(ClickHandler handler) {
+        this.userMenu.addQuickAddHandler(handler);
+    }
+
+    @Override
     public void updateMenuItemCounts(ArrayList<MenuItem> item) {
         this.userMenu.updateCounts(item);
     }
@@ -244,11 +248,17 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public void setPromotionDelegate(ServiceDelegate<MenuItem> delegate) {
         this.sharedCollections.setPromotionDelegate(delegate);
+        this.userMenu.setPromotionDelegate(delegate);
     }
 
     @Override
     public void setDemotionDelegate(ServiceDelegate<MenuItem> delegate) {
         this.systemMenu.setDemotionDelegate(delegate);
+    }
+
+    @Override
+    public void setPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> delegate) {
+        this.userMenu.setRemoveAddPublicAccessDelegate(delegate);
     }
 
     @Override
@@ -269,7 +279,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public SingleSelectionModel<MenuItem> getMenuModel(FolderShareType type) {
+    public SingleSelectionModel<MenuItem> getMenuModel(FolderType type) {
         switch (type) {
             case PUBLIC:
                 return systemMenu.getSelectionModel();
@@ -291,6 +301,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         this.exportAs.enable(enable);
         if (transferMenu != null)
             this.transferMenu.setEnabled(enable);
+        this.subMenu.setCanAdd(enable);
     }
 
     @Override

@@ -17,19 +17,24 @@ import org.jbei.ice.client.bulkupload.sheet.header.BulkUploadHeaders;
 import org.jbei.ice.client.bulkupload.sheet.header.SampleHeaders;
 import org.jbei.ice.client.bulkupload.sheet.header.StrainWithPlasmidHeaders;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.PartSample;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+/**
+ * Presenter for the bulk upload sheet view
+ *
+ * @author Hector Plahar
+ */
 public class SheetPresenter {
 
     /**
@@ -66,10 +71,11 @@ public class SheetPresenter {
     private String currentSampleLocationId;
     private final HashMap<Integer, BitSet> rowBitSet;
     private ServiceDelegate<BulkUploadAutoUpdate> autoUpdateDelegate;
+    private ServiceDelegate<HashMap<Long, SheetCellData>> fileDelete;
     private final ServiceDelegate<PreferenceInfo> serviceDelegate;
-    private final HashMap<Integer, EntryInfo> rowInfoMap;
-    private static final HashMap<EntryAddType, SheetModel<? extends EntryInfo>> sheetModelCache =
-            new HashMap<EntryAddType, SheetModel<? extends EntryInfo>>();
+    private final HashMap<Integer, PartData> rowInfoMap;
+    private static final HashMap<EntryAddType, SheetModel<? extends PartData>> sheetModelCache =
+            new HashMap<EntryAddType, SheetModel<? extends PartData>>();
 
     public SheetPresenter(View view, EntryAddType type, BulkUploadInfo info, ServiceDelegate<PreferenceInfo>
             serviceDelegate) {
@@ -77,14 +83,16 @@ public class SheetPresenter {
         this.type = type;
         this.serviceDelegate = serviceDelegate;
         this.rowBitSet = new HashMap<Integer, BitSet>();
-        this.rowInfoMap = new HashMap<Integer, EntryInfo>();
+        this.rowInfoMap = new HashMap<Integer, PartData>();
 
         this.currentInfo = info;
         if (info != null && info.getEntryList() != null) {
-            Collections.sort(info.getEntryList(), new Comparator<EntryInfo>() {
+            Collections.sort(info.getEntryList(), new Comparator<PartData>() {
                 @Override
-                public int compare(EntryInfo o1, EntryInfo o2) {
-                    return o1.getCreationTime().compareTo(o2.getCreationTime());
+                public int compare(PartData o1, PartData o2) {
+                    long x = o1.getCreationTime();
+                    long y = o2.getCreationTime();
+                    return (x < y) ? -1 : ((x == y) ? 0 : 1);
                 }
             });
             for (int i = 0; i < info.getEntryList().size(); i += 1) {
@@ -125,7 +133,7 @@ public class SheetPresenter {
 
             @Override
             public long getEntryIdForRow(int row) {
-                EntryInfo info = rowInfoMap.get(row);
+                PartData info = rowInfoMap.get(row);
                 if (info == null)
                     return 0;
                 return info.getId();
@@ -133,9 +141,8 @@ public class SheetPresenter {
 
             @Override
             public void callBackForLockedColumns(int row, long bulkUploadId, long entryId, EntryType entryType) {
-                BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
+                BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(entryType);
                 update.setEntryId(entryId);
-                update.setType(entryType);
                 update.setBulkUploadId(bulkUploadId);
                 update.setRow(row);
 
@@ -165,6 +172,13 @@ public class SheetPresenter {
                 if (currentInfo == null)
                     return 0;
                 return currentInfo.getId();
+            }
+
+            @Override
+            public void deleteUploadedFile(long entryId, SheetCellData data) {
+                HashMap<Long, SheetCellData> map = new HashMap<Long, SheetCellData>();
+                map.put(entryId, data);
+                fileDelete.execute(map);
             }
         };
     }
@@ -218,7 +232,7 @@ public class SheetPresenter {
         }
         currentInfo.setId(autoUpdate.getBulkUploadId());
 
-        EntryInfo info = rowInfoMap.get(autoUpdate.getRow());
+        PartData info = rowInfoMap.get(autoUpdate.getRow());
 
         // display all fields that were added
         for (Map.Entry<EntryField, String> set : autoUpdate.getKeyValue().entrySet()) {
@@ -243,8 +257,8 @@ public class SheetPresenter {
         return sampleHeaders.getHeaderForIndex(index).getCell();
     }
 
-    private SheetModel<? extends EntryInfo> getModelForCurrentType() {
-        SheetModel<? extends EntryInfo> model = sheetModelCache.get(type);
+    private SheetModel<? extends PartData> getModelForCurrentType() {
+        SheetModel<? extends PartData> model = sheetModelCache.get(type);
         if (model == null) {
             model = ModelFactory.getModelForType(type);
             sheetModelCache.put(type, model);
@@ -254,6 +268,10 @@ public class SheetPresenter {
 
     public void setAutoUpdateDelegate(ServiceDelegate<BulkUploadAutoUpdate> delegate) {
         autoUpdateDelegate = delegate;
+    }
+
+    public void setDeleteEntryFileDelegate(ServiceDelegate<HashMap<Long, SheetCellData>> delegate) {
+        this.fileDelete = delegate;
     }
 
     /**
@@ -282,7 +300,7 @@ public class SheetPresenter {
 
         // determine if the entry exists and we are updating based on the entryid
         long entryId = 0;
-        EntryInfo rowInfo = rowInfoMap.get(inputRow);
+        PartData rowInfo = rowInfoMap.get(inputRow);
         EntryType entryType;
         if (type == EntryAddType.STRAIN_WITH_PLASMID) {
             boolean isPlasmid = StrainWithPlasmidHeaders.isPlasmidHeader(header.getHeaderType());
@@ -303,10 +321,9 @@ public class SheetPresenter {
         }
 
         // submit for auto update
-        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
+        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(entryType);
         update.setEntryId(entryId);
         update.getKeyValue().put(header.getHeaderType(), value);
-        update.setType(entryType);
         long bulkUpload = currentInfo == null ? 0 : currentInfo.getId();
         update.setBulkUploadId(bulkUpload);
         update.setRow(inputRow);
@@ -357,7 +374,7 @@ public class SheetPresenter {
             String value = "";
 
             // check for existing infos
-            EntryInfo info = rowInfoMap.get(row);
+            PartData info = rowInfoMap.get(row);
             if (info != null) {
                 // extractor also sets the header data structure
                 CellColumnHeader header = headers.getHeaderForIndex(i);
@@ -379,7 +396,7 @@ public class SheetPresenter {
         int i = headers.getHeaderSize();   // starting point
         for (CellColumnHeader header : sampleHeaders.getHeaders()) {
             String value = "";
-            EntryInfo info = rowInfoMap.get(row);
+            PartData info = rowInfoMap.get(row);
             if (info != null) {
                 // extractor also sets the header data structure
                 if (info.isHasSample()) {
@@ -463,6 +480,8 @@ public class SheetPresenter {
             // for each header (col)
             col = 0;
             for (CellColumnHeader header : headers.getHeaders()) {
+                if (header.isLocked())
+                    continue;
                 SheetCell cell = header.getCell();
                 String errMsg = cell.inputIsValid(row);
                 if (errMsg.isEmpty()) {
@@ -530,7 +549,7 @@ public class SheetPresenter {
     }
 
     public HandlerRegistration setSampleSelectionHandler(final EntryAddType addType,
-            final SingleSelectionModel<SampleInfo> selectionModel) {
+            final SingleSelectionModel<PartSample> selectionModel) {
 
         return selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -538,9 +557,9 @@ public class SheetPresenter {
                 if (SheetPresenter.this.type != addType)
                     return;
 
-                // get selected sample info and retrieve storage list options
-                SampleInfo info = selectionModel.getSelectedObject();
-                if (selectSample(addType, info.getLocationId())) {
+                // get selected sample part and retrieve storage list options
+                PartSample part = selectionModel.getSelectedObject();
+                if (selectSample(addType, part.getLocationId())) {
                     // scroll everything into view
                     view.scrollElementToView(0, getFieldSize() - 1);
                 }

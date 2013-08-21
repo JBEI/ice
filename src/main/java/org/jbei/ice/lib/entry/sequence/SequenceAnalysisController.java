@@ -2,9 +2,9 @@ package org.jbei.ice.lib.entry.sequence;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 
@@ -25,14 +25,14 @@ import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqParser;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
+import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * ABI to manipulate DNA sequence trace analysis
@@ -43,15 +43,12 @@ public class SequenceAnalysisController {
 
     private final TraceSequenceDAO traceDao;
     private final PermissionsController permissionsController;
-    private final File traceSequenceFileDir;
+
+    public static final String tracesDirName = "traces";
 
     public SequenceAnalysisController() {
         traceDao = new TraceSequenceDAO();
         permissionsController = new PermissionsController();
-        String tracesDir = Utils.getConfigValue(ConfigurationKey.TRACE_FILES_DIRECTORY);
-        if (tracesDir == null)
-            tracesDir = "/tmp/traces";
-        traceSequenceFileDir = new File(tracesDir);
     }
 
     /**
@@ -83,11 +80,11 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to save trace sequence without sequence!");
         }
 
-        TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence,
-                                                        date);
+        TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence, date);
+        File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
 
         try {
-            return traceDao.create(traceSequenceFileDir, traceSequence, inputStream);
+            return traceDao.create(tracesDir, traceSequence, inputStream);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -108,9 +105,7 @@ public class SequenceAnalysisController {
      */
     public TraceSequence uploadTraceSequence(Entry entry, String filename, String depositor,
             String sequence, InputStream inputStream) throws ControllerException {
-
-        return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(),
-                                   new Date(), inputStream);
+        return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(), new Date(), inputStream);
     }
 
     /**
@@ -131,7 +126,8 @@ public class SequenceAnalysisController {
         }
 
         try {
-            traceDao.delete(traceSequenceFileDir, traceSequence);
+            File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
+            traceDao.delete(tracesDir, traceSequence);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -234,12 +230,8 @@ public class SequenceAnalysisController {
      * @throws ControllerException
      */
     public File getFile(TraceSequence traceSequence) throws ControllerException {
-
-        try {
-            return TraceSequenceDAO.getFile(traceSequenceFileDir, traceSequence);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName,
+                         traceSequence.getFileId()).toFile();
     }
 
     /**
@@ -261,14 +253,9 @@ public class SequenceAnalysisController {
 
         byte[] bytes;
 
-        try {
-            FileInputStream fileStream = new FileInputStream(file);
+        try (FileInputStream fileStream = new FileInputStream(file)) {
             bytes = new byte[(int) (file.length())];
-
             fileStream.read(bytes);
-
-        } catch (FileNotFoundException e) {
-            throw new ControllerException(e);
         } catch (IOException e) {
             throw new ControllerException(e);
         }
@@ -314,10 +301,9 @@ public class SequenceAnalysisController {
             entrySequenceString += entrySequenceString;
         }
 
-        Blast blast = new Blast();
         String bl2seqOutput;
         try {
-            bl2seqOutput = blast.runBl2Seq(entrySequenceString, traceSequenceString);
+            bl2seqOutput = BlastPlus.runBlast2Seq(entrySequenceString, traceSequenceString);
         } catch (BlastException e) {
             throw new ControllerException(e);
         } catch (ProgramTookTooLongException e) {
@@ -346,10 +332,7 @@ public class SequenceAnalysisController {
 
                 if (maxBl2SeqResult != null) {
                     int strand = maxBl2SeqResult.getOrientation() == 0 ? 1 : -1;
-
-                    TraceSequenceAlignment traceSequenceAlignment = traceSequence
-                            .getTraceSequenceAlignment();
-
+                    TraceSequenceAlignment traceSequenceAlignment = traceSequence.getTraceSequenceAlignment();
                     int queryStart = maxBl2SeqResult.getQueryStart();
                     int queryEnd = maxBl2SeqResult.getQueryEnd();
                     int subjectStart = maxBl2SeqResult.getSubjectStart();

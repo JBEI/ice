@@ -2,6 +2,8 @@ package org.jbei.ice.lib.entry.sequence;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -9,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.composers.formatters.FormatterException;
@@ -26,6 +29,8 @@ import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.vo.DNAFeature;
@@ -33,7 +38,6 @@ import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
-import org.jbei.ice.shared.dto.entry.EntryType;
 
 /**
  * ABI to manipulate {@link Sequence}s.
@@ -41,9 +45,9 @@ import org.jbei.ice.shared.dto.entry.EntryType;
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
 public class SequenceController {
+
     private final SequenceDAO dao;
     private final PermissionsController permissionsController;
-
 
     public SequenceController() {
         dao = new SequenceDAO();
@@ -148,6 +152,14 @@ public class SequenceController {
             Sequence oldSequence = getByEntry(entry);
 
             if (oldSequence != null) {
+                String tmpDir = ControllerFactory.getConfigurationController()
+                                                 .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+                String hash = oldSequence.getFwdHash();
+                try {
+                    Files.deleteIfExists(Paths.get(tmpDir, hash + ".png"));
+                } catch (IOException e) {
+                    Logger.warn(e.getMessage());
+                }
                 oldSequence.setSequenceUser(sequence.getSequenceUser());
                 oldSequence.setSequence(sequence.getSequence());
                 oldSequence.setFwdHash(sequence.getFwdHash());
@@ -180,7 +192,9 @@ public class SequenceController {
         }
 
         try {
-            dao.deleteSequence(sequence);
+            String tmpDir = ControllerFactory.getConfigurationController()
+                                             .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+            dao.deleteSequence(sequence, tmpDir);
             ApplicationController.scheduleBlastIndexRebuildTask(true);
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -221,7 +235,7 @@ public class SequenceController {
      * @param sequence
      * @return FeaturedDNASequence
      */
-    public static FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
+    public FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
         if (sequence == null) {
             return null;
         }
@@ -264,7 +278,7 @@ public class SequenceController {
         if (entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.name()))
             circular = ((Plasmid) sequence.getEntry()).getCircular();
         FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence(
-                sequence.getSequence(), entry.getNamesAsString(), circular, features, "", "");
+                sequence.getSequence(), entry.getName(), circular, features, "", "");
         featuredDNASequence.setUri(sequence.getUri());
 
         return featuredDNASequence;
@@ -385,9 +399,9 @@ public class SequenceController {
         return sequence;
     }
 
-    public boolean hasSequence(Entry entry) throws ControllerException {
+    public boolean hasSequence(long entryId) throws ControllerException {
         try {
-            return dao.hasSequence(entry);
+            return dao.hasSequence(entryId);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -396,19 +410,23 @@ public class SequenceController {
     /**
      * Determines if the user uploaded a sequence file and associated it with an entry
      *
-     * @param entry entry sequence file is associated with
+     * @param entryId unique identifier for entry
      * @return true if there is a sequence file that was originally uploaded by user, false otherwise
      * @throws ControllerException
      */
-    public boolean hasOriginalSequence(Entry entry) throws ControllerException {
+    public boolean hasOriginalSequence(long entryId) throws ControllerException {
         try {
-            return dao.hasOriginalSequence(entry);
+            return dao.hasOriginalSequence(entryId);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }
 
-    public List<Sequence> getAllSequences() throws ControllerException {
+    /**
+     * @return sequences for entries which are not deleted, not pending and not drafts
+     * @throws ControllerException
+     */
+    public Set<Sequence> getAllSequences() throws ControllerException {
         try {
             return dao.getAllSequences();
         } catch (DAOException e) {

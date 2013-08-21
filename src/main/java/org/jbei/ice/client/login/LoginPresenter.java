@@ -7,7 +7,7 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.event.LoginEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.Utils;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -99,10 +99,10 @@ public class LoginPresenter extends AbstractPresenter {
 
         // client validation passed. attempt to login
         Utils.showWaitCursor(null);
-        service.login(loginName, loginPass, new AsyncCallback<AccountInfo>() {
+        service.login(loginName, loginPass, new AsyncCallback<User>() {
 
             @Override
-            public void onSuccess(AccountInfo result) {
+            public void onSuccess(User result) {
                 if (result == null) {
                     display.setLoginPassError("Invalid username and/or password!");
                     enableInputFields();
@@ -150,7 +150,7 @@ public class LoginPresenter extends AbstractPresenter {
     }
 
     private void createNewAccount(final RegistrationDetails details) {
-        service.retrieveAccount(details.getEmail(), new AsyncCallback<AccountInfo>() {
+        service.retrieveAccount(details.getEmail(), new AsyncCallback<User>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -158,7 +158,7 @@ public class LoginPresenter extends AbstractPresenter {
             }
 
             @Override
-            public void onSuccess(AccountInfo result) {
+            public void onSuccess(User result) {
                 if (result != null) {
                     display.informOfDuplicateRegistrationEmail();
                 } else {
@@ -175,7 +175,7 @@ public class LoginPresenter extends AbstractPresenter {
      * @param details user registration information
      */
     private void saveNewAccount(RegistrationDetails details) {
-        AccountInfo info = new AccountInfo();
+        User info = new User();
         info.setEmail(details.getEmail());
         info.setDescription(details.getAbout());
         info.setFirstName(details.getFirstName());
@@ -222,7 +222,7 @@ public class LoginPresenter extends AbstractPresenter {
         if (login.isEmpty())
             return;
 
-        service.retrieveAccount(login, new AsyncCallback<AccountInfo>() {
+        service.retrieveAccount(login, new AsyncCallback<User>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -230,7 +230,7 @@ public class LoginPresenter extends AbstractPresenter {
             }
 
             @Override
-            public void onSuccess(AccountInfo result) {
+            public void onSuccess(User result) {
                 if (result == null) {
                     Window.alert("Could not retrieve user account");
                     return;

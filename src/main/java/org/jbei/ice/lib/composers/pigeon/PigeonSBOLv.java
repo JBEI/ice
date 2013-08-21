@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jbei.ice.lib.composers.formatters.SBOLVisitor;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
 
 import org.apache.http.HttpResponse;
@@ -29,7 +30,7 @@ import org.sbolstandard.core.StrandType;
 public class PigeonSBOLv {
 
     private static final String NEWLINE = System.getProperty("line.separator");
-    private static String mPigeonImageIdentifier = "Weyekin output image";
+    private static final String mPigeonImageIdentifier = "Weyekin output image";
     private static final String PIGEON_URL = "http://cidar1.bu.edu:5801/pigeon1.php";
     private static final String PIGEON_URL2 = "http://cidar1.bu.edu:5801/pigeon.php";
     private static final HashMap<String, String> map = new HashMap<>();
@@ -119,7 +120,12 @@ public class PigeonSBOLv {
         }
 
         sb.append("# Arcs").append(NEWLINE);
-        return postToPigeon(sb.toString());
+        long start = System.currentTimeMillis();
+        try {
+            return postToPigeon(sb.toString());
+        } finally {
+            Logger.info("Pigeon: " + (System.currentTimeMillis() - start) + "ms for " + sequence.getEntry().getId());
+        }
     }
 
     public static String generatePigeonScript(Sequence sequence) {
@@ -157,6 +163,8 @@ public class PigeonSBOLv {
                 else
                     pigeonType = split[0];
                 String replacedSpaces = component.getName().replaceAll(" ", "_");
+                if (replacedSpaces.trim().isEmpty())
+                    replacedSpaces = "unnamed";
                 sb.append(pigeonType).append(" ").append(replacedSpaces).append(" ").append(split[1]);
                 sb.append(NEWLINE);
             }
@@ -194,6 +202,8 @@ public class PigeonSBOLv {
             httpPost.setURI(new URI(PIGEON_URL2));
             HttpResponse response = httpClient.execute(httpPost);
             pigeonResponseString = EntityUtils.toString(response.getEntity());
+        } catch (RuntimeException re) {
+            throw re;
         } catch (Exception ce) {
             return null;
         } finally {

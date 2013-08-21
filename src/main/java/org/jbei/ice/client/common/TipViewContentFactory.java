@@ -1,5 +1,18 @@
 package org.jbei.ice.client.common;
 
+import java.util.Date;
+
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.RegistryService;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.History;
@@ -7,11 +20,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
-import org.jbei.ice.client.*;
-import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.dto.entry.*;
-
-import java.util.Date;
 
 /**
  * Factory for generating a widget that is used as a tooltip for entrys
@@ -22,28 +30,28 @@ public class TipViewContentFactory {
 
     private static final RegistryServiceAsync service = GWT.create(RegistryService.class);
 
-    public static void getContents(final EntryInfo entry, String url, final Callback<Widget> callback) {
+    public static void getContents(final PartData entry, String url, final Callback<Widget> callback) {
         try {
-            service.retrieveEntryTipDetails(ClientController.sessionId, entry.getRecordId(), url,
-                    new AsyncCallback<EntryInfo>() {
+            service.retrieveEntryTipDetails(ClientController.sessionId, entry.getId(), url,
+                                            new AsyncCallback<PartData>() {
 
-                        @Override
-                        public void onSuccess(EntryInfo result) {
-                            Widget contents = getContents(result);
-                            callback.onSuccess(contents);
-                        }
+                                                @Override
+                                                public void onSuccess(PartData result) {
+                                                    Widget contents = getContents(result);
+                                                    callback.onSuccess(contents);
+                                                }
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            callback.onFailure();
-                        }
-                    });
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    callback.onFailure();
+                                                }
+                                            });
         } catch (AuthenticationException e) {
             History.newItem(Page.LOGIN.getLink());
         }
     }
 
-    private static Widget getContents(EntryInfo entry) {
+    private static Widget getContents(PartData entry) {
         FlexTable table = new FlexTable();
         table.setWidth("650px");
         table.setCellPadding(2);
@@ -54,23 +62,22 @@ public class TipViewContentFactory {
 
         switch (entry.getType()) {
             case STRAIN:
-                StrainInfo view = (StrainInfo) entry;
+                StrainData view = (StrainData) entry;
                 r = getStrainContent(table, view);
                 break;
 
             case PLASMID:
-                PlasmidInfo plasmidInfo = (PlasmidInfo) entry;
-                r = getPlasmidContent(table, plasmidInfo);
+                PlasmidData plasmidData = (PlasmidData) entry;
+                r = getPlasmidContent(table, plasmidData);
                 break;
 
             case ARABIDOPSIS:
-                ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) entry;
-                r = getSeedContent(table, seedInfo);
+                ArabidopsisSeedData seedData = (ArabidopsisSeedData) entry;
+                r = getSeedContent(table, seedData);
                 break;
 
             case PART:
-                PartInfo partInfo = (PartInfo) entry;
-                r = getPartContent(table, partInfo);
+                r = getPartContent(table, entry);
                 break;
 
             default:
@@ -81,7 +88,7 @@ public class TipViewContentFactory {
         return table;
     }
 
-    private static int getPlasmidContent(FlexTable table, PlasmidInfo view) {
+    private static int getPlasmidContent(FlexTable table, PlasmidData view) {
         setLeftColumn(table, view);
 
         // second column
@@ -89,31 +96,38 @@ public class TipViewContentFactory {
         addField(table, 2, 2, "Backbone", view.getBackbone(), "135px", "230px");
         addField(table, 3, 2, "Origin of Replication", view.getOriginOfReplication(), "135px", "230px");
         addField(table, 4, 2, "Promoters", view.getPromoters(), "135px", "230px");
+        addField(table, 5, 2, "Replicates In", view.getReplicatesIn(), "135px", "230px");
 
         String strains = "";
-        for (Long id : view.getStrains().keySet())
-            strains += (view.getStrains().get(id) + ", ");
-
-        if (view.getStrains().keySet().size() > 0)
-            strains = strains.substring(0, strains.lastIndexOf(", "));
-        addField(table, 5, 2, "Strains", strains, "135px", "230px");
-        addField(table, 6, 2, "Funding Source", view.getFundingSource(), "135px", "230px");
-        return 7;
+        for (int i = 0; i < view.getLinkedParts().size(); i += 1) {
+            if (i > 0)
+                strains += ", ";
+            strains += view.getLinkedParts().get(i).getPartId();
+        }
+        addField(table, 6, 2, "Strains", strains, "135px", "230px");
+        addField(table, 7, 2, "Funding Source", view.getFundingSource(), "135px", "230px");
+        return 8;
     }
 
-    private static int getStrainContent(FlexTable table, StrainInfo view) {
+    private static int getStrainContent(FlexTable table, StrainData view) {
         setLeftColumn(table, view);
 
         // second column
         addField(table, 1, 2, "Selection Markers", view.getSelectionMarkers(), "135px", "230px");
-        addField(table, 2, 2, "Host", view.getLinkifiedHost(), "125px", "200px");
+        addField(table, 2, 2, "Host", view.getHost(), "125px", "200px");
         addField(table, 3, 2, "Genotype/Phenotype", view.getGenotypePhenotype(), "135px", "230px");
-        addField(table, 4, 2, "Plasmids", view.getLinkifiedPlasmids(), "135px", "230px");
+        String value = "";
+        for (int i = 0; i < view.getLinkedParts().size(); i += 1) {
+            if (i > 0)
+                value += ", ";
+            value += view.getLinkedParts().get(i).getPartId();
+        }
+        addField(table, 4, 2, "Plasmids", value, "135px", "230px");
         addField(table, 5, 2, "Funding Source", view.getFundingSource(), "135px", "230px");
         return 6;
     }
 
-    private static int getPartContent(FlexTable table, PartInfo view) {
+    private static int getPartContent(FlexTable table, PartData view) {
         setLeftColumn(table, view);
 
         // second column
@@ -122,7 +136,7 @@ public class TipViewContentFactory {
         return 2;
     }
 
-    private static int getSeedContent(FlexTable table, ArabidopsisSeedInfo view) {
+    private static int getSeedContent(FlexTable table, ArabidopsisSeedData view) {
         setLeftColumn(table, view);
 
         // second column
@@ -139,7 +153,7 @@ public class TipViewContentFactory {
     }
 
     private static void addField(FlexTable table, int row, int col, String header,
-                                 String value, String headerWidth, String valueWidth) {
+            String value, String headerWidth, String valueWidth) {
         table.setHTML(row, col, "<b class=\"font-75em\" style=\"color: #222\">" + header + "</b>");
         table.getFlexCellFormatter().setWidth(row, col, headerWidth);
         table.getFlexCellFormatter().setVerticalAlignment(row, col, HasAlignment.ALIGN_TOP);
@@ -153,13 +167,13 @@ public class TipViewContentFactory {
         table.getFlexCellFormatter().setVerticalAlignment(row, col, HasAlignment.ALIGN_TOP);
     }
 
-    private static void setLeftColumn(FlexTable table, EntryInfo entry) {
+    private static void setLeftColumn(FlexTable table, PartData entry) {
         addField(table, 1, 0, "Part ID", entry.getPartId(), "115px", "170px");
         addField(table, 2, 0, "Alias", entry.getAlias(), "115px", "170px");
         addField(table, 3, 0, "Creator", entry.getCreator(), "115px", "170px");
         addField(table, 4, 0, "Owner", entry.getOwner(), "115px", "170px");
-        addField(table, 5, 0, "Links", entry.getLinkifiedLinks(), "115px", "170px");
-        addField(table, 6, 0, "Modified", generateDate(entry.getModificationTime()), "115px", "170px");
+        addField(table, 5, 0, "Links", entry.getLinks(), "115px", "170px");
+        addField(table, 6, 0, "Modified", generateDate(new Date(entry.getModificationTime())), "115px", "170px");
         addField(table, 7, 0, "Keywords", entry.getKeywords(), "115px", "170px");
         addField(table, 8, 0, "References", entry.getReferences(), "115px", "170px");
         addField(table, 9, 0, "Bio Safety", "Level " + entry.getBioSafetyLevel(), "115px", "170px");

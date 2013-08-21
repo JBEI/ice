@@ -8,13 +8,12 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.entry.EntryType;
 
 /**
  * ABI to manipulate {@link Storage}.
@@ -240,6 +239,7 @@ public class StorageController {
 
         switch (type) {
             case STRAIN:
+            default:
                 uuid = configurationController.getPropertyValue(ConfigurationKey.STRAIN_STORAGE_ROOT);
                 break;
 

@@ -1,13 +1,14 @@
 package org.jbei.ice.client.profile.preferences;
 
+import java.util.HashMap;
+
+import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.profile.widget.IUserProfilePanel;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Widget;
-import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.client.profile.widget.IUserProfilePanel;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
-
-import java.util.HashMap;
 
 /**
  * Panel for user preference settings
@@ -44,8 +45,8 @@ public class UserPreferencesPanel extends Composite implements IUserProfilePanel
 
     private Widget createGeneralSettingPanel(HashMap<String, String> settings) {
         return new PreferencesPanel(settings, "Create Entry Defaults", serviceDelegate,
-                PreferenceKey.PRINCIPAL_INVESTIGATOR,
-                PreferenceKey.FUNDING_SOURCE);
+                                    PreferenceKey.PRINCIPAL_INVESTIGATOR,
+                                    PreferenceKey.FUNDING_SOURCE);
     }
 
     private Widget createSearchSettings(HashMap<String, String> settings) {

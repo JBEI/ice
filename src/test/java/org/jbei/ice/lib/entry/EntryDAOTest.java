@@ -2,8 +2,8 @@ package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.entry.EntryType;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -36,6 +36,10 @@ public class EntryDAOTest {
     }
 
     @Test
+    public void testSetEntryVisibility() throws Exception {
+    }
+
+    @Test
     public void testSave() throws Exception {
         Entry entry = new Entry();
         entry.setRecordId(Utils.generateUUID());
@@ -54,6 +58,7 @@ public class EntryDAOTest {
 
     @Test
     public void testRetrieveStrainsForPlasmid() throws Exception {
+        dao.upgradeLinks();
     }
 
     @Test

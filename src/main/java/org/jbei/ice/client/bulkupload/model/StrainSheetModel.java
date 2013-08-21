@@ -1,11 +1,11 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
-public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
+public class StrainSheetModel extends SingleInfoSheetModel<StrainData> {
 
-    public StrainInfo setField(StrainInfo strain, SheetCellData datum) {
+    public StrainData setField(StrainData strain, SheetCellData datum) {
 
         if (datum == null)
             return strain;
@@ -30,7 +30,7 @@ public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
                 break;
 
             case PLASMIDS:
-                strain.setPlasmids(value);
+//                strain.setPlasmids(value);   // TODO
                 break;
 
             // todo : samples
@@ -40,7 +40,7 @@ public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
     }
 
     @Override
-    public StrainInfo createInfo() {
-        return new StrainInfo();
+    public StrainData createInfo() {
+        return new StrainData();
     }
 }

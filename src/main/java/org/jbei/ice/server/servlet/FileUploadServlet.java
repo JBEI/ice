@@ -4,13 +4,18 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import javax.servlet.http.Cookie;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,70 +23,57 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.bulkupload.BulkUploadUtil;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.FileUtils;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.shared.dto.entry.EntryType;
 
-import gwtupload.server.UploadAction;
-import gwtupload.server.exceptions.UploadActionException;
-import gwtupload.shared.UConsts;
-import org.apache.commons.fileupload.FileItem;
+import au.com.bytecode.opencsv.CSVReader;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileItemIterator;
+import org.apache.commons.fileupload.FileItemStream;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.util.Streams;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 /**
- * GWTUpload servlet that handles file uploads. If an upload type (e.g. sequence or attachment)
+ * Servlet that handles file uploads. If an upload type (e.g. sequence or attachment)
  * is associated with an entry if the entry id (EID) passed is valid. If no valid EID is provided
  * then the file is simply uploaded and the file id (essentially a unique identifier based on type)
  * is returned
  *
  * @author Hector Plahar
  */
-public class FileUploadServlet extends UploadAction {
+public class FileUploadServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String SEQUENCE_TYPE = "sequence";
+    private static final String TRACE_SEQUENCE = "trace_sequence";
     private static final String ATTACHMENT_TYPE = "attachment";
     private static final String BULK_UPLOAD_FILE_TYPE = "bulk_file_upload";
     private static final String BULK_CSV_UPLOAD = "bulk_csv";
+    private static final String SEQUENCE = "sequence";
 
-    Hashtable<String, String> receivedContentTypes = new Hashtable<>();
-    Hashtable<String, File> receivedFiles = new Hashtable<>(); // received files list and content types
-
-    private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
-        for (Cookie cookie : cookies) {
-            if ("gd-ice".equals(cookie.getName())) {
-                String sid = cookie.getValue();
-                if (sid == null || sid.isEmpty())
-                    return null;
-
-                if (!AccountController.isAuthenticated(sid))
-                    return null;
-                AccountController controller = ControllerFactory.getAccountController();
-                return controller.getAccountBySessionKey(sid);
-            }
-        }
-        return null;
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doPost(req, resp);
     }
 
-    /**
-     * Override executeAction to save the received files in a custom place and delete this items from session.
-     */
     @Override
-    public String executeAction(HttpServletRequest request, List<FileItem> sessionFiles) throws UploadActionException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String desc = request.getParameter("desc");
         String type = request.getParameter("type");
         String entryId = request.getParameter("eid");
@@ -94,14 +86,14 @@ public class FileUploadServlet extends UploadAction {
         Account account;
 
         try {
-            account = isLoggedIn(request.getCookies());
+            account = ServletHelper.isLoggedIn(request.getCookies());
             if (account == null) {
                 if (!AccountController.isAuthenticated(sid))
-                    return "";
+                    return;
                 AccountController controller = ControllerFactory.getAccountController();
                 account = controller.getAccountBySessionKey(sid);
                 if (account == null)
-                    return "";
+                    return;
             }
         } catch (ControllerException ce) {
             Logger.error(ce);
@@ -109,64 +101,84 @@ public class FileUploadServlet extends UploadAction {
             String path = request.getServletPath();
             url = url.substring(0, url.indexOf(path));
             Logger.info(FileUploadServlet.class.getSimpleName() + ": Redirecting user to login at \"" + url + "\"");
-            return "";
+            return;
         }
 
         String result = "";
         String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
 
-        // retrieve file
-        for (FileItem item : sessionFiles) {
-            if (item.isFormField())
-                continue;
+        // upload
+        try {
+            FileItemFactory fileItemFactory = new DiskFileItemFactory();
+            ServletFileUpload servletFileUpload = new ServletFileUpload(fileItemFactory);
+            FileItemIterator fileItemIterator = servletFileUpload.getItemIterator(request);
 
-            String saveName = item.getName().replaceAll("[\\\\/><\\|\\s\"'{}()\\[\\]]+", "_");
-            if (saveName.isEmpty())
-                continue;
+            while (fileItemIterator.hasNext()) {
+                FileItemStream fileItemStream = fileItemIterator.next();
 
-            File file = new File(tmpDir + File.separator + saveName);
+                String filePath = fileItemStream.getName();
+                String fileName = filePath.substring(filePath.lastIndexOf(File.pathSeparatorChar) + 1);
+                File file = new File(tmpDir, fileName);
+                if (file.length() > 3000000l) {
+                    sendServerResponse(response, "Error: File size is too large");
+                    return;
+                }
 
-            try {
-                item.write(file);
-            } catch (Exception e) {
-                Logger.error(e);
-                continue;
+                Streams.copy(fileItemStream.openStream(), new FileOutputStream(file), true);
+                switch (type) {
+                    case ATTACHMENT_TYPE:
+                        result = uploadAttachment(account, file, entryId, desc, fileName);
+                        break;
+
+                    case TRACE_SEQUENCE:
+                        try {
+                            result = uploadSequenceTraceFile(file, entryId, account, fileName);
+                        } catch (IOException e) {
+                            Logger.error(e);
+                        }
+                        break;
+
+                    case BULK_UPLOAD_FILE_TYPE:
+                        long entryIdl = Long.decode(entryId);
+                        Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
+                        result = uploadBulkUploadFile(account, file, bulkUploadId, entryIdl, fileName, isSequence,
+                                                      entryType, entryAddType);
+                        break;
+
+                    case BULK_CSV_UPLOAD:
+                        uploadCSV(request, file);
+                        break;
+
+                    case SEQUENCE:
+                        result = ServletHelper.uploadSequence(file);
+                        break;
+
+                    default:
+                        return;
+                }
             }
-
-            switch (type) {
-                case ATTACHMENT_TYPE:
-                    result = uploadAttachment(account, file, entryId, desc, saveName);
-                    break;
-
-                case SEQUENCE_TYPE:
-                    try {
-                        result = uploadSequenceTraceFile(file, entryId, account, saveName);
-                    } catch (IOException e) {
-                        Logger.error(e);
-                    }
-                    break;
-
-                case BULK_UPLOAD_FILE_TYPE:
-                    Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
-                    result = uploadBulkUploadFile(account, file, bulkUploadId, entryId, saveName, isSequence, entryType,
-                                                  entryAddType);
-                    break;
-
-                case BULK_CSV_UPLOAD:
-                    // TODO
-                    break;
-
-                default:
-                    return "Error";
-            }
-            break;
+        } catch (FileUploadException fue) {
+            String errMsg = "Error: " + fue.getMessage();
+            sendServerResponse(response, errMsg);
+            return;
         }
 
-        removeSessionFileItems(request);
-        return result;
+        sendServerResponse(response, result);
     }
 
-    public String uploadBulkUploadFile(Account account, File file, String bulkUploadIdStr, String entryId,
+    /**
+     * Writes a response to the client.
+     */
+    protected void sendServerResponse(HttpServletResponse response, String message) throws IOException {
+        response.setContentType("text/html; charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        out.print(message);
+        out.flush();
+        out.close();
+    }
+
+    public String uploadBulkUploadFile(Account account, File file, String bulkUploadIdStr, long entryId,
             String saveName, boolean isSequence, String entryType, String entryAddType) {
         long bulkUploadId;
         try {
@@ -178,48 +190,42 @@ public class FileUploadServlet extends UploadAction {
 
         EntryType type = EntryType.valueOf(entryType);
         EntryAddType addType = EntryAddType.valueOf(entryAddType);
+        EntryController entryController = ControllerFactory.getEntryController();
+
+        Entry entry;
+        try {
+            entry = entryController.get(account, entryId);
+        } catch (ControllerException ce) {
+            return "Error";
+        }
 
         try {
-            if (entryId == null || "0".equals(entryId.trim())) {
+            if (entry == null) {
                 return uploadToNewEntry(account, file, saveName, isSequence, type, addType, bulkUploadId);
             }
 
             // associate with entry
-            EntryController entryController = ControllerFactory.getEntryController();
             AttachmentController attachmentController = ControllerFactory.getAttachmentController();
 
-            Entry entry = null;
-
-            try {
-                boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
-                        && type == EntryType.PLASMID);
-                entry = entryController.get(account, Long.decode(entryId));
-                if (isStrainWithPlasmidPlasmid) {
-                    String plasmid = ((Strain) entry).getPlasmids();
-                    entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account,
-                                                                         ControllerFactory.getEntryController(),
-                                                                         plasmid);
-                }
-            } catch (NumberFormatException | ControllerException e) {
-                Logger.error(e);
+            boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
+                    && type == EntryType.PLASMID);
+            if (isStrainWithPlasmidPlasmid && !entry.getLinkedEntries().isEmpty()) {
+                entry = (Entry) entry.getLinkedEntries().toArray()[0];
             }
-            if (entry == null)
-                return uploadToNewEntry(account, file, saveName, isSequence, type, addType, bulkUploadId);
 
             if (isSequence) {
                 String sequenceString = FileUtils.readFileToString(file);
                 ControllerFactory.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
                 return saveName;
             } else {
-                FileInputStream inputStream = new FileInputStream(file);
-                try {
+                try (FileInputStream inputStream = new FileInputStream(file)) {
                     ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
                     if (attachments != null && !attachments.isEmpty()) {
                         for (Attachment attachment : attachments) {
                             try {
                                 attachmentController.delete(account, attachment);
                             } catch (PermissionException e) {
-                                continue;
+                                Logger.warn(e.getMessage());
                             }
                         }
                     }
@@ -228,9 +234,9 @@ public class FileUploadServlet extends UploadAction {
                     attachment.setEntry(entry);
                     attachment.setDescription("");
                     attachment.setFileName(saveName);
-                    Attachment saved = attachmentController.save(account, attachment, inputStream);
-                    if (saved != null)
-                        return saved.getFileId();
+                    attachment = attachmentController.save(account, attachment, inputStream);
+                    if (attachment != null)
+                        return attachment.getFileId() + ", " + saveName;
                     return "";
                 } catch (ControllerException e) {
                     Logger.error(e);
@@ -245,18 +251,15 @@ public class FileUploadServlet extends UploadAction {
 
     public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, EntryType type,
             EntryAddType addType, long bid) {
-        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate();
+        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(type);
         update.setBulkUploadId(bid);
-        update.setType(type);
         try {
             update = ControllerFactory.getBulkUploadController().autoUpdateBulkUpload(account, update, addType);
             boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
                     && type == EntryType.PLASMID);
             Entry entry = ControllerFactory.getEntryController().get(account, update.getEntryId());
-            if (isStrainWithPlasmidPlasmid) {
-                String plasmid = ((Strain) entry).getPlasmids();
-                entry = BulkUploadUtil.getPartNumberForStrainPlasmid(account, ControllerFactory.getEntryController(),
-                                                                     plasmid);
+            if (isStrainWithPlasmidPlasmid && !entry.getLinkedEntries().isEmpty()) {
+                entry = (Entry) entry.getLinkedEntries().toArray()[0];
             }
 
             if (isSequence) {
@@ -275,7 +278,7 @@ public class FileUploadServlet extends UploadAction {
                     try {
                         attachmentController.delete(account, attachment);
                     } catch (PermissionException e) {
-                        continue;
+                        Logger.warn(e.getMessage());
                     }
                 }
             }
@@ -380,70 +383,107 @@ public class FileUploadServlet extends UploadAction {
     // TODO : check for path information in filename. safari includes it
     private String uploadAttachment(Account account, File file, String entryId, String desc, String filename) {
         EntryController controller = ControllerFactory.getEntryController();
-        Entry entry = null;
+        Entry entry;
         try {
             entry = controller.get(account, Long.decode(entryId));
-        } catch (NumberFormatException | ControllerException e) {
-            Logger.error(e);
-        }
 
-        try {
-            FileInputStream inputStream = new FileInputStream(file);
             if (entry != null) {
-                try {
-                    Attachment attachment = new Attachment();
-                    attachment.setEntry(entry);
-                    attachment.setDescription(desc);
-                    attachment.setFileName(filename);
-                    AttachmentController attachmentController = ControllerFactory.getAttachmentController();
-                    Attachment saved = attachmentController.save(account, attachment, inputStream);
-                    if (saved != null)
-                        return saved.getFileId();
-                } catch (ControllerException e) {
-                    Logger.error(e);
-                }
+                Attachment attachment = new Attachment();
+                attachment.setEntry(entry);
+                attachment.setDescription(desc);
+                attachment.setFileName(filename);
+                AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+                Attachment saved = attachmentController.save(account, attachment, new FileInputStream(file));
+                if (saved != null)
+                    return saved.getFileId() + "," + filename;
             } else {
                 // upload file. return file id
                 String fileId = Utils.generateUUID();
-                File attDir = new File(Utils.getConfigValue(ConfigurationKey.ATTACHMENTS_DIRECTORY));
-                FileUtils.writeFile(attDir, fileId, inputStream);
-                return fileId;
+                File attachmentFile = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
+                                                AttachmentController.attachmentDirName, fileId).toFile();
+                FileUtils.copyFile(file, attachmentFile);
+                return fileId + "," + filename;
             }
-        } catch (IOException e) {
+        } catch (ControllerException | IOException | NumberFormatException e) {
             Logger.error(e);
-            return null;
         }
 
         return null;
     }
 
-    /**
-     * Get the content of an uploaded file.
-     */
-    @Override
-    public void getUploadedFile(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String fieldName = request.getParameter(UConsts.PARAM_SHOW);
-        File f = receivedFiles.get(fieldName);
-        if (f != null) {
-            response.setContentType(receivedContentTypes.get(fieldName));
-            try (FileInputStream is = new FileInputStream(f)) {
-                copyFromInputStreamToOutputStream(is, response.getOutputStream());
+    protected String uploadCSV(HttpServletRequest request, File file) {
+        String entryAddTypeString = request.getParameter("type");
+        EntryAddType addType = EntryAddType.valueOf(entryAddTypeString);
+
+        try {
+            InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(file));
+            List<EntryField> fields = new LinkedList<>();
+            List<BulkUploadAutoUpdate> updates = new LinkedList<>();
+            try (CSVReader csvReader = new CSVReader(inputStreamReader)) {
+                String[] lines;
+                while ((lines = csvReader.readNext()) != null) {
+                    if (fields.isEmpty()) {
+                        for (int i = 0; i < lines.length; i += 1) {
+                            String line = lines[i];
+                            EntryField field = EntryField.fromString(line);
+                            if (field == null)
+                                return "Error: Unrecognized field " + line;
+
+                            fields.add(i, field);
+                        }
+                    } else {
+                        // process values
+                        for (int i = 0; i < lines.length; i += 1) {
+                            EntryField field = fields.get(i);
+                            EntryType type = toEntryType(addType, field);
+                            BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(type);
+                            autoUpdate.getKeyValue().put(field, lines[i]);
+                            updates.add(autoUpdate);
+                        }
+                    }
+                }
             }
-        } else {
-            renderXmlResponse(request, response, XML_ERROR_ITEM_NOT_FOUND);
+        } catch (Exception c) {
+            Logger.error(c);
+            return c.getMessage();
         }
+
+        return "";
     }
 
-    /**
-     * Remove a file when the user sends a delete request.
-     */
-    @Override
-    public void removeItem(HttpServletRequest request, String fieldName) throws UploadActionException {
-        File file = receivedFiles.get(fieldName);
-        receivedFiles.remove(fieldName);
-        receivedContentTypes.remove(fieldName);
-        if (file != null && file.delete()) {
-            Logger.warn("Could not delete file " + file.getAbsolutePath());
+    // TODO : combine with StrainWithPlasmidHeaders::isPlasmidHeader()
+    private EntryType toEntryType(EntryAddType type, EntryField field) {
+        EntryType entryType;
+        if (type == EntryAddType.STRAIN_WITH_PLASMID) {
+            boolean isPlasmid = isPlasmidHeader(field);
+
+            if (isPlasmid) {
+                // if updating plasmid portion of strain with one plasmid
+                entryType = EntryType.PLASMID;
+            } else {
+                entryType = EntryType.STRAIN;
+            }
+        } else {
+            entryType = EntryAddType.addTypeToType(type);
         }
+        return entryType;
+    }
+
+    protected boolean isPlasmidHeader(EntryField entryField) {
+        return (entryField == EntryField.PLASMID_NAME
+                || entryField == EntryField.PLASMID_ALIAS
+                || entryField == EntryField.PLASMID_LINKS
+                || entryField == EntryField.PLASMID_SELECTION_MARKERS
+                || entryField == EntryField.CIRCULAR
+                || entryField == EntryField.PLASMID_BACKBONE
+                || entryField == EntryField.PLASMID_PROMOTERS
+                || entryField == EntryField.PLASMID_REPLICATES_IN
+                || entryField == EntryField.PLASMID_ORIGIN_OF_REPLICATION
+                || entryField == EntryField.PLASMID_KEYWORDS
+                || entryField == EntryField.PLASMID_SUMMARY
+                || entryField == EntryField.PLASMID_NOTES
+                || entryField == EntryField.PLASMID_REFERENCES
+                || entryField == EntryField.PLASMID_SEQ_FILENAME
+                || entryField == EntryField.PLASMID_ATT_FILENAME);
     }
 }

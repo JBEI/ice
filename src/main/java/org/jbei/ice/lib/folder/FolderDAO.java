@@ -2,21 +2,24 @@ package org.jbei.ice.lib.folder;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.folder.FolderStatus;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 
 /**
  * Manipulate {@link Folder} objects in the database.
@@ -82,33 +85,46 @@ class FolderDAO extends HibernateRepository<Folder> {
     public ArrayList<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit)
             throws DAOException {
         Session session = currentSession();
+
         try {
             Folder folder = get(folderId);
             if (folder == null)
                 throw new DAOException();
 
-            String queryString = " order by";
+            String sortString;
 
             switch (sort) {
                 default:
                 case CREATED:
-                    queryString += " id";
+                    sortString = " id";
                     break;
 
                 case STATUS:
-                    queryString += " status";
+                    sortString = " status";
+                    break;
+
+                case NAME:
+                    sortString = " name";
+                    break;
+
+                case PART_ID:
+                    sortString = " partNumber";
                     break;
 
                 case TYPE:
-                    queryString += " recordType";
+                    sortString = " recordType";
                     break;
             }
 
-            queryString += (asc ? " asc" : " desc");
-            Query query = session.createFilter(folder.getContents(), queryString);
-            List list = query.setFirstResult(start).setMaxResults(limit).list();
-            ArrayList<Entry> results = new ArrayList<Entry>(list);
-            return results;
+            String ascString = asc ? " asc" : " desc";
+            Query query = session.createQuery("select distinct e from Entry e "
+                                                      + "join e.folders f where f.id = :id order by e."
+                                                      + sortString + ascString);
+            query.setLong("id", folderId);
+            query.setFirstResult(start);
+            query.setMaxResults(limit);
+            List list = query.list();
+            return new ArrayList<Entry>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -154,13 +170,13 @@ class FolderDAO extends HibernateRepository<Folder> {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Folder> getFoldersByStatus(FolderStatus status) throws DAOException {
+    public List<Folder> getFoldersByType(FolderType type) throws DAOException {
         ArrayList<Folder> folders;
         Session session = currentSession();
         try {
-            String queryString = "from " + Folder.class.getName() + " WHERE status = :status";
+            String queryString = "from " + Folder.class.getName() + " WHERE type = :type";
             Query query = session.createQuery(queryString);
-            query.setParameter("status", status);
+            query.setParameter("type", type);
             folders = new ArrayList<Folder>(query.list());
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve folders!", e);
@@ -185,5 +201,16 @@ class FolderDAO extends HibernateRepository<Folder> {
         }
 
         return folders;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Set<Long> getAllFolderIds() throws DAOException {
+        try {
+            List list = currentSession().createCriteria(Folder.class).setProjection(Projections.property("id")).list();
+            return new HashSet<Long>(list);
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 }

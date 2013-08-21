@@ -1,30 +1,40 @@
 package org.jbei.ice.lib.utils;
 
-import org.dom4j.*;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.XMLWriter;
-import org.dom4j.tree.DefaultElement;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
+
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimeZone;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.Namespace;
+import org.dom4j.QName;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
+import org.dom4j.tree.DefaultElement;
 
 /**
  * IceXML serializer/deserializer.
@@ -66,6 +76,7 @@ public class IceXmlSerializer {
     private static final String HOST = "host";
     private static final String IS_CIRCULAR = "isCircular";
     private static final String PROMOTERS = "promoters";
+    private static final String REPLICATES_IN = "replicatesIn";
     private static final String ORIGIN_OF_REPLICATION = "originOfReplication";
     private static final String BACKBONE = "backbone";
     private static final String FILE_NAME = "fileName";
@@ -77,7 +88,6 @@ public class IceXmlSerializer {
     private static final String INTELLECTUAL_PROPERTY = "intellectualProperty";
     private static final String BIO_SAFETY_LEVEL = "bioSafetyLevel";
     private static final String REFERENCES = "references";
-    private static final String LONG_DESCRIPTION_MARKUP_TYPE = "longDescriptionMarkupType";
     private static final String LONG_DESCRIPTION = "longDescription";
     private static final String SHORT_DESCRIPTION = "shortDescription";
     private static final String STATUS = "status";
@@ -88,18 +98,14 @@ public class IceXmlSerializer {
     private static final String PERSON_NAME = "personName";
     private static final String OWNER = "owner";
     private static final String PART_NAME = "partName";
-    private static final String PART_NAMES = "partNames";
     private static final String PART_NUMBER = "partNumber";
-    private static final String PART_NUMBERS = "partNumbers";
     private static final String RECORD_TYPE = "recordType";
     private static final String RECORD_ID = "recordId";
-    private static final String INDEX = "index";
-    private static final String SEQ = "seq";
 
-    public static Namespace iceNamespace = new Namespace("ice", "http://jbei.org/ice");
-    public static Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-    public static Namespace expNamespace = new Namespace(EXP, "http://jbei.org/exp");
-    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    public static final Namespace iceNamespace = new Namespace("ice", "http://jbei.org/ice");
+    public static final Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    public static final Namespace expNamespace = new Namespace(EXP, "http://jbei.org/exp");
+    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     /**
      * Generate ice-xml from given List of {@link Entry}s.
@@ -126,14 +132,10 @@ public class IceXmlSerializer {
         try {
             writer = new XMLWriter(byteArrayOutputStream, format);
             writer.write(serializeToJbeiXml(account, entries, sequences));
-            String temp = byteArrayOutputStream.toString("utf8");
-            return temp;
-        } catch (UnsupportedEncodingException e) {
-            throw new UtilityException(e);
+            return byteArrayOutputStream.toString("utf8");
         } catch (IOException e) {
             throw new UtilityException(e);
         }
-
     }
 
     /**
@@ -162,7 +164,6 @@ public class IceXmlSerializer {
         for (int index = 0; index < entries.size(); index++) {
             Logger.debug("Serialize to XML " + entries.get(index).getRecordId());
             Element entryElement = toEntryElement(account, entries.get(index), sequences.get(index));
-            entryElement.addAttribute(INDEX, Integer.toString(index));
             root.add(entryElement);
         }
 
@@ -187,25 +188,16 @@ public class IceXmlSerializer {
         entryRoot.add(new DefaultElement(RECORD_ID, iceNamespace).addText(entry.getRecordId()));
         entryRoot.add(new DefaultElement(RECORD_TYPE, iceNamespace).addText(entry.getRecordType()));
         entryRoot.add(new DefaultElement(CREATION_TIME_STAMP, iceNamespace)
-                .addText(simpleDateFormat.format(entry.getCreationTime())));
+                              .addText(simpleDateFormat.format(entry.getCreationTime())));
         if (entry.getModificationTime() != null) {
             entryRoot.add(new DefaultElement(MODIFICATION_TIME_STAMP, iceNamespace)
-                    .addText(simpleDateFormat.format(entry.getModificationTime())));
+                                  .addText(simpleDateFormat.format(entry.getModificationTime())));
         } else {
             entryRoot.add(new DefaultElement(MODIFICATION_TIME_STAMP, iceNamespace)
-                    .addText(simpleDateFormat.format(entry.getCreationTime())));
+                                  .addText(simpleDateFormat.format(entry.getCreationTime())));
         }
-        DefaultElement partNumbers = new DefaultElement(PART_NUMBERS, iceNamespace);
-        for (PartNumber partNumber : entry.getPartNumbers()) {
-            partNumbers.add(new DefaultElement(PART_NUMBER, iceNamespace).addText(partNumber.getPartNumber()));
-        }
-        entryRoot.add(partNumbers);
-
-        DefaultElement partNames = new DefaultElement(PART_NAMES, iceNamespace);
-        for (Name name : entry.getNames()) {
-            partNames.add(new DefaultElement(PART_NAME, iceNamespace).addText(name.getName()));
-        }
-        entryRoot.add(partNames);
+        entryRoot.add(new DefaultElement(PART_NUMBER, iceNamespace).addText(entry.getPartNumber()));
+        entryRoot.add(new DefaultElement(PART_NAME, iceNamespace).addText(entry.getName()));
 
         DefaultElement owner = new DefaultElement(OWNER, iceNamespace);
         owner.add(new DefaultElement(PERSON_NAME, iceNamespace).addText(emptyStringify(entry.getOwner())));
@@ -221,8 +213,8 @@ public class IceXmlSerializer {
             DefaultElement links = new DefaultElement(LINKS, iceNamespace);
             for (Link link : entry.getLinks()) {
                 links.add(new DefaultElement(LINK, iceNamespace)
-                        .addAttribute(URL, emptyStringify(link.getUrl()))
-                        .addText(emptyStringify(link.getLink())));
+                                  .addAttribute(URL, emptyStringify(link.getUrl()))
+                                  .addText(emptyStringify(link.getLink())));
             }
             entryRoot.add(links);
         }
@@ -230,26 +222,26 @@ public class IceXmlSerializer {
         entryRoot.add(new DefaultElement(STATUS, iceNamespace).addText(emptyStringify(entry.getStatus())));
 
         entryRoot.add(new DefaultElement(LONG_DESCRIPTION, iceNamespace)
-                .addText(emptyStringify(entry.getLongDescription())));
-        entryRoot.add(new DefaultElement(LONG_DESCRIPTION_MARKUP_TYPE, iceNamespace).addText(
-                entry.getLongDescriptionType()));
+                              .addText(emptyStringify(entry.getLongDescription())));
+        entryRoot.add(new DefaultElement(SHORT_DESCRIPTION, iceNamespace).addText(
+                entry.getShortDescription()));
         entryRoot.add(new DefaultElement(REFERENCES, iceNamespace).addText(emptyStringify(entry.getReferences())));
         entryRoot.add(getEntryTypeSpecificFields(entry));
 
         entryRoot.add(new DefaultElement(BIO_SAFETY_LEVEL, iceNamespace)
-                .addText(emptyStringify(entry.getBioSafetyLevel().toString())));
+                              .addText(emptyStringify(entry.getBioSafetyLevel().toString())));
         entryRoot.add(new DefaultElement(INTELLECTUAL_PROPERTY, iceNamespace)
-                .addText(emptyStringify(entry.getIntellectualProperty())));
+                              .addText(emptyStringify(entry.getIntellectualProperty())));
 
         if (entry.getFundingSources().size() > 0) {
             DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
             for (EntryFundingSource fundingSource : entry.getFundingSources()) {
                 fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace)
-                        .addText(emptyStringify(fundingSource.getFundingSource().getFundingSource()))
-                        .addAttribute(
-                                PRINCIPAL_INVESTIGATOR,
-                                emptyStringify(fundingSource.getFundingSource()
-                                        .getPrincipalInvestigator())));
+                                           .addText(emptyStringify(fundingSource.getFundingSource().getFundingSource()))
+                                           .addAttribute(
+                                                   PRINCIPAL_INVESTIGATOR,
+                                                   emptyStringify(fundingSource.getFundingSource()
+                                                                               .getPrincipalInvestigator())));
             }
             entryRoot.add(fundingSources);
         }
@@ -275,20 +267,14 @@ public class IceXmlSerializer {
                     file = attachmentController.getFile(account, attachment);
                     fileString = SerializationUtils
                             .serializeBytesToBase64String(org.apache.commons.io.FileUtils.readFileToByteArray(file));
-                } catch (FileNotFoundException e) {
-                    throw new UtilityException(e);
-                } catch (IOException e) {
-                    throw new UtilityException(e);
-                } catch (ControllerException e) {
-                    throw new UtilityException(e);
-                } catch (PermissionException e) {
+                } catch (IOException | ControllerException | PermissionException e) {
                     throw new UtilityException(e);
                 }
 
                 attachmentsRoot.add(new DefaultElement(ATTACHMENT, iceNamespace)
-                        .addCDATA(fileString).addAttribute(FILE_NAME, attachment.getFileName())
-                        .addAttribute(FILE_ID, attachment.getFileId())
-                        .addAttribute(DESCRIPTION, attachment.getDescription()));
+                                            .addCDATA(fileString).addAttribute(FILE_NAME, attachment.getFileName())
+                                            .addAttribute(FILE_ID, attachment.getFileId())
+                                            .addAttribute(DESCRIPTION, attachment.getDescription()));
             }
             entryRoot.add(attachmentsRoot);
         }
@@ -324,12 +310,12 @@ public class IceXmlSerializer {
             if (getSelectionMarkers(plasmid) != null) {
                 fields.add(getSelectionMarkers(plasmid));
             }
-            fields.add(new DefaultElement(BACKBONE, iceNamespace).addText(emptyStringify(plasmid
-                    .getBackbone())));
+            fields.add(new DefaultElement(BACKBONE, iceNamespace).addText(emptyStringify(plasmid.getBackbone())));
             fields.add(new DefaultElement(ORIGIN_OF_REPLICATION, iceNamespace)
-                    .addText(emptyStringify(plasmid.getOriginOfReplication())));
-            fields.add(new DefaultElement(PROMOTERS, iceNamespace).addText(emptyStringify(plasmid
-                    .getPromoters())));
+                               .addText(emptyStringify(plasmid.getOriginOfReplication())));
+            fields.add(new DefaultElement(PROMOTERS, iceNamespace).addText(emptyStringify(plasmid.getPromoters())));
+            fields.add(new DefaultElement(REPLICATES_IN, iceNamespace).addText(
+                    emptyStringify(plasmid.getReplicatesIn())));
             fields.add(new DefaultElement(IS_CIRCULAR, iceNamespace).addText((plasmid.getCircular() ? "true"
                     : "false")));
         } else if (entry.getRecordType().equals(STRAIN)) {
@@ -337,10 +323,9 @@ public class IceXmlSerializer {
             if (getSelectionMarkers(strain) != null) {
                 fields.add(getSelectionMarkers(strain));
             }
-            fields.add(new DefaultElement(HOST, iceNamespace).addText(emptyStringify(strain
-                    .getHost())));
+            fields.add(new DefaultElement(HOST, iceNamespace).addText(emptyStringify(strain.getHost())));
             fields.add(new DefaultElement(GENOTYPE_PHENOTYPE, iceNamespace)
-                    .addText(emptyStringify(strain.getGenotypePhenotype())));
+                               .addText(emptyStringify(strain.getGenotypePhenotype())));
             fields.add(new DefaultElement(PLASMIDS, iceNamespace).addText(emptyStringify(strain.getPlasmids())));
         } else if (entry.getRecordType().equals(ARABIDOPSIS)) {
             ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -349,7 +334,7 @@ public class IceXmlSerializer {
 
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             fields.add(new DefaultElement(HARVEST_DATE, iceNamespace).addText(simpleDateFormat
-                    .format(seed.getHarvestDate())));
+                                                                                      .format(seed.getHarvestDate())));
 
             fields.add(new DefaultElement(PARENTS, iceNamespace).addText(emptyStringify(seed.getParents())));
             fields.add(new DefaultElement(GENERATION, iceNamespace).addText(seed.getGeneration().toString()));
@@ -388,15 +373,14 @@ public class IceXmlSerializer {
      * @throws UtilityException
      */
     private static Element getExperimentElement(Entry entry) throws UtilityException {
-        String traceFilePath = Utils.getConfigValue(ConfigurationKey.TRACE_FILES_DIRECTORY);
-
+        SequenceAnalysisController controller = ControllerFactory.getSequenceAnalysisController();
         Element result = null;
         DefaultElement expElement = new DefaultElement(EXP, expNamespace);
         DefaultElement tracesElement = new DefaultElement(SEQUENCE_TRACES, expNamespace);
         List<TraceSequence> traces;
         try {
-            traces = TraceSequenceDAO.getByEntry(entry);
-        } catch (DAOException e) {
+            traces = controller.getTraceSequences(entry);
+        } catch (ControllerException e) {
             throw new UtilityException(e);
         }
 
@@ -407,15 +391,26 @@ public class IceXmlSerializer {
                 File traceFile;
                 String traceString;
                 try {
-                    traceFile = TraceSequenceDAO.getFile(new File(traceFilePath), trace);
-                    traceString = SerializationUtils
-                            .serializeBytesToBase64String(org.apache.commons.io.FileUtils
-                                    .readFileToByteArray(traceFile));
-                } catch (DAOException e) {
-                    // skip this one
-                    Logger.error("Could not read trace file " + trace.getFileId());
-                    continue;
-                } catch (IOException e) {
+                    traceFile = controller.getFile(trace);
+                    traceString = SerializationUtils.serializeBytesToBase64String(org.apache.commons.io.FileUtils
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                       .readFileToByteArray(
+                                                                                                               traceFile));
+                } catch (IOException | ControllerException e) {
                     // skip this one
                     Logger.error("Could not serialize trace file " + trace.getFileId());
                     continue;
@@ -427,7 +422,7 @@ public class IceXmlSerializer {
                 traceElement.addAttribute(DEPOSITOR_EMAIL, trace.getDepositor());
                 simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                 traceElement.addAttribute(TIME_STAMP,
-                        simpleDateFormat.format(trace.getCreationTime()));
+                                          simpleDateFormat.format(trace.getCreationTime()));
                 tracesElement.add(traceElement);
                 counter++;
             }
@@ -442,11 +437,7 @@ public class IceXmlSerializer {
     }
 
     /**
-     * Replace null value of a string object into an empty string. Non-null value is returned
-     * unaltered.
-     *
-     * @param string
-     * @return
+     * Replace null value of a string object into an empty string. Non-null value is returned unaltered.
      */
     private static String emptyStringify(String string) {
         if (string == null) {

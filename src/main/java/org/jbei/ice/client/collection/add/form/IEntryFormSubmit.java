@@ -2,8 +2,9 @@ package org.jbei.ice.client.collection.add.form;
 
 import java.util.HashMap;
 
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -27,9 +28,11 @@ public interface IEntryFormSubmit {
 
     void populateEntries();
 
-    EntryInfo getEntry();
+    PartData getEntry();
 
     void setPreferences(HashMap<PreferenceKey, String> preferences);
 
     String getHeaderDisplay();
+
+    SequenceViewPanelPresenter getSequenceViewPresenter();
 }

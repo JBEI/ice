@@ -2,7 +2,7 @@ package org.jbei.ice.client.profile.message;
 
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -36,7 +36,8 @@ public class MessageDataTable extends CellTable<MessageInfo> {
         DataTableStyle cellTableStyle();
     }
 
-    public interface DataTableStyle extends Style {}
+    public interface DataTableStyle extends Style {
+    }
 
     private MessageSelectionModel selectionModel;
     private Delegate<MessageInfo> cellClickDelegate;

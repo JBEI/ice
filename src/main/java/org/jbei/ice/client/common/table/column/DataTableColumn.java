@@ -1,6 +1,6 @@
 package org.jbei.ice.client.common.table.column;
 
-import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.lib.shared.ColumnField;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.user.cellview.client.Column;

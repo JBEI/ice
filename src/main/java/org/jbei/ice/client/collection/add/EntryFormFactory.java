@@ -6,14 +6,18 @@ import org.jbei.ice.client.collection.add.form.NewStrainWithPlasmidForm;
 import org.jbei.ice.client.collection.add.form.PartForm;
 import org.jbei.ice.client.collection.add.form.PlasmidForm;
 import org.jbei.ice.client.collection.add.form.StrainForm;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.entry.PartInfo;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
+/**
+ * Factory class for returning the appropriate form for the type of part being created
+ *
+ * @author Hector Plahar
+ */
 public class EntryFormFactory {
     /**
      * creates a new form based on specific types of entries.
@@ -25,59 +29,58 @@ public class EntryFormFactory {
     public static IEntryFormSubmit entryForm(EntryAddType type, String creatorName, String creatorEmail) {
         switch (type) {
             case PLASMID:
-                PlasmidInfo plasmidInfo = new PlasmidInfo();
-                plasmidInfo.setCircular(true);
-                plasmidInfo.setCreator(creatorName);
-                plasmidInfo.setCreatorEmail(creatorEmail);
-                return new PlasmidForm(plasmidInfo);
+                PlasmidData plasmidData = new PlasmidData();
+                plasmidData.setCircular(true);
+                plasmidData.setCreator(creatorName);
+                plasmidData.setCreatorEmail(creatorEmail);
+                return new PlasmidForm(plasmidData);
 
             case STRAIN:
-                StrainInfo strainInfo = new StrainInfo();
-                strainInfo.setCreator(creatorName);
-                strainInfo.setCreatorEmail(creatorEmail);
-                return new StrainForm(strainInfo);
+                StrainData strainData = new StrainData();
+                strainData.setCreator(creatorName);
+                strainData.setCreatorEmail(creatorEmail);
+                return new StrainForm(strainData);
 
             case PART:
-                PartInfo partInfo = new PartInfo();
+                PartData partInfo = new PartData();
                 partInfo.setCreator(creatorName);
                 partInfo.setCreatorEmail(creatorEmail);
                 return new PartForm(partInfo);
 
             case STRAIN_WITH_PLASMID:
-                StrainInfo strain = new StrainInfo();
+                StrainData strain = new StrainData();
                 strain.setCreator(creatorName);
                 strain.setCreatorEmail(creatorEmail);
-                strain.setInfo(new PlasmidInfo());
+                strain.setInfo(new PlasmidData());
                 return new NewStrainWithPlasmidForm(strain);
 
             case ARABIDOPSIS:
-                ArabidopsisSeedInfo seedInfo = new ArabidopsisSeedInfo();
-                seedInfo.setCreator(creatorName);
-                seedInfo.setCreatorEmail(creatorEmail);
-                return new ArabidopsisForm(seedInfo);
+                ArabidopsisSeedData seedData = new ArabidopsisSeedData();
+                seedData.setCreator(creatorName);
+                seedData.setCreatorEmail(creatorEmail);
+                return new ArabidopsisForm(seedData);
 
             default:
                 return null;
         }
     }
 
-    public static IEntryFormSubmit updateForm(EntryInfo info) {
+    public static IEntryFormSubmit updateForm(PartData info) {
         switch (info.getType()) {
             case PLASMID:
-                PlasmidInfo plasmidInfo = (PlasmidInfo) info;
-                return new PlasmidForm(plasmidInfo);
+                PlasmidData plasmidData = (PlasmidData) info;
+                return new PlasmidForm(plasmidData);
 
             case PART:
-                PartInfo partInfo = (PartInfo) info;
-                return new PartForm(partInfo);
+                return new PartForm(info);
 
             case ARABIDOPSIS:
-                ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
-                return new ArabidopsisForm(seedInfo);
+                ArabidopsisSeedData seedData = (ArabidopsisSeedData) info;
+                return new ArabidopsisForm(seedData);
 
             case STRAIN:
-                StrainInfo strainInfo = (StrainInfo) info;
-                return new StrainForm(strainInfo);
+                StrainData strainData = (StrainData) info;
+                return new StrainForm(strainData);
 
             default:
                 return null;

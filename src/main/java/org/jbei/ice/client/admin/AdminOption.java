@@ -3,16 +3,18 @@ package org.jbei.ice.client.admin;
 import org.jbei.ice.client.common.widget.FAIconType;
 
 /**
+ * Menu options for the administrative page
+ *
  * @author Hector Plahar
  */
 public enum AdminOption {
 
-    SETTINGS(FAIconType.COGS, "System Settings", "settings"),
-    WEB(FAIconType.GLOBE, "Web of Registries", "Web of registries settings"),
-    USERS(FAIconType.USER, "Manage Users", "users"),
+    SETTINGS(FAIconType.COGS, "System Settings", "Site wide system settings"),
+    WEB(FAIconType.GLOBE, "Web of Registries",
+        "Enable/Disable information sharing and retrieval from other ICE instances"),
+    USERS(FAIconType.USER, "Manage Users", "Manage user accounts and privileges"),
     GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members"),
-    SEARCH(FAIconType.SEARCH, "Manage Search", "Rebuild the search indices and change search settings");
-//    TRANSFER(FAIconType.INBOX, "Transfer Entries", "transfer entries between ICE instances");
+    PARTS(FAIconType.LIST, "Transferred Parts", "Approve/Reject parts transferred from other registries");
 
     private final String display;
     private final FAIconType iconType;

@@ -14,7 +14,7 @@ import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.entry.IHasEntryId;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 
 /**
  * Handler for adding to a collection

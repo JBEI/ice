@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -29,10 +29,10 @@ public class CreateGroupWidget {
     private Button createButton;
     private Button cancelButton;
     private SelectGroupMemberTable table;
-    private ServiceDelegate<GroupInfo> delete;
-    private final GroupInfo parent;
+    private ServiceDelegate<UserGroup> delete;
+    private final UserGroup parent;
 
-    public CreateGroupWidget(GroupInfo parent) {
+    public CreateGroupWidget(UserGroup parent) {
         initComponents();
         this.parent = parent;
 
@@ -69,7 +69,7 @@ public class CreateGroupWidget {
         this.createButton.addClickHandler(handler);
     }
 
-    public void setAvailableMemberList(ArrayList<AccountInfo> memberList) {
+    public void setAvailableMemberList(ArrayList<User> memberList) {
         table.setData(memberList);
     }
 
@@ -106,11 +106,11 @@ public class CreateGroupWidget {
         return groupDescription.getText().trim();
     }
 
-    public void setGroupCreationMembers(ArrayList<AccountInfo> list) {
+    public void setGroupCreationMembers(ArrayList<User> list) {
         table.setData(list);
     }
 
-    public void setGroupMemberDelegate(ServiceDelegate<GroupInfo> serviceDelegate) {
+    public void setGroupMemberDelegate(ServiceDelegate<UserGroup> serviceDelegate) {
         this.delete = serviceDelegate;
     }
 

@@ -5,8 +5,8 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.dto.search.SearchQuery;
-import org.jbei.ice.shared.dto.search.SearchResults;
+import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.search.SearchResults;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -46,10 +46,12 @@ public class SearchModel {
             public void serverFailure() {
                 callback.onFailure();
             }
-        }.go(eventBus);
-    }
 
-    public HandlerManager getEventBus() {
-        return eventBus;
+            @Override
+            public void onNullResult() {
+                super.onNullResult();
+                callback.onFailure();
+            }
+        }.go(eventBus);
     }
 }

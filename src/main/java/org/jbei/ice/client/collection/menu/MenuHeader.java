@@ -11,6 +11,9 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 
 /**
+ * Header widget for the collection menu. Renders the header label and requested icons
+ * such as the quick add icon
+ *
  * @author Hector Plahar
  */
 public class MenuHeader extends Composite {
@@ -18,7 +21,7 @@ public class MenuHeader extends Composite {
     private Icon expandCollapseIcon;    // icon that indicates whether collection has been expanded or collapsed
     private final Label headerLabel;
     private HTML quickAddIcon;
-    private boolean collapsed; // this should be saved
+    private boolean collapsed; // this should be saved in a cookie or something
 
     public MenuHeader(String header, boolean addQuickEdit) {
         expandCollapseIcon = new Icon(FAIconType.FOLDER_OPEN);
@@ -26,11 +29,10 @@ public class MenuHeader extends Composite {
         headerLabel.setStyleName("display-inline");
         headerLabel.addStyleName("cursor_pointer");
         // quick collection add
-        quickAddIcon = new HTML("<i class=\"" + FAIconType.FOLDER_CLOSE_ALT.getStyleName()
-                                        + "\"></i><i style=\"vertical-align: text-bottom; font-size: 7px\" class=\""
-                                        + FAIconType.PLUS.getStyleName() + "\"></i>");
+        quickAddIcon = new HTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + " font-12em\"></i>");
         quickAddIcon.setVisible(addQuickEdit);
-        quickAddIcon.addStyleName("quick_add_icon");
+        quickAddIcon.addStyleName("edit_icon");
+        quickAddIcon.setTitle("Create a new collection");
 
         HTMLPanel menuHeaderPanel = new HTMLPanel(
                 "<span style=\"float: left; opacity: 0.65;\" "
@@ -48,7 +50,6 @@ public class MenuHeader extends Composite {
     }
 
     public void addExpandCollapseHandler(final ClickHandler handler) {
-
         ClickHandler newClickHandler = new ClickHandler() {
 
             @Override
