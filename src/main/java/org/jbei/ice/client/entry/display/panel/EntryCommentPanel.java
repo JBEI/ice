@@ -40,7 +40,7 @@ public class EntryCommentPanel extends Composite {
         table.setWidth("100%");
 
         Button addCommentButton = new Button(
-                "<i class=\"" + FAIconType.COMMENTS.getStyleName() + "\"></i> Add Comment");
+                "<i class=\"" + FAIconType.COMMENTS_ALT.getStyleName() + "\"></i> Comment");
         addCommentPanel = new AddCommentPanel();
         addCommentPanel.setCancelHandler(new ShowHidePanelAddHandler());
 
