@@ -480,6 +480,8 @@ public class SheetPresenter {
             // for each header (col)
             col = 0;
             for (CellColumnHeader header : headers.getHeaders()) {
+                if (header.isLocked())
+                    continue;
                 SheetCell cell = header.getCell();
                 String errMsg = cell.inputIsValid(row);
                 if (errMsg.isEmpty()) {
