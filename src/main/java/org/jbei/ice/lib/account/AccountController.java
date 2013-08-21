@@ -14,7 +14,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.authentication.IAuthentication;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
-import org.jbei.ice.lib.authentication.LocalBackend;
+import org.jbei.ice.lib.authentication.UserIdAuthentication;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.Group;
@@ -182,7 +182,7 @@ public class AccountController {
         String subject = "Account created successfully";
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("Dear " + info.getEmail() + ", ")
+        stringBuilder.append("Dear ").append(info.getEmail()).append(", ")
                      .append("\n\nThank you for creating a ")
                      .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
                      .append(" account. \nBy accessing ")
@@ -389,7 +389,7 @@ public class AccountController {
         SessionData result = null;
         Account account;
         try {
-            IAuthentication authentication = new LocalBackend();
+            IAuthentication authentication = new UserIdAuthentication();
             account = authentication.authenticate(login, password);
         } catch (AuthenticationException e2) {
             throw new ControllerException(e2);
@@ -437,8 +437,7 @@ public class AccountController {
      * @throws InvalidCredentialsException
      * @throws ControllerException
      */
-    public User authenticate(String login, String password)
-            throws InvalidCredentialsException, ControllerException {
+    public User authenticate(String login, String password) throws InvalidCredentialsException, ControllerException {
         SessionData sessionData = authenticate(login, password, "");
         if (sessionData == null)
             return null;
@@ -450,8 +449,8 @@ public class AccountController {
 
         info.setLastLogin(account.getLastLoginTime());
         info.setId(account.getId());
-        boolean isModerator = isAdministrator(account);
-        info.setAdmin(isModerator);
+        boolean isAdmin = isAdministrator(account);
+        info.setAdmin(isAdmin);
         info.setSessionId(sessionData.getSessionKey());
         return info;
     }

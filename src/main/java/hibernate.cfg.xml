@@ -8,10 +8,10 @@
     <session-factory>
 
         <!-- Database connection settings -->
-        <property name="hibernate.connection.url">jdbc:hsqldb:file:data/hsqldb</property>
-        <property name="hibernate.connection.driver_class">org.hsqldb.jdbc.JDBCDriver</property>
-        <property name="hibernate.connection.username">sa</property>
-        <property name="hibernate.connection.password">password</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost/regdb</property>
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.username">reguser</property>
+        <property name="hibernate.connection.password">ice_dev</property>
 
         <!-- JDBC connection pool (using c3p0) -->
         <property name="hibernate.c3p0.min_size">5</property>
@@ -25,7 +25,7 @@
         <property name="hibernate.c3p0.acquireRetryDelay">30000</property>
 
         <!-- SQL dialect: use the correct one for your database -->
-        <property name="dialect">org.hibernate.dialect.HSQLDialect</property>
+        <property name="dialect">org.hibernate.dialect.PostgreSQL82Dialect</property>
 
         <!-- Enables Hibernate's automatic session context management -->
         <property name="current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext
