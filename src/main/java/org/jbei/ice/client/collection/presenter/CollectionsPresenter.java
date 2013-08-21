@@ -801,7 +801,8 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                 @Override
                 public void onSuccess(ArrayList<FolderDetails> result) {
-                    History.newItem(Page.COLLECTIONS.getLink() + ";id=" + currentFolder.getId());
+                    long id = currentFolder == null ? 0 : currentFolder.getId();
+                    History.newItem(Page.COLLECTIONS.getLink() + ";id=" + id);
                     ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
                     FeedbackEvent event = new FeedbackEvent(false, "Entry deleted successfully");
                     model.getEventBus().fireEvent(event);
