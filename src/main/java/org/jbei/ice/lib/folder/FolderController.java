@@ -102,7 +102,13 @@ public class FolderController {
         // now check actual permissions
         Set<Folder> folders = new HashSet<>();
         folders.add(folder);
-        return ControllerFactory.getPermissionController().groupHasReadPermission(account.getGroups(), folders);
+        PermissionsController controller = ControllerFactory.getPermissionController();
+        if (controller.groupHasReadPermission(account.getGroups(), folders)
+                || controller.groupHasWritePermission(account.getGroups(), folders))
+            return true;
+
+        return controller.accountHasReadPermission(account, folders)
+                || controller.accountHasWritePermission(account, folders);
     }
 
     public FolderDetails retrieveFolderContents(Account account, long folderId, ColumnField sort, boolean asc,

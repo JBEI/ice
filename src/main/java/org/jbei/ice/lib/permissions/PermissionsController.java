@@ -214,7 +214,7 @@ public class PermissionsController {
         }
     }
 
-    protected boolean accountHasReadPermission(Account account, Entry entry) throws ControllerException {
+    public boolean accountHasReadPermission(Account account, Entry entry) throws ControllerException {
         try {
             return dao.hasPermission(entry, null, account, null, true, false);
         } catch (DAOException dao) {
@@ -223,7 +223,7 @@ public class PermissionsController {
         return false;
     }
 
-    protected boolean accountHasReadPermission(Account account, Set<Folder> folders) throws ControllerException {
+    public boolean accountHasReadPermission(Account account, Set<Folder> folders) throws ControllerException {
         try {
             return dao.hasPermissionMulti(null, folders, account, null, true, false);
         } catch (DAOException dao) {
@@ -232,7 +232,7 @@ public class PermissionsController {
         return false;
     }
 
-    protected boolean accountHasWritePermission(Account account, Entry entry) throws ControllerException {
+    public boolean accountHasWritePermission(Account account, Entry entry) throws ControllerException {
         try {
             return dao.hasPermission(entry, null, account, null, false, true);
         } catch (DAOException dao) {
@@ -241,7 +241,7 @@ public class PermissionsController {
         return false;
     }
 
-    protected boolean accountHasWritePermission(Account account, Set<Folder> folders) throws ControllerException {
+    public boolean accountHasWritePermission(Account account, Set<Folder> folders) throws ControllerException {
         try {
             return dao.hasPermissionMulti(null, folders, account, null, false, true);
         } catch (DAOException dao) {
@@ -314,6 +314,8 @@ public class PermissionsController {
             throw new ControllerException(e);
         }
     }
+
+//    public boolean accountHasReadPermission()
 
     /**
      * Checks if an account has read permissions for an entry. If no account is specified,
