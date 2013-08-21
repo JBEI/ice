@@ -222,6 +222,7 @@ public enum FAIconType {
     UNDERLINE("icon-underline"),
     UNDO("icon-undo"),
     UNLOCK("icon-unlock"),
+    UNLOCK_ALT("icon-unlock-alt"),
     UPLOAD("icon-upload"),
     UPLOAD_ALT("icon-upload-alt"),
     USER("icon-user"),

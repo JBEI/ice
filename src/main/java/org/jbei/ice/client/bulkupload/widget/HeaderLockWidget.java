@@ -37,7 +37,7 @@ public class HeaderLockWidget implements IsWidget {
             lockIcon.setTitle(columnHeader.getDefaultValue());
             lockIcon.addStyleName("bulk_upload_locked_header");
         } else {
-            lockIcon = new Icon(FAIconType.UNLOCK);
+            lockIcon = new Icon(FAIconType.UNLOCK_ALT);
             lockIcon.setTitle("Set " + columnHeader.getHeaderType().toString() + " default value");
         }
 
@@ -80,7 +80,8 @@ public class HeaderLockWidget implements IsWidget {
         htmlPanel.add(lockSubmit, "lock_button");
         lockSubmit.addClickHandler(new LockClickHandler());
 
-        Button unlockSubmit = new Button("<i class=\"" + FAIconType.UNLOCK.getStyleName() + " font-11em\"></i> Unlock");
+        Button unlockSubmit = new Button(
+                "<i class=\"" + FAIconType.UNLOCK_ALT.getStyleName() + " font-11em\"></i> Unlock");
         htmlPanel.add(unlockSubmit, "unlock_button");
         unlockSubmit.addClickHandler(new UnlockClickHandler());
 
@@ -124,7 +125,7 @@ public class HeaderLockWidget implements IsWidget {
             if (defaultValueBox.getText().isEmpty()) {
                 defaultValueBox.setStyleName("input_box_error");
                 popUp.show();
-                lockIcon.setType(FAIconType.UNLOCK);
+                lockIcon.setType(FAIconType.UNLOCK_ALT);
                 lockIcon.removeStyleName("bulk_upload_locked_header");
                 lockIcon.setTitle("Set " + columnHeader.getHeaderType().toString() + " default value");
                 lockIcon.removeStyleName("font-awesome");
@@ -149,7 +150,7 @@ public class HeaderLockWidget implements IsWidget {
 
         @Override
         public void onClick(ClickEvent event) {
-            lockIcon.setType(FAIconType.UNLOCK);
+            lockIcon.setType(FAIconType.UNLOCK_ALT);
             lockIcon.removeStyleName("bulk_upload_locked_header");
             lockIcon.setTitle("Set " + columnHeader.getHeaderType().toString() + " default value");
             lockIcon.removeStyleName("font-awesome");

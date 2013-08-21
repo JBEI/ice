@@ -800,6 +800,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     public void upgradeNamesAndPartNumbers(String partNumberPrefix) throws DAOException {
         Session session = currentSession();
         int i = 0;
+        Logger.info("Upgrading part numbers");
 
         Query query = session.createQuery("from " + PartNumber.class.getName());
         Iterator iterator = query.iterate();
@@ -821,6 +822,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             }
         }
 
+        Logger.info("Upgrading names");
         // upgrade names
         query = session.createQuery("from " + Name.class.getName());
         iterator = query.iterate();

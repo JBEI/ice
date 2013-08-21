@@ -153,7 +153,7 @@ public class HeaderView extends Composite {
         loggedInContentsPanel.setHTML(0, 6, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
         SafeHtml helpHtml = SafeHtmlUtils.fromSafeConstant("<i class=\"color_444 " + FAIconType.BOOK.getStyleName()
                                                                    + "\"></i> Help");
-        Anchor anchor = new Anchor(helpHtml, "https://public-registry.jbei.org/help.htm");
+        Anchor anchor = new Anchor(helpHtml, "https://public-registry.jbei.org/static/help.htm");
         loggedInContentsPanel.setWidget(0, 7, anchor);
 
         return loggedInContentsPanel;
