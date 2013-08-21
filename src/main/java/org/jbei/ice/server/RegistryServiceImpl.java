@@ -43,7 +43,6 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.news.News;
 import org.jbei.ice.lib.news.NewsController;
-import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -86,7 +85,6 @@ import org.jbei.ice.lib.utils.IceXlsSerializer;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 
@@ -1563,7 +1561,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public PartData saveSequence(String sessionId, PartData part, String sequenceUser) throws AuthenticationException {
+    public PartData saveSequence(String sessionId, PartData part, String sequenceUser, boolean isFile)
+            throws AuthenticationException {
         Account account;
         Entry entry;
         try {
@@ -1581,33 +1580,30 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         Logger.info(account.getEmail() + ": saving sequence for entry " + entry.getId());
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
-        IDNASequence dnaSequence = SequenceController.parse(sequenceUser);
+        if (isFile) {
+            String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+            File file = Paths.get(tmpDir, sequenceUser).toFile();
+            if (!file.exists())
+                return null;
 
-        if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
-            String errorMsg = "Couldn't parse sequence file! Supported formats: "
-                    + GeneralParser.getInstance().availableParsersToString() + ". "
-                    + "If you believe this is an error, please contact the administrator with your file";
-
-            Logger.error(errorMsg);
-            return null;
+            try {
+                sequenceUser = FileUtils.readFileToString(file);
+            } catch (IOException e) {
+                Logger.error(e);
+                return null;
+            }
         }
 
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
         try {
-            Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-            sequence.setSequenceUser(sequenceUser);
-            sequence.setEntry(entry);
-            if (sequenceController.save(account, sequence) != null) {
-                part.setId(entry.getId());
-                part.setRecordId(entry.getRecordId());
-                return part;
-            }
+            sequenceController.parseAndSaveSequence(account, entry, sequenceUser);
+            part.setId(entry.getId());
+            part.setRecordId(entry.getRecordId());
+            return part;
         } catch (ControllerException e) {
             Logger.error(e);
-        } catch (PermissionException e) {
-            Logger.warn(e.getMessage());
+            return null;
         }
-        return null;
     }
 
     @Override

@@ -571,7 +571,8 @@ public class EntryPresenter extends AbstractPresenter {
 
                 @Override
                 protected void callService(AsyncCallback<PartData> callback) throws AuthenticationException {
-                    service.saveSequence(ClientController.sessionId, currentPart, sequence, callback);
+                    boolean isFile = !presenter.isPastedSequence();
+                    service.saveSequence(ClientController.sessionId, currentPart, sequence, isFile, callback);
                 }
 
                 @Override

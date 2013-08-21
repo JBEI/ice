@@ -4,7 +4,6 @@ import org.jbei.ice.client.entry.display.view.DeleteSequenceHandler;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * Presenter for {@link SequenceViewPanel}
@@ -31,7 +30,7 @@ public class SequenceViewPanelPresenter {
 
         void showSequenceDeleteLink(DeleteSequenceHandler deleteHandler);
 
-        IsWidget asWidget();
+        boolean isPastedSequence();
     }
 
     private final ISequenceView view;
@@ -75,5 +74,9 @@ public class SequenceViewPanelPresenter {
 
     public boolean isCanEdit() {
         return this.canEdit;
+    }
+
+    public boolean isPastedSequence() {
+        return view.isPastedSequence();
     }
 }

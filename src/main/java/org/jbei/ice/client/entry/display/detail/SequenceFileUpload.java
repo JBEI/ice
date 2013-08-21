@@ -50,8 +50,9 @@ class SequenceFileUpload implements IsWidget, IView {
     private final PasteSequenceWidget pasteSequenceWidget;
     private final UploadSequenceFileWidget fileUploadWidget;
     private final PopupHandler popupHandler;
+    private boolean pasteAction;
 
-    public SequenceFileUpload(final long entryId) {
+    public SequenceFileUpload() {
         SequenceFileUploadResource.INSTANCE.cellListStyle().ensureInjected();
         label = new Label("Add Sequence");
         label.setStyleName(SequenceFileUploadResource.INSTANCE.cellListStyle().downloadStyle());
@@ -74,12 +75,13 @@ class SequenceFileUpload implements IsWidget, IView {
         optionSelection = new SingleSelectionModel<UploadOption>();
         options.setSelectionModel(optionSelection);
         pasteSequenceWidget = new PasteSequenceWidget();
-        fileUploadWidget = new UploadSequenceFileWidget(entryId);
+        fileUploadWidget = new UploadSequenceFileWidget();
         new SequenceFileUploadPresenter(this);
     }
 
     public void addSubmitSequencePasteHandler(ClickHandler handler) {
         pasteSequenceWidget.addSaveHandler(handler);
+        fileUploadWidget.addSaveHandler(handler);
     }
 
     @Override
@@ -89,7 +91,13 @@ class SequenceFileUpload implements IsWidget, IView {
 
     @Override
     public String getPastedSequence() {
-        return pasteSequenceWidget.getSequence();
+        if (pasteAction)
+            return pasteSequenceWidget.getSequence();
+        return fileUploadWidget.getFileName();
+    }
+
+    public boolean isPasteAction() {
+        return this.pasteAction;
     }
 
     @Override
@@ -99,17 +107,22 @@ class SequenceFileUpload implements IsWidget, IView {
 
     @Override
     public void showPasteSequenceDialog() {
+        pasteAction = true;
         pasteSequenceWidget.showDialog();
         popupHandler.hidePopup();
     }
 
     @Override
     public void showUploadFileDialog() {
+        pasteAction = false;
         fileUploadWidget.showDialog();
         popupHandler.hidePopup();
     }
 
     public void hidePasteDialog() {
-        pasteSequenceWidget.hideDialog();
+        if (pasteAction)
+            pasteSequenceWidget.hideDialog();
+        else
+            fileUploadWidget.hideDialog();
     }
 }

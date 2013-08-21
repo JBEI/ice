@@ -74,3 +74,4 @@ public class PasteSequenceWidget implements ICanReset {
         return area;
     }
 }
+

@@ -2,18 +2,17 @@ package org.jbei.ice.server.servlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.servlet.http.Cookie;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-
-import org.apache.commons.io.FileUtils;
+import org.jbei.ice.lib.utils.Utils;
 
 /**
  * Helper class for the servlets
@@ -51,23 +50,14 @@ public class ServletHelper {
         return null;
     }
 
-    public static String uploadSequence(Account account, long entryId, File sequenceFile) {
-        EntryController entryController = ControllerFactory.getEntryController();
-        Entry entry;
+    public static String uploadSequence(File sequenceFile) {
+        Path existingPath = Paths.get(sequenceFile.getAbsolutePath());
+        String uuid = Utils.generateUUID();
         try {
-            entry = entryController.get(account, entryId);
-            String sequenceUser = FileUtils.readFileToString(sequenceFile);
-            SequenceController sequenceController = ControllerFactory.getSequenceController();
-            try {
-                sequenceController.parseAndSaveSequence(account, entry, sequenceUser);
-                return "";
-            } catch (ControllerException e) {
-                Logger.error(e);
-                return e.getMessage();
-            }
-        } catch (ControllerException | IOException e) {
-            Logger.error(e);
-            return "Could not retrieve entry with id " + entryId;
+            Files.move(existingPath, existingPath.resolveSibling(uuid));
+            return uuid;
+        } catch (IOException e) {
+            return "Error: Could not upload file";
         }
     }
 }

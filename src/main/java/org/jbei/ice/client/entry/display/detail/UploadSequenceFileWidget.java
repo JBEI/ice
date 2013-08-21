@@ -4,7 +4,8 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.GenericPopup;
 import org.jbei.ice.client.common.widget.ICanReset;
 
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -19,18 +20,18 @@ import com.google.gwt.user.client.ui.Label;
  */
 public class UploadSequenceFileWidget extends Composite implements ICanReset {
 
-    private final long entryId;
     private Label feedback;
     private GenericPopup popup;
     private FlexTable layout;
+    private FormPanel formPanel;
+    private String fileName;
 
-    public UploadSequenceFileWidget(long eid) {
+    public UploadSequenceFileWidget() {
         layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
         layout.setWidth("100%");
 
-        this.entryId = eid;
         initWidget(layout);
         popup = new GenericPopup(this, "<b>Upload Sequence File</b>");
 
@@ -44,47 +45,45 @@ public class UploadSequenceFileWidget extends Composite implements ICanReset {
         feedback.setStyleName("upload_sequence_feedback");
         feedback.setVisible(false);
 
-        final FormPanel formPanel = new FormPanel();
+        formPanel = new FormPanel();
         formPanel.setAction("/upload?sid=" + ClientController.sessionId + "&type=sequence");
         formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         formPanel.setMethod(FormPanel.METHOD_POST);
 
-        FileUpload fileUpload = new FileUpload();
+        final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("uploadFormElement");
         formPanel.add(fileUpload);
-
-        popup.addSaveButtonHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                formPanel.submit();
-            }
-        });
-
-        formPanel.addSubmitHandler(new FormPanel.SubmitHandler() {
-            @Override
-            public void onSubmit(FormPanel.SubmitEvent event) {
-                formPanel.setAction(formPanel.getAction() + "&eid=" + entryId);
-            }
-        });
 
         formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                String errMsg = event.getResults();
-
-                if (errMsg.isEmpty()) {
-                    feedback.setText(errMsg);
-                    feedback.setVisible(false);
-                    formPanel.reset();
-                    popup.hideDialog();
+                String msg = event.getResults();
+                if (msg.contains("Error")) {
+                    feedback.setText(msg);
+                    feedback.setVisible(true);
                     return;
                 }
 
-                feedback.setText(errMsg);
-                feedback.setVisible(true);
+                fileName = msg;
+            }
+        });
+
+        fileUpload.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                if (fileUpload.getFilename().isEmpty())
+                    return;
+
+                formPanel.submit();
             }
         });
 
         layout.setWidget(2, 0, formPanel);
+    }
+
+    public void addSaveHandler(ClickHandler handler) {
+        popup.addSaveButtonHandler(handler);
+        popup.hideDialog();
     }
 
     public void showDialog() {
@@ -93,8 +92,19 @@ public class UploadSequenceFileWidget extends Composite implements ICanReset {
         popup.showDialog();
     }
 
+    public void hideDialog() {
+        popup.hideDialog();
+    }
+
+    public String getFileName() {
+        return this.fileName;
+    }
+
     @Override
     public void reset() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        fileName = null;
+        feedback.setText("");
+        feedback.setVisible(false);
+        formPanel.reset();
     }
 }

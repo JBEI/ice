@@ -106,7 +106,8 @@ public interface RegistryService extends RemoteService {
 
     boolean removePermission(String sessionId, AccessPermission accessPermission) throws AuthenticationException;
 
-    PartData saveSequence(String sessionId, PartData data, String sequenceUser) throws AuthenticationException;
+    PartData saveSequence(String sessionId, PartData data, String sequenceUser, boolean isFile)
+            throws AuthenticationException;
 
     String getConfigurationSetting(String name);
 

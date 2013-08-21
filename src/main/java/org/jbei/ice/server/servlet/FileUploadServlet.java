@@ -113,7 +113,6 @@ public class FileUploadServlet extends HttpServlet {
             ServletFileUpload servletFileUpload = new ServletFileUpload(fileItemFactory);
             FileItemIterator fileItemIterator = servletFileUpload.getItemIterator(request);
 
-            // TODO : fileSize
             while (fileItemIterator.hasNext()) {
                 FileItemStream fileItemStream = fileItemIterator.next();
 
@@ -126,8 +125,6 @@ public class FileUploadServlet extends HttpServlet {
                 }
 
                 Streams.copy(fileItemStream.openStream(), new FileOutputStream(file), true);
-                long entryIdl = Long.decode(entryId);
-
                 switch (type) {
                     case ATTACHMENT_TYPE:
                         result = uploadAttachment(account, file, entryId, desc, fileName);
@@ -142,8 +139,8 @@ public class FileUploadServlet extends HttpServlet {
                         break;
 
                     case BULK_UPLOAD_FILE_TYPE:
+                        long entryIdl = Long.decode(entryId);
                         Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
-
                         result = uploadBulkUploadFile(account, file, bulkUploadId, entryIdl, fileName, isSequence,
                                                       entryType, entryAddType);
                         break;
@@ -153,7 +150,7 @@ public class FileUploadServlet extends HttpServlet {
                         break;
 
                     case SEQUENCE:
-                        result = ServletHelper.uploadSequence(account, entryIdl, file);
+                        result = ServletHelper.uploadSequence(file);
                         break;
 
                     default:

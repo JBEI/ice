@@ -48,7 +48,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         sequenceDownload = new SequenceFileDownload(partData.getId(), partData.isHasOriginalSequence());
         sequenceDownload.asWidget().addStyleName("display-inline");
 
-        sequenceUpload = new SequenceFileUpload(partData.getId());
+        sequenceUpload = new SequenceFileUpload();
         sequenceUpload.asWidget().addStyleName("display-inline");
 
         layout.setWidget(0, 0, createSequenceHeader());
@@ -132,6 +132,11 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         return sequenceUpload.getPastedSequence();
     }
 
+    @Override
+    public boolean isPastedSequence() {
+        return sequenceUpload.isPasteAction();
+    }
+
     public SequenceViewPanelPresenter getPresenter() {
         return this.presenter;
     }
@@ -148,6 +153,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             Flash flash = new Flash(param);
             layout.setWidget(3, 0, flash);
             layout.getFlexCellFormatter().setHeight(3, 0, "600px");
+            layout.getFlexCellFormatter().setVisible(2, 0, true);
         } else {
             layout.getFlexCellFormatter().setVisible(2, 0, false);
             String html = "<span class=\"font-80em\"><i style=\"color: #999\">No sequence data provided</i></span>";
