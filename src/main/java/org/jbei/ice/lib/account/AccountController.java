@@ -182,7 +182,7 @@ public class AccountController {
         String subject = "Account created successfully";
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("Dear " + info.getEmail() + ", ")
+        stringBuilder.append("Dear ").append(info.getEmail()).append(", ")
                      .append("\n\nThank you for creating a ")
                      .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
                      .append(" account. \nBy accessing ")
@@ -437,8 +437,7 @@ public class AccountController {
      * @throws InvalidCredentialsException
      * @throws ControllerException
      */
-    public User authenticate(String login, String password)
-            throws InvalidCredentialsException, ControllerException {
+    public User authenticate(String login, String password) throws InvalidCredentialsException, ControllerException {
         SessionData sessionData = authenticate(login, password, "");
         if (sessionData == null)
             return null;
@@ -450,8 +449,8 @@ public class AccountController {
 
         info.setLastLogin(account.getLastLoginTime());
         info.setId(account.getId());
-        boolean isModerator = isAdministrator(account);
-        info.setAdmin(isModerator);
+        boolean isAdmin = isAdministrator(account);
+        info.setAdmin(isAdmin);
         info.setSessionId(sessionData.getSessionKey());
         return info;
     }
