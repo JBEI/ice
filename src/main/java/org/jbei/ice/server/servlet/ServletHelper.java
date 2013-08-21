@@ -11,8 +11,12 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.parsers.GeneralParser;
+import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.IDNASequence;
 
 /**
  * Helper class for the servlets
@@ -51,9 +55,20 @@ public class ServletHelper {
     }
 
     public static String uploadSequence(File sequenceFile) {
-        Path existingPath = Paths.get(sequenceFile.getAbsolutePath());
-        String uuid = Utils.generateUUID();
         try {
+            String sequence = FileUtils.readFileToString(sequenceFile);
+            IDNASequence dnaSequence = SequenceController.parse(sequence);
+
+            if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
+                return "Error: Couldn't parse sequence file! Supported formats: "
+                        + GeneralParser.getInstance().availableParsersToString()
+                        + ". "
+                        + "If you believe this is an error, please contact the administrator with your file";
+            }
+
+            // validate sequence
+            Path existingPath = Paths.get(sequenceFile.getAbsolutePath());
+            String uuid = Utils.generateUUID();
             Files.move(existingPath, existingPath.resolveSibling(uuid));
             return uuid;
         } catch (IOException e) {
