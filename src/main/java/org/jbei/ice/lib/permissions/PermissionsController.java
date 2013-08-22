@@ -22,6 +22,11 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
+/**
+ * Controller for permissions
+ *
+ * @author Hector Plahar
+ */
 public class PermissionsController {
 
     private final AccountController accountController;
@@ -36,10 +41,20 @@ public class PermissionsController {
         dao = new PermissionDAO();
     }
 
-    public Permission recordPermission(AccessPermission access) throws ControllerException {
+    /**
+     * Creates a new permission object for groups from the fields in the parameter.
+     * Used mainly by bulk upload since permissions are set at the group level
+     *
+     * @param access information about the access permission
+     * @return saved permission
+     * @throws ControllerException
+     */
+    public Permission recordGroupPermission(AccessPermission access) throws ControllerException {
         try {
             Group group = groupController.getGroupById(access.getArticleId());
-            // add the permission if not
+            if (group == null)
+                throw new ControllerException("Could retrieve group for permission add");
+
             Permission permission = new Permission();
             permission.setGroup(group);
             permission.setCanRead(access.isCanRead());
@@ -176,7 +191,17 @@ public class PermissionsController {
         }
     }
 
-    public int clearPermissions(Account account, Entry entry) throws ControllerException, PermissionException {
+    /**
+     * Clears all permission that have been set for an entry including
+     * those for the owner. This is intended to be used in logical deletes of entries
+     *
+     * @param account account for user making request; should have write privileges
+     * @param entry   part whose permissions are being removed
+     * @return number of permission that were removed
+     * @throws ControllerException on exception clearing permissions
+     * @throws PermissionException if account in parameter those not have the appropriate permissions
+     */
+    public int clearEntryPermissions(Account account, Entry entry) throws ControllerException, PermissionException {
         if (!hasWritePermission(account, entry)) {
             throw new PermissionException(account.getEmail() + " doesn't have write permission for entry "
                                                   + entry.getId());
@@ -189,6 +214,15 @@ public class PermissionsController {
         }
     }
 
+    /**
+     * Removes all permissions associated with the specified folder
+     *
+     * @param account account for user making request. Should have write permissions for folder
+     * @param folder  folder whose permissions are to be removed
+     * @return number of permissions that were removed for the folder
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public int clearFolderPermissions(Account account, Folder folder) throws ControllerException, PermissionException {
         if (!hasWritePermission(account, folder)) {
             throw new PermissionException(account.getEmail() + " doesn't have write permissions for folder "

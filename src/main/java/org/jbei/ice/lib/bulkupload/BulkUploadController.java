@@ -735,7 +735,7 @@ public class BulkUploadController {
                     continue;
 
                 // new permission
-                Permission permission = ControllerFactory.getPermissionController().recordPermission(access);
+                Permission permission = ControllerFactory.getPermissionController().recordGroupPermission(access);
                 upload.getPermissions().add(permission);
             }
 
