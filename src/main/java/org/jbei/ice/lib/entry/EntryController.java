@@ -835,7 +835,7 @@ public class EntryController {
         Account sysAccount = accountController.getSystemAccount();
         entry.setOwnerEmail(sysAccount.getEmail());
 
-        permissionsController.clearPermissions(sysAccount, entry);
+        permissionsController.clearEntryPermissions(sysAccount, entry);
         entry.setModificationTime(Calendar.getInstance().getTime());
 
         try {

@@ -1,5 +1,8 @@
 package org.jbei.ice.lib.permissions;
 
+import java.util.ArrayList;
+
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.EntryCreator;
 import org.jbei.ice.lib.account.model.Account;
@@ -10,23 +13,20 @@ import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
+ * Unit test for {@link PermissionsController}
+ *
  * @author Hector Plahar
  */
 public class PermissionsControllerTest {
 
     private PermissionsController controller;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        HibernateHelper.initializeMock();
-    }
-
     @Before
     public void setUp() throws Exception {
+        HibernateHelper.initializeMock();
         HibernateHelper.beginTransaction();
         controller = new PermissionsController();
     }
@@ -34,6 +34,24 @@ public class PermissionsControllerTest {
     @After
     public void tearDown() throws Exception {
         HibernateHelper.commitTransaction();
+    }
+
+    @Test
+    public void testRecordGroupPermission() throws Exception {
+        AccessPermission permission = new AccessPermission();
+        permission.setType(AccessPermission.Type.READ_ENTRY);
+        boolean threwException = false;
+        try {
+            controller.recordGroupPermission(permission);
+        } catch (ControllerException ce) {
+            threwException = true;
+        }
+
+        Assert.assertTrue(threwException);
+        Account account = AccountCreator.createTestAccount("testRecordPermission", false);
+        Strain strain = EntryCreator.createTestStrain(account);
+        permission.setArticle(AccessPermission.Article.ACCOUNT);
+        permission.setTypeId(strain.getId());
     }
 
     @Test
@@ -117,66 +135,19 @@ public class PermissionsControllerTest {
     }
 
     @Test
-    public void testSetReadUser() throws Exception {
-    }
+    public void testClearEntryPermissions() throws Exception {
+        Account account = AccountCreator.createTestAccount("testClearEntryPermissions", false);
+        Strain strain = EntryCreator.createTestStrain(account);
 
-    @Test
-    public void testAddReadUser() throws Exception {
-    }
+        AccessPermission accessPermission = new AccessPermission();
+        accessPermission.setArticle(AccessPermission.Article.ACCOUNT);
+        accessPermission.setType(AccessPermission.Type.READ_ENTRY);
+        accessPermission.setArticleId(account.getId());
+        accessPermission.setTypeId(strain.getId());
 
-    @Test
-    public void testRemoveReadUser() throws Exception {
-    }
-
-    @Test
-    public void testAddReadGroup() throws Exception {
-    }
-
-    @Test
-    public void testRemoveReadGroup() throws Exception {
-    }
-
-    @Test
-    public void testAddWriteUser() throws Exception {
-    }
-
-    @Test
-    public void testRemoveWriteUser() throws Exception {
-    }
-
-    @Test
-    public void testRemoveWriteGroup() throws Exception {
-    }
-
-    @Test
-    public void testAddWriteGroup() throws Exception {
-    }
-
-    @Test
-    public void testSetWriteUser() throws Exception {
-    }
-
-    @Test
-    public void testHasReadPermission() throws Exception {
-    }
-
-    @Test
-    public void testHasWritePermission() throws Exception {
-    }
-
-    @Test
-    public void testGetReadUser() throws Exception {
-    }
-
-    @Test
-    public void testGetWriteUser() throws Exception {
-    }
-
-    @Test
-    public void testGetReadGroup() throws Exception {
-    }
-
-    @Test
-    public void test() throws Exception {
+        Assert.assertNotNull(controller.addPermission(account, accessPermission));
+        ArrayList<AccessPermission> permissions = controller.retrieveSetEntryPermissions(account, strain);
+        // write accounts are automaticall
+        Assert.assertEquals(permissions.size(), controller.clearEntryPermissions(account, strain));
     }
 }
