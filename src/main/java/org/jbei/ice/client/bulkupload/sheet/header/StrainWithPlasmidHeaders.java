@@ -10,16 +10,16 @@ import org.jbei.ice.client.bulkupload.sheet.cell.BioSafetySheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.BooleanSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.FileInputCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.StatusSheetCell;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.entry.PlasmidInfo;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 /**
- * Headers for strain with plasmid sheet
+ * Headers for strain with plasmid bulk upload sheet
  *
  * @author Hector Plahar
  */
@@ -61,6 +61,7 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(EntryField.PLASMID_BACKBONE, preferences));
         headers.add(new CellColumnHeader(EntryField.PLASMID_PROMOTERS, preferences, false,
                                          new AutoCompleteSheetCell(AutoCompleteField.PROMOTERS)));
+        headers.add(new CellColumnHeader(EntryField.REPLICATES_IN, preferences, false));
         headers.add(new CellColumnHeader(EntryField.PLASMID_ORIGIN_OF_REPLICATION, preferences, false,
                                          new AutoCompleteSheetCell(AutoCompleteField.ORIGIN_OF_REPLICATION)));
         headers.add(new CellColumnHeader(EntryField.PLASMID_KEYWORDS, preferences));
@@ -83,6 +84,7 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                 || header == EntryField.CIRCULAR
                 || header == EntryField.PLASMID_BACKBONE
                 || header == EntryField.PLASMID_PROMOTERS
+                || header == EntryField.PLASMID_REPLICATES_IN
                 || header == EntryField.PLASMID_ORIGIN_OF_REPLICATION
                 || header == EntryField.PLASMID_KEYWORDS
                 || header == EntryField.PLASMID_SUMMARY
@@ -93,7 +95,7 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
     }
 
     @Override
-    public SheetCellData extractValue(EntryField header, EntryInfo info) {
+    public SheetCellData extractValue(EntryField header, PartData info) {
         SheetCellData data = extractCommon(header, info);
         if (data != null)
             return data;
@@ -102,8 +104,8 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         if (data != null)
             return data;
 
-        StrainInfo strain = (StrainInfo) info;
-        PlasmidInfo plasmid = (PlasmidInfo) info.getInfo();
+        StrainData strain = (StrainData) info;
+        PlasmidData plasmid = (PlasmidData) info.getInfo();
 
         String value = null;
         switch (header) {
@@ -164,15 +166,15 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                 value = plasmid.getPromoters();
                 break;
 
+            case PLASMID_REPLICATES_IN:
+                value = plasmid.getReplicatesIn();
+                break;
+
             case CIRCULAR:
                 if (plasmid.getCircular() == null)
                     value = "";
-                else {
-                    if (plasmid.getCircular().booleanValue())
-                        value = "Yes";
-                    else
-                        value = "No";
-                }
+                else
+                    value = plasmid.getCircular() ? "Yes" : "No";
                 break;
 
             case PLASMID_NAME:

@@ -1,7 +1,7 @@
 package org.jbei.ice.client.admin.group;
 
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -16,7 +16,7 @@ import com.google.gwt.view.client.SelectionModel;
 /**
  * @author Hector Plahar
  */
-public class GroupMemberTable extends CellTable<AccountInfo> {
+public class GroupMemberTable extends CellTable<User> {
 
     protected interface TableResources extends Resources {
         static TableResources INSTANCE = GWT.create(TableResources.class);
@@ -26,9 +26,9 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
         Style cellTableStyle();
     }
 
-    private ServiceDelegate<AccountInfo> deleteDelegate;
+    private ServiceDelegate<User> deleteDelegate;
 
-    public GroupMemberTable(ServiceDelegate<AccountInfo> deleteDelegate) {
+    public GroupMemberTable(ServiceDelegate<User> deleteDelegate) {
         super(15, TableResources.INSTANCE);
 
         Label empty = new Label();
@@ -44,16 +44,16 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
      * Adds a selection model so cells can be selected
      */
     private void setSelectionModel() {
-        SelectionModel<AccountInfo> selectionModel = new MultiSelectionModel<AccountInfo>(
-                new ProvidesKey<AccountInfo>() {
+        SelectionModel<User> selectionModel = new MultiSelectionModel<User>(
+                new ProvidesKey<User>() {
 
                     @Override
-                    public String getKey(AccountInfo item) {
+                    public String getKey(User item) {
                         return String.valueOf(item.getId());
                     }
                 });
 
-        setSelectionModel(selectionModel, DefaultSelectionEventManager.<AccountInfo>createCheckboxManager());
+        setSelectionModel(selectionModel, DefaultSelectionEventManager.<User>createCheckboxManager());
     }
 
     protected void createColumns() {
@@ -63,11 +63,11 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
     }
 
     protected void createEditRemoveColumn() {
-        DeleteActionCell<AccountInfo> cell = new DeleteActionCell<AccountInfo>(deleteDelegate);
-        Column<AccountInfo, AccountInfo> column = new Column<AccountInfo, AccountInfo>(cell) {
+        DeleteActionCell<User> cell = new DeleteActionCell<User>(deleteDelegate);
+        Column<User, User> column = new Column<User, User>(cell) {
 
             @Override
-            public AccountInfo getValue(AccountInfo object) {
+            public User getValue(User object) {
                 return object;
             }
         };
@@ -76,9 +76,9 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
     }
 
     protected void createNameColumn() {
-        Column<AccountInfo, String> column = new Column<AccountInfo, String>(new TextCell()) {
+        Column<User, String> column = new Column<User, String>(new TextCell()) {
             @Override
-            public String getValue(AccountInfo object) {
+            public String getValue(User object) {
                 if (object == null)
                     return "";
 
@@ -92,9 +92,9 @@ public class GroupMemberTable extends CellTable<AccountInfo> {
     }
 
     protected void createEmailColumn() {
-        Column<AccountInfo, String> column = new Column<AccountInfo, String>(new TextCell()) {
+        Column<User, String> column = new Column<User, String>(new TextCell()) {
             @Override
-            public String getValue(AccountInfo object) {
+            public String getValue(User object) {
                 if (object == null)
                     return "";
                 return object.getEmail();

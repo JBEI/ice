@@ -6,9 +6,9 @@ import javax.mail.MessagingException;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * Logger for gd-ice.

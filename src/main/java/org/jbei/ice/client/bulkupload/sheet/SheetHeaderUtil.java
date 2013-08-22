@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.widget.HeaderLockWidget;
-import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;

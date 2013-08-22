@@ -18,8 +18,7 @@ import org.jbei.ice.lib.models.SequenceFeature;
  *
  * @author Timothy Ham, Zinovii Dmytriv
  */
-public class SequenceFeatureCollection implements Cloneable, Collection<SequenceFeature>,
-                                                  Serializable, Set<SequenceFeature> {
+public class SequenceFeatureCollection implements Collection<SequenceFeature>, Serializable, Set<SequenceFeature> {
 
     private static final long serialVersionUID = 1L;
     private final ArrayList<SequenceFeature> sequenceFeatures = new ArrayList<SequenceFeature>();
@@ -29,23 +28,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * Default constructor.
      */
     public SequenceFeatureCollection() {
-
     }
-
-    /**
-     * Constructor that takes a Collection of {@link SequenceFeature}s.
-     *
-     * @param c Collection of SequenceFeatures.
-     */
-    public SequenceFeatureCollection(Collection<SequenceFeature> c) {
-        if (c == null) {
-            return;
-        }
-
-        addAll(c);
-    }
-
-    // unique methods
 
     /**
      * Determine if the given {@link Feature} exists.
@@ -119,7 +102,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * @return List of SequenceFeatures.
      */
     public List<SequenceFeature> getBySequence(String sequenceString) {
-        ArrayList<SequenceFeature> result = new ArrayList<SequenceFeature>();
+        ArrayList<SequenceFeature> result = new ArrayList<>();
         for (SequenceFeature sequenceFeature : sequenceFeatures) {
             String featureSequence = sequenceFeature.getFeature().getSequence();
             if (featureSequence.equals(sequenceString)) {
@@ -136,7 +119,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * @return List of SequeceFeatures.
      */
     public List<SequenceFeature> getFeaturesAt(int genbankPosition) {
-        ArrayList<SequenceFeature> result = new ArrayList<SequenceFeature>();
+        ArrayList<SequenceFeature> result = new ArrayList<>();
         for (SequenceFeature sequenceFeature : sequenceFeatures) {
             for (AnnotationLocation location : sequenceFeature.getAnnotationLocations()) {
                 if (location.getGenbankStart() >= genbankPosition

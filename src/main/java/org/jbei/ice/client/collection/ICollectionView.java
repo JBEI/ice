@@ -1,20 +1,23 @@
 package org.jbei.ice.client.collection;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
+import org.jbei.ice.client.collection.model.PropagateOption;
+import org.jbei.ice.client.collection.model.ShareCollectionData;
 import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -32,8 +35,6 @@ public interface ICollectionView {
     void setSystemCollectionMenuItems(ArrayList<MenuItem> items);
 
     void setUserCollectionMenuItems(ArrayList<MenuItem> items, IDeleteMenuHandler handler);
-
-    void setUserFolderPermissions(ArrayList<PermissionInfo> list);
 
     boolean getQuickEditVisibility();
 
@@ -82,7 +83,7 @@ public interface ICollectionView {
 
     void showFeedbackMessage(String msg, boolean errMsg);
 
-    SingleSelectionModel<MenuItem> getMenuModel(FolderShareType type);
+    SingleSelectionModel<MenuItem> getMenuModel(FolderType type);
 
     void addSubMenuFolder(OptionSelect option);
 
@@ -100,7 +101,7 @@ public interface ICollectionView {
 
     void addRemoveHandler(ClickHandler handler);
 
-    void setSubMenuEnable(boolean enableAddTo, boolean enableRemove, boolean enableMoveTo);
+    void setCanMove(boolean enableMove);
 
     SingleSelectionModel<ExportAsOption> getExportAsModel();
 
@@ -108,11 +109,19 @@ public interface ICollectionView {
 
     void setSharedCollectionsMenuItems(ArrayList<MenuItem> items);
 
-    void setPermissionDelegate(Delegate<ShareCollectionData> delegate);
+    void setMenuDelegates(Delegate<ShareCollectionData> delegate, ServiceDelegate<PropagateOption> propagate);
 
     void addTransferHandler(ClickHandler handler);
 
     void setTransferOptions(ArrayList<OptionSelect> options);
 
     ArrayList<OptionSelect> getSelectedTransfers();
+
+    void setPromotionDelegate(ServiceDelegate<MenuItem> delegate);
+
+    void setDemotionDelegate(ServiceDelegate<MenuItem> delegate);
+
+    void setPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> delegate);
+
+    void addQuickAddHandler(ClickHandler handler);
 }

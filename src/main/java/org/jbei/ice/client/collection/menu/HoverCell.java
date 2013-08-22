@@ -1,6 +1,6 @@
 package org.jbei.ice.client.collection.menu;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
@@ -25,8 +25,10 @@ import com.google.gwt.view.client.SingleSelectionModel;
  */
 
 public class HoverCell extends Composite {
+
     private final PopupHandler popupHandler;
-    private final SingleSelectionModel<HoverOptions> optionSelection;
+    private final SingleSelectionModel<HoverOption> optionSelection;
+    private final CellList<HoverOption> options;
 
     interface HoverCellListResource extends CellList.Resources {
 
@@ -44,9 +46,9 @@ public class HoverCell extends Composite {
         HoverCellListResource.INSTANCE.cellListStyle().ensureInjected();
         panel.add(icon, "icon");
         panel.setStyleName("collection_options");
-        CellList<HoverOptions> options = new CellList<HoverOptions>(new AbstractCell<HoverOptions>() {
+        options = new CellList<HoverOption>(new AbstractCell<HoverOption>() {
             @Override
-            public void render(Context context, HoverOptions value, SafeHtmlBuilder sb) {
+            public void render(Context context, HoverOption value, SafeHtmlBuilder sb) {
                 sb.appendHtmlConstant(
                         "<i style=\"display: inline-block; width: 1.3em; text-align: left\" class=\""
                                 + value.getIcon().getStyleName()
@@ -54,8 +56,6 @@ public class HoverCell extends Composite {
             }
         }, HoverCellListResource.INSTANCE);
         options.setWidth("80px");
-
-        options.setRowData(Arrays.asList(HoverOptions.values()));
 
         popupHandler = new PopupHandler(options, panel.getElement(), false);
         panel.addDomHandler(new ClickHandler() {
@@ -66,11 +66,15 @@ public class HoverCell extends Composite {
             }
         }, ClickEvent.getType());
 
-        optionSelection = new SingleSelectionModel<HoverOptions>();
+        optionSelection = new SingleSelectionModel<HoverOption>();
         options.setSelectionModel(optionSelection);
     }
 
-    public SingleSelectionModel<HoverOptions> getOptionSelection() {
+    public void setHoverOptions(List<HoverOption> optionList) {
+        options.setRowData(optionList);
+    }
+
+    public SingleSelectionModel<HoverOption> getOptionSelection() {
         return optionSelection;
     }
 
@@ -84,28 +88,5 @@ public class HoverCell extends Composite {
 
     public void addOptionsCloseHandler(CloseHandler<PopupPanel> handler) {
         popupHandler.setCloseHandler(handler);
-    }
-
-    public enum HoverOptions {
-
-        EDIT(FAIconType.EDIT, "Rename"),
-        DELETE(FAIconType.TRASH, "Delete"),
-        SHARE(FAIconType.SHARE, "Share");
-
-        private final String display;
-        private final FAIconType icon;
-
-        HoverOptions(FAIconType icon, String display) {
-            this.display = display;
-            this.icon = icon;
-        }
-
-        public String toString() {
-            return this.display;
-        }
-
-        public FAIconType getIcon() {
-            return this.icon;
-        }
     }
 }

@@ -13,6 +13,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 
+/**
+ * Panel for displaying feedback messages to the user. The messages have a timeout of
+ * 25secs after which they are hidden
+ *
+ * @author Hector Plahar
+ */
 public class FeedbackPanel extends Composite {
 
     interface Style extends CssResource {

@@ -2,7 +2,7 @@ package org.jbei.ice.client.news;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.shared.dto.NewsItem;
+import org.jbei.ice.lib.shared.dto.NewsItem;
 
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;

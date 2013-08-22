@@ -1,7 +1,8 @@
 package org.jbei.ice.server.servlet;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.util.UUID;
+import java.net.URI;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -14,15 +15,13 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.composers.formatters.SBOLFormatter;
+import org.jbei.ice.lib.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Name;
-import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.permissions.PermissionException;
 
 import org.apache.commons.io.IOUtils;
 
@@ -67,9 +66,6 @@ public class SequenceDownloadServlet extends HttpServlet {
         } catch (NumberFormatException | ControllerException e) {
             Logger.error(e);
             return;
-        } catch (PermissionException e) {
-            Logger.warn(e.getMessage());
-            return;
         }
 
         if (entry == null) {
@@ -88,6 +84,10 @@ public class SequenceDownloadServlet extends HttpServlet {
             getFasta(response, entry);
         else if ("sbol".equals(type))
             getSBOL(response, entry);
+        else if ("pigeonI".equalsIgnoreCase(type))
+            getSBOLv(response, entry);
+        else if ("pigeonS".equalsIgnoreCase(type))
+            getPigeonScript(response, entry);
         else
             Logger.error("Unrecognized sequence download type " + type);
     }
@@ -145,7 +145,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
     private void getGenbank(HttpServletResponse response, Entry entry) {
         SequenceController sequenceController = ControllerFactory.getSequenceController();
-        GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getNamesAsString());
+        GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
         genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false); // TODO
 
         Sequence sequence;
@@ -203,7 +203,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
         String sequenceString;
         try {
-            FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getNamesAsString());
+            FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getName());
             sequenceString = sequenceController.compose(sequence, formatter);
         } catch (ControllerException e) {
             Logger.error("Failed to generate fasta file for download!", e);
@@ -259,22 +259,65 @@ public class SequenceDownloadServlet extends HttpServlet {
         }
     }
 
+    private void getSBOLv(HttpServletResponse response, Entry entry) {
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
+        Sequence sequence;
+
+        try {
+            sequence = sequenceController.getByEntry(entry);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return;
+        }
+
+        URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
+        response.setContentType("image/png");
+        String filename = getFileName(entry) + ".png";
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
+        try (BufferedInputStream in = new BufferedInputStream(uri.toURL().openStream())) {
+            byte data[] = new byte[1024];
+            int count;
+            while ((count = in.read(data, 0, 1024)) != -1) {
+                response.getOutputStream().write(data, 0, count);
+            }
+            response.getOutputStream().flush();
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+    }
+
+    private void getPigeonScript(HttpServletResponse response, Entry entry) {
+        SequenceController sequenceController = ControllerFactory.getSequenceController();
+        Sequence sequence;
+
+        try {
+            sequence = sequenceController.getByEntry(entry);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return;
+        }
+
+        String pigeonScript = PigeonSBOLv.generatePigeonScript(sequence);
+        try {
+            byte[] bytes = pigeonScript.getBytes();
+            response.setContentType("text/plain");
+            String filename = getFileName(entry) + ".txt";
+            response.setContentLength(bytes.length);
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
+            IOUtils.write(bytes, response.getOutputStream());
+            response.setContentType("text/plain");
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+    }
+
     /**
-     * Retrieves the first partnumber of first name of the entry. If one
-     * is not available, a random string is returned
+     * Retrieves the entry name for use as the filename
      *
-     * @param entry entry whose partNumber or name is desired to be used as the filename
+     * @param entry entry whose name is desired to be used as the filename
      * @return string to be used as a filename
      */
     private String getFileName(Entry entry) {
-        Name name = entry.getOneName();
-        if (name != null)
-            return name.getName();
-
-        PartNumber partNumber = entry.getOnePartNumber();
-        if (partNumber != null)
-            return partNumber.getPartNumber();
-
-        return UUID.randomUUID().toString().split("-")[0];
+        return entry.getName();
     }
 }

@@ -14,7 +14,7 @@ import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.entry.IHasEntryId;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 
 /**
  * Handler for adding to a collection
@@ -66,8 +66,7 @@ public class AddToHandler implements SubmitHandler {
                     public void onSuccess(ArrayList<FolderDetails> results) {
                         ArrayList<MenuItem> items = new ArrayList<MenuItem>();
                         for (FolderDetails result : results) {
-                            items.add(new MenuItem(result.getId(), result.getName(), result.getCount(),
-                                                   result.isSystemFolder(), false));
+                            items.add(new MenuItem(result.getId(), result.getName(), result.getCount()));
                         }
                         view.updateMenuItemCounts(items);
                         String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";

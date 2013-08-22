@@ -1,24 +1,28 @@
 package org.jbei.ice.client.collection.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class CollectionsModel {
+
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
 
@@ -113,51 +117,49 @@ public class CollectionsModel {
         }
     }
 
-    public void retrieveAllVisibleEntries(final Callback<FolderDetails> callback, int start, int limit) {
-        FolderDetails details = new FolderDetails(-1, "Available Entries", true);
-        service.retrieveAllVisibleEntrys(ClientController.sessionId, details, ColumnField.CREATED, false, start,
-                                         limit,
-                                         new AsyncCallback<FolderDetails>() {
+    public void retrieveAllVisibleEntries(final Callback<FolderDetails> callback, final int start, final int limit) {
+        new IceAsyncCallback<FolderDetails>() {
 
-                                             @Override
-                                             public void onSuccess(FolderDetails result) {
-                                                 callback.onSuccess(result);
-                                             }
+            @Override
+            protected void callService(AsyncCallback<FolderDetails> callback) throws AuthenticationException {
+                FolderDetails details = new FolderDetails(-1, "Available Entries");
+                service.retrieveAllVisibleEntrys(ClientController.sessionId, details, ColumnField.CREATED, false, start,
+                                                 limit, callback);
+            }
 
-                                             @Override
-                                             public void onFailure(Throwable caught) {
-                                                 if (caught instanceof AuthenticationException) {
-                                                     ClientController.sessionId = null;
-                                                     History.newItem(Page.LOGIN.getLink());
-                                                     return;
-                                                 }
+            @Override
+            public void onSuccess(FolderDetails result) {
+                callback.onSuccess(result);
+            }
 
-                                                 callback.onFailure();
-                                             }
-                                         });
+            @Override
+            public void serverFailure() {
+                callback.onFailure();
+            }
+        }.go(eventBus);
     }
 
-    public void retrieveEntriesForCurrentUser(final Callback<FolderDetails> callback, int start, int limit) {
-        String id = Long.toString(ClientController.account.getId());
-        service.retrieveUserEntries(ClientController.sessionId, id, ColumnField.CREATED, false, start, limit,
-                                    new AsyncCallback<FolderDetails>() {
+    public void retrieveEntriesForCurrentUser(final Callback<FolderDetails> callback, final int start,
+            final int limit) {
+        new IceAsyncCallback<FolderDetails>() {
 
-                                        @Override
-                                        public void onSuccess(FolderDetails result) {
-                                            callback.onSuccess(result);
-                                        }
+            @Override
+            protected void callService(AsyncCallback<FolderDetails> callback) throws AuthenticationException {
+                String id = Long.toString(ClientController.account.getId());
+                service.retrieveUserEntries(ClientController.sessionId, id, ColumnField.CREATED, false, start, limit,
+                                            callback);
+            }
 
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            if (caught instanceof AuthenticationException) {
-                                                ClientController.sessionId = null;
-                                                History.newItem(Page.LOGIN.getLink());
-                                                return;
-                                            }
+            @Override
+            public void onSuccess(FolderDetails result) {
+                callback.onSuccess(result);
+            }
 
-                                            callback.onFailure();
-                                        }
-                                    });
+            @Override
+            public void serverFailure() {
+                callback.onFailure();
+            }
+        }.go(eventBus);
     }
 
     public void addEntriesToFolder(final ArrayList<Long> destinationFolderIds, final ArrayList<Long> ids,
@@ -220,36 +222,16 @@ public class CollectionsModel {
         }.go(eventBus);
     }
 
-    public void retrieveWebOfRegistrySettings(final Callback<HashMap<String, String>> callback) {
-        new IceAsyncCallback<HashMap<String, String>>() {
+    public void retrieveWebOfRegistryPartners(final Callback<WebOfRegistries> callback) {
+        new IceAsyncCallback<WebOfRegistries>() {
 
             @Override
-            protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
-                service.retrieveWebOfRegistrySettings(ClientController.sessionId, callback);
+            protected void callService(AsyncCallback<WebOfRegistries> callback) throws AuthenticationException {
+                service.retrieveWebOfRegistryPartners(ClientController.sessionId, callback);
             }
 
             @Override
-            public void onSuccess(HashMap<String, String> result) {
-                callback.onSuccess(result);
-            }
-        }.go(eventBus);
-    }
-
-    public void retrieveFolderPermissions(final ArrayList<Long> userFolderIds,
-            final Callback<ArrayList<PermissionInfo>> callback) {
-        if (userFolderIds == null || userFolderIds.isEmpty())
-            return;
-
-        new IceAsyncCallback<ArrayList<PermissionInfo>>() {
-
-            @Override
-            protected void callService(AsyncCallback<ArrayList<PermissionInfo>> callback)
-                    throws AuthenticationException {
-                service.retrieveFolderPermissions(ClientController.sessionId, userFolderIds, callback);
-            }
-
-            @Override
-            public void onSuccess(ArrayList<PermissionInfo> result) {
+            public void onSuccess(WebOfRegistries result) {
                 callback.onSuccess(result);
             }
         }.go(eventBus);
@@ -272,10 +254,87 @@ public class CollectionsModel {
             }
 
             @Override
-            public void onSuccess(Void result) {}
+            public void onSuccess(Void result) {
+            }
 
             @Override
-            public void onNullResult() {}
+            public void onNullResult() {
+            }
         }.go(eventBus);
+    }
+
+    public Delegate<ShareCollectionData> createPermissionDelegate() {
+        return new Delegate<ShareCollectionData>() {
+
+            @Override
+            public void execute(final ShareCollectionData data) {
+                IceAsyncCallback<Boolean> asyncCallback;
+                if (data.isDelete()) {
+                    asyncCallback = new IceAsyncCallback<Boolean>() {
+
+                        @Override
+                        protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                            service.removePermission(ClientController.sessionId, data.getAccess(), callback);
+                        }
+
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            data.getInfoCallback().onSuccess(data);
+                        }
+                    };
+                } else {
+                    asyncCallback = new IceAsyncCallback<Boolean>() {
+
+                        @Override
+                        protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                            service.addPermission(ClientController.sessionId, data.getAccess(), callback);
+                        }
+
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            data.getInfoCallback().onSuccess(data);
+                        }
+                    };
+                }
+                asyncCallback.go(eventBus);
+            }
+        };
+    }
+
+    public ServiceDelegate<PropagateOption> createPropagateDelegate() {
+        return new ServiceDelegate<PropagateOption>() {
+            @Override
+            public void execute(final PropagateOption propagateOption) {
+                new IceAsyncCallback<Boolean>() {
+
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        service.setPropagatePermissionForFolder(
+                                ClientController.sessionId, propagateOption.getFolderId(),
+                                propagateOption.isPropagate(), callback);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                    }
+                }.go(eventBus);
+            }
+        };
+    }
+
+    public void exportParts(final ArrayList<Long> partIds, final ExportAsOption option) {
+        new IceAsyncCallback<String>() {
+
+            @Override
+            protected void callService(AsyncCallback<String> callback) throws AuthenticationException {
+                service.exportParts(ClientController.sessionId, partIds, option.toString(), callback);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                Window.Location.replace("/download?id=" + result + "&type=tmp");
+            }
+        }.go(eventBus);
+
     }
 }

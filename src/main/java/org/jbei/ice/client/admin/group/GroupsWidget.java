@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jbei.ice.client.ServiceDelegate;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -21,18 +21,18 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
  */
 public class GroupsWidget extends Composite {
 
-    private GroupInfo root;
+    private UserGroup root;
     private FlexTable groupList;
     private int row;
-    private HashMap<Integer, GroupInfo> mapping;
+    private HashMap<Integer, UserGroup> mapping;
     private final GroupMembersWidget groupMembers;
 
-    public GroupsWidget(ServiceDelegate<AccountInfo> delegate) {
+    public GroupsWidget(ServiceDelegate<User> delegate) {
         groupList = new FlexTable();
         groupList.setCellPadding(0);
         groupList.setCellSpacing(0);
         groupList.getFlexCellFormatter().setWidth(0, 0, "250px");
-        mapping = new HashMap<Integer, GroupInfo>();
+        mapping = new HashMap<Integer, UserGroup>();
         groupMembers = new GroupMembersWidget();
         groupMembers.setVisible(false);
         HorizontalPanel layout = new HorizontalPanel();
@@ -43,7 +43,7 @@ public class GroupsWidget extends Composite {
         layout.add(groupMembers);
     }
 
-    public GroupInfo getGroupSelection(ClickEvent event) {
+    public UserGroup getGroupSelection(ClickEvent event) {
         HTMLTable.Cell cell = groupList.getCellForEvent(event);
         if (cell == null || cell.getCellIndex() > 0)
             return null;
@@ -52,7 +52,7 @@ public class GroupsWidget extends Composite {
         return mapping.get(cell.getRowIndex());
     }
 
-    public void setGroupMembers(ArrayList<AccountInfo> members) {
+    public void setGroupMembers(ArrayList<User> members) {
         groupMembers.setMemberList(members);
         groupMembers.setVisible(true);
     }
@@ -61,10 +61,10 @@ public class GroupsWidget extends Composite {
         groupList.addClickHandler(handler);
     }
 
-    public void setRootGroup(GroupInfo list) {
+    public void setRootGroup(UserGroup list) {
         this.root = list;
         mapping.clear();
-        groupMembers.setMemberList(new ArrayList<AccountInfo>());  // reset
+        groupMembers.setMemberList(new ArrayList<User>());  // reset
         groupMembers.setVisible(false);
         row = 0;
     }
@@ -73,13 +73,13 @@ public class GroupsWidget extends Composite {
         displayGroup(root);
     }
 
-    private void displayGroup(GroupInfo info) {
-        if (info == null)
+    private void displayGroup(UserGroup user) {
+        if (user == null)
             return;
 
-        draw(row, info);
+        draw(row, user);
 
-        for (GroupInfo child : info.getChildren()) {
+        for (UserGroup child : user.getChildren()) {
             row += 1;
             draw(row, child);
         }
@@ -94,11 +94,11 @@ public class GroupsWidget extends Composite {
         }
     }
 
-    public void addNewGroup(GroupInfo newGroup) {
-        long parentId = newGroup.getParentId();
+    public void addNewGroup(UserGroup newUserGroup) {
+        long parentId = newUserGroup.getParentId();
         int parentRow = -1;
 
-        for (Map.Entry<Integer, GroupInfo> entry : mapping.entrySet()) {
+        for (Map.Entry<Integer, UserGroup> entry : mapping.entrySet()) {
             if (entry.getValue().getId() == parentId) {
                 parentRow = entry.getKey().intValue();
                 break;
@@ -112,31 +112,31 @@ public class GroupsWidget extends Composite {
         // insert
         Cell cell = (Cell) groupList.getWidget(parentRow, 0);
         int row = groupList.insertRow(parentRow + 1);
-        draw(row, newGroup);
+        draw(row, newUserGroup);
     }
 
-    private void draw(int row, GroupInfo info) {
-        Cell cell = new Cell(info);
+    private void draw(int row, UserGroup user) {
+        Cell cell = new Cell(user);
         groupList.setWidget(row, 0, cell);
         groupList.getFlexCellFormatter().setStyleName(row, 0, "group_info_td");
-        mapping.put(row, info);
+        mapping.put(row, user);
     }
 
     private class Cell extends Composite {
 
-        private final GroupInfo info;
+        private final UserGroup user;
 
-        public Cell(GroupInfo info) {
-            this.info = info;
+        public Cell(UserGroup user) {
+            this.user = user;
 
-            HTMLPanel panel = new HTMLPanel("<div><b>" + info.getLabel() + "</b><br><span style=\"color: #888; "
+            HTMLPanel panel = new HTMLPanel("<div><b>" + user.getLabel() + "</b><br><span style=\"color: #888; "
                                                     + "font-size: 0.62em; top: -5px; position: relative\">"
-                                                    + info.getDescription() + "</span></div>");
+                                                    + user.getDescription() + "</span></div>");
             initWidget(panel);
         }
 
-        public GroupInfo getGroup() {
-            return this.info;
+        public UserGroup getGroup() {
+            return this.user;
         }
     }
 }

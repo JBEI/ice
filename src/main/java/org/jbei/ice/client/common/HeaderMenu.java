@@ -38,6 +38,8 @@ public class HeaderMenu extends Composite {
 
         html += ("</ul>");
         HTMLPanel panel = new HTMLPanel(html);
+        panel.setStyleName("no_wrap");
+        panel.addStyleName("display-inline");
         panel.add(collectionsLink, "collections_link");
         panel.add(newsLink, "news_link");
         if (isAdmin)

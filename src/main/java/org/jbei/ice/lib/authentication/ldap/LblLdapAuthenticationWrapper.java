@@ -263,7 +263,7 @@ public class LblLdapAuthenticationWrapper {
      *
      * @author Zinovii Dmytriv
      */
-    public class LblLdapAuthenticationWrapperException extends Exception {
+    public static class LblLdapAuthenticationWrapperException extends Exception {
         private static final long serialVersionUID = 1L;
 
         public LblLdapAuthenticationWrapperException(String message, Throwable cause) {

@@ -19,9 +19,9 @@ import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -61,7 +61,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private HTML reset;
     private SaveDraftInput draftInput;
     private PermissionsSelection selection;
-    //    private UploadCSV uploadCSV;
     private HTML updating;
     private HTML uploadName;
     private String lastUpdated;
@@ -105,7 +104,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         updating.addStyleName("relative_top_3");
         updating.setVisible(false);
         selection = new PermissionsSelection();
-//        uploadCSV = new UploadCSV();
         creator = new CreatorWidget(ClientController.account.getFullName(), ClientController.account.getEmail());
 
         uploadName = new HTML();
@@ -117,8 +115,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 "<span id=\"bulk_import_display_type\"></span>"
                         + "<span style=\"vertical-align: middle; float:left\" id=\"upload_name\"></span>"
                         + "<span style=\"vertical-align: middle; float:left\" id=\"draft_name\"></span>"
-                        + "&nbsp;&nbsp;<span style=\"vertical-align: middle; float:left\" " +
-                        "id=\"updating_icon\"></span></span>"
+                        + "&nbsp;&nbsp;<span style=\"vertical-align: middle; float:left\" "
+                        + "id=\"updating_icon\"></span></span>"
                         + "<span style=\"float: right;\">"
 //                        + "<span id=\"bulk_import_upload_csv\"></span>"
 //                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
@@ -184,14 +182,13 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                     updating.setHTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">Updated: "
                                              + lastUpdated + "</span>");
                     updating.setVisible(true);
-                    return;
                 }
             }
         });
     }
 
     @Override
-    public void setPermissionDelegate(ServiceDelegate<Set<GroupInfo>> handler) {
+    public void setPermissionDelegate(ServiceDelegate<Set<UserGroup>> handler) {
         selection.setPermissionUpdateDelegate(handler);
     }
 
@@ -219,8 +216,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setPermissionGroups(ArrayList<GroupInfo> groups) {
-        selection.setData(groups);
+    public void setPermissionGroups(ArrayList<UserGroup> userGroups) {
+        selection.setData(userGroups);
     }
 
     @Override

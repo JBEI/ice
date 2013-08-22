@@ -1,51 +1,55 @@
 package org.jbei.ice.client.search.blast;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.HasEntryInfo;
-import org.jbei.ice.shared.dto.search.SearchResultInfo;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.search.SearchResult;
 
 import com.google.gwt.view.client.Range;
 
-public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<SearchResultInfo> {
+public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<SearchResult> {
 
-    public BlastSearchDataProvider(HasEntryDataTable<SearchResultInfo> view, RegistryServiceAsync service) {
+    public BlastSearchDataProvider(HasEntryDataTable<SearchResult> view, RegistryServiceAsync service) {
         super(view, service, ColumnField.BIT_SCORE);
     }
 
-    public void setBlastData(LinkedList<SearchResultInfo> data) {
+    public void setBlastData(LinkedList<SearchResult> data) {
         reset();
         if (data == null) {
             updateRowCount(0, true);
             return;
         }
 
+        Collections.sort(data, new Comparator<SearchResult>() {
+            @Override
+            public int compare(SearchResult o1, SearchResult o2) {
+                return Float.compare(o1.getScore(), o2.getScore());
+            }
+        });
+
         results.addAll(data);
-        resultSize = data.size();  // todo : need a blastResult object as a wrapper
+        resultSize = data.size();  // TODO : need a blastResult object as a wrapper
         updateRowCount(resultSize, true);
 
         // retrieve the first page of results and updateRowData
         final Range range = this.dataTable.getVisibleRange();
         final int rangeStart = 0;
-        int rangeEnd = rangeStart + range.getLength();
-        if (rangeEnd > resultSize)
-            rangeEnd = resultSize;
-
+        int rangeEnd = range.getLength() > resultSize ? resultSize : range.getLength();
         updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
         dataTable.setPageStart(0);
     }
 
     @Override
-    public EntryInfo getCachedData(long entryId, String recordId) {
-        for (HasEntryInfo result : results) {
-            EntryInfo info = result.getEntryInfo();
-            if (recordId != null && info.getRecordId().equalsIgnoreCase(recordId))
-                return info;
+    public PartData getCachedData(long entryId, String recordId) {
+        for (HasEntryData result : results) {
+            PartData info = result.getEntryInfo();
 
             if (info.getId() == entryId)
                 return info;
@@ -54,9 +58,9 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
     }
 
     @Override
-    public int indexOfCached(EntryInfo info) {
+    public int indexOfCached(PartData info) {
         int i = 0;
-        for (HasEntryInfo result : results) {
+        for (HasEntryData result : results) {
 
             if (result.getEntryInfo().getId() == info.getId())
                 return i;
@@ -71,7 +75,7 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
     }
 
     @Override
-    public EntryInfo getNext(EntryInfo info) {
+    public PartData getNext(PartData info) {
         int idx = indexOfCached(info);
         if (idx == -1)
             return null;
@@ -79,7 +83,7 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<Search
     }
 
     @Override
-    public EntryInfo getPrev(EntryInfo info) {
+    public PartData getPrev(PartData info) {
         int idx = indexOfCached(info);
         if (idx == -1)
             return null;

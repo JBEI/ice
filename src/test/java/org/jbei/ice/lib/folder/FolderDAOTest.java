@@ -4,7 +4,6 @@ import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -14,13 +13,9 @@ public class FolderDAOTest {
 
     private FolderDAO dao;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        HibernateHelper.initializeMock();
-    }
-
     @Before
     public void setUp() {
+        HibernateHelper.initializeMock();
         dao = new FolderDAO();
         HibernateHelper.beginTransaction();
     }

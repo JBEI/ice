@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload.model;
 
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 /**
  * Factory for creating sheet models based on entry types
@@ -10,7 +10,7 @@ import org.jbei.ice.shared.dto.entry.EntryInfo;
  */
 public class ModelFactory {
 
-    public static SheetModel<? extends EntryInfo> getModelForType(EntryAddType type) {
+    public static SheetModel<? extends PartData> getModelForType(EntryAddType type) {
         switch (type) {
             case STRAIN:
                 return new StrainSheetModel();

@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.sheet.cell.InputSheetCell;
 import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
 /**
  * Header for each sheet header

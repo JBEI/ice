@@ -30,6 +30,10 @@ public class UserPreferencesPresenter extends PanelPresenter {
         panel.setData(settings);
     }
 
+    public void setSearchPreferences(HashMap<String, String> settings) {
+//        panel.setSearchData(settings);
+    }
+
     public ServiceDelegate<RowData> getServiceDelegate() {
         return new ServiceDelegate<RowData>() {
             @Override
@@ -38,13 +42,13 @@ public class UserPreferencesPresenter extends PanelPresenter {
 
                     @Override
                     protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        service.setPreferenceSetting(ClientController.sessionId,
-                                                     rowData.getKey(), rowData.getValue(), callback);
+                        String key = rowData.getKey() == null ? rowData.getField().name() : rowData.getKey().name();
+                        service.setPreferenceSetting(ClientController.sessionId, key, rowData.getValue(), callback);
                     }
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        panel.setConfigValue(rowData.getKey(), rowData.getRow(), rowData.getValue());
+                        panel.setConfigValue(rowData.getSection(), rowData.getRow(), rowData.getValue());
                     }
                 }.go(eventBus);
             }

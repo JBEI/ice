@@ -2,19 +2,24 @@ package org.jbei.ice.client.common.header;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -24,14 +29,20 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * View widget for the page header. Shared across all instances of pages
+ *
+ * @author Hector Plahar
+ */
 public class HeaderView extends Composite {
 
     private SearchCompositeBox searchInput;
     private Button searchBtn;
     private final AdvancedSearchWidget widgetAdvanced;
     private final FlexTable loggedInContentsPanel;
-    private final static HeaderView INSTANCE = new HeaderView();
+    private static final HeaderView INSTANCE = new HeaderView();
     private final HeaderMenu headerMenu;
+    private ServiceDelegate<SearchQuery> queryServiceDelegate;
 
     public static HeaderView getInstance() {
         return INSTANCE;
@@ -67,7 +78,7 @@ public class HeaderView extends Composite {
 
         // search Option
         widgetAdvanced = new AdvancedSearchWidget(searchInput);
-        widgetAdvanced.setWidth("394px");
+        widgetAdvanced.setWidth("395px");
         widgetAdvanced.setHeight("150px");
 
         createHandlers();
@@ -75,10 +86,6 @@ public class HeaderView extends Composite {
 
     public void resetSearchBox() {
         widgetAdvanced.reset();
-    }
-
-    public void setSearchBox(String box) {
-        searchInput.setSearch(box);
     }
 
     protected Widget createSearchPanel() {
@@ -120,37 +127,45 @@ public class HeaderView extends Composite {
      * @return top right hand corner widget. Empty when the user is not logged in
      *         controller/presenter
      */
-    private Widget createLoggedInContents(final AccountInfo info) {
+    private Widget createLoggedInContents(final User info) {
         if (info == null) {
             loggedInContentsPanel.setHTML(0, 0, SafeHtmlUtils.EMPTY_SAFE_HTML);
             return loggedInContentsPanel;
         }
 
         // user
-        loggedInContentsPanel.setHTML(0, 0, "<a href=\"#" + Page.PROFILE.getLink() + ";id=" + info.getId()
-                + "\">" + info.getEmail() + "</a>");
+        SafeHtml profileHTML = SafeHtmlUtils.fromSafeConstant("<i class=\"color_444 " + FAIconType.GEAR.getStyleName()
+                                                                      + "\"></i> " + info.getEmail());
+        Hyperlink profile = new Hyperlink(profileHTML, Page.PROFILE.getLink() + ";id=" + info.getId() + ";s=profile");
+        loggedInContentsPanel.setWidget(0, 0, profile);
 
         // messages
         loggedInContentsPanel.setHTML(0, 1, "");
 
         // pipe
-        HTML pipe3 = new HTML("&nbsp;&nbsp;|&nbsp;&nbsp;");
-        pipe3.addStyleName("color_eee");
-        loggedInContentsPanel.setWidget(0, 2, pipe3);
+        loggedInContentsPanel.setHTML(0, 2, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
 
         // logout link
-        loggedInContentsPanel.setWidget(0, 3, new Icon(FAIconType.SIGNOUT));
-        loggedInContentsPanel.setWidget(0, 4, new HTML("&nbsp;"));
-        Hyperlink logout = new Hyperlink("Log Out", Page.LOGOUT.getLink());
+        SafeHtml html = SafeHtmlUtils.fromSafeConstant("<i class=\"color_444 " + FAIconType.SIGNOUT.getStyleName()
+                                                               + "\"></i> Log Out");
+        Hyperlink logout = new Hyperlink(html, Page.LOGOUT.getLink());
         loggedInContentsPanel.setWidget(0, 5, logout);
+        loggedInContentsPanel.setHTML(0, 6, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
+        SafeHtml helpHtml = SafeHtmlUtils.fromSafeConstant("<i class=\"color_444 " + FAIconType.BOOK.getStyleName()
+                                                                   + "\"></i> Help");
+        Anchor anchor = new Anchor(helpHtml, "https://public-registry.jbei.org/static/help.htm");
+        loggedInContentsPanel.setWidget(0, 7, anchor);
+
         return loggedInContentsPanel;
     }
 
-    private void setNewMessages(int newMessageCount) {
-        if (newMessageCount <= 0)
+    public void setNewMessages(int newMessageCount) {
+        if (newMessageCount <= 0) {
+            loggedInContentsPanel.setHTML(0, 1, "");
             return;
+        }
 
-        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #EEE\">|</span>&nbsp;&nbsp;"
+        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #969696\">|</span>&nbsp;&nbsp;"
                                                  + "<span class=\"badge\">" + newMessageCount + "</span>");
         String title = "You have " + newMessageCount + " new message";
         title += newMessageCount != 1 ? "s" : "";
@@ -158,9 +173,9 @@ public class HeaderView extends Composite {
         emailBadge.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-//                emailBadge.setVisible(false);
-//                emailBadge.setHTML("");
-//                loggedInContentsPanel.setHTML(0, 1, "");
+                emailBadge.setVisible(false);
+                emailBadge.setHTML("");
+                loggedInContentsPanel.setHTML(0, 1, "");
                 History.newItem(Page.PROFILE.getLink() + ";id=" + ClientController.account.getId() + ";s=messages");
             }
         });
@@ -170,17 +185,27 @@ public class HeaderView extends Composite {
 
     public void createHandlers() {
         if (this.searchInput != null) {
-            PopupHandler handler = new PopupHandler(widgetAdvanced, this.searchInput.getPullDownAreaElement(), false);
+            final PopupHandler handler = new PopupHandler(widgetAdvanced, this.searchInput.getPullDownAreaElement(),
+                                                          false, searchInput);
             handler.addAutoHidePartner(searchInput.getTextBoxElement());
             handler.setCloseHandler(searchInput.getCloseHandler());
             this.searchInput.setPullDownClickHandler(handler);
+
+            this.searchInput.setFocusHandler(new FocusHandler() {
+                @Override
+                public void onFocus(FocusEvent event) {
+                    if (!widgetAdvanced.isDefaultState()) {
+                        handler.showRelativeTo(searchInput);
+                    }
+                }
+            });
         }
 
         ClickHandler searchHandler = new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 searchInput.advancedWidgetClosed();
-                widgetAdvanced.parseSearchOptions();
+                widgetAdvanced.parseSearchOptions(queryServiceDelegate);
             }
         };
 
@@ -192,8 +217,12 @@ public class HeaderView extends Composite {
         headerMenu.setSelected(page);
     }
 
-    public void setHeaderData(AccountInfo account) {
+    public void setHeaderData(User account) {
         createLoggedInContents(account);
         setNewMessages(account.getNewMessageCount());
+    }
+
+    public void setQueryDelegate(ServiceDelegate<SearchQuery> queryDelegate) {
+        queryServiceDelegate = queryDelegate;
     }
 }

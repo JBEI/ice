@@ -17,11 +17,23 @@ class SearchDAO extends HibernateRepository {
             Session session = HibernateHelper.newSession();
             FullTextSession fullTextSession = Search.getFullTextSession(session);
             try {
+                fullTextSession.createIndexer().idFetchSize(100);
                 fullTextSession.createIndexer().startAndWait();
             } catch (InterruptedException e) {
                 Thread.interrupted();
                 Logger.warn("Re-indexing not complete");
             }
+        } catch (HibernateException he) {
+            throw new DAOException(he);
+        }
+    }
+
+    public void reIndexInbackground() throws DAOException {
+        try {
+            Session session = HibernateHelper.newSession();
+            FullTextSession fullTextSession = Search.getFullTextSession(session);
+            fullTextSession.createIndexer().idFetchSize(100);
+            fullTextSession.createIndexer().start();
         } catch (HibernateException he) {
             throw new DAOException(he);
         }

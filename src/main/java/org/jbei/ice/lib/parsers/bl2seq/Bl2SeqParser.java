@@ -64,12 +64,11 @@ public class Bl2SeqParser {
                     // get score
                     score = new Integer((scoreMatcher.group(1))).intValue();
 
-                    line = stringTokenizer.nextToken();
-                    line = stringTokenizer.nextToken();
+                    stringTokenizer.nextToken();
+                    line = stringTokenizer.nextToken();   // strand is second line after score
 
-                    // get orientation
-                    String orientationLetter = line.substring(17, 18);
-                    orientation = (orientationLetter.equals("P")) ? 0 : 1;
+                    // format is Strand=Plus/Plus
+                    orientation = line.indexOf("Plus", 0) == line.lastIndexOf("Plus") ? 0 : 1;
                     isFirstRun = false;
                     continue;
                 }

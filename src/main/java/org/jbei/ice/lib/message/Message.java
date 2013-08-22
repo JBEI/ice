@@ -1,10 +1,14 @@
 package org.jbei.ice.lib.message;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Analyze;
@@ -15,27 +19,39 @@ import org.hibernate.search.annotations.Resolution;
 import org.hibernate.search.annotations.Store;
 
 /**
+ * Encapsulates system and user messages which can be sent to groups or individuals.
+ * Maintains a parent/child relationship in order to capture message threads. This requires traversing the object
+ * to retrieve parents and constructing the hierarchy.
+ *
  * @author Hector Plahar
  */
 @Indexed(index = "Message")
 @Entity
 @Table(name = "MESSAGE")
+@SequenceGenerator(name = "sequence", sequenceName = "message_id_seq", allocationSize = 1)
 public class Message implements IModel {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Field(store = Store.YES, analyze = Analyze.NO)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
     @Column(name = "from_user", length = 127)
     @Field(store = Store.YES, analyze = Analyze.NO)
     private String fromEmail;
 
-    @Column(name = "to_user", length = 127)
-    @Field(store = Store.YES, analyze = Analyze.NO)
-    private String toEmail;
+    @ManyToMany
+    @JoinTable(name = "message_destination_accounts",
+               joinColumns = {@JoinColumn(name = "message_id")},
+               inverseJoinColumns = {@JoinColumn(name = "account_id")})
+    private Set<Account> destinationAccounts = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "message_destination_groups",
+               joinColumns = {@JoinColumn(name = "message_id")},
+               inverseJoinColumns = {@JoinColumn(name = "group_id")})
+    private Set<Group> destinationGroups = new HashSet<>();
 
     @Column(name = "message")
     @Lob
@@ -59,6 +75,10 @@ public class Message implements IModel {
     @Column(name = "is_read", nullable = false)
     private boolean isRead;
 
+    @Column(name = "status")
+    @Enumerated(value = EnumType.STRING)
+    private MessageStatus status = MessageStatus.INBOX;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent")
     private Message parent;
@@ -73,14 +93,6 @@ public class Message implements IModel {
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
-    }
-
-    public String getToEmail() {
-        return toEmail;
-    }
-
-    public void setToEmail(String toEmail) {
-        this.toEmail = toEmail;
     }
 
     public String getMessage() {
@@ -121,6 +133,30 @@ public class Message implements IModel {
 
     public void setRead(boolean read) {
         isRead = read;
+    }
+
+    public MessageStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(MessageStatus status) {
+        this.status = status;
+    }
+
+    public Set<Account> getDestinationAccounts() {
+        return destinationAccounts;
+    }
+
+    public void setDestinationAccounts(HashSet<Account> destinationAccounts) {
+        this.destinationAccounts = destinationAccounts;
+    }
+
+    public Set<Group> getDestinationGroups() {
+        return destinationGroups;
+    }
+
+    public void setDestinationGroups(HashSet<Group> destinationGroups) {
+        this.destinationGroups = destinationGroups;
     }
 
     public static MessageInfo toDTO(Message message) {

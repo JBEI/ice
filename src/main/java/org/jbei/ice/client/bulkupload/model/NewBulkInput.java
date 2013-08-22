@@ -3,7 +3,7 @@ package org.jbei.ice.client.bulkupload.model;
 import org.jbei.ice.client.bulkupload.sheet.Sheet;
 import org.jbei.ice.client.bulkupload.widget.SampleSelectionWidget;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.lib.shared.EntryAddType;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.VerticalPanel;

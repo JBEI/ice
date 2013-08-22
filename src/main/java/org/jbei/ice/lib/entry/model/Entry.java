@@ -17,9 +17,7 @@ import org.jbei.ice.lib.entry.filter.EntrySecurityFilterFactory;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.model.Permission;
-import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.Visibility;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;
@@ -32,11 +30,6 @@ import org.jbei.ice.lib.entry.model.Parameter;
  * <p/>
  * Entry class represent the unique handle for each record in the system. It provides the common fields, such as the
  * recordId (uuid), timestamps, owner and creator information, etc.
- * <p/>
- * Many of the fields accept mediawiki style linking tags. For example, "[[jbei:JBx_000001|Descriptive Name]]" will
- * automatically generate a clickable link to the part JBx_000001 with text "Descriptive Name". The wiki link prefix
- * (jbei:) in this case can be configured in the configuration file. In the future, links to other registries can be
- * specified via the configuration, similar to other mediawiki links.
  * <p/>
  * Description of Entry fields:
  * <p/>
@@ -132,6 +125,14 @@ public class Entry implements IModel {
     @Field(store = Store.YES)
     private String alias;
 
+    @Column(name = "name", length = 127)
+    @Field(store = Store.YES, boost = @Boost(2f))
+    private String name;
+
+    @Column(name = "part_number", length = 127)
+    @Field(boost = @Boost(2f), store = Store.YES, analyze = Analyze.NO)
+    private String partNumber;
+
     @Column(name = "keywords", length = 127)
     @Field
     @Boost(1.2f)
@@ -195,14 +196,6 @@ public class Entry implements IModel {
     @IndexedEmbedded
     private final Set<Link> links = new LinkedHashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
-    @IndexedEmbedded
-    private final Set<Name> names = new LinkedHashSet<>();
-
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
-    @IndexedEmbedded
-    private final Set<PartNumber> partNumbers = new LinkedHashSet<>();
-
     @OneToMany(mappedBy = "entry", fetch = FetchType.EAGER)
     @IndexedEmbedded
     private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<>();
@@ -218,10 +211,15 @@ public class Entry implements IModel {
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents")
     private Set<Folder> folders = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+    @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
+               inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
+    private Set<Entry> linkedEntries = new HashSet<>();
+
     public Entry() {
-        setStatus("");
-        setLongDescriptionType("text");
-        setBioSafetyLevel(new Integer(0));
+        setStatus("Complete");
+        longDescriptionType = "text";
+        setBioSafetyLevel(1);
     }
 
     @XmlTransient
@@ -258,86 +256,6 @@ public class Entry implements IModel {
     public void setRecordType(String recordType) {
         this.recordType = recordType;
     }
-
-    public Set<Name> getNames() {
-        return names;
-    }
-
-    public void setNames(Set<Name> inputNames) {
-        /*
-         * Warning! This is a hibernate workaround. 
-         */
-
-        // for JAXB webservices should be this way
-        if (inputNames == null) {
-            names.clear();
-            return;
-        }
-
-        if (inputNames != names) {
-            names.clear();
-            names.addAll(inputNames);
-        }
-    }
-
-    public Name getOneName() {
-        Name result = null;
-        if (names.size() > 0) {
-            result = (Name) names.toArray()[0];
-        }
-        return result;
-    }
-
-    public String getNamesAsString() {
-        String result;
-        ArrayList<String> names = new ArrayList<>();
-        for (Name name : this.names) {
-            names.add(name.getName());
-        }
-        result = org.jbei.ice.lib.utils.Utils.join(", ", names);
-        return result;
-    }
-
-    public Set<PartNumber> getPartNumbers() {
-        return partNumbers;
-    }
-
-    /**
-     * Return the first {@link PartNumber} associated with this entry, preferring the PartNumber local to this instance
-     * of gd-ice.
-     *
-     * @return PartNumber.
-     */
-    public PartNumber getOnePartNumber() {
-        PartNumber result = null;
-        // prefer local part number prefix over other prefixes
-        if (partNumbers.size() > 0) {
-            for (PartNumber partNumber : partNumbers) {
-                String partNumberPrefix = Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX);
-                if (partNumber.getPartNumber().contains(partNumberPrefix)) {
-                    result = partNumber;
-                    break;
-                }
-            }
-            if (result == null) {
-                result = (PartNumber) partNumbers.toArray()[0];
-            }
-        }
-        return result;
-    }
-
-//    public void setPartNumbers(Set<PartNumber> inputPartNumbers) {
-//        // for JAXB webservices should be this way
-//        if (inputPartNumbers == null) {
-//            partNumbers.clear();
-//            return;
-//        }
-//
-//        if (inputPartNumbers != partNumbers) {
-//            partNumbers.clear();
-//            partNumbers.addAll(inputPartNumbers);
-//        }
-//    }
 
     public String getOwner() {
         return owner;
@@ -445,7 +363,6 @@ public class Entry implements IModel {
     public void setLinks(Set<Link> inputLinks) {
         if (inputLinks == null) {
             links.clear();
-
             return;
         }
 
@@ -506,6 +423,8 @@ public class Entry implements IModel {
 
     @XmlTransient
     public Date getModificationTime() {
+        if (modificationTime == null)
+            return creationTime;
         return modificationTime;
     }
 
@@ -585,6 +504,34 @@ public class Entry implements IModel {
         return Objects.hashCode(getId(), getRecordId());
     }
 
+    public Set<Folder> getFolders() {
+        return folders;
+    }
+
+    public Set<EntryFundingSource> getFundingSources() {
+        return entryFundingSources;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPartNumber() {
+        return partNumber;
+    }
+
+    public void setPartNumber(String partNumber) {
+        this.partNumber = partNumber;
+    }
+
+    public Set<Entry> getLinkedEntries() {
+        return linkedEntries;
+    }
+
     @Override
     public boolean equals(final Object obj) {
         if (obj == null)
@@ -598,13 +545,5 @@ public class Entry implements IModel {
         return Objects.equal(this.recordId, other.getRecordId())
                 && Objects.equal(this.recordType, other.getRecordType())
                 && Objects.equal(this.getId(), other.getId());
-    }
-
-    public Set<Folder> getFolders() {
-        return folders;
-    }
-
-    public Set<EntryFundingSource> getFundingSources() {
-        return entryFundingSources;
     }
 }

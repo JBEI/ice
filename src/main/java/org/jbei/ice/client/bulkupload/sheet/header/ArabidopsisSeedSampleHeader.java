@@ -3,10 +3,10 @@ package org.jbei.ice.client.bulkupload.sheet.header;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
-import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.shared.dto.StorageInfo;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
+import org.jbei.ice.client.entry.display.model.SampleStorage;
+import org.jbei.ice.lib.shared.dto.StorageInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 /**
  * @author Hector Plahar
@@ -17,7 +17,7 @@ public class ArabidopsisSeedSampleHeader extends SampleHeaders {
         super(locationList, null);
     }
 
-    public SheetCellData extractValue(EntryField headerType, EntryInfo info) {
+    public SheetCellData extractValue(EntryField headerType, PartData info) {
         SheetCellData data = super.extractCommon(headerType, info);
         if (data != null)
             return data;

@@ -7,7 +7,7 @@ import java.util.Set;
 import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
 
 /**
- * Value object to store Restrection Enzyme Group information for flex apps.
+ * Value object to store Restriction Enzyme Group information for flex apps.
  *
  * @author Zinovii Dmytriv
  */

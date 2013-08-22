@@ -8,13 +8,16 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.group.GroupPresenter;
+import org.jbei.ice.client.admin.part.AdminTransferredPartPresenter;
 import org.jbei.ice.client.admin.setting.SystemSettingPresenter;
 import org.jbei.ice.client.admin.user.UserPresenter;
 import org.jbei.ice.client.admin.web.WebOfRegistriesPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.dto.AccountResults;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -33,6 +36,7 @@ public class AdminPresenter extends AbstractPresenter {
     private GroupPresenter groupPresenter;
     private UserPresenter userPresenter;
     private SystemSettingPresenter systemSettingPresenter;
+    private AdminTransferredPartPresenter partPresenter;
     private WebOfRegistriesPresenter webPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view, String optionStr) {
@@ -70,7 +74,7 @@ public class AdminPresenter extends AbstractPresenter {
             case WEB:
                 if (webPresenter == null)
                     webPresenter = new WebOfRegistriesPresenter(service, eventBus);
-                retrieveWebOfRegistriesSettings();
+                retrieveWebOfRegistryPartners();
                 break;
 
             case GROUPS:
@@ -85,23 +89,25 @@ public class AdminPresenter extends AbstractPresenter {
                 retrieveUsers();
                 break;
 
-//            case TRANSFER:
-//                view.show(currentOption, new TransferEntryPanel());
-//                break;
+            case PARTS:
+                if (partPresenter == null)
+                    partPresenter = new AdminTransferredPartPresenter(service, eventBus);
+                retrievePendingTransfers();
+                break;
         }
     }
 
     // GROUPS
     private void retrieveGroups() {
-        new IceAsyncCallback<ArrayList<GroupInfo>>() {
+        new IceAsyncCallback<ArrayList<UserGroup>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<GroupInfo>> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<ArrayList<UserGroup>> callback) throws AuthenticationException {
                 service.retrieveGroups(ClientController.sessionId, GroupType.PUBLIC, callback);
             }
 
             @Override
-            public void onSuccess(ArrayList<GroupInfo> result) {
+            public void onSuccess(ArrayList<UserGroup> result) {
                 if (result == null || currentOption != AdminOption.GROUPS)
                     return;
 
@@ -131,25 +137,27 @@ public class AdminPresenter extends AbstractPresenter {
         }.go(eventBus);
     }
 
-    private void retrieveWebOfRegistriesSettings() {
-        new IceAsyncCallback<HashMap<String, String>>() {
+    // WEB OF REGISTRIES
+    private void retrieveWebOfRegistryPartners() {
+        new IceAsyncCallback<WebOfRegistries>() {
 
             @Override
-            protected void callService(AsyncCallback<HashMap<String, String>> callback) throws AuthenticationException {
-                service.retrieveWebOfRegistrySettings(ClientController.sessionId, callback);
+            protected void callService(AsyncCallback<WebOfRegistries> callback) throws AuthenticationException {
+                service.retrieveWebOfRegistryPartners(ClientController.sessionId, callback);
             }
 
             @Override
-            public void onSuccess(HashMap<String, String> settings) {
-                if (settings == null || currentOption != AdminOption.WEB)
+            public void onSuccess(WebOfRegistries partners) {
+                if (partners == null || currentOption != AdminOption.WEB)
                     return;
 
-                webPresenter.setData(settings);
+                webPresenter.setData(partners);
                 view.show(currentOption, webPresenter.getView().asWidget());
             }
         }.go(eventBus);
     }
 
+    // USERS
     private void retrieveUsers() {
         new IceAsyncCallback<AccountResults>() {
 
@@ -165,6 +173,26 @@ public class AdminPresenter extends AbstractPresenter {
 
                 userPresenter.setData(result);
                 view.show(currentOption, userPresenter.getView().asWidget());
+            }
+        }.go(eventBus);
+    }
+
+    // PENDING TRANSFERS
+    private void retrievePendingTransfers() {
+        new IceAsyncCallback<ArrayList<PartData>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<PartData>> callback) throws AuthenticationException {
+                service.retrieveTransferredParts(ClientController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<PartData> result) {
+                if (currentOption != AdminOption.PARTS)
+                    return;
+
+                partPresenter.setData(result);
+                view.show(currentOption, partPresenter.getView().asWidget());
             }
         }.go(eventBus);
     }

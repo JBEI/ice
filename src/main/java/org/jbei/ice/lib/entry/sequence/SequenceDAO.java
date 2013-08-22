@@ -1,8 +1,11 @@
 package org.jbei.ice.lib.entry.sequence;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +17,7 @@ import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 
@@ -129,14 +133,22 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     /**
      * Delete the given {@link Sequence} object in the database.
      *
-     * @param sequence sequence to delete
+     * @param sequence          sequence to delete
+     * @param pigeonImageFolder path of the image folder where the pigeon images are cached
      * @throws DAOException
      */
-    public void deleteSequence(Sequence sequence) throws DAOException {
+    public void deleteSequence(Sequence sequence, String pigeonImageFolder) throws DAOException {
+        String sequenceHash = sequence.getFwdHash();
         sequence.setEntry(null);
         sequence.getSequenceFeatures();
         super.delete(sequence);
         currentSession().flush();
+
+        try {
+            Files.deleteIfExists(Paths.get(pigeonImageFolder, sequenceHash + ".png"));
+        } catch (IOException e) {
+            Logger.error(e);
+        }
     }
 
     /**
@@ -192,27 +204,24 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         return sequence;
     }
 
-    public boolean hasSequence(Entry entry) throws DAOException {
+    public boolean hasSequence(long entryId) throws DAOException {
         Session session = currentSession();
         try {
-
             Number itemCount = (Number) session.createCriteria(Sequence.class)
                                                .setProjection(Projections.countDistinct("id"))
-                                               .add(Restrictions.eq("entry", entry)).uniqueResult();
-
+                                               .add(Restrictions.eq("entry.id", entryId)).uniqueResult();
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
+            throw new DAOException("Failed to retrieve sequence by entry: " + entryId, e);
         }
     }
 
-    public boolean hasOriginalSequence(Entry entry) throws DAOException {
+    public boolean hasOriginalSequence(long entryId) throws DAOException {
         Session session = currentSession();
         try {
-
             Number itemCount = (Number) session.createCriteria(Sequence.class)
                                                .setProjection(Projections.countDistinct("id"))
-                                               .add(Restrictions.eq("entry", entry))
+                                               .add(Restrictions.eq("entry.id", entryId))
                                                .add(Restrictions.conjunction().add(
                                                        Restrictions.ne("sequenceUser", "")).add(
                                                        Restrictions.isNotNull("sequenceUser")))
@@ -220,7 +229,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
 
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
+            throw new DAOException("Failed to retrieve sequence by entry: " + entryId, e);
         }
     }
 
@@ -231,11 +240,18 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public List<Sequence> getAllSequences() throws DAOException {
+    public Set<Sequence> getAllSequences() throws DAOException {
         Session session = currentSession();
         try {
-            Criteria criteria = session.createCriteria(Sequence.class).setFirstResult(0);
-            return new LinkedList<Sequence>(criteria.list());
+            Criteria criteria = session.createCriteria(Sequence.class);
+
+            Criteria entryC = criteria.createCriteria("entry", "entry");
+            entryC.add(Restrictions.disjunction()
+                                   .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                                   .add(Restrictions.isNull("visibility"))
+                                   .add(Restrictions.ne("ownerEmail", "system")));
+
+            return new LinkedHashSet<Sequence>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

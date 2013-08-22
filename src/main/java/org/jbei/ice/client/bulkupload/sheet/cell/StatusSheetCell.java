@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
-import org.jbei.ice.shared.StatusType;
+import org.jbei.ice.lib.shared.StatusType;
 
 /**
  * Sheet cell for status column

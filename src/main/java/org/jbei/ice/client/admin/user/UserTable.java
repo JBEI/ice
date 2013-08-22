@@ -1,6 +1,8 @@
 package org.jbei.ice.client.admin.user;
 
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.common.table.cell.UrlCell;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.EditTextCell;
@@ -8,23 +10,21 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
-import com.google.gwt.view.client.SelectionModel;
 
 /**
  * Table for displaying list of users
  *
  * @author Hector Plahar
  */
-public class UserTable extends CellTable<AccountInfo> {
+public class UserTable extends CellTable<User> {
 
     protected interface UserTableResources extends Resources {
 
@@ -35,12 +35,12 @@ public class UserTable extends CellTable<AccountInfo> {
         Style cellTableStyle();
     }
 
-    private SelectionModel<AccountInfo> selectionModel;
+    private UserTableSelectionModel selectionModel;
 
     public UserTable() {
         super(15, UserTableResources.INSTANCE);
         Label empty = new Label();
-        empty.setText("No data available");
+        empty.setText("No users available");
         empty.setStyleName("no_data_style");
         this.setEmptyTableWidget(empty);
         setSelectionModel();
@@ -51,56 +51,54 @@ public class UserTable extends CellTable<AccountInfo> {
      * Adds a selection model so cells can be selected
      */
     private void setSelectionModel() {
-        selectionModel = new MultiSelectionModel<AccountInfo>(new ProvidesKey<AccountInfo>() {
-
-            @Override
-            public String getKey(AccountInfo item) {
-                return item.getEmail();
-            }
-        });
-
-        setSelectionModel(selectionModel, DefaultSelectionEventManager.<AccountInfo>createCheckboxManager());
+        selectionModel = new UserTableSelectionModel();
+        setSelectionModel(selectionModel, DefaultSelectionEventManager.<User>createCheckboxManager());
     }
 
     private void createColumns() {
-        createSelectionColumn();
+//        createSelectionColumn();
         createFirstNameColumn();
         createLastNameColumn();
         createEmailColumn();
+        createAccountTypeColumn();
         createEntryCountColumn();
+        createActionColumn();
+    }
+
+    private void createActionColumn() {
     }
 
     private void createSelectionColumn() {
-        Column<AccountInfo, Boolean> checkColumn = new Column<AccountInfo, Boolean>(
-                new CheckboxCell(true, false)) {
+
+        Column<User, Boolean> checkColumn = new Column<User, Boolean>(new CheckboxCell(true, false)) {
             @Override
-            public Boolean getValue(AccountInfo object) {
+            public Boolean getValue(User object) {
                 return selectionModel.isSelected(object);
             }
         };
-        addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
+        addColumn(checkColumn, new SelectionColumnHeader());
         setColumnWidth(checkColumn, 15, Unit.PX);
     }
 
     private void createFirstNameColumn() {
-        Column<AccountInfo, String> firstNameColumn = new Column<AccountInfo, String>(
+        Column<User, String> firstNameColumn = new Column<User, String>(
                 new EditTextCell()) {
             @Override
-            public String getValue(AccountInfo object) {
+            public String getValue(User object) {
                 return object.getFirstName();
             }
         };
 
         firstNameColumn.setSortable(false);
-        //        sortHandler.setComparator(firstNameColumn, new Comparator<AccountInfo>() {
-        //            public int compare(AccountInfo o1, AccountInfo o2) {
+        //        sortHandler.setComparator(firstNameColumn, new Comparator<User>() {
+        //            public int compare(User o1, User o2) {
         //                return o1.getFirstName().compareTo(o2.getFirstName());
         //            }
         //        });
 
         addColumn(firstNameColumn, "First Name");
-        firstNameColumn.setFieldUpdater(new FieldUpdater<AccountInfo, String>() {
-            public void update(int index, AccountInfo object, String value) {
+        firstNameColumn.setFieldUpdater(new FieldUpdater<User, String>() {
+            public void update(int index, User object, String value) {
                 // Called when the user changes the value.
                 object.setFirstName(value);
                 //                ContactDatabase.get().refreshDisplays();
@@ -112,23 +110,23 @@ public class UserTable extends CellTable<AccountInfo> {
 
     private void createLastNameColumn() {
 
-        Column<AccountInfo, String> lastName = new Column<AccountInfo, String>(new EditTextCell()) {
+        Column<User, String> lastName = new Column<User, String>(new EditTextCell()) {
             @Override
-            public String getValue(AccountInfo object) {
+            public String getValue(User object) {
                 return object.getLastName();
             }
         };
 
         lastName.setSortable(false);
-        //        sortHandler.setComparator(firstNameColumn, new Comparator<AccountInfo>() {
-        //            public int compare(AccountInfo o1, AccountInfo o2) {
+        //        sortHandler.setComparator(firstNameColumn, new Comparator<User>() {
+        //            public int compare(User o1, User o2) {
         //                return o1.getFirstName().compareTo(o2.getFirstName());
         //            }
         //        });
 
         addColumn(lastName, "Last Name");
-        lastName.setFieldUpdater(new FieldUpdater<AccountInfo, String>() {
-            public void update(int index, AccountInfo object, String value) {
+        lastName.setFieldUpdater(new FieldUpdater<User, String>() {
+            public void update(int index, User object, String value) {
                 // Called when the user changes the value.
                 object.setLastName(value);
                 //                ContactDatabase.get().refreshDisplays(); // TODO
@@ -138,22 +136,34 @@ public class UserTable extends CellTable<AccountInfo> {
     }
 
     private void createEmailColumn() {
-        Column<AccountInfo, String> email = new Column<AccountInfo, String>(new TextCell()) {
+        EmailCell cell = new EmailCell();
+        Column<User, User> email = new Column<User, User>(cell) {
 
             @Override
-            public String getValue(AccountInfo object) {
-                return object.getEmail();
+            public User getValue(User object) {
+                return object;
             }
         };
         addColumn(email, "Email");
         setColumnWidth(email, 30, Unit.PT);
     }
 
+    private void createAccountTypeColumn() {
+        Column<User, String> accountType = new Column<User, String>(new TextCell()) {
+            @Override
+            public String getValue(User object) {
+                return object.getAccountType().toString();
+            }
+        };
+        addColumn(accountType, "Account Type");
+        setColumnWidth(accountType, 130, Unit.PX);
+    }
+
     private void createEntryCountColumn() {
-        Column<AccountInfo, String> entryCount = new Column<AccountInfo, String>(new TextCell()) {
+        Column<User, String> entryCount = new Column<User, String>(new TextCell()) {
 
             @Override
-            public String getValue(AccountInfo object) {
+            public String getValue(User object) {
                 return object.getUserEntryCount() + "";
             }
         };
@@ -164,11 +174,52 @@ public class UserTable extends CellTable<AccountInfo> {
     //
     // inner classes
     //
-    private class UserTableFooter extends Composite {
+    protected class EmailCell extends UrlCell<User> {
 
-        public UserTableFooter() {
-            HTMLPanel panel = new HTMLPanel("");
-            initWidget(panel);
+        @Override
+        protected String getCellValue(User object) {
+            return object.getEmail();
+        }
+
+        @Override
+        protected void onClick(User object) {
+            History.newItem(Page.PROFILE.getLink() + ";id=" + object.getId() + ";s=profile");
+        }
+    }
+
+    private class SelectionColumnHeader extends Header<String> {
+
+        public SelectionColumnHeader() {
+            super(new TextCell());
+        }
+
+        @Override
+        public String getValue() {
+            return Integer.toString(selectionModel.getSelectedSet().size());
+        }
+    }
+
+    private class UserTableSelectionModel extends MultiSelectionModel<User> {
+
+        private boolean allSelected;
+
+        public UserTableSelectionModel() {
+
+            super(new ProvidesKey<User>() {
+
+                @Override
+                public String getKey(User item) {
+                    return item.getEmail();
+                }
+            });
+        }
+
+        public boolean isAllSelected() {
+            return allSelected;
+        }
+
+        public void setAllSelected(boolean allSelected) {
+            this.allSelected = allSelected;
         }
     }
 }

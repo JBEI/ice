@@ -4,7 +4,6 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.logging.UsageLogger;
 
 /**
  * Base service for BlazeDS.
@@ -18,7 +17,7 @@ public class BaseService {
     }
 
     protected Account getAccountBySessionId(String sessionId) {
-        Account account = null;
+        Account account;
 
         try {
             account = ControllerFactory.getAccountController().getAccountBySessionKey(sessionId);
@@ -44,6 +43,6 @@ public class BaseService {
     }
 
     protected void logInfo(String message) {
-        UsageLogger.info(getLoggerPrefix() + message);
+        Logger.info(getLoggerPrefix() + message);
     }
 }

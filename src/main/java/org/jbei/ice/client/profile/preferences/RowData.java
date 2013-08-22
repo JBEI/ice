@@ -1,15 +1,20 @@
 package org.jbei.ice.client.profile.preferences;
 
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 /**
+ * Wrapper around entry defaults and search settings
+ *
  * @author Hector Plahar
  */
 public class RowData {
 
     private PreferenceKey key;
+    private SearchBoostField field;
     private int row;
     private String value;
+    private int section; // section in the panel that should be updated
 
     public PreferenceKey getKey() {
         return key;
@@ -33,5 +38,21 @@ public class RowData {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public SearchBoostField getField() {
+        return field;
+    }
+
+    public void setField(SearchBoostField field) {
+        this.field = field;
+    }
+
+    public int getSection() {
+        return section;
+    }
+
+    public void setSection(int section) {
+        this.section = section;
     }
 }

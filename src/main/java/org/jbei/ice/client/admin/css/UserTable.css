@@ -80,7 +80,7 @@
 }
 
 .cellTableOddRow {
-    background-color: #FAFAFA;
+    background-color: #fefefe;
 }
 
 .cellTableEvenRowCell {
@@ -90,7 +90,7 @@
 }
 
 .cellTableHoveredRow {
-    background-color: #b4d0f8;
+    background-color: #efefef;
 }
 
 .cellTableHoveredRowCell {

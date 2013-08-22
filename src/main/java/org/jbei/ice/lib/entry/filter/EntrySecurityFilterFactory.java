@@ -45,7 +45,7 @@ public class EntrySecurityFilterFactory {
         return filter;
     }
 
-    public class SecurityFilter extends Filter {
+    public static class SecurityFilter extends Filter {
         private String accountId;
         private HashSet<String> uuids;
 

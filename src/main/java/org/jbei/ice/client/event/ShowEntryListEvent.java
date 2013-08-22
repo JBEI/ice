@@ -14,7 +14,7 @@ import com.google.gwt.event.shared.GwtEvent;
  */
 public class ShowEntryListEvent extends GwtEvent<ShowEntryListEventHandler> {
 
-    public static Type<ShowEntryListEventHandler> TYPE = new Type<ShowEntryListEventHandler>();
+    public static final Type<ShowEntryListEventHandler> TYPE = new Type<ShowEntryListEventHandler>();
     private final EntryContext context;
 
     public ShowEntryListEvent(EntryContext context) {

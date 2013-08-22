@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.lib.shared.dto.PartSample;
 
 public class SampleLocation {
 
-    private final HashMap<SampleInfo, ArrayList<String>> sampleLocation;
+    private final HashMap<PartSample, ArrayList<String>> sampleLocation;
 
-    public SampleLocation(HashMap<SampleInfo, ArrayList<String>> sampleLocation) {
+    public SampleLocation(HashMap<PartSample, ArrayList<String>> sampleLocation) {
         this.sampleLocation = sampleLocation;
     }
 
-    public ArrayList<SampleInfo> getLocations() {
-        ArrayList<SampleInfo> locations = new ArrayList<SampleInfo>(sampleLocation.keySet());
+    public ArrayList<PartSample> getLocations() {
+        ArrayList<PartSample> locations = new ArrayList<PartSample>(sampleLocation.keySet());
         Collections.sort(locations);
         return locations;
     }
@@ -23,9 +23,9 @@ public class SampleLocation {
     public ArrayList<String> getListForLocation(String locationId) {
         ArrayList<String> list = new ArrayList<String>();
 
-        for (SampleInfo info : sampleLocation.keySet()) {
-            if (locationId.equalsIgnoreCase(info.getLocationId())) {
-                list.addAll(sampleLocation.get(info));
+        for (PartSample part : sampleLocation.keySet()) {
+            if (locationId.equalsIgnoreCase(part.getLocationId())) {
+                list.addAll(sampleLocation.get(part));
                 break;
             }
         }

@@ -12,7 +12,6 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.authentication.IAuthentication;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.authentication.LocalBackend;
@@ -22,11 +21,13 @@ import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.session.PersistentSessionDataWrapper;
+import org.jbei.ice.lib.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountResults;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * ABI to manipulate {@link Account} objects.
@@ -112,48 +113,58 @@ public class AccountController {
     }
 
     /**
-     * Creates a new account using the parameters passed. A random password is initially generated ,
-     * encrypted and
-     * assigned to the account
+     * validates the account dto to ensure that the fields required (especially by the database)
+     * are present
      *
-     * @param firstName   account first name
-     * @param lastName    account last name
-     * @param initials    account initials
-     * @param email       unique identifier for account
-     * @param institution account institution affiliation
-     * @param description account description
+     * @param user account dto for validation
+     * @throws ControllerException if validation fails
+     */
+    private void validateRequiredAccountFields(User user) throws ControllerException {
+        if (user.getFirstName() == null || user.getFirstName().trim().isEmpty())
+            throw new ControllerException("Account first name is required");
+
+        if (user.getLastName() == null || user.getLastName().trim().isEmpty())
+            throw new ControllerException("Account last name is required");
+
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            throw new ControllerException("Cannot create account without user id");
+        }
+    }
+
+    /**
+     * Creates a new account using the parameters passed. A random password is initially generated ,
+     * encrypted and assigned to the account
+     *
+     * @param info      contains information needed to create account
+     * @param sendEmail whether to send account information (including password by email)
      * @return generated password
      * @throws ControllerException in the event email is already assigned to another user or is empty
      */
-    public String createNewAccount(String firstName, String lastName, String initials,
-            String email, String institution, String description) throws ControllerException {
-        if (email == null || email.isEmpty()) {
-            throw new ControllerException("Cannot create account with null email");
-        }
+    public String createNewAccount(User info, boolean sendEmail) throws ControllerException {
+        // validate fields required by the database
+        validateRequiredAccountFields(info);
 
+        String email = info.getEmail().trim();
         if (getByEmail(email) != null) {
-            throw new ControllerException("Account with email \"" + email + "\" already exists");
+            throw new ControllerException("Account with id \"" + email + "\" already exists");
         }
 
-        if (initials == null) {
-            initials = "";
-        }
-        if (institution == null) {
-            institution = "";
-        }
-        if (description == null) {
-            description = "";
-        }
-
+        // generate salt and encrypt password before storing
         String salt = Utils.generateSaltForUserAccount();
         String newPassword = Utils.generateUUID().substring(24);
-        String encryptedPassword = AccountUtils.encryptPassword(newPassword, salt);
-        Account account = new Account(firstName, lastName, initials, email, encryptedPassword,
-                                      institution, description);
-        account.setIp("");
-        account.setIsSubscribed(1);
+        String encryptedPassword;
+        try {
+            encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
+        } catch (UtilityException e) {
+            Logger.error(e);
+            throw new ControllerException(e);
+        }
+
+        Account account = AccountUtils.fromDTO(info);
+        account.setPassword(encryptedPassword);
         account.setSalt(salt);
         account.setCreationTime(Calendar.getInstance().getTime());
+
         try {
             List<Group> autoJoin = ControllerFactory.getGroupController().getAutoJoinGroups();
             if (autoJoin != null && !autoJoin.isEmpty())
@@ -164,6 +175,42 @@ public class AccountController {
         }
 
         save(account);
+
+        if (!sendEmail)
+            return newPassword;
+
+        String subject = "Account created successfully";
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("Dear ").append(info.getEmail()).append(", ")
+                     .append("\n\nThank you for creating a ")
+                     .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
+                     .append(" account. \nBy accessing ")
+                     .append("this site with the password provided at the bottom ")
+                     .append("you agree to the following terms:\n\n");
+
+        String terms = "Biological Parts IP Disclaimer: \n\n"
+                + "The JBEI Registry of Biological Parts Software is licensed under a standard BSD\n"
+                + "license. Permission or license to use the biological parts registered in\n"
+                + "the JBEI Registry of Biological Parts is not included in the BSD license\n"
+                + "to use the JBEI Registry Software. Berkeley Lab and JBEI make no representation\n"
+                + "that the use of the biological parts registered in the JBEI Registry of\n"
+                + "Biological Parts will not infringe any patent or other proprietary right.";
+
+        stringBuilder.append(terms);
+        stringBuilder.append("\n\nYour new password is: ")
+                     .append(newPassword)
+                     .append("\nYour login id is: ")
+                     .append(info.getEmail());
+
+        String server = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+        if (server != null && !server.isEmpty()) {
+            stringBuilder.append("Use it to login at ")
+                         .append(server)
+                         .append(". ");
+        }
+        stringBuilder.append("\nPlease remember to change your password by going to your profile page.\n\n");
+        Emailer.send(info.getEmail(), subject, stringBuilder.toString());
         return newPassword;
     }
 
@@ -193,9 +240,9 @@ public class AccountController {
     }
 
     /**
-     * Retrieve {@link Account} by email.
+     * Retrieve {@link Account} by user id.
      *
-     * @param email of the account
+     * @param email unique identifier for account, typically email
      * @return {@link Account}
      * @throws ControllerException
      */
@@ -269,10 +316,21 @@ public class AccountController {
             throw new ControllerException("Failed to verify password for null Account!");
         }
 
-        Boolean result = false;
+        Boolean result;
 
-        if (account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()))) {
-            result = true;
+        try {
+            result = account.getPassword().equals(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
+
+            // update encryption if needed
+            if (!result) {
+                result = account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()));
+                if (result) {
+                    account.setPassword(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
+                    save(account);
+                }
+            }
+        } catch (UtilityException e) {
+            throw new ControllerException(e);
         }
 
         return result;
@@ -337,7 +395,7 @@ public class AccountController {
             throw new ControllerException(e2);
         } catch (InvalidCredentialsException e) {
             try {
-                Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password bruteforce hacking
+                Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password brute force hacking
             } catch (InterruptedException ie) {
                 throw new ControllerException(ie);
             }
@@ -375,25 +433,24 @@ public class AccountController {
      *
      * @param login
      * @param password
-     * @return {@link AccountInfo}
+     * @return {@link org.jbei.ice.lib.shared.dto.user.User}
      * @throws InvalidCredentialsException
      * @throws ControllerException
      */
-    public AccountInfo authenticate(String login, String password)
-            throws InvalidCredentialsException, ControllerException {
+    public User authenticate(String login, String password) throws InvalidCredentialsException, ControllerException {
         SessionData sessionData = authenticate(login, password, "");
         if (sessionData == null)
             return null;
 
         Account account = sessionData.getAccount();
-        AccountInfo info = AccountUtils.accountToInfo(account);
+        User info = Account.toDTO(account);
         if (info == null)
             return info;
 
         info.setLastLogin(account.getLastLoginTime());
         info.setId(account.getId());
-        boolean isModerator = isAdministrator(account);
-        info.setAdmin(isModerator);
+        boolean isAdmin = isAdministrator(account);
+        info.setAdmin(isAdmin);
         info.setSessionId(sessionData.getSessionKey());
         return info;
     }
@@ -483,31 +540,28 @@ public class AccountController {
         }
     }
 
-    public Set<Account> getMatchingAccounts(String query, int limit) throws ControllerException {
+    public Set<Account> getMatchingAccounts(Account account, String query, int limit) throws ControllerException {
         try {
-            return dao.getMatchingAccounts(query, limit);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public Account getAccountByAuthToken(String sessionKey) throws ControllerException {
-        try {
-            return dao.getAccountByAuthToken(sessionKey);
+            return dao.getMatchingAccounts(account, query, limit);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }
 
     public AccountResults retrieveAccounts(Account account, int start, int limit) throws ControllerException {
+        if (!isAdministrator(account)) {
+            Logger.warn(account.getEmail() + " attempting to retrieve all user accounts without admin privileges");
+            return null;
+        }
+
         try {
             AccountResults results = new AccountResults();
-            EntryController entryController = new EntryController();
+            EntryController entryController = ControllerFactory.getEntryController();
             LinkedList<Account> accounts = dao.retrieveAccounts(start, limit);
 
-            ArrayList<AccountInfo> infos = new ArrayList<>();
+            ArrayList<User> infos = new ArrayList<>();
             for (Account userAccount : accounts) {
-                AccountInfo info = new AccountInfo();
+                User info = new User();
                 long count;
                 try {
                     count = entryController.getNumberOfOwnerEntries(userAccount, userAccount.getEmail());
@@ -522,11 +576,12 @@ public class AccountController {
                 info.setFirstName(userAccount.getFirstName());
                 info.setLastName(userAccount.getLastName());
                 info.setLastLogin(userAccount.getLastLoginTime());
-                info.setId(account.getId());
+                info.setId(userAccount.getId());
+                info.setAccountType(userAccount.getType());
                 infos.add(info);
             }
             results.getResults().addAll(infos);
-            int count = dao.retrieveAllAccountCount();
+            int count = dao.retrieveAllNonSystemAccountCount();
             results.setResultCount(count);
             return results;
 
@@ -553,6 +608,7 @@ public class AccountController {
         systemAccount.setCreationTime(currentTime);
         systemAccount.setModificationTime(currentTime);
         systemAccount.setLastLoginTime(currentTime);
+        systemAccount.setType(AccountType.SYSTEM);
         save(systemAccount);
     }
 

@@ -42,8 +42,8 @@ public class SeqXmlSerializer {
     private static final String FEATURE = "feature";
     private static final String FEATURES = "features";
     private static final String COMPLEMENT = "complement";
-    public static Namespace seqNamespace = new Namespace("seq", "http://jbei.org/sequence");
-    public static Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    public static final Namespace seqNamespace = new Namespace("seq", "http://jbei.org/sequence");
+    public static final Namespace xsiNamespace = new Namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
     /**
      * Generate seq xml {@link Element} from the give {@link Sequence}.
@@ -64,7 +64,7 @@ public class SeqXmlSerializer {
                          "http://jbei.org/sequence seq.xsd");
         Entry entry = sequence.getEntry();
 
-        seq.add(new DefaultElement(NAME, seqNamespace).addText(entry.getNamesAsString()));
+        seq.add(new DefaultElement(NAME, seqNamespace).addText(entry.getName()));
 
         Boolean circular = false;
         if (entry.getRecordType().equals("plasmid")) {

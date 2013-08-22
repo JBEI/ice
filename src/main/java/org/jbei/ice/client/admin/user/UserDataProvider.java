@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.Window;
@@ -19,26 +19,25 @@ import com.google.gwt.view.client.Range;
 /**
  * @author Hector Plahar
  */
-public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
+public class UserDataProvider extends AsyncDataProvider<User> {
 
     protected int resultSize;
-    protected LinkedList<AccountInfo> cachedEntries;
+    protected LinkedList<User> cachedEntries;
     protected final RegistryServiceAsync service;
     protected final UserTable table;
     protected ColumnField lastSortField;
     protected boolean lastSortAsc = false;
-    private AccountResults accountResults;
 
     public UserDataProvider(UserTable view, RegistryServiceAsync service) {
         this.table = view;
         this.service = service;
-        cachedEntries = new LinkedList<AccountInfo>();
+        cachedEntries = new LinkedList<User>();
 
         // connect sorting to async handler
         ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(table);
         table.addColumnSortHandler(columnSortHandler);
 
-//        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
+//        DataTable<PartData>.DataTableColumn<?> defaultSortField = this.table.getColumn(ColumnField.CREATED);
 //
 //        if (defaultSortField != null) {
 //            ColumnSortList.ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
@@ -49,7 +48,7 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
     }
 
     @Override
-    protected void onRangeChanged(HasData<AccountInfo> display) {
+    protected void onRangeChanged(HasData<User> display) {
         if (resultSize == 0)   // display changed its range of interest but no data
             return;
 
@@ -83,7 +82,6 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
 
                                                 @Override
                                                 public void onSuccess(AccountResults result) {
-                                                    accountResults = result;
                                                     if (result == null) {
                                                         return;
                                                     }
@@ -106,7 +104,6 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
             lastSortField = null;
 
         reset();
-        this.accountResults = results;
         if (results == null) {
             updateRowCount(0, true);
             return;
@@ -129,7 +126,6 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
 
     public void reset() {
         this.cachedEntries.clear();
-        accountResults = null;
         this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
 
 //        // reset sort
@@ -138,7 +134,7 @@ public class UserDataProvider extends AsyncDataProvider<AccountInfo> {
 //            lastSortField = ColumnField.CREATED;
 //
 //            this.table.getColumnSortList().clear();
-//            DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table.getColumn(lastSortField);
+//            DataTable<PartData>.DataTableColumn<?> defaultSortField = this.table.getColumn(lastSortField);
 //
 //            if (defaultSortField != null) {
 //                ColumnSortList.ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);

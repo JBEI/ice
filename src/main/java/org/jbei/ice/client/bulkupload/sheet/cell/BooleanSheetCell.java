@@ -46,7 +46,7 @@ public class BooleanSheetCell extends MultiSuggestSheetCell {
                 && !"True".equalsIgnoreCase(value)
                 && !"False".equalsIgnoreCase(value)
                 && !"No".equalsIgnoreCase(value))) {
-            return null;
+            return Boolean.FALSE;
         }
 
         return "Yes".equalsIgnoreCase(value) || "True".equalsIgnoreCase(value);

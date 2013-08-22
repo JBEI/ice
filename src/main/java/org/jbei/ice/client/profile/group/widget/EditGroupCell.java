@@ -1,7 +1,7 @@
 package org.jbei.ice.client.profile.group.widget;
 
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.dto.group.GroupInfo;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -20,14 +20,14 @@ public class EditGroupCell extends Composite {
     private final HTML submit;
     private final HTML cancel;
     private final CreateGroupCell cell;
-    private final GroupInfo info;
+    private final UserGroup user;
 
-    public EditGroupCell(GroupInfo info) {
+    public EditGroupCell(UserGroup user) {
         cell = new CreateGroupCell();
 
-        this.info = info;
-        cell.setGroupName(info.getLabel());
-        cell.setGroupDescription(info.getDescription());
+        this.user = user;
+        cell.setGroupName(user.getLabel());
+        cell.setGroupDescription(user.getDescription());
 
         FlexTable panel = new FlexTable();
         panel.setWidth("100%");
@@ -73,9 +73,9 @@ public class EditGroupCell extends Composite {
         });
     }
 
-    public GroupInfo getGroup() {
-        info.setLabel(cell.getGroupName());
-        info.setDescription(cell.getGroupDescription());
-        return info;
+    public UserGroup getGroup() {
+        user.setLabel(cell.getGroupName());
+        user.setDescription(cell.getGroupDescription());
+        return user;
     }
 }

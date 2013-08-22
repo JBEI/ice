@@ -5,12 +5,9 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntryTablePager;
-import org.jbei.ice.client.common.table.column.DataTableColumn;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 
-import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.Range;
@@ -22,13 +19,14 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
 
     private FolderDetails details;
     private final EntryTablePager pager;
+    private String userId;
 
     public FolderEntryDataProvider(CollectionDataTable view, RegistryServiceAsync service) {
         super(view, service);
         pager = view.getPager();
     }
 
-    private void retrieveAllVisibleEntrys(ColumnField field, boolean asc, final int start, final int factor,
+    private void retrieveAllVisibleParts(ColumnField field, boolean asc, final int start, final int factor,
             final boolean reset) {
         service.retrieveAllVisibleEntrys(
                 ClientController.sessionId, details, field, asc, start, factor,
@@ -43,13 +41,6 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                     public void onSuccess(FolderDetails result) {
                         details = result;
                         if (result == null) {
-                            resetLoading();
-                            return;
-                        }
-
-                        if (resultSize == (start + factor)) {
-                            // we are showing the last page so do not cache at all
-                            updateRowData(start, result.getEntries());
                             resetLoading();
                             return;
                         }
@@ -72,21 +63,17 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
 
     private void retrieveUserEntrys(ColumnField field, boolean asc, final int start, final int factor,
             final boolean reset) {
+        if (userId == null)
+            userId = Long.toString(ClientController.account.getId());
+
         service.retrieveUserEntries(
-                ClientController.sessionId, ClientController.account.getId() + "", field, asc, start, factor,
+                ClientController.sessionId, userId, field, asc, start, factor,
                 new AsyncCallback<FolderDetails>() {
 
                     @Override
                     public void onSuccess(FolderDetails result) {
                         details = result;
                         if (result == null) {
-                            resetLoading();
-                            return;
-                        }
-
-                        if (resultSize == (start + factor)) {
-                            // we are showing the last page so do not cache at all
-                            updateRowData(start, result.getEntries());
                             resetLoading();
                             return;
                         }
@@ -120,13 +107,6 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                             return;
                         }
 
-                        if (resultSize == (start + factor)) {
-                            // we are showing the last page so do not cache at all
-                            updateRowData(start, result.getEntries());
-                            resetLoading();
-                            return;
-                        }
-
                         if (reset)
                             setFolderData(details, false);
                         else
@@ -145,20 +125,18 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
     protected void fetchEntryData(ColumnField field, boolean asc, final int start, final int factor,
             final boolean reset) {   // if reset setFolderData() is called instead of adding to cache
 
-        if (!reset && (cachedEntries.size() == resultSize || cachedEntries.size() >= (start + factor))) {
+        if (!reset && cachedEntries.size() >= (start + factor)) {
             updateRowData(start, cachedEntries.subList(start, (start + factor)));
             return;
         }
 
-        boolean loadingEnabled = false;
         if (!reset && resultSize != (start + factor)) {
             pager.setLoading();
-            loadingEnabled = true;
         }
 
         switch ((int) details.getId()) {
             case -1:
-                retrieveAllVisibleEntrys(field, asc, start, factor, reset);
+                retrieveAllVisibleParts(field, asc, start, factor, reset);
                 break;
             case 0:
                 retrieveUserEntrys(field, asc, start, factor, reset);
@@ -166,30 +144,11 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
             default:
                 retrieveEntriesForFolder(field, asc, start, factor, reset);
         }
-
-        if (loadingEnabled) {
-
-        }
     }
 
     public void reset() {
-        this.cachedEntries.clear();
+        super.reset();
         details = null;
-        this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
-
-        // reset sort
-        if (lastSortField == null) {
-            lastSortAsc = false;
-            lastSortField = ColumnField.CREATED;
-
-            this.table.getColumnSortList().clear();
-            DataTableColumn<EntryInfo, ?> defaultSortField = this.table.getColumn(lastSortField);
-
-            if (defaultSortField != null) {
-                ColumnSortList.ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
-                this.table.getColumnSortList().push(info);
-            }
-        }
     }
 
     public void setFolderData(FolderDetails details, boolean resetSort) {
@@ -222,8 +181,12 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
             rangeEnd += range.getLength();
             if (rangeEnd > resultSize)
                 rangeEnd = resultSize;
-            cacheMore(lastSortField, lastSortAsc, rangeStart, rangeEnd);
+            cacheMore(lastSortField, lastSortAsc, rangeStart, 2 * rangeEnd);
         }
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
 

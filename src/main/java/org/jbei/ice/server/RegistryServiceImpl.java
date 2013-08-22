@@ -3,27 +3,25 @@ package org.jbei.ice.server;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 import org.jbei.ice.client.RegistryService;
-import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -45,48 +43,58 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.news.News;
 import org.jbei.ice.lib.news.NewsController;
-import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.search.SearchController;
-import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.AccountResults;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.NewsItem;
+import org.jbei.ice.lib.shared.dto.PartSample;
+import org.jbei.ice.lib.shared.dto.StorageInfo;
+import org.jbei.ice.lib.shared.dto.autocomplete.AutoCompleteSuggestion;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.shared.dto.comment.UserComment;
+import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
+import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
+import org.jbei.ice.lib.shared.dto.message.MessageList;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.permission.PermissionSuggestion;
+import org.jbei.ice.lib.shared.dto.search.IndexType;
+import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
+import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.search.SearchResults;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
+import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
+import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
+import org.jbei.ice.lib.utils.IceXlsSerializer;
+import org.jbei.ice.lib.utils.IceXmlSerializer;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
-import org.jbei.ice.services.webservices.ServiceException;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AccountResults;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.ConfigurationKey;
-import org.jbei.ice.shared.dto.MessageInfo;
-import org.jbei.ice.shared.dto.NewsItem;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
-import org.jbei.ice.shared.dto.autocomplete.AutoCompleteSuggestion;
-import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.folder.FolderDetails;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
-import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
-import org.jbei.ice.shared.dto.search.SearchQuery;
-import org.jbei.ice.shared.dto.search.SearchResults;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import org.apache.commons.io.FileUtils;
 
+// TODO : use command pattern to split this up
 public class RegistryServiceImpl extends RemoteServiceServlet implements RegistryService {
 
     private static final long serialVersionUID = 1L;
@@ -98,6 +106,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             value = controller.getPropertyValue(name);
         } catch (ControllerException e) {
+            Logger.error(e);
         }
         return value;
     }
@@ -117,7 +126,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean setPreferenceSetting(String sid, PreferenceKey key, String value) throws AuthenticationException {
+    public boolean setPreferenceSetting(String sid, String key, String value) throws AuthenticationException {
         PreferencesController controller = ControllerFactory.getPreferencesController();
         Account account = retrieveAccountForSid(sid);
         try {
@@ -140,6 +149,27 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public ArrayList<AccessPermission> retrieveDefaultPermissions(String sid) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            return ControllerFactory.getPermissionController().getDefaultPermissions(account);
+        } catch (ControllerException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public HashMap<String, String> retrieveUserSearchPreferences(String sid) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            List<SearchBoostField> searchBoostFields = Arrays.asList(SearchBoostField.values());
+            return ControllerFactory.getPreferencesController().retrieveUserPreferenceList(account, searchBoostFields);
+        } catch (ControllerException e) {
+            return null;
+        }
+    }
+
+    @Override
     public BulkUploadAutoUpdate autoUpdateBulkUpload(String sid, BulkUploadAutoUpdate wrapper, EntryAddType addType)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
@@ -156,7 +186,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public Long updateBulkUploadPreference(String sid, long bulkUploadId, EntryAddType addType, PreferenceInfo info)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        Logger.info(account.getEmail() + ": Preference " + info.toString() + " for bulk upload " + bulkUploadId);
+        Logger.info(account.getEmail() + ": preference " + info.toString() + " for bulk upload " + bulkUploadId);
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         try {
             return controller.updatePreference(account, bulkUploadId, addType, info);
@@ -167,116 +197,76 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public Long updateBulkUploadPermissions(String sid, long id, EntryAddType type,
-            ArrayList<PermissionInfo> permissions) throws AuthenticationException {
+            ArrayList<AccessPermission> accessPermissions) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": updating permissions for bulk upload " + id);
         try {
-            return ControllerFactory.getBulkUploadController().updatePermissions(account, id, type, permissions);
+            return ControllerFactory.getBulkUploadController().updatePermissions(account, id, type, accessPermissions);
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites) {
-        Account account;
+    public void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
         try {
-            account = retrieveAccountForSid(sid);
-            if (!ControllerFactory.getAccountController().isAdministrator(account))
-                return;
-
-            Logger.info("Requesting transfer of " + ids.size() + " entries");
-        } catch (AuthenticationException | ControllerException e) {
+            ControllerFactory.getEntryController().transferEntries(account, ids, sites);
+        } catch (ControllerException e) {
             Logger.error(e);
-            return;
-        }
-
-        // retrieve entries
-        EntryController entryController = ControllerFactory.getEntryController();
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
-
-        HashMap<Entry, String> entrySeq = new HashMap<>();
-        for (long id : ids) {
-            try {
-                Entry entry = entryController.get(account, id);
-                Sequence sequence = sequenceController.getByEntry(entry);
-                String sequenceString = null;
-                if (sequence != null) {
-                    sequenceString = sequence.getSequenceUser();
-                    if (sequenceString == null || sequenceString.isEmpty())
-                        sequenceString = sequence.getSequence();
-                }
-                entrySeq.put(entry, sequenceString);
-            } catch (ControllerException | PermissionException e) {
-                Logger.warn(e.getMessage());
-                continue;
-            }
-        }
-
-        for (String url : sites) {
-            IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
-            if (api == null) {
-                Logger.error("Could not retrieve api for " + url + ". Transfer aborted");
-                continue;
-            }
-
-            try {
-                api.transmitEntries(entrySeq);
-            } catch (ServiceException e) {
-                Logger.error(e);
-            }
         }
     }
 
     @Override
-    public GroupInfo createNewGroup(String sessionId, GroupInfo info) throws AuthenticationException {
+    public UserGroup createNewGroup(String sessionId, UserGroup user) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
-            return ControllerFactory.getGroupController().createGroup(account, info);
+            return ControllerFactory.getGroupController().createGroup(account, user);
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public GroupInfo updateGroup(String sessionId, GroupInfo info) throws AuthenticationException {
+    public UserGroup updateGroup(String sessionId, UserGroup user) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        Logger.info(account.getEmail() + ": updating group " + info.getId());
-        if (info.getType() == null)
-            info.setType(GroupType.PRIVATE);
+        Logger.info(account.getEmail() + ": updating group " + user.getId());
+        if (user.getType() == null)
+            user.setType(GroupType.PRIVATE);
 
         try {
-            return ControllerFactory.getGroupController().updateGroup(account, info);
+            return ControllerFactory.getGroupController().updateGroup(account, user);
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public GroupInfo deleteGroup(String sessionId, GroupInfo info) throws AuthenticationException {
+    public UserGroup deleteGroup(String sessionId, UserGroup user) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        Logger.info(account.getEmail() + ": deleting group " + info.getId());
+        Logger.info(account.getEmail() + ": deleting group " + user.getId());
         GroupController controller = ControllerFactory.getGroupController();
-        if (info.getType() == null)
-            info.setType(GroupType.PRIVATE);
+        if (user.getType() == null)
+            user.setType(GroupType.PRIVATE);
 
         try {
-            return controller.deleteGroup(account, info);
+            return controller.deleteGroup(account, user);
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public boolean removeAccountFromGroup(String sessionId, GroupInfo info, AccountInfo accountInfo)
+    public boolean removeAccountFromGroup(String sessionId, UserGroup info, User user)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        Logger.info(account.getEmail() + ": removing \"" + accountInfo.getEmail() + "\" from group " + info.getId());
+        Logger.info(account.getEmail() + ": removing \"" + user.getEmail() + "\" from group " + info.getId());
         if (info.getType() == null)
             info.setType(GroupType.PRIVATE);
 
         try {
-            ControllerFactory.getAccountController().removeMemberFromGroup(info.getId(), accountInfo.getEmail());
+            ControllerFactory.getAccountController().removeMemberFromGroup(info.getId(), user.getEmail());
             return true;
         } catch (ControllerException ce) {
             return false;
@@ -284,10 +274,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo login(String name, String pass) {
+    public User login(String name, String pass) {
         try {
             AccountController controller = ControllerFactory.getAccountController();
-            AccountInfo info = controller.authenticate(name, pass);
+            User info = controller.authenticate(name, pass);
             if (info == null) {
                 return null;
             }
@@ -303,8 +293,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             info.setUserEntryCount(ownerEntryCount);
 
             // get new message count
-            MessageController messageController = new MessageController();
-            int count = messageController.getNewMessageCount(account, account.getEmail());
+            MessageController messageController = ControllerFactory.getMessageController();
+            int count = messageController.getNewMessageCount(account);
             info.setNewMessageCount(count);
             return info;
         } catch (ControllerException e) {
@@ -317,20 +307,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public AccountResults retrieveAllUserAccounts(String sid, int start, int limit) throws AuthenticationException {
-        AccountController controller = ControllerFactory.getAccountController();
-
         try {
             Account account = retrieveAccountForSid(sid);
-            boolean isModerator = controller.isAdministrator(account);
-            if (!isModerator) {
-                Logger.warn(account.getEmail()
-                                    + " attempting to retrieve all user accounts without moderation privileges");
-                return null;
-            }
-
-            Logger.info(account.getEmail() + ": retrieving all user accounts [" + start + " - " + start + limit + "]");
-            return controller.retrieveAccounts(account, start, limit);
-
+            Logger.info(account.getEmail() + ": retrieving all accounts [" + start + " - " + limit + "]");
+            return ControllerFactory.getAccountController().retrieveAccounts(account, start, limit);
         } catch (ControllerException e) {
             Logger.error(e);
         }
@@ -368,46 +348,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo createNewAccount(AccountInfo info, String url) {
-
+    public String createNewAccount(User info, boolean sendEmail) {
         try {
-            AccountController controller = ControllerFactory.getAccountController();
-            String newPassword = controller.createNewAccount(info.getFirstName(),
-                                                             info.getLastName(), info.getInitials(), info.getEmail(),
-                                                             info.getInstitution(),
-                                                             info.getDescription());
-
-            if (url != null && !url.isEmpty()) {
-                // send email
-                String subject = "Account created successfully";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                stringBuilder
-                        .append("Dear " + info.getEmail() + ", ")
-                        .append("\n\nThank you for creating a "
-                                        + Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
-                        .append(" account. \nBy accessing ")
-                        .append("this site with the password provided at the bottom ")
-                        .append("you agree to the following terms:\n\n");
-
-                String terms = "Biological Parts IP Disclaimer: \n\n"
-                        + "The JBEI Registry of Biological Parts Software is licensed under a standard BSD\n"
-                        + "license. Permission or license to use the biological parts registered in\n"
-                        + "the JBEI Registry of Biological Parts is not included in the BSD license\n"
-                        + "to use the JBEI Registry Software. Berkeley Lab and JBEI make no representation\n"
-                        + "that the use of the biological parts registered in the JBEI Registry of\n"
-                        + "Biological Parts will not infringe any patent or other proprietary right.";
-
-                stringBuilder.append(terms);
-
-                stringBuilder.append("\n\nYour new password is: ").append(newPassword)
-                             .append("\nPlease go to the following link and change your password:\n\n")
-                             .append(url);
-
-                Emailer.send(info.getEmail(), subject, stringBuilder.toString());
-            }
-
-            return info;
+            return ControllerFactory.getAccountController().createNewAccount(info, sendEmail);
         } catch (ControllerException e) {
             Logger.error("Error creating new account", e);
             return null;
@@ -415,7 +358,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo retrieveAccount(String email) {
+    public User retrieveAccount(String email) {
         Account account = null;
         AccountController controller = ControllerFactory.getAccountController();
 
@@ -429,7 +372,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo updateAccount(String sid, String email, AccountInfo info) throws AuthenticationException {
+    public User updateAccount(String sid, String email, User info) throws AuthenticationException {
         AccountController controller = ControllerFactory.getAccountController();
         try {
             Account account = retrieveAccountForSid(sid);
@@ -459,14 +402,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo sessionValid(String sid) {
+    public User sessionValid(String sid) {
         AccountController controller = ControllerFactory.getAccountController();
         EntryController entryController = ControllerFactory.getEntryController();
 
         try {
             if (AccountController.isAuthenticated(sid)) {
                 Account account = controller.getAccountBySessionKey(sid);
-                AccountInfo info = Account.toDTO(account);
+                User info = Account.toDTO(account);
                 long entryCount = entryController.getNumberOfOwnerEntries(account, account.getEmail());
                 info.setUserEntryCount(entryCount);
 
@@ -476,8 +419,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 info.setVisibleEntryCount(visibleEntryCount);
 
                 // get new message count
-                MessageController messageController = new MessageController();
-                int count = messageController.getNewMessageCount(account, account.getEmail());
+                MessageController messageController = ControllerFactory.getMessageController();
+                int count = messageController.getNewMessageCount(account);
                 info.setNewMessageCount(count);
 
                 return info;
@@ -513,6 +456,28 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public boolean promoteCollection(String sessionId, long id) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        Logger.info(account.getEmail() + ": promoting collection with id " + id);
+        try {
+            return ControllerFactory.getFolderController().promoteFolder(account, id);
+        } catch (ControllerException ce) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean demoteCollection(String sessionId, long id) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        Logger.info(account.getEmail() + ": demoting collection with id " + id);
+        try {
+            return ControllerFactory.getFolderController().demoteFolder(account, id);
+        } catch (ControllerException ce) {
+            return false;
+        }
+    }
+
+    @Override
     public FolderDetails retrieveEntriesForFolder(String sessionId, long folderId, ColumnField sort, boolean asc,
             int start, int limit) throws AuthenticationException {
         try {
@@ -520,7 +485,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": retrieving entries for folder " + folderId + " from " + start
                                 + " with size " + limit);
             FolderController folderController = ControllerFactory.getFolderController();
-            return folderController.retrieveFolderContents(folderId, sort, asc, start, limit);
+            return folderController.retrieveFolderContents(account, folderId, sort, asc, start, limit);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -532,29 +497,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Account account = this.retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": deleting folder " + folderId);
-            FolderController folderController = ControllerFactory.getFolderController();
-            Folder folder = folderController.getFolderById(folderId);
-            if (folder == null)
-                return null;
-
-            AccountController controller = ControllerFactory.getAccountController();
-            Account system = controller.getSystemAccount();
-            boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
-            if (isSystem) {
-                Logger.info("Cannot delete system folder");
-                return null;
-            }
-
-            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
-            long folderSize = folderController.getFolderSize(folderId);
-            details.setCount(folderSize);
-            details.setDescription(folder.getDescription());
-            folderController.delete(account, folder);
-            return details;
+            return ControllerFactory.getFolderController().delete(account, folderId);
         } catch (ControllerException e) {
             Logger.error(e);
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
         }
         return null;
     }
@@ -565,7 +510,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Account account = this.retrieveAccountForSid(sid);
             EntryController entryController = ControllerFactory.getEntryController();
-            FolderDetails details = new FolderDetails(0, "My Entries", true);
+            FolderDetails details = new FolderDetails(0, "My Entries");
+            details.setType(FolderType.SHARED);
             AccountController controller = ControllerFactory.getAccountController();
             Account user = controller.get(Long.decode(userId));
             Logger.info(account.getEmail() + ": retrieving user entries for " + user.getEmail());
@@ -574,7 +520,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             long count = entryController.getNumberOfOwnerEntries(account, user.getEmail());
             details.setCount(count);
             for (Entry entry : entries) {
-                EntryInfo info = ModelToInfoFactory.createTableViewData(entry, false);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, false);
                 details.getEntries().add(info);
             }
             return details;
@@ -605,7 +551,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<AccountInfo> retrieveAvailableAccounts(String sessionId) throws AuthenticationException {
+    public ArrayList<User> retrieveAvailableAccounts(String sessionId) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
         Logger.info(account.getEmail() + ": retrieving available accounts for group creation");
         GroupController controller = ControllerFactory.getGroupController();
@@ -664,8 +610,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         } catch (ControllerException | DAOException e) {
             Logger.error(e);
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
         }
 
         return null;
@@ -680,7 +624,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entry == null)
                 return null;
 
-            SequenceAnalysisController controller = new SequenceAnalysisController();
+            SequenceAnalysisController controller = ControllerFactory.getSequenceAnalysisController();
             for (String id : fileId) {
                 TraceSequence sequence = controller.getTraceSequenceByFileId(id);
                 if (sequence == null) {
@@ -702,73 +646,90 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public EntryInfo retrieveEntryDetails(String sid, long id, String recordId, String url)
-            throws AuthenticationException {
+    public PartData retrieveEntryDetails(String sid, long id, String url) throws AuthenticationException {
+        EntryController controller = ControllerFactory.getEntryController();
         Account account = retrieveAccountForSid(sid);
 
         try {
-            Entry entry;
-            if (recordId == null || recordId.isEmpty()) {
-                entry = ControllerFactory.getEntryController().get(account, id);
-                return ControllerFactory.getEntryController().retrieveEntryDetails(account, entry);
-            }
-
-            if (url != null) {
+            if (url != null && !url.isEmpty()) {
+                Logger.info(account.getEmail() + ": retrieving entry details for " + id + " from " + url);
                 IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
-                entry = api.getPublicEntryByRecordId(recordId);
-                boolean hasSequence = api.hasSequence(entry.getRecordId());
-                boolean hasOriginalSequence = api.hasOriginalSequence(entry.getRecordId());
-                return ModelToInfoFactory.getInfo(null, entry, null, null, null, hasSequence, hasOriginalSequence);
+                if (api == null)
+                    return null;
+                return controller.retrieveEntryDetailsFromURL(id, api);
             }
 
-            entry = ControllerFactory.getEntryController().getByRecordId(account, recordId);
-            return ControllerFactory.getEntryController().retrieveEntryDetails(account, entry);
-        } catch (ControllerException | ServiceException ce) {
+            Logger.info(account.getEmail() + ": retrieving entry details for " + id);
+            return controller.retrieveEntryDetails(account, id);
+        } catch (ControllerException ce) {
             Logger.error(ce);
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
+            return null;
         }
-        return null;
     }
 
     @Override
-    public EntryInfo retrieveEntryTipDetails(String sid, String recordId, String url) throws AuthenticationException {
-        Account account = null;
-        if (url == null) {
-            try {
-                account = retrieveAccountForSid(sid);
-                Entry entry;
-                try {
-                    entry = ControllerFactory.getEntryController().getByRecordId(account, recordId);
-                } catch (PermissionException e) {
-                    Logger.warn(account.getEmail() + ": No read permission for " + recordId);
-                    return null;
-                }
-
-                Logger.info(account.getEmail() + ": retrieving entry tip details for " + entry.getId());
-                return ModelToInfoFactory.createTipView(account, entry);
-            } catch (ControllerException e) {
-                Logger.error(e);
-                return null;
-            }
-        }
-
-        IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
+    public boolean enablePublicReadAccess(String sid, long entryId) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
         try {
-            Entry entry = api.getPublicEntryByRecordId(recordId);
-            return ModelToInfoFactory.createTipView(account, entry);
-        } catch (ServiceException e) {
+            return ControllerFactory.getPermissionController().enablePublicReadAccess(account, entryId);
+        } catch (ControllerException e) {
             Logger.error(e);
+            return false;
         }
-        return null;
+    }
+
+    @Override
+    public boolean disablePublicReadAccess(String sid, long entryId) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            return ControllerFactory.getPermissionController().disablePublicReadAccess(account, entryId);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean enableOrDisableFolderPublicAccess(String sid, long folderId, boolean isEnable)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            PermissionsController controller = ControllerFactory.getPermissionController();
+            return controller.enableOrDisableFolderPublicAccess(account, folderId, isEnable);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public PartData retrieveEntryTipDetails(String sid, long entryId, String url) throws AuthenticationException {
+        EntryController controller = ControllerFactory.getEntryController();
+        Account account = retrieveAccountForSid(sid);
+
+        try {
+            if (url != null && !url.isEmpty()) {
+                Logger.info(account.getEmail() + ": retrieving entry tip details for " + entryId + " from " + url);
+                IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
+                if (api == null)
+                    return null;
+
+                return controller.retrieveEntryTipDetailsFromURL(entryId, api);
+            }
+
+            Logger.info(account.getEmail() + ": retrieving entry tip details for " + entryId);
+            return controller.retrieveEntryTipDetails(account, entryId);
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return null;
+        }
     }
 
     @Override
     public SearchResults performSearch(String sid, SearchQuery query, boolean isWeb) throws AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sid);
-            SearchController search = new SearchController();
-            SearchResults searchResults = search.runSearch(account, query, isWeb);
+            SearchResults searchResults = ControllerFactory.getSearchController().runSearch(account, query, isWeb);
             if (searchResults == null)
                 return null;
             searchResults.setQuery(query);
@@ -780,30 +741,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails createUserCollection(String sid, String name, String description,
-            ArrayList<Long> contents) throws AuthenticationException {
+    public FolderDetails createUserCollection(String sid, String name, String description, ArrayList<Long> contents)
+            throws AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sid);
-            EntryController entryController = ControllerFactory.getEntryController();
-            FolderController folderController = ControllerFactory.getFolderController();
             Logger.info(account.getEmail() + ": creating new folder with name " + name);
-
-            Folder folder = folderController.createNewFolder(account.getEmail(), name, description);
-
-            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
-            details.setDescription(folder.getDescription());
-
-            if (contents != null && !contents.isEmpty()) {
-
-                ArrayList<Entry> entrys = new ArrayList<>(entryController.getEntriesByIdSet(account, contents));
-                folderController.addFolderContents(folder.getId(), entrys);
-//                details.setAccountInfo(contents);
-                details.setCount(contents.size());
-            } else {
-                details.setCount(0l);
-            }
-
-            return details;
+            return ControllerFactory.getFolderController().createNewFolder(account, name, description, contents);
         } catch (ControllerException e) {
             Logger.error(e.getMessage());
             return null;
@@ -832,21 +775,23 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         for (long folderId : destination) {
             try {
-                Folder folder = folderController.addFolderContents(folderId, entrys);
-                FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
+                Folder folder = folderController.addFolderContents(account, folderId, entrys);
+                FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
                 long folderSize = folderController.getFolderSize(folder.getId());
                 details.setCount(folderSize + entryIds.size());
                 details.setDescription(folder.getDescription());
+                details.setType(folder.getType());
                 results.add(details);
             } catch (ControllerException ce) {
-                continue;
+                return null;
             }
         }
 
         try {
             Folder sourceFolder = folderController.getFolderById(source);
             long folderSize = folderController.getFolderSize(source);
-            FolderDetails sourceDetails = new FolderDetails(sourceFolder.getId(), sourceFolder.getName(), false);
+            FolderDetails sourceDetails = new FolderDetails(sourceFolder.getId(), sourceFolder.getName());
+            sourceDetails.setType(sourceFolder.getType());
             sourceDetails.setCount(folderSize - entryIds.size());
             results.add(sourceDetails);
             return results;
@@ -867,7 +812,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (folder == null)
                 return null;
 
-            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+            details.setType(folder.getType());
             long folderSize = folderController.getFolderSize(source);
             details.setCount(folderSize - entryIds.size());
             details.setDescription(folder.getDescription());
@@ -892,8 +838,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<Entry> entrys = new ArrayList<>(entryController.getEntriesByIdSet(account, entryIds));
             for (long folderId : destination) {
                 long size = folderController.getFolderSize(folderId);
-                Folder folder = folderController.addFolderContents(folderId, entrys);
-                FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
+                Folder folder = folderController.addFolderContents(account, folderId, entrys);
+                FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+                details.setType(folder.getType());
                 details.setCount(size + entryIds.size());
                 details.setDescription(folder.getDescription());
                 results.add(details);
@@ -906,22 +853,27 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo retrieveProfileInfo(String sid, String userId) throws AuthenticationException {
+    public User retrieveProfileInfo(String sid, String userId) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
             AccountController controller = ControllerFactory.getAccountController();
             EntryController entryController = ControllerFactory.getEntryController();
-            account = controller.get(Long.decode(userId));
+            try {
+                account = controller.get(Long.decode(userId));
+            } catch (NumberFormatException nfe) {
+                return null;
+            }
+
             if (account == null)
                 return null;
 
-            AccountInfo accountInfo = Account.toDTO(account);
+            User user = Account.toDTO(account);
             long visibleEntryCount = entryController.getNumberOfVisibleEntries(account);
-            accountInfo.setVisibleEntryCount(visibleEntryCount);
+            user.setVisibleEntryCount(visibleEntryCount);
             long entryCount = entryController.getNumberOfOwnerEntries(account, account.getEmail());
-            accountInfo.setUserEntryCount(entryCount);
-            return accountInfo;
+            user.setUserEntryCount(entryCount);
+            return user;
         } catch (ControllerException e) {
             return null;
         }
@@ -931,18 +883,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public boolean removeSequence(String sid, long entryId) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            Entry entry = null;
+            Entry entry;
             EntryController entryController = ControllerFactory.getEntryController();
 
-            try {
-                entry = entryController.get(account, entryId);
-                if (entry == null) {
-                    Logger.info("Could not retrieve entry with id " + entryId);
-                    return false;
-                }
-            } catch (PermissionException e) {
-                Logger.warn(account.getEmail() + " attempting to retrieve entry " + entryId
-                                    + " but does not have permissions");
+            entry = entryController.get(account, entryId);
+            if (entry == null) {
+                Logger.info("Could not retrieve entry with id " + entryId);
+                return false;
             }
 
             SequenceController sequenceController = ControllerFactory.getSequenceController();
@@ -970,10 +917,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<BulkUploadInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            BulkUploadController controller = ControllerFactory.getBulkUploadController();
             Logger.info(account.getEmail() + ": retrieve user saved drafts");
-            ArrayList<BulkUploadInfo> result = controller.retrieveByUser(account, account);
-            return result;
+            return ControllerFactory.getBulkUploadController().retrieveByUser(account, account);
         } catch (Exception ce) {
             return null;
         }
@@ -989,10 +934,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
             }
 
-            BulkUploadController controller = ControllerFactory.getBulkUploadController();
             Logger.info(account.getEmail() + ": retrieving drafts pending verification");
-            ArrayList<BulkUploadInfo> result = controller.retrievePendingImports(account);
-            return result;
+            return ControllerFactory.getBulkUploadController().retrievePendingImports(account);
         } catch (Exception ce) {
             return null;
         }
@@ -1024,8 +967,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account account = retrieveAccountForSid(sid);
             BulkUploadController draftController = ControllerFactory.getBulkUploadController();
             Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draftId);
-            BulkUploadInfo result = draftController.deleteDraftById(account, draftId);
-            return result;
+            return draftController.deleteDraftById(account, draftId);
         } catch (Exception ce) {
             return null;
         }
@@ -1038,8 +980,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             Logger.info(account.getEmail() + ": retrieving bulk import with id \"" + id + "\"");
-            BulkUploadInfo result = controller.retrieveById(account, id, start, limit);
-            return result;
+            return controller.retrieveById(account, id, start, limit);
         } catch (Exception e) {
             return null;
         }
@@ -1071,32 +1012,43 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (!controller.isAdministrator(account))
                 return null;
 
-            Logger.info(account.getEmail() + " retrieving system settings");
-            ConfigurationController configurationController = new ConfigurationController();
-            HashMap<String, String> settings = configurationController.retrieveSystemSettings();
-            return settings;
+            Logger.info(account.getEmail() + ": retrieving system settings");
+            return ControllerFactory.getConfigurationController().retrieveSystemSettings();
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public HashMap<String, String> retrieveWebOfRegistrySettings(String sid) throws AuthenticationException {
+    public WebOfRegistries retrieveWebOfRegistryPartners(String sid) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            AccountController controller = ControllerFactory.getAccountController();
-            if (!controller.isAdministrator(account))
+            if (!ControllerFactory.getAccountController().isAdministrator(account))
                 return null;
 
-            Logger.info(account.getEmail() + " retrieving web of registry system settings");
-            ConfigurationController configurationController = new ConfigurationController();
-            HashMap<String, String> settings = new HashMap<>();
+            return ControllerFactory.getWebController().getRegistryPartners();
+        } catch (ControllerException e) {
+            return null;
+        }
+    }
 
-            String v = configurationController.getPropertyValue(ConfigurationKey.WEB_PARTNERS);
-            settings.put(ConfigurationKey.WEB_PARTNERS.name(), v);
-            v = configurationController.getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-            settings.put(ConfigurationKey.JOIN_WEB_OF_REGISTRIES.name(), v);
-            return settings;
+    @Override
+    public ArrayList<RegistryPartner> setEnableWebOfRegistries(String sessionId, boolean value)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        if (account.getType() != AccountType.ADMIN)
+            return null;
+
+        String uri = getThreadLocalRequest().getRequestURL().substring(
+                getThreadLocalRequest().getScheme().length() + 3);
+        uri = uri.substring(0, uri.indexOf("/"));
+
+        if (value)
+            Logger.info(account.getEmail() + ": adding " + uri + " to web of registries");
+        else
+            Logger.info(account.getEmail() + ": dropping " + uri + " from web of registries");
+        try {
+            return ControllerFactory.getWebController().setEnable(uri, value);
         } catch (ControllerException e) {
             return null;
         }
@@ -1104,24 +1056,28 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean isWebOfRegistriesEnabled() {
-        ConfigurationController configurationController = new ConfigurationController();
-        try {
-            String value = configurationController.getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-            return value.equalsIgnoreCase("yes");
-        } catch (ControllerException e) {
-            return false;
-        }
+        return ControllerFactory.getWebController().isWebEnabled();
     }
 
     @Override
-    public ArrayList<MessageInfo> retrieveMessages(String sessionId, int start, int count)
-            throws AuthenticationException {
+    public MessageList retrieveMessages(String sessionId, int start, int count) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        MessageController controller = new MessageController();
+        MessageController controller = ControllerFactory.getMessageController();
         try {
             return controller.retrieveMessages(account, account, start, count);
         } catch (ControllerException e) {
             return null;
+        }
+    }
+
+    @Override
+    public int markMessageRead(String sessionId, long id) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        MessageController controller = ControllerFactory.getMessageController();
+        try {
+            return controller.markMessageAsRead(account, id);
+        } catch (ControllerException ce) {
+            return -1;
         }
     }
 
@@ -1138,46 +1094,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<PermissionInfo> retrieveFolderPermissions(String sessionId, ArrayList<Long> userFolderIds)
-            throws AuthenticationException {
-        Account account = retrieveAccountForSid(sessionId);
-        FolderController folderController = ControllerFactory.getFolderController();
-        PermissionsController permissionsController = ControllerFactory.getPermissionController();
-        ArrayList<PermissionInfo> results = new ArrayList<>();
-
-        for (Long id : userFolderIds) {
-            if (id == null)
-                continue;
-
-            try {
-                Folder folder = folderController.getFolderById(id.longValue());
-                ArrayList<PermissionInfo> infos = permissionsController.retrieveSetFolderPermission(account, folder);
-                results.addAll(infos);
-            } catch (ControllerException e) {
-                Logger.error(e);
-                continue;
-            }
-        }
-
-        return results;
-    }
-
-    @Override
-    public boolean addWebPartner(String sessionId, String webPartner) {
+    public boolean addWebPartner(String sessionId, String partnerUrl, String partnerName) {
         try {
             Account account = retrieveAccountForSid(sessionId);
             AccountController accountController = ControllerFactory.getAccountController();
             if (!accountController.isAdministrator(account))
                 return false;
 
-            Logger.info(account.getEmail() + ": adding web partner " + webPartner);
-            ConfigurationController configurationController = ControllerFactory.getConfigurationController();
-            String value = configurationController.getPropertyValue(ConfigurationKey.WEB_PARTNERS);
-            if (value == null || value.isEmpty())
-                value = webPartner;
-            else
-                value += (";" + webPartner);
-            configurationController.setPropertyValue(ConfigurationKey.WEB_PARTNERS, value);
+            Logger.info(account.getEmail() + ": adding web partner " + partnerName + "(" + partnerUrl + ")");
+            ControllerFactory.getWebController().addWebPartner(partnerUrl, partnerName);
             return true;
         } catch (ControllerException | AuthenticationException e) {
             return false;
@@ -1185,21 +1110,20 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<AccountInfo> retrieveGroupMembers(String sessionId, GroupInfo info)
+    public ArrayList<User> retrieveGroupMembers(String sessionId, UserGroup user)
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + " retrieving members for group " + info.getLabel());
+            Logger.info(account.getEmail() + " retrieving members for group " + user.getLabel());
             GroupController controller = ControllerFactory.getGroupController();
-            ArrayList<AccountInfo> result = controller.retrieveGroupMembers(info.getUuid());
-            return result;
+            return controller.retrieveGroupMembers(user.getUuid());
         } catch (ControllerException e) {
             return null;
         }
     }
 
     @Override
-    public ArrayList<GroupInfo> retrieveUserGroups(String sessionId) throws AuthenticationException {
+    public ArrayList<UserGroup> retrieveUserGroups(String sessionId) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": retrieving user groups");
@@ -1210,13 +1134,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<AccountInfo> setGroupMembers(String sessionId, GroupInfo info, ArrayList<AccountInfo> members)
+    public ArrayList<User> setGroupMembers(String sessionId, UserGroup user, ArrayList<User> members)
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + ": adding " + members.size() + " members to group " + info.getId());
+            Logger.info(account.getEmail() + ": adding " + members.size() + " members to group " + user.getId());
             GroupController groupController = ControllerFactory.getGroupController();
-            return groupController.setGroupMembers(account, info, members);
+            return groupController.setGroupMembers(account, user, members);
         } catch (ControllerException ce) {
             return null;
         }
@@ -1245,7 +1169,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public Long createEntry(String sid, EntryInfo info) throws AuthenticationException {
+    public Long createEntry(String sid, PartData info) throws AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": creating new entry");
@@ -1258,17 +1182,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (info.getInfo() != null) {
                 Entry enclosed = InfoToModelFactory.infoToEntry(info.getInfo());
-                controller.createStrainWithPlasmid(account, entry, enclosed, info.getPermissions());
+                controller.createStrainWithPlasmid(account, entry, enclosed, info.getAccessPermissions());
             } else
-                entry = controller.createEntry(account, entry, info.getPermissions());
+                entry = controller.createEntry(account, entry, info.getAccessPermissions());
 
             if (sampleMap != null) {
                 for (SampleStorage sampleStorage : sampleMap) {
-                    SampleInfo sampleInfo = sampleStorage.getSample();
+                    PartSample partSample = sampleStorage.getPartSample();
                     LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
 
-                    Sample sample = sampleController.createSample(sampleInfo.getLabel(),
-                                                                  account.getEmail(), sampleInfo.getNotes());
+                    Sample sample = sampleController.createSample(partSample.getLabel(),
+                                                                  account.getEmail(), partSample.getNotes());
                     sample.setEntry(entry);
 
                     if (locations == null || locations.isEmpty()) {
@@ -1297,7 +1221,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         Logger.info("Creating sample with locations " + sb.toString());
                         Storage storage;
                         try {
-                            Storage scheme = storageController.get(Long.parseLong(sampleInfo.getLocationId()), false);
+                            Storage scheme = storageController.get(Long.parseLong(partSample.getLocationId()), false);
                             storage = storageController.getLocation(scheme, labels);
                             storage = storageController.update(storage);
                             sample.setStorage(storage);
@@ -1322,7 +1246,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             // save attachments
             if (info.getAttachments() != null) {
                 AttachmentController attachmentController = ControllerFactory.getAttachmentController();
-                String attDir = Utils.getConfigValue(ConfigurationKey.ATTACHMENTS_DIRECTORY);
+                String attDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY) + File.separator
+                        + AttachmentController.attachmentDirName;
                 for (AttachmentInfo attachmentInfo : info.getAttachments()) {
                     Attachment attachment = new Attachment();
                     attachment.setEntry(entry);
@@ -1336,7 +1261,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         attachmentController.save(account, attachment, inputStream);
                     } catch (FileNotFoundException e) {
                         Logger.warn(e.getMessage());
-                        continue;
                     }
                 }
             }
@@ -1348,12 +1272,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean deleteSample(String sessionId, SampleInfo info) throws AuthenticationException {
+    public boolean deleteSample(String sessionId, PartSample part) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        Logger.info(account.getEmail() + ": deleting sample " + info.getSampleId());
+        Logger.info(account.getEmail() + ": deleting sample " + part.getSampleId());
         SampleController sampleController = ControllerFactory.getSampleController();
         try {
-            long id = Long.decode(info.getSampleId());
+            long id = Long.decode(part.getSampleId());
             Sample sample = sampleController.getSampleById(id);
             sampleController.deleteSample(account, sample);
             return true;
@@ -1386,15 +1310,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
-        } catch (PermissionException e) {
-            Logger.warn(e.getMessage());
-            return null;
         }
 
-        SampleInfo sampleInfo = sampleStorage.getSample();
+        PartSample partSample = sampleStorage.getPartSample();
         LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
 
-        Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(), sampleInfo.getNotes());
+        Sample sample = sampleController.createSample(partSample.getLabel(), account.getEmail(), partSample.getNotes());
         sample.setEntry(entry);
 
         if (locations == null || locations.isEmpty()) {
@@ -1403,8 +1324,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             // create sample, but not location
             try {
                 sample = sampleController.saveSample(account, sample);
-                sampleStorage.getSample().setSampleId(sample.getId() + "");
-                sampleStorage.getSample().setDepositor(account.getEmail());
+                sampleStorage.getPartSample().setSampleId(sample.getId() + "");
+                sampleStorage.getPartSample().setDepositor(account.getEmail());
                 return sampleStorage;
             } catch (ControllerException e) {
                 Logger.error(e);
@@ -1426,7 +1347,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         Logger.info("Creating sample with locations " + sb.toString());
         try {
-            Storage scheme = storageController.get(Long.parseLong(sampleInfo.getLocationId()), false);
+            Storage scheme = storageController.get(Long.parseLong(partSample.getLocationId()), false);
             Storage storage = storageController.getLocation(scheme, labels);
             storage = storageController.update(storage);
             sample.setStorage(storage);
@@ -1444,8 +1365,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
             }
 
-            sampleStorage.getSample().setSampleId(sample.getId() + "");
-            sampleStorage.getSample().setDepositor(account.getEmail());
+            sampleStorage.getPartSample().setSampleId(sample.getId() + "");
+            sampleStorage.getPartSample().setDepositor(account.getEmail());
             return sampleStorage;
         } catch (NumberFormatException | ControllerException e) {
             Logger.error(e);
@@ -1457,30 +1378,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean updateEntry(String sid, EntryInfo info) throws AuthenticationException {
+    public Long updateEntry(String sid, PartData info) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-
             Logger.info(account.getEmail() + ": updating entry " + info.getId());
-            EntryController controller = ControllerFactory.getEntryController();
-            Entry existing = controller.getByRecordId(account, info.getRecordId());
-
-            Entry entry = InfoToModelFactory.infoToEntry(info, existing);
-            controller.update(account, entry, info.getPermissions());
-            return true;
+            return ControllerFactory.getEntryController().updatePart(account, info);
         } catch (ControllerException e) {
             Logger.error(e);
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
+            return null;
         }
-        return false;
     }
 
     @Override
-    public HashMap<SampleInfo, ArrayList<String>> retrieveStorageSchemes(String sessionId,
+    public HashMap<PartSample, ArrayList<String>> retrieveStorageSchemes(String sessionId,
             EntryType type) throws AuthenticationException {
         retrieveAccountForSid(sessionId);
-        HashMap<SampleInfo, ArrayList<String>> schemeMap = new HashMap<>();
+        HashMap<PartSample, ArrayList<String>> schemeMap = new HashMap<>();
         StorageController storageController = ControllerFactory.getStorageController();
         List<Storage> schemes;
         try {
@@ -1491,9 +1404,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         for (Storage scheme : schemes) {
-            SampleInfo sampleInfo = new SampleInfo();
-            sampleInfo.setLocation(scheme.getName());
-            sampleInfo.setLocationId(String.valueOf(scheme.getId()));
+            PartSample partSample = new PartSample();
+            partSample.setLocation(scheme.getName());
+            partSample.setLocationId(String.valueOf(scheme.getId()));
 
             ArrayList<String> schemeOptions = new ArrayList<>();
             try {
@@ -1509,40 +1422,48 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 continue;
             }
 
-            sampleInfo.setLabel(scheme.getName());
-            schemeMap.put(sampleInfo, schemeOptions);
+            partSample.setLabel(scheme.getName());
+            schemeMap.put(partSample, schemeOptions);
         }
 
         return schemeMap;
     }
 
     @Override
-    public SuggestOracle.Response getPermissionSuggestions(Request req) {
+    public SuggestOracle.Response getPermissionSuggestions(String sid, Request req) throws AuthenticationException {
         SuggestOracle.Response resp = new SuggestOracle.Response();
         List<Suggestion> suggestions = new ArrayList<>(req.getLimit());
+        Account account = retrieveAccountForSid(sid);
 
         try {
-            // TODO : split tokens if there are spaces. this is for a manager
-            AccountController controller = ControllerFactory.getAccountController();
-            Set<Account> accounts = controller.getMatchingAccounts(req.getQuery(), req.getLimit());
-            for (Account account : accounts) {
-                PermissionInfo info = new PermissionInfo();
-                info.setDisplay(account.getFullName());
-                info.setArticle(PermissionInfo.Article.ACCOUNT);
-                info.setArticleId(account.getId());
-                PermissionSuggestion object = new PermissionSuggestion(info);
-                suggestions.add(object);
-            }
             GroupController groupController = ControllerFactory.getGroupController();
-            Set<Group> groups = groupController.getMatchingGroups(req.getQuery(), req.getLimit());
+            Set<Group> groups = groupController.getMatchingGroups(account, req.getQuery(), req.getLimit());
             for (Group group : groups) {
-                PermissionInfo info = new PermissionInfo();
-                info.setDisplay(group.getLabel());
-                info.setArticle(PermissionInfo.Article.GROUP);
-                info.setArticleId(group.getId());
-                PermissionSuggestion object = new PermissionSuggestion(info);
+                AccessPermission access = new AccessPermission();
+                access.setDisplay(group.getLabel());
+                access.setArticle(AccessPermission.Article.GROUP);
+                access.setArticleId(group.getId());
+                PermissionSuggestion object = new PermissionSuggestion(access);
                 suggestions.add(object);
             }
+
+            int balance = req.getLimit() - suggestions.size();
+            if (balance == 0) {
+                resp.setSuggestions(suggestions);
+                return resp;
+            }
+
+            AccountController controller = ControllerFactory.getAccountController();
+            Set<Account> accounts = controller.getMatchingAccounts(account, req.getQuery(), balance);
+            for (Account matching : accounts) {
+                AccessPermission access = new AccessPermission();
+                access.setDisplay(matching.getFullName());
+                access.setArticle(AccessPermission.Article.ACCOUNT);
+                access.setArticleId(matching.getId());
+                PermissionSuggestion object = new PermissionSuggestion(access);
+                suggestions.add(object);
+            }
+
         } catch (ControllerException e) {
             Logger.error(e);
         }
@@ -1584,9 +1505,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return item;
         } catch (ControllerException e) {
             Logger.error(e);
+            return null;
         }
-
-        return null;
     }
 
     @Override
@@ -1612,12 +1532,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean addPermission(String sessionId, PermissionInfo permissionInfo) throws AuthenticationException {
+    public boolean addPermission(String sessionId, AccessPermission accessPermission) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + ": adding permissions " + permissionInfo.toString());
+            Logger.info(account.getEmail() + ": adding permissions " + accessPermission.toString());
             PermissionsController permissionController = ControllerFactory.getPermissionController();
-            permissionController.addPermission(account, permissionInfo);
+            permissionController.addPermission(account, accessPermission);
             return true;
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1626,12 +1546,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean removePermission(String sessionId, PermissionInfo permissionInfo) throws AuthenticationException {
+    public boolean removePermission(String sessionId, AccessPermission accessPermission)
+            throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + ": removing permissions " + permissionInfo.toString());
+            Logger.info(account.getEmail() + ": removing permissions " + accessPermission.toString());
             PermissionsController permissionController = ControllerFactory.getPermissionController();
-            permissionController.removePermission(account, permissionInfo);
+            permissionController.removePermission(account, accessPermission);
             return true;
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1640,61 +1561,53 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean saveSequence(String sessionId, long entryId, String sequenceUser) throws AuthenticationException {
+    public PartData saveSequence(String sessionId, PartData part, String sequenceUser, boolean isFile)
+            throws AuthenticationException {
         Account account;
         Entry entry;
         try {
             account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + ": saving sequence for entry " + entryId);
             EntryController entryController = ControllerFactory.getEntryController();
-            entry = entryController.get(account, entryId);
+            entry = entryController.get(account, part.getId());
             if (entry == null) {
-                Logger.error("Could not retrieve entry with id " + entryId);
-                return false;
+                entry = EntryUtil.createEntryFromType(part.getType(), account.getFullName(), account.getEmail());
+                entry.setVisibility(Visibility.DRAFT.getValue());
+                entry = entryController.createEntry(account, entry, null);
             }
         } catch (ControllerException e) {
             Logger.error(e);
-            return false;
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
-            return false;
+            return null;
+        }
+
+        Logger.info(account.getEmail() + ": saving sequence for entry " + entry.getId());
+        if (isFile) {
+            String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+            File file = Paths.get(tmpDir, sequenceUser).toFile();
+            if (!file.exists())
+                return null;
+
+            try {
+                sequenceUser = FileUtils.readFileToString(file);
+            } catch (IOException e) {
+                Logger.error(e);
+                return null;
+            }
         }
 
         SequenceController sequenceController = ControllerFactory.getSequenceController();
-        IDNASequence dnaSequence = SequenceController.parse(sequenceUser);
-
-        if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
-            String errorMsg = "Couldn't parse sequence file! Supported formats: "
-                    + GeneralParser.getInstance().availableParsersToString() + ". "
-                    + "If you believe this is an error, please contact the administrator with your file";
-
-            Logger.error(errorMsg);
-            return false;
-        }
-
         try {
-            Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-            sequence.setSequenceUser(sequenceUser);
-            sequence.setEntry(entry);
-            return sequenceController.save(account, sequence) != null;
+            sequenceController.parseAndSaveSequence(account, entry, sequenceUser);
+            part.setId(entry.getId());
+            part.setRecordId(entry.getRecordId());
+            return part;
         } catch (ControllerException e) {
             Logger.error(e);
-        } catch (PermissionException e) {
-            Logger.warn(e.getMessage());
+            return null;
         }
-        return false;
     }
 
     @Override
-    public boolean sendFeedback(String email, String message) {
-        Emailer.send(email, Utils.getConfigValue(ConfigurationKey.PROJECT_NAME),
-                     "Thank you for sending your feedback.\n\nBest regards,\nRegistry Team");
-        Emailer.send(Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL), "Registry site feedback", message);
-        return true;
-    }
-
-    @Override
-    public ArrayList<GroupInfo> retrieveGroups(String sid, GroupType type) throws AuthenticationException {
+    public ArrayList<UserGroup> retrieveGroups(String sid, GroupType type) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": retrieving " + type.toString() + " groups");
         GroupController controller = ControllerFactory.getGroupController();
@@ -1724,37 +1637,34 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<FolderDetails> deleteEntry(String sessionId, EntryInfo info)
+    public ArrayList<FolderDetails> deleteEntry(String sessionId, PartData info)
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": deleting entry " + info.getId());
             EntryController controller = ControllerFactory.getEntryController();
-            AccountController accountController = ControllerFactory.getAccountController();
             FolderController folderController = ControllerFactory.getFolderController();
 
             Entry entry = controller.get(account, info.getId());
             if (entry == null)
                 return null;
 
-            controller.delete(account, entry);
+            controller.delete(account, entry.getId());
 
             ArrayList<FolderDetails> folderList = new ArrayList<>();
             List<Folder> folders = folderController.getFoldersByEntry(entry);
-            String systemEmail = accountController.getSystemAccount().getEmail();
             ArrayList<Long> entryIds = new ArrayList<>();
             entryIds.add(entry.getId());
             if (folders != null) {
                 for (Folder folder : folders) {
                     try {
                         Folder returned = folderController.removeFolderContents(account, folder.getId(), entryIds);
-                        boolean isSystem = systemEmail.equals(returned.getOwnerEmail());
-                        FolderDetails details = new FolderDetails(returned.getId(), returned.getName(), isSystem);
+                        FolderDetails details = new FolderDetails(returned.getId(), returned.getName());
                         long size = folderController.getFolderSize(folder.getId());
                         details.setCount(size);
                         folderList.add(details);
                     } catch (ControllerException me) {
-                        continue;
+                        Logger.error(me);
                     }
                 }
             }
@@ -1767,5 +1677,140 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.warn(e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public Boolean sendMessage(String sid, MessageInfo info) throws AuthenticationException {
+        try {
+            Account account = retrieveAccountForSid(sid);
+            Logger.info(account.getEmail() + ": sending message");
+            ControllerFactory.getMessageController().sendMessage(account, info);
+            return true;
+        } catch (ControllerException ce) {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean rebuildSearchIndex(String sid, IndexType type) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        return ControllerFactory.getSearchController().rebuildIndexes(account, type);
+    }
+
+    @Override
+    public UserComment sendComment(String sid, UserComment comment) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        Logger.info(account.getEmail() + ": adding comment to entry " + comment.getEntryId());
+        try {
+            return ControllerFactory.getEntryController().addCommentToEntry(account, comment);
+        } catch (ControllerException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean requestSample(String sid, long entryID, String details) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        Logger.info(account.getEmail() + ": requesting sample for entry " + entryID + " with options " + details);
+        return ControllerFactory.getEntryController().requestSample(account, entryID, details);
+    }
+
+    @Override
+    public UserComment alertToEntryProblem(String sid, long entryID, String details) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        Logger.info(account.getEmail() + ": sending alert for entry " + entryID + " with details " + details);
+        return ControllerFactory.getEntryController().sendProblemNotification(account, entryID, details);
+    }
+
+    @Override
+    public ArrayList<PartData> retrieveTransferredParts(String sessionId) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        try {
+            return ControllerFactory.getEntryController().getTransferredParts(account);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean processTransferredParts(String sid, ArrayList<Long> partIds, boolean accept)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        if (partIds == null || partIds.isEmpty())
+            return false;
+
+        try {
+            return ControllerFactory.getEntryController().processTransferredParts(account, partIds, accept);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean setPropagatePermissionForFolder(String sid, long folderId, boolean prop)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            return ControllerFactory.getFolderController().setPropagatePermissionForFolder(account, folderId, prop);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public String exportParts(String sid, ArrayList<Long> partIds, String export) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        EntryController entryController = ControllerFactory.getEntryController();
+        Set<String> typeSet = new HashSet<>();
+        LinkedList<Entry> entries = new LinkedList<>();
+
+        try {
+            for (long id : partIds) {
+                Entry entry = entryController.get(account, id);
+                if (entry == null)
+                    continue;
+
+                typeSet.add(entry.getRecordType().toUpperCase());
+                entries.add(entry);
+            }
+
+            String tempDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+            String fileName = UUID.randomUUID().toString();
+            String data;
+
+            // actual export
+            switch (export.toLowerCase()) {
+                case "xml":
+                    fileName = fileName + ".xml";
+                    data = IceXmlSerializer.serializeToJbeiXml(account, entries);
+                    break;
+                case "excel":
+                default:
+                    fileName = fileName + ".csv";
+                    data = IceXlsSerializer.serialize(entries, new TreeSet<>(typeSet));
+                    break;
+            }
+            File file = Files.createFile(Paths.get(tempDir, fileName)).toFile();
+            FileUtils.writeStringToFile(file, data);
+            return fileName;
+        } catch (ControllerException | IOException | UtilityException ce) {
+            Logger.error(ce);
+            return null;
+        }
+    }
+
+    @Override
+    public RegistryPartner setRegistryPartnerStatus(String sid, RegistryPartner partner)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        RemotePartnerStatus status = RemotePartnerStatus.valueOf(partner.getStatus());
+        try {
+            return ControllerFactory.getWebController().setPartnerStatus(account, partner.getUrl(), status);
+        } catch (ControllerException e) {
+            return null;
+        }
     }
 }

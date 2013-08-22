@@ -6,14 +6,16 @@ import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellColumnHeader;
 import org.jbei.ice.client.bulkupload.sheet.cell.AutoCompleteSheetCell;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
-import org.jbei.ice.shared.dto.entry.StrainInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 /**
+ * Headers for strain bulk upload in addition to the common part headers.
+ *
  * @author Hector Plahar
  */
 public class StrainHeaders extends PartHeader {
@@ -31,12 +33,12 @@ public class StrainHeaders extends PartHeader {
     }
 
     @Override
-    public SheetCellData extractValue(EntryField header, EntryInfo info) {
+    public SheetCellData extractValue(EntryField header, PartData info) {
         SheetCellData data = extractCommon(header, info);
         if (data != null)
             return data;
 
-        StrainInfo strain = (StrainInfo) info;
+        StrainData strain = (StrainData) info;
         String value = null;
         switch (header) {
             case PARENTAL_STRAIN:
@@ -48,7 +50,12 @@ public class StrainHeaders extends PartHeader {
                 break;
 
             case PLASMIDS:
-                value = strain.getPlasmids();
+                value = "";
+                for (int i = 0; i < strain.getLinkedParts().size(); i += 1) {
+                    if (i > 0)
+                        value += ", ";
+                    value += strain.getLinkedParts().get(i).getPartId();
+                }
                 break;
         }
 

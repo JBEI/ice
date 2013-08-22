@@ -43,18 +43,6 @@ public class ImageUtil {
         return new Image(Resources.INSTANCE.sample());
     }
 
-    public static Image getAttachment() {
-        return new Image(Resources.INSTANCE.attachment());
-    }
-
-    public static Image getSequenceIcon() {
-        return new Image(Resources.INSTANCE.sequence());
-    }
-
-    public static Image getBlankIcon() {
-        return new Image(Resources.INSTANCE.blank());
-    }
-
     public static Image getBusyIcon() {
         return new Image(Resources.INSTANCE.busyIndicatorImage());
     }
@@ -65,9 +53,5 @@ public class ImageUtil {
 
     public static Image getHideSideImage() {
         return new Image(Resources.INSTANCE.hideSideImage());
-    }
-
-    public static Image getFileUpload() {
-        return new Image(Resources.INSTANCE.fileUpload());
     }
 }

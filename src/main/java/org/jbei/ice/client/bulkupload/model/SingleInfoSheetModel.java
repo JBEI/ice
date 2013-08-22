@@ -2,13 +2,13 @@ package org.jbei.ice.client.bulkupload.model;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.shared.BioSafetyOption;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.client.entry.display.model.SampleStorage;
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.shared.dto.PartSample;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
 /**
  * Extracts common elements of entries from sheet
@@ -16,11 +16,11 @@ import org.jbei.ice.shared.dto.entry.SequenceAnalysisInfo;
  * @param <T>
  * @author Hector Plahar
  */
-public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetModel<T> {
+public abstract class SingleInfoSheetModel<T extends PartData> extends SheetModel<T> {
 
     public abstract T setField(T info, SheetCellData datum);
 
-    public T setInfoField(SheetCellData datum, EntryInfo info) {
+    public T setInfoField(SheetCellData datum, PartData info) {
 
         if (info == null)
             info = createInfo();
@@ -64,7 +64,6 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
 
             case NOTES:
                 info.setLongDescription(value);
-                info.setLongDescriptionType("text");
                 break;
 
             case REFERENCES:
@@ -145,10 +144,10 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
                     break;
 
                 SampleStorage sampleStorage = info.getOneSampleStorage();
-                if (sampleStorage.getSample() == null)
-                    sampleStorage.setSample(new SampleInfo());
+                if (sampleStorage.getPartSample() == null)
+                    sampleStorage.setPartSample(new PartSample());
 
-                sampleStorage.getSample().setLabel(value);
+                sampleStorage.getPartSample().setLabel(value);
                 break;
         }
 
