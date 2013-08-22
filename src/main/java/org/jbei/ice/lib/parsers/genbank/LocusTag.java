@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.parsers.genbank;
 
-import java.util.Date;
-
 /**
  * @author Hector Plahar
  */
@@ -9,7 +7,6 @@ class LocusTag extends Tag {
 
     private String locusName = "";
     private boolean isCircular = true;
-    private Date date;
 
     public LocusTag() {
         super(Type.LOCUS);
@@ -29,9 +26,5 @@ class LocusTag extends Tag {
 
     public void setCircular(boolean isCircular) {
         this.isCircular = isCircular;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 }

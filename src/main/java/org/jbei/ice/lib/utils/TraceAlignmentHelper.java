@@ -8,8 +8,8 @@ import org.jbei.ice.lib.models.TraceSequenceAlignment;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqException;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqParser;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
-import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
+import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.vo.TraceData;
 
@@ -123,9 +123,8 @@ public class TraceAlignmentHelper {
             querySequence += querySequence;
         }
 
-        Blast blast = new Blast();
         try {
-            bl2seqOutput = blast.runBl2Seq(querySequence, traceSequence);
+            bl2seqOutput = BlastPlus.runBlast2Seq(querySequence, traceSequence);
         } catch (BlastException e) {
 
         } catch (ProgramTookTooLongException e) {

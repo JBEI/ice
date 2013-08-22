@@ -11,14 +11,15 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
-import org.jbei.ice.client.entry.view.EntryPresenter;
-import org.jbei.ice.client.entry.view.view.AttachmentItem;
+import org.jbei.ice.client.entry.display.EntryPresenter;
+import org.jbei.ice.client.entry.display.view.AttachmentItem;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.shared.dto.entry.EntryInfo;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -42,8 +43,9 @@ public class EntryAddPresenter {
     private final EntryPresenter entryPresenter;
     private EntryAddType currentType;
     public HashMap<PreferenceKey, String> preferences;
+    private ArrayList<AccessPermission> accessPermissions;
 
-    public EntryAddPresenter(CollectionsPresenter presenter, EntryPresenter entryPresenter,
+    public EntryAddPresenter(CollectionsPresenter presenter, final EntryPresenter entryPresenter,
             RegistryServiceAsync service, HandlerManager eventBus) {
         this.service = service;
         this.eventBus = eventBus;
@@ -70,6 +72,25 @@ public class EntryAddPresenter {
 
                 IEntryFormSubmit formSubmit = formsCache.get(currentType);
                 formSubmit.setPreferences(result);
+            }
+        }.go(eventBus);
+
+        // retrieve default permissions
+        new IceAsyncCallback<ArrayList<AccessPermission>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<AccessPermission>> callback)
+                    throws AuthenticationException {
+                EntryAddPresenter.this.service.retrieveDefaultPermissions(ClientController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<AccessPermission> result) {
+                if (currentType == null || !formsCache.containsKey(currentType))
+                    return;
+
+                accessPermissions = result;
+                entryPresenter.setDefaultPermissions(accessPermissions);
             }
         }.go(eventBus);
     }
@@ -105,16 +126,16 @@ public class EntryAddPresenter {
 //            return;
 //        }
 //
-//        new IceAsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
+//        new IceAsyncCallback<HashMap<PartSample, ArrayList<String>>>() {
 //
 //            @Override
-//            protected void callService(AsyncCallback<HashMap<SampleInfo, ArrayList<String>>> callback)
+//            protected void callService(AsyncCallback<HashMap<PartSample, ArrayList<String>>> callback)
 //                    throws AuthenticationException {
 //                service.retrieveStorageSchemes(ClientController.sessionId, type, callback);
 //            }
 //
 //            @Override
-//            public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
+//            public void onSuccess(HashMap<PartSample, ArrayList<String>> result) {
 //                if (result == null)
 //                    return;
 //
@@ -133,19 +154,22 @@ public class EntryAddPresenter {
     /**
      * Makes an rpc to save the set of entrys
      */
-    protected void save(final EntryInfo primary) {
+    protected void save(final PartData primary) {
         if (primary == null)
             return;
 
         final Set<Long> list = new HashSet<Long>();
-        list.add(Long.valueOf(0));
+        list.add((long) 0);
         presenter.getView().setBusyIndicator(list, true);
 
         new IceAsyncCallback<Long>() {
 
             @Override
             protected void callService(AsyncCallback<Long> callback) throws AuthenticationException {
-                service.createEntry(ClientController.sessionId, primary, callback);
+                if (primary.getId() > 0)
+                    service.updateEntry(ClientController.sessionId, primary, callback);
+                else
+                    service.createEntry(ClientController.sessionId, primary, callback);
             }
 
             @Override
@@ -159,6 +183,8 @@ public class EntryAddPresenter {
                     count += 1;
 
                 ClientController.account.setUserEntryCount(ClientController.account.getUserEntryCount() + count);
+                ClientController.account.setVisibleEntryCount(ClientController.account.getVisibleEntryCount() + count);
+
                 formsCache.clear();
                 presenter.getView().setBusyIndicator(list, false);
                 History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + result.toString());
@@ -177,10 +203,9 @@ public class EntryAddPresenter {
      * To create a new entry/form, add the type to {@link EntryAddType} and create a new form here
      *
      * @param type          EntryType
-     * @param cancelHandler Clickhandler for handling press of the cancel create button
+     * @param cancelHandler Click handler for handling press of the cancel create button
      * @return form specific to type
      */
-
     public IEntryFormSubmit getEntryForm(EntryAddType type, ClickHandler cancelHandler) {
         currentType = type;
 
@@ -214,7 +239,7 @@ public class EntryAddPresenter {
                 }
 
                 form.populateEntries();
-                EntryInfo primary = form.getEntry();
+                PartData primary = form.getEntry();
 
                 // attachments
                 ArrayList<AttachmentInfo> attachmentInfos = new ArrayList<AttachmentInfo>();
@@ -239,5 +264,11 @@ public class EntryAddPresenter {
 
     public HashMap<PreferenceKey, String> getPreferences() {
         return preferences;
+    }
+
+    public ArrayList<AccessPermission> getDefaultPermissions() {
+        if (accessPermissions == null)
+            return new ArrayList<AccessPermission>();
+        return this.accessPermissions;
     }
 }

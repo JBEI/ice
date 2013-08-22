@@ -9,6 +9,7 @@ import org.jbei.ice.lib.logging.Logger;
  * @author Hector Plahar
  */
 class TaskHandler implements Runnable {
+
     private final Task task;
 
     public TaskHandler(Task task) {

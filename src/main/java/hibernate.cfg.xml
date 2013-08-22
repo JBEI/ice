@@ -8,7 +8,7 @@
     <session-factory>
 
         <!-- Database connection settings -->
-        <property name="hibernate.connection.url">jdbc:hsqldb:file:ice_db</property>
+        <property name="hibernate.connection.url">jdbc:hsqldb:file:data/hsqldb</property>
         <property name="hibernate.connection.driver_class">org.hsqldb.jdbc.JDBCDriver</property>
         <property name="hibernate.connection.username">sa</property>
         <property name="hibernate.connection.password">password</property>
@@ -21,7 +21,6 @@
         <property name="hibernate.c3p0.timeout">300</property>
         <property name="hibernate.c3p0.max_statements">50</property>
         <property name="hibernate.c3p0.idle_test_period">100</property>
-        <property name="hibernate.c3p0.unreturnedConnectionTimeout">300</property>
         <property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">true</property>
         <property name="hibernate.c3p0.acquireRetryAttempts">0</property>
         <!-- wait 30secs before attempting to acquire db connection after a failed attempt -->
@@ -50,7 +49,7 @@
         <property name="hibernate.search.default.directory_provider">
             org.hibernate.search.store.impl.FSDirectoryProvider
         </property>
-        <property name="hibernate.search.default.indexBase">regdb_index</property>
+        <property name="hibernate.search.default.indexBase">data/index</property>
 
         <!-- mapping files -->
         <mapping class="org.jbei.ice.lib.entry.model.Entry"/>
@@ -73,8 +72,6 @@
         <mapping class="org.jbei.ice.lib.account.model.Account"/>
         <mapping class="org.jbei.ice.lib.entry.attachment.Attachment"/>
         <mapping class="org.jbei.ice.lib.entry.sample.model.Sample"/>
-        <mapping class="org.jbei.ice.lib.models.Label"/>
-        <mapping class="org.jbei.ice.lib.entry.model.EntryLabel"/>
         <mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
         <mapping class="org.jbei.ice.lib.group.Group"/>
         <mapping class="org.jbei.ice.lib.permissions.model.ReadUser"/>
@@ -96,5 +93,6 @@
         <mapping class="org.jbei.ice.lib.permissions.model.Permission"/>
         <mapping class="org.jbei.ice.lib.message.Message"/>
         <mapping class="org.jbei.ice.lib.account.model.Preference"/>
+        <mapping class="org.jbei.ice.lib.net.RemotePartner"/>
     </session-factory>
 </hibernate-configuration>

@@ -93,10 +93,6 @@ public class TransferMenu extends Composite {
 
                 boolean select = model.isSelected(event.getValue());
                 model.setSelected(event.getValue(), !select);
-                // we can either trigger a submit when user clicks a single cell
-                // or has the check box selected only (user then has to click submit)
-                // currently choosing the latter option
-                // dispatchSubmitEvent();
             }
         });
 

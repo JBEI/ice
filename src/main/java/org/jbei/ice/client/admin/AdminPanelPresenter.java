@@ -4,6 +4,11 @@ import org.jbei.ice.client.RegistryServiceAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * Parent abstract Presenter class for admin presenters
+ *
+ * @author Hector Plahar
+ */
 public abstract class AdminPanelPresenter {
 
     protected final RegistryServiceAsync service;

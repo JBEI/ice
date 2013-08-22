@@ -1,8 +1,6 @@
 package org.jbei.ice.lib.authentication.ldap;
 
 import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
 
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.controllers.ControllerFactory;
@@ -14,7 +12,8 @@ import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.authentication.LocalBackend;
 import org.jbei.ice.lib.authentication.ldap.LblLdapAuthenticationWrapper.LblLdapAuthenticationWrapperException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * Authentication Backend for LDAP authentication at JBEI's home institution (Lawrence Berkeley Lab,
@@ -24,8 +23,8 @@ import org.jbei.ice.lib.utils.Utils;
  * @author Timothy Ham, Zinovii Dmytriv, Joanna Chen, Hector Plahar
  */
 public class LblLdapAuthentication implements IAuthentication, Serializable {
-    private static String LBL_LDAP_EMAIL_SUFFIX = "@lbl.gov";
 
+    private static String LBL_LDAP_EMAIL_SUFFIX = "@lbl.gov";
     private static final long serialVersionUID = 1L;
 
     @Override
@@ -43,28 +42,20 @@ public class LblLdapAuthentication implements IAuthentication, Serializable {
             LblLdapAuthenticationWrapper lblLdapAuthenticationWrapper = new LblLdapAuthenticationWrapper();
             if (lblLdapAuthenticationWrapper.isWikiUser(loginId)) {
                 lblLdapAuthenticationWrapper.authenticate(loginId, password);
-
                 account = accountController.getByEmail(loginId + LBL_LDAP_EMAIL_SUFFIX);
-                Date currentTime = Calendar.getInstance().getTime();
 
                 if (account == null) {
-                    account = new Account();
-                    account.setCreationTime(currentTime);
-                    account.setSalt(Utils.generateSaltForUserAccount());
+                    User user = new User();
+                    user.setAccountType(AccountType.NORMAL);
+                    user.setEmail(lblLdapAuthenticationWrapper.geteMail());
+                    user.setFirstName(lblLdapAuthenticationWrapper.getGivenName());
+                    user.setLastName(lblLdapAuthenticationWrapper.getSirName());
+                    user.setInstitution(lblLdapAuthenticationWrapper.getOrg());
+                    user.setDescription(lblLdapAuthenticationWrapper.getDescription());
+
+                    accountController.createNewAccount(user, false);
+                    account = accountController.getByEmail(user.getEmail());
                 }
-
-                account.setEmail(lblLdapAuthenticationWrapper.geteMail());
-                account.setFirstName(lblLdapAuthenticationWrapper.getGivenName());
-                account.setLastName(lblLdapAuthenticationWrapper.getSirName());
-                account.setInstitution(lblLdapAuthenticationWrapper.getOrg());
-                account.setDescription(lblLdapAuthenticationWrapper.getDescription());
-                account.setPassword("");
-                account.setIsSubscribed(1);
-                account.setInitials("");
-                account.setIp("");
-                account.setModificationTime(currentTime);
-
-                accountController.save(account);
             } else {
                 // try local backend
                 LocalBackend localBackend = new LocalBackend();

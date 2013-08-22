@@ -29,6 +29,6 @@ public class BlastFilterFactory {
     @Factory
     public Filter getFilter() {
         String[] a = new String[]{};
-        return new FieldCacheTermsFilter("recordId", recordIds.toArray(a));
+        return new FieldCacheTermsFilter("id", recordIds.toArray(a));
     }
 }

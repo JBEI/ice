@@ -11,13 +11,13 @@ import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEventHandler;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.PartSample;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -151,8 +151,8 @@ public class BulkUploadModel {
         SampleLocation cacheLocation = locationCache.get(entryType);
         if (cacheLocation != null) {
             bulkInput.setSampleLocation(cacheLocation);
-            if (sampleStorage != null && sampleStorage.getSample() != null) {
-                String locationId = sampleStorage.getSample().getLocationId();
+            if (sampleStorage != null && sampleStorage.getPartSample() != null) {
+                String locationId = sampleStorage.getPartSample().getLocationId();
                 bulkInput.getSheet().selectSample(type, locationId);
             }
             return;
@@ -161,7 +161,7 @@ public class BulkUploadModel {
         service.retrieveStorageSchemes(
                 ClientController.sessionId,
                 entryType,
-                new AsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
+                new AsyncCallback<HashMap<PartSample, ArrayList<String>>>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -169,15 +169,15 @@ public class BulkUploadModel {
                     }
 
                     @Override
-                    public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
+                    public void onSuccess(HashMap<PartSample, ArrayList<String>> result) {
                         if (result == null)
                             return;
 
                         SampleLocation sampleLocation = new SampleLocation(result);
                         locationCache.put(entryType, sampleLocation);
                         bulkInput.setSampleLocation(sampleLocation);
-                        if (sampleStorage != null && sampleStorage.getSample() != null) {
-                            String locationId = sampleStorage.getSample().getLocationId();
+                        if (sampleStorage != null && sampleStorage.getPartSample() != null) {
+                            String locationId = sampleStorage.getPartSample().getLocationId();
                             bulkInput.getSheet().selectSample(type, locationId);
                         }
                     }

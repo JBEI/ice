@@ -2,7 +2,7 @@
     height: 18px;
     width: 70px;
     gwt-image: 'sortDown';
-    background-position: 40px 5px;
+    background-position: 78px 5px;
     padding-right: 13px;
     text-align: center;
     border: 0px;
@@ -38,6 +38,7 @@
 
 .cellListOddItem:hover, .cellListEvenItem:hover {
     background-color: #ededed;
+    color: #0082c0;
 }
 
 .cellListWidget {
@@ -47,5 +48,4 @@
     list-style: none;
     width: 120px;
     font-family: Arial;
-    font-size: 13px;
 }

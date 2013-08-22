@@ -1,63 +1,79 @@
 package org.jbei.ice.lib.search.filter;
 
+import java.util.HashSet;
+
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 /**
  * @author Hector Plahar
  */
 public class SearchFieldFactory {
 
-    public static String[] entryFields(EntryType type) {
-        String[] fields;
+    private static HashSet<String> commonFields = new HashSet<>();
+    private static HashSet<String> strainFields = new HashSet<>();
+    private static HashSet<String> plasmidFields = new HashSet<>();
+    private static HashSet<String> seedFields = new HashSet<>();
 
+    static {
+        commonFields.add("owner");
+        commonFields.add("ownerEmail");
+        commonFields.add("creator");
+        commonFields.add("name");
+        commonFields.add("alias");
+        commonFields.add("creatorEmail");
+        commonFields.add("keywords");
+        commonFields.add("shortDescription");
+        commonFields.add("longDescription");
+        commonFields.add("intellectualProperty");
+        commonFields.add("references");
+        commonFields.add("partNumber");
+        commonFields.add("links.link");
+        commonFields.add("links.url");
+        commonFields.add("selectionMarkers.name");
+        commonFields.add("entryFundingSources.fundingSource.fundingSource");
+        commonFields.add("entryFundingSources.fundingSource.principalInvestigator");
+
+        // strain fields
+        strainFields.add("plasmids");
+        strainFields.add("genotypePhenotype");
+        strainFields.add("host");
+
+        // plasmid fields
+        plasmidFields.add("backbone");
+        plasmidFields.add("promoters");
+        plasmidFields.add("replicatesIn");
+        plasmidFields.add("originOfReplication");
+
+        // seed fields
+        seedFields.add("ecotype");
+        seedFields.add("generation");
+        seedFields.add("parents");
+        seedFields.add("plantType");
+    }
+
+    public static HashSet<String> getCommonFields() {
+        return commonFields;
+    }
+
+    public static HashSet<String> entryFields(EntryType type) {
         switch (type) {
             case STRAIN:
-                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty", "host",
-                        "plasmids", "genotypePhenotype", "partNumbers.partNumber", "links.link", "links.url",
-                        "entryFundingSources.fundingSource.fundingSource", "selectionMarkers.name",
-                        "entryFundingSources.fundingSource.principalInvestigator"
-                };
-                break;
+                return strainFields;
 
             case PLASMID:
-                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty", "backbone",
-                        "originOfReplication", "promoters", "partNumbers.partNumber", "links.link", "links.url",
-                        "entryFundingSources.fundingSource.fundingSource", "selectionMarkers.name",
-                        "entryFundingSources.fundingSource.principalInvestigator"
-                };
-                break;
+                return plasmidFields;
 
             case ARABIDOPSIS:
-                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty",
-                        "partNumbers.partNumber", "links.link", "links.url", "selectionMarkers.name",
-                        "entryFundingSources.fundingSource.fundingSource",
-                        "entryFundingSources.fundingSource.principalInvestigator", "generation", "ecotype", "plantType",
-                        "parents"
-                };
-                break;
-
-            case PART:
-                fields = new String[]{"owner", "creator", "names.name", "alias", "creator", "keywords",
-                        "shortDescription", "references", "longDescription", "intellectualProperty",
-                        "partNumbers.partNumber", "links.link", "links.url", "selectionMarkers.name",
-                        "entryFundingSources.fundingSource.fundingSource",
-                        "entryFundingSources.fundingSource.principalInvestigator"
-                };
-                break;
+                return seedFields;
 
             default:
-                fields = new String[]{};
+                return commonFields;
         }
-
-        return fields;
     }
 
     public static Class<?> entryClass(EntryType type) {

@@ -1,29 +1,25 @@
 package org.jbei.ice.client.collection.view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.ICollectionView;
-import org.jbei.ice.client.collection.ShareCollectionData;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.event.SubmitHandler;
-import org.jbei.ice.client.collection.menu.CollectionEntryActionMenu;
-import org.jbei.ice.client.collection.menu.CollectionMenu;
-import org.jbei.ice.client.collection.menu.ExportAsMenu;
-import org.jbei.ice.client.collection.menu.ExportAsOption;
-import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
-import org.jbei.ice.client.collection.menu.MenuItem;
-import org.jbei.ice.client.collection.menu.TransferMenu;
+import org.jbei.ice.client.collection.menu.*;
+import org.jbei.ice.client.collection.model.PropagateOption;
+import org.jbei.ice.client.collection.model.ShareCollectionData;
 import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.folder.FolderShareType;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -106,12 +102,9 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         contents.setCellSpacing(0);
         contents.setCellPadding(0);
 
-        systemMenu = new CollectionMenu(false, "Collections");
-        systemMenu.setEmptyCollectionMessage("No collections available");
-        userMenu = new CollectionMenu(true, "My Collections");
-        userMenu.setEmptyCollectionMessage("No collections available");
-        sharedCollections = new CollectionMenu(false, "Shared Collections");
-        sharedCollections.setEmptyCollectionMessage("No collections have been shared with you");
+        systemMenu = new SystemCollectionMenu();
+        userMenu = new UserCollectionMenu();
+        sharedCollections = new SharedCollectionMenu();
 
         HTMLPanel menuPanel = new HTMLPanel(
                 "<br><span id=\"system_menu\"></span><br><span id=\"user_menu\"></span><br><span " +
@@ -140,8 +133,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void setPermissionDelegate(Delegate<ShareCollectionData> delegate) {
-        userMenu.setPermissionInfoDelegate(delegate);
+    public void setMenuDelegates(Delegate<ShareCollectionData> delegate, ServiceDelegate<PropagateOption> propagate) {
+        userMenu.setDelegates(delegate, propagate);
     }
 
     @Override
@@ -179,8 +172,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void setSubMenuEnable(boolean enableAddTo, boolean enableRemove, boolean enableMoveTo) {
-        subMenu.setEnable(enableAddTo, enableRemove, enableMoveTo);
+    public void setCanMove(boolean enableMove) {
+        subMenu.setCanMove(enableMove);
     }
 
     @Override
@@ -191,11 +184,6 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public void setUserCollectionMenuItems(ArrayList<MenuItem> items, IDeleteMenuHandler handler) {
         this.userMenu.setMenuItems(items, handler);
-    }
-
-    @Override
-    public void setUserFolderPermissions(ArrayList<PermissionInfo> list) {
-        this.userMenu.setPermissions(list);
     }
 
     @Override
@@ -228,6 +216,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
+    public void addQuickAddHandler(ClickHandler handler) {
+        this.userMenu.addQuickAddHandler(handler);
+    }
+
+    @Override
     public void updateMenuItemCounts(ArrayList<MenuItem> item) {
         this.userMenu.updateCounts(item);
     }
@@ -253,6 +246,22 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
+    public void setPromotionDelegate(ServiceDelegate<MenuItem> delegate) {
+        this.sharedCollections.setPromotionDelegate(delegate);
+        this.userMenu.setPromotionDelegate(delegate);
+    }
+
+    @Override
+    public void setDemotionDelegate(ServiceDelegate<MenuItem> delegate) {
+        this.systemMenu.setDemotionDelegate(delegate);
+    }
+
+    @Override
+    public void setPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> delegate) {
+        this.userMenu.setRemoveAddPublicAccessDelegate(delegate);
+    }
+
+    @Override
     public void setCurrentMenuSelection(long id) {
         this.userMenu.setSelection(id);
         this.systemMenu.setSelection(id);
@@ -270,7 +279,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public SingleSelectionModel<MenuItem> getMenuModel(FolderShareType type) {
+    public SingleSelectionModel<MenuItem> getMenuModel(FolderType type) {
         switch (type) {
             case PUBLIC:
                 return systemMenu.getSelectionModel();
@@ -292,6 +301,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         this.exportAs.enable(enable);
         if (transferMenu != null)
             this.transferMenu.setEnabled(enable);
+        this.subMenu.setCanAdd(enable);
     }
 
     @Override

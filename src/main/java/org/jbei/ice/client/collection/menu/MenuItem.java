@@ -1,22 +1,33 @@
 package org.jbei.ice.client.collection.menu;
 
-import org.jbei.ice.client.collection.view.OptionSelect;
+import java.util.ArrayList;
 
+import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.user.User;
+
+/**
+ * Data for Collection menu cells
+ *
+ * @author Hector Plahar
+ */
 public class MenuItem extends OptionSelect {
 
     private long count;
-    private final boolean isSystem;
-    private boolean shared;
+    private ArrayList<AccessPermission> accessPermissions;
+    private User owner;
+    private FolderType type;
+    private boolean propagatePermission;
+    private boolean publicReadAccess;
 
-    public MenuItem(long id, String name, long count, boolean isSystem, boolean shared) {
+    public MenuItem(long id, String name, long count) {
         super(id, name);
         this.count = count;
-        this.isSystem = isSystem;
-        this.shared = shared;
     }
 
-    public boolean isSystem() {
-        return this.isSystem;
+    public boolean hasSubMenu() {
+        return getId() > 0;
     }
 
     public long getCount() {
@@ -27,11 +38,40 @@ public class MenuItem extends OptionSelect {
         this.count = count;
     }
 
-    public boolean isShared() {
-        return shared;
+    public void setAccessPermissions(ArrayList<AccessPermission> accessPermissions, boolean publicReadAccess) {
+        this.accessPermissions = accessPermissions;
+        this.publicReadAccess = publicReadAccess;
     }
 
-    public void setShared(boolean shared) {
-        this.shared = shared;
+    public boolean isPublicReadAccess() {
+        return this.publicReadAccess;
+    }
+
+    public ArrayList<AccessPermission> getAccessPermissions() {
+        return accessPermissions;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public FolderType getType() {
+        return type;
+    }
+
+    public void setType(FolderType type) {
+        this.type = type;
+    }
+
+    public boolean isPropagatePermission() {
+        return propagatePermission;
+    }
+
+    public void setPropagatePermission(boolean propagatePermission) {
+        this.propagatePermission = propagatePermission;
     }
 }

@@ -5,8 +5,8 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.EntryInfoDelegate;
 import org.jbei.ice.client.bulkupload.sheet.header.*;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 /**
  * utility class for returning the headers for specific import type

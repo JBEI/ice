@@ -8,7 +8,7 @@ import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.NewsItem;
+import org.jbei.ice.lib.shared.dto.NewsItem;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

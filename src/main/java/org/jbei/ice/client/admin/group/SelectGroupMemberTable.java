@@ -2,7 +2,7 @@ package org.jbei.ice.client.admin.group;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.view.client.ListDataProvider;
 
@@ -11,23 +11,15 @@ import com.google.gwt.view.client.ListDataProvider;
  */
 public class SelectGroupMemberTable extends GroupMemberTable {
 
-    private final ListDataProvider<AccountInfo> dataProvider;
+    private final ListDataProvider<User> dataProvider;
 
     public SelectGroupMemberTable() {
         super(null);
-        this.dataProvider = new ListDataProvider<AccountInfo>();
+        this.dataProvider = new ListDataProvider<User>();
         this.dataProvider.addDataDisplay(this);
     }
 
-    public void setData(ArrayList<AccountInfo> data) {
+    public void setData(ArrayList<User> data) {
         dataProvider.setList(data);
     }
-
-//    @Override
-//    protected void createColumns() {
-//        createSelectionColumn();
-////        createIDColumn();
-//        createNameColumn();
-//        createEmailColumn();
-//    }
 }

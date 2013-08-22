@@ -9,7 +9,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.group.GroupMembersWidget;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -27,10 +27,10 @@ public class GroupAddMembersWidget extends Composite {
     private ListBox listBox;
     private GroupMembersWidget selectedGroupMembersWidget;
     private Icon icon;
-    private HashMap<Long, AccountInfo> available;
+    private HashMap<Long, User> available;
     private FlexTable layout;
     private Button save;
-    private ArrayList<AccountInfo> listList;
+    private ArrayList<User> listList;
     private TextBox registeredUserBox;
     private Button addUser;
     private HTML cancel;
@@ -76,36 +76,36 @@ public class GroupAddMembersWidget extends Composite {
         listBox.setWidth("160px");
 
         selectedGroupMembersWidget = new GroupMembersWidget();
-        selectedGroupMembersWidget.setDeleteMemberDelegate(new ServiceDelegate<AccountInfo>() {
+        selectedGroupMembersWidget.setDeleteMemberDelegate(new ServiceDelegate<User>() {
 
             @Override
-            public void execute(AccountInfo accountInfo) {
-                selectedGroupMembersWidget.removeMember(accountInfo);
-                listList.add(accountInfo);
+            public void execute(User user) {
+                selectedGroupMembersWidget.removeMember(user);
+                listList.add(user);
 
-                Collections.sort(listList, new Comparator<AccountInfo>() {
+                Collections.sort(listList, new Comparator<User>() {
                     @Override
-                    public int compare(AccountInfo o1, AccountInfo o2) {
+                    public int compare(User o1, User o2) {
                         return o1.getFullName().compareTo(o2.getFullName());
                     }
                 });
 
-                int index = listList.indexOf(accountInfo);
-                listBox.insertItem(accountInfo.getFullName(), accountInfo.getId() + "", index);
+                int index = listList.indexOf(user);
+                listBox.insertItem(user.getFullName(), user.getId() + "", index);
             }
         });
 
         icon = new Icon(FAIconType.ARROW_RIGHT);
         icon.addStyleName("font-11em");
 
-        available = new HashMap<Long, AccountInfo>();
+        available = new HashMap<Long, User>();
         save = new Button("<span style=\"font-size: 12px\"><i class=\"" + FAIconType.SAVE.getStyleName()
                                   + "\"></i> Save</span>");
         cancel = new HTML("Cancel");
         cancel.setStyleName("display-inline");
         cancel.addStyleName("font-75em");
         cancel.addStyleName("footer_feedback_widget");
-        listList = new ArrayList<AccountInfo>();
+        listList = new ArrayList<User>();
 
         registeredUserBox = new TextBox();
         registeredUserBox.setWidth("180px");
@@ -149,15 +149,15 @@ public class GroupAddMembersWidget extends Composite {
         return panel;
     }
 
-    public void setAvailableAccounts(ArrayList<AccountInfo> list) {
-        for (AccountInfo info : list) {
+    public void setAvailableAccounts(ArrayList<User> list) {
+        for (User info : list) {
             listBox.addItem(info.getFullName(), info.getId() + "");
             available.put(info.getId(), info);
             listList.add(info);
         }
     }
 
-    public void addVerifiedMember(AccountInfo info) {
+    public void addVerifiedMember(User info) {
         if (info == null && registeredUserBox.getText() != null) {
             registeredUserBox.setStyleName("input_box_error");
             return;
@@ -179,15 +179,15 @@ public class GroupAddMembersWidget extends Composite {
     /**
      * @return list of members selected to be added to the group
      */
-    public ArrayList<AccountInfo> getSelectedMembers() {
+    public ArrayList<User> getSelectedMembers() {
         return selectedGroupMembersWidget.getMemberList();
     }
 
-    public void setSelectedMembers(ArrayList<AccountInfo> members) {
+    public void setSelectedMembers(ArrayList<User> members) {
         selectedGroupMembersWidget.setMemberList(members);
 
-        for (AccountInfo member : members) {
-            AccountInfo info = available.get(member.getId());
+        for (User member : members) {
+            User info = available.get(member.getId());
 
             if (info != null) {
                 int index = listList.indexOf(info);
@@ -209,7 +209,7 @@ public class GroupAddMembersWidget extends Composite {
                     String value = listBox.getValue(selected);
                     listBox.removeItem(selected);
                     long id = Long.decode(value).longValue();
-                    AccountInfo info = available.get(id);
+                    User info = available.get(id);
                     selectedGroupMembersWidget.addMember(info);
                     listList.remove(info);
                 }
@@ -222,21 +222,21 @@ public class GroupAddMembersWidget extends Composite {
     public void reset() {
         listBox.clear();
         listList.clear();
-        selectedGroupMembersWidget.setMemberList(new ArrayList<AccountInfo>());
+        selectedGroupMembersWidget.setMemberList(new ArrayList<User>());
 
         if (available.isEmpty())
             return;
 
-        ArrayList<AccountInfo> accountInfos = new ArrayList<AccountInfo>(available.values());
-        Collections.sort(accountInfos, new Comparator<AccountInfo>() {
+        ArrayList<User> users = new ArrayList<User>(available.values());
+        Collections.sort(users, new Comparator<User>() {
 
             @Override
-            public int compare(AccountInfo o1, AccountInfo o2) {
+            public int compare(User o1, User o2) {
                 return o1.getFullName().compareTo(o2.getFullName());
             }
         });
 
-        for (AccountInfo info : accountInfos) {
+        for (User info : users) {
             listBox.addItem(info.getFullName(), info.getId() + "");
             listList.add(info);
         }

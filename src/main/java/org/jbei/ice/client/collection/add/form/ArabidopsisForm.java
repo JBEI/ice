@@ -1,10 +1,11 @@
 package org.jbei.ice.client.collection.add.form;
 
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.Generation;
-import org.jbei.ice.shared.dto.entry.ArabidopsisSeedInfo.PlantType;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.Generation;
+import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.PlantType;
+import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -16,7 +17,12 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class ArabidopsisForm extends EntryForm<ArabidopsisSeedInfo> {
+/**
+ * Form for creating a new Arabidopsis Seed record
+ *
+ * @author Hector Plahar
+ */
+public class ArabidopsisForm extends EntryForm<ArabidopsisSeedData> {
 
     private ListBox generation;
     private ListBox plantType;
@@ -27,39 +33,39 @@ public class ArabidopsisForm extends EntryForm<ArabidopsisSeedInfo> {
     private DateBox harvestDate;
     private CheckBox sentToAbrc;
 
-    public ArabidopsisForm(ArabidopsisSeedInfo seedInfo) {
-        super(seedInfo);
+    public ArabidopsisForm(ArabidopsisSeedData seedData) {
+        super(seedData);
 
-        if (seedInfo.getGeneration() != null) {
+        if (seedData.getGeneration() != null) {
             for (int i = 0; i < this.generation.getItemCount(); i += 1) {
-                if (this.generation.getValue(i).equalsIgnoreCase(seedInfo.getGeneration().name())) {
+                if (this.generation.getValue(i).equalsIgnoreCase(seedData.getGeneration().name())) {
                     this.generation.setSelectedIndex(i);
                     break;
                 }
             }
         }
 
-        if (seedInfo.getPlantType() != null) {
+        if (seedData.getPlantType() != null) {
             for (int i = 0; i < this.plantType.getItemCount(); i += 1) {
-                if (this.plantType.getValue(i).equalsIgnoreCase(seedInfo.getPlantType().name())) {
+                if (this.plantType.getValue(i).equalsIgnoreCase(seedData.getPlantType().name())) {
                     this.plantType.setSelectedIndex(i);
                     break;
                 }
             }
         }
 
-        homozygosity.setText(seedInfo.getHomozygosity());
-        markers.setText(seedInfo.getSelectionMarkers());
-        ecoType.setText(seedInfo.getEcotype());
-        parents.setText(seedInfo.getParents());
-        if (seedInfo.getHarvestDate() != null)
-            harvestDate.setValue(seedInfo.getHarvestDate());
-        sentToAbrc.setValue(seedInfo.isSentToAbrc());
+        homozygosity.setText(seedData.getHomozygosity());
+        markers.setText(seedData.getSelectionMarkers());
+        ecoType.setText(seedData.getEcotype());
+        parents.setText(seedData.getParents());
+        if (seedData.getHarvestDate() != null)
+            harvestDate.setValue(seedData.getHarvestDate());
+        sentToAbrc.setValue(seedData.isSentToAbrc());
     }
 
     protected void initComponents() {
         super.initComponents();
-        markers = createAutoCompleteForSelectionMarkers("300px");
+        markers = createSuggestBox(AutoCompleteField.SELECTION_MARKERS, "300px");
         generation = new ListBox();
         generation.setVisibleItemCount(1);
         for (Generation gen : Generation.values()) {
@@ -81,9 +87,9 @@ public class ArabidopsisForm extends EntryForm<ArabidopsisSeedInfo> {
         harvestDate.setWidth("205px");
         harvestDate.setFormat(new DateBox.DefaultFormat(dateFormat));
 
-        homozygosity = createStandardTextBox("300px");
-        ecoType = createStandardTextBox("300px");
-        parents = createStandardTextBox("300px");
+        homozygosity = createStandardTextBox("300px", 150);
+        ecoType = createStandardTextBox("300px", 150);
+        parents = createStandardTextBox("300px", 150);
         sentToAbrc = new CheckBox();
     }
 
@@ -218,7 +224,7 @@ public class ArabidopsisForm extends EntryForm<ArabidopsisSeedInfo> {
     public void populateEntries() {
         super.populateEntries();
 
-        ArabidopsisSeedInfo seed = super.getEntryInfo();
+        ArabidopsisSeedData seed = super.getEntryInfo();
         String selectionMarkers = ((MultipleTextBox) markers.getValueBox()).getWholeText();
         seed.setSelectionMarkers(selectionMarkers);
 

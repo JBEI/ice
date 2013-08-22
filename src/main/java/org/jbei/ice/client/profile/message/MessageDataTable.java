@@ -2,7 +2,7 @@ package org.jbei.ice.client.profile.message;
 
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.MessageInfo;
+import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -21,8 +21,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 
 /**
+ * Data table for displaying list of messages
+ *
  * @author Hector Plahar
- *         TODO : duplicates EntrySelectionColumnHeaderCell
  */
 public class MessageDataTable extends CellTable<MessageInfo> {
 
@@ -46,7 +47,7 @@ public class MessageDataTable extends CellTable<MessageInfo> {
         this.cellClickDelegate = cellClickDelegate;
         this.setWidth("80%");
         Label empty = new Label();
-        empty.setText("No data available");
+        empty.setText("No messages available");
         empty.setStyleName("no_data_style");
         this.setEmptyTableWidget(empty);
         setSelectionModel();
@@ -55,9 +56,7 @@ public class MessageDataTable extends CellTable<MessageInfo> {
         this.addRowHoverHandler(new RowHoverEvent.Handler() {
             @Override
             public void onRowHover(RowHoverEvent event) {
-                GWT.log("" + event.getHoveringRow().getRowIndex());
                 event.isUnHover();
-                //To change body of implemented methods use File | Settings | File Templates.
             }
         });
     }
@@ -137,11 +136,12 @@ public class MessageDataTable extends CellTable<MessageInfo> {
             @Override
             public SafeHtml render(MessageInfo object) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                String title = object.getTitle() == null ? "" : object.getTitle();
                 if (object.isRead())
-                    sb.appendEscaped(object.getTitle());
+                    sb.appendEscaped(title);
                 else {
                     sb.appendHtmlConstant("<b>");
-                    sb.appendEscaped(object.getTitle());
+                    sb.appendEscaped(title);
                     sb.appendHtmlConstant("</b>");
                 }
                 return sb.toSafeHtml();

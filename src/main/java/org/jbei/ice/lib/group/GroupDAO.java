@@ -9,7 +9,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -64,13 +64,26 @@ class GroupDAO extends HibernateRepository<Group> {
         }
     }
 
-    public Set<Group> getMatchingGroups(String token, int limit) throws DAOException {
+    public Set<Group> getMatchingGroups(Account account, String token, int limit) throws DAOException {
         Session session = currentSession();
+        Set<Group> userGroups = account.getGroups();
+
         try {
             token = token.toUpperCase();
-            String queryString = "from " + Group.class.getName() + " where (UPPER(label) like '%"
-                    + token + "%')";
+            String queryString = "from " + Group.class.getName() + " g where (UPPER(g.label) like '%" + token + "%') "
+                    + " AND (g.type='PUBLIC' OR owner = :owner";
+            // or private groups that are in specified list
+            if (userGroups != null && !userGroups.isEmpty()) {
+                queryString += " OR g in :groups)";
+            }
+            queryString += ") AND g.uuid != '" + GroupController.PUBLIC_GROUP_UUID + "'";
+
             Query query = session.createQuery(queryString);
+            query.setParameter("owner", account);
+            if (userGroups != null && !userGroups.isEmpty()) {
+                query.setParameterList("groups", userGroups);
+            }
+
             if (limit > 0)
                 query.setMaxResults(limit);
 

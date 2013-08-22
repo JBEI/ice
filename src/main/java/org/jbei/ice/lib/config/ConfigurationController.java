@@ -6,8 +6,8 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Configuration;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * @author Hector Plahar
@@ -41,7 +41,7 @@ public class ConfigurationController {
         }
     }
 
-    // upgrade config from pre version 3.3.0. goes through the propery file and just
+    // upgrade config from pre version 3.3.0. goes through the property file and just
     // saves the value in the database
     public void upgradeConfiguration() throws ControllerException {
         Logger.info("Upgrading configuration");
@@ -140,9 +140,8 @@ public class ConfigurationController {
                 Logger.info("Setting value for " + key.toString() + " to " + key.getDefaultValue());
                 setPropertyValue(key, key.getDefaultValue());
             } catch (DAOException e) {
-                continue;
+                Logger.warn(e.getMessage());
             }
-
         }
     }
 }

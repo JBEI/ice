@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.group;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,16 +8,15 @@ import java.util.Set;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.AccountUtils;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
 
 public class GroupController {
 
@@ -52,8 +50,8 @@ public class GroupController {
         }
     }
 
-    public ArrayList<GroupInfo> retrieveGroups(Account account, GroupType type) throws ControllerException {
-        ArrayList<GroupInfo> groups = new ArrayList<>();
+    public ArrayList<UserGroup> retrieveGroups(Account account, GroupType type) throws ControllerException {
+        ArrayList<UserGroup> userGroups = new ArrayList<>();
 
         try {
             ArrayList<Group> result;
@@ -72,11 +70,11 @@ public class GroupController {
             }
 
             for (Group group : result) {
-                GroupInfo info = Group.toDTO(group);
-                info.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
-                groups.add(info);
+                UserGroup user = Group.toDTO(group);
+                user.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
+                userGroups.add(user);
             }
-            return groups;
+            return userGroups;
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
@@ -89,21 +87,21 @@ public class GroupController {
      * @return list of available groups retrieved
      * @throws ControllerException on exception retrieving groups
      */
-    public ArrayList<GroupInfo> retrieveUserGroups(Account account) throws ControllerException {
-        ArrayList<GroupInfo> groups = new ArrayList<>();
+    public ArrayList<UserGroup> retrieveUserGroups(Account account) throws ControllerException {
+        ArrayList<UserGroup> userGroups = new ArrayList<>();
         Set<Group> result = account.getGroups();
         Group publicGroup = createOrRetrievePublicGroup();
         for (Group group : result) {
             if (group.getUuid().equalsIgnoreCase(PUBLIC_GROUP_UUID))
                 continue;
 
-            GroupInfo info = Group.toDTO(group);
-            info.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
-            groups.add(info);
+            UserGroup user = Group.toDTO(group);
+            user.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
+            userGroups.add(user);
         }
-        groups.addAll(retrieveGroups(account, GroupType.PRIVATE));
-        groups.add(0, Group.toDTO(publicGroup));
-        return groups;
+        userGroups.addAll(retrieveGroups(account, GroupType.PRIVATE));
+        userGroups.add(0, Group.toDTO(publicGroup));
+        return userGroups;
     }
 
     public Set<String> retrieveAccountGroupUUIDs(Account account) throws ControllerException {
@@ -133,16 +131,19 @@ public class GroupController {
     }
 
     // create group without parent
-    public GroupInfo createGroup(Account account, GroupInfo info) throws ControllerException {
+    public UserGroup createGroup(Account account, UserGroup info) throws ControllerException {
         if (info.getType() == GroupType.PUBLIC && !accountController.isAdministrator(account)) {
             String errMsg = "Non admin " + account.getEmail() + " attempting to create public group";
             Logger.error(errMsg);
             throw new ControllerException(errMsg);
         }
 
+        if (info.getType() == null)
+            info.setType(GroupType.PRIVATE);
+
         Group group = new Group();
         group.setLabel(info.getLabel());
-        group.setDescription(info.getDescription());
+        group.setDescription(info.getDescription() == null ? "" : info.getDescription());
         group.setType(info.getType());
         if (info.getType() == GroupType.PRIVATE)
             group.setOwner(account);
@@ -155,8 +156,8 @@ public class GroupController {
         group = save(group);
 
         ArrayList<Account> accounts = new ArrayList<>();
-        for (AccountInfo accountInfo : info.getMembers()) {
-            Account memberAccount = accountController.getByEmail(accountInfo.getEmail());
+        for (User user : info.getMembers()) {
+            Account memberAccount = accountController.getByEmail(user.getEmail());
             if (memberAccount == null)
                 continue;
             memberAccount.getGroups().add(group);
@@ -179,8 +180,8 @@ public class GroupController {
         return info;
     }
 
-    public GroupInfo updateGroup(Account account, GroupInfo info) throws ControllerException {
-        if (info.getType() == GroupType.PUBLIC && !accountController.isAdministrator(account)) {
+    public UserGroup updateGroup(Account account, UserGroup user) throws ControllerException {
+        if (user.getType() == GroupType.PUBLIC && !accountController.isAdministrator(account)) {
             String errMsg = "Non admin " + account.getEmail() + " attempting to update public group";
             Logger.error(errMsg);
             throw new ControllerException(errMsg);
@@ -188,7 +189,7 @@ public class GroupController {
 
         Group group;
         try {
-            group = dao.get(info.getId());
+            group = dao.get(user.getId());
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -197,8 +198,8 @@ public class GroupController {
         }
 
         try {
-            group.setLabel(info.getLabel());
-            group.setDescription(info.getDescription());
+            group.setLabel(user.getLabel());
+            group.setDescription(user.getDescription());
             group = dao.update(group);
             return Group.toDTO(group);
         } catch (DAOException e) {
@@ -206,8 +207,8 @@ public class GroupController {
         }
     }
 
-    public GroupInfo deleteGroup(Account account, GroupInfo info) throws ControllerException {
-        if (info.getType() == GroupType.PUBLIC && account.getType() != AccountType.ADMIN) {
+    public UserGroup deleteGroup(Account account, UserGroup user) throws ControllerException {
+        if (user.getType() == GroupType.PUBLIC && account.getType() != AccountType.ADMIN) {
             String errMsg = "Non admin " + account.getEmail() + " attempting to delete public group";
             Logger.error(errMsg);
             throw new ControllerException(errMsg);
@@ -215,7 +216,7 @@ public class GroupController {
 
         Group group;
         try {
-            group = dao.get(info.getId());
+            group = dao.get(user.getId());
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -230,9 +231,9 @@ public class GroupController {
                 }
             }
             ControllerFactory.getPermissionController().clearGroupPermissions(account, group);
-            GroupInfo groupInfo = Group.toDTO(group);
+            UserGroup userGroup = Group.toDTO(group);
             dao.delete(group);
-            return groupInfo;
+            return userGroup;
         } catch (DAOException e) {
             throw new ControllerException(e);
         } catch (PermissionException e) {
@@ -255,9 +256,9 @@ public class GroupController {
         return save(publicGroup);
     }
 
-    public Set<Group> getMatchingGroups(String query, int limit) throws ControllerException {
+    public Set<Group> getMatchingGroups(Account account, String query, int limit) throws ControllerException {
         try {
-            return dao.getMatchingGroups(query, limit);
+            return dao.getMatchingGroups(account, query, limit);
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);
@@ -265,12 +266,19 @@ public class GroupController {
     }
 
     /**
-     * retrieves all parent groups for any group in the set.
+     * retrieves all parent groups for any group in the set. if account is null, then the everyone group
+     * is returned
      *
      * @param account account whose groups are being retrieved
      * @return set of groups retrieved for account
      */
     public Set<Group> getAllGroups(Account account) throws ControllerException {
+        if (account == null) {
+            Set<Group> groups = new HashSet<>();
+            groups.add(createOrRetrievePublicGroup());
+            return groups;
+        }
+
         Set<Long> groupIds = getAllAccountGroups(account);
         try {
             return dao.getByIdList(groupIds);
@@ -332,13 +340,13 @@ public class GroupController {
         return groupIds;
     }
 
-    public ArrayList<AccountInfo> retrieveGroupMembers(String uuid) throws ControllerException {
+    public ArrayList<User> retrieveGroupMembers(String uuid) throws ControllerException {
         try {
-            ArrayList<AccountInfo> result = new ArrayList<>();
+            ArrayList<User> result = new ArrayList<>();
             Group group = dao.get(uuid);
             for (Account account : group.getMembers()) {
-                AccountInfo accountInfo = AccountUtils.accountToInfo(account);
-                result.add(accountInfo);
+                User user = Account.toDTO(account);
+                result.add(user);
             }
             return result;
         } catch (DAOException e) {
@@ -354,28 +362,6 @@ public class GroupController {
         }
     }
 
-    public void addMemberToGroup(long groupId, String email) throws ControllerException {
-        try {
-            Group group = dao.get(groupId);
-            if (group == null)
-                throw new ControllerException("Could not retrieve group with id " + groupId);
-
-            // public groups do not need to have members added
-            if (group.getUuid().equals(PUBLIC_GROUP_UUID))
-                return;
-
-            Account account = accountController.getByEmail(email);
-            if (account == null)
-                throw new ControllerException("Could not retrieve account " + email);
-
-            group.getMembers().add(account);
-            group.setModificationTime(new Date(System.currentTimeMillis()));
-            dao.update(group);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
     public List<Group> getAutoJoinGroups() throws ControllerException {
         try {
             return dao.getAutoJoinGroups();
@@ -384,22 +370,22 @@ public class GroupController {
         }
     }
 
-    public ArrayList<AccountInfo> retrieveAccountsForGroupCreation(Account account) throws ControllerException {
+    public ArrayList<User> retrieveAccountsForGroupCreation(Account account) throws ControllerException {
         Set<Group> groups = getAllGroups(account);
-        Set<AccountInfo> accounts = new HashSet<>();
+        Set<User> accounts = new HashSet<>();
 
         for (Group group : groups) {
             if (group.getType() == GroupType.PRIVATE)
                 continue;
 
-            ArrayList<AccountInfo> members = retrieveGroupMembers(group.getUuid());
+            ArrayList<User> members = retrieveGroupMembers(group.getUuid());
             accounts.addAll(members);
         }
 
         return new ArrayList<>(accounts);
     }
 
-    public ArrayList<AccountInfo> setGroupMembers(Account account, GroupInfo info, ArrayList<AccountInfo> members)
+    public ArrayList<User> setGroupMembers(Account account, UserGroup info, ArrayList<User> members)
             throws ControllerException {
         Group group = getGroupById(info.getId());
         if (group == null) {
@@ -432,8 +418,8 @@ public class GroupController {
 
         // add
         ArrayList<Account> accounts = new ArrayList<>();
-        for (AccountInfo accountInfo : members) {
-            Account memberAccount = accountController.getByEmail(accountInfo.getEmail());
+        for (User user : members) {
+            Account memberAccount = accountController.getByEmail(user.getEmail());
             if (memberAccount == null)
                 continue;
             memberAccount.getGroups().add(group);

@@ -2,7 +2,6 @@ package org.jbei.ice.lib.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -48,6 +47,7 @@ public class IceXlsSerializer {
                 headers.add("Circular");
                 headers.add("Backbone");
                 headers.add("Promoters");
+                headers.add("Replicates In");
                 headers.add("Origin of Replication");
                 break;
 
@@ -66,6 +66,9 @@ public class IceXlsSerializer {
                 headers.add("Plant Type");
                 headers.add("Sent to ABRC?");
                 break;
+
+            default:
+                return headers;
         }
         return headers;
     }
@@ -107,11 +110,10 @@ public class IceXlsSerializer {
         SequenceController sequenceController = ControllerFactory.getSequenceController();
         AttachmentController attachmentController = ControllerFactory.getAttachmentController();
 
-        for (Iterator<Entry> iterator = entries.iterator(); iterator.hasNext(); ) {
-            Entry entry = iterator.next();
+        for (Entry entry : entries) {
             stringBuilder.append(escapeCSVValue(entry.getRecordType())).append("\t");
-            stringBuilder.append(escapeCSVValue(EntryUtil.getPartNumbersAsString(entry))).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getNamesAsString())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getPartNumber())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getName())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getOwner())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getCreator())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getAlias())).append("\t");
@@ -178,6 +180,8 @@ public class IceXlsSerializer {
                             stringBuilder.append(escapeCSVValue(plasmid.getBackbone())).append("\t");
                         if (header.equalsIgnoreCase("Promoters"))
                             stringBuilder.append(escapeCSVValue(plasmid.getPromoters())).append("\t");
+                        if (header.equalsIgnoreCase("Replicates In"))
+                            stringBuilder.append(escapeCSVValue(plasmid.getReplicatesIn())).append("\t");
                         if (header.equalsIgnoreCase("Origin of Replication"))
                             stringBuilder.append(escapeCSVValue(plasmid.getOriginOfReplication())).append("\t");
                     }
@@ -211,7 +215,7 @@ public class IceXlsSerializer {
 
             stringBuilder.append(attachmentController.hasAttachment(entry) ? "Yes" : "No").append("\t");
             stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append("\t");
-            stringBuilder.append((sequenceController.hasSequence(entry)) ? "Yes" : "No").append("\n");
+            stringBuilder.append((sequenceController.hasSequence(entry.getId())) ? "Yes" : "No").append("\n");
         }
 
         return stringBuilder.toString();

@@ -7,8 +7,8 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.shared.dto.group.GroupInfo;
-import org.jbei.ice.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.GroupType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 
 /**
  * Aggregate users into groups.
@@ -153,17 +153,17 @@ public class Group implements IModel {
         this.autoJoin = autoJoin;
     }
 
-    public static GroupInfo toDTO(Group group) {
-        GroupInfo info = new GroupInfo();
-        info.setUuid(group.getUuid());
-        info.setId(group.getId());
-        info.setLabel(group.getLabel());
-        info.setDescription(group.getDescription());
+    public static UserGroup toDTO(Group group) {
+        UserGroup user = new UserGroup();
+        user.setUuid(group.getUuid());
+        user.setId(group.getId());
+        user.setLabel(group.getLabel());
+        user.setDescription(group.getDescription());
         Group parent = group.getParent();
         if (parent != null) {
-            info.setParentId(parent.getId());
+            user.setParentId(parent.getId());
         }
-        info.setType(group.getType());
-        return info;
+        user.setType(group.getType());
+        return user;
     }
 }

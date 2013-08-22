@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet;
 
+import java.util.HashMap;
+
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.SheetPresenter;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
@@ -7,10 +9,10 @@ import org.jbei.ice.client.bulkupload.sheet.cell.SheetCell;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
 import org.jbei.ice.client.bulkupload.widget.SampleSelectionWidget;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.BulkUploadInfo;
-import org.jbei.ice.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -63,7 +65,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private SampleSelectionWidget sampleSelectionWidget;
     private HandlerRegistration sampleSelectionRegistration;
 
-    public final static int ROW_COUNT = 35;
+    public static final int ROW_COUNT = 35;
     private int dragRow = -1;
     private int dragCol = -1;
     private boolean dragging;
@@ -326,6 +328,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     public void setAutoUpdateDelegate(ServiceDelegate<BulkUploadAutoUpdate> delegate) {
         presenter.setAutoUpdateDelegate(delegate);
+    }
+
+    public void setDeleteEntryFileDelegate(ServiceDelegate<HashMap<Long, SheetCellData>> delegate) {
+        presenter.setDeleteEntryFileDelegate(delegate);
     }
 
     @Override

@@ -1,18 +1,16 @@
 package org.jbei.ice.client.common.table;
 
+import java.sql.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.entry.IHasEntryId;
-import org.jbei.ice.client.common.table.cell.HasEntryPartIDCell;
 import org.jbei.ice.client.common.table.cell.HasEntrySelectionColumnHeaderCell;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
-import org.jbei.ice.client.common.table.column.HasEntryPartIdColumn;
 import org.jbei.ice.client.common.table.column.ImageColumn;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.entry.HasEntryInfo;
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -27,6 +25,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 
 /**
@@ -34,14 +33,14 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
  * has a @see EntryDataView
  *
  * @author Hector Plahar
- * @see HasEntryInfo
+ * @see org.jbei.ice.lib.shared.dto.entry.HasEntryData
  */
-public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTable<T> implements IHasEntryId {
+public abstract class HasEntryDataTable<T extends HasEntryData> extends DataTable<T> implements IHasEntryId {
 
     private HasEntrySelectionModel<T> selectionModel;
 
-    public HasEntryDataTable() {
-        super();
+    public HasEntryDataTable(ServiceDelegate<T> delegate) {
+        super(delegate);
     }
 
     @Override
@@ -53,8 +52,8 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
     @Override
     public Set<Long> getSelectedEntrySet() {
         Set<Long> infoSet = new HashSet<Long>();
-        for (HasEntryInfo info : selectionModel.getSelectedSet()) {
-            infoSet.add(info.getEntryInfo().getId());
+        for (HasEntryData data : selectionModel.getSelectedSet()) {
+            infoSet.add(data.getEntryInfo().getId());
         }
         return infoSet;
     }
@@ -65,6 +64,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
     protected DataTableColumn<T, Boolean> addSelectionColumn() {
         final CheckboxCell columnCell = new CheckboxCell(true, false) {
+
             @Override
             public void onBrowserEvent(Context context, Element parent, Boolean value,
                     NativeEvent event, ValueUpdater<Boolean> valueUpdater) {
@@ -82,15 +82,15 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
             }
         };
 
-        DataTableColumn<T, Boolean> selectionColumn =
-                new DataTableColumn<T, Boolean>(columnCell, ColumnField.SELECTION) {
+        DataTableColumn<T, Boolean> selectionColumn = new DataTableColumn<T, Boolean>(columnCell,
+                                                                                      ColumnField.SELECTION) {
 
-                    @Override
-                    public Boolean getValue(T object) {
-                        // returns column value from underlying data object (EntryDataView in this instance)
-                        return selectionModel.isSelected(object);
-                    }
-                };
+            @Override
+            public Boolean getValue(T object) {
+                // returns column value from underlying data object (EntryDataView in this instance)
+                return selectionModel.isSelected(object);
+            }
+        };
         selectionColumn.setSortable(false);
         SelectionColumnHeader header = new SelectionColumnHeader();
 
@@ -115,7 +115,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
     protected void addHasAttachmentColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT) {
-            public boolean showImage(HasEntryInfo info) {
+            public boolean showImage(HasEntryData info) {
                 return info.getEntryInfo().isHasAttachment();
             }
         };
@@ -125,7 +125,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
     protected void addHasSampleColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE) {
-            public boolean showImage(HasEntryInfo info) {
+            public boolean showImage(HasEntryData info) {
                 return info.getEntryInfo().isHasSample();
             }
         };
@@ -135,7 +135,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
 
     protected void addHasSequenceColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE) {
-            public boolean showImage(HasEntryInfo info) {
+            public boolean showImage(HasEntryData info) {
                 return info.getEntryInfo().isHasSequence();
             }
         };
@@ -143,17 +143,15 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
         this.setColumnWidth(column, 30, Unit.PX);
     }
 
-    protected DataTableColumn<T, HasEntryInfo> addPartIdColumn(boolean sortable, double width, Unit unit) {
-        HasEntryPartIDCell<HasEntryInfo> cell = new HasEntryPartIDCell<HasEntryInfo>(EntryContext.Type.SEARCH);
-        cell.addEntryHandler(getHandler());
-        DataTableColumn<T, HasEntryInfo> partIdColumn = new HasEntryPartIdColumn<T>(cell);
-        this.setColumnWidth(partIdColumn, width, unit);
-        partIdColumn.setSortable(sortable);
-        this.addColumn(partIdColumn, "Part ID");
-        return partIdColumn;
-    }
-
-    protected abstract EntryViewEventHandler getHandler();
+//    protected DataTableColumn<T, HasEntryData> addPartIdColumn(ServiceDelegate<HasEntryData> delegate,
+// boolean sortable, double width, Unit unit) {
+//        HasEntryPartIDCell<HasEntryData> cell = new HasEntryPartIDCell<HasEntryData>(delegate);
+//        DataTableColumn<T, HasEntryData> partIdColumn = new HasEntryPartIdColumn<T>(cell);
+//        this.setColumnWidth(partIdColumn, width, unit);
+//        partIdColumn.setSortable(sortable);
+//        this.addColumn(partIdColumn, "Part ID");
+//        return partIdColumn;
+//    }
 
     protected DataTableColumn<T, SafeHtml> addNameColumn(final double width, Unit unit) {
 
@@ -181,14 +179,42 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
         return nameColumn;
     }
 
+    protected DataTableColumn<T, SafeHtml> addSummaryColumn() {
+        DataTableColumn<T, SafeHtml> summaryColumn = new DataTableColumn<T, SafeHtml>(
+                new SafeHtmlCell(), ColumnField.SUMMARY) {
+
+            @Override
+            public SafeHtml getValue(T object) {
+                String description = object.getEntryInfo().getShortDescription();
+                if (description == null)
+                    return SafeHtmlUtils.EMPTY_SAFE_HTML;
+
+                int size = (Window.getClientWidth() - 1000);
+                if (size <= 0)
+                    size = 300;
+
+                return SafeHtmlUtils
+                        .fromSafeConstant("<div style=\"width: "
+                                                  + size
+                                                  + "px; white-space: nowrap; overflow: hidden; text-overflow: " +
+                                                  "ellipsis;\" title=\""
+                                                  + description.replaceAll("\"", "'") + "\">"
+                                                  + description + "</div>");
+            }
+        };
+
+        this.addColumn(summaryColumn, "Summary");
+        return summaryColumn;
+    }
+
     protected DataTableColumn<T, String> addCreatedColumn(boolean sortable) {
         DataTableColumn<T, String> createdColumn = new DataTableColumn<T, String>(new TextCell(), ColumnField.CREATED) {
 
             @Override
-            public String getValue(HasEntryInfo object) {
+            public String getValue(HasEntryData object) {
 
                 DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
-                String value = format.format(object.getEntryInfo().getCreationTime());
+                String value = format.format(new Date(object.getEntryInfo().getCreationTime()));
                 if (value.length() >= 13)
                     value = (value.substring(0, 9) + "...");
                 return value;

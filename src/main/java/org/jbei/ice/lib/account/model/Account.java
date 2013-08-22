@@ -7,7 +7,8 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.shared.dto.user.User;
 
 import org.hibernate.annotations.Type;
 
@@ -83,7 +84,7 @@ public class Account implements IModel {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"),
                inverseJoinColumns = @JoinColumn(name = "group_id"))
-    private Set<Group> groups = new LinkedHashSet<Group>();
+    private Set<Group> groups = new LinkedHashSet<>();
 
     /**
      * Constructor.
@@ -221,10 +222,6 @@ public class Account implements IModel {
         return description;
     }
 
-    public void setGroups(Set<Group> groups) {
-        this.groups = groups;
-    }
-
     public Set<Group> getGroups() {
         return groups;
     }
@@ -235,11 +232,16 @@ public class Account implements IModel {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj.getClass() != Account.class)
+        if (obj == null || obj.getClass() != Account.class)
             return false;
 
         Account account = (Account) obj;
         return account.getId() == this.getId() && account.getEmail().equals(this.getEmail());
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.valueOf(this.id).intValue();
     }
 
     public AccountType getType() {
@@ -261,11 +263,11 @@ public class Account implements IModel {
         this.salt = salt;
     }
 
-    public static AccountInfo toDTO(Account account) {
+    public static User toDTO(Account account) {
         if (account == null)
             return null;
 
-        AccountInfo info = new AccountInfo();
+        User info = new User();
         info.setEmail(account.getEmail());
         info.setFirstName(account.getFirstName());
         info.setLastName(account.getLastName());

@@ -4,14 +4,13 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 
-import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class AccountDAOTest extends TestCase {
+public class AccountDAOTest {
 
     private AccountDAO dao;
 

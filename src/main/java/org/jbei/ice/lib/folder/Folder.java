@@ -7,6 +7,7 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.shared.dto.folder.FolderType;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -48,6 +49,13 @@ public class Folder implements IModel {
     @Column(name = "modification_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationTime;
+
+    @Column(name = "type")
+    @Enumerated(value = EnumType.STRING)
+    private FolderType type;
+
+    @Column(name = "propagate_permissions")
+    private Boolean propagatePermissions;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
@@ -112,5 +120,21 @@ public class Folder implements IModel {
 
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
+    }
+
+    public FolderType getType() {
+        return type;
+    }
+
+    public void setType(FolderType type) {
+        this.type = type;
+    }
+
+    public boolean isPropagatePermissions() {
+        return propagatePermissions != null && propagatePermissions;
+    }
+
+    public void setPropagatePermissions(Boolean propagatePermissions) {
+        this.propagatePermissions = propagatePermissions;
     }
 }

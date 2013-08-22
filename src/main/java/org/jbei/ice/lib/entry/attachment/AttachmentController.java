@@ -2,6 +2,7 @@ package org.jbei.ice.lib.entry.attachment;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.jbei.ice.controllers.ControllerFactory;
@@ -11,8 +12,9 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.shared.dto.ConfigurationKey;
 
 /**
  * ABI to manipulate {@link Attachment}s.
@@ -23,15 +25,12 @@ public class AttachmentController {
 
     private final AttachmentDAO dao;
     private final PermissionsController permissionsController;
-    private File attachmentFile;
+
+    public static final String attachmentDirName = "attachments";
 
     public AttachmentController() {
         permissionsController = ControllerFactory.getPermissionController();
         dao = new AttachmentDAO();
-        String attachmentFileLocation = Utils.getConfigValue(ConfigurationKey.ATTACHMENTS_DIRECTORY);
-        if (attachmentFileLocation == null)
-            attachmentFileLocation = "/tmp/attachments";
-        attachmentFile = new File(attachmentFileLocation);
     }
 
     /**
@@ -67,19 +66,22 @@ public class AttachmentController {
     }
 
     /**
-     * Save attachment to the database and the disk.
+     * Save attachment to the database and the disk. Entry has to be a transferred entry (Visibility of 2)
+     * or the account must have write permissions to it
      *
-     * @param attachment
+     * @param account     account for user making request. Can be null if method is called as a result of a transfer
+     * @param attachment  attachment
      * @param inputStream The data stream of the file.
      * @return Saved attachment.
      * @throws ControllerException
      */
     public Attachment save(Account account, Attachment attachment, InputStream inputStream) throws ControllerException {
-        if (!hasWritePermission(account, attachment)) {
+        if (attachment.getEntry().getVisibility() != Visibility.TRANSFERRED.getValue() &&
+                !hasWritePermission(account, attachment)) {
             throw new ControllerException("No permissions to save attachment!");
         }
 
-        if (attachment.getFileId() == null || attachment.getFileId() == "") {
+        if (attachment.getFileId() == null || attachment.getFileId().isEmpty()) {
             String fileId = Utils.generateUUID();
             attachment.setFileId(fileId);
         }
@@ -87,15 +89,14 @@ public class AttachmentController {
         if (attachment.getDescription() == null)
             attachment.setDescription("");
 
-        Attachment result;
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        File attachmentDir = Paths.get(dataDir, attachmentDirName).toFile();
 
         try {
-            result = dao.save(attachmentFile, attachment, inputStream);
+            return dao.save(attachmentDir, attachment, inputStream);
         } catch (DAOException e) {
             throw new ControllerException("Failed to save attachment!", e);
         }
-
-        return result;
     }
 
     /**
@@ -110,8 +111,10 @@ public class AttachmentController {
             throw new PermissionException("No permissions to delete attachment!");
         }
 
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        File attachmentDir = Paths.get(dataDir, attachmentDirName).toFile();
         try {
-            dao.delete(attachmentFile, attachment);
+            dao.delete(attachmentDir, attachment);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -136,8 +139,11 @@ public class AttachmentController {
             throw new PermissionException("No permissions to read attachment file!");
         }
 
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        File attachmentDir = Paths.get(dataDir, attachmentDirName).toFile();
+
         try {
-            return dao.getFile(attachmentFile, attachment);
+            return dao.getFile(attachmentDir, attachment);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

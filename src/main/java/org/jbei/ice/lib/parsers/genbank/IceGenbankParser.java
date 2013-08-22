@@ -3,12 +3,9 @@ package org.jbei.ice.lib.parsers.genbank;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -77,7 +74,6 @@ public class IceGenbankParser extends AbstractParser {
             JOURNAL_TAG, MEDLINE_TAG, PUBMED_TAG, REMARK_TAG
     };
     private static final String[] IGNORE_TAGS = {BASE_TAG,};
-    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
 
     private static final Pattern startStopPattern = Pattern.compile("[<>]*(\\d+)\\.\\.[<>]*(\\d+)");
     private static final Pattern startOnlyPattern = Pattern.compile("\\d+");
@@ -616,14 +612,15 @@ public class IceGenbankParser extends AbstractParser {
             result.setCircular(false);
         }
 
-        String dateString = locusChunks[locusChunks.length - 1].trim();
-        try {
-            result.setDate(simpleDateFormat.parse(dateString));
-        } catch (ParseException e1) {
-            getErrors().add("Invalid date format: " + dateString + ". Setting today's date.");
-            hasErrors = true;
-            result.setDate(new Date());
-        }
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+//        String dateString = locusChunks[locusChunks.length - 1].trim();
+//        try {
+//            result.setDate(simpleDateFormat.parse(dateString));
+//        } catch (ParseException e1) {
+//            getErrors().add("Invalid date format: " + dateString + ". Setting today's date.");
+//            hasErrors = true;
+//            result.setDate(new Date());
+//        }
 
         if (Arrays.asList(locusChunks).indexOf("bp") == 3) {
             result.setLocusName(locusChunks[1]);

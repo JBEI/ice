@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -110,7 +110,7 @@ public class PreferencesPanel extends Composite {
         return panel;
     }
 
-    public void updateConfigSetting(PreferenceKey key, int row, String value) {
+    public void updateConfigSetting(int row, String value) {
         table.setHTML(row, 1, value);
     }
 }

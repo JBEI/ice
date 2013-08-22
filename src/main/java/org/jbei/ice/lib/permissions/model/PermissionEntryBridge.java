@@ -5,8 +5,8 @@ import org.hibernate.search.bridge.FieldBridge;
 import org.hibernate.search.bridge.LuceneOptions;
 
 /**
- * Permission bridge that indexes all accounts that can read the entry
- * that the indexes will be contained in
+ * Permission bridge that indexes the fields needed by the
+ * {@link org.jbei.ice.lib.entry.filter.EntrySecurityFilterFactory}
  *
  * @author Hector Plahar
  */
@@ -21,30 +21,27 @@ public class PermissionEntryBridge implements FieldBridge {
         if (permission.getEntry() == null && permission.getFolder() == null)
             return;
 
-        String fieldName = null;
+        String fieldName;
         if (permission.isCanRead() || permission.isCanWrite()) {
             fieldName = "canRead";
-        }
-
-        if (fieldName == null)
+        } else
             return;
 
         // account
         if (permission.getAccount() != null) {
-            luceneOptions.addFieldToDocument(fieldName, permission.getAccount().getEmail(), document);
+            String existingFieldValue = document.get(fieldName);
+            if (!permission.getAccount().getEmail().equalsIgnoreCase(existingFieldValue))
+                luceneOptions.addFieldToDocument(fieldName, permission.getAccount().getEmail(), document);
         }
 
         // group
         if (permission.getGroup() != null) {
-            luceneOptions.addFieldToDocument(fieldName, permission.getGroup().getUuid(), document);
+            String existingFieldValue = document.get(fieldName);
+            if (!permission.getGroup().getUuid().equalsIgnoreCase(existingFieldValue))
+                luceneOptions.addFieldToDocument(fieldName, permission.getGroup().getUuid(), document);
         }
 
-        // folder
-        if (permission.getFolder() != null) {
-            luceneOptions.addFieldToDocument(fieldName, "f_" + permission.getFolder().getId(), document);
-        }
-
-        // entry
-        luceneOptions.addFieldToDocument(fieldName, permission.getEntry().getOwnerEmail(), document);
+        // TODO: adding entries to a folder that has permission granted to someone does not trigger this
+        // bridge until an entry is edited.
     }
 }

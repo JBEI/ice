@@ -12,6 +12,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
 /**
+ * Sheet cell for data fields
+ *
  * @author Hector Plahar
  */
 public class DateInputCell extends SheetCell {
@@ -20,7 +22,6 @@ public class DateInputCell extends SheetCell {
     private int currentRow;
 
     public DateInputCell() {
-
         dateBox = new DateBox();
         dateBox.setStyleName("cell_input");
         dateBox.getDatePicker().setStyleName("font-70em");
