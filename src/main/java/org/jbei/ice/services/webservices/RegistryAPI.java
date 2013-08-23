@@ -293,11 +293,8 @@ public class RegistryAPI implements IRegistryAPI {
 
         try {
             SequenceController sequenceController = ControllerFactory.getSequenceController();
-            FeaturedDNASequence sequence = sequenceController.sequenceToDNASequence(
-                    sequenceController.getByEntry(ControllerFactory.getEntryController()
-                                                                   .getByRecordId(account, entryId)));
             log("User '" + account.getEmail() + "' pulled sequence: '" + entryId + "'");
-            return sequence;
+            return sequenceController.retrievePartSequence(account, entryId);
         } catch (Exception e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
