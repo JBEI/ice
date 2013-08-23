@@ -23,6 +23,7 @@ import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResult;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 
@@ -60,10 +61,10 @@ public class SearchController {
                 continue;
             }
 
-            String url = name.getNamespaceURI();
+            String myUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
             String apiKey;
             try {
-                apiKey = ControllerFactory.getWebController().getApiKey(url);
+                apiKey = ControllerFactory.getWebController().getApiKey(name.getNamespaceURI());
                 if (apiKey == null)
                     continue;
             } catch (ControllerException e) {
@@ -73,9 +74,9 @@ public class SearchController {
             try {
                 IRegistryAPI api = service.getPort(name, IRegistryAPI.class);
                 if (results == null)
-                    results = api.runSearch(url, apiKey, query);
+                    results = api.runSearch(myUrl, apiKey, query);
                 else {
-                    SearchResults tmpResults = api.runSearch(url, apiKey, query);
+                    SearchResults tmpResults = api.runSearch(myUrl, apiKey, query);
                     if (tmpResults.getResultCount() == 0)
                         continue;
 

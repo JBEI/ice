@@ -229,6 +229,24 @@ public class SequenceController {
         return byteStream.toString();
     }
 
+    public FeaturedDNASequence retrievePartSequence(Account account, String recordId) throws ControllerException {
+        Entry entry;
+        try {
+            entry = ControllerFactory.getEntryController().getByRecordId(account, recordId);
+        } catch (PermissionException e) {
+            throw new ControllerException("No permission to view part");
+        }
+
+        if (entry == null)
+            throw new ControllerException("The part could not be located");
+
+        Sequence sequence = getByEntry(entry);
+        if (sequence == null)
+            return null;
+
+        return sequenceToDNASequence(sequence);
+    }
+
     /**
      * Generate a {@link FeaturedDNASequence} from a given {@link Sequence} object.
      *
