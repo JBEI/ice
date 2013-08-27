@@ -284,8 +284,9 @@ public class ModelToInfoFactory {
             info.setFundingSource(source.getFundingSource().getFundingSource());
 
             while (iterator.hasNext()) {
-                String pi = ((EntryFundingSource) iterator.next()).getFundingSource().getPrincipalInvestigator();
-                String fs = ((EntryFundingSource) iterator.next()).getFundingSource().getFundingSource();
+                EntryFundingSource next = (EntryFundingSource) iterator.next();
+                String pi = next.getFundingSource().getPrincipalInvestigator();
+                String fs = next.getFundingSource().getFundingSource();
 
                 if (pi != null && !pi.trim().isEmpty()) {
                     info.setPrincipalInvestigator(info.getPrincipalInvestigator() + ", " + pi);
