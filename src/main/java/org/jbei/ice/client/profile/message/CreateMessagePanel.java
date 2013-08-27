@@ -15,8 +15,6 @@ import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -185,6 +183,7 @@ public class CreateMessagePanel extends Composite {
     }
 
     public void showDialog(boolean show) {
+        recipientWidget.reset();
         if (show)
             dialogBox.center();
         else
@@ -252,13 +251,6 @@ public class CreateMessagePanel extends Composite {
 
             addToHandler = new PopupHandler(table, toLabel.getElement(), false);
             toLabel.addClickHandler(addToHandler);
-            addToHandler.setCloseHandler(new CloseHandler<PopupPanel>() {
-
-                @Override
-                public void onClose(CloseEvent<PopupPanel> popupPanelCloseEvent) {
-                    model.clear();
-                }
-            });
 
             dataProvider = new ListDataProvider<OptionSelect>();
             model = new MultiSelectionModel<OptionSelect>();
@@ -315,5 +307,9 @@ public class CreateMessagePanel extends Composite {
 //            return wrapper;
 //        }
 
+        public void reset() {
+            model.clear();
+
+        }
     }
 }

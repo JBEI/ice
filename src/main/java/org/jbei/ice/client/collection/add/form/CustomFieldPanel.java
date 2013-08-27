@@ -28,9 +28,9 @@ import com.google.gwt.user.client.ui.Widget;
 public class CustomFieldPanel extends Composite {
 
     private final LinkedHashMap<Integer, Parameter> map = new LinkedHashMap<Integer, Parameter>();
-    private int row;
     private final FlexTable table;
     private final Button addFieldButton;
+    private int mapKey;
 
     public CustomFieldPanel() {
         this.table = new FlexTable();
@@ -57,23 +57,26 @@ public class CustomFieldPanel extends Composite {
     }
 
     private void addRow() {
-        Parameter param = new Parameter(row, new RemoveParameterHandler(row));
+        int row = map.size();
+        Parameter param = new Parameter(mapKey, new RemoveParameterHandler(mapKey));
         table.setWidget(row, 0, param);
-        map.put(row, param);
-        row += 1;
+        map.put(mapKey, param);
+        mapKey += 1;
     }
 
     public void setFields(ArrayList<CustomField> customFields) {
         if (customFields == null || customFields.isEmpty())
             return;
 
+        int row = map.size();
         for (CustomField field : customFields) {
-            Parameter param = new Parameter(row, new RemoveParameterHandler(row));
+            Parameter param = new Parameter(mapKey, new RemoveParameterHandler(mapKey));
             param.setName(field.getName());
             param.setValue(field.getValue());
             table.setWidget(row, 0, param);
-            map.put(row, param);
+            map.put(mapKey, param);
             row += 1;
+            mapKey += 1;
         }
     }
 

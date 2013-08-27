@@ -551,6 +551,14 @@ public class EntryController {
         info.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
         info.setHasOriginalSequence(hasOriginalSequence);
+        info.setOwnerId(0);
+        info.setCreatorId(0);
+
+        if (hasSequence) {
+            String script = PigeonSBOLv.generatePigeonScript(sequenceController.getByEntry(entry));
+            info.setSbolVisualURL(script);
+        }
+
         return info;
     }
 
@@ -934,6 +942,25 @@ public class EntryController {
             info.setHasSequence(hasSequence);
             boolean hasOriginalSequence = api.hasUploadedSequence(info.getRecordId());
             info.setHasOriginalSequence(hasOriginalSequence);
+
+            if (hasSequence && info.getSbolVisualURL() != null) {
+                // retrieve cached pigeon image or generate and cache
+                String tmpDir = ControllerFactory.getConfigurationController()
+                                                 .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+
+                String hash = Utils.generateUUID();
+                URI uri = PigeonSBOLv.postToPigeon(info.getSbolVisualURL());
+                if (uri != null) {
+                    try {
+                        IOUtils.copy(uri.toURL().openStream(),
+                                     new FileOutputStream(tmpDir + File.separatorChar + hash + ".png"));
+                        info.setSbolVisualURL(hash + ".png");
+                    } catch (IOException e) {
+                        Logger.error(e);
+                    }
+                }
+            }
+
             return info;
         } catch (ServiceException e) {
             Logger.error(e);

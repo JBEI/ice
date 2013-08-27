@@ -3,7 +3,6 @@ package org.jbei.ice.client.entry.display.view;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jbei.ice.client.entry.display.EntryPresenter.MenuSelectionHandler;
 import org.jbei.ice.client.entry.display.view.MenuItem.Menu;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,6 +13,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLTable;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
@@ -153,7 +153,7 @@ public class EntryViewMenu extends Composite implements HasClickHandlers {
         return format.format(l);
     }
 
-    public void setSelectionHandler(MenuSelectionHandler menuSelectionHandler) {
+    public void setSelectionHandler(SelectionChangeEvent.Handler menuSelectionHandler) {
         if (selectionRegistration != null)
             selectionRegistration.removeHandler();
         selectionRegistration = selectionModel.addSelectionChangeHandler(menuSelectionHandler);

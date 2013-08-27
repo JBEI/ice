@@ -129,6 +129,9 @@ public class PigeonSBOLv {
     }
 
     public static String generatePigeonScript(Sequence sequence) {
+        if (sequence == null)
+            return "# Arcs";
+
         SBOLVisitor visitor = new SBOLVisitor();
         visitor.visit(sequence);
 

@@ -387,6 +387,10 @@ public class PartData implements IDTOModel {
         return comments;
     }
 
+    /**
+     * @return the url for the SBOL Visual image or the actual pigeon script if being retrieved from
+     *         another registry
+     */
     public String getSbolVisualURL() {
         return sbolVisualURL;
     }
