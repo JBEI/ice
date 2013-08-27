@@ -1,5 +1,8 @@
 package org.jbei.ice.lib.entry.filter;
 
+import java.io.IOException;
+import java.util.HashSet;
+
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
@@ -10,9 +13,6 @@ import org.hibernate.search.annotations.Factory;
 import org.hibernate.search.annotations.Key;
 import org.hibernate.search.filter.FilterKey;
 import org.hibernate.search.filter.StandardFilterKey;
-
-import java.io.IOException;
-import java.util.HashSet;
 
 /**
  * @author Hector Plahar

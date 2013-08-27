@@ -573,6 +573,7 @@ public class BulkUploadController {
                 // convert entries to pending
                 for (Entry entry : draft.getContents()) {
                     entry.setVisibility(Visibility.PENDING.getValue());
+
                     entryController.update(account, entry);
 
                     if (isStrainWithPlasmid && entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getName())
@@ -650,6 +651,12 @@ public class BulkUploadController {
         // TODO : this needs to go into a task that auto updates
         for (Entry entry : bulkUpload.getContents()) {
             entry.setVisibility(Visibility.OK.getValue());
+            Set<Entry> linked = entry.getLinkedEntries();
+            Entry plasmid = null;
+            if (linked != null && !linked.isEmpty()) {
+                plasmid = (Entry) linked.toArray()[0];
+                plasmid.setVisibility(Visibility.OK.getValue());
+            }
 
             // set permissions
             for (Permission permission : bulkUpload.getPermissions()) {
@@ -660,8 +667,12 @@ public class BulkUploadController {
                 access.setArticle(AccessPermission.Article.GROUP);
                 Permission entryPermission = ControllerFactory.getPermissionController().addPermission(account, access);
                 entry.getPermissions().add(entryPermission);
+                if (plasmid != null)
+                    plasmid.getPermissions().add(entryPermission);
             }
             entryController.update(account, entry);
+            if (plasmid != null)
+                entryController.update(account, plasmid);
         }
 
         // when done approving, delete the bulk upload record but not the entries associated with it.

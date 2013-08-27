@@ -1,7 +1,8 @@
 package org.jbei.ice.client.event;
 
-import com.google.gwt.event.shared.GwtEvent;
 import org.jbei.ice.client.collection.presenter.EntryContext;
+
+import com.google.gwt.event.shared.GwtEvent;
 
 /**
  * Used to show a list of entries in a specific context. E.g. when viewing individual entries in a collection,

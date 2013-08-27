@@ -11,7 +11,8 @@ import org.jbei.ice.lib.models.SequenceFeature;
  */
 public class SequenceVisitor {
 
-    public SequenceVisitor() {}
+    public SequenceVisitor() {
+    }
 
     public void visit(Sequence sequence) {
         Set<SequenceFeature> features = sequence.getSequenceFeatures();

@@ -459,13 +459,10 @@ public class SheetPresenter {
 
         // for each row
         for (int row = 0; row < view.getSheetRowCount(); row += 1) {
-
             boolean atLeastOneCellHasRowData = false;
 
             int col = 0;
             for (CellColumnHeader header : headers.getHeaders()) {
-                if (header.isLocked())
-                    continue;
                 SheetCell cell = header.getCell();
                 view.clearErrorCell(row, col);
                 atLeastOneCellHasRowData = (cell.getDataForRow(row) != null);

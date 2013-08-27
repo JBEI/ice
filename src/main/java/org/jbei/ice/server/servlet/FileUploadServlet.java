@@ -50,10 +50,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 /**
+ * <<<<<<< HEAD
+ * GWTUpload servlet that handles file uploads.
+ * =======
  * Servlet that handles file uploads. If an upload type (e.g. sequence or attachment)
  * is associated with an entry if the entry id (EID) passed is valid. If no valid EID is provided
  * then the file is simply uploaded and the file id (essentially a unique identifier based on type)
  * is returned
+ * >>>>>>> release-3.4
  *
  * @author Hector Plahar
  */
@@ -251,6 +255,7 @@ public class FileUploadServlet extends HttpServlet {
 
     public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, EntryType type,
             EntryAddType addType, long bid) {
+
         BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(type);
         update.setBulkUploadId(bid);
         try {
@@ -258,6 +263,7 @@ public class FileUploadServlet extends HttpServlet {
             boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
                     && type == EntryType.PLASMID);
             Entry entry = ControllerFactory.getEntryController().get(account, update.getEntryId());
+
             if (isStrainWithPlasmidPlasmid && !entry.getLinkedEntries().isEmpty()) {
                 entry = (Entry) entry.getLinkedEntries().toArray()[0];
             }

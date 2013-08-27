@@ -1,10 +1,11 @@
 package org.jbei.ice.client.common;
 
+import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.Page;
+
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.Page;
 
 /**
  * Menu right below main header on top of all protected pages

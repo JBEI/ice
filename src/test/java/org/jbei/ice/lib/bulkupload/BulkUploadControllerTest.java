@@ -256,7 +256,15 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
         autoUpdate.getKeyValue().put(EntryField.PI, "test");
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "select");
-        autoUpdate.getKeyValue().put(EntryField.STATUS, "Complete");
+
+        // use preference for the status
+        PreferenceInfo preference = new PreferenceInfo();
+        preference.setAdd(true);
+        preference.setKey(EntryField.STATUS.toString());
+        preference.setValue("Complete");
+
+        long id = controller.updatePreference(account, autoUpdate.getBulkUploadId(), EntryAddType.STRAIN, preference);
+        Assert.assertEquals(autoUpdate.getBulkUploadId(), id);
 
         // validation should fail because of this
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, "BLS1");
@@ -279,6 +287,9 @@ public class BulkUploadControllerTest {
         Assert.assertEquals(entryInfo.getName(), "JBEI-0001");
         Assert.assertEquals(entryInfo.getShortDescription(), "this is a test");
         Assert.assertEquals(entryInfo.getPrincipalInvestigator(), "test");
+        Assert.assertEquals(entryInfo.getSelectionMarkers(), "select");
+        Assert.assertEquals(entryInfo.getBioSafetyLevel(), new Integer(BioSafetyOption.LEVEL_TWO.getValue()));
+        Assert.assertEquals(entryInfo.getStatus(), "Complete");
     }
 
     @Test
@@ -349,6 +360,48 @@ public class BulkUploadControllerTest {
         Assert.assertEquals("test", fundingSource.getFundingSource().getPrincipalInvestigator());
         Assert.assertEquals("JBEI", fundingSource.getFundingSource().getFundingSource());
         Assert.assertEquals("JBEI-0001", entry.getName());
+
+        // test strain with plasmid
+        autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
+        autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0002");
+        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "strain for plasmid");
+        autoUpdate.getKeyValue().put(EntryField.PI, "nathan hillson");
+        autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.IN_PROGRESS.toString());
+        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_ONE.getValue());
+        autoUpdate.getKeyValue().put(EntryField.STRAIN_SELECTION_MARKERS, "select");
+        autoUpdate.getKeyValue().put(EntryField.PLASMID_NAME, "pst100");
+        autoUpdate.getKeyValue().put(EntryField.PLASMID_SUMMARY, "plasmid for strain");
+        autoUpdate.getKeyValue().put(EntryField.PLASMID_SELECTION_MARKERS, "plasmid select");
+
+        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        Assert.assertNotNull(autoUpdate);
+        Assert.assertTrue(autoUpdate.getEntryId() > 0);
+        Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
+        Assert.assertTrue(autoUpdate.getLastUpdate() != null);
+
+        long id = autoUpdate.getEntryId();
+        Entry strain = entryController.get(account, id);
+        Set<Entry> linked = strain.getLinkedEntries();
+        Assert.assertEquals(1, linked.size());
+
+        Entry plasmid = (Entry) linked.toArray()[0];
+        Assert.assertTrue(strain.getVisibility() == plasmid.getVisibility() &&
+                                  plasmid.getVisibility() == Visibility.DRAFT.getValue());
+
+        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
+        strain = entryController.get(account, id);
+        linked = strain.getLinkedEntries();
+        plasmid = (Entry) linked.toArray()[0];
+        Assert.assertTrue(strain.getVisibility() == plasmid.getVisibility() &&
+                                  plasmid.getVisibility() == Visibility.PENDING.getValue());
+
+        Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
+
+        strain = entryController.get(account, id);
+        linked = strain.getLinkedEntries();
+        plasmid = (Entry) linked.toArray()[0];
+        Assert.assertTrue(strain.getVisibility() == plasmid.getVisibility() &&
+                                  plasmid.getVisibility() == Visibility.OK.getValue());
     }
 
     @Test

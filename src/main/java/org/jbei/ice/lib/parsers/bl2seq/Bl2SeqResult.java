@@ -17,7 +17,7 @@ public class Bl2SeqResult {
     private final int orientation; //0 for +/+, 1 for +/-
 
     public Bl2SeqResult(int score, int queryStart, int queryEnd, String querySequence,
-                        int subjectStart, int subjectEnd, String subjectSequence, int orientation) {
+            int subjectStart, int subjectEnd, String subjectSequence, int orientation) {
         this.score = score;
         this.queryStart = queryStart;
         this.queryEnd = queryEnd;

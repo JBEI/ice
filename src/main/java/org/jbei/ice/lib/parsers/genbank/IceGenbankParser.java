@@ -1,19 +1,28 @@
 package org.jbei.ice.lib.parsers.genbank;
 
-import org.apache.commons.io.IOUtils;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.*;
+import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNAFeatureLocation;
+import org.jbei.ice.lib.vo.DNAFeatureNote;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Genbank parser and generator.
@@ -357,7 +366,7 @@ public class IceGenbankParser extends AbstractParser {
                         complement = true;
                         locationString = locationString.trim();
                         locationString = locationString.substring(11, locationString.length() - 1)
-                                .trim();
+                                                       .trim();
                     }
 
                     genbankLocations = parseGenbankLocation(locationString);
@@ -513,7 +522,7 @@ public class IceGenbankParser extends AbstractParser {
      * @param qualifierItem
      */
     private void addQualifierItemToDnaFeatureNote(DNAFeatureNote dnaFeatureNote,
-                                                  StringBuilder qualifierItem) {
+            StringBuilder qualifierItem) {
         String qualifierValue;
         qualifierValue = qualifierItem.toString();
         if (qualifierValue.startsWith("\"") && qualifierValue.endsWith("\"")) {

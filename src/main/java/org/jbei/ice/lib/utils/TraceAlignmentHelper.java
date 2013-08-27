@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.utils;
 
+import java.util.List;
+
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
@@ -10,8 +12,6 @@ import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.vo.TraceData;
-
-import java.util.List;
 
 /**
  * Utility methods for sequence trace alignments.
@@ -42,13 +42,13 @@ public class TraceAlignmentHelper {
                     .setQueryStart(traceSequence.getTraceSequenceAlignment().getQueryStart());
             resultTraceData.setQueryEnd(traceSequence.getTraceSequenceAlignment().getQueryEnd());
             resultTraceData.setSubjectStart(traceSequence.getTraceSequenceAlignment()
-                    .getSubjectStart());
+                                                         .getSubjectStart());
             resultTraceData
                     .setSubjectEnd(traceSequence.getTraceSequenceAlignment().getSubjectEnd());
             resultTraceData.setQueryAlignment(traceSequence.getTraceSequenceAlignment()
-                    .getQueryAlignment());
+                                                           .getQueryAlignment());
             resultTraceData.setSubjectAlignment(traceSequence.getTraceSequenceAlignment()
-                    .getSubjectAlignment());
+                                                             .getSubjectAlignment());
         }
 
         return resultTraceData;
@@ -64,7 +64,7 @@ public class TraceAlignmentHelper {
      * @return TraceSequence object.
      */
     public static TraceSequence traceDataToTraceSequence(TraceData traceData, String depositor,
-                                                         Entry entry) {
+            Entry entry) {
         TraceSequence resultTraceSequence = new TraceSequence();
 
         if (traceData == null) {
@@ -114,7 +114,7 @@ public class TraceAlignmentHelper {
      * @return {@link TraceData} object.
      */
     public static TraceData alignSequences(String querySequence, String traceSequence,
-                                           String traceFileName, boolean isCircular) {
+            String traceFileName, boolean isCircular) {
         int querySequenceLength = querySequence.length();
 
         String bl2seqOutput = "";
@@ -182,10 +182,10 @@ public class TraceAlignmentHelper {
                 }
 
                 TraceData resultTraceData = new TraceData(traceFileName, traceSequence,
-                        maxBl2SeqResult.getScore(), strand, queryStart, queryEnd,
-                        subjectStart,
-                        subjectEnd, maxBl2SeqResult.getQuerySequence(),
-                        maxBl2SeqResult.getSubjectSequence());
+                                                          maxBl2SeqResult.getScore(), strand, queryStart, queryEnd,
+                                                          subjectStart,
+                                                          subjectEnd, maxBl2SeqResult.getQuerySequence(),
+                                                          maxBl2SeqResult.getSubjectSequence());
 
                 return resultTraceData;
             } else {

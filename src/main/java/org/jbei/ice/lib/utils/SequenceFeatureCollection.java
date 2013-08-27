@@ -1,11 +1,15 @@
 package org.jbei.ice.lib.utils;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.SequenceFeature;
-
-import java.io.Serializable;
-import java.util.*;
 
 /**
  * Container class for {@link SequenceFeature} objects.

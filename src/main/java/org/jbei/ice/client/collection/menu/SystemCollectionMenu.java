@@ -1,9 +1,9 @@
 package org.jbei.ice.client.collection.menu;
 
-import org.jbei.ice.client.ClientController;
-
 import java.util.Arrays;
 import java.util.List;
+
+import org.jbei.ice.client.ClientController;
 
 /**
  * @author Hector Plahar

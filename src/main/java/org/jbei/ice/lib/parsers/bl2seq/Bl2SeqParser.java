@@ -93,7 +93,7 @@ public class Bl2SeqParser {
                         ArrayList<String> subjectDataSequencePartial = parseSequenceLine(line);
 
                         subjectDataSequence.set(2,
-                                subjectDataSequence.get(2).concat(subjectDataSequencePartial.get(2)));
+                                                subjectDataSequence.get(2).concat(subjectDataSequencePartial.get(2)));
                         subjectDataSequence.set(1, subjectDataSequencePartial.get(1));
                     }
 
@@ -105,9 +105,9 @@ public class Bl2SeqParser {
                     if (queryDataSequence != null && score >= MIN_SCORE) {
                         Bl2SeqResult bl2seqResult = new Bl2SeqResult(score, new Integer(
                                 queryDataSequence.get(0)), new Integer(queryDataSequence.get(1)),
-                                queryDataSequence.get(2), new Integer(
+                                                                     queryDataSequence.get(2), new Integer(
                                 subjectDataSequence.get(0)), new Integer(subjectDataSequence.get(1)),
-                                subjectDataSequence.get(2), orientation);
+                                                                     subjectDataSequence.get(2), orientation);
 
                         results.add(bl2seqResult);
                     }

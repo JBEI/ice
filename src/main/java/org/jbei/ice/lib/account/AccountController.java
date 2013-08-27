@@ -26,7 +26,6 @@ import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.Emailer;
-import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -152,13 +151,7 @@ public class AccountController {
         // generate salt and encrypt password before storing
         String salt = Utils.generateSaltForUserAccount();
         String newPassword = Utils.generateUUID().substring(24);
-        String encryptedPassword;
-        try {
-            encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
-        } catch (UtilityException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
+        String encryptedPassword = AccountUtils.encryptPassword(newPassword, salt);
 
         Account account = AccountUtils.fromDTO(info);
         account.setPassword(encryptedPassword);
@@ -316,24 +309,7 @@ public class AccountController {
             throw new ControllerException("Failed to verify password for null Account!");
         }
 
-        Boolean result;
-
-        try {
-            result = account.getPassword().equals(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
-
-            // update encryption if needed
-            if (!result) {
-                result = account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()));
-                if (result) {
-                    account.setPassword(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
-                    save(account);
-                }
-            }
-        } catch (UtilityException e) {
-            throw new ControllerException(e);
-        }
-
-        return result;
+        return account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()));
     }
 
     /**

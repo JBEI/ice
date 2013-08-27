@@ -408,6 +408,8 @@ public class IceXmlSerializer {
 
 
 
+
+
                                                                                                        .readFileToByteArray(
                                                                                                                traceFile));
                 } catch (IOException | ControllerException e) {
