@@ -42,7 +42,7 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResult> {
         // selection column
         columns.add(super.addSelectionColumn());
 
-        columns.add(addScoreColumn());
+        columns.add(addScoreColumn(true));
 
         // type column
         columns.add(super.addTypeColumn(true));
@@ -141,7 +141,7 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResult> {
         return ownerColumn;
     }
 
-    protected DataTableColumn<SearchResult, SearchResult> addScoreColumn() {
+    protected DataTableColumn<SearchResult, SearchResult> addScoreColumn(boolean sort) {
 
         SearchRelevanceCell<SearchResult> cell = new SearchRelevanceCell<SearchResult>() {
             @Override
@@ -185,7 +185,7 @@ public class SearchResultsTable extends HasEntryDataTable<SearchResult> {
             }
         };
 
-        scoreColumn.setSortable(true);
+        scoreColumn.setSortable(sort);
         this.addColumn(scoreColumn, "Relevance");
         this.setColumnWidth(scoreColumn, 90, Unit.PX);
         return scoreColumn;
