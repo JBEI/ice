@@ -255,7 +255,8 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     @SuppressWarnings("unchecked")
-    public SequenceViewPanelPresenter setEntryInfoForView(PartData info, ServiceDelegate<PartSample> handler) {
+    public SequenceViewPanelPresenter setEntryInfoForView(PartData info, ServiceDelegate<PartSample> handler,
+            boolean local) {
         boolean showEdit = info.isCanEdit();
         currentView = viewCache.get(info.getType());
         if (currentView == null) {
@@ -267,8 +268,10 @@ public class EntryView extends Composite implements IEntryView {
 
         deleteSequenceHandler.setEntryId(info.getId());
         currentView.getSequencePanel().setDeleteHandler(deleteSequenceHandler);
-        entryAction.setVisible(true);
-        entryAction.showEdit(showEdit);
+        if (local) {
+            entryAction.setVisible(true);
+            entryAction.showEdit(showEdit);
+        }
 
         mainContent.setWidget(1, 0, currentView);
         SequenceViewPanel sequenceViewPanel = currentView.getSequencePanel();
