@@ -244,8 +244,8 @@ public class SearchPresenter extends AbstractPresenter {
         @Override
         protected ArrayList<DataTableColumn<SearchResult, ?>> createColumns(ServiceDelegate<SearchResult> delegate) {
             ArrayList<DataTableColumn<SearchResult, ?>> columns = new ArrayList<DataTableColumn<SearchResult, ?>>();
-            columns.add(addScoreColumn());
-            columns.add(super.addTypeColumn(true));
+            columns.add(addScoreColumn(false));
+            columns.add(super.addTypeColumn(false));
             columns.add(addPartIdColumn(delegate, false, 120, com.google.gwt.dom.client.Style.Unit.PX));
             columns.add(super.addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
             columns.add(addSummaryColumn());
@@ -253,7 +253,7 @@ public class SearchPresenter extends AbstractPresenter {
             columns.add(addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
             super.addHasAttachmentColumn();
             super.addHasSequenceColumn();
-            columns.add(super.addCreatedColumn(true));
+            columns.add(super.addCreatedColumn(false));
             return columns;
         }
 
