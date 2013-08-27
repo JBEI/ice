@@ -2,6 +2,7 @@ package org.jbei.ice.client.profile.widget;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.client.profile.ChangePasswordPanel;
@@ -142,5 +143,12 @@ public class ProfilePanel extends Composite implements IUserProfilePanel {
         changePasswordPanel.addSubmitClickHandler(submitHandler);
         changePasswordPanel.addCancelHandler(cancelHandler);
         table.setWidget(1, 0, changePasswordPanel);
+    }
+
+    public void warnMessageNotSent() {
+        FeedbackPanel panel = new FeedbackPanel("300px");
+        panel.setFailureMessage("Some or all of your messages could not be sent");
+        panel.setVisible(true);
+        table.setWidget(2, 0, panel);
     }
 }

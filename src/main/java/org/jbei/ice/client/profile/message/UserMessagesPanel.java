@@ -5,6 +5,7 @@ import java.util.List;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
@@ -20,7 +21,6 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -34,28 +34,46 @@ public class UserMessagesPanel extends Composite implements IUserProfilePanel {
     private Button createMessage;
     private final CreateMessagePanel createMessagePanel;
     private final SimplePager pager;
+    private final FlexTable vPanel;
 
     public UserMessagesPanel(Delegate<MessageInfo> delegate) {
         layout = new FlexTable();
 
         this.table = new MessageDataTable(delegate);
+
         layout.setWidth("100%");
-        layout.setWidget(0, 0, table);
+
         pager = new SimplePager();
-        layout.setWidget(1, 0, pager);
-        layout.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
         pager.setDisplay(table);
         pager.setPageSize(15);
 
-        VerticalPanel vPanel = new VerticalPanel();
-        vPanel.setWidth("100%");
         createMessage = new Button("<i class=\"blue " + FAIconType.ENVELOPE.getStyleName() + "\"></i>"
                                            + "<i style=\"vertical-align: sub; font-size: 7px;\" class=\""
                                            + FAIconType.PLUS.getStyleName() + "\"></i>&nbsp; Compose");
-        vPanel.add(new HTML("&nbsp;"));
-        vPanel.add(createMessage);
-        vPanel.add(new HTML("&nbsp;"));
-        vPanel.add(layout);
+
+        layout.setWidget(0, 0, table);
+        layout.setWidget(1, 0, pager);
+        layout.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
+
+        vPanel = new FlexTable();
+        vPanel.setWidth("100%");
+
+        vPanel.setHTML(0, 0, "&nbsp;");
+        vPanel.getFlexCellFormatter().setColSpan(0, 0, 2);
+
+        vPanel.setWidget(1, 0, createMessage);
+        vPanel.getFlexCellFormatter().setWidth(1, 0, "620px");
+        FeedbackPanel panel = new FeedbackPanel("340px");
+        panel.setFailureMessage("Could not sent message to one or more recipients");
+        vPanel.setWidget(1, 1, panel);
+        vPanel.getFlexCellFormatter().setVisible(1, 1, false);
+
+        vPanel.setHTML(2, 0, "&nbsp;");
+        vPanel.getFlexCellFormatter().setColSpan(2, 0, 2);
+
+        vPanel.setWidget(3, 0, layout);
+        vPanel.getFlexCellFormatter().setColSpan(3, 0, 2);
+
         initWidget(vPanel);
 
         createMessagePanel = new CreateMessagePanel();
@@ -107,6 +125,10 @@ public class UserMessagesPanel extends Composite implements IUserProfilePanel {
 
     public void refresh() {
         table.redraw();
+    }
+
+    public void showErrorMessage(boolean show) {
+        vPanel.getFlexCellFormatter().setVisible(1, 1, show);
     }
 
     /**

@@ -1684,8 +1684,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Account account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": sending message");
-            ControllerFactory.getMessageController().sendMessage(account, info);
-            return true;
+            return ControllerFactory.getMessageController().sendMessage(account, info);
         } catch (ControllerException ce) {
             return false;
         }

@@ -78,6 +78,7 @@ public class MessageDAO extends HibernateRepository<Message> {
                     builder.append(group.getId());
                     if (i < size - 1)
                         builder.append(", ");
+                    i += 1;
                 }
 
                 builder.append("))");
@@ -124,6 +125,7 @@ public class MessageDAO extends HibernateRepository<Message> {
                     builder.append(group.getId());
                     if (i < size - 1)
                         builder.append(", ");
+                    i += 1;
                 }
 
                 builder.append("))");
