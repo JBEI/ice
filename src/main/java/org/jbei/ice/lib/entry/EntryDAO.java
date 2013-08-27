@@ -222,10 +222,11 @@ public class EntryDAO extends HibernateRepository<Entry> {
         Session session = currentSession();
 
         try {
-            Criteria criteria = session.createCriteria(Entry.class.getName())
-                                       .add(Restrictions.eq("name", name))
-                                       .add(Restrictions.eq("visibility", Visibility.OK.getValue()));
-            List queryResult = criteria.list();
+            Query query = session.createQuery("from " + Entry.class.getName() + " where name=:name AND visibility=:v");
+            query.setParameter("name", name);
+            query.setParameter("v", Visibility.OK.getValue());
+
+            List queryResult = query.list();
             if (queryResult == null || queryResult.isEmpty()) {
                 return null;
             }
