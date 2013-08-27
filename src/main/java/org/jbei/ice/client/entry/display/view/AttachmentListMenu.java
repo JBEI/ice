@@ -30,11 +30,10 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
     private final FlexTable layout;
     private final Button saveAttachment;
-    private final Widget attachmentForm;
+    private final VerticalPanel formPanel;
     private final AttachmentListMenuPresenter presenter;
     private final Icon quickAdd;
     private long entryId;
-    private final TextArea attachmentDescription;
     private HasAttachmentDeleteHandler handler;
     private HTML cancelUpload;
 
@@ -53,22 +52,22 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
         quickAdd = new Icon(FAIconType.PLUS_SIGN);
         quickAdd.addStyleName("edit_icon");
-        attachmentDescription = new TextArea();
-        attachmentDescription.setStyleName("attachment_description_input");
-        attachmentDescription.getElement().setAttribute("placeholder", "Enter File Description");
+
 
         panel.add(quickAdd);
         panel.setWidth("100%");
         panel.setCellHorizontalAlignment(quickAdd, HasAlignment.ALIGN_RIGHT);
 
         saveAttachment = new Button();
-        attachmentForm = createAddToAttachment();
+        formPanel = new VerticalPanel();
+        createAddToAttachment();
 
         layout.setWidget(0, 0, panel);
         layout.getCellFormatter().setStyleName(0, 0, "entry_attributes_sub_header");
-        layout.setWidget(1, 0, attachmentForm);
+        layout.setWidget(1, 0, formPanel);
+        layout.getRowFormatter().setVisible(1, false);
 
-        attachmentForm.setVisible(false);
+//        attachmentForm.setVisible(false);
 
         // this is replaced when menu data is set
         layout.setHTML(2, 0, "&nbsp;");
@@ -104,14 +103,15 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
      */
     @Override
     public void switchAttachmentAddButton() {
-        if (attachmentForm == null)
+        if (formPanel == null)
             return;
 
-        if (attachmentForm.isVisible()) {
-            attachmentForm.setVisible(false);
-        } else {
-            attachmentForm.setVisible(true);
-        }
+//        if (formPanel.isVisible()) {
+//            formPanel.setVisible(false);
+//        } else {
+//            formPanel.setVisible(true);
+//        }
+        layout.getRowFormatter().setVisible(1, !layout.getRowFormatter().isVisible(1));
     }
 
     void setMenuItems(ArrayList<AttachmentItem> items, long entryId) {
@@ -171,9 +171,8 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         return presenter.getAttachmentItems();
     }
 
-    protected Widget createAddToAttachment() {
-        final VerticalPanel vPanel = new VerticalPanel();
-        vPanel.setWidth("180px");
+    protected void createAddToAttachment() {
+        formPanel.setWidth("180px");
 
         final FormPanel panel = new FormPanel();
         panel.setWidth("180px");
@@ -191,17 +190,21 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         actionPanel.add(saveAttachment, "upload_att");
         actionPanel.add(cancelUpload, "cancel_att");
 
-        vPanel.add(panel);
-        vPanel.add(attachmentDescription);
-        vPanel.add(actionPanel);
-        vPanel.setCellHorizontalAlignment(actionPanel, HasAlignment.ALIGN_RIGHT);
+        final TextArea description = new TextArea();
+        description.setStyleName("attachment_description_input");
+        description.getElement().setAttribute("placeholder", "Enter File Description");
+
+        formPanel.add(panel);
+        formPanel.add(description);
+        formPanel.add(actionPanel);
+        formPanel.setCellHorizontalAlignment(actionPanel, HasAlignment.ALIGN_RIGHT);
 
         saveAttachment.setText("Submit");
 
         panel.addSubmitHandler(new FormPanel.SubmitHandler() {
             @Override
             public void onSubmit(FormPanel.SubmitEvent event) {
-                panel.setAction(panel.getAction() + "&eid=" + entryId + "&desc=" + attachmentDescription);
+                panel.setAction(panel.getAction() + "&eid=" + entryId + "&desc=" + description.getText());
             }
         });
 
@@ -214,12 +217,12 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
                     return;
                 }
                 switchAttachmentAddButton();
-                String attDesc = attachmentDescription.getText().trim();
+                String attDesc = description.getText().trim();
                 int rowCount = layout.getRowCount();
                 AttachmentItem item = new AttachmentItem(rowCount + 1, split[1], attDesc);
                 item.setFileId(split[0]);
                 presenter.addAttachmentItem(item);
-                attachmentDescription.setVisible(true);
+                description.setVisible(true);
                 panel.reset();
             }
         });
@@ -233,7 +236,6 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
                 panel.submit();
             }
         });
-        return vPanel;
     }
 
     private class MenuCell extends Composite implements HasMouseOverHandlers, HasMouseOutHandlers {
