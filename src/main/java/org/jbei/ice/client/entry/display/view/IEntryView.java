@@ -82,7 +82,7 @@ public interface IEntryView extends IsWidget {
 
     void setSequenceDeleteHandler(ClickHandler handler);
 
-    SequenceViewPanelPresenter setEntryInfoForView(PartData info, ServiceDelegate<PartSample> delegate);
+    SequenceViewPanelPresenter setEntryInfoForView(PartData info, ServiceDelegate<PartSample> delegate, boolean local);
 
     void setAttachmentDeleteHandler(HasAttachmentDeleteHandler handler);
 

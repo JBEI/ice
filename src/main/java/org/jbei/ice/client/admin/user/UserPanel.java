@@ -254,7 +254,7 @@ public class UserPanel extends Composite implements IAdminPanel {
                     + "The password is shown below <br><br><b style=\"font-size: 16px\">"
                     + password + "</b></div>";
 
-            int row = inputTable.getRowCount() - 1;
+            int row = inputTable.getRowCount();
             inputTable.getFlexCellFormatter().setColSpan(row, 0, 2);
             inputTable.setHTML(row, 0, message);
         }

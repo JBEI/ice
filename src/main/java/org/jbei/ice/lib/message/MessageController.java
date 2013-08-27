@@ -10,7 +10,6 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
@@ -52,13 +51,15 @@ public class MessageController {
      * Sends message contained in the MessageInfo to the specified recipients. It some of the
      * recipients do not exist, the routine does its best to deliver as many as possible
      *
-     * @param sender
-     * @param info
+     * @param sender account for user sending the message
+     * @param info   details of message including recipient(s)
+     * @return false if the message fails to be sent to all the intended recipients
      * @throws ControllerException
      */
-    public void sendMessage(Account sender, MessageInfo info) throws ControllerException {
+    public boolean sendMessage(Account sender, MessageInfo info) throws ControllerException {
         if (info == null || info.getAccounts().isEmpty() && info.getUserGroups().isEmpty())
             throw new ControllerException("Cannot send message");
+        boolean success = true;
 
         Message message = new Message();
         message.setDateSent(new Date(System.currentTimeMillis()));
@@ -70,7 +71,7 @@ public class MessageController {
             for (User user : info.getAccounts()) {
                 Account account = ControllerFactory.getAccountController().getByEmail(user.getEmail());
                 if (account == null) {
-                    // TODO : send a message to send indicating that the message could not be delivered to recipient
+                    success = false;
                     continue;
                 }
                 message.getDestinationAccounts().add(account);
@@ -81,20 +82,24 @@ public class MessageController {
             for (UserGroup userGroup : info.getUserGroups()) {
                 Group group = ControllerFactory.getGroupController().getGroupById(userGroup.getId());
                 if (group == null) {
-                    continue; // TODO : send message to sender
+                    Logger.warn("Could not retrieve group with id " + userGroup.getId() + " to send message");
+                    success = false;
+                    continue;
                 }
 
-                if (group.getType() != GroupType.PRIVATE) {
-                    continue; // TODO : send message to sender
-                }
+                message.getDestinationGroups().add(group);
             }
         }
+
+        if (message.getDestinationAccounts().isEmpty() && message.getDestinationGroups().isEmpty())
+            return false;
 
         try {
             dao.save(message);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+        return success;
     }
 
     public MessageList retrieveMessages(Account requester, Account owner, int start, int count)

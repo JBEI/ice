@@ -127,8 +127,7 @@ public class UserProfilePresenter extends PanelPresenter {
 
                 @Override
                 protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                    service.updateAccountPassword(ClientController.sessionId, user.getEmail(), password,
-                                                  callback);
+                    service.updateAccountPassword(ClientController.sessionId, user.getEmail(), password, callback);
                 }
 
                 @Override
@@ -191,6 +190,8 @@ public class UserProfilePresenter extends PanelPresenter {
 
                 @Override
                 public void onSuccess(Boolean result) {
+                    if (!result)
+                        panel.warnMessageNotSent();
                 }
             }.go(eventBus);
         }

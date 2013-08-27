@@ -105,6 +105,7 @@ public class UserMessagesPresenter extends PanelPresenter {
                 @Override
                 public void onSuccess(Boolean result) {
                     panel.refresh();
+                    panel.showErrorMessage(!result);
                 }
             }.go(eventBus);
         }

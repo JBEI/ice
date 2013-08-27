@@ -61,6 +61,7 @@ public class EntryPresenter extends AbstractPresenter {
     private EntryContext currentContext;
     private EntryAddPresenter entryAddPresenter;
     private IEntryFormSubmit formSubmit;
+    private CollectionsPresenter collectionsPresenter;
 
     public EntryPresenter(final RegistryServiceAsync service, CollectionsPresenter collectionsPresenter,
             final HandlerManager eventBus, EntryContext context) {
@@ -69,6 +70,7 @@ public class EntryPresenter extends AbstractPresenter {
         this.currentContext = context;
         this.model = new EntryModel(service, this.display, eventBus);
         display.getMenu().setSelectionHandler(new MenuSelectionHandler());
+        this.collectionsPresenter = collectionsPresenter;
         if (collectionsPresenter != null)
             entryAddPresenter = new EntryAddPresenter(collectionsPresenter, EntryPresenter.this, service, eventBus);
 
@@ -257,7 +259,8 @@ public class EntryPresenter extends AbstractPresenter {
 
                 PartData nextInfo = nav.getNext(currentInfo);
                 long currentId = nextInfo.getId();
-                History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId, false);
+                if (currentContext.getPartnerUrl() == null)
+                    History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId, false);
 //                EntryPresenter.this.currentPart = nextInfo;
                 currentContext.setId(currentId);
                 currentContext.setRecordId(nextInfo.getRecordId());
@@ -454,7 +457,9 @@ public class EntryPresenter extends AbstractPresenter {
 
                 // permission (order is important here)
                 ServiceDelegate<PartSample> delegate = model.createDeleteSampleHandler();
-                SequenceViewPanelPresenter sequencePresenter = display.setEntryInfoForView(currentPart, delegate);
+                boolean isLocal = currentContext.getPartnerUrl() == null;
+                SequenceViewPanelPresenter sequencePresenter = display.setEntryInfoForView(currentPart, delegate,
+                                                                                           isLocal);
                 display.getPermissionsWidget().setPermissionData(result.getAccessPermissions(), new DeletePermission());
                 new PasteSequenceDelegate(sequencePresenter);
 
@@ -467,6 +472,8 @@ public class EntryPresenter extends AbstractPresenter {
 
                 // show/hide sample button
                 display.setUserCanEdit(currentPart.isCanEdit());
+                collectionsPresenter.getView().setCanMove(currentContext.getPartnerUrl() == null);
+                collectionsPresenter.getView().enableExportAs(currentContext.getPartnerUrl() == null);
 
                 handleMenuSelection(menu);
             }
