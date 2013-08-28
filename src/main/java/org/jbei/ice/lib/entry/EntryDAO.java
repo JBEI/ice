@@ -63,19 +63,19 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     public Set<String> getMatchingSelectionMarkers(String token, int limit) throws DAOException {
-        return getMatchingField("selectionMarker.name", "SelectionMarker selectionMarker", token, limit);
+        return getMatchingField("selectionMarker.name", "selection_markers selectionMarker", token, limit);
     }
 
     public Set<String> getMatchingOriginOfReplication(String token, int limit) throws DAOException {
-        return getMatchingField("plasmid.originOfReplication", "Plasmid plasmid", token, limit);
+        return getMatchingField("plasmid.origin_of_replication", "Plasmids plasmid", token, limit);
     }
 
     public Set<String> getMatchingPromoters(String token, int limit) throws DAOException {
-        return getMatchingField("plasmid.promoters", "Plasmid plasmid", token, limit);
+        return getMatchingField("plasmid.promoters", "Plasmids plasmid", token, limit);
     }
 
     public Set<String> getMatchingReplicatesIn(String token, int limit) throws DAOException {
-        return getMatchingField("plasmid.replicatesIn", "Plasmid plasmid", token, limit);
+        return getMatchingField("plasmid.replicates_in", "Plasmids plasmid", token, limit);
     }
 
     @SuppressWarnings("unchecked")
@@ -85,7 +85,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             token = token.toUpperCase();
             String queryString = "select distinct " + field + " from " + object + " where "
                     + " UPPER(" + field + ") like '%" + token + "%'";
-            Query query = session.createQuery(queryString);
+            Query query = session.createSQLQuery(queryString);
             if (limit > 0)
                 query.setMaxResults(limit);
             return new HashSet<String>(query.list());
