@@ -46,9 +46,13 @@ public class ProfilePresenter extends AbstractPresenter {
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus, IProfileView display,
             final String userId, String selection) {
         super(service, eventBus);
-        this.userId = userId;
+        if (userId != null)
+            this.userId = userId;
+        else
+            this.userId = Long.toString(ClientController.account.getId());
+
         this.display = display;
-        profilePresenter = new UserProfilePresenter(service, eventBus, userId);
+        profilePresenter = new UserProfilePresenter(service, eventBus, this.userId);
         profilePresenter.setNameChangeCallback(getCallback());
 
         // check if it is the owner viewing the profile

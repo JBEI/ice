@@ -38,7 +38,7 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
     // cookie times out in three days (current value set in Ice)
     private static final int COOKIE_TIMEOUT = (1000 * 60 * 60 * 24) * 3;
     private static final int DAY_TIMEOUT = (1000 * 60 * 60 * 24);
-    private static final String COOKIE_NAME = "gd-ice"; // TODO: this is set in the backend. does anyone even change it?
+    private static final String COOKIE_NAME = "gd-ice";
     private static final String COOKIE_PATH = "/";
 
     private HasWidgets container; // root panel

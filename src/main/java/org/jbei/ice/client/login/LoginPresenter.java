@@ -253,8 +253,8 @@ public class LoginPresenter extends AbstractPresenter {
 
             @Override
             public void onSuccess(Boolean result) {
-                if (result.booleanValue()) {
-                    Window.alert("A new password has been emailed to you");
+                if (result) {
+                    Window.alert("Please check your email for your temporary password.");
                     display.switchToLoginMode();
                 }
             }
