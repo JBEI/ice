@@ -86,9 +86,6 @@ public class EntryAddPresenter {
 
             @Override
             public void onSuccess(ArrayList<AccessPermission> result) {
-                if (currentType == null || !formsCache.containsKey(currentType))
-                    return;
-
                 accessPermissions = result;
                 entryPresenter.setDefaultPermissions(accessPermissions);
             }
