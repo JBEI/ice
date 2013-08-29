@@ -28,6 +28,12 @@ import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 
+/**
+ * Submenu that allows users to add selected parts (or a part being viewed) to folder
+ *
+ * @param <T>
+ * @author Hector Plahar
+ */
 public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implements SubMenuOptionsPresenter.View<T> {
 
     interface SelectionResource extends CellTable.Resources {

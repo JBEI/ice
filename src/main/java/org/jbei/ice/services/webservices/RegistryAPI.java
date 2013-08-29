@@ -40,6 +40,7 @@ import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.PartTransfer;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
+import org.jbei.ice.server.ModelToInfoFactory;
 
 /**
  * SOAP API methods.
@@ -633,6 +634,7 @@ public class RegistryAPI implements IRegistryAPI {
         try {
             Storage storage = storageController.retrieveStorageTube(barcode.trim());
             if (storage == null) {
+                Logger.info("Could not find storage for tube with barcode " + barcode);
                 return null;
             }
 
@@ -643,11 +645,8 @@ public class RegistryAPI implements IRegistryAPI {
                     continue;
                 if (sampleStorage.getStorageType() != StorageType.TUBE)
                     continue;
-                // TODO:
-//                Entry entry = sample.getEntry();
-//                if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString()))
-//                    return (Strain) entry;
-                return null;
+
+                return (StrainData) ModelToInfoFactory.getInfo(sample.getEntry());
             }
             return null;
         } catch (ControllerException e) {

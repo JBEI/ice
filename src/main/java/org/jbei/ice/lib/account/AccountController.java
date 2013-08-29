@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.account;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,6 +28,8 @@ import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * ABI to manipulate {@link Account} objects.
@@ -83,15 +86,30 @@ public class AccountController {
         account.setPassword(encryptedNewPassword);
 
         save(account);
+        if (!sendEmail || url == null || url.trim().isEmpty())
+            return;
 
-        if (sendEmail && url != null && !url.isEmpty()) {
-            String subject = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME) + " Password Reminder";
-            String body = "Someone (maybe you) have requested to reset your password.\n\n";
-            body = body + "Your new password is " + newPassword + ".\n\n";
-            body = body + "Please go to the following link and change your password.\n\n";
-            body = body + url;
-            Emailer.send(account.getEmail(), subject, body);
+        String projectName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
+        String subject = projectName + " Password Reminder";
+        String name = account.getFirstName();
+        if (StringUtils.isBlank(name)) {
+            name = account.getLastName();
+            if (StringUtils.isBlank(name))
+                name = email;
         }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d, yyyy 'at' HH:mm aaa, z");
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Dear ").append(name).append(",\n\n")
+               .append("The password for your ").append(projectName)
+               .append(" account (").append(email).append(") was reset on ")
+               .append(dateFormat.format(new Date())).append(". Your new temporary password is\n\n")
+               .append(newPassword).append("\n\n")
+               .append("Please go to the following link to login and change your password.\n\n").append(url)
+               .append("\n\nThank you.");
+
+        Emailer.send(account.getEmail(), subject, builder.toString());
     }
 
     /**

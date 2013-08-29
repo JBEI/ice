@@ -113,6 +113,12 @@ public class CollectionEntryActionMenu implements IsWidget {
         this.add.addSubmitHandler(handler);
     }
 
+    /**
+     * Adds information about a collection that the user can add or move
+     * part to/from
+     *
+     * @param option id and name of collection
+     */
     public void addOption(OptionSelect option) {
         this.add.addOption(option);
         this.move.addOption(option);
@@ -143,7 +149,8 @@ public class CollectionEntryActionMenu implements IsWidget {
     }
 
     /**
-     * enables or disables the moveTo and remove button. Both actions move entries out of current folder
+     * enables or disables the moveTo and remove button.
+     * Both actions move entries out of current folder
      *
      * @param canMove whether user can move entries out of this folder
      */
