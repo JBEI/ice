@@ -457,7 +457,7 @@ public class EntryPresenter extends AbstractPresenter {
 
                 // permission (order is important here)
                 ServiceDelegate<PartSample> delegate = model.createDeleteSampleHandler();
-                boolean isLocal = currentContext.getPartnerUrl() == null;
+                boolean isLocal = currentContext.getPartnerUrl() == null || currentContext.getPartnerUrl().isEmpty();
                 SequenceViewPanelPresenter sequencePresenter = display.setEntryInfoForView(currentPart, delegate,
                                                                                            isLocal);
                 display.getPermissionsWidget().setPermissionData(result.getAccessPermissions(), new DeletePermission());
@@ -472,7 +472,6 @@ public class EntryPresenter extends AbstractPresenter {
 
                 // show/hide sample button
                 display.setUserCanEdit(currentPart.isCanEdit());
-                collectionsPresenter.getView().setCanMove(currentContext.getPartnerUrl() == null);
                 collectionsPresenter.getView().enableExportAs(currentContext.getPartnerUrl() == null);
 
                 handleMenuSelection(menu);

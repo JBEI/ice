@@ -50,7 +50,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private SuggestBox plasmidMarkers;
     private SuggestBox origin;
     private SuggestBox promoters;
-    private TextBox replicatesIn;
+    private SuggestBox replicatesIn;
     private TextBox plasmidKeywords;
     private TextArea plasmidSummary;
     private TextArea plasmidReferences;
@@ -189,7 +189,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         // name
         row += 1;
         setLabel(true, "Plasmid Name", general, row, 0);
-        plasmidName = createAutoCompleteForPlasmidNames("205px");
+        plasmidName = createSuggestBox(AutoCompleteField.PLASMID_NAME, "205px");
         Widget widget = createTextBoxWithHelp(plasmidName, "e.g. pTSH117");
         general.setWidget(row, 1, widget);
 
@@ -221,7 +221,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         // selection markers
         row += 1;
         setLabel(true, "Selection Markers", general, row, 0);
-        plasmidMarkers = createAutoCompleteForSelectionMarkers("300px");
+        plasmidMarkers = createSuggestBox(AutoCompleteField.SELECTION_MARKERS, "300px");
         widget = createTextBoxWithHelp(plasmidMarkers, "Comma separated");
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
@@ -229,7 +229,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         // origin of replication
         row += 1;
         setLabel(false, "Origin of Replication", general, row, 0);
-        origin = createAutoCompleteForOriginOfReplication("300px");
+        origin = createSuggestBox(AutoCompleteField.ORIGIN_OF_REPLICATION, "300px");
         widget = createTextBoxWithHelp(origin, "Comma separated");
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
@@ -237,7 +237,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         // promoters
         row += 1;
         setLabel(false, "Promoters", general, row, 0);
-        promoters = createAutoCompleteForPromoters("300px");
+        promoters = createSuggestBox(AutoCompleteField.PROMOTERS, "300px");
         widget = createTextBoxWithHelp(promoters, "Comma separated");
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
@@ -245,7 +245,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         // replicates in
         row += 1;
         setLabel(false, "Replicates In", general, row, 0);
-        replicatesIn = createStandardTextBox("300px");
+        replicatesIn = createSuggestBox(AutoCompleteField.REPLICATES_IN, "300px");
         widget = createTextBoxWithHelp(replicatesIn, "Comma separated");
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
@@ -287,22 +287,6 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         box.setStyleName("input_box");
         box.setWidth(width);
         return box;
-    }
-
-    public SuggestBox createAutoCompleteForPromoters(String width) {
-        return createSuggestBox(AutoCompleteField.PROMOTERS, width);
-    }
-
-    public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
-        return createSuggestBox(AutoCompleteField.SELECTION_MARKERS, width);
-    }
-
-    public SuggestBox createAutoCompleteForPlasmidNames(String width) {
-        return createSuggestBox(AutoCompleteField.PLASMID_NAME, width);
-    }
-
-    public SuggestBox createAutoCompleteForOriginOfReplication(String width) {
-        return this.createSuggestBox(AutoCompleteField.ORIGIN_OF_REPLICATION, width);
     }
 
     protected TextArea createTextArea(String width, String height) {
@@ -389,7 +373,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         // selection markers
         row += 1;
         setLabel(true, "Selection Markers", general, row, 0);
-        strainMarkers = createAutoCompleteForSelectionMarkers("300px");
+        strainMarkers = createSuggestBox(AutoCompleteField.SELECTION_MARKERS, "300px");
         widget = createTextBoxWithHelp(strainMarkers, "Comma separated");
         general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);

@@ -23,7 +23,7 @@ public class AutoCompleteSuggestion implements IsSerializable, SuggestOracle.Sug
 
     @Override
     public String getDisplayString() {
-        return display;
+        return display.trim();
     }
 
     @Override

@@ -1,28 +1,25 @@
 package org.jbei.ice.lib.utils;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Properties;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
+import org.apache.cxf.common.util.StringUtils;
 
 /**
  * Utility methods for email.
  * <p/>
- * The SMTP server is specified in the configuration file.
+ * The SMTP server is specified in the configuration file and the admin email is also used for all communications
  *
- * @author Zinovii Dmytriv, Timothy Ham
+ * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
  */
 public class Emailer {
+
     /**
-     * Send an email.
+     * Sends an email to the specified recipient with a carbon copy send to the specified ccEmail.
+     * The email contains the specified subject and body
      *
      * @param receiverEmail Address to send email to.
      * @param ccEmail       Address to send carbon copy to.
@@ -30,29 +27,23 @@ public class Emailer {
      * @param body          Text of body.
      */
     public static boolean send(String receiverEmail, String ccEmail, String subject, String body) {
-        Properties props = new Properties();
-        props.put("mail.smtp.host", Utils.getConfigValue(ConfigurationKey.SMTP_HOST));
-        // props.put("mail.debug", "true");
+        String hostName = Utils.getConfigValue(ConfigurationKey.SMTP_HOST);
+        if (StringUtils.isEmpty(hostName)) {
+            return false;
+        }
 
-        Session session = Session.getInstance(props);
-
+        Email email = new SimpleEmail();
+        email.setHostName(hostName);
         try {
-            Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL)));
-
-            InternetAddress[] receivers = {new InternetAddress(ccEmail), new InternetAddress(receiverEmail)};
-
-            msg.setRecipients(Message.RecipientType.TO, receivers);
-            msg.setSubject(subject);
-            msg.setSentDate(new Date());
-            msg.setText(body);
-
-            Transport.send(msg);
+            email.setFrom(Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL));
+            email.addTo(receiverEmail);
+            email.addCc(ccEmail);
+            email.setSubject(subject);
+            email.setMsg(body);
+            email.send();
             return true;
-        } catch (MessagingException e) {
-            Logger.error("Failed to send email message to " + receiverEmail + "!", e);
-            Logger.error("Error message: " + e.getMessage(), e);
-            Logger.error("Stacktrace: " + Arrays.toString(e.getStackTrace()), e);
+        } catch (EmailException e) {
+            Logger.error(e);
             return false;
         }
     }

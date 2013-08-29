@@ -146,7 +146,8 @@ public class PlasmidForm extends EntryForm<PlasmidData> {
         // replicates In
         row += 1;
         setLabel(false, "Replicates In", general, row, 0);
-        general.setWidget(row, 1, replicatesIn);
+        widget = createTextBoxWithHelp(replicatesIn, "Comma separated");
+        general.setWidget(row, 1, widget);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
         // keywords

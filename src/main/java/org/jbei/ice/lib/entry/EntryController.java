@@ -119,8 +119,7 @@ public class EntryController {
             HashSet<String> individualResults = new HashSet<>();
             for (String result : results) {
                 for (String split : result.split(",")) {
-                    if (split.contains(token))
-                        individualResults.add(split);
+                    individualResults.add(split.trim());
                 }
             }
             return individualResults;
