@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -194,6 +195,18 @@ public class InfoToModelFactory {
         if (fundingSources == null) {
             fundingSources = new HashSet<>();
             entry.setEntryFundingSources(fundingSources);
+        } else if (!fundingSources.isEmpty()) {
+            // hack till funding source issue is fixed
+            Iterator<EntryFundingSource> iterator = fundingSources.iterator();
+            while (iterator.hasNext()) {
+                EntryFundingSource source = iterator.next();
+                String funding = source.getFundingSource().getFundingSource();
+                String pi = source.getFundingSource().getPrincipalInvestigator();
+                if (pI != null && pi.equals(pi) && fundingSourcesStr != null && fundingSourcesStr.equals(funding)) {
+                    iterator.remove();
+                    break;
+                }
+            }
         }
 
         if (fundingSourcesStr != null) {
@@ -214,7 +227,7 @@ public class InfoToModelFactory {
                     entryFundingSource.setFundingSource(fundingSource);
                 }
 
-                fundingSource.setFundingSource(currentItem);
+                fundingSource.setFundingSource(currentItem);  // update the funding source
                 if (pI == null)
                     pI = "";
                 fundingSource.setPrincipalInvestigator(pI);
@@ -382,6 +395,8 @@ public class InfoToModelFactory {
 
             case BIOSAFETY_LEVEL:
                 Integer level = BioSafetyOption.intValue(value);
+                if (level == null)
+                    break;
                 entry.setBioSafetyLevel(level);
                 if (plasmid != null) {
                     plasmid.setBioSafetyLevel(level);
@@ -479,19 +494,13 @@ public class InfoToModelFactory {
                 entry.setSelectionMarkers(markers);
                 break;
 
-            case PLASMID_SELECTION_MARKERS:
-                markers = new HashSet<>();
-                marker = new SelectionMarker(value, plasmid);
-                markers.add(marker);
-                plasmid.setSelectionMarkers(markers);
-                break;
-
             case PARENTAL_STRAIN:
             case GENOTYPE_OR_PHENOTYPE:
             case PLASMIDS:
                 entry = infoToStrainForField(entry, value, field);
                 break;
 
+            case PLASMID_SELECTION_MARKERS:
             case BACKBONE:
             case PLASMID_BACKBONE:
             case PROMOTERS:
@@ -501,7 +510,7 @@ public class InfoToModelFactory {
             case CIRCULAR:
             case ORIGIN_OF_REPLICATION:
             case PLASMID_ORIGIN_OF_REPLICATION:
-                entry = infoToPlasmidForField(entry, value, field);
+                plasmid = infoToPlasmidForField(plasmid, value, field);
                 break;
 
             case HOMOZYGOSITY:
@@ -575,6 +584,13 @@ public class InfoToModelFactory {
             case ORIGIN_OF_REPLICATION:
             case PLASMID_ORIGIN_OF_REPLICATION:
                 plasmid.setOriginOfReplication(value);
+                return plasmid;
+
+            case PLASMID_SELECTION_MARKERS:
+                HashSet<SelectionMarker> markers = new HashSet<>();
+                SelectionMarker marker = new SelectionMarker(value, plasmid);
+                markers.add(marker);
+                plasmid.setSelectionMarkers(markers);
                 return plasmid;
 
             default:

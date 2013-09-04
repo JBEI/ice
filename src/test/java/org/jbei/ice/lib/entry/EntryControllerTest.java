@@ -29,6 +29,7 @@ import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.server.InfoToModelFactory;
+import org.jbei.ice.server.ModelToInfoFactory;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -65,6 +66,33 @@ public class EntryControllerTest {
     @Test
     public void testGetAllEntryIDs() throws Exception {
         Assert.assertNotNull(controller.getAllEntryIds());
+    }
+
+    @Test
+    public void testUpdateFundingSource() throws Exception {
+        Account account = AccountCreator.createTestAccount("testUpdateFundingSource", false);
+        PartData part = new PartData();
+        part.setPrincipalInvestigator("Nathan");
+        part.setFundingSource("JBEI");
+        part.setShortDescription("test");
+        long id = controller.createPart(account, part).getId();
+
+        // create second part with same parameters
+        long id2 = controller.createPart(account, part).getId();
+        Assert.assertFalse(id == id2);
+
+        Entry entry = controller.get(account, id);
+        Assert.assertNotNull(entry);
+        entry = controller.get(account, id2);
+        Assert.assertNotNull(entry);
+
+        part = ModelToInfoFactory.createTipView(entry);
+        part.setPrincipalInvestigator("Nathan Hillson");
+        Assert.assertEquals(id2, controller.updatePart(account, part));
+
+        entry = controller.get(account, id);
+        PartData data = ModelToInfoFactory.getInfo(entry);
+        Assert.assertEquals("Nathan", data.getPrincipalInvestigator());
     }
 
     @Test

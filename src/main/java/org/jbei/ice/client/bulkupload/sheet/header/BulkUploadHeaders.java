@@ -42,8 +42,8 @@ public abstract class BulkUploadHeaders {
      * Extracts appropriate value from info using the header enum
      * sets the cell widget value using the index
      *
-     * @param header
-     * @param info
+     * @param header header type used to indicate the type of data cells in column support
+     * @param info   part data
      * @return extracted value or null if none is found
      */
     public SheetCellData extractCommon(EntryField header, PartData info) {
