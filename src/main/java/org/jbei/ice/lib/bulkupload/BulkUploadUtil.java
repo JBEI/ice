@@ -10,6 +10,8 @@ import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.StatusType;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Utility class for Bulk Import
  *
@@ -26,26 +28,34 @@ public class BulkUploadUtil {
      */
     public static boolean validate(BulkUpload bulkUpload) {
         for (Entry entry : bulkUpload.getContents()) {
+            boolean isValid;
+
             EntryType type = EntryType.nameToType(entry.getRecordType());
             switch (type) {
                 case STRAIN:
-                    return validateStrain((Strain) entry);
+                    isValid = validateStrain((Strain) entry);
+                    break;
 
                 case PLASMID:
-                    return validatePlasmid((Plasmid) entry);
+                    isValid = validatePlasmid((Plasmid) entry);
+                    break;
 
                 case PART:
-                    return validateCommonFields(entry);
+                    isValid = validateCommonFields(entry);
+                    break;
 
                 case ARABIDOPSIS:
-                    return validateCommonFields(entry);
+                    isValid = validateCommonFields(entry);
+                    break;
 
                 // unknown type
                 default:
                     return false;
             }
+            if (!isValid)
+                return false;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -75,14 +85,14 @@ public class BulkUploadUtil {
         if (!validateCommonFields(strain))
             return false;
 
-        return (!stringIsEmpty(strain.getSelectionMarkersAsString()));
+        return (!StringUtils.isBlank(strain.getSelectionMarkersAsString()));
     }
 
     private static boolean validatePlasmid(Plasmid plasmid) {
         if (!validateCommonFields(plasmid))
             return false;
 
-        return (!stringIsEmpty(plasmid.getSelectionMarkersAsString()));
+        return (!StringUtils.isBlank(plasmid.getSelectionMarkersAsString()));
     }
 
     /**
@@ -101,20 +111,16 @@ public class BulkUploadUtil {
         if (entry.getName() == null)
             return false;
 
-        if (stringIsEmpty(entry.getCreator()))
+        if (StringUtils.isBlank(entry.getCreator()))
             return false;
 
-        if (stringIsEmpty(entry.getCreatorEmail()))
+        if (StringUtils.isBlank(entry.getCreatorEmail()))
             return false;
 
         // principal investigator is required and that should create at least one funding source
         if (entry.getEntryFundingSources() == null || entry.getEntryFundingSources().isEmpty())
             return false;
 
-        return !stringIsEmpty(entry.getShortDescription());
-    }
-
-    private static boolean stringIsEmpty(String s) {
-        return s == null || s.isEmpty();
+        return !StringUtils.isBlank(entry.getShortDescription());
     }
 }

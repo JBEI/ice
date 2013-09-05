@@ -385,7 +385,7 @@ public class HibernateSearch {
 
         resultCount = fullTextQuery.getResultSize();
 
-        // execute search
+        // execute search       R
         result = fullTextQuery.list();
         String email = "Anon";
         if (account != null)
