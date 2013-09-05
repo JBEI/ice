@@ -153,7 +153,7 @@ public class EntrySamplePanel extends Composite {
         table.setHTML(1, 0, "");
         requestSample.setVisible(!data.isEmpty());
         if (data.isEmpty()) {
-            table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No samples availabe</i>");
+            table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No samples available</i>");
             return;
         }
 
