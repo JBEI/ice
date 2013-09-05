@@ -28,7 +28,6 @@ public class FileInputCell extends SheetCell {
 
     private final CellUploader uploader;
     private final boolean sequenceUpload;
-    private final CellWidget widget;
     private final EntryInfoDelegate delegate;
     private final EntryType entryType;
     private final Label cellLabel;
@@ -47,7 +46,6 @@ public class FileInputCell extends SheetCell {
 
         this.uploader = new CellUploader(delegate, addType, type);
         setUploadHandlers();
-        widget = new CellWidget("", -1);
     }
 
     protected void setUploadHandlers() {
@@ -123,6 +121,14 @@ public class FileInputCell extends SheetCell {
         return true;
     }
 
+    /**
+     * Retrieves the widget to be used for display in the bulk upload cell
+     *
+     * @param row                bulk upload row
+     * @param isCurrentSelection true is selection is current user selection (focus) or previous
+     * @param tabIndex           index for tab
+     * @return widget for display
+     */
     @Override
     public Widget getWidget(int row, boolean isCurrentSelection, int tabIndex) {
         SheetCellData data = getDataForRow(row);
@@ -133,11 +139,12 @@ public class FileInputCell extends SheetCell {
             if (name != null && name.length() > 17)
                 name = (name.substring(0, 14) + "...");
             cellLabel.setText(name);
-        }
+        } else
+            cellLabel.setText("");
 
         if (isCurrentSelection) {
             uploader.setPanelWidget(panel);
-
+            uploader.setCurrentRow(row);
             final FocusPanel focusPanel = new FocusPanel();
             focusPanel.setTabIndex(tabIndex);
             focusPanel.setWidget(uploader);
@@ -161,8 +168,8 @@ public class FileInputCell extends SheetCell {
         } else {
             // if this cell is not the current focused selection, just display
             // a regular cell widget
-            widget.setValue(value);
-            widget.setTabIndex(tabIndex);
+            CellWidget widget = new CellWidget(value, tabIndex);
+            widget.setFocus(false);
             return widget;
         }
     }

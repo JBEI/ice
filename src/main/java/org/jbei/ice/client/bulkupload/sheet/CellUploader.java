@@ -20,6 +20,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
+ * Widget used to upload files in the bulk upload interface
+ *
  * @author Hector Plahar
  */
 public class CellUploader extends Composite {
