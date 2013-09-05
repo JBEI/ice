@@ -10,6 +10,7 @@ import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.BioSafetyOption;
@@ -266,11 +267,6 @@ public class BulkUploadControllerTest {
         long id = controller.updatePreference(account, autoUpdate.getBulkUploadId(), EntryAddType.STRAIN, preference);
         Assert.assertEquals(autoUpdate.getBulkUploadId(), id);
 
-        // validation should fail because of this
-        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, "BLS1");
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN);
-        Assert.assertFalse(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
-
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
         autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN);
 
@@ -385,14 +381,14 @@ public class BulkUploadControllerTest {
         Assert.assertEquals(1, linked.size());
 
         Entry plasmid = (Entry) linked.toArray()[0];
-        Assert.assertTrue(strain.getVisibility() == plasmid.getVisibility() &&
+        Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
                                   plasmid.getVisibility() == Visibility.DRAFT.getValue());
 
         Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
         strain = entryController.get(account, id);
         linked = strain.getLinkedEntries();
         plasmid = (Entry) linked.toArray()[0];
-        Assert.assertTrue(strain.getVisibility() == plasmid.getVisibility() &&
+        Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
                                   plasmid.getVisibility() == Visibility.PENDING.getValue());
 
         Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
@@ -400,7 +396,7 @@ public class BulkUploadControllerTest {
         strain = entryController.get(account, id);
         linked = strain.getLinkedEntries();
         plasmid = (Entry) linked.toArray()[0];
-        Assert.assertTrue(strain.getVisibility() == plasmid.getVisibility() &&
+        Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
                                   plasmid.getVisibility() == Visibility.OK.getValue());
     }
 
@@ -566,13 +562,47 @@ public class BulkUploadControllerTest {
             boolean found = false;
             for (Permission entryPermission : entryPermissions) {
                 if (entryPermission.getGroup() != null
-                        && entryPermission.getGroup().getId() == ap.getArticleId()
-                        && entryPermission.isCanRead()) {
+                        && entryPermission.getGroup().getId() == ap.getArticleId() && entryPermission.isCanRead()) {
                     found = true;
                     break;
                 }
             }
             Assert.assertTrue("Permissions for bulk upload were not propagated to the entry", found);
         }
+    }
+
+    @Test
+    public void testStrainWithOnePlasmidAutoUpdating() throws Exception {
+        Account account = AccountCreator.createTestAccount("testAutoUpdating", false);
+        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        Assert.assertNotNull(autoUpdate);
+        autoUpdate.getKeyValue().put(EntryField.PI, "Nathan");
+        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+
+        // get entry
+        EntryController entryController = new EntryController();
+        Entry entry = entryController.get(account, autoUpdate.getEntryId());
+        Assert.assertNotNull(entry);
+        Assert.assertEquals(entry.getRecordType().toLowerCase(), EntryType.STRAIN.toString().toLowerCase());
+
+        // get associated plasmid
+        Assert.assertEquals(1, entry.getLinkedEntries().size());
+        Entry plasmid = (Entry) entry.getLinkedEntries().toArray()[0];
+        Assert.assertEquals(plasmid.getRecordType().toLowerCase(), EntryType.PLASMID.toString().toLowerCase());
+
+        // add promoters to plasmid
+        autoUpdate.getKeyValue().put(EntryField.PLASMID_PROMOTERS, "promoters");
+        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        entry = entryController.get(account, autoUpdate.getEntryId());
+        plasmid = (Entry) entry.getLinkedEntries().toArray()[0];
+        Assert.assertEquals("promoters", ((Plasmid) plasmid).getPromoters());
+
+        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, "BLS1");
+        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        entry = entryController.get(account, autoUpdate.getEntryId());
+        plasmid = (Entry) entry.getLinkedEntries().toArray()[0];
+        Assert.assertEquals(1, entry.getBioSafetyLevel().intValue());
+        Assert.assertEquals(1, plasmid.getBioSafetyLevel().intValue());
     }
 }

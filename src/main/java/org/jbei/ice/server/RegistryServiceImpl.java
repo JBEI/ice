@@ -1,8 +1,6 @@
 package org.jbei.ice.server;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -57,7 +55,6 @@ import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
-import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
@@ -1173,101 +1170,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             Account account = this.retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": creating new entry");
-            EntryController controller = ControllerFactory.getEntryController();
-            Entry entry = InfoToModelFactory.infoToEntry(info);
-
-            SampleController sampleController = ControllerFactory.getSampleController();
-            StorageController storageController = ControllerFactory.getStorageController();
-            ArrayList<SampleStorage> sampleMap = info.getSampleStorage();
-
-            if (info.getInfo() != null) {
-                Entry enclosed = InfoToModelFactory.infoToEntry(info.getInfo());
-                controller.createStrainWithPlasmid(account, entry, enclosed, info.getAccessPermissions());
-            } else
-                entry = controller.createEntry(account, entry, info.getAccessPermissions());
-
-            if (sampleMap != null) {
-                for (SampleStorage sampleStorage : sampleMap) {
-                    PartSample partSample = sampleStorage.getPartSample();
-                    LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
-
-                    Sample sample = sampleController.createSample(partSample.getLabel(),
-                                                                  account.getEmail(), partSample.getNotes());
-                    sample.setEntry(entry);
-
-                    if (locations == null || locations.isEmpty()) {
-                        // create sample, but not location
-                        try {
-                            Logger.info("Creating sample without location");
-                            sampleController.saveSample(account, sample);
-                        } catch (PermissionException e) {
-                            Logger.warn(e.getMessage());
-                            sample = null;
-                        } catch (ControllerException e) {
-                            Logger.error(e);
-                            sample = null;
-                        }
-                    } else {
-                        // create sample and location
-                        String[] labels = new String[locations.size()];
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < labels.length; i++) {
-                            labels[i] = locations.get(i).getDisplay();
-                            sb.append(labels[i]);
-                            if (i - 1 < labels.length)
-                                sb.append("/");
-                        }
-
-                        Logger.info("Creating sample with locations " + sb.toString());
-                        Storage storage;
-                        try {
-                            Storage scheme = storageController.get(Long.parseLong(partSample.getLocationId()), false);
-                            storage = storageController.getLocation(scheme, labels);
-                            storage = storageController.update(storage);
-                            sample.setStorage(storage);
-                        } catch (NumberFormatException | ControllerException e) {
-                            Logger.error(e);
-                            continue;
-                        }
-                    }
-
-                    if (sample != null) {
-                        try {
-                            sampleController.saveSample(account, sample);
-                        } catch (ControllerException e) {
-                            Logger.error(e);
-                        } catch (PermissionException ce) {
-                            Logger.warn(ce.getMessage());
-                        }
-                    }
-                }
-            }
-
-            // save attachments
-            if (info.getAttachments() != null) {
-                AttachmentController attachmentController = ControllerFactory.getAttachmentController();
-                String attDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY) + File.separator
-                        + AttachmentController.attachmentDirName;
-                for (AttachmentInfo attachmentInfo : info.getAttachments()) {
-                    Attachment attachment = new Attachment();
-                    attachment.setEntry(entry);
-                    attachment.setDescription(attachmentInfo.getDescription());
-                    attachment.setFileName(attachmentInfo.getFilename());
-                    File file = new File(attDir + File.separator + attachmentInfo.getFileId());
-                    if (!file.exists())
-                        continue;
-                    try {
-                        FileInputStream inputStream = new FileInputStream(file);
-                        attachmentController.save(account, attachment, inputStream);
-                    } catch (FileNotFoundException e) {
-                        Logger.warn(e.getMessage());
-                    }
-                }
-            }
-            return entry.getId();
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return 0l;
+            return ControllerFactory.getEntryController().createPart(account, info).getId();
+        } catch (ControllerException ce) {
+            return null;
         }
     }
 

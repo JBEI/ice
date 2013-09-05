@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.entry;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -27,6 +29,8 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
@@ -43,6 +47,7 @@ import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.PartSample;
+import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
@@ -260,6 +265,102 @@ public class EntryController {
         }
 
         return entry;
+    }
+
+    public PartData createPart(Account account, PartData part) throws ControllerException {
+        Entry entry = InfoToModelFactory.infoToEntry(part);
+
+        SampleController sampleController = ControllerFactory.getSampleController();
+        StorageController storageController = ControllerFactory.getStorageController();
+        ArrayList<SampleStorage> sampleMap = part.getSampleStorage();
+
+        if (part.getInfo() != null) {
+            Entry enclosed = InfoToModelFactory.infoToEntry(part.getInfo());
+            createStrainWithPlasmid(account, entry, enclosed, part.getAccessPermissions());
+        } else
+            entry = createEntry(account, entry, part.getAccessPermissions());
+
+        if (sampleMap != null) {
+            for (SampleStorage sampleStorage : sampleMap) {
+                PartSample partSample = sampleStorage.getPartSample();
+                LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
+
+                Sample sample = sampleController.createSample(partSample.getLabel(),
+                                                              account.getEmail(), partSample.getNotes());
+                sample.setEntry(entry);
+
+                if (locations == null || locations.isEmpty()) {
+                    // create sample, but not location
+                    try {
+                        Logger.info("Creating sample without location");
+                        sampleController.saveSample(account, sample);
+                    } catch (PermissionException e) {
+                        Logger.warn(e.getMessage());
+                        sample = null;
+                    } catch (ControllerException e) {
+                        Logger.error(e);
+                        sample = null;
+                    }
+                } else {
+                    // create sample and location
+                    String[] labels = new String[locations.size()];
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < labels.length; i++) {
+                        labels[i] = locations.get(i).getDisplay();
+                        sb.append(labels[i]);
+                        if (i - 1 < labels.length)
+                            sb.append("/");
+                    }
+
+                    Logger.info("Creating sample with locations " + sb.toString());
+                    Storage storage;
+                    try {
+                        Storage scheme = storageController.get(Long.parseLong(partSample.getLocationId()), false);
+                        storage = storageController.getLocation(scheme, labels);
+                        storage = storageController.update(storage);
+                        sample.setStorage(storage);
+                    } catch (NumberFormatException | ControllerException e) {
+                        Logger.error(e);
+                        continue;
+                    }
+                }
+
+                if (sample != null) {
+                    try {
+                        sampleController.saveSample(account, sample);
+                    } catch (ControllerException e) {
+                        Logger.error(e);
+                    } catch (PermissionException ce) {
+                        Logger.warn(ce.getMessage());
+                    }
+                }
+            }
+        }
+
+        // save attachments
+        if (part.getAttachments() != null) {
+            AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+            String attDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY) + File.separator
+                    + AttachmentController.attachmentDirName;
+            for (AttachmentInfo attachmentInfo : part.getAttachments()) {
+                Attachment attachment = new Attachment();
+                attachment.setEntry(entry);
+                attachment.setDescription(attachmentInfo.getDescription());
+                attachment.setFileName(attachmentInfo.getFilename());
+                File file = new File(attDir + File.separator + attachmentInfo.getFileId());
+                if (!file.exists())
+                    continue;
+                try {
+                    FileInputStream inputStream = new FileInputStream(file);
+                    attachmentController.save(account, attachment, inputStream);
+                } catch (FileNotFoundException e) {
+                    Logger.warn(e.getMessage());
+                }
+            }
+        }
+
+        part.setId(entry.getId());
+        return part;
     }
 
     public void transferEntries(Account account, ArrayList<Long> ids, ArrayList<String> sites)
