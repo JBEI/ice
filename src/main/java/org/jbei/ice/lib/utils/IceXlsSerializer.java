@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -126,10 +125,8 @@ public class IceXlsSerializer {
             stringBuilder.append(escapeCSVValue(entry.getReferences())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getBioSafetyLevel())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getIntellectualProperty())).append("\t");
-            String pis = EntryUtil.principalInvestigatorToString(entry.getEntryFundingSources());
-            stringBuilder.append(escapeCSVValue(pis)).append("\t");
-            String fundingSources = EntryUtil.fundingSourceToString(entry.getEntryFundingSources());
-            stringBuilder.append(escapeCSVValue(fundingSources)).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getPrincipalInvestigator())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getFundingSource())).append("\t");
             String time = (entry.getCreationTime() == null) ? "" : dateFormat.format(entry.getCreationTime());
             stringBuilder.append(escapeCSVValue(time)).append("\t");
             time = (entry.getModificationTime() == null) ? "" : dateFormat.format(entry.getModificationTime());

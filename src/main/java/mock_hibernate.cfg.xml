@@ -65,8 +65,6 @@
         <mapping class="org.jbei.ice.lib.permissions.model.WriteUser"/>
         <mapping class="org.jbei.ice.lib.permissions.model.ReadGroup"/>
         <mapping class="org.jbei.ice.lib.permissions.model.WriteGroup"/>
-        <mapping class="org.jbei.ice.lib.models.FundingSource"/>
-        <mapping class="org.jbei.ice.lib.entry.model.EntryFundingSource"/>
         <mapping class="org.jbei.ice.lib.models.SessionData"/>
         <mapping class="org.jbei.ice.lib.models.TraceSequence"/>
         <mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment"/>

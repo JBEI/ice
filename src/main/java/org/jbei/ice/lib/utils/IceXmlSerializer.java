@@ -15,7 +15,6 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
@@ -233,18 +232,13 @@ public class IceXmlSerializer {
         entryRoot.add(new DefaultElement(INTELLECTUAL_PROPERTY, iceNamespace)
                               .addText(emptyStringify(entry.getIntellectualProperty())));
 
-        if (entry.getFundingSources().size() > 0) {
-            DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
-            for (EntryFundingSource fundingSource : entry.getFundingSources()) {
-                fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace)
-                                           .addText(emptyStringify(fundingSource.getFundingSource().getFundingSource()))
-                                           .addAttribute(
-                                                   PRINCIPAL_INVESTIGATOR,
-                                                   emptyStringify(fundingSource.getFundingSource()
-                                                                               .getPrincipalInvestigator())));
-            }
-            entryRoot.add(fundingSources);
-        }
+        DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
+        fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace)
+                                   .addText(emptyStringify(entry.getFundingSource()))
+                                   .addAttribute(
+                                           PRINCIPAL_INVESTIGATOR,
+                                           emptyStringify(entry.getPrincipalInvestigator())));
+        entryRoot.add(fundingSources);
 
         if (sequence != null) {
             entryRoot.add(SeqXmlSerializer.serializeToSeqXmlAsElement(sequence));

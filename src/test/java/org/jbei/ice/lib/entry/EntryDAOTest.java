@@ -21,7 +21,7 @@ public class EntryDAOTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        HibernateHelper.initializeMock();
+//        HibernateHelper.initializeMock();
     }
 
     @Before
@@ -32,11 +32,16 @@ public class EntryDAOTest {
 
     @After
     public void tearDown() {
-        HibernateHelper.rollbackTransaction();
+        HibernateHelper.commitTransaction();
     }
 
     @Test
     public void testSetEntryVisibility() throws Exception {
+    }
+
+    @Test
+    public void upgrade() throws Exception {
+        dao.upgradeFundingSources();
     }
 
     @Test

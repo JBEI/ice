@@ -5,20 +5,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
@@ -165,7 +162,8 @@ public class InfoToModelFactory {
         if (visibility != null)
             entry.setVisibility(visibility.getValue());
 
-        getFundingSources(info.getFundingSource(), info.getPrincipalInvestigator(), entry);
+        entry.setFundingSource(info.getFundingSource());
+        entry.setPrincipalInvestigator(info.getPrincipalInvestigator());
         entry.setKeywords(info.getKeywords());
 
         // parameters 
@@ -188,72 +186,6 @@ public class InfoToModelFactory {
             parameters.add(param);
         }
         return parameters;
-    }
-
-    private static Set<EntryFundingSource> getFundingSources(String fundingSourcesStr, String pI, Entry entry) {
-        Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
-        if (fundingSources == null) {
-            fundingSources = new HashSet<>();
-            entry.setEntryFundingSources(fundingSources);
-        } else if (!fundingSources.isEmpty()) {
-            // hack till funding source issue is fixed
-            Iterator<EntryFundingSource> iterator = fundingSources.iterator();
-            while (iterator.hasNext()) {
-                EntryFundingSource source = iterator.next();
-                String funding = source.getFundingSource().getFundingSource();
-                String pi = source.getFundingSource().getPrincipalInvestigator();
-                if (pI != null && pi.equals(pi) && fundingSourcesStr != null && fundingSourcesStr.equals(funding)) {
-                    iterator.remove();
-                    break;
-                }
-            }
-        }
-
-        if (fundingSourcesStr != null) {
-            String[] itemsAsString = fundingSourcesStr.split("\\s*,+\\s*");
-
-            for (int i = 0; i < itemsAsString.length; i++) {
-                String currentItem = itemsAsString[i];
-                EntryFundingSource entryFundingSource;
-                FundingSource fundingSource;
-
-                if (fundingSources.size() > i) {
-                    entryFundingSource = (EntryFundingSource) fundingSources.toArray()[i];
-                    fundingSource = entryFundingSource.getFundingSource();
-                } else {
-                    fundingSource = new FundingSource();
-                    entryFundingSource = new EntryFundingSource();
-                    fundingSources.add(entryFundingSource);
-                    entryFundingSource.setFundingSource(fundingSource);
-                }
-
-                fundingSource.setFundingSource(currentItem);  // update the funding source
-                if (pI == null)
-                    pI = "";
-                fundingSource.setPrincipalInvestigator(pI);
-                entryFundingSource.setEntry(entry);
-            }
-        } else if (pI != null) {
-            EntryFundingSource entryFundingSource;
-            FundingSource fundingSource;
-
-            if (!fundingSources.isEmpty()) {
-                entryFundingSource = (EntryFundingSource) fundingSources.toArray()[0];
-                fundingSource = entryFundingSource.getFundingSource();
-            } else {
-                fundingSource = new FundingSource();
-                entryFundingSource = new EntryFundingSource();
-                fundingSources.add(entryFundingSource);
-                entryFundingSource.setFundingSource(fundingSource);
-            }
-
-            fundingSourcesStr = "";
-            fundingSource.setFundingSource(fundingSourcesStr);
-            fundingSource.setPrincipalInvestigator(pI);
-            entryFundingSource.setEntry(entry);
-        }
-
-        return fundingSources;
     }
 
     private static Set<SelectionMarker> getSelectionMarkers(String markerStr, Entry entry) {
@@ -328,62 +260,16 @@ public class InfoToModelFactory {
     public static Entry[] infoToEntryForField(Entry entry, Entry plasmid, String value, EntryField field) {
         switch (field) {
             case PI: {
-                Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
-                EntryFundingSource entryFundingSource;
-                FundingSource fundingSource;
-
-                if (fundingSources == null)
-                    fundingSources = new HashSet<>();
-
-                if (fundingSources.isEmpty()) {
-                    fundingSource = new FundingSource();
-                    fundingSource.setFundingSource("");
-                    fundingSource.setPrincipalInvestigator(value);
-                    entryFundingSource = new EntryFundingSource();
-                    fundingSources.add(entryFundingSource);
-                    entryFundingSource.setFundingSource(fundingSource);
-                } else {
-                    entryFundingSource = (EntryFundingSource) fundingSources.toArray()[0];
-                    fundingSource = entryFundingSource.getFundingSource();
-                    fundingSource.setPrincipalInvestigator(value);
-                }
-
-                entry.setEntryFundingSources(fundingSources);
-                entryFundingSource.setEntry(entry);
-                if (plasmid != null) {
-                    plasmid.setEntryFundingSources(fundingSources);
-                    entryFundingSource.setEntry(plasmid);
-                }
+                entry.setPrincipalInvestigator(value);
+                if (plasmid != null)
+                    plasmid.setPrincipalInvestigator(value);
                 break;
             }
 
             case FUNDING_SOURCE: {
-                Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
-                EntryFundingSource entryFundingSource;
-                FundingSource fundingSource;
-
-                if (fundingSources == null)
-                    fundingSources = new HashSet<>();
-
-                if (fundingSources.isEmpty()) {
-                    fundingSource = new FundingSource();
-                    fundingSource.setFundingSource(value);
-                    fundingSource.setPrincipalInvestigator("");
-                    entryFundingSource = new EntryFundingSource();
-                    fundingSources.add(entryFundingSource);
-                    entryFundingSource.setFundingSource(fundingSource);
-                } else {
-                    entryFundingSource = (EntryFundingSource) fundingSources.toArray()[0];
-                    fundingSource = entryFundingSource.getFundingSource();
-                    fundingSource.setFundingSource(value);
-                }
-
-                entry.setEntryFundingSources(fundingSources);
-                entryFundingSource.setEntry(entry);
-                if (plasmid != null) {
-                    plasmid.setEntryFundingSources(fundingSources);
-                    entryFundingSource.setEntry(plasmid);
-                }
+                entry.setFundingSource(value);
+                if (plasmid != null)
+                    plasmid.setFundingSource(value);
                 break;
             }
 
