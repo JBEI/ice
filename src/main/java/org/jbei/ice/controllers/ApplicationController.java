@@ -14,8 +14,8 @@ import org.jbei.ice.lib.shared.dto.ConfigurationKey;
  */
 public class ApplicationController {
 
-    public static final String RELEASE_DATABASE_SCHEMA_VERSION = "3.4";
-    public static final String[] SUPPORTED_PREVIOUS_DB_VERSIONS = {"3.1.0", "3.3.0"};
+    public static final String RELEASE_DATABASE_SCHEMA_VERSION = "3.4.5";
+    public static final String[] SUPPORTED_PREVIOUS_DB_VERSIONS = {"3.1.0", "3.3.0", "3.4"};
 
     /**
      * Schedule task to rebuild the blast index
@@ -76,6 +76,7 @@ public class ApplicationController {
                 ControllerFactory.getConfigurationController().upgradeConfiguration();
                 ControllerFactory.getFolderController().upgradeFolders();
                 ControllerFactory.getEntryController().upgradeTo3Point4();
+                ControllerFactory.getEntryController().upgradeTo3Point4Point5();
                 break;
 
             // upgrade from 3.3 to 3.4
@@ -83,6 +84,12 @@ public class ApplicationController {
                 // upgrade web of registries partners
                 ControllerFactory.getFolderController().upgradeFolders();
                 ControllerFactory.getEntryController().upgradeTo3Point4();
+                ControllerFactory.getEntryController().upgradeTo3Point4Point5();
+                break;
+
+            case "3.4":
+                // upgrade from 3.4 to 3.4.5
+                ControllerFactory.getEntryController().upgradeTo3Point4Point5();
                 break;
         }
     }

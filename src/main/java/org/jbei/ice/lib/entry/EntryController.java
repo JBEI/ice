@@ -242,7 +242,7 @@ public class EntryController {
             entry.setBioSafetyLevel(0);
 
         try {
-            entry = dao.saveEntry(entry);
+            entry = dao.save(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -454,7 +454,7 @@ public class EntryController {
                     entry.setVersionId(entry.getRecordId());
 
                 try {
-                    entry = dao.saveEntry(entry);
+                    entry = dao.save(entry);
                 } catch (DAOException e) {
                     Logger.error(e);
                     continue;
@@ -843,7 +843,7 @@ public class EntryController {
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
             entry.setVisibility(Visibility.OK.getValue());
-            dao.updateEntry(entry);
+            dao.update(entry);
 
             if (scheduleRebuild) {
                 ApplicationController.scheduleBlastIndexRebuildTask(true);
@@ -870,7 +870,7 @@ public class EntryController {
             entry.setModificationTime(Calendar.getInstance().getTime());
             if (entry.getVisibility() == null)
                 entry.setVisibility(Visibility.OK.getValue());
-            dao.updateEntry(entry);
+            dao.update(entry);
 
             if (scheduleRebuild) {
                 ApplicationController.scheduleBlastIndexRebuildTask(true);
@@ -1250,6 +1250,17 @@ public class EntryController {
         } catch (DAOException e) {
             Logger.error(e);
         }
+    }
+
+    public void upgradeTo3Point4Point5() throws ControllerException {
+        try {
+            Logger.info("Upgrading funding sources. Please wait....");
+            dao.upgradeFundingSources();
+            Logger.info("Funding Source upgrade complete");
+        } catch (DAOException e) {
+            Logger.error(e);
+        }
+
     }
 
     public ArrayList<PartData> getTransferredParts(Account account) throws ControllerException {

@@ -15,7 +15,6 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.Part;
@@ -24,7 +23,6 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -33,6 +31,7 @@ import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.utils.Utils;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -109,49 +108,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Logger.error(he);
             throw new DAOException(he);
         }
-    }
-
-    /**
-     * Save {@link FundingSource} object into the database.
-     *
-     * @param fundingSource funding source to save
-     * @return Saved FundingSource object.
-     * @throws DAOException
-     */
-    public FundingSource saveFundingSource(FundingSource fundingSource) throws DAOException {
-        Session session = currentSession();
-        if (fundingSource.getFundingSource() == null)
-            fundingSource.setFundingSource("");
-
-        try {
-            session.saveOrUpdate(fundingSource);
-            return fundingSource;
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-    }
-
-    protected FundingSource getExistingFundingSource(FundingSource fundingSource) throws DAOException {
-        if (fundingSource == null)
-            return null;
-
-        String pI = fundingSource.getPrincipalInvestigator();
-        if (pI == null)
-            pI = "";
-        String source = fundingSource.getFundingSource();
-        String queryString = "from " + FundingSource.class.getName()
-                + " where fundingSource=:fundingSource AND principalInvestigator=:principalInvestigator";
-        Query query = currentSession().createQuery(queryString);
-        query.setParameter("fundingSource", source);
-        query.setParameter("principalInvestigator", pI);
-        List result = query.list();
-        if (!result.isEmpty()) {
-            if (result.size() > 1)
-                Logger.warn("Duplicate funding source found for (" + pI + ", " + source + ")");
-            return (FundingSource) result.get(0);
-        } else
-            return null;
     }
 
     /**
@@ -651,53 +607,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public Entry updateEntry(Entry entry) throws DAOException {
-        HashSet<EntryFundingSource> sources = null;
-        if (entry.getEntryFundingSources() != null) {
-            sources = new HashSet<>(entry.getEntryFundingSources());
-        }
-
-        if (sources != null) {
-            for (EntryFundingSource entryFundingSource : sources) {
-                FundingSource newFundingSource = entryFundingSource.getFundingSource();
-                FundingSource newFundingSourceExisting = getExistingFundingSource(newFundingSource);
-                if (newFundingSourceExisting == null)
-                    newFundingSourceExisting = saveFundingSource(newFundingSource);
-
-                entryFundingSource.setFundingSource(newFundingSourceExisting);
-                entryFundingSource.setEntry(entry);
-                currentSession().saveOrUpdate(entryFundingSource);
-            }
-        }
-
-        update(entry);
-        return entry;
-    }
-
-    public Entry saveEntry(Entry entry) throws DAOException {
-        HashSet<EntryFundingSource> sources = null;
-        if (entry.getEntryFundingSources() != null) {
-            sources = new HashSet<>(entry.getEntryFundingSources());
-        }
-
-        entry = save(entry);
-
-        if (sources != null) {
-            for (EntryFundingSource entryFundingSource : sources) {
-                FundingSource fundingSource = entryFundingSource.getFundingSource();
-                FundingSource existingFundingSource = getExistingFundingSource(fundingSource);
-                if (existingFundingSource == null)
-                    existingFundingSource = saveFundingSource(fundingSource);
-
-                entryFundingSource.setFundingSource(existingFundingSource);
-                entryFundingSource.setEntry(entry);
-                currentSession().saveOrUpdate(entryFundingSource);
-            }
-        }
-
-        return entry;
-    }
-
     // experimental. do not use
     public void fullDelete(Entry entry) throws DAOException {
         // delete from sub class (plasmid, strain, seed)
@@ -724,9 +633,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
         hql = "delete from " + SelectionMarker.class.getName() + " where entry=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
 
-        // delete from funding source
-        hql = "delete from " + EntryFundingSource.class.getName() + " where entry=:entry";
-        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
+//        // delete from funding source
+//        hql = "delete from " + EntryFundingSource.class.getName() + " where entry=:entry";
+//        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
 
         // delete from permission
         hql = "delete from " + Permission.class.getName() + " where entry=:entry";
@@ -795,6 +704,54 @@ public class EntryDAO extends HibernateRepository<Entry> {
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
+        }
+    }
+
+    void upgradeFundingSources() throws DAOException {
+        String sql = "select entries_id, funding_source_id from entries_funding_source";
+        Session session = currentSession();
+        Query query = session.createSQLQuery(sql);
+        List list = query.list();
+
+        int i = 0;
+        for (Object object : list) {
+            long entryId = ((Number) ((Object[]) object)[0]).longValue();
+            long fundingSourceId = ((Number) ((Object[]) object)[1]).longValue();
+
+            Entry entry = (Entry) session.get(Entry.class, entryId);
+            if (entry == null) {
+                Logger.warn("Could not retrieve entry with id " + entryId + " for funding source upgrade");
+                continue;
+            }
+
+            String sql2 = "select funding_source, principal_investigator from funding_source where id=" +
+                    fundingSourceId;
+            Object results = session.createSQLQuery(sql2).uniqueResult();
+
+            String entryFundingSource = StringUtils.isBlank(
+                    entry.getFundingSource()) ? ((String) ((Object[]) results)[0])
+                    : (entry.getFundingSource() + ", " + ((Object[]) results)[0]);
+
+            String pi = StringUtils.isBlank(
+                    entry.getPrincipalInvestigator()) ? (String) ((Object[]) results)[1] : (entry
+                    .getPrincipalInvestigator() + ", " + ((Object[]) results)[1]);
+
+            entry.setFundingSource(entryFundingSource);
+            entry.setPrincipalInvestigator(pi);
+
+            String sql3 = "update entries e set funding_source=:fs, principal_investigator=:pi where e.id=" + entryId;
+            Query updateQuery = session.createSQLQuery(sql3);
+            updateQuery.setString("fs", entryFundingSource);
+            updateQuery.setString("pi", pi);
+            int count = updateQuery.executeUpdate();
+
+            i += 1;
+
+            if (i % 20 == 0) {
+                Logger.info(Long.toString(i));
+                session.flush();
+                session.clear();
+            }
         }
     }
 

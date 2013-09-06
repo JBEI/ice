@@ -1,7 +1,6 @@
 package org.jbei.ice.server;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Plasmid;
@@ -277,26 +275,8 @@ public class ModelToInfoFactory {
         info.setSelectionMarkers(entry.getSelectionMarkersAsString());
 
         // funding sources
-        if (!entry.getEntryFundingSources().isEmpty()) {
-            Iterator iterator = entry.getEntryFundingSources().iterator();
-            EntryFundingSource source = (EntryFundingSource) iterator.next();
-            info.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
-            info.setFundingSource(source.getFundingSource().getFundingSource());
-
-            while (iterator.hasNext()) {
-                EntryFundingSource next = (EntryFundingSource) iterator.next();
-                String pi = next.getFundingSource().getPrincipalInvestigator();
-                String fs = next.getFundingSource().getFundingSource();
-
-                if (pi != null && !pi.trim().isEmpty()) {
-                    info.setPrincipalInvestigator(info.getPrincipalInvestigator() + ", " + pi);
-                }
-
-                if (fs != null && !fs.trim().isEmpty()) {
-                    info.setFundingSource(info.getFundingSource() + ", " + fs);
-                }
-            }
-        }
+        info.setFundingSource(entry.getFundingSource());
+        info.setPrincipalInvestigator(entry.getPrincipalInvestigator());
 
         // linked entries
         for (Entry linkedEntry : entry.getLinkedEntries()) {
@@ -377,11 +357,8 @@ public class ModelToInfoFactory {
         view.setCreationTime(entry.getCreationTime().getTime());
         view.setModificationTime(entry.getModificationTime().getTime());
         view.setBioSafetyLevel(entry.getBioSafetyLevel());
-        if (!entry.getEntryFundingSources().isEmpty()) {
-            EntryFundingSource source = entry.getEntryFundingSources().iterator().next();
-            view.setFundingSource(source.getFundingSource().getFundingSource());
-            view.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
-        }
+        view.setFundingSource(entry.getFundingSource());
+        view.setPrincipalInvestigator(entry.getPrincipalInvestigator());
 
         for (Entry linkedEntry : entry.getLinkedEntries()) {
             PartData data = new PartData();

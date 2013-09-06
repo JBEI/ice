@@ -118,7 +118,7 @@ public class BulkUploadUtil {
             return false;
 
         // principal investigator is required and that should create at least one funding source
-        if (entry.getEntryFundingSources() == null || entry.getEntryFundingSources().isEmpty())
+        if (StringUtils.isBlank(entry.getPrincipalInvestigator()))
             return false;
 
         return !StringUtils.isBlank(entry.getShortDescription());

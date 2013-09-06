@@ -34,6 +34,9 @@ public class ServletHelper {
      * @return Account for the stored session id, if available and still valid; null otherwise
      */
     public static Account isLoggedIn(Cookie[] cookies) {
+        if (cookies == null)
+            return null;
+
         try {
             for (Cookie cookie : cookies) {
                 if (COOKIE_NAME.equals(cookie.getName())) {
