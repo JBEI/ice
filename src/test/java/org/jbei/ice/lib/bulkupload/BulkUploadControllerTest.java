@@ -9,7 +9,6 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.permissions.model.Permission;
@@ -351,10 +350,8 @@ public class BulkUploadControllerTest {
         Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
 
         // check the set values of the entry (particularly the preferences)
-        Assert.assertTrue(entry.getEntryFundingSources() != null && entry.getEntryFundingSources().size() == 1);
-        EntryFundingSource fundingSource = (EntryFundingSource) entry.getEntryFundingSources().toArray()[0];
-        Assert.assertEquals("test", fundingSource.getFundingSource().getPrincipalInvestigator());
-        Assert.assertEquals("JBEI", fundingSource.getFundingSource().getFundingSource());
+        Assert.assertEquals("test", entry.getPrincipalInvestigator());
+        Assert.assertEquals("JBEI", entry.getFundingSource());
         Assert.assertEquals("JBEI-0001", entry.getName());
 
         // test strain with plasmid

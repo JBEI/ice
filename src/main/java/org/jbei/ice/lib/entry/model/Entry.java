@@ -69,8 +69,8 @@ import org.jbei.ice.lib.entry.model.Parameter;
  * etc) for this entry.</li> <li><b>selectionMarkers:</b> {@link org.jbei.ice.lib.models.SelectionMarker}s for this
  * entry. In the future, this field will propagate to other entries based on inheritance.</li> <li><b>links:</b> URL or
  * other links that point outside of this instance of gd-ice.</li> <lli><b>names: </b> {@link Name}s for this
- * entry.</li> <li><b>partNumbers: </b> {@link PartNumber}s for this entry.</li> <li><b>entryFundingSources</b> {@link
- * EntryFundingSource}s for this entry.</li> <li><b>parameters: {@link Parameter}s for this entry.</b></li> </ul>
+ * entry.</li> <li><b>partNumbers: </b> {@link PartNumber}s for this entry.</li>
+ * <li><b>parameters: {@link Parameter}s for this entry.</b></li> </ul>
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
@@ -188,6 +188,14 @@ public class Entry implements IModel {
     @Type(type = "org.hibernate.type.TextType")
     private String intellectualProperty;
 
+    @Column(name = "funding_source", length = 512)
+    @Field
+    private String fundingSource;
+
+    @Column(name = "principal_investigator", length = 512)
+    @Field
+    private String principalInvestigator;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
     @IndexedEmbedded
     private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<>();
@@ -195,10 +203,6 @@ public class Entry implements IModel {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
     @IndexedEmbedded
     private final Set<Link> links = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "entry", fetch = FetchType.EAGER)
-    @IndexedEmbedded
-    private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<>();
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
     private final List<Parameter> parameters = new ArrayList<>();
@@ -461,22 +465,6 @@ public class Entry implements IModel {
         return intellectualProperty;
     }
 
-    public void setEntryFundingSources(Set<EntryFundingSource> inputEntryFundingSources) {
-        if (inputEntryFundingSources == null) {
-            entryFundingSources.clear();
-            return;
-        }
-
-        if (inputEntryFundingSources != entryFundingSources) {
-            entryFundingSources.clear();
-            entryFundingSources.addAll(inputEntryFundingSources);
-        }
-    }
-
-    public Set<EntryFundingSource> getEntryFundingSources() {
-        return entryFundingSources;
-    }
-
     public void setParameters(List<Parameter> inputParameters) {
         if (inputParameters == null) {
             parameters.clear();
@@ -506,10 +494,6 @@ public class Entry implements IModel {
 
     public Set<Folder> getFolders() {
         return folders;
-    }
-
-    public Set<EntryFundingSource> getFundingSources() {
-        return entryFundingSources;
     }
 
     public String getName() {
@@ -545,5 +529,21 @@ public class Entry implements IModel {
         return Objects.equal(this.recordId, other.getRecordId())
                 && Objects.equal(this.recordType, other.getRecordType())
                 && Objects.equal(this.getId(), other.getId());
+    }
+
+    public String getFundingSource() {
+        return fundingSource;
+    }
+
+    public void setFundingSource(String fundingSource) {
+        this.fundingSource = fundingSource;
+    }
+
+    public String getPrincipalInvestigator() {
+        return principalInvestigator;
+    }
+
+    public void setPrincipalInvestigator(String principalInvestigator) {
+        this.principalInvestigator = principalInvestigator;
     }
 }
