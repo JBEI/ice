@@ -142,57 +142,10 @@ public class SequenceFeature implements IModel {
         this.feature = feature;
     }
 
-//    public void setAnnotationLocations(Set<AnnotationLocation> annotationLocations) {
-//        // for JAXB web services
-//        if (annotationLocations == null) {
-//            this.annotationLocations.clear();
-//            return;
-//        }
-//        if (annotationLocations != this.annotationLocations) {
-//            annotationLocations.clear();
-//            this.annotationLocations.addAll(annotationLocations);
-//        }
-//    }
-
     public Set<AnnotationLocation> getAnnotationLocations() {
         return annotationLocations;
     }
 
-    /**
-     * Use locations instead. This field exists to allow scripted migration of data using
-     * the new database schema.
-     */
-//    @Deprecated
-//    public int getGenbankStart() {
-//        return genbankStart;
-//    }
-
-    /**
-     * Use locations instead. This field exists to allow scripted migration of data using
-     * the new database schema.
-     */
-//    @Deprecated
-//    public void setGenbankStart(int genbankStart) {
-//        this.genbankStart = genbankStart;
-//    }
-
-    /**
-     * Use locations instead. This field exists to allow scripted migration of data using
-     * the new database schema.
-     */
-//    @Deprecated
-//    public int getEnd() {
-//        return end;
-//    }
-
-//    /**
-//     * Use locations instead. This field exists to allow scripted migration of data using
-//     * the new database schema.
-//     */
-//    @Deprecated
-//    public void setEnd(int end) {
-//        this.end = end;
-//    }
     public int getStrand() {
         return strand;
     }
@@ -216,14 +169,6 @@ public class SequenceFeature implements IModel {
         return genbankType;
     }
 
-//    public void setGenbankType(String genbankType) {
-//        this.genbankType = genbankType;
-//    }
-//
-//    public void setAnnotationType(AnnotationType annotationType) {
-//        this.annotationType = annotationType;
-//    }
-
     public AnnotationType getAnnotationType() {
         return annotationType;
     }
@@ -231,19 +176,6 @@ public class SequenceFeature implements IModel {
     public Set<SequenceFeatureAttribute> getSequenceFeatureAttributes() {
         return sequenceFeatureAttributes;
     }
-
-//    public void setSequenceFeatureAttributes(Set<SequenceFeatureAttribute> sequenceFeatureAttributes) {
-//        if (sequenceFeatureAttributes == null) {
-//            this.sequenceFeatureAttributes.clear();
-//            return;
-//        }
-//
-//        if (this.sequenceFeatureAttributes != sequenceFeatureAttributes) {
-//            sequenceFeatureAttributes.clear();
-//            sequenceFeatureAttributes.addAll(sequenceFeatureAttributes);
-//        }
-//
-//    }
 
     public Integer getUniqueGenbankStart() {
         Integer result = null;
@@ -261,5 +193,4 @@ public class SequenceFeature implements IModel {
         }
         return result;
     }
-
 }

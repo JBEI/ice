@@ -14,6 +14,7 @@ import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
 
+import org.apache.commons.lang.StringUtils;
 import org.sbolstandard.core.DnaComponent;
 import org.sbolstandard.core.DnaSequence;
 import org.sbolstandard.core.SBOLFactory;
@@ -45,7 +46,8 @@ public class SBOLVisitor {
             dnaComponent.setDisplayId(partId);
         } else {
             dnaComponent.setURI(URI.create(dcUri));
-            String displayId = dcUri.substring(dcUri.lastIndexOf("#") + 1);
+            String displayId = StringUtils.isBlank(sequence.getIdentifier()) ?
+                    dcUri.substring(dcUri.lastIndexOf("/") + 1) : sequence.getIdentifier();
             dnaComponent.setDisplayId(displayId);
         }
         dnaComponent.setName(entry.getName());
@@ -119,7 +121,8 @@ public class SBOLVisitor {
             subComponent.setDisplayId(dcUri);
         } else {
             subComponent.setURI(URI.create(dcUri));
-            String displayId = dcUri.substring(dcUri.lastIndexOf("#") + 1);
+            String displayId = StringUtils.isBlank(feature.getFeature().getIdentification()) ?
+                    dcUri.substring(dcUri.lastIndexOf("/") + 1) : feature.getFeature().getIdentification();
             subComponent.setDisplayId(displayId);
         }
 

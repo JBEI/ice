@@ -329,6 +329,7 @@ public class SequenceController {
             FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) dnaSequence;
             sequence.setUri(featuredDNASequence.getUri());
             sequence.setComponentUri(featuredDNASequence.getDcUri());
+            sequence.setIdentifier(featuredDNASequence.getIdentifier());
 
             if (featuredDNASequence.getFeatures() != null && !featuredDNASequence.getFeatures().isEmpty()) {
                 for (DNAFeature dnaFeature : featuredDNASequence.getFeatures()) {
@@ -380,7 +381,8 @@ public class SequenceController {
                         annotationType = AnnotationType.valueOf(dnaFeature.getAnnotationType());
                     }
 
-                    Feature feature = new Feature(dnaFeature.getName(), "", featureSequence, 0, dnaFeature.getType());
+                    Feature feature = new Feature(dnaFeature.getName(), dnaFeature.getIdentifier(), featureSequence, 0,
+                                                  dnaFeature.getType());
                     if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
                         feature.setUri(dnaFeature.getLocations().get(0).getUri());
 

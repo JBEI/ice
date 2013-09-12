@@ -46,6 +46,9 @@ public class Sequence implements IModel {
     @Type(type = "org.hibernate.type.TextType")
     private String sequence;
 
+    @Column(name = "identifier")
+    private String identifier;
+
     @Column(name = "sequence_user")
     @Lob
     @Type(type = "org.hibernate.type.TextType")
@@ -74,7 +77,8 @@ public class Sequence implements IModel {
     @OrderBy("id")
     private Set<SequenceFeature> sequenceFeatures = new SequenceFeatureCollection();
 
-    public Sequence() {}
+    public Sequence() {
+    }
 
     public Sequence(String sequence, String sequenceUser, String fwdHash, String revHash, Entry entry) {
         super();
@@ -183,5 +187,13 @@ public class Sequence implements IModel {
 
     public void setComponentUri(String componentUri) {
         this.componentUri = componentUri;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 }
