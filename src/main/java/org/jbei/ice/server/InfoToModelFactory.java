@@ -27,6 +27,8 @@ import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Factory object for converting data transfer objects to model objects
  *
@@ -133,9 +135,12 @@ public class InfoToModelFactory {
         Set<SelectionMarker> markers = getSelectionMarkers(info.getSelectionMarkers(), entry);
         entry.setSelectionMarkers(markers);
         entry.setReferences(info.getReferences());
-        entry.setRecordId(info.getRecordId());
-        entry.setPartNumber(info.getPartId());
-        entry.setCreationTime(new Date(info.getCreationTime()));
+        if (StringUtils.isBlank(entry.getRecordId()))
+            entry.setRecordId(info.getRecordId());
+        if (StringUtils.isBlank(entry.getPartNumber()))
+            entry.setPartNumber(info.getPartId());
+        if (entry.getCreationTime() == null)
+            entry.setCreationTime(new Date(info.getCreationTime()));
         entry.setModificationTime(new Date(info.getModificationTime()));
 
         if (info.getOwnerEmail() != null) {
@@ -148,9 +153,20 @@ public class InfoToModelFactory {
             entry.setCreatorEmail(info.getCreatorEmail());
         }
 
-        entry.setStatus(info.getStatus() == null ? "" : info.getStatus());
+        if (info.getStatus() == null) {
+            if (StringUtils.isBlank(entry.getStatus()))
+                entry.setStatus("");
+        } else
+            entry.setStatus(info.getStatus());
+
         entry.setAlias(info.getAlias());
-        entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? Integer.valueOf(0) : info.getBioSafetyLevel());
+
+        if (info.getBioSafetyLevel() == null) {
+            if (entry.getBioSafetyLevel() == null)
+                entry.setBioSafetyLevel(0);
+        } else
+            entry.setBioSafetyLevel(info.getBioSafetyLevel());
+
         entry.setShortDescription(info.getShortDescription());
         entry.setLongDescription(info.getLongDescription());
         entry.setIntellectualProperty(info.getIntellectualProperty());
