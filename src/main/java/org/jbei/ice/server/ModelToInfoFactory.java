@@ -14,7 +14,6 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
@@ -304,25 +303,8 @@ public class ModelToInfoFactory {
 
         // get visibility
         info.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
-
         info.setLongDescription(entry.getLongDescription());
         info.setShortDescription(entry.getShortDescription());
-
-        String links = "";
-        StringBuilder linkStr = new StringBuilder();
-        if (entry.getLinks() != null) {
-            for (Link link : entry.getLinks()) {
-                if (link.getLink() != null && !link.getLink().isEmpty()) {
-                    linkStr.append(link.getLink()).append(", ");
-                } else if (link.getUrl() != null && !link.getUrl().isEmpty())
-                    linkStr.append(link.getUrl()).append(", ");
-            }
-
-            links = linkStr.toString();
-            if (!links.isEmpty())
-                links = links.substring(0, links.length() - 1);
-        }
-        info.setLinks(links);
         info.setReferences(entry.getReferences());
         return info;
     }

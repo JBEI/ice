@@ -132,6 +132,9 @@ public abstract class EntryDataView<T extends PartData> extends Composite {
         RegExp regExp = RegExp.compile(regex, "gi");
         MatchResult result = regExp.exec(input);
         int i = 0;
+        if (result == null)
+            return input;
+
         String links = "";
         while (result != null) {
             String url = result.getGroup(0);
