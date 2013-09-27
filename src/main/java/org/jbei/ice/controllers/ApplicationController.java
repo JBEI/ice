@@ -73,7 +73,6 @@ public class ApplicationController {
             case "3.1.0":
                 ControllerFactory.getPermissionController().upgradePermissions();
                 initializeHibernateSearch();
-                ControllerFactory.getConfigurationController().upgradeConfiguration();
                 ControllerFactory.getFolderController().upgradeFolders();
                 ControllerFactory.getEntryController().upgradeTo3Point4();
                 ControllerFactory.getEntryController().upgradeTo3Point4Point5();

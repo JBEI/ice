@@ -7,7 +7,6 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.utils.JbeirSettings;
 
 /**
  * @author Hector Plahar
@@ -36,34 +35,6 @@ public class ConfigurationController {
             Configuration configuration = dao.get(ConfigurationKey.DATABASE_SCHEMA_VERSION);
             configuration.setValue(newVersion);
             dao.save(configuration);
-        } catch (DAOException de) {
-            throw new ControllerException(de);
-        }
-    }
-
-    // upgrade config from pre version 3.3.0. goes through the property file and just
-    // saves the value in the database
-    public void upgradeConfiguration() throws ControllerException {
-        Logger.info("Upgrading configuration");
-        try {
-            for (ConfigurationKey type : ConfigurationKey.values()) {
-                String value;
-                try {
-                    value = JbeirSettings.getSetting(type.name());
-                } catch (Exception e) {
-                    Logger.warn("Skipping adding " + type.name() + " to configuration database ");
-                    continue;
-                    // assuming it is alread in the db  e.g. plasmid storage types
-                }
-
-                Configuration config = dao.get(type);
-                if (config == null)
-                    config = new Configuration(type.name(), value);
-                else
-                    config.setValue(value);
-                Logger.info("Adding {key, value} -> " + type.name() + ", " + value);
-                dao.save(config);
-            }
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
