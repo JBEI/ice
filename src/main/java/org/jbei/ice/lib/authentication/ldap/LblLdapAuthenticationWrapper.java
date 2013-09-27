@@ -96,13 +96,13 @@ public class LblLdapAuthenticationWrapper {
                 try {
                     authContext.close();
                 } catch (NamingException e) {
-                    throw new LblLdapAuthenticationWrapperException("LDAP excepting closing", e);
+                    Logger.error(e);
                 }
             }
             try {
                 dirContext.close();
             } catch (NamingException e) {
-                throw new LblLdapAuthenticationWrapperException("LDAP Exception closing", e);
+                Logger.error(e);
             }
         }
     }

@@ -123,6 +123,7 @@ public class SBOLParser extends AbstractParser {
                 if (name == null || name.trim().isEmpty())
                     name = subComponent.getDisplayId();
                 feature.setName(name);
+                feature.setIdentifier(subComponent.getDisplayId());
                 location.setUri(subComponent.getURI().toString());
             }
 

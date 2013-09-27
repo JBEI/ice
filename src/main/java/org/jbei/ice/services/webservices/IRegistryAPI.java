@@ -140,4 +140,12 @@ public interface IRegistryAPI {
 
     boolean isValidApiKey(@WebParam(name = "url") String url, @WebParam(name = "apiKey") String apiKey)
             throws ServiceException;
+
+    String createStrainWithPlasmid(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "strain") PartTransfer strain, @WebParam(name = "plasmid") PartTransfer plasmid)
+            throws ServiceException;
+
+    boolean updatePartStatus(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "recordId") String recordId, @WebParam(name = "status") String status)
+            throws ServiceException;
 }

@@ -92,6 +92,9 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         if (f1.getUri() == null && f2.getUri() == null)
             return true;
 
+        if (!f1.getIdentification().equalsIgnoreCase(f2.getIdentification()))
+            return false;
+
         if (f1.getUri() != null && !f1.getUri().equalsIgnoreCase(f2.getUri()))
             return false;
 

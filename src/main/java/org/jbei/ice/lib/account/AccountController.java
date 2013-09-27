@@ -212,7 +212,8 @@ public class AccountController {
         stringBuilder.append("\n\nYour new password is: ")
                      .append(newPassword)
                      .append("\nYour login id is: ")
-                     .append(info.getEmail());
+                     .append(info.getEmail())
+                     .append("\n\n");
 
         String server = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
         if (server != null && !server.isEmpty()) {

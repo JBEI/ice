@@ -348,6 +348,34 @@ public class RegistryAPI implements IRegistryAPI {
         return genbankSequence;
     }
 
+    @Override
+    public String createStrainWithPlasmid(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "strain") PartTransfer strainTransfer,
+            @WebParam(name = "plasmid") PartTransfer plasmidTransfer) throws ServiceException {
+
+        try {
+            Account account = validateAccount(sessionId);
+            Logger.info(account.getEmail() + ": remotely creating strain with plasmid");
+            return ControllerFactory.getEntryController().createStrainWithPlasmid(account, strainTransfer,
+                                                                                  plasmidTransfer);
+        } catch (SessionException | ControllerException se) {
+            throw new ServiceException(se);
+        }
+    }
+
+    @Override
+    public boolean updatePartStatus(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "recordId") String recordId, @WebParam(name = "status") String status)
+            throws ServiceException {
+        try {
+            Account account = validateAccount(sessionId);
+            ControllerFactory.getEntryController().updatePartStatus(account, recordId, status);
+            return true;
+        } catch (SessionException | ControllerException e) {
+            throw new ServiceException(e);
+        }
+    }
+
     /**
      * Genbank formatted {@link Sequence} of the specified part record id
      *

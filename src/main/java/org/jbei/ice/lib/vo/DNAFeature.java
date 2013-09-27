@@ -20,6 +20,7 @@ public class DNAFeature implements Serializable {
     private int strand = 1;
     private String annotationType;
     private String uri;
+    private String identifier;
     private List<DNAFeatureNote> notes = new LinkedList<>();
     private List<DNAFeatureLocation> locations = new LinkedList<>();
 
@@ -85,5 +86,13 @@ public class DNAFeature implements Serializable {
 
     public void setUri(String uri) {
         this.uri = uri;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 }

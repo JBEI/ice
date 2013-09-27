@@ -10,18 +10,21 @@ import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 
+import org.slf4j.LoggerFactory;
+
 /**
- * Logger for gd-ice.
+ * Logger for ICE.
  * <p/>
  * Contains static methods for different log levels, using the log configuration defined in the
  * settings file.
  * <p/>
  * For Errors and Fatal levels, send out an email, according to the configuration.
  *
- * @author Timothy Ham
+ * @author Hector Plahar, Timothy Ham
  */
 public class Logger {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger("org.jbei.ice.system");
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger("org.jbei.ice");
 
     /**
      * Log a message at the DEBUG level.
@@ -29,7 +32,7 @@ public class Logger {
      * @param msg
      */
     public static void debug(String msg) {
-        logger.debug(msg);
+        LOGGER.debug(msg);
     }
 
     /**
@@ -38,7 +41,7 @@ public class Logger {
      * @param msg
      */
     public static void info(String msg) {
-        logger.info(msg);
+        LOGGER.info(msg);
     }
 
     /**
@@ -47,7 +50,7 @@ public class Logger {
      * @param msg
      */
     public static void warn(String msg) {
-        logger.warn(msg);
+        LOGGER.warn(msg);
     }
 
     /**
@@ -57,7 +60,7 @@ public class Logger {
      */
     public static void error(String msg) {
         sendEmail(msg);
-        logger.error(msg);
+        LOGGER.error(msg);
     }
 
     /**
@@ -72,7 +75,7 @@ public class Logger {
     public static void error(String msg, Throwable e) {
         msg = msg + "\n" + Utils.stackTraceToString(e);
         sendEmail(msg, e);
-        logger.error(msg);
+        LOGGER.error(msg);
     }
 
     /**
@@ -83,30 +86,7 @@ public class Logger {
     public static void error(Throwable e) {
         String msg = Utils.stackTraceToString(e);
         sendEmail(msg, e);
-        logger.error(msg);
-    }
-
-    /**
-     * Log a message at the fatal level.
-     *
-     * @param msg
-     */
-
-    public static void fatal(String msg) {
-        sendEmail(msg);
-        logger.fatal(msg);
-    }
-
-    /**
-     * Log a message at the fatal level, with Throwable e.
-     *
-     * @param msg
-     * @param e
-     */
-    public static void fatal(String msg, Throwable e) {
-        msg = msg + "\n" + Utils.stackTraceToString(e);
-        sendEmail(msg, e);
-        logger.fatal(msg);
+        LOGGER.error(msg);
     }
 
     /**

@@ -213,8 +213,8 @@ public class BulkUploadController {
                     hasOriginalSequence = sequenceController.hasOriginalSequence(plasmid.getId());
                     PartData plasmidInfo = ModelToInfoFactory.getInfo(plasmid);
                     ArrayList<AttachmentInfo> partAttachments = ModelToInfoFactory.getAttachments(attachments);
-                    info.setAttachments(partAttachments);
-                    info.setHasAttachment(!partAttachments.isEmpty());
+                    plasmidInfo.setAttachments(partAttachments);
+                    plasmidInfo.setHasAttachment(!partAttachments.isEmpty());
                     plasmidInfo.setHasSequence(hasSequence);
                     plasmidInfo.setHasOriginalSequence(hasOriginalSequence);
                     Set<Permission> permissions = plasmid.getPermissions();
