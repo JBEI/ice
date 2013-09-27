@@ -93,31 +93,6 @@ public class Account implements IModel {
         super();
     }
 
-    /**
-     * Constructor with simplified parameters.
-     *
-     * @param firstName
-     * @param lastName
-     * @param initials
-     * @param email
-     * @param password
-     * @param institution
-     * @param description
-     */
-    public Account(String firstName, String lastName, String initials, String email,
-            String password, String institution, String description) {
-        super();
-
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.initials = initials;
-        this.email = email;
-        this.password = password;
-        this.institution = institution;
-        this.description = description;
-        creationTime = new Date();
-    }
-
     public long getId() {
         return id;
     }
