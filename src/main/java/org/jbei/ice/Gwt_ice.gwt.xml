@@ -4,7 +4,6 @@
     <inherits name='com.google.gwt.user.User'/>
 
     <!--  css for file upload -->
-    <stylesheet src="Upload.css"/>
 
     <!-- Other module inherits                                      -->
 
