@@ -17,7 +17,7 @@ public class PartTransfer implements Serializable {
 
     private PartData part;
     private ArrayList<PartAttachment> attachments;
-    private String sequenceString;
+    private PartAttachment sequence;
 
     public PartTransfer() {
         attachments = new ArrayList<>();
@@ -39,11 +39,11 @@ public class PartTransfer implements Serializable {
         this.attachments = attachments;
     }
 
-    public String getSequenceString() {
-        return sequenceString;
+    public PartAttachment getSequence() {
+        return sequence;
     }
 
-    public void setSequenceString(String sequenceString) {
-        this.sequenceString = sequenceString;
+    public void setSequence(PartAttachment sequence) {
+        this.sequence = sequence;
     }
 }

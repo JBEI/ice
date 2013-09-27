@@ -156,7 +156,7 @@ public class EntryController {
         }
     }
 
-    public void createStrainWithPlasmid(Account account, Entry strain, Entry plasmid,
+    public Entry createStrainWithPlasmid(Account account, Entry strain, Entry plasmid,
             ArrayList<AccessPermission> accessPermissions) throws ControllerException {
         if (strain == null || plasmid == null)
             throw new ControllerException("Cannot create null entries");
@@ -165,9 +165,10 @@ public class EntryController {
         strain = createEntry(account, strain, accessPermissions);
         strain.getLinkedEntries().add(plasmid);
         try {
-            dao.update(strain);
+            return dao.update(strain);
         } catch (DAOException de) {
             Logger.error(de);
+            throw new ControllerException(de);
         }
     }
 
@@ -276,10 +277,12 @@ public class EntryController {
 
         if (part.getInfo() != null) {
             Entry enclosed = InfoToModelFactory.infoToEntry(part.getInfo());
-            createStrainWithPlasmid(account, entry, enclosed, part.getAccessPermissions());
-        } else
+            Entry created = createStrainWithPlasmid(account, entry, enclosed, part.getAccessPermissions());
+            part.setRecordId(created.getRecordId());
+        } else {
             entry = createEntry(account, entry, part.getAccessPermissions());
-
+            part.setRecordId(entry.getRecordId());
+        }
         if (sampleMap != null) {
             for (SampleStorage sampleStorage : sampleMap) {
                 PartSample partSample = sampleStorage.getPartSample();
@@ -395,7 +398,10 @@ public class EntryController {
                             sequenceString = sequence.getSequence();
                     }
 
-                    part.setSequenceString(sequenceString);
+                    PartAttachment sequenceAttachment = new PartAttachment();
+                    DataHandler data = new DataHandler(sequenceString.getBytes(), "application/octet-stream");
+                    sequenceAttachment.setAttachmentData(data);
+                    part.setSequence(sequenceAttachment);
 
                     if (attachmentController.hasAttachment(entry)) {
                         ArrayList<PartAttachment> attachments = new ArrayList<>();
@@ -438,6 +444,91 @@ public class EntryController {
         }
     }
 
+    public String createStrainWithPlasmid(Account account, PartTransfer strainTransfer, PartTransfer plasmidTransfer)
+            throws ControllerException {
+        // create strain
+        Entry strain = InfoToModelFactory.infoToEntry(strainTransfer.getPart());
+        Entry plasmid = InfoToModelFactory.infoToEntry(plasmidTransfer.getPart());
+
+        strain = createStrainWithPlasmid(account, strain, plasmid, null);
+
+        // check attachments
+        if (strainTransfer.getAttachments() != null) {
+            for (PartAttachment partAttachment : strainTransfer.getAttachments()) {
+                DataHandler handler = partAttachment.getAttachmentData();
+                Attachment attachment = new Attachment();
+                attachment.setEntry(strain);
+                attachment.setDescription(partAttachment.getDescription());
+                attachment.setFileName(partAttachment.getName());
+                AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+                try {
+                    attachmentController.save(account, attachment, handler.getInputStream());
+                } catch (IOException e) {
+                    Logger.error(e);
+                }
+            }
+        }
+
+        // check sequence
+        if (strainTransfer.getSequence() != null) {
+            String sequenceString;
+            try {
+                sequenceString = IOUtils.toString(strainTransfer.getSequence().getAttachmentData().getInputStream());
+                IDNASequence dnaSequence = SequenceController.parse(sequenceString);
+                if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
+                    Logger.error("Couldn't parse sequence file!");
+                } else {
+                    Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+                    sequence.setSequenceUser(sequenceString);
+                    sequence.setEntry(strain);
+                    sequenceController.saveSequence(sequence);
+                    ApplicationController.scheduleBlastIndexRebuildTask(true);
+                }
+            } catch (IOException e) {
+                Logger.error(e);
+            }
+        }
+
+        // check attachments
+        if (plasmidTransfer.getAttachments() != null) {
+            for (PartAttachment partAttachment : plasmidTransfer.getAttachments()) {
+                DataHandler handler = partAttachment.getAttachmentData();
+                Attachment attachment = new Attachment();
+                attachment.setEntry(plasmid);
+                attachment.setDescription(partAttachment.getDescription());
+                attachment.setFileName(partAttachment.getName());
+                AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+                try {
+                    attachmentController.save(account, attachment, handler.getInputStream());
+                } catch (IOException e) {
+                    Logger.error(e);
+                }
+            }
+        }
+
+        // check sequence
+        if (plasmidTransfer.getSequence() != null) {
+            String sequenceString;
+            try {
+                sequenceString = IOUtils.toString(plasmidTransfer.getSequence().getAttachmentData().getInputStream());
+                IDNASequence dnaSequence = SequenceController.parse(sequenceString);
+                if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
+                    Logger.error("Couldn't parse sequence file!");
+                } else {
+                    Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+                    sequence.setSequenceUser(sequenceString);
+                    sequence.setEntry(plasmid);
+                    sequenceController.saveSequence(sequence);
+                    ApplicationController.scheduleBlastIndexRebuildTask(true);
+                }
+            } catch (IOException e) {
+                Logger.error(e);
+            }
+        }
+
+        return strain.getRecordId();
+    }
+
     public boolean recordParts(ArrayList<PartTransfer> parts) {
         if (parts == null)
             return false;
@@ -478,20 +569,21 @@ public class EntryController {
                 }
 
                 // check sequence
-                String sequenceString = part.getSequenceString();
-                if (sequenceString != null) {
-                    IDNASequence dnaSequence = SequenceController.parse(sequenceString);
-                    if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
-                        Logger.error("Couldn't parse sequence file!");
-                    }
-
+                if (part.getSequence() != null) {
+                    String sequenceString;
                     try {
-                        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-                        sequence.setSequenceUser(sequenceString);
-                        sequence.setEntry(entry);
-                        sequenceController.saveSequence(sequence);
-                        ApplicationController.scheduleBlastIndexRebuildTask(true);
-                    } catch (ControllerException e) {
+                        sequenceString = IOUtils.toString(part.getSequence().getAttachmentData().getInputStream());
+                        IDNASequence dnaSequence = SequenceController.parse(sequenceString);
+                        if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
+                            Logger.error("Couldn't parse sequence file!");
+                        } else {
+                            Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+                            sequence.setSequenceUser(sequenceString);
+                            sequence.setEntry(entry);
+                            sequenceController.saveSequence(sequence);
+                            ApplicationController.scheduleBlastIndexRebuildTask(true);
+                        }
+                    } catch (IOException e) {
                         Logger.error(e);
                     }
                 }
@@ -1064,6 +1156,23 @@ public class EntryController {
             return info;
         } catch (ServiceException e) {
             Logger.error(e);
+            throw new ControllerException(e);
+        }
+    }
+
+    public void updatePartStatus(Account account, String recordId, String newStatus) throws ControllerException {
+        try {
+            Entry entry = getByRecordId(account, recordId);
+            entry.setStatus(newStatus);
+            dao.update(entry);
+
+            if (entry.getLinkedEntries() != null) {
+                for (Entry linkedEntry : entry.getLinkedEntries()) {
+                    linkedEntry.setStatus(newStatus);
+                    dao.update(entry);
+                }
+            }
+        } catch (DAOException | PermissionException e) {
             throw new ControllerException(e);
         }
     }
