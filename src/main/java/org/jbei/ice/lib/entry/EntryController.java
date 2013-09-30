@@ -1189,43 +1189,47 @@ public class EntryController {
         partData.setHasOriginalSequence(hasOriginalSequence);
 
         // attachments
-        ArrayList<Attachment> attachments = ControllerFactory.getAttachmentController().getByEntry(account, entry);
-        ArrayList<AttachmentInfo> attachmentInfos = ModelToInfoFactory.getAttachments(attachments);
-        partData.setAttachments(attachmentInfos);
-        partData.setHasAttachment(!attachmentInfos.isEmpty());
+        try {
+            ArrayList<Attachment> attachments = ControllerFactory.getAttachmentController().getByEntry(account, entry);
+            ArrayList<AttachmentInfo> attachmentInfos = ModelToInfoFactory.getAttachments(attachments);
+            partData.setAttachments(attachmentInfos);
+            partData.setHasAttachment(!attachmentInfos.isEmpty());
 
-        // samples
-        ArrayList<Sample> samples = ControllerFactory.getSampleController().getSamples(entry);
-        ArrayList<SampleStorage> sampleStorages = new ArrayList<>();
-        if (samples != null && !samples.isEmpty()) {
-            for (Sample sample : samples) {
-                SampleStorage sampleStorage = new SampleStorage();
+            // samples
+            ArrayList<Sample> samples = ControllerFactory.getSampleController().getSamples(entry);
+            ArrayList<SampleStorage> sampleStorages = new ArrayList<>();
+            if (samples != null && !samples.isEmpty()) {
+                for (Sample sample : samples) {
+                    SampleStorage sampleStorage = new SampleStorage();
 
-                // convert sample to info
-                PartSample partSample = new PartSample();
-                partSample.setCreationTime(sample.getCreationTime());
-                partSample.setLabel(sample.getLabel());
-                partSample.setNotes(sample.getNotes());
-                partSample.setDepositor(sample.getDepositor());
-                sampleStorage.setPartSample(partSample);
+                    // convert sample to info
+                    PartSample partSample = new PartSample();
+                    partSample.setCreationTime(sample.getCreationTime());
+                    partSample.setLabel(sample.getLabel());
+                    partSample.setNotes(sample.getNotes());
+                    partSample.setDepositor(sample.getDepositor());
+                    sampleStorage.setPartSample(partSample);
 
-                // convert sample to info
-                Storage storage = sample.getStorage();
+                    // convert sample to info
+                    Storage storage = sample.getStorage();
 
-                while (storage != null) {
-                    if (storage.getStorageType() == Storage.StorageType.SCHEME) {
-                        partSample.setLocationId(storage.getId() + "");
-                        partSample.setLocation(storage.getName());
-                        break;
+                    while (storage != null) {
+                        if (storage.getStorageType() == Storage.StorageType.SCHEME) {
+                            partSample.setLocationId(storage.getId() + "");
+                            partSample.setLocation(storage.getName());
+                            break;
+                        }
+
+                        sampleStorage.getStorageList().add(ModelToInfoFactory.getStorageInfo(storage));
+                        storage = storage.getParent();
                     }
-
-                    sampleStorage.getStorageList().add(ModelToInfoFactory.getStorageInfo(storage));
-                    storage = storage.getParent();
+                    sampleStorages.add(sampleStorage);
                 }
-                sampleStorages.add(sampleStorage);
             }
+            partData.setSampleMap(sampleStorages);
+        } catch (ControllerException ce) {
+            Logger.error(ce);
         }
-        partData.setSampleMap(sampleStorages);
 
         // sequence analysis
         try {

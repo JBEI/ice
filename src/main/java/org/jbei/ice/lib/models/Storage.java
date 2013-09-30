@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.models;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 
@@ -99,7 +100,7 @@ public class Storage implements IModel {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "parent", orphanRemoval = true)
     @OrderBy("id")
-    private final Set<Storage> children = null;
+    private final Set<Storage> children = new HashSet<>();
 
     public Storage() {
         super();
