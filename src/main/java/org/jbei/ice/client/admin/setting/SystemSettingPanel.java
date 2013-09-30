@@ -44,7 +44,7 @@ public class SystemSettingPanel extends Composite implements IAdminPanel {
 //        layout.setWidth("100%");
         reIndex = new Button("<i class=\"blue " + FAIconType.REFRESH.getStyleName() + "\"></i>&nbsp; Rebuild Indexes");
         blastReIndex = new Button("<i class=\"blue " + FAIconType.REFRESH.getStyleName()
-                                          + "\"></i>&nbsp; Rebuild BLAST®");
+                                          + "\"></i>&nbsp; Rebuild BLAST");
     }
 
     public void setRebuildIndexesHandler(final ServiceDelegate<IndexType> delegate) {
