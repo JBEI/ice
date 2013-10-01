@@ -44,8 +44,6 @@
         <mapping class="org.jbei.ice.lib.entry.model.Strain"/>
         <mapping class="org.jbei.ice.lib.entry.model.Part"/>
         <mapping class="org.jbei.ice.lib.entry.model.ArabidopsisSeed"/>
-        <mapping class="org.jbei.ice.lib.entry.model.Name"/>
-        <mapping class="org.jbei.ice.lib.entry.model.PartNumber"/>
         <mapping class="org.jbei.ice.lib.entry.model.Link"/>
         <mapping class="org.jbei.ice.lib.models.SelectionMarker"/>
         <mapping class="org.jbei.ice.lib.models.Sequence"/>
@@ -61,10 +59,6 @@
         <mapping class="org.jbei.ice.lib.entry.sample.model.Sample"/>
         <mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
         <mapping class="org.jbei.ice.lib.group.Group"/>
-        <mapping class="org.jbei.ice.lib.permissions.model.ReadUser"/>
-        <mapping class="org.jbei.ice.lib.permissions.model.WriteUser"/>
-        <mapping class="org.jbei.ice.lib.permissions.model.ReadGroup"/>
-        <mapping class="org.jbei.ice.lib.permissions.model.WriteGroup"/>
         <mapping class="org.jbei.ice.lib.models.SessionData"/>
         <mapping class="org.jbei.ice.lib.models.TraceSequence"/>
         <mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment"/>

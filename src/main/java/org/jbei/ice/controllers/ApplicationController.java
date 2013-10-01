@@ -71,7 +71,6 @@ public class ApplicationController {
         switch (versionToUpgrade) {
             // UPGRADE from 3.1.0 to 3.4
             case "3.1.0":
-                ControllerFactory.getPermissionController().upgradePermissions();
                 initializeHibernateSearch();
                 ControllerFactory.getFolderController().upgradeFolders();
                 ControllerFactory.getEntryController().upgradeTo3Point4();

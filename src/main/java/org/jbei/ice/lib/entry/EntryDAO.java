@@ -16,9 +16,7 @@ import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.Group;
@@ -759,17 +757,24 @@ public class EntryDAO extends HibernateRepository<Entry> {
         Session session = currentSession();
         int i = 0;
         Logger.info("Upgrading part numbers");
+        Query query = session.createSQLQuery("select entries_id, part_number from part_numbers");
+        List list = query.list();
 
-        Query query = session.createQuery("from " + PartNumber.class.getName());
-        Iterator iterator = query.iterate();
-        while (iterator.hasNext()) {
-            PartNumber number = (PartNumber) iterator.next();
-            Entry entry = number.getEntry();
+        for (Object object : list) {
+            long entryId = ((Number) ((Object[]) object)[0]).longValue();
+            String partNumber = ((String) ((Object[]) object)[1]);
+
+            Entry entry = (Entry) session.get(Entry.class, entryId);
+            if (entry == null) {
+                Logger.warn("Could not retrieve entry with id " + entryId);
+                continue;
+            }
+
             if (entry.getPartNumber() == null || entry.getPartNumber().isEmpty()) {
-                entry.setPartNumber(number.getPartNumber());
+                entry.setPartNumber(partNumber);
             } else {
-                if (number.getPartNumber().startsWith(partNumberPrefix))
-                    entry.setPartNumber(number.getPartNumber());
+                if (partNumber.startsWith(partNumberPrefix))
+                    entry.setPartNumber(partNumber);
             }
             session.update(entry);
             i += 1;
@@ -782,13 +787,21 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
         Logger.info("Upgrading names");
         // upgrade names
-        query = session.createQuery("from " + Name.class.getName());
-        iterator = query.iterate();
-        while (iterator.hasNext()) {
-            Name name = (Name) iterator.next();
-            Entry entry = name.getEntry();
+        query = session.createSQLQuery("select entries_id, name from names");
+        list = query.list();
+
+        for (Object object : list) {
+            long entryId = ((Number) ((Object[]) object)[0]).longValue();
+            String name = ((String) ((Object[]) object)[1]);
+
+            Entry entry = (Entry) session.get(Entry.class, entryId);
+            if (entry == null) {
+                Logger.warn("Could not retrieve entry with id " + entryId);
+                continue;
+            }
+
             if (entry.getName() == null || entry.getName().isEmpty()) {
-                entry.setName(name.getName());
+                entry.setName(name);
             }
             session.update(entry);
             i += 1;
