@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
@@ -22,7 +21,6 @@ import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
-import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
@@ -93,36 +91,6 @@ public class EntryControllerTest {
         entry = controller.get(account, id);
         PartData data = ModelToInfoFactory.getInfo(entry);
         Assert.assertEquals("Nathan", data.getPrincipalInvestigator());
-    }
-
-    @Test
-    public void testCreateStrainWithPlasmid() throws Exception {
-        Account account = AccountCreator.createTestAccount("testCreateStrainWithPlasmid", false);
-        try {
-            controller.createStrainWithPlasmid(account, null, null, null);
-        } catch (ControllerException ce) {
-            // expecting ce
-        }
-
-        StrainData strainData = new StrainData();
-        strainData.setAlias("testStrainAlias");
-        strainData.setBioSafetyLevel(1);
-        strainData.setGenotypePhenotype("genPhenTest");
-        strainData.setHost("testHost");
-        strainData.setName("sTrain");
-        Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainData);
-        Assert.assertNotNull(strain);
-
-        PlasmidData plasmidData = new PlasmidData();
-        plasmidData.setName("pLasmid");
-        plasmidData.setCircular(true);
-        plasmidData.setOriginOfReplication("repOrigin");
-        plasmidData.setPromoters("None");
-        plasmidData.setBackbone("backbone");
-        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidData);
-        Assert.assertNotNull(plasmid);
-
-        controller.createStrainWithPlasmid(account, strain, plasmid, null);
     }
 
     @Test

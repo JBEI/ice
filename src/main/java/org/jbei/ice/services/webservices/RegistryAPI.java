@@ -30,6 +30,7 @@ import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.user.User;
@@ -351,13 +352,14 @@ public class RegistryAPI implements IRegistryAPI {
     @Override
     public String createStrainWithPlasmid(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "strain") PartTransfer strainTransfer,
-            @WebParam(name = "plasmid") PartTransfer plasmidTransfer) throws ServiceException {
+            @WebParam(name = "plasmid") PartTransfer plasmidTransfer,
+            @WebParam(name = "permissions") ArrayList<AccessPermission> permissions) throws ServiceException {
 
         try {
             Account account = validateAccount(sessionId);
             Logger.info(account.getEmail() + ": remotely creating strain with plasmid");
-            return ControllerFactory.getEntryController().createStrainWithPlasmid(account, strainTransfer,
-                                                                                  plasmidTransfer);
+            EntryController controller = ControllerFactory.getEntryController();
+            return controller.createStrainWithPlasmid(account, strainTransfer, plasmidTransfer, permissions);
         } catch (SessionException | ControllerException se) {
             throw new ServiceException(se);
         }
@@ -452,147 +454,6 @@ public class RegistryAPI implements IRegistryAPI {
 //        }
 //
 //        return fastaSequence;
-//    }
-
-//    /**
-//     * Assign the specified {@link Entry} a new {@link Sequence} object.
-//     *
-//     * @param sessionId           Session key.
-//     * @param entryId             RecordId of the desired Entry.
-//     * @param featuredDNASequence Annotated DNA Sequence.
-//     * @return {@link FeaturedDNASequence} as saved on the server.
-//     * @throws SessionException
-//     * @throws ServiceException
-//     */
-//    @Override
-//    public FeaturedDNASequence createSequence(@WebParam(name = "sessionId") String sessionId,
-//            @WebParam(name = "entryId") String entryId,
-//            @WebParam(name = "sequence") FeaturedDNASequence featuredDNASequence)
-//            throws SessionException, ServiceException {
-//        log(sessionId, "createSequence: " + entryId);
-//        Entry entry;
-//        FeaturedDNASequence savedFeaturedDNASequence;
-//        Account account = validateAccount(sessionId);
-//
-//        try {
-//            EntryController entryController = ControllerFactory.getEntryController();
-//            SequenceController sequenceController = ControllerFactory.getSequenceController();
-//            entry = entryController.getByRecordId(account, entryId);
-//
-//            if (entry == null) {
-//                throw new ServiceException("Entry doesn't exist!");
-//            }
-//
-//            if (sequenceController.hasSequence(entry.getId())) {
-//                throw new ServiceException(
-//                        "Entry has sequence already assigned. Remove it first and then create new one.");
-//            }
-//
-//            Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
-//            sequence.setEntry(entry);
-//
-//            savedFeaturedDNASequence = sequenceController
-//                    .sequenceToDNASequence(sequenceController.save(account, sequence));
-//
-//            log("User '" + account.getEmail() + "' saved sequence: '" + entryId + "'");
-//        } catch (Exception e) {
-//            Logger.error(e);
-//            throw new ServiceException("Registry Service Internal Error!");
-//        }
-//
-//        return savedFeaturedDNASequence;
-//    }
-
-//    /**
-//     * Remove the {@link Sequence} object associated with the specified {@link Entry}.
-//     *
-//     * @param sessionId Session key.
-//     * @param entryId   RecordId of the entry.
-//     * @throws SessionException
-//     * @throws ServiceException
-//     */
-//    @Override
-//    public void removeSequence(@WebParam(name = "sessionId") String sessionId,
-//            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
-//        log(sessionId, "removeSequence: " + entryId);
-//        Account account = validateAccount(sessionId);
-//
-//        try {
-//            EntryController entryController = ControllerFactory.getEntryController();
-//            Entry entry;
-//
-//            try {
-//                entry = entryController.getByRecordId(account, entryId);
-//            } catch (PermissionException e) {
-//                throw new ServiceException("No permission to read this entry");
-//            }
-//
-//            SequenceController sequenceController = ControllerFactory.getSequenceController();
-//            Sequence sequence = sequenceController.getByEntry(entry);
-//
-//            if (sequence != null) {
-//                try {
-//                    sequenceController.delete(account, sequence);
-//
-//                    log("User '" + account.getEmail() + "' removed sequence: '" + entryId + "'");
-//                } catch (PermissionException e) {
-//                    throw new ServiceException("No permission to delete sequence");
-//                }
-//            }
-//        } catch (Exception e) {
-//            Logger.error(e);
-//            throw new ServiceException("Registry Service Internal Error!");
-//        }
-//    }
-
-//    /**
-//     * Upload a sequence file (genbank, fasta, etc) and associate with the specified {@link Entry}.
-//     *
-//     * @param sessionId Session key.
-//     * @param entryId   RecordId of the desired Entry.
-//     * @param sequence  Text of sequence file to parse.
-//     * @return {@link FeaturedDNASequence} object.
-//     * @throws SessionException
-//     * @throws ServiceException
-//     */
-//    @Override
-//    public FeaturedDNASequence uploadSequence(@WebParam(name = "sessionId") String sessionId,
-//            @WebParam(name = "entryId") String entryId, @WebParam(name = "sequence") String sequence)
-//            throws SessionException, ServiceException {
-//        log(sessionId, "uploadSequence: " + entryId);
-//        Account account = validateAccount(sessionId);
-//        EntryController entryController = ControllerFactory.getEntryController();
-//        SequenceController sequenceController = ControllerFactory.getSequenceController();
-//        FeaturedDNASequence dnaSequence = (FeaturedDNASequence) SequenceController.parse(sequence);
-//
-//        if (dnaSequence == null) {
-//            throw new ServiceException("Couldn't parse sequence file! Supported formats: "
-//                                               + GeneralParser.getInstance().availableParsersToString());
-//        }
-//
-//        Entry entry;
-//
-//        FeaturedDNASequence savedFeaturedDNASequence;
-//        Sequence modelSequence;
-//        try {
-//            entry = entryController.getByRecordId(account, entryId);
-//
-//            if (sequenceController.hasSequence(entry.getId())) {
-//                throw new ServiceException("Entry has sequence already assigned. Remove it and then upload new one.");
-//            }
-//
-//            modelSequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-//            modelSequence.setEntry(entry);
-//            modelSequence.setSequenceUser(sequence);
-//            Sequence savedSequence = sequenceController.save(account, modelSequence);
-//            savedFeaturedDNASequence = sequenceController.sequenceToDNASequence(savedSequence);
-//            log("User '" + account.getEmail() + "' uploaded new sequence: '" + entryId + "'");
-//        } catch (Exception e) {
-//            Logger.error(e);
-//            throw new ServiceException("Registry Service Internal Error!");
-//        }
-//
-//        return savedFeaturedDNASequence;
 //    }
 
     /**

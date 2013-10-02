@@ -9,6 +9,7 @@ import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
@@ -61,22 +62,10 @@ public interface IRegistryAPI {
 //            @WebParam(name = "entryId") String entryId)
 //            throws SessionException, ServiceException;
 
-//    String getFastaSequence(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "entryId") String
+    //    String getFastaSequence(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "entryId") String
 // entryId)
 //            throws SessionException, ServiceException;
 //
-//    FeaturedDNASequence createSequence(@WebParam(name = "sessionId") String sessionId,
-//            @WebParam(name = "entryId") String entryId,
-//            @WebParam(name = "sequence") FeaturedDNASequence featuredDNASequence)
-//            throws SessionException, ServiceException;
-//
-//    void removeSequence(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "entryId") String entryId)
-//            throws SessionException, ServiceException;
-//
-//    FeaturedDNASequence uploadSequence(@WebParam(name = "sessionId") String sessionId,
-//            @WebParam(name = "entryId") String entryId, @WebParam(name = "sequence") String sequence)
-//            throws SessionException, ServiceException;
-
     ArrayList<Sample> retrieveEntrySamples(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId)
             throws SessionException, ServiceException;
@@ -142,7 +131,8 @@ public interface IRegistryAPI {
             throws ServiceException;
 
     String createStrainWithPlasmid(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "strain") PartTransfer strain, @WebParam(name = "plasmid") PartTransfer plasmid)
+            @WebParam(name = "strain") PartTransfer strain, @WebParam(name = "plasmid") PartTransfer plasmid,
+            @WebParam(name = "permissions") ArrayList<AccessPermission> permissions)
             throws ServiceException;
 
     boolean updatePartStatus(@WebParam(name = "sessionId") String sessionId,
