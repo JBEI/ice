@@ -3,6 +3,7 @@ package org.jbei.ice.lib.group;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
@@ -96,12 +97,24 @@ public class GroupControllerTest {
         UserGroup g1 = new UserGroup();
         g1.setDescription("desc");
         g1.setLabel("label");
-        Assert.assertNotNull(controller.createGroup(account, g1));
+        g1 = controller.createGroup(account, g1);
+        Assert.assertNotNull(g1);
+
+        Group group1 = controller.getGroupById(g1.getId());
+        account.getGroups().add(group1);
+        Assert.assertNotNull(group1);
 
         UserGroup g2 = new UserGroup();
         g2.setDescription("desc");
         g2.setLabel("myg2");
-        Assert.assertNotNull(controller.createGroup(account, g2));
+        g2 = controller.createGroup(account, g2);
+        Assert.assertNotNull(g2);
+        Group group2 = controller.getGroupById(g2.getId());
+        Assert.assertNotNull(group2);
+        account.getGroups().add(group2);
+
+        // save to add groups to account
+        ControllerFactory.getAccountController().save(account);
 
         Account account2 = AccountCreator.createTestAccount("testGetMatchingGroups2", false);
         UserGroup g3 = new UserGroup();
