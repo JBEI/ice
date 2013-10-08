@@ -12,6 +12,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
@@ -274,14 +275,49 @@ public class FolderController {
                 }
             }
 
-            // get folders shared with this user
+            // get folders shared with this user. permissions are included if the user has write permissions for folder
             Set<Folder> sharedFolders = ControllerFactory.getPermissionController().retrievePermissionFolders(account);
             if (sharedFolders != null) {
+
                 for (Folder folder : sharedFolders) {
                     if (userFolders != null && userFolders.contains(folder))
                         continue;
 
+                    ArrayList<AccessPermission> permissions = new ArrayList<>();
+                    ArrayList<AccessPermission> folderPermissions = controller.retrieveSetFolderPermission(folder,
+                                                                                                           false);
+                    for (AccessPermission accessPermission : folderPermissions) {
+                        if (!accessPermission.isCanWrite())
+                            continue;
+
+                        // account either has direct write permissions
+                        if (accessPermission.getArticle() == AccessPermission.Article.ACCOUNT
+                                && accessPermission.getArticleId() == account.getId()) {
+                            permissions.add(accessPermission);
+                            break;
+                        }
+
+                        if (account.getGroups() == null || account.getGroups().isEmpty())
+                            continue;
+
+                        // or belongs to a group that has the write permissions
+                        if (accessPermission.getArticle() == AccessPermission.Article.GROUP) {
+                            Group group = ControllerFactory.getGroupController().getGroupById(
+                                    accessPermission.getArticleId());
+                            if (group == null)
+                                continue;
+
+                            if (account.getGroups().contains(group)) {
+                                permissions.add(accessPermission);
+                                break;
+                            }
+                        }
+                    }
+
                     FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+                    if (!permissions.isEmpty())
+                        details.setAccessPermissions(permissions);
+
                     details.setType(FolderType.SHARED);
                     long folderSize = getFolderSize(folder.getId());
                     details.setCount(folderSize);
