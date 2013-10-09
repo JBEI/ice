@@ -70,27 +70,30 @@ class GroupDAO extends HibernateRepository<Group> {
 
         try {
             token = token.toUpperCase();
-            String queryString = "from " + Group.class.getName() + " g where (UPPER(g.label) like '%" + token + "%') "
-                    + " AND (g.type='PUBLIC' OR owner = :owner";
-            // or private groups that are in specified list
-            if (userGroups != null && !userGroups.isEmpty()) {
-                queryString += " OR g in :groups)";
-            }
-            queryString += ") AND g.uuid != '" + GroupController.PUBLIC_GROUP_UUID + "'";
-
+            // match the string and group must either be public, owned by user or in user's private groups
+            String queryString = "from " + Group.class.getName() + " g where (UPPER(g.label) like '%" + token + "%')";
             Query query = session.createQuery(queryString);
-            query.setParameter("owner", account);
-            if (userGroups != null && !userGroups.isEmpty()) {
-                query.setParameterList("groups", userGroups);
-            }
 
             if (limit > 0)
                 query.setMaxResults(limit);
 
             @SuppressWarnings("unchecked")
             HashSet<Group> result = new HashSet<Group>(query.list());
-            return result;
+            if (result == null || result.isEmpty())
+                return result;
 
+            HashSet<Group> matches = new HashSet<>();
+            for (Group group : result) {
+                if (group.getUuid().equals(GroupController.PUBLIC_GROUP_UUID))
+                    continue;
+
+                if (group.getType() != GroupType.PUBLIC && (userGroups == null || !userGroups.contains(group)))
+                    continue;
+
+                matches.add(group);
+            }
+
+            return matches;
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Error retrieving matching groups", e);

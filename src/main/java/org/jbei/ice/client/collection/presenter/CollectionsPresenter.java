@@ -686,6 +686,13 @@ public class CollectionsPresenter extends AbstractPresenter {
                     case SHARED:
                         item.setOwner(folder.getOwner());
                         sharedMenuItems.add(item);
+                        ArrayList<AccessPermission> permissions = folder.getAccessPermissions();
+                        if (permissions != null && !permissions.isEmpty()) {
+                            for (AccessPermission permission : permissions) {
+                                if (permission.isCanWrite())
+                                    display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
+                            }
+                        }
                         break;
                 }
             }
