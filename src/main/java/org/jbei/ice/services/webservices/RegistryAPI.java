@@ -123,7 +123,10 @@ public class RegistryAPI implements IRegistryAPI {
      * Retrieve a part by its name. Note that the name has to be unique to the part.
      * Names are generally free form fields and so unless your registry instance
      * enforces uniqueness of names, this call can fail if there are multiple parts with
-     * the same name
+     * the same name.
+     * <p/>
+     * If the name is detected to start with the part number prefix (obtained from database properties)
+     * then the part number is checked instead.
      *
      * @param sessionId Session key.
      * @param name      Name of the Entry to retrieve.
@@ -136,6 +139,9 @@ public class RegistryAPI implements IRegistryAPI {
         log(sessionId, "getPartByUniqueName: " + name);
         try {
             Account account = validateAccount(sessionId);
+            String prefix = Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX);
+            if (prefix != null && name.startsWith(prefix))
+                return ControllerFactory.getEntryController().getByPartNumber(account, name);
             return ControllerFactory.getEntryController().getByUniqueName(account, name);
         } catch (Exception e) {
             Logger.error(e);
