@@ -1,15 +1,11 @@
 package org.jbei.ice.client.collection;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 
 import com.google.gwt.user.client.Window;
@@ -24,12 +20,10 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
     private FolderDetails details;
     private final EntryTablePager pager;
     private String userId;
-    private HashSet<Long> partDataIds;
 
     public FolderEntryDataProvider(CollectionDataTable view, RegistryServiceAsync service) {
         super(view, service);
         pager = view.getPager();
-        partDataIds = new HashSet<Long>();
     }
 
     private void retrieveAllVisibleParts(ColumnField field, boolean asc, final int start, final int factor,
@@ -54,7 +48,7 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                         if (reset)
                             setFolderData(details, false);
                         else
-                            cacheParts(result.getEntries());
+                            cachedEntries.addAll(result.getEntries());
 
                         resetLoading();
                     }
@@ -65,15 +59,6 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
     protected void resetLoading() {
         pager.determineSetNextEnabled();
         pager.setDefaultHTML();
-    }
-
-    protected void cacheParts(LinkedList<PartData> data) {
-        for (PartData datum : data) {
-            if (partDataIds.contains(datum.getId()))
-                continue;
-            partDataIds.add(datum.getId());
-            cachedEntries.add(datum);
-        }
     }
 
     private void retrieveUserEntrys(ColumnField field, boolean asc, final int start, final int factor,
@@ -96,8 +81,7 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                         if (reset)
                             setFolderData(details, false);
                         else
-                            cacheParts(result.getEntries());
-
+                            cachedEntries.addAll(result.getEntries());
                         resetLoading();
                     }
 
@@ -126,8 +110,7 @@ public class FolderEntryDataProvider extends EntryDataViewDataProvider {
                         if (reset)
                             setFolderData(details, false);
                         else
-                            cacheParts(result.getEntries());
-
+                            cachedEntries.addAll(result.getEntries());
                         resetLoading();
                     }
 
