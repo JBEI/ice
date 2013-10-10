@@ -1,6 +1,7 @@
 package org.jbei.ice.client.bulkupload.widget;
 
 import org.jbei.ice.client.ClientController;
+import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.widget.Dialog;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.lib.shared.EntryAddType;
@@ -28,6 +29,7 @@ public class UploadCSV extends Composite {
     private HandlerRegistration handler;
     private Dialog dialog;
     private EntryAddType addType;
+    private ServiceDelegate<Long> delegate;
 
     public UploadCSV() {
         label = new HTML("<i class=\"" + FAIconType.CLOUD_UPLOAD.getStyleName() + "\"></i> CSV Upload");
@@ -66,6 +68,8 @@ public class UploadCSV extends Composite {
         formPanel.add(fileUpload);
 
         table.setWidget(0, 0, formPanel);
+        table.setHTML(1, 0, "");
+        table.getFlexCellFormatter().setVisible(1, 0, false);
 
         dialog = new Dialog(table, "600px", "CSV Upload");
 
@@ -73,10 +77,19 @@ public class UploadCSV extends Composite {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 String msg = event.getResults();
-                if (msg.startsWith("Error")) {
-                    // error msg
-                    table.setHTML(1, 0, msg);
+                table.setHTML(1, 0, msg);
+                boolean success = !msg.startsWith("Error");
+                table.getFlexCellFormatter().setVisible(1, 0, !success);
+                if (success) {
+                    try {
+                        delegate.execute(Long.decode(msg.trim()));
+                        dialog.showDialog(false);
+                    } catch (NumberFormatException nfe) {
+                        table.setHTML(1, 0, "There was an unknown problem creating the parts from the file");
+                        table.getFlexCellFormatter().setVisible(1, 0, true);
+                    }
                 }
+
                 formPanel.reset();
             }
         });
@@ -92,5 +105,9 @@ public class UploadCSV extends Composite {
                 formPanel.submit();
             }
         });
+    }
+
+    public void setDelegate(ServiceDelegate<Long> handler) {
+        delegate = handler;
     }
 }

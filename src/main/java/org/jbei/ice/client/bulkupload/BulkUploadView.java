@@ -196,6 +196,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
+    public void setCSVUploadSuccessDelegate(ServiceDelegate<Long> handler) {
+        this.uploadCSV.setDelegate(handler);
+    }
+
+    @Override
     protected Widget createContents() {
         layout = new FlexTable();
         layout.setWidth("100%");

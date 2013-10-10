@@ -30,11 +30,11 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.server.servlet.helper.BulkCSVUpload;
+import org.jbei.ice.server.servlet.helper.HelperFactory;
 
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileItemIterator;
@@ -143,7 +143,7 @@ public class FileUploadServlet extends HttpServlet {
                         break;
 
                     case BULK_CSV_UPLOAD:
-                        result = uploadCSV(request, file);
+                        result = uploadCSV(account, request, file);
                         break;
 
                     case SEQUENCE:
@@ -410,9 +410,9 @@ public class FileUploadServlet extends HttpServlet {
         return null;
     }
 
-    protected String uploadCSV(HttpServletRequest request, File file) {
+    protected String uploadCSV(Account account, HttpServletRequest request, File file) {
         String entryAddTypeString = request.getParameter("upload");
-        EntryAddType addType = null;
+        EntryAddType addType;
         try {
             addType = EntryAddType.valueOf(entryAddTypeString);
         } catch (IllegalArgumentException ie) {
@@ -421,43 +421,9 @@ public class FileUploadServlet extends HttpServlet {
         if (addType == null)
             return "Error: CSV upload has unknown type";
 
-        BulkCSVUpload upload = new BulkCSVUpload(addType, file.toPath());
+        BulkCSVUpload upload = HelperFactory.createCSVUpload(account, addType, file.toPath());
+        if (upload == null)
+            return "Error: Upload type [" + addType.toString() + "] is currently unsupported";
         return upload.processUpload();
-    }
-
-    // TODO : combine with StrainWithPlasmidHeaders::isPlasmidHeader()
-    private EntryType toEntryType(EntryAddType type, EntryField field) {
-        EntryType entryType;
-        if (type == EntryAddType.STRAIN_WITH_PLASMID) {
-            boolean isPlasmid = isPlasmidHeader(field);
-
-            if (isPlasmid) {
-                // if updating plasmid portion of strain with one plasmid
-                entryType = EntryType.PLASMID;
-            } else {
-                entryType = EntryType.STRAIN;
-            }
-        } else {
-            entryType = EntryAddType.addTypeToType(type);
-        }
-        return entryType;
-    }
-
-    protected boolean isPlasmidHeader(EntryField entryField) {
-        return (entryField == EntryField.PLASMID_NAME
-                || entryField == EntryField.PLASMID_ALIAS
-                || entryField == EntryField.PLASMID_LINKS
-                || entryField == EntryField.PLASMID_SELECTION_MARKERS
-                || entryField == EntryField.CIRCULAR
-                || entryField == EntryField.PLASMID_BACKBONE
-                || entryField == EntryField.PLASMID_PROMOTERS
-                || entryField == EntryField.PLASMID_REPLICATES_IN
-                || entryField == EntryField.PLASMID_ORIGIN_OF_REPLICATION
-                || entryField == EntryField.PLASMID_KEYWORDS
-                || entryField == EntryField.PLASMID_SUMMARY
-                || entryField == EntryField.PLASMID_NOTES
-                || entryField == EntryField.PLASMID_REFERENCES
-                || entryField == EntryField.PLASMID_SEQ_FILENAME
-                || entryField == EntryField.PLASMID_ATT_FILENAME);
     }
 }

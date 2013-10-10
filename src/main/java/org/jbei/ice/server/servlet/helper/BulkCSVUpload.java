@@ -1,65 +1,30 @@
 package org.jbei.ice.server.servlet.helper;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
 
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
-
-import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * Helper class for dealing with bulk CSV uploads
  *
  * @author Hector Plahar
  */
-public class BulkCSVUpload {
+public abstract class BulkCSVUpload {
 
-    private final EntryAddType uploadType;
-    private final Path csvFilePath;
+    protected final Path csvFilePath;
+    protected final Account account;
+    protected final EntryAddType addType;
 
-    public BulkCSVUpload(EntryAddType addType, Path csvFilePath) {
-        this.uploadType = addType;
+    public BulkCSVUpload(EntryAddType addType, Account account, Path csvFilePath) {
+        this.addType = addType;
+        this.account = account;
         this.csvFilePath = csvFilePath;
     }
 
-    public String processUpload() {
-        List<EntryField> fields = new LinkedList<>();
-        List<BulkUploadAutoUpdate> updates = new LinkedList<>();
-        try (CSVReader csvReader = new CSVReader(new FileReader(csvFilePath.toString()))) {
-            String[] lines;
-            while ((lines = csvReader.readNext()) != null) {
-                if (fields.isEmpty()) {
-                    for (int i = 0; i < lines.length; i += 1) {
-                        String line = lines[i];
-                        EntryField field = EntryField.fromString(line);
-                        if (field == null)
-                            return "Error: Unrecognized field " + line;
-
-                        fields.add(i, field);
-                    }
-                } else {
-                    // process values
-                    for (int i = 0; i < lines.length; i += 1) {
-                        EntryField field = fields.get(i);
-                        EntryType type = toEntryType(uploadType, field);
-                        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(type);
-                        autoUpdate.getKeyValue().put(field, lines[i]);
-                        updates.add(autoUpdate);
-                    }
-                }
-            }
-        } catch (IOException io) {
-            Logger.error(io);
-        }
-        return "";
-    }
+    public abstract String processUpload();
 
     // TODO : combine with StrainWithPlasmidHeaders::isPlasmidHeader()
     private EntryType toEntryType(EntryAddType type, EntryField field) {
