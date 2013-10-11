@@ -412,9 +412,9 @@ public class BulkUploadController {
                 // validate add type and entrytype
                 if (addType != EntryAddType.STRAIN_WITH_PLASMID && EntryType.nameToType(addType.name()) != autoUpdate
                         .getType()) {
-                    throw new ControllerException("Incompatible add type (" + addType.toString()
-                                                          + " and auto update entry type ("
-                                                          + autoUpdate.getType().toString() + ")");
+                    throw new ControllerException("Incompatible add type [" + addType.toString()
+                                                          + "] and auto update entry type ["
+                                                          + autoUpdate.getType().toString() + "]");
                 }
 
                 draft = new BulkUpload();

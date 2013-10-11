@@ -95,6 +95,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
         createPreferenceDelegate();
         createPermissionDelegate();
         createFileDeleteDelegate();
+        createCSVUploadDelegate();
 
         view.setPermissionDelegate(updatePermissionDelegate);
     }
@@ -132,6 +133,19 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 }.go(eventBus);
             }
         };
+    }
+
+    protected void createCSVUploadDelegate() {
+        ServiceDelegate<Long> delegate = new ServiceDelegate<Long>() {
+            @Override
+            public void execute(Long id) {
+                if (id != null) {
+                    loadBulkImport(id, false);
+                    retrieveSavedDrafts();
+                }
+            }
+        };
+        view.setCSVUploadSuccessDelegate(delegate);
     }
 
     protected void createFileDeleteDelegate() {
@@ -409,6 +423,65 @@ public class BulkUploadPresenter extends AbstractPresenter {
         container.add(this.view.asWidget());
     }
 
+    private void loadBulkImport(long bulkImportId, final boolean isValidation) {
+        view.setLoading(true);
+        model.retrieveBulkImport(bulkImportId, 0, 1000, new SavedDraftsEventHandler() {
+
+            @Override
+            public void onDataRetrieval(SavedDraftsEvent event) {
+                if (event == null) {
+                    view.showFeedback("Could not retrieve saved draft", true);
+                    return;
+                }
+
+                BulkUploadInfo info = event.getData().get(0);
+                PartData firstEntry = info.getEntryList().isEmpty() ? null : info.getEntryList().get(0);
+                Sheet sheet = new Sheet(info.getType(), updatePreferenceDelegate, info);
+                sheet.setAutoUpdateDelegate(autoUpdateDelegate);
+                sheet.setDeleteEntryFileDelegate(fileDelete);
+                currentInput = new NewBulkInput(info.getType(), sheet);
+                currentInput.setId(info.getId());
+//                    if (firstEntry != null) {
+//                        model.retrieveStorageSchemes(info.getType(), currentInput, firstEntry.getOneSampleStorage());
+//                    }
+
+                // bulk upload permissions
+                ArrayList<OptionSelect> groups = new ArrayList<OptionSelect>();
+                for (AccessPermission accessPermission : info.getAccessPermissions()) {
+                    if (accessPermission.getArticle() != AccessPermission.Article.GROUP)
+                        continue;
+
+                    groups.add(new OptionSelect(accessPermission.getArticleId(), accessPermission.getDisplay()));
+                }
+                view.setSelectedPermissionGroups(groups);
+
+                String name = info.getName();
+
+                // setting name to creation date is none exist
+                if (name == null) {
+                    name = DateUtilities.formatDate(info.getCreated());
+                    info.setName(name);
+                }
+                currentInput.setName(name);
+
+                view.setSheet(currentInput, false, isValidation);
+                view.setDraftMenuVisibility(false, false);
+
+                // assume uniform values for all entries in regards to creator (same for permissions)
+                String creator = ClientController.account.getFullName();
+                String creatorEmail = ClientController.account.getEmail();
+                if (firstEntry != null) {
+                    if (firstEntry.getCreatorEmail() != null && !firstEntry.getCreatorEmail().isEmpty()
+                            && firstEntry.getCreator() != null && !firstEntry.getCreator().isEmpty()) {
+                        creator = firstEntry.getCreator();
+                        creatorEmail = firstEntry.getCreatorEmail();
+                    }
+                }
+                view.setCreatorInformation(creator, creatorEmail);
+            }
+        });
+    }
+
     //
     // inner classes
     //
@@ -511,62 +584,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
         @Override
         public void onSelectionChange(SelectionChangeEvent event) {
             final BulkUploadMenuItem item = selection.getSelectedObject();
-            view.setLoading(true);
-            model.retrieveBulkImport(item.getId(), 0, 1000, new SavedDraftsEventHandler() {
-
-                @Override
-                public void onDataRetrieval(SavedDraftsEvent event) {
-                    if (event == null) {
-                        view.showFeedback("Could not retrieve saved draft", true);
-                        return;
-                    }
-
-                    BulkUploadInfo info = event.getData().get(0);
-                    PartData firstEntry = info.getEntryList().isEmpty() ? null : info.getEntryList().get(0);
-                    Sheet sheet = new Sheet(info.getType(), updatePreferenceDelegate, info);
-                    sheet.setAutoUpdateDelegate(autoUpdateDelegate);
-                    sheet.setDeleteEntryFileDelegate(fileDelete);
-                    currentInput = new NewBulkInput(info.getType(), sheet);
-                    currentInput.setId(info.getId());
-//                    if (firstEntry != null) {
-//                        model.retrieveStorageSchemes(info.getType(), currentInput, firstEntry.getOneSampleStorage());
-//                    }
-
-                    // bulk upload permissions
-                    ArrayList<OptionSelect> groups = new ArrayList<OptionSelect>();
-                    for (AccessPermission accessPermission : info.getAccessPermissions()) {
-                        if (accessPermission.getArticle() != AccessPermission.Article.GROUP)
-                            continue;
-
-                        groups.add(new OptionSelect(accessPermission.getArticleId(), accessPermission.getDisplay()));
-                    }
-                    view.setSelectedPermissionGroups(groups);
-
-                    String name = info.getName();
-
-                    // setting name to creation date is none exist
-                    if (name == null) {
-                        name = DateUtilities.formatDate(info.getCreated());
-                        info.setName(name);
-                    }
-                    currentInput.setName(name);
-
-                    view.setSheet(currentInput, false, isValidation);
-                    view.setDraftMenuVisibility(false, false);
-
-                    // assume uniform values for all entries in regards to creator (same for permissions)
-                    String creator = ClientController.account.getFullName();
-                    String creatorEmail = ClientController.account.getEmail();
-                    if (firstEntry != null) {
-                        if (firstEntry.getCreatorEmail() != null && !firstEntry.getCreatorEmail().isEmpty()
-                                && firstEntry.getCreator() != null && !firstEntry.getCreator().isEmpty()) {
-                            creator = firstEntry.getCreator();
-                            creatorEmail = firstEntry.getCreatorEmail();
-                        }
-                    }
-                    view.setCreatorInformation(creator, creatorEmail);
-                }
-            });
+            loadBulkImport(item.getId(), isValidation);
         }
     }
 }

@@ -63,14 +63,14 @@ public class PermissionsSelection implements IsWidget {
     }
 
     public PermissionsSelection() {
-        Icon icon = new Icon(FAIconType.KEY);
+        Icon icon = new Icon(FAIconType.SHIELD);
         icon.setTitle("Click to set permissions");
         icon.addStyleName("display-inline");
         icon.removeStyleName("font-awesome");
 
-        HTMLPanel panel = new HTMLPanel("<span id=\"creator_icon\"></span> Permissions <i class=\""
+        HTMLPanel panel = new HTMLPanel("<span id=\"permission_icon\"></span> Permissions <i class=\""
                                                 + FAIconType.CARET_DOWN.getStyleName() + "\"></i>");
-        panel.add(icon, "creator_icon");
+        panel.add(icon, "permission_icon");
         panel.setStyleName("display-inline");
         panel.setTitle("Set read permissions for entries");
 

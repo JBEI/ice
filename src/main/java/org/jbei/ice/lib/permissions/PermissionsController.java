@@ -2,7 +2,6 @@ package org.jbei.ice.lib.permissions;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 import org.jbei.ice.controllers.ControllerFactory;
@@ -10,9 +9,7 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.EntryDAO;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.folder.FolderController;
@@ -616,49 +613,6 @@ public class PermissionsController {
         }
 
         return accessPermissions;
-    }
-
-    public void upgradePermissions() throws ControllerException {
-        try {
-            Logger.info("Upgrading permissions....please wait");
-            dao.upgradePermissions();
-
-            LinkedList<Long> entries = ControllerFactory.getEntryController().getAllEntryIds();
-            int count = entries.size();
-            int i = -1;
-
-            EntryDAO dao = new EntryDAO();
-
-            for (long id : entries) {
-                i += 1;
-                if (i % 20 == 0) {
-                    HibernateHelper.getSessionFactory().getCurrentSession().flush();
-                    HibernateHelper.getSessionFactory().getCurrentSession().clear();
-                    if (i % 1000 == 0)
-                        Logger.info("Processed " + i + " entries (" + ((float) i / (float) count * 100) + "%)");
-                }
-
-                Entry entry;
-                try {
-                    entry = dao.get(id);
-                } catch (DAOException e) {
-                    Logger.warn(e.getMessage());
-                    continue;
-                }
-                Account account = accountController.getByEmail(entry.getOwnerEmail());
-                if (account == null)
-                    continue;
-
-                // add write permissions for owner
-                AccessPermission access = new AccessPermission(AccessPermission.Article.ACCOUNT, account.getId(),
-                                                               AccessPermission.Type.WRITE_ENTRY,
-                                                               entry.getId(), account.getFullName());
-                addPermission(account, access);
-            }
-            Logger.info("Permissions upgrade complete");
-        } catch (DAOException e) {
-            Logger.error(e);
-        }
     }
 
     public ArrayList<AccessPermission> getDefaultPermissions(Account account) throws ControllerException {

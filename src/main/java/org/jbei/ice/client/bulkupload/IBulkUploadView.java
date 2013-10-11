@@ -71,4 +71,6 @@ public interface IBulkUploadView {
     void setSelectedPermissionGroups(ArrayList<OptionSelect> groups);
 
     void setPermissionDelegate(ServiceDelegate<Set<UserGroup>> handler);
+
+    void setCSVUploadSuccessDelegate(ServiceDelegate<Long> handler);
 }

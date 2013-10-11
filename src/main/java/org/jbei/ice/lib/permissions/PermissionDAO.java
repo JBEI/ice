@@ -1,8 +1,6 @@
 package org.jbei.ice.lib.permissions;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -14,10 +12,6 @@ import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.model.Permission;
-import org.jbei.ice.lib.permissions.model.ReadGroup;
-import org.jbei.ice.lib.permissions.model.ReadUser;
-import org.jbei.ice.lib.permissions.model.WriteGroup;
-import org.jbei.ice.lib.permissions.model.WriteUser;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -158,104 +152,12 @@ class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    @Deprecated
-    // this will be removed in the next release
-    public void upgradePermissions() throws DAOException {
-        Session session = currentSession();
-        try {
-            // convert read group
-            Query query = session.createQuery("from " + ReadGroup.class.getName());
-            Iterator iterator = query.iterate();
-            int i = 0;
-
-            while (iterator.hasNext()) {
-                ReadGroup readGroup = (ReadGroup) iterator.next();
-                i += 1;
-                Permission permission = new Permission();
-                permission.setGroup(readGroup.getGroup());
-                permission.setCanRead(true);
-                Entry entry = readGroup.getEntry();
-                permission.setEntry(entry);
-                entry.getPermissions().add(permission);
-                session.save(permission);
-                session.delete(readGroup);
-                if (i % 20 == 0) {
-                    session.flush();
-                    session.clear();
-                }
-            }
-
-            // convert read user
-            query = session.createQuery("from " + ReadUser.class.getName());
-            i = 0;
-            ArrayList<ReadUser> readUsers = new ArrayList<ReadUser>(query.list());
-            Logger.info("Read User list: " + readUsers.size());
-            for (ReadUser readUser : readUsers) {
-                i += 1;
-                Permission permission = new Permission();
-                permission.setAccount(readUser.getAccount());
-                permission.setCanRead(true);
-                Entry entry = readUser.getEntry();
-                permission.setEntry(entry);
-                entry.getPermissions().add(permission);
-                session.save(permission);
-                session.delete(readUser);
-                if (i % 20 == 0) {
-                    session.flush();
-                    session.clear();
-                }
-            }
-
-            // convert write group
-            query = session.createQuery("from " + WriteGroup.class.getName());
-            ArrayList<WriteGroup> writeGroups = new ArrayList<WriteGroup>(query.list());
-            Logger.info("Write Group list: " + writeGroups.size());
-            for (WriteGroup writeGroup : writeGroups) {
-                i += 1;
-                Permission permission = new Permission();
-                permission.setGroup(writeGroup.getGroup());
-                permission.setCanWrite(true);
-                Entry entry = writeGroup.getEntry();
-                permission.setEntry(entry);
-                entry.getPermissions().add(permission);
-                session.save(permission);
-                session.delete(writeGroup);
-                if (i % 20 == 0) {
-                    session.flush();
-                    session.clear();
-                }
-            }
-
-            // convert write user
-            query = session.createQuery("from " + WriteUser.class.getName());
-            ArrayList<WriteUser> writeUsers = new ArrayList<WriteUser>(query.list());
-            Logger.info("Write User list: " + writeUsers.size());
-            for (WriteUser writeUser : writeUsers) {
-                i += 1;
-                Permission permission = new Permission();
-                permission.setAccount(writeUser.getAccount());
-                permission.setCanWrite(true);
-                Entry entry = writeUser.getEntry();
-                permission.setEntry(entry);
-                entry.getPermissions().add(permission);
-                session.save(permission);
-                session.delete(writeUser);
-                if (i % 20 == 0) {
-                    session.flush();
-                    session.clear();
-                }
-            }
-        } catch (HibernateException he) {
-            throw new DAOException(he);
-        }
-    }
-
     public Set<Account> retrieveAccountPermissions(Entry entry, boolean canWrite, boolean canRead) throws DAOException {
         Session session = currentSession();
         try {
             List list = session.createCriteria(Permission.class)
-                               .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
-                               .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)))
+                               .add(Restrictions.eq("canWrite", canWrite))
+                               .add(Restrictions.eq("canRead", canRead))
                                .add(Restrictions.eq("entry", entry))
                                .setProjection(Projections.property("account"))
                                .add(Restrictions.isNotNull("account"))
@@ -273,8 +175,8 @@ class PermissionDAO extends HibernateRepository<Permission> {
         Session session = currentSession();
         try {
             List list = session.createCriteria(Permission.class)
-                               .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
-                               .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)))
+                               .add(Restrictions.eq("canWrite", canWrite))
+                               .add(Restrictions.eq("canRead", canRead))
                                .add(Restrictions.eq("folder", folder))
                                .setProjection(Projections.property("account"))
                                .add(Restrictions.isNotNull("account"))
@@ -292,8 +194,8 @@ class PermissionDAO extends HibernateRepository<Permission> {
         try {
             List list = session.createCriteria(Permission.class)
                                .add(Restrictions.eq("entry", entry))
-                               .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
-                               .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)))
+                               .add(Restrictions.eq("canWrite", canWrite))
+                               .add(Restrictions.eq("canRead", canRead))
                                .setProjection(Projections.property("group"))
                                .add(Restrictions.isNotNull("group"))
                                .list();
@@ -309,8 +211,8 @@ class PermissionDAO extends HibernateRepository<Permission> {
         try {
             List list = session.createCriteria(Permission.class)
                                .add(Restrictions.eq("folder", folder))
-                               .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
-                               .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)))
+                               .add(Restrictions.eq("canWrite", canWrite))
+                               .add(Restrictions.eq("canRead", canRead))
                                .setProjection(Projections.property("group"))
                                .add(Restrictions.isNotNull("group"))
                                .list();
