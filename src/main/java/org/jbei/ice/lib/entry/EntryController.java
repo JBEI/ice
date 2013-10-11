@@ -444,13 +444,14 @@ public class EntryController {
         }
     }
 
-    public String createStrainWithPlasmid(Account account, PartTransfer strainTransfer, PartTransfer plasmidTransfer)
-            throws ControllerException {
+    // NOTE that this method returns the plasmid record id, not the strain
+    public String createStrainWithPlasmid(Account account, PartTransfer strainTransfer, PartTransfer plasmidTransfer,
+            ArrayList<AccessPermission> accessPermissions) throws ControllerException {
         // create strain
         Entry strain = InfoToModelFactory.infoToEntry(strainTransfer.getPart());
         Entry plasmid = InfoToModelFactory.infoToEntry(plasmidTransfer.getPart());
 
-        strain = createStrainWithPlasmid(account, strain, plasmid, null);
+        strain = createStrainWithPlasmid(account, strain, plasmid, accessPermissions);
 
         // check attachments
         if (strainTransfer.getAttachments() != null) {
@@ -526,7 +527,7 @@ public class EntryController {
             }
         }
 
-        return strain.getRecordId();
+        return plasmid.getRecordId();
     }
 
     public boolean recordParts(ArrayList<PartTransfer> parts) {

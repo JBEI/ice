@@ -96,23 +96,23 @@ class FolderDAO extends HibernateRepository<Folder> {
             switch (sort) {
                 default:
                 case CREATED:
-                    sortString = " id";
+                    sortString = "id";
                     break;
 
                 case STATUS:
-                    sortString = " status";
+                    sortString = "status";
                     break;
 
                 case NAME:
-                    sortString = " name";
+                    sortString = "name";
                     break;
 
                 case PART_ID:
-                    sortString = " partNumber";
+                    sortString = "partNumber";
                     break;
 
                 case TYPE:
-                    sortString = " recordType";
+                    sortString = "recordType";
                     break;
             }
 
