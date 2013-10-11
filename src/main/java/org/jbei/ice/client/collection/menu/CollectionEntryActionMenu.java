@@ -82,7 +82,7 @@ public class CollectionEntryActionMenu implements IsWidget {
         this.menuHolder.setWidget(0, 1, removeButton);
         this.removeButton.setEnabled(false);
 
-        this.move = new AddToMenuItem<OptionSelect>("<i class=\"" + FAIconType.SHARE.getStyleName()
+        this.move = new AddToMenuItem<OptionSelect>("<i class=\"" + FAIconType.MOVE.getStyleName()
                                                             + "\" style=\"opacity:0.85;\"></i> Move To");
         this.move.setStyleName(Resources.INSTANCE.subMenuStyle().buttonGroupItem());
         this.move.addStyleName(Resources.INSTANCE.subMenuStyle().buttonMoveTo());
