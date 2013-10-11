@@ -116,11 +116,11 @@ public abstract class EntryDataViewDataProvider extends AsyncDataProvider<PartDa
         // sort did not change, use data in cache
         updateRowData(rangeStart, cachedEntries.subList(rangeStart, rangeEnd));
 
-        long cacheSize = cachedEntries.size();
+        int cacheSize = cachedEntries.size();
         // if range is close enough to the cache within some delta, cache more entries
         if (rangeEnd + (2 * range.getLength()) >= cacheSize) {
             int fetchSize = (2 * range.getLength()) + rangeEnd;
-            cacheMore(lastSortField, lastSortAsc, rangeEnd, fetchSize);
+            cacheMore(lastSortField, lastSortAsc, cacheSize, fetchSize);
         }
     }
 
