@@ -11,7 +11,13 @@ import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
  */
 public class SeedBulkCSVUpload extends PartBulkCSVUpload {
 
-    static {
+    public SeedBulkCSVUpload(EntryAddType addType, Account account, Path csvFilePath) {
+        super(addType, account, csvFilePath);
+    }
+
+    @Override
+    protected void populateHeaderFields() {
+        super.populateHeaderFields();
         headerFields.add(EntryField.HOMOZYGOSITY);
         headerFields.add(EntryField.HARVEST_DATE);
         headerFields.add(EntryField.ECOTYPE);
@@ -20,14 +26,13 @@ public class SeedBulkCSVUpload extends PartBulkCSVUpload {
         headerFields.add(EntryField.PLANT_TYPE);
         headerFields.add(EntryField.GENERATION);
         headerFields.add(EntryField.SENT_TO_ABRC);
+    }
 
-        // required fields
+    @Override
+    protected void populateRequiredFields() {
+        super.populateRequiredFields();
         requiredFields.add(EntryField.SELECTION_MARKERS);
         requiredFields.add(EntryField.PLANT_TYPE);
         requiredFields.add(EntryField.GENERATION);
-    }
-
-    public SeedBulkCSVUpload(EntryAddType addType, Account account, Path csvFilePath) {
-        super(addType, account, csvFilePath);
     }
 }

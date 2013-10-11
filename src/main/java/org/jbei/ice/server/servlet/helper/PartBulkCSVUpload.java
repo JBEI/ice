@@ -27,14 +27,17 @@ import org.apache.commons.lang.StringUtils;
  */
 public class PartBulkCSVUpload extends BulkCSVUpload {
 
-    // all fields
-    protected static List<EntryField> headerFields = new LinkedList<EntryField>();
+    public PartBulkCSVUpload(EntryAddType addType, Account account, Path csvFilePath) {
+        super(addType, account, csvFilePath);
+    }
 
-    // required fields
-    protected static List<EntryField> requiredFields = new LinkedList<EntryField>();
+    protected boolean isValidHeader(EntryField field) {
+        return (field != null && headerFields.contains(field));
+    }
 
-    static {
-        // add all fields
+    @Override
+    protected void populateHeaderFields() {
+        headerFields.clear();
         headerFields.add(EntryField.PI);
         headerFields.add(EntryField.FUNDING_SOURCE);
         headerFields.add(EntryField.IP);
@@ -47,24 +50,14 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
         headerFields.add(EntryField.REFERENCES);
         headerFields.add(EntryField.LINKS);
         headerFields.add(EntryField.STATUS);
-        // the files are optional and will never be processed
-        headerFields.add(EntryField.SEQ_FILENAME);
-        headerFields.add(EntryField.ATT_FILENAME);
+    }
 
-        // add required fields (status and bio-safety have defaults)
+    @Override
+    protected void populateRequiredFields() {
+        requiredFields.clear();
         requiredFields.add(EntryField.PI);
         requiredFields.add(EntryField.NAME);
         requiredFields.add(EntryField.SUMMARY);
-
-        // todo : samples
-    }
-
-    public PartBulkCSVUpload(EntryAddType addType, Account account, Path csvFilePath) {
-        super(addType, account, csvFilePath);
-    }
-
-    protected boolean isValidHeader(EntryField field) {
-        return (field != null && headerFields.contains(field));
     }
 
     @Override
@@ -85,12 +78,9 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
                     for (int i = 0; i < lines.length; i += 1) {
                         String line = lines[i];
                         EntryField field = EntryField.fromString(line);
-                        if (!isValidHeader(field))
-                            return "Error: Unrecognized or invalid field " + line;
-
-                        // file fields are simply ignored
-                        if (field == EntryField.SEQ_FILENAME || field == EntryField.ATT_FILENAME)
-                            continue;
+                        if (!isValidHeader(field)) {
+                            return "Error: The selected upload type doesn't support the following field [" + line + "]";
+                        }
 
                         fields.add(i, field);
                     }
@@ -119,24 +109,28 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
             return errorString;
 
         // create actual parts in the registry
+        try {
+            return Long.toString(createRegistryParts(updates));
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return "Error: " + ce.getMessage();
+        }
+    }
+
+    protected long createRegistryParts(List<BulkUploadAutoUpdate> updates) throws ControllerException {
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         long bulkUploadId = 0;
+
         for (BulkUploadAutoUpdate update : updates) {
-            try {
-                if (update.getBulkUploadId() <= 0)
-                    update.setBulkUploadId(bulkUploadId);
+            if (update.getBulkUploadId() <= 0)
+                update.setBulkUploadId(bulkUploadId);
 
-                Logger.info(account.getEmail() + ": " + update.toString());
-                update = controller.autoUpdateBulkUpload(account, update, addType);
-                if (bulkUploadId == 0)
-                    bulkUploadId = update.getBulkUploadId();
-            } catch (ControllerException de) {
-                Logger.error(de);
-                return "Error: " + de.getMessage();
-            }
+            Logger.info(account.getEmail() + ": " + update.toString());
+            update = controller.autoUpdateBulkUpload(account, update, addType);
+            if (bulkUploadId == 0)
+                bulkUploadId = update.getBulkUploadId();
         }
-
-        return Long.toString(bulkUploadId);
+        return bulkUploadId;
     }
 
     protected String validate(List<BulkUploadAutoUpdate> updates) {
@@ -159,7 +153,7 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
 
             if (!toValidate.isEmpty()) {
                 StringBuilder builder = new StringBuilder();
-                builder.append("Error: Missing required fields [");
+                builder.append("Error: File is missing the following required fields [");
                 int i = 0;
                 for (EntryField field : toValidate) {
                     if (i > 0)

@@ -139,8 +139,10 @@ public class BulkUploadPresenter extends AbstractPresenter {
         ServiceDelegate<Long> delegate = new ServiceDelegate<Long>() {
             @Override
             public void execute(Long id) {
-                if (id != null)
+                if (id != null) {
                     loadBulkImport(id, false);
+                    retrieveSavedDrafts();
+                }
             }
         };
         view.setCSVUploadSuccessDelegate(delegate);

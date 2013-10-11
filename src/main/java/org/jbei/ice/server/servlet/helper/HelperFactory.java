@@ -30,6 +30,9 @@ public class HelperFactory {
             case ARABIDOPSIS:
                 return new SeedBulkCSVUpload(type, account, csvFilePath);
 
+            case STRAIN_WITH_PLASMID:
+                return new StrainWithPlasmidBulkCSVUpload(type, account, csvFilePath);
+
             default:
                 return null;
         }
