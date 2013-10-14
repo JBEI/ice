@@ -1,6 +1,8 @@
 package org.jbei.ice.client.bulkupload.model;
 
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 public class StrainSheetModel extends SingleInfoSheetModel<StrainData> {
@@ -30,7 +32,12 @@ public class StrainSheetModel extends SingleInfoSheetModel<StrainData> {
                 break;
 
             case PLASMIDS:
-//                strain.setPlasmids(value);   // TODO
+                for (String plasmid : value.split(",")) {
+                    PartData data = new PartData();
+                    data.setType(EntryType.PLASMID);
+                    data.setPartId(plasmid.trim());
+                    strain.getLinkedParts().add(data);
+                }
                 break;
 
             // todo : samples
