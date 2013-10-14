@@ -29,6 +29,7 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
@@ -93,6 +94,7 @@ public class EntryController {
 
     public Set<String> getMatchingAutoCompleteField(AutoCompleteField field, String token, int limit)
             throws ControllerException {
+        token = token.replaceAll("'", "");
         try {
             Set<String> results;
             switch (field) {
@@ -277,7 +279,7 @@ public class EntryController {
                     if (linked == null)
                         continue;
 
-                    if (!permissionsController.hasReadPermission(account, entry)) {
+                    if (!permissionsController.hasReadPermission(account, linked)) {
                         continue;
                     }
 
@@ -642,6 +644,32 @@ public class EntryController {
         return entry;
     }
 
+    public void setStrainPlasmids(Account account, Strain strain, String plasmids) {
+        if (plasmids != null && !plasmids.isEmpty()) {
+            for (String plasmid : plasmids.split(",")) {
+                try {
+                    Entry linked = dao.getByPartNumber(plasmid.trim());
+                    if (linked == null)
+                        continue;
+
+                    if (!permissionsController.hasReadPermission(account, linked)) {
+                        continue;
+                    }
+
+                    strain.getLinkedEntries().add(linked);
+                } catch (DAOException | ControllerException e) {
+                    Logger.error(e);
+                }
+            }
+
+            try {
+                update(account, strain);
+            } catch (PermissionException | ControllerException pe) {
+                Logger.error(pe);
+            }
+        }
+    }
+
     /**
      * Retrieve {@link Entry} from the database by recordId (uuid).
      *
@@ -936,7 +964,7 @@ public class EntryController {
                     if (linked == null)
                         continue;
 
-                    if (!permissionsController.hasReadPermission(account, entry)) {
+                    if (!permissionsController.hasReadPermission(account, linked)) {
                         continue;
                     }
 
