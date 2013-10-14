@@ -507,8 +507,9 @@ public class BulkUploadController {
             if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())) {
                 Strain strain = (Strain) entry;
                 entryController.setStrainPlasmids(account, strain, strain.getPlasmids());
-            } else // set strain plasmids methods updates the entry
-                entryController.update(account, entry);
+            }
+
+            entryController.update(account, entry);
         } catch (PermissionException e) {
             throw new ControllerException(e);
         }
