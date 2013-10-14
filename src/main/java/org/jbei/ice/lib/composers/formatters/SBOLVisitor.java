@@ -3,7 +3,6 @@ package org.jbei.ice.lib.composers.formatters;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,21 +68,8 @@ public class SBOLVisitor {
 
         List<SequenceFeature> features = new ArrayList<>(sequence.getSequenceFeatures());
 
-        Collections.sort(features, new Comparator<SequenceFeature>() {
-            @Override
-            public int compare(SequenceFeature o1, SequenceFeature o2) {
-                if (o1.getUniqueGenbankStart() == null || o2.getUniqueGenbankStart() == null)
-                    return 0;
+        Collections.sort(features, new SequenceFeatureComparator());
 
-                if (o1.getUniqueGenbankStart().intValue() == o2.getUniqueGenbankStart().intValue()) {
-                    if (o1.getUniqueEnd() == null || o2.getUniqueEnd() == null)
-                        return 0;
-
-                    return o1.getUniqueEnd().compareTo(o2.getUniqueEnd());
-                }
-                return o1.getUniqueGenbankStart().compareTo(o2.getUniqueGenbankStart());
-            }
-        });
         for (SequenceFeature feature : features)
             visit(feature);
     }
