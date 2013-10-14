@@ -100,7 +100,7 @@ public class GroupsListWidget extends Composite {
                 if (emailVerifierDelegate == null)
                     return;
 
-                String email = createGroupMembersWidget.getRegisteredUserEmailInput();
+                String email = createGroupMembersWidget.getRegisteredUserEmailInput().trim();
                 if (email == null || email.isEmpty())
                     return;
 
@@ -115,7 +115,7 @@ public class GroupsListWidget extends Composite {
                     return;
 
                 mode = Mode.ADDING_MEMBER;
-                String email = addMembersWidget.getRegisteredUserEmailInput();
+                String email = addMembersWidget.getRegisteredUserEmailInput().trim();
                 if (email == null || email.isEmpty())
                     return;
 

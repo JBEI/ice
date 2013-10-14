@@ -126,8 +126,16 @@ public abstract class GroupPanel extends Composite {
         groupsWidget.setSelectionHandler(handler);
     }
 
+    public void setMemberGroupSelectionHandler(ServiceDelegate<UserGroup> handler) {
+        memberGroupWidget.setSelectionHandler(handler);
+    }
+
     public void setGroupMembers(UserGroup userGroup, ArrayList<User> list) {
         groupsWidget.setGroupMembers(userGroup, list);
+    }
+
+    public void setMemberGroupMembers(UserGroup userGroup, ArrayList<User> list) {
+        memberGroupWidget.setGroupMembers(userGroup, list);
     }
 
     public void setAvailableAccounts(ArrayList<User> result) {
