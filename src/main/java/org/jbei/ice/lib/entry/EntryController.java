@@ -270,7 +270,23 @@ public class EntryController {
 
     public PartData createPart(Account account, PartData part) throws ControllerException {
         Entry entry = InfoToModelFactory.infoToEntry(part);
+        if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
+            for (PartData data : part.getLinkedParts()) {
+                try {
+                    Entry linked = dao.getByPartNumber(data.getPartId());
+                    if (linked == null)
+                        continue;
 
+                    if (!permissionsController.hasReadPermission(account, entry)) {
+                        continue;
+                    }
+
+                    entry.getLinkedEntries().add(linked);
+                } catch (DAOException e) {
+                    Logger.error(e);
+                }
+            }
+        }
         SampleController sampleController = ControllerFactory.getSampleController();
         StorageController storageController = ControllerFactory.getStorageController();
         ArrayList<SampleStorage> sampleMap = part.getSampleStorage();
