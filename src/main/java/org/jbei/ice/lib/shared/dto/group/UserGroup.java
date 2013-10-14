@@ -22,6 +22,7 @@ public class UserGroup implements IDTOModel {
     private ArrayList<User> members;
     private long memberCount;
     private GroupType type;
+    private String ownerEmail;
 
     public UserGroup() {
         children = new ArrayList<UserGroup>();
@@ -98,5 +99,13 @@ public class UserGroup implements IDTOModel {
 
     public void setType(GroupType type) {
         this.type = type;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
     }
 }

@@ -3,8 +3,6 @@
     <!-- Inherit the core Web Toolkit stuff.                        -->
     <inherits name='com.google.gwt.user.User'/>
 
-    <!--  css for file upload -->
-
     <!-- Other module inherits                                      -->
 
     <!-- Specify the app entry point class.                         -->

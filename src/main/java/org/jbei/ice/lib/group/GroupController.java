@@ -50,6 +50,29 @@ public class GroupController {
         }
     }
 
+    /**
+     * Retrieves groups that user is either a member of. Users are implicit members of the groups
+     * that they create so call also returns those group
+     *
+     * @param account user account
+     * @return list of groups that user is a member of
+     * @throws ControllerException
+     */
+    public ArrayList<UserGroup> retrieveUserGroups(Account account) throws ControllerException {
+        try {
+            Set<Group> result = dao.retrieveMemberGroups(account);
+            ArrayList<UserGroup> userGroups = new ArrayList<>();
+            for (Group group : result) {
+                UserGroup user = Group.toDTO(group);
+                user.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
+                userGroups.add(user);
+            }
+            return userGroups;
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
     public ArrayList<UserGroup> retrieveGroups(Account account, GroupType type) throws ControllerException {
         ArrayList<UserGroup> userGroups = new ArrayList<>();
 
@@ -80,29 +103,29 @@ public class GroupController {
         }
     }
 
-    /**
-     * Retrieves groups for user; including private groups that the user created
-     *
-     * @param account account for user making request
-     * @return list of available groups retrieved
-     * @throws ControllerException on exception retrieving groups
-     */
-    public ArrayList<UserGroup> retrieveUserGroups(Account account) throws ControllerException {
-        ArrayList<UserGroup> userGroups = new ArrayList<>();
-        Set<Group> result = account.getGroups();
-        Group publicGroup = createOrRetrievePublicGroup();
-        for (Group group : result) {
-            if (group.getUuid().equalsIgnoreCase(PUBLIC_GROUP_UUID))
-                continue;
-
-            UserGroup user = Group.toDTO(group);
-            user.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
-            userGroups.add(user);
-        }
-        userGroups.addAll(retrieveGroups(account, GroupType.PRIVATE));
-        userGroups.add(0, Group.toDTO(publicGroup));
-        return userGroups;
-    }
+//    /**
+//     * Retrieves groups for user; including private groups that the user created
+//     *
+//     * @param account account for user making request
+//     * @return list of available groups retrieved
+//     * @throws ControllerException on exception retrieving groups
+//     */
+//    public ArrayList<UserGroup> retrieveUserGroups(Account account) throws ControllerException {
+//        ArrayList<UserGroup> userGroups = new ArrayList<>();
+//        Set<Group> result = account.getGroups();
+//        Group publicGroup = createOrRetrievePublicGroup();
+//        for (Group group : result) {
+//            if (group.getUuid().equalsIgnoreCase(PUBLIC_GROUP_UUID))
+//                continue;
+//
+//            UserGroup user = Group.toDTO(group);
+//            user.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
+//            userGroups.add(user);
+//        }
+//        userGroups.addAll(retrieveGroups(account, GroupType.PRIVATE));
+//        userGroups.add(0, Group.toDTO(publicGroup));
+//        return userGroups;
+//    }
 
     public Set<String> retrieveAccountGroupUUIDs(Account account) throws ControllerException {
         Set<String> uuids = new HashSet<>();

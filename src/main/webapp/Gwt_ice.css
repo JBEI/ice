@@ -2014,3 +2014,15 @@ td.selected i.font-awesome {
     border-radius: 2px;
     color: #bf984c;
 }
+
+.group_list_header {
+    border-bottom: 1px solid #6F7277;
+    color: #4B4A4A;
+    font-size: 0.8em;
+    font-weight: bold;
+    font-style: italic;
+    text-shadow: 1px 1px 0 #DDDDFF;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-top: 20px;
+}

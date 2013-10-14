@@ -52,6 +52,10 @@ public class UserGroupPresenter extends PanelPresenter {
         groupPanel.displayGroups(result);
     }
 
+    public void setMemberGroups(ArrayList<UserGroup> result) {
+        groupPanel.displayMemberGroups(result);
+    }
+
     public void addGroupDeleteDelegate() {
         groupPanel.setDeleteGroupDelegate(new ServiceDelegate<UserGroup>() {
 
