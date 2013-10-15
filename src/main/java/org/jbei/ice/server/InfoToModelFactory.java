@@ -403,16 +403,19 @@ public class InfoToModelFactory {
                 break;
 
             case PLASMID_SELECTION_MARKERS:
-            case BACKBONE:
             case PLASMID_BACKBONE:
-            case PROMOTERS:
             case PLASMID_PROMOTERS:
-            case REPLICATES_IN:
             case PLASMID_REPLICATES_IN:
-            case CIRCULAR:
-            case ORIGIN_OF_REPLICATION:
             case PLASMID_ORIGIN_OF_REPLICATION:
                 plasmid = infoToPlasmidForField(plasmid, value, field);
+                break;
+
+            case BACKBONE:
+            case ORIGIN_OF_REPLICATION:
+            case CIRCULAR:
+            case PROMOTERS:
+            case REPLICATES_IN:
+                entry = infoToPlasmidForField(entry, value, field);
                 break;
 
             case HOMOZYGOSITY:
