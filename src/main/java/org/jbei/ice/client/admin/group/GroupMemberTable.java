@@ -14,6 +14,9 @@ import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionModel;
 
 /**
+ * Table for displaying the name and email addresses (userId) of members of a group.
+ * Also provides the option of removing each member
+ *
  * @author Hector Plahar
  */
 public class GroupMemberTable extends CellTable<User> {
@@ -37,7 +40,7 @@ public class GroupMemberTable extends CellTable<User> {
         empty.setStyleName("no_data_style");
         this.setEmptyTableWidget(empty);
         setSelectionModel();
-        createColumns();
+        createColumns(deleteDelegate != null);
     }
 
     /**
@@ -56,10 +59,11 @@ public class GroupMemberTable extends CellTable<User> {
         setSelectionModel(selectionModel, DefaultSelectionEventManager.<User>createCheckboxManager());
     }
 
-    protected void createColumns() {
+    protected void createColumns(boolean createEditColumn) {
         createNameColumn();
         createEmailColumn();
-        createEditRemoveColumn();
+        if (createEditColumn)
+            createEditRemoveColumn();
     }
 
     protected void createEditRemoveColumn() {
