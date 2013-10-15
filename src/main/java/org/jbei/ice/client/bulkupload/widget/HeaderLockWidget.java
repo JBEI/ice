@@ -43,7 +43,7 @@ public class HeaderLockWidget implements IsWidget {
 
         lockIcon.addStyleName("display-inline");
         lockIcon.removeStyleName("font-awesome");
-        lockIcon.addStyleName("edit_icon");
+        lockIcon.addStyleName("opacity_hover");
 
         this.columnHeader = columnHeader;
         this.delegate = lockUnlockDelegate;

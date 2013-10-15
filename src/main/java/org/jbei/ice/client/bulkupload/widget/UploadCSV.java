@@ -34,7 +34,7 @@ public class UploadCSV extends Composite {
     private ServiceDelegate<Long> delegate;
 
     public UploadCSV() {
-        label = new HTML("<i class=\"" + FAIconType.CLOUD_UPLOAD.getStyleName() + "\"></i> CSV Upload");
+        label = new HTML("<i class=\"" + FAIconType.TABLE.getStyleName() + "\"></i> CSV Upload");
         label.setStyleName("bulk_upload_visibility");
         label.addStyleName("opacity_hover");
         initWidget(label);

@@ -1729,7 +1729,7 @@ td.datePickerMonth {
 }
 
 .bulk_upload_locked_header {
-    color: #aa0000;
+    color: #0082C0;
     opacity: 1;
 }
 
@@ -1852,13 +1852,14 @@ td.selected i.font-awesome {
 .group_info_td {
     padding: 3px;
     opacity: 0.8;
-    border-top: 1px solid #eeeeee;
+    border-top: 1px solid #e8e8e8;
     border-bottom: 1px solid #fefde6;
 }
 
 .group_info_td_selected {
-    border: 1px solid #ccc;
-    background-color: #e4e4e4;
+    border-bottom: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    background-color: #e8e8e8;
     opacity: 1;
 }
 
@@ -2016,7 +2017,6 @@ td.selected i.font-awesome {
 }
 
 .group_list_header {
-    border-bottom: 1px solid #6F7277;
     color: #4B4A4A;
     font-size: 0.8em;
     font-weight: bold;
