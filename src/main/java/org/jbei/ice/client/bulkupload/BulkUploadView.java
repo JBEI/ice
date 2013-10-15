@@ -315,8 +315,9 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                                     + "an administrator must approve your"
                                     + " submission before they will show up in search listings for others. You will "
                                     + "however still be able to view and modify them on the collections page.</p>"
-                                    + "<p>To upload data from a file, make sure it is saved as a CSV file with the "
-                                    + "field delimiter set to a comma (,) and the text delimiter set to a quote (\")"
+                                    + "<p>To upload data from a file, make sure it is saved as a comma-separated value"
+                                    + " (CSV) file with the field delimiter set to a comma (,) "
+                                    + "and the text delimiter set to a quote (\")"
                                     + "</div>");
         return mainContent;
     }
