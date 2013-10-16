@@ -42,13 +42,13 @@ public abstract class GroupPanel extends Composite {
             vPanel.add(createGroup);
 
             HTML header = new HTML("Groups you created");
-            header.setStyleName("group_list_header");
+            header.setStyleName("general_sub_header");
             header.setWidth("800px");
             vPanel.add(header);
             vPanel.add(groupsWidget);
 
             HTML memberHeader = new HTML("Groups you are a member of");
-            memberHeader.setStyleName("group_list_header");
+            memberHeader.setStyleName("general_sub_header");
             memberHeader.setWidth("800px");
             vPanel.add(memberHeader);
             vPanel.add(memberGroupWidget);
