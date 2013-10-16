@@ -108,14 +108,12 @@ public class FileUtils {
      * @param fileName
      * @param inputStream
      * @throws java.io.IOException
-     * @throws org.jbei.ice.lib.dao.DAOException
-     *
      */
     public static void writeFile(File attDir, String fileName, InputStream inputStream) throws IOException {
         File file = new File(attDir + File.separator + fileName);
         if (!attDir.exists()) {
             if (!attDir.mkdirs()) {
-                throw new IOException("Could not create attachment directory");
+                throw new IOException("Could not create attachment directory " + attDir.getAbsolutePath());
             }
         }
 
