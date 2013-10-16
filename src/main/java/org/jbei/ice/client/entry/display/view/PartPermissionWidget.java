@@ -116,6 +116,10 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
         permissionSuggestions.setLimit(7);
 
         // add read list public read access and hide by default
+        initReadList();
+    }
+
+    protected void initReadList() {
         String iconStyle = FAIconType.GLOBE.getStyleName() + " blue";
         readList.setHTML(0, 0, "<i class=\"" + iconStyle + "\"></i> Public");
         Icon deleteIcon = new Icon(FAIconType.REMOVE);
@@ -277,8 +281,8 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
     @Override
     public void resetPermissionDisplay() {
         writeList.removeAllRows();
-        for (int i = 1; i < readList.getRowCount(); i += 1)
-            readList.removeRow(i);
+        readList.removeAllRows();
+        initReadList();
     }
 
     @Override
