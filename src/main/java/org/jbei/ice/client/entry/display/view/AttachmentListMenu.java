@@ -176,7 +176,6 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
         final FormPanel panel = new FormPanel();
         panel.setWidth("180px");
-        panel.setAction("/upload?type=attachment&sid=" + ClientController.sessionId);
         panel.setEncoding(FormPanel.ENCODING_MULTIPART);
         panel.setMethod(FormPanel.METHOD_POST);
 
@@ -204,7 +203,9 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         panel.addSubmitHandler(new FormPanel.SubmitHandler() {
             @Override
             public void onSubmit(FormPanel.SubmitEvent event) {
-                panel.setAction(panel.getAction() + "&eid=" + entryId + "&desc=" + description.getText());
+                String descText = description.getText();
+                panel.setAction("/upload?type=attachment&sid=" + ClientController.sessionId + "&eid=" + entryId
+                                        + "&desc=" + descText);
             }
         });
 
@@ -223,6 +224,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
                 item.setFileId(split[0]);
                 presenter.addAttachmentItem(item);
                 description.setVisible(true);
+                description.setText("");
                 panel.reset();
             }
         });
