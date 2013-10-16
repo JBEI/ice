@@ -16,6 +16,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Interface for bulk upload view
+ *
+ * @author Hector Plahar
+ */
 public interface IBulkUploadView {
 
     Widget asWidget();
@@ -70,7 +75,7 @@ public interface IBulkUploadView {
 
     void setSelectedPermissionGroups(ArrayList<OptionSelect> groups);
 
-    void setPermissionDelegate(ServiceDelegate<Set<UserGroup>> handler);
+    Set<UserGroup> getSelectedPermissionGroups();
 
     void setCSVUploadSuccessDelegate(ServiceDelegate<Long> handler);
 }

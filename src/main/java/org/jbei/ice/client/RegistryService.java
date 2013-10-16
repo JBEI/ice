@@ -145,7 +145,7 @@ public interface RegistryService extends RemoteService {
 
     boolean approvePendingBulkImport(String sessionId, long id) throws AuthenticationException;
 
-    boolean submitBulkUploadDraft(String sid, long draftId) throws AuthenticationException;
+    boolean submitBulkUploadDraft(String sid, long draftId, ArrayList<UserGroup> groups) throws AuthenticationException;
 
     HashMap<String, String> retrieveSystemSettings(String sid) throws AuthenticationException;
 
@@ -203,9 +203,6 @@ public interface RegistryService extends RemoteService {
     boolean deleteSample(String sessionId, PartSample part) throws AuthenticationException;
 
     ArrayList<UserGroup> retrieveUserGroups(String sessionId) throws AuthenticationException;
-
-    Long updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
-            ArrayList<AccessPermission> accessPermissions) throws AuthenticationException;
 
     boolean promoteCollection(String sessionId, long id) throws AuthenticationException;
 

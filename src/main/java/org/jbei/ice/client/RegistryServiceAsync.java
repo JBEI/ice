@@ -178,7 +178,7 @@ public interface RegistryServiceAsync {
 
     void approvePendingBulkImport(String sessionId, long id, AsyncCallback<Boolean> async);
 
-    void submitBulkUploadDraft(String sid, long draftId, AsyncCallback<Boolean> async);
+    void submitBulkUploadDraft(String sid, long draftId, ArrayList<UserGroup> readGroups, AsyncCallback<Boolean> async);
 
     void getAutoCompleteSuggestion(AutoCompleteField field, SuggestOracle.Request request,
             AsyncCallback<SuggestOracle.Response> async);
@@ -207,10 +207,6 @@ public interface RegistryServiceAsync {
 
     void updateBulkUploadPreference(String sid, long bulkUploadId, EntryAddType addType, PreferenceInfo info,
             AsyncCallback<Long> callback) throws AuthenticationException;
-
-    void updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
-            ArrayList<AccessPermission> accessPermissions, AsyncCallback<Long> callback)
-            throws AuthenticationException;
 
     void retrieveUserPreferences(String sid, ArrayList<PreferenceKey> keys,
             AsyncCallback<HashMap<PreferenceKey, String>> async) throws AuthenticationException;

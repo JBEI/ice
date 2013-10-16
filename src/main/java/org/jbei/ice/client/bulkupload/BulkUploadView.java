@@ -191,8 +191,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setPermissionDelegate(ServiceDelegate<Set<UserGroup>> handler) {
-        selection.setPermissionUpdateDelegate(handler);
+    public Set<UserGroup> getSelectedPermissionGroups() {
+        return selection.getSelectedGroups();
     }
 
     @Override

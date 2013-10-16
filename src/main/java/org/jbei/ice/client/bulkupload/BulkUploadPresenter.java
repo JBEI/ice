@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.ClientController;
@@ -59,7 +58,6 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private final ArrayList<BulkUploadMenuItem> savedDrafts = new ArrayList<BulkUploadMenuItem>();
     private ServiceDelegate<BulkUploadAutoUpdate> autoUpdateDelegate;
     private ServiceDelegate<PreferenceInfo> updatePreferenceDelegate;
-    private ServiceDelegate<Set<UserGroup>> updatePermissionDelegate;
     private ServiceDelegate<HashMap<Long, SheetCellData>> fileDelete;
 
     public BulkUploadPresenter(RegistryServiceAsync service, HandlerManager eventBus, final IBulkUploadView display) {
@@ -93,46 +91,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
         enableAutoUpdate();
         createPreferenceDelegate();
-        createPermissionDelegate();
         createFileDeleteDelegate();
         createCSVUploadDelegate();
-
-        view.setPermissionDelegate(updatePermissionDelegate);
-    }
-
-    /**
-     * Initializes delegate for updating bulk upload permissions
-     */
-    protected void createPermissionDelegate() {
-        updatePermissionDelegate = new ServiceDelegate<Set<UserGroup>>() {
-            @Override
-            public void execute(final Set<UserGroup> selected) {
-                new IceAsyncCallback<Long>() {
-
-                    @Override
-                    protected void callService(AsyncCallback<Long> callback) throws AuthenticationException {
-                        ArrayList<AccessPermission> accesses = new ArrayList<AccessPermission>();
-                        for (UserGroup select : selected) {
-                            if (select.getId() == 0) {
-                                continue;
-                            }
-                            AccessPermission accessPermission = new AccessPermission();
-                            accessPermission.setType(AccessPermission.Type.READ_ENTRY);
-                            accessPermission.setArticle(AccessPermission.Article.GROUP);
-                            accessPermission.setArticleId(select.getId());
-                            accesses.add(accessPermission);
-                        }
-                        service.updateBulkUploadPermissions(ClientController.sessionId, currentInput.getId(),
-                                                            currentInput.getImportType(), accesses, callback);
-                    }
-
-                    @Override
-                    public void onSuccess(Long result) {
-                        currentInput.setId(result);
-                    }
-                }.go(eventBus);
-            }
-        };
     }
 
     protected void createCSVUploadDelegate() {
@@ -172,7 +132,6 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     public void onSuccess(Boolean result) {
                     }
                 }.go(eventBus);
-
             }
         };
     }
@@ -510,7 +469,9 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 }
             };
 
-            model.submitBulkImportDraft(currentInput.getId(), eventHandler);
+            // get the permissions
+            ArrayList<UserGroup> groups = new ArrayList<UserGroup>(view.getSelectedPermissionGroups());
+            model.submitBulkImportDraft(currentInput.getId(), groups, eventHandler);
         }
     }
 

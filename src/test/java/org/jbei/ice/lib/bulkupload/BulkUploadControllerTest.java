@@ -10,8 +10,6 @@ import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.StatusType;
@@ -22,9 +20,6 @@ import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
-import org.jbei.ice.lib.shared.dto.group.GroupType;
-import org.jbei.ice.lib.shared.dto.group.UserGroup;
-import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import junit.framework.Assert;
@@ -78,7 +73,8 @@ public class BulkUploadControllerTest {
         BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull("Null bulk upload", info);
 
-        Assert.assertTrue("Submitting draft", controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
+        Assert.assertTrue("Submitting draft", controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(),
+                                                                               null));
 
         // entries associated with bulk upload must be pending
         info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 10);
@@ -250,7 +246,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(info);
 
         // try to submit. should be rejected because the required fields are not present
-        Assert.assertFalse(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
+        Assert.assertFalse(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
 
         // enter information for others
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
@@ -269,7 +265,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
         autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN);
 
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
+        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
 
         // entries associated with bulk upload must be pending
         info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 10);
@@ -308,7 +304,7 @@ public class BulkUploadControllerTest {
 
         // try to revert. not submitted
         Assert.assertFalse(controller.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
+        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
         BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull(info);
         Assert.assertTrue(controller.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
@@ -336,7 +332,7 @@ public class BulkUploadControllerTest {
         controller.updatePreference(account, autoUpdate.getBulkUploadId(), EntryAddType.PLASMID, preference);
 
         // submit draft
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
+        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
         Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
 
         // bulk upload should be deleted
@@ -381,7 +377,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
                                   plasmid.getVisibility() == Visibility.DRAFT.getValue());
 
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
+        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
         strain = entryController.get(account, id);
         linked = strain.getLinkedEntries();
         plasmid = (Entry) linked.toArray()[0];
@@ -438,134 +434,7 @@ public class BulkUploadControllerTest {
         preference = new PreferenceInfo(true, EntryField.SUMMARY.toString(), "unit test summary");
         controller.updatePreference(account, autoUpdate.getBulkUploadId(), EntryAddType.PART, preference);
 
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
-    }
-
-    @Test
-    public void testUpdatePermissions() throws Exception {
-        Account account = AccountCreator.createTestAccount("testUpdatePermissions", true);
-        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
-        autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
-        autoUpdate.getKeyValue().put(EntryField.PI, "test");
-        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "select");
-        autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
-        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
-
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.PLASMID);
-        Assert.assertNotNull(autoUpdate);
-        Assert.assertTrue(autoUpdate.getEntryId() > 0);
-        Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
-        Assert.assertTrue(autoUpdate.getLastUpdate() != null);
-
-        // create test groups
-        GroupController groupController = new GroupController();
-        UserGroup userGroup1 = new UserGroup();
-        userGroup1.setType(GroupType.PRIVATE);
-        userGroup1.setDescription("test group");
-        userGroup1.setLabel("test");
-        userGroup1 = groupController.createGroup(account, userGroup1);
-        Assert.assertNotNull(userGroup1);
-        Assert.assertTrue(userGroup1.getId() > 0);
-
-        UserGroup userGroup2 = new UserGroup();
-        userGroup2.setType(GroupType.PRIVATE);
-        userGroup2.setDescription("test group2");
-        userGroup2.setLabel("test2");
-        userGroup2 = groupController.createGroup(account, userGroup2);
-        Assert.assertNotNull(userGroup2);
-        Assert.assertTrue(userGroup2.getId() > 0);
-        Assert.assertTrue(userGroup2.getId() != userGroup1.getId());
-
-        BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
-        Assert.assertNotNull(info);
-        Assert.assertTrue(info.getAccessPermissions().isEmpty());
-
-        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-
-        // add permission for group 2
-        AccessPermission accessPermission = new AccessPermission();
-        accessPermission.setArticle(AccessPermission.Article.GROUP);
-        accessPermission.setType(AccessPermission.Type.READ_ENTRY);
-        accessPermission.setArticleId(userGroup2.getId());
-        accessPermissions.add(accessPermission);
-        long id = controller.updatePermissions(account, autoUpdate.getBulkUploadId(), EntryAddType.PLASMID,
-                                               accessPermissions);
-        Assert.assertEquals(autoUpdate.getBulkUploadId(), id);
-
-        // verify that permissions have been added
-        info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
-        Assert.assertNotNull(info);
-        Assert.assertTrue(info.getAccessPermissions().size() == 1);
-
-        // check actual permission
-        accessPermission = info.getAccessPermissions().get(0);
-        Assert.assertEquals(accessPermission.getArticleId(), userGroup2.getId());
-
-        // change permission to group 1
-        accessPermission = new AccessPermission();
-        accessPermission.setArticleId(userGroup1.getId());
-        accessPermission.setArticle(AccessPermission.Article.GROUP);
-        accessPermission.setType(AccessPermission.Type.READ_ENTRY);
-        accessPermissions.clear();
-        accessPermissions.add(accessPermission);
-        id = controller.updatePermissions(account, autoUpdate.getBulkUploadId(), EntryAddType.PLASMID,
-                                          accessPermissions);
-        Assert.assertEquals(autoUpdate.getBulkUploadId(), id);
-
-        // verify that permissions have been changed
-        info = controller.retrieveById(account, id, 0, 0);
-        Assert.assertNotNull(info);
-        Assert.assertTrue(info.getAccessPermissions().size() == 1);
-
-        // check actual permission
-        accessPermission = info.getAccessPermissions().get(0);
-        Assert.assertEquals(accessPermission.getArticleId(), userGroup1.getId());
-
-        // change permission to both
-        accessPermissions.clear();
-        AccessPermission accessPermission1 = new AccessPermission();
-        accessPermission1.setArticle(AccessPermission.Article.GROUP);
-        accessPermission1.setArticleId(userGroup1.getId());
-        accessPermission1.setType(AccessPermission.Type.READ_ENTRY);
-        accessPermissions.add(accessPermission1);
-
-        AccessPermission accessPermission2 = new AccessPermission();
-        accessPermission2.setArticleId(userGroup2.getId());
-        accessPermission2.setArticle(AccessPermission.Article.GROUP);
-        accessPermission2.setType(AccessPermission.Type.READ_ENTRY);
-        accessPermissions.add(accessPermission2);
-
-        id = controller.updatePermissions(account, autoUpdate.getBulkUploadId(), EntryAddType.PLASMID,
-                                          accessPermissions);
-        Assert.assertEquals(autoUpdate.getBulkUploadId(), id);
-
-        // verify that permissions have been changed
-        info = controller.retrieveById(account, id, 0, 0);
-        Assert.assertNotNull(info);
-        Assert.assertTrue(info.getAccessPermissions().size() == 2);
-
-        // approve the bulk upload
-        Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
-
-        EntryController entryController = new EntryController();
-        Entry entry = entryController.get(account, autoUpdate.getEntryId());
-        Assert.assertNotNull(entry);
-        Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
-
-        // check the entry permissions to ensure they are correct
-        Set<Permission> entryPermissions = entry.getPermissions();
-        for (AccessPermission ap : accessPermissions) {
-            boolean found = false;
-            for (Permission entryPermission : entryPermissions) {
-                if (entryPermission.getGroup() != null
-                        && entryPermission.getGroup().getId() == ap.getArticleId() && entryPermission.isCanRead()) {
-                    found = true;
-                    break;
-                }
-            }
-            Assert.assertTrue("Permissions for bulk upload were not propagated to the entry", found);
-        }
+        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
     }
 
     @Test

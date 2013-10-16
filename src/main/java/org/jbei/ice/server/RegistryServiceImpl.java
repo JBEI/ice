@@ -193,18 +193,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public Long updateBulkUploadPermissions(String sid, long id, EntryAddType type,
-            ArrayList<AccessPermission> accessPermissions) throws AuthenticationException {
-        Account account = retrieveAccountForSid(sid);
-        Logger.info(account.getEmail() + ": updating permissions for bulk upload " + id);
-        try {
-            return ControllerFactory.getBulkUploadController().updatePermissions(account, id, type, accessPermissions);
-        } catch (ControllerException e) {
-            return null;
-        }
-    }
-
-    @Override
     public void requestEntryTransfer(String sid, ArrayList<Long> ids, ArrayList<String> sites)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
@@ -984,13 +972,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean submitBulkUploadDraft(String sid, long draftId) throws AuthenticationException {
+    public boolean submitBulkUploadDraft(String sid, long draftId, ArrayList<UserGroup> readGroups)
+            throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": submitting bulk import draft \"" + draftId);
             BulkUploadController controller = ControllerFactory.getBulkUploadController();
             try {
-                return controller.submitBulkImportDraft(account, draftId);
+                return controller.submitBulkImportDraft(account, draftId, readGroups);
             } catch (PermissionException e) {
                 Logger.warn(e.getMessage());
                 return false;

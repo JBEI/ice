@@ -41,6 +41,7 @@ import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
@@ -533,7 +534,7 @@ public class BulkUploadController {
      * @param draftId unique identifier for saved bulk import
      * @return true, if draft was sa
      */
-    public boolean submitBulkImportDraft(Account account, long draftId)
+    public boolean submitBulkImportDraft(Account account, long draftId, ArrayList<UserGroup> readGroups)
             throws ControllerException, PermissionException {
         // retrieve draft
         BulkUpload draft;
@@ -550,6 +551,12 @@ public class BulkUploadController {
         if (!draft.getAccount().equals(account) && !accountController.isAdministrator(account))
             throw new PermissionException("User " + account.getEmail()
                                                   + " does not have permission to update draft " + draftId);
+
+        // update permissions
+        if (readGroups != null && !readGroups.isEmpty()) {
+            updatePermissions(draft, readGroups);
+        }
+
         // set preferences
         Set<Preference> bulkUploadPreferences = new HashSet<>(draft.getPreferences());
 
@@ -667,15 +674,17 @@ public class BulkUploadController {
 
             // set permissions
             for (Permission permission : bulkUpload.getPermissions()) {
+                // add permission for entry
                 AccessPermission access = new AccessPermission();
                 access.setType(AccessPermission.Type.READ_ENTRY);
                 access.setTypeId(entry.getId());
                 access.setArticleId(permission.getGroup().getId());
                 access.setArticle(AccessPermission.Article.GROUP);
-                Permission entryPermission = ControllerFactory.getPermissionController().addPermission(account, access);
-                entry.getPermissions().add(entryPermission);
-                if (plasmid != null)
-                    plasmid.getPermissions().add(entryPermission);
+                ControllerFactory.getPermissionController().addPermission(account, access);
+                if (plasmid != null) {
+                    access.setTypeId(plasmid.getId());
+                    ControllerFactory.getPermissionController().addPermission(account, access);
+                }
             }
             entryController.update(account, entry);
             if (plasmid != null)
@@ -713,27 +722,14 @@ public class BulkUploadController {
         }
     }
 
-    public Long updatePermissions(Account account, long bulkUploadId, EntryAddType addType,
-            ArrayList<AccessPermission> accessPermissions) throws ControllerException {
-        BulkUpload upload;
-
+    void updatePermissions(BulkUpload upload, ArrayList<UserGroup> groups) throws ControllerException {
         try {
-            upload = dao.retrieveById(bulkUploadId);
-            if (upload == null) {
-                upload = BulkUploadUtil.createNewBulkUpload(addType);
-                upload.setAccount(account);
-                upload = dao.save(upload);
-            } else {
-                if (!upload.getAccount().equals(account) && account.getType() != AccountType.ADMIN)
-                    throw new ControllerException("No permissions to update bulk upload");
-            }
-
             ArrayList<Permission> existingPermissions = new ArrayList<>(upload.getPermissions());
             upload.getPermissions().clear();
 
             // update permissions
-            for (AccessPermission access : accessPermissions) {
-                Group group = ControllerFactory.getGroupController().getGroupById(access.getArticleId());
+            for (UserGroup userGroup : groups) {
+                Group group = ControllerFactory.getGroupController().getGroupById(userGroup.getId());
                 if (group == null)
                     continue;
 
@@ -742,7 +738,7 @@ public class BulkUploadController {
                 // article is not unique to each permission, but the combination will be unique
                 // currently, permissions for bulk upload is restricted to read permissions by groups
                 for (Permission permission : existingPermissions) {
-                    if (permission.getGroup().getId() == access.getArticleId()) {
+                    if (permission.getGroup().getId() == group.getId()) {
                         upload.getPermissions().add(permission);
                         break;
                     }
@@ -753,12 +749,16 @@ public class BulkUploadController {
                     continue;
 
                 // new permission
+                AccessPermission access = new AccessPermission();
+                access.setArticle(AccessPermission.Article.GROUP);
+                access.setType(AccessPermission.Type.READ_ENTRY);
+                access.setArticleId(group.getId());
+
                 Permission permission = ControllerFactory.getPermissionController().recordGroupPermission(access);
                 upload.getPermissions().add(permission);
             }
 
             dao.update(upload);
-            return upload.getId();
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

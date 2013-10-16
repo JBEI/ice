@@ -956,10 +956,13 @@ public class EntryController {
 
     public long updatePart(Account account, PartData part) throws ControllerException {
         Entry existing = get(account, part.getId());
+        if (!permissionsController.hasWritePermission(account, existing))
+            throw new ControllerException(account.getEmail() + ": no permission to update " + part.getPartId());
+
         Entry entry = InfoToModelFactory.infoToEntry(part, existing);
-        if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
-            for (PartData data : part.getLinkedParts()) {
-                try {
+        try {
+            if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
+                for (PartData data : part.getLinkedParts()) {
                     Entry linked = dao.getByPartNumber(data.getPartId());
                     if (linked == null)
                         continue;
@@ -969,10 +972,10 @@ public class EntryController {
                     }
 
                     entry.getLinkedEntries().add(linked);
-                } catch (DAOException e) {
-                    Logger.error(e);
                 }
             }
+        } catch (DAOException e) {
+            Logger.error(e);
         }
 
         boolean scheduleRebuild = sequenceController.hasSequence(entry.getId());
