@@ -32,6 +32,7 @@ public class StrainSheetModel extends SingleInfoSheetModel<StrainData> {
                 break;
 
             case PLASMIDS:
+                strain.getLinkedParts().clear();
                 for (String plasmid : value.split(",")) {
                     PartData data = new PartData();
                     data.setType(EntryType.PLASMID);
