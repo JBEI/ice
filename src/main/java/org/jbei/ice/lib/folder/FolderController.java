@@ -356,16 +356,12 @@ public class FolderController {
                 return true;
 
             folder.setType(FolderType.PUBLIC);
+            folder.setOwnerEmail("");
             folder.setModificationTime(new Date(System.currentTimeMillis()));
             dao.update(folder);
 
-            // remove account permissions for this administrator
-            AccessPermission access = new AccessPermission();
-            access.setType(AccessPermission.Type.READ_FOLDER);
-            access.setArticle(AccessPermission.Article.ACCOUNT);
-            access.setArticleId(account.getId());
-            access.setTypeId(id);
-            ControllerFactory.getPermissionController().removePermission(account, access);
+            // remove all permissions for folder
+            ControllerFactory.getPermissionController().removeAllFolderPermissions(account, id);
             return true;
         } catch (DAOException e) {
             throw new ControllerException(e);
