@@ -9,7 +9,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
  */
 public enum AdminOption {
 
-    SETTINGS(FAIconType.COGS, "System Settings", "Site wide system settings"),
+    SETTINGS(FAIconType.COGS, "Application Settings", "Application wide settings"),
     WEB(FAIconType.GLOBE, "Web of Registries",
         "Enable/Disable information sharing and retrieval from other ICE instances"),
     USERS(FAIconType.USER, "Manage Users", "Manage user accounts and privileges"),
