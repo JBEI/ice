@@ -108,7 +108,7 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
         return typeCol;
     }
 
-    protected DataTableColumn<T, SafeHtml> addNameColumn(final double width, Unit unit) {
+    protected DataTableColumn<T, SafeHtml> addNameColumn(final double width, Unit unit, boolean sortable) {
 
         DataTableColumn<T, SafeHtml> nameColumn = new DataTableColumn<T, SafeHtml>(new SafeHtmlCell(),
                                                                                    ColumnField.NAME) {
@@ -129,7 +129,7 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
         };
 
         this.addColumn(nameColumn, "Name");
-        nameColumn.setSortable(true);
+        nameColumn.setSortable(sortable);
         this.setColumnWidth(nameColumn, width, unit);
         return nameColumn;
     }
@@ -162,7 +162,7 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
         return summaryColumn;
     }
 
-    protected DataTableColumn<T, String> addStatusColumn() {
+    protected DataTableColumn<T, String> addStatusColumn(boolean sortable) {
         DataTableColumn<T, String> statusColumn = new DataTableColumn<T, String>(new TextCell(), ColumnField.STATUS) {
 
             @Override
@@ -172,7 +172,7 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
         };
 
         this.addColumn(statusColumn, "Status");
-        statusColumn.setSortable(true);
+        statusColumn.setSortable(sortable);
         this.setColumnWidth(statusColumn, 90, Unit.PX);
         return statusColumn;
     }
@@ -213,7 +213,7 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
         this.setColumnWidth(column, 30, Unit.PX);
     }
 
-    protected DataTableColumn<T, String> addCreatedColumn() {
+    protected DataTableColumn<T, String> addCreatedColumn(boolean sortable) {
         DataTableColumn<T, String> createdColumn = new DataTableColumn<T, String>(new TextCell(), ColumnField.CREATED) {
 
             @Override
@@ -223,7 +223,7 @@ public abstract class EntryDataTable<T extends PartData> extends DataTable<T> im
             }
         };
 
-        createdColumn.setSortable(true);
+        createdColumn.setSortable(sortable);
         this.addColumn(createdColumn, "Created");
         this.setColumnWidth(createdColumn, 100, Unit.PX);
         return createdColumn;
