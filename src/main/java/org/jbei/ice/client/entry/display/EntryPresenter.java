@@ -431,6 +431,7 @@ public class EntryPresenter extends AbstractPresenter {
         if (currentContext == null)
             return;
 
+        display.getPermissionsWidget().reset();
         display.showLoadingIndicator(false);
 
         new IceAsyncCallback<PartData>() {
