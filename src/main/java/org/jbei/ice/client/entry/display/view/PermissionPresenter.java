@@ -113,8 +113,6 @@ public class PermissionPresenter {
     }
 
     public void setPermissionData(ArrayList<AccessPermission> listAccess, Delegate<AccessPermission> deleteHandler) {
-        view.resetPermissionDisplay();
-
         if (listAccess == null)
             return;
 
