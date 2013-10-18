@@ -40,6 +40,7 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.PartTransfer;
+import org.jbei.ice.lib.vo.SequencePartTransfer;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 import org.jbei.ice.server.ModelToInfoFactory;
 
@@ -1014,19 +1015,19 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     @Override
-    public boolean uploadParts(@WebParam(name = "partnerId") String partnerId,
-            @WebParam(name = "parts") ArrayList<PartTransfer> parts) throws ServiceException {
+    public boolean uploadPartsWithSequences(@WebParam(name = "partnerId") String partnerId, @WebParam(
+            name = "apiKey") String apiKey, @WebParam(name = "sequenceParts") ArrayList<SequencePartTransfer>
+            sequencePartTransfers) throws ServiceException {
         WoRController controller = ControllerFactory.getWebController();
         try {
-            if (!controller.isWebEnabled() || !controller.isValidWebPartner(partnerId))
+            if (!controller.isWebEnabled() || !controller.isValidWebPartner(partnerId, apiKey))
                 return false;
         } catch (ControllerException e) {
             throw new ServiceException("Could not validate");
         }
 
-        Logger.info("Registry API: transmit entries from ");
-        EntryController entryController = ControllerFactory.getEntryController();
-        return entryController.recordParts(parts);
+        Logger.info("Registry API: transmit sequence entries from " + partnerId);
+        return ControllerFactory.getEntryTransfers().recordParts(sequencePartTransfers);
     }
 
     @Override

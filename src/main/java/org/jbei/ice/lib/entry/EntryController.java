@@ -14,8 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.controllers.ApplicationController;
@@ -56,7 +54,6 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
@@ -66,7 +63,6 @@ import org.jbei.ice.lib.vo.PartTransfer;
 import org.jbei.ice.server.InfoToModelFactory;
 import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.services.webservices.IRegistryAPI;
-import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.services.webservices.ServiceException;
 
 import org.apache.commons.io.IOUtils;
@@ -180,7 +176,7 @@ public class EntryController {
      * @return The next part number.
      * @throws ControllerException
      */
-    private String getNextPartNumber() throws ControllerException {
+    public String getNextPartNumber() throws ControllerException {
         try {
             return dao.generateNextPartNumber(Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX),
                                               Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DELIMITER),
@@ -384,84 +380,6 @@ public class EntryController {
         return part;
     }
 
-    public void transferEntries(Account account, ArrayList<Long> ids, ArrayList<String> sites)
-            throws ControllerException {
-        if (!ControllerFactory.getAccountController().isAdministrator(account))
-            return;
-
-        Logger.info(account.getEmail() + ": requesting transfer of " + ids.size() + " entries");
-
-        // retrieve entries
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
-        AttachmentController attachmentController = ControllerFactory.getAttachmentController();
-        ArrayList<PartTransfer> parts = new ArrayList<>();
-
-        for (long id : ids) {
-            try {
-                PartData partData;
-                String sequenceString = null;
-                PartTransfer part = new PartTransfer();
-
-                try {
-                    Entry entry = dao.get(id);
-                    partData = ModelToInfoFactory.getInfo(entry);
-                    part.setPart(partData);
-                    Sequence sequence = sequenceController.getByEntry(entry);
-
-                    // this uses the uploaded file which contains the annotations. If there is none (or created with
-                    // vector editor) then the raw sequence is sent
-                    if (sequence != null) {
-                        sequenceString = sequence.getSequenceUser();
-                        if (sequenceString == null || sequenceString.isEmpty())
-                            sequenceString = sequence.getSequence();
-                    }
-
-                    PartAttachment sequenceAttachment = new PartAttachment();
-                    DataHandler data = new DataHandler(sequenceString.getBytes(), "application/octet-stream");
-                    sequenceAttachment.setAttachmentData(data);
-                    part.setSequence(sequenceAttachment);
-
-                    if (attachmentController.hasAttachment(entry)) {
-                        ArrayList<PartAttachment> attachments = new ArrayList<>();
-                        for (Attachment attachment : attachmentController.getByEntry(account, entry)) {
-                            PartAttachment partAttachment = new PartAttachment();
-                            partAttachment.setName(attachment.getFileName());
-                            partAttachment.setDescription(attachment.getDescription());
-
-                            DataSource source = new FileDataSource(attachmentController.getFile(account, attachment));
-                            partAttachment.setAttachmentData(new DataHandler(source));
-                            attachments.add(partAttachment);
-                        }
-                        part.setAttachments(attachments);
-                    }
-                } catch (DAOException | PermissionException e) {
-                    Logger.error(e);
-                    continue;
-                }
-
-                parts.add(part);
-            } catch (ControllerException e) {
-                Logger.error(e);
-            }
-        }
-
-        String siteUrl = ControllerFactory.getConfigurationController().getPropertyValue(ConfigurationKey.URI_PREFIX);
-
-        for (String url : sites) {
-            IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
-            if (api == null) {
-                Logger.error("Could not retrieve api for " + url + ". Transfer aborted");
-                continue;
-            }
-
-            try {
-                api.uploadParts(siteUrl, parts);
-            } catch (ServiceException e) {
-                Logger.error(e);
-            }
-        }
-    }
-
     // NOTE that this method returns the plasmid record id, not the strain
     public String createStrainWithPlasmid(Account account, PartTransfer strainTransfer, PartTransfer plasmidTransfer,
             ArrayList<AccessPermission> accessPermissions) throws ControllerException {
@@ -548,72 +466,6 @@ public class EntryController {
         return plasmid.getRecordId();
     }
 
-    public boolean recordParts(ArrayList<PartTransfer> parts) {
-        if (parts == null)
-            return false;
-
-        try {
-            for (PartTransfer part : parts) {
-                Entry entry = InfoToModelFactory.infoToEntry(part.getPart());
-                entry.setVisibility(Visibility.TRANSFERRED.getValue());
-                entry.setPartNumber(getNextPartNumber());
-                if (entry.getRecordId() == null)
-                    entry.setRecordId(Utils.generateUUID());
-
-                if (entry.getVersionId() == null)
-                    entry.setVersionId(entry.getRecordId());
-
-                try {
-                    entry = dao.save(entry);
-                } catch (DAOException e) {
-                    Logger.error(e);
-                    continue;
-                }
-
-                // check attachments
-                if (part.getAttachments() != null && !part.getAttachments().isEmpty()) {
-                    for (PartAttachment partAttachment : part.getAttachments()) {
-                        DataHandler handler = partAttachment.getAttachmentData();
-                        Attachment attachment = new Attachment();
-                        attachment.setEntry(entry);
-                        attachment.setDescription(partAttachment.getDescription());
-                        attachment.setFileName(partAttachment.getName());
-                        AttachmentController attachmentController = ControllerFactory.getAttachmentController();
-                        try {
-                            attachmentController.save(null, attachment, handler.getInputStream());
-                        } catch (IOException e) {
-                            Logger.error(e);
-                        }
-                    }
-                }
-
-                // check sequence
-                if (part.getSequence() != null) {
-                    String sequenceString;
-                    try {
-                        sequenceString = IOUtils.toString(part.getSequence().getAttachmentData().getInputStream());
-                        IDNASequence dnaSequence = SequenceController.parse(sequenceString);
-                        if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
-                            Logger.error("Couldn't parse sequence file!");
-                        } else {
-                            Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-                            sequence.setSequenceUser(sequenceString);
-                            sequence.setEntry(entry);
-                            sequenceController.saveSequence(sequence);
-                            ApplicationController.scheduleBlastIndexRebuildTask(true);
-                        }
-                    } catch (IOException e) {
-                        Logger.error(e);
-                    }
-                }
-            }
-        } catch (ControllerException ce) {
-            Logger.error(ce);
-            return false;
-        }
-
-        return true;
-    }
 
     /**
      * Retrieve {@link Entry} from the database by id.
@@ -1417,40 +1269,6 @@ public class EntryController {
             Logger.info("Funding Source upgrade complete");
         } catch (DAOException e) {
             Logger.error(e);
-        }
-
-    }
-
-    public ArrayList<PartData> getTransferredParts(Account account) throws ControllerException {
-        if (account.getType() != AccountType.ADMIN)
-            return null;
-
-        try {
-            Set<Entry> entries = dao.retrieveTransferredEntries();
-            if (entries == null)
-                return null;
-
-            ArrayList<PartData> data = new ArrayList<>();
-            for (Entry entry : entries) {
-                data.add(ModelToInfoFactory.createTableViewData(entry, false));
-            }
-            return data;
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public boolean processTransferredParts(Account account, ArrayList<Long> partIds, boolean accept)
-            throws ControllerException {
-        if (!accountController.isAdministrator(account))
-            return false;
-
-        Visibility visibility = accept ? Visibility.OK : Visibility.DELETED;
-        try {
-            dao.setEntryVisibility(partIds, visibility.getValue());
-            return true;
-        } catch (DAOException de) {
-            throw new ControllerException(de);
         }
     }
 }

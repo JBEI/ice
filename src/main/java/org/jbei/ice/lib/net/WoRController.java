@@ -50,14 +50,15 @@ public class WoRController {
 
     /**
      * @param partnerId unique identifier for web partner
+     * @param apiKey    authentication key known only to this partner
      * @return true if partner identified by the id is determined to be a valid
-     *         web of registries partner for part transfer
+     *         web of registries partner for part transfer based on the status and authentication key
      */
-    public boolean isValidWebPartner(String partnerId) throws ControllerException {
+    public boolean isValidWebPartner(String partnerId, String apiKey) throws ControllerException {
         try {
             RemotePartner partner = dao.getByUrl(partnerId);
             return partner != null && partner.getPartnerStatus() == RemotePartnerStatus.APPROVED
-                    && partner.getAuthenticationToken() != null;
+                    && apiKey != null && apiKey.equalsIgnoreCase(partner.getAuthenticationToken());
         } catch (DAOException de) {
             throw new ControllerException(de);
         }
