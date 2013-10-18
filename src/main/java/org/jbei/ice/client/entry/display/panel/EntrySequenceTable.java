@@ -155,11 +155,13 @@ public class EntrySequenceTable extends Composite {
                     sb.appendHtmlConstant("</span>");
                 } else {
                     String name = info.getDepositor().getFullName();
-                    if (info.getDepositor().getId() <= 0)
-                        sb.appendHtmlConstant("by <i>" + name + "</i></span>");
-                    else {
-                        String link = Page.PROFILE.getLink() + ";id=" + info.getDepositor().getId();
-                        sb.appendHtmlConstant("by <a href=\"#" + link + "\">" + name + "</a></span>");
+                    if (name != null) {
+                        if (info.getDepositor().getId() <= 0)
+                            sb.appendHtmlConstant("by <i>" + name + "</i></span>");
+                        else {
+                            String link = Page.PROFILE.getLink() + ";id=" + info.getDepositor().getId();
+                            sb.appendHtmlConstant("by <a href=\"#" + link + "\">" + name + "</a></span>");
+                        }
                     }
                 }
 

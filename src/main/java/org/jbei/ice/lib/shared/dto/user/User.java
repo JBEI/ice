@@ -65,6 +65,8 @@ public class User implements IDTOModel {
     }
 
     public String getFullName() {
+        if (firstName == null && lastName == null)
+            return null;
         return this.firstName + " " + this.lastName;
     }
 
