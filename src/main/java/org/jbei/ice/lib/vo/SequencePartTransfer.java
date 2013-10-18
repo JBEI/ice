@@ -18,9 +18,11 @@ public class SequencePartTransfer implements Serializable {
     private PartData part;
     private ArrayList<PartAttachment> attachments;
     private FeaturedDNASequence sequence;
+    private ArrayList<TraceSequenceAttachment> traceSequences;
 
     public SequencePartTransfer() {
         attachments = new ArrayList<>();
+        traceSequences = new ArrayList<>();
     }
 
     public PartData getPart() {
@@ -45,5 +47,13 @@ public class SequencePartTransfer implements Serializable {
 
     public void setAttachments(ArrayList<PartAttachment> attachments) {
         this.attachments = attachments;
+    }
+
+    public ArrayList<TraceSequenceAttachment> getTraceSequences() {
+        return traceSequences;
+    }
+
+    public void setTraceSequences(ArrayList<TraceSequenceAttachment> traceSequences) {
+        this.traceSequences = traceSequences;
     }
 }

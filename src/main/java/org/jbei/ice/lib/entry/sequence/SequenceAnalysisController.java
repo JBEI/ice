@@ -241,16 +241,13 @@ public class SequenceAnalysisController {
      * @return SequenceTraceFile object
      * @throws ControllerException
      */
-    public SequenceTraceFile getSequenceTraceFile(TraceSequence traceSequence)
-            throws ControllerException {
+    public SequenceTraceFile getSequenceTraceFile(TraceSequence traceSequence) throws ControllerException {
         if (traceSequence == null) {
             return null;
         }
 
-        String base64Data = null;
-
+        String base64Data;
         File file = getFile(traceSequence);
-
         byte[] bytes;
 
         try (FileInputStream fileStream = new FileInputStream(file)) {
