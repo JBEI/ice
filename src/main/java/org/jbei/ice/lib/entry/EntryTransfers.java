@@ -113,7 +113,7 @@ public class EntryTransfers {
                                 continue;
                             }
                             DataHandler dataHandler = new DataHandler(new FileDataSource(file));
-                            attachment.setData(dataHandler);
+                            attachment.setSequenceData(dataHandler);
                             attachment.setDepositor(traceSequence.getDepositor());
                             attachments.add(attachment);
                         }

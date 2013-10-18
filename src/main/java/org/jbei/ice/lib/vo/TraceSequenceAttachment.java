@@ -18,7 +18,7 @@ public class TraceSequenceAttachment {
         return data;
     }
 
-    public void setData(DataHandler data) {
+    public void setSequenceData(DataHandler data) {
         this.data = data;
     }
 
