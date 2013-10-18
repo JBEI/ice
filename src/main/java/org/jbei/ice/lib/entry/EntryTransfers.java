@@ -157,11 +157,16 @@ public class EntryTransfers {
                 Entry entry = InfoToModelFactory.infoToEntry(part.getPart());
                 entry.setVisibility(Visibility.TRANSFERRED.getValue());
                 entry.setPartNumber(ControllerFactory.getEntryController().getNextPartNumber());
-                if (entry.getRecordId() == null)
-                    entry.setRecordId(Utils.generateUUID());
 
-                if (entry.getVersionId() == null)
+                // always assign new record id to uploaded part and maintain any existing as legacy version
+                String newRecordId = Utils.generateUUID();
+                if (entry.getRecordId() == null || entry.getRecordId().trim().isEmpty()) {
+                    entry.setRecordId(newRecordId);
+                    entry.setVersionId(newRecordId);
+                } else {
                     entry.setVersionId(entry.getRecordId());
+                    entry.setRecordId(newRecordId);
+                }
 
                 try {
                     entry = dao.save(entry);
