@@ -134,8 +134,8 @@ public class HeaderView extends Composite {
         }
 
         // user
-        SafeHtml profileHTML = SafeHtmlUtils.fromSafeConstant("<i class=\"color_444 " + FAIconType.GEAR.getStyleName()
-                                                                      + "\"></i> " + info.getEmail());
+        String htmlStr = "<i style=\"color: #757575\" class=\"" + FAIconType.USER.getStyleName() + "\"></i> ";
+        SafeHtml profileHTML = SafeHtmlUtils.fromSafeConstant(htmlStr + info.getEmail());
         Hyperlink profile = new Hyperlink(profileHTML, Page.PROFILE.getLink() + ";id=" + info.getId() + ";s=profile");
         loggedInContentsPanel.setWidget(0, 0, profile);
 
@@ -146,13 +146,13 @@ public class HeaderView extends Composite {
         loggedInContentsPanel.setHTML(0, 2, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
 
         // logout link
-        SafeHtml html = SafeHtmlUtils.fromSafeConstant("<i class=\"color_444 " + FAIconType.SIGNOUT.getStyleName()
-                                                               + "\"></i> Log Out");
+        String logoutHtmlStr = "<i style=\"color: #757575\" class=\"" + FAIconType.SIGNOUT.getStyleName();
+        SafeHtml html = SafeHtmlUtils.fromSafeConstant(logoutHtmlStr + "\"></i> Log Out");
         Hyperlink logout = new Hyperlink(html, Page.LOGOUT.getLink());
         loggedInContentsPanel.setWidget(0, 5, logout);
         loggedInContentsPanel.setHTML(0, 6, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
-        SafeHtml helpHtml = SafeHtmlUtils.fromSafeConstant("<i class=\"color_444 " + FAIconType.BOOK.getStyleName()
-                                                                   + "\"></i> Help");
+        String helpStr = "<i style=\"color: #757575\" class=\"" + FAIconType.BOOK.getStyleName() + "\"></i> Help";
+        SafeHtml helpHtml = SafeHtmlUtils.fromSafeConstant(helpStr);
         Anchor anchor = new Anchor(helpHtml, "https://public-registry.jbei.org/static/help.htm");
         loggedInContentsPanel.setWidget(0, 7, anchor);
 
