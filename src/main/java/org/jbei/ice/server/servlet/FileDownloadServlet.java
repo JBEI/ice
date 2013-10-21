@@ -1,9 +1,11 @@
 package org.jbei.ice.server.servlet;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,8 +20,11 @@ import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.server.servlet.helper.BulkCSVUploadHeaders;
 
 import org.apache.commons.io.IOUtils;
 
@@ -37,6 +42,7 @@ public class FileDownloadServlet extends HttpServlet {
     private static final String ATTACHMENT_TYPE = "attachment";
     private static final String SBOL_VISUAL_TYPE = "sbol_visual";
     private static final String TMP_FILE_TYPE = "tmp";
+    private static final String TEMPLATE_TYPE = "template";
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": attempt to download file");
@@ -57,7 +63,6 @@ public class FileDownloadServlet extends HttpServlet {
                 if (account == null)
                     return;
             }
-
         } catch (ControllerException ce) {
             Logger.error(ce);
             String url = request.getRequestURL().toString();
@@ -83,6 +88,10 @@ public class FileDownloadServlet extends HttpServlet {
             return;
         } else if (TMP_FILE_TYPE.equalsIgnoreCase(type)) {
             file = getTempFile(fileId, response);
+        } else if (TEMPLATE_TYPE.equalsIgnoreCase(type)) {
+            String addType = request.getParameter("add_type");
+            getCSVTemplate(addType, response);
+            return;
         }
 
         // check for null file
@@ -150,5 +159,33 @@ public class FileDownloadServlet extends HttpServlet {
         File file = Paths.get(tempDir, fileId).toFile();
         response.setHeader("Content-Disposition", "attachment;filename=" + fileId);
         return file;
+    }
+
+    private void getCSVTemplate(String addType, HttpServletResponse response) {
+        EntryAddType entryAddType = EntryAddType.valueOf(addType);
+        if (entryAddType == null)
+            return;
+
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment;filename=" + addType.toLowerCase() + "_csv_upload.csv");
+        ArrayList<EntryField> headers = BulkCSVUploadHeaders.getHeadersForType(entryAddType);
+        if (headers == null)
+            return;
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < headers.size(); i++) {
+            if (i != 0) {
+                sb.append(",");
+            }
+
+            sb.append('"').append(headers.get(i).toString()).append('"');
+        }
+
+        sb.append("\n");
+        try {
+            IOUtils.copy(new ByteArrayInputStream(sb.toString().getBytes()), response.getOutputStream());
+        } catch (IOException e) {
+            Logger.error(e);
+        }
     }
 }
