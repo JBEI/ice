@@ -37,6 +37,44 @@ public class BulkCSVUploadHeaders {
         }
     }
 
+    public static boolean isRequired(EntryField field, EntryAddType addType) {
+        if (addType == null || field == null)
+            throw new IllegalArgumentException("Both field and addType are required");
+
+        if (field == EntryField.PI ||
+                field == EntryField.BIOSAFETY_LEVEL ||
+                field == EntryField.NAME ||
+                field == EntryField.SUMMARY ||
+                field == EntryField.STATUS)
+            return true;
+
+        switch (addType) {
+            case PLASMID:
+                return field == EntryField.SELECTION_MARKERS ||
+                        field == EntryField.CIRCULAR;
+
+            case STRAIN:
+                return field == EntryField.SELECTION_MARKERS;
+
+            case ARABIDOPSIS:
+                return field == EntryField.GENERATION ||
+                        field == EntryField.PLANT_TYPE ||
+                        field == EntryField.SENT_TO_ABRC;
+
+            case STRAIN_WITH_PLASMID:
+                return field == EntryField.STRAIN_NAME ||
+                        field == EntryField.STRAIN_SELECTION_MARKERS ||
+                        field == EntryField.STRAIN_SUMMARY ||
+                        field == EntryField.PLASMID_NAME ||
+                        field == EntryField.PLASMID_SELECTION_MARKERS ||
+                        field == EntryField.CIRCULAR ||
+                        field == EntryField.PLASMID_SUMMARY;
+
+            default:
+                return false;
+        }
+    }
+
     public static ArrayList<EntryField> getPartHeaders() {
         ArrayList<EntryField> headerFields = new ArrayList<>();
         headerFields.add(EntryField.PI);
@@ -124,11 +162,6 @@ public class BulkCSVUploadHeaders {
         headerFields.add(EntryField.PLASMID_SUMMARY);
         headerFields.add(EntryField.PLASMID_NOTES);
         headerFields.add(EntryField.PLASMID_REFERENCES);
-
-        headerFields.add(EntryField.PARENTAL_STRAIN);
-        headerFields.add(EntryField.GENOTYPE_OR_PHENOTYPE);
-        headerFields.add(EntryField.PLASMIDS);
-        headerFields.add(EntryField.SELECTION_MARKERS);
         return headerFields;
     }
 }

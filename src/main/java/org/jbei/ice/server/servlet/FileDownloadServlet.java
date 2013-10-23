@@ -178,7 +178,11 @@ public class FileDownloadServlet extends HttpServlet {
                 sb.append(",");
             }
 
-            sb.append('"').append(headers.get(i).toString()).append('"');
+            sb.append('"');
+            sb.append(headers.get(i).toString());
+            if (BulkCSVUploadHeaders.isRequired(headers.get(i), entryAddType))
+                sb.append("*");
+            sb.append('"');
         }
 
         sb.append("\n");
