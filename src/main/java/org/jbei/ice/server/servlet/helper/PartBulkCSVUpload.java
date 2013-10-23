@@ -1,6 +1,5 @@
 package org.jbei.ice.server.servlet.helper;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,7 +16,8 @@ import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
-import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVParser;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -68,18 +68,31 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
         List<BulkUploadAutoUpdate> updates = new LinkedList<>();
 
         int rowsProcessed = 0;
+        CSVParser parser = null;
 
         // read file
-        try (CSVReader csvReader = new CSVReader(new FileReader(csvFilePath.toString()))) {
-            String[] lines;
-            while ((lines = csvReader.readNext()) != null) {
-                if (fields.isEmpty()) {
-                    // assume first line is being processed which is expected to have the field headers
-                    for (int i = 0; i < lines.length; i += 1) {
-                        String line = lines[i];
-                        EntryField field = EntryField.fromString(line);
+        try {
+            List<String> lines = FileUtils.readLines(csvFilePath.toFile());
+            for (String line : lines) {
+                if (parser == null) {
+                    // header is a good indicator of what the separator char is (tab vs comma)
+                    if (line.contains("\t") && !line.contains(","))
+                        parser = new CSVParser('\t');
+                    else
+                        parser = new CSVParser();
+
+                    String[] fieldStrArray = parser.parseLine(line);
+                    for (int i = 0; i < fieldStrArray.length; i += 1) {
+                        String fieldStr = fieldStrArray[i];
+
+                        // account for "*" that indicates a header is required
+                        if (fieldStr.lastIndexOf("*") != -1)
+                            fieldStr = fieldStr.substring(0, fieldStr.length() - 1);
+
+                        EntryField field = EntryField.fromString(fieldStr);
                         if (!isValidHeader(field)) {
-                            return "Error: The selected upload type doesn't support the following field [" + line + "]";
+                            return "<b>Error<b>: The selected upload type doesn't support the following field ["
+                                    + fieldStr + "]";
                         }
 
                         fields.add(i, field);
@@ -87,9 +100,10 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
                 } else {
                     // process values
                     BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryAddType.addTypeToType(addType));
-                    for (int i = 0; i < lines.length; i += 1) {
+                    String[] valuesArray = parser.parseLine(line);
+                    for (int i = 0; i < valuesArray.length; i += 1) {
                         EntryField field = fields.get(i);
-                        autoUpdate.getKeyValue().put(field, lines[i]);
+                        autoUpdate.getKeyValue().put(field, valuesArray[i]);
                     }
                     updates.add(autoUpdate);
                     rowsProcessed += 1;
