@@ -43,7 +43,7 @@ public class PermissionsSelection implements IsWidget {
         static SelectionResource INSTANCE = GWT.create(SelectionResource.class);
 
         @Override
-        @Source("org/jbei/ice/client/resource/css/CollectionMultiSelect.css")
+        @Source("org/jbei/ice/client/resource/css/PermissionSelection.css")
         CellTable.Style cellTableStyle();
     }
 

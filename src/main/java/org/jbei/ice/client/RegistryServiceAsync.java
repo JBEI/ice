@@ -236,7 +236,7 @@ public interface RegistryServiceAsync {
 
     void deleteSample(String sessionId, PartSample part, AsyncCallback<Boolean> async);
 
-    void retrieveUserGroups(String sessionId, AsyncCallback<ArrayList<UserGroup>> async);
+    void retrieveUserGroups(String sessionId, boolean includePublicGroup, AsyncCallback<ArrayList<UserGroup>> async);
 
     void promoteCollection(String sessionId, long id, AsyncCallback<Boolean> async);
 

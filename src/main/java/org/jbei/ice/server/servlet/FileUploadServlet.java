@@ -411,6 +411,10 @@ public class FileUploadServlet extends HttpServlet {
     }
 
     protected String uploadCSV(Account account, HttpServletRequest request, File file) {
+        if (!file.getName().endsWith(".csv")) {
+            return "Error: Only comma-separated value files with the extension '.csv' are accepted.";
+        }
+
         String entryAddTypeString = request.getParameter("upload");
         EntryAddType addType;
         try {

@@ -202,7 +202,8 @@ public interface RegistryService extends RemoteService {
 
     boolean deleteSample(String sessionId, PartSample part) throws AuthenticationException;
 
-    ArrayList<UserGroup> retrieveUserGroups(String sessionId) throws AuthenticationException;
+    ArrayList<UserGroup> retrieveUserGroups(String sessionId, boolean includePublicGroup)
+            throws AuthenticationException;
 
     boolean promoteCollection(String sessionId, long id) throws AuthenticationException;
 

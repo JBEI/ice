@@ -1109,11 +1109,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<UserGroup> retrieveUserGroups(String sessionId) throws AuthenticationException {
+    public ArrayList<UserGroup> retrieveUserGroups(String sessionId, boolean includePublicGroup)
+            throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": retrieving user groups");
-            return ControllerFactory.getGroupController().retrieveUserGroups(account);
+            return ControllerFactory.getGroupController().retrieveUserGroups(account, includePublicGroup);
         } catch (ControllerException ce) {
             return null;
         }

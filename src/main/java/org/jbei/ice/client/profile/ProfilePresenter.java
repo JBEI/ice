@@ -181,7 +181,7 @@ public class ProfilePresenter extends AbstractPresenter {
 
             @Override
             protected void callService(AsyncCallback<ArrayList<UserGroup>> callback) throws AuthenticationException {
-                service.retrieveUserGroups(ClientController.sessionId, callback);
+                service.retrieveUserGroups(ClientController.sessionId, false, callback);
             }
 
             @Override

@@ -54,14 +54,21 @@ public class GroupController {
      * Retrieves groups that user is either a member of. Users are implicit members of the groups
      * that they create so call also returns those groups
      *
-     * @param account user account
+     * @param account            user account
+     * @param includePublicGroup whether to include the public group that everyone is implicitly a member of
      * @return list of groups that user is a member of
      * @throws ControllerException
      */
-    public ArrayList<UserGroup> retrieveUserGroups(Account account) throws ControllerException {
+    public ArrayList<UserGroup> retrieveUserGroups(Account account, boolean includePublicGroup)
+            throws ControllerException {
         try {
             Set<Group> result = dao.retrieveMemberGroups(account);
             ArrayList<UserGroup> userGroups = new ArrayList<>();
+            if (includePublicGroup) {
+                Group publicGroup = createOrRetrievePublicGroup();
+                userGroups.add(Group.toDTO(publicGroup));
+            }
+
             for (Group group : result) {
                 UserGroup user = Group.toDTO(group);
                 user.setMemberCount(retrieveGroupMemberCount(group.getUuid()));

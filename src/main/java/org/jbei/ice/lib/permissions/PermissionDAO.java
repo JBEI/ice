@@ -189,6 +189,14 @@ class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
+    public boolean hasSetWriteFolderPermission(Folder folder, Account account) throws DAOException {
+        List list = currentSession().createCriteria(Permission.class).add(Restrictions.eq("folder", folder))
+                .add(Restrictions.eq("account", account))
+                .add(Restrictions.eq("canWrite", true))
+                .add(Restrictions.isNull("entry")).list();
+        return list != null && !list.isEmpty();
+    }
+
     public Set<Group> retrieveGroupPermissions(Entry entry, boolean canWrite, boolean canRead) throws DAOException {
         Session session = currentSession();
         try {
