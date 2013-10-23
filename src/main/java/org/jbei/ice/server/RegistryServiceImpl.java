@@ -45,6 +45,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.ExportAsOption;
 import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.NewsItem;
@@ -1655,7 +1656,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public String exportParts(String sid, ArrayList<Long> partIds, String export) throws AuthenticationException {
+    public String exportParts(String sid, ArrayList<Long> partIds, ExportAsOption option)
+            throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         EntryController entryController = ControllerFactory.getEntryController();
         Set<String> typeSet = new HashSet<>();
@@ -1676,12 +1678,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             String data;
 
             // actual export
-            switch (export.toLowerCase()) {
-                case "xml":
+            switch (option) {
+                case XML:
                     fileName = fileName + ".xml";
                     data = IceXmlSerializer.serializeToJbeiXml(account, entries);
                     break;
-                case "excel":
+                case CSV:
                 default:
                     fileName = fileName + ".csv";
                     data = IceXlsSerializer.serialize(entries, new TreeSet<>(typeSet));

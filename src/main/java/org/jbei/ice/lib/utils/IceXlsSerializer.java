@@ -31,7 +31,7 @@ public class IceXlsSerializer {
     protected static Object escapeCSVValue(Object value) {
         if (value != null) {
             String stringValue = StringUtils.trim(value.toString());
-            if (!StringUtils.containsNone(stringValue, new char[]{'\n', ',', '\t'})) {
+            if (!StringUtils.containsNone(stringValue, new char[]{'\n', ',', ','})) {
                 return "\"" + StringUtils.replace(stringValue, "\"", "\\\"") + "\"";
             }
             return stringValue;
@@ -74,34 +74,34 @@ public class IceXlsSerializer {
 
     public static String serialize(List<Entry> entries, Set<String> types) throws ControllerException {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Type").append("\t");
-        stringBuilder.append("Part ID").append("\t");
-        stringBuilder.append("Name").append("\t");
-        stringBuilder.append("Owner").append("\t");
-        stringBuilder.append("Creator").append("\t");
-        stringBuilder.append("Alias").append("\t");
-        stringBuilder.append("Keywords").append("\t");
-        stringBuilder.append("Markers").append("\t");
-        stringBuilder.append("Links").append("\t");
-        stringBuilder.append("Status").append("\t");
-        stringBuilder.append("Summary").append("\t");
-        stringBuilder.append("Notes").append("\t");
-        stringBuilder.append("References").append("\t");
-        stringBuilder.append("BioSafety Level").append("\t");
-        stringBuilder.append("IP Information").append("\t");
-        stringBuilder.append("Principal Investigator").append("\t");
-        stringBuilder.append("Funding Source").append("\t");
-        stringBuilder.append("Created").append("\t");
-        stringBuilder.append("Updated").append("\t");
+        stringBuilder.append("Type").append(",");
+        stringBuilder.append("Part ID").append(",");
+        stringBuilder.append("Name").append(",");
+        stringBuilder.append("Owner").append(",");
+        stringBuilder.append("Creator").append(",");
+        stringBuilder.append("Alias").append(",");
+        stringBuilder.append("Keywords").append(",");
+        stringBuilder.append("Markers").append(",");
+        stringBuilder.append("Links").append(",");
+        stringBuilder.append("Status").append(",");
+        stringBuilder.append("Summary").append(",");
+        stringBuilder.append("Notes").append(",");
+        stringBuilder.append("References").append(",");
+        stringBuilder.append("BioSafety Level").append(",");
+        stringBuilder.append("IP Information").append(",");
+        stringBuilder.append("Principal Investigator").append(",");
+        stringBuilder.append("Funding Source").append(",");
+        stringBuilder.append("Created").append(",");
+        stringBuilder.append("Updated").append(",");
 
         for (String type : types) {
             for (String header : getHeaders(type)) {
-                stringBuilder.append(header).append("\t");
+                stringBuilder.append(header).append(",");
             }
         }
 
-        stringBuilder.append("Has Attachment").append("\t");
-        stringBuilder.append("Has Samples").append("\t");
+        stringBuilder.append("Has Attachment").append(",");
+        stringBuilder.append("Has Samples").append(",");
         stringBuilder.append("Has Sequence").append("\n");
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
@@ -110,27 +110,27 @@ public class IceXlsSerializer {
         AttachmentController attachmentController = ControllerFactory.getAttachmentController();
 
         for (Entry entry : entries) {
-            stringBuilder.append(escapeCSVValue(entry.getRecordType())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getPartNumber())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getName())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getOwner())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getCreator())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getAlias())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getKeywords())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getSelectionMarkersAsString())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getLinksAsString())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getStatus())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getShortDescription())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getLongDescription())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getReferences())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getBioSafetyLevel())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getIntellectualProperty())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getPrincipalInvestigator())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getFundingSource())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getRecordType())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getPartNumber())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getName())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getOwner())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getCreator())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getAlias())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getKeywords())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getSelectionMarkersAsString())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getLinksAsString())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getStatus())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getShortDescription())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getLongDescription())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getReferences())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getBioSafetyLevel())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getIntellectualProperty())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getPrincipalInvestigator())).append(",");
+            stringBuilder.append(escapeCSVValue(entry.getFundingSource())).append(",");
             String time = (entry.getCreationTime() == null) ? "" : dateFormat.format(entry.getCreationTime());
-            stringBuilder.append(escapeCSVValue(time)).append("\t");
+            stringBuilder.append(escapeCSVValue(time)).append(",");
             time = (entry.getModificationTime() == null) ? "" : dateFormat.format(entry.getModificationTime());
-            stringBuilder.append(escapeCSVValue(time)).append("\t");
+            stringBuilder.append(escapeCSVValue(time)).append(",");
             final String type = entry.getRecordType().toUpperCase();
 
             switch (type) {
@@ -138,29 +138,29 @@ public class IceXlsSerializer {
                     ArabidopsisSeed seed = (ArabidopsisSeed) entry;
                     for (String header : getHeaders(type)) {
                         if (header.equalsIgnoreCase("Homozygosity"))
-                            stringBuilder.append(escapeCSVValue(seed.getHomozygosity())).append("\t");
+                            stringBuilder.append(escapeCSVValue(seed.getHomozygosity())).append(",");
                         if (header.equalsIgnoreCase("Harvest Date")) {
                             time = (entry.getCreationTime() == null) ? "" : dateFormat.format(seed.getHarvestDate());
-                            stringBuilder.append(escapeCSVValue(time)).append("\t");
+                            stringBuilder.append(escapeCSVValue(time)).append(",");
                         }
                         if (header.equalsIgnoreCase("Ecotype"))
-                            stringBuilder.append(escapeCSVValue(seed.getEcotype())).append("\t");
+                            stringBuilder.append(escapeCSVValue(seed.getEcotype())).append(",");
                         if (header.equalsIgnoreCase("Parents"))
-                            stringBuilder.append(escapeCSVValue(seed.getParents())).append("\t");
+                            stringBuilder.append(escapeCSVValue(seed.getParents())).append(",");
                         if (header.equalsIgnoreCase("Generation"))
-                            stringBuilder.append(escapeCSVValue(seed.getGeneration())).append("\t");
+                            stringBuilder.append(escapeCSVValue(seed.getGeneration())).append(",");
                         if (header.equalsIgnoreCase("Plant Type"))
-                            stringBuilder.append(escapeCSVValue(seed.getPlantType())).append("\t");
+                            stringBuilder.append(escapeCSVValue(seed.getPlantType())).append(",");
                         if (header.equalsIgnoreCase("Sent to ABRC?"))
-                            stringBuilder.append(seed.isSentToABRC() ? "Yes" : "No").append("\t");
+                            stringBuilder.append(seed.isSentToABRC() ? "Yes" : "No").append(",");
                     }
                     if (types.contains(PLASMID_TYPE)) {
                         for (int i = 0; i < 4; i += 1)
-                            stringBuilder.append("\t");
+                            stringBuilder.append(",");
                     }
                     if (types.contains(STRAIN_TYPE)) {
                         for (int i = 0; i < 3; i += 1)
-                            stringBuilder.append("\t");
+                            stringBuilder.append(",");
                     }
                     break;
 
@@ -168,23 +168,23 @@ public class IceXlsSerializer {
                     Plasmid plasmid = (Plasmid) entry;
                     if (types.contains(ARABIDOPSIS_TYPE)) {
                         for (int i = 0; i < 7; i += 1)
-                            stringBuilder.append("\t");
+                            stringBuilder.append(",");
                     }
                     for (String header : getHeaders(type)) {
                         if (header.equalsIgnoreCase("Circular"))
-                            stringBuilder.append(plasmid.getCircular() ? "Yes" : "No").append("\t");
+                            stringBuilder.append(plasmid.getCircular() ? "Yes" : "No").append(",");
                         if (header.equalsIgnoreCase("Backbone"))
-                            stringBuilder.append(escapeCSVValue(plasmid.getBackbone())).append("\t");
+                            stringBuilder.append(escapeCSVValue(plasmid.getBackbone())).append(",");
                         if (header.equalsIgnoreCase("Promoters"))
-                            stringBuilder.append(escapeCSVValue(plasmid.getPromoters())).append("\t");
+                            stringBuilder.append(escapeCSVValue(plasmid.getPromoters())).append(",");
                         if (header.equalsIgnoreCase("Replicates In"))
-                            stringBuilder.append(escapeCSVValue(plasmid.getReplicatesIn())).append("\t");
+                            stringBuilder.append(escapeCSVValue(plasmid.getReplicatesIn())).append(",");
                         if (header.equalsIgnoreCase("Origin of Replication"))
-                            stringBuilder.append(escapeCSVValue(plasmid.getOriginOfReplication())).append("\t");
+                            stringBuilder.append(escapeCSVValue(plasmid.getOriginOfReplication())).append(",");
                     }
                     if (types.contains(STRAIN_TYPE)) {
                         for (int i = 0; i < 3; i += 1)
-                            stringBuilder.append("\t");
+                            stringBuilder.append(",");
                     }
                     break;
 
@@ -193,25 +193,25 @@ public class IceXlsSerializer {
                     Strain strain = (Strain) entry;
                     if (types.contains(ARABIDOPSIS_TYPE)) {
                         for (int i = 0; i < 7; i += 1)
-                            stringBuilder.append("\t");
+                            stringBuilder.append(",");
                     }
                     if (types.contains(PLASMID_TYPE)) {
                         for (int i = 0; i < 4; i += 1)
-                            stringBuilder.append("\t");
+                            stringBuilder.append(",");
                     }
                     for (String header : getHeaders(type)) {
                         if (header.equalsIgnoreCase("Parental Strain"))
-                            stringBuilder.append(escapeCSVValue(strain.getHost())).append("\t");
+                            stringBuilder.append(escapeCSVValue(strain.getHost())).append(",");
                         if (header.equalsIgnoreCase("Genotype or Phenotype"))
-                            stringBuilder.append(escapeCSVValue(strain.getGenotypePhenotype())).append("\t");
+                            stringBuilder.append(escapeCSVValue(strain.getGenotypePhenotype())).append(",");
                         if (header.equalsIgnoreCase("Plasmids"))
-                            stringBuilder.append(escapeCSVValue(strain.getPlasmids())).append("\t");
+                            stringBuilder.append(escapeCSVValue(strain.getPlasmids())).append(",");
                     }
                     break;
             }
 
-            stringBuilder.append(attachmentController.hasAttachment(entry) ? "Yes" : "No").append("\t");
-            stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append("\t");
+            stringBuilder.append(attachmentController.hasAttachment(entry) ? "Yes" : "No").append(",");
+            stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append(",");
             stringBuilder.append((sequenceController.hasSequence(entry.getId())) ? "Yes" : "No").append("\n");
         }
 

@@ -317,7 +317,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                                     + "however still be able to view and modify them on the collections page.</p>"
                                     + "<p>To upload data from a file, make sure it is saved as a comma-separated value"
                                     + " (CSV) file with the field delimiter set to a comma (,) "
-                                    + "and the text delimiter set to a quote (\")"
+                                    + "and the text delimiter set to a quote (\"). After uploading the part information"
+                                    + ", you can use the bulk upload interface to associate sequence files manually."
                                     + "</div>");
         return mainContent;
     }

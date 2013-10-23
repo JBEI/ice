@@ -7,6 +7,7 @@ import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.ExportAsOption;
 import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.NewsItem;
@@ -268,7 +269,7 @@ public interface RegistryServiceAsync {
 
     void setPropagatePermissionForFolder(String sid, long folderId, boolean prop, AsyncCallback<Boolean> async);
 
-    void exportParts(String sid, ArrayList<Long> partIds, String export, AsyncCallback<String> asyncCallback);
+    void exportParts(String sid, ArrayList<Long> partIds, ExportAsOption option, AsyncCallback<String> asyncCallback);
 
     void enableOrDisableFolderPublicAccess(String sid, long folderId, boolean isEnable, AsyncCallback<Boolean> async)
             throws AuthenticationException;

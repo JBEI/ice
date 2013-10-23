@@ -8,7 +8,6 @@ import java.util.Set;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.event.SubmitHandler;
-import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.model.PropagateOption;
@@ -17,6 +16,7 @@ import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.ExportAsOption;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 
 import com.google.gwt.event.dom.client.ClickHandler;

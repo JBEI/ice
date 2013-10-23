@@ -558,6 +558,9 @@ public class EntryPresenter extends AbstractPresenter {
         private SequenceViewPanelPresenter presenter;
 
         public PasteSequenceDelegate(final SequenceViewPanelPresenter presenter) {
+            if (presenter == null)
+                return;
+
             this.presenter = presenter;
             presenter.addSequencePasteHandler(new ClickHandler() {
                 @Override
@@ -574,6 +577,9 @@ public class EntryPresenter extends AbstractPresenter {
         }
 
         private void callService(final String sequence) {
+            if (this.presenter == null)
+                return;
+
             new IceAsyncCallback<PartData>() {
 
                 @Override
