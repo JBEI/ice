@@ -26,11 +26,11 @@ public class PagerWidget extends Composite {
         goBack.setTitle("Back");
         goBack.addStyleName("entry_go_back");
 
-        leftBtn = new Icon(FAIconType.CHEVRON_SIGN_LEFT);
+        leftBtn = new Icon(FAIconType.CHEVRON_CIRCLE_LEFT);
         leftBtn.removeStyleName("font-awesome");
         leftBtn.addStyleName("context_nav_pager");
 
-        rightBtn = new Icon(FAIconType.CHEVRON_SIGN_RIGHT);
+        rightBtn = new Icon(FAIconType.CHEVRON_CIRCLE_RIGHT);
         rightBtn.removeStyleName("font-awesome");
         rightBtn.addStyleName("context_nav_pager");
 

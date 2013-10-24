@@ -139,6 +139,7 @@ public class FolderController {
             ArrayList<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit);
             for (Entry entry : results) {
                 PartData info = ModelToInfoFactory.createTableViewData(entry, false);
+                info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
                 details.getEntries().add(info);
             }
             return details;

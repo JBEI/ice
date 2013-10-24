@@ -32,11 +32,14 @@ import org.jbei.ice.client.search.advanced.ISearchView;
 import org.jbei.ice.client.search.advanced.SearchPresenter;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.ExportAsOption;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
+import org.jbei.ice.lib.shared.dto.search.SearchResult;
 import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
@@ -344,6 +347,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                 boolean hasSelection = (selectionModel.getSelectedSet().size() > 0);
                 display.enableExportAs(hasSelection);
 
+                display.enableBulkEdit(sameSelectedType(selectionModel.getSelectedSet()));
+
                 boolean canRemove = currentFolder.getOwner() != null
                         && ClientController.account.getEmail().equals(currentFolder.getOwner().getEmail());
                 if (!canRemove && currentFolder.getAccessPermissions() != null) {
@@ -361,6 +366,52 @@ public class CollectionsPresenter extends AbstractPresenter {
             }
         });
     }
+
+    /**
+     * @return true if all the parts are of the same type and the set is non empty
+     */
+    private boolean sameSelectedType(Set<PartData> parts) {
+        if (parts == null || parts.isEmpty())
+            return false;
+
+        EntryType type = null;
+        for (PartData data : parts) {
+            if (!data.isCanEdit())
+                return false;
+
+            if (type == null) {
+                type = data.getType();
+                continue;
+            }
+
+            if (data.getType() != type)
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * @return true if all the parts are of the same type and the set is non empty
+     */
+    private boolean hasSameSelectedType(Set<SearchResult> parts) {
+        if (parts == null || parts.isEmpty())
+            return false;
+
+        EntryType type = null;
+        for (HasEntryData data : parts) {
+            if (!data.getEntryInfo().isCanEdit())
+                return false;
+
+            if (type == null) {
+                type = data.getEntryInfo().getType();
+                continue;
+            }
+            if (data.getEntryInfo().getType() != type)
+                return false;
+        }
+        return true;
+    }
+
 
     private void initExportAsHandler() {
         display.getExportAsModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -413,6 +464,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         if (event.getPartnerUrl() == null || event.getPartnerUrl().trim().isEmpty())
             History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getId(), false);
         display.enableExportAs(true);
+        display.enableBulkEditVisibility(false);
         display.setMainContent(entryViewPresenter.getView().asWidget());
         boolean enable = false;
         if (currentFolder != null && currentFolder.getAccessPermissions() != null) {
@@ -438,6 +490,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     boolean enable = (searchPresenter.getResultSelectedSet().size() > 0);
                     display.setCanMove(false);
                     display.enableExportAs(enable);
+                    display.enableBulkEdit(hasSameSelectedType(searchPresenter.getResultSelectedSet()));
                 }
             });
         }
@@ -613,6 +666,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         folderDataProvider.updateRowCount(0, false);
         display.setDataView(collectionsDataTable);
         display.enableExportAs(false);
+        display.enableBulkEdit(false);
         display.setCanMove(false);
         int limit = collectionsDataTable.getVisibleRange().getLength();
 

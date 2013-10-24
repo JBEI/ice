@@ -11,15 +11,7 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.event.SubmitHandler;
-import org.jbei.ice.client.collection.menu.CollectionEntryActionMenu;
-import org.jbei.ice.client.collection.menu.CollectionMenu;
-import org.jbei.ice.client.collection.menu.ExportAsMenu;
-import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
-import org.jbei.ice.client.collection.menu.MenuItem;
-import org.jbei.ice.client.collection.menu.SharedCollectionMenu;
-import org.jbei.ice.client.collection.menu.SystemCollectionMenu;
-import org.jbei.ice.client.collection.menu.TransferMenu;
-import org.jbei.ice.client.collection.menu.UserCollectionMenu;
+import org.jbei.ice.client.collection.menu.*;
 import org.jbei.ice.client.collection.model.PropagateOption;
 import org.jbei.ice.client.collection.model.ShareCollectionData;
 import org.jbei.ice.client.collection.presenter.MoveToHandler;
@@ -53,6 +45,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
 
     private CreateEntryMenu createNew;
     private CollectionEntryActionMenu subMenu;
+    private BulkEdit bulkEdit;
     private ExportAsMenu exportAs;
     private TransferMenu transferMenu;
     private FeedbackPanel feedback;
@@ -79,9 +72,15 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         subMenu = new CollectionEntryActionMenu();
         rightContents.setWidget(0, cell, subMenu);
 
-        // export as
-        String width = (subMenu.getWidth() + 12) + "px";
+        // bulk edit
+        String width = (subMenu.getWidth() + 10) + "px";
         rightContents.getFlexCellFormatter().setWidth(0, cell, width);
+        bulkEdit = new BulkEdit();
+        cell += 1;
+        rightContents.setWidget(0, cell, bulkEdit);
+
+        // export as
+        rightContents.getFlexCellFormatter().setWidth(0, cell, "97px");
         exportAs = new ExportAsMenu();
         cell += 1;
         rightContents.setWidget(0, cell, exportAs);
@@ -303,6 +302,17 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public SingleSelectionModel<ExportAsOption> getExportAsModel() {
         return exportAs.getSelectionModel();
+    }
+
+    @Override
+    public void enableBulkEdit(boolean enable) {
+        this.rightContents.getFlexCellFormatter().setVisible(0, 2, true);
+        this.bulkEdit.setEnabled(enable);
+    }
+
+    @Override
+    public void enableBulkEditVisibility(boolean b) {
+        this.rightContents.getFlexCellFormatter().setVisible(0, 2, b);
     }
 
     @Override

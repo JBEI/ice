@@ -72,7 +72,7 @@ public class EntryActionWidget extends Composite {
         delete.setStyleName("delete_icon");
         delete.setTitle("Delete");
         pipe2 = new HTML("<span style=\"color: #ccc\">&nbsp;|&nbsp;</span>");
-        flag = new HTML("<i class=\"" + FAIconType.WARNING_SIGN.getStyleName()
+        flag = new HTML("<i class=\"" + FAIconType.WARNING.getStyleName()
                                 + "\"></i> <span class=\"font-80em\">Alert</span>");
         flag.setStyleName("flag_icon");
 

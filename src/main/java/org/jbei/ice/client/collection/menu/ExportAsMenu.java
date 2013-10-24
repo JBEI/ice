@@ -38,7 +38,7 @@ public class ExportAsMenu implements IsWidget {
         Style cellListStyle();
     }
 
-    private static final String LABEL = "<i class=\"" + FAIconType.DOWNLOAD_ALT.getStyleName()
+    private static final String LABEL = "<i class=\"" + FAIconType.DOWNLOAD.getStyleName()
             + "\" style=\"opacity:0.85; color: #0082C0\"></i> "
             + "Export As <i class=\"" + FAIconType.CARET_DOWN.getStyleName() + "\"></i>";
     private final Button exportAs;

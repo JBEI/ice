@@ -12,8 +12,8 @@ public enum HoverOption {
     EDIT(FAIconType.EDIT, "Rename"),
     DELETE(FAIconType.TRASH, "Delete"),
     SHARE(FAIconType.SHARE, "Share"),
-    PIN(FAIconType.PUSHPIN, "Promote"),
-    UNPIN(FAIconType.REMOVE, "Demote");
+    PIN(FAIconType.THUMB_TACK, "Promote"),
+    UNPIN(FAIconType.TIMES, "Demote");
 
     private final String display;
     private final FAIconType icon;

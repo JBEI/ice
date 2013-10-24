@@ -85,7 +85,7 @@ public class HeaderLockWidget implements IsWidget {
         htmlPanel.add(unlockSubmit, "unlock_button");
         unlockSubmit.addClickHandler(new UnlockClickHandler());
 
-        HTML cancel = new HTML("<i class=\"" + FAIconType.REMOVE.getStyleName() + "\"></i> Close");
+        HTML cancel = new HTML("<i class=\"" + FAIconType.TIMES.getStyleName() + "\"></i> Close");
         cancel.setStyleName("edit_icon");
         cancel.addStyleName("font-85em");
         htmlPanel.add(cancel, "cancel_action");

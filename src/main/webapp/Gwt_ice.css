@@ -683,7 +683,7 @@ a.cell_mouseover:hover {
 
 @font-face {
     font-family: "BebasNeue";
-    src: url("static/font/BebasNeue.otf") format("opentype");
+    src: url("static/fonts/BebasNeue.otf") format("opentype");
 }
 
 .entry_view_sub_menu_header {

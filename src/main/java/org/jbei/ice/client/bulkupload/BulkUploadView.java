@@ -101,7 +101,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         draftInput.setVisible(false);
 
         updating = new HTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
-                                    + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
+                                    + "<i class=\"fa-spinner fa-spin fa-1x\"></i> Saving</span>");
         updating.setStyleName("display-inline");
         updating.addStyleName("relative_top_3");
         updating.setVisible(false);
@@ -161,7 +161,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                     return;
                 }
                 updating.setHTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
-                                         + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
+                                         + "<i class=\"fa-spinner fa-spin fa-1x\"></i> Saving</span>");
                 updating.setVisible(false);
             }
         });
@@ -327,7 +327,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     public void setLoading(boolean set) {
         HTML html = new HTML(
                 "<div style=\"margin-top: 17px; border: 1px solid #e4e4e4; background-color: #f3f3f3; padding: 10px; "
-                        + "opacity: 0.3\"><i class=\"icon-spinner icon-spin icon-3x\"></i><br><h2>LOADING " +
+                        + "opacity: 0.3\"><i class=\"fa-spinner fa-spin fa-3x\"></i><br><h2>LOADING " +
                         "CONTENT</h2></div>");
         mainContent.setWidget(1, 0, html);
         mainContent.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
@@ -423,7 +423,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     public void setUpdatingVisibility(boolean visible) {
         if (visible) {
             updating.setHTML("&nbsp;<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
-                                     + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
+                                     + "<i class=\"fa-spinner fa-spin fa-1x\"></i> Saving</span>");
         } else {
             updating.setHTML(
                     "&nbsp;<span style=\"font-size: 11px; font-weight: normal; vertical-align: middle; color: #999\">"

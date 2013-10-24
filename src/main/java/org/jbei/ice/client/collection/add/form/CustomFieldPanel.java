@@ -186,7 +186,7 @@ public class CustomFieldPanel extends Composite {
             value = createStandardTextBox("300px");
             value.setMaxLength(500);
 
-            iconRemove = new Icon(FAIconType.REMOVE);
+            iconRemove = new Icon(FAIconType.TIMES);
             iconRemove.addStyleName("delete_icon");
 
             nameLabel = new HTML();

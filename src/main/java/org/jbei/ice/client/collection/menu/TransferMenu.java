@@ -61,7 +61,7 @@ public class TransferMenu extends Composite {
         CellTable.Style cellTableStyle();
     }
 
-    private static final String LABEL = "<i class=\"" + FAIconType.SHARE_ALT.getStyleName()
+    private static final String LABEL = "<i class=\"" + FAIconType.SHARE_SQUARE.getStyleName()
             + "\" style=\"opacity:0.85; color: #0082C0\"></i> "
             + "Transfer <i class=\"" + FAIconType.CARET_DOWN.getStyleName() + "\"></i>";
     private final Button transfer;

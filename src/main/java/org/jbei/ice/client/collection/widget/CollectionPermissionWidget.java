@@ -199,7 +199,7 @@ public class CollectionPermissionWidget extends Composite {
     }
 
     protected void createSuggestWidget() {
-        HTML deleteIcon = new HTML("<i class=\"delete_icon " + FAIconType.REMOVE.getStyleName() + "\"></i>");
+        HTML deleteIcon = new HTML("<i class=\"delete_icon " + FAIconType.TIMES.getStyleName() + "\"></i>");
         deleteIcon.setStyleName("display-inline");
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
@@ -243,7 +243,7 @@ public class CollectionPermissionWidget extends Composite {
         writeListTable.setCellSpacing(0);
         writeListTable.setStyleName("permission_list");
 
-        addReadPermission = new HTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
+        addReadPermission = new HTML("<i class=\"" + FAIconType.PLUS_CIRCLE.getStyleName() + "\"></i>");
         addReadPermission.addStyleName("edit_icon");
         addReadPermission.addStyleName("font-14em");
 
@@ -262,7 +262,7 @@ public class CollectionPermissionWidget extends Composite {
         // add read list public read access and hide by default
         String iconStyle = FAIconType.GLOBE.getStyleName() + " blue";
         readListTable.setHTML(0, 0, "<i class=\"" + iconStyle + "\"></i> Public");
-        Icon deleteIcon = new Icon(FAIconType.REMOVE);
+        Icon deleteIcon = new Icon(FAIconType.TIMES);
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -334,7 +334,7 @@ public class CollectionPermissionWidget extends Composite {
 
         table.setHTML(row, 0, "<i class=\"" + iconStyle + "\"></i> " + display);
         table.getCellFormatter().setWidth(row, 0, "160px");
-        Icon deleteIcon = new Icon(FAIconType.REMOVE);
+        Icon deleteIcon = new Icon(FAIconType.TIMES);
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -422,7 +422,7 @@ public class CollectionPermissionWidget extends Composite {
                 writeLabelPanel.setStyleName("permission_tab_inactive");
                 permissionLayout.setWidget(2, 0, readListTable);
                 addWritePermission.setHTML("<span>" + writeList.size() + "</span>");
-                addReadPermission.setHTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
+                addReadPermission.setHTML("<i class=\"" + FAIconType.PLUS_CIRCLE.getStyleName() + "\"></i>");
             } else {
                 if (cell.getCellIndex() == 0)
                     return;
@@ -434,7 +434,7 @@ public class CollectionPermissionWidget extends Composite {
                 permissionLayout.setWidget(2, 0, writeListTable);
                 int readSize = isPublicReadEnabled ? readList.size() + 1 : readList.size();
                 addReadPermission.setHTML("<span>" + readSize + "</span>");
-                addWritePermission.setHTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
+                addWritePermission.setHTML("<i class=\"" + FAIconType.PLUS_CIRCLE.getStyleName() + "\"></i>");
             }
 
             permissionLayout.getRowFormatter().setVisible(3, !isViewingWriteTab);

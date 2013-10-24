@@ -49,7 +49,7 @@ public class EntryTablePager extends AbstractPager {
         }
 
         public void setLoading() {
-            setHTML("<i class=\"icon-spin " + FAIconType.REFRESH.getStyleName() + "\"></i>");
+            setHTML("<i class=\"fa-spin " + FAIconType.REFRESH.getStyleName() + "\"></i>");
         }
 
         public void setDefaultHTML() {

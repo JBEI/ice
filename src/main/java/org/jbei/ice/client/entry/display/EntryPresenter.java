@@ -474,6 +474,7 @@ public class EntryPresenter extends AbstractPresenter {
                 // show/hide sample button
                 display.setUserCanEdit(currentPart.isCanEdit());
                 collectionsPresenter.getView().enableExportAs(currentContext.getPartnerUrl() == null);
+                collectionsPresenter.getView().enableBulkEditVisibility(false);
 
                 handleMenuSelection(menu);
             }

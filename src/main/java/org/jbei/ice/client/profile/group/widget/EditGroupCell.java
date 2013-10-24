@@ -41,7 +41,7 @@ public class EditGroupCell extends Composite {
         submit.addStyleName("add_icon");
 
         // cancel
-        cancel = new HTML("<i class=\"" + FAIconType.REMOVE.getStyleName() + "\"></i>");
+        cancel = new HTML("<i class=\"" + FAIconType.TIMES.getStyleName() + "\"></i>");
         cancel.setStyleName("display-inline");
         cancel.addStyleName("delete_icon");
 

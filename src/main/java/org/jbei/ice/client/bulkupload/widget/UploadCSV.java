@@ -136,8 +136,8 @@ public class UploadCSV extends Composite {
             this.table = new FlexTable();
             String html = "<p style=\"padding: 6px; border: 1px solid #eee; background-color: #f1f1f1; color: #555;"
                     + "font-size: 0.80em; border-radius: 3px; \"><i style=\"font-size:70px; float: left;"
-                    + "padding-right:10px; color: #3a87ad\" class=\"icon-info-sign\"></i>The first line of your CSV " +
-                    "file should contain"
+                    + "padding-right:10px; color: #3a87ad\" class=\"" + FAIconType.INFO_CIRCLE.getStyleName()
+                    + "\"></i>The first line of your CSV file should contain"
                     + " the header information and must be spelled exactly as it appears in the web interface. e.g. "
                     + "<b>\"Principal Investigator\", \"Funding Source\", \"Intellectual Property\",</b> etc.<br><br>"
                     + "<span id=\"template_download\"></span> to download a template for the CSV upload.</p>";

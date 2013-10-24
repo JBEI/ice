@@ -107,6 +107,10 @@ public interface ICollectionView {
 
     void enableExportAs(boolean enable);
 
+    void enableBulkEdit(boolean enable);
+
+    void enableBulkEditVisibility(boolean b);
+
     void setSharedCollectionsMenuItems(ArrayList<MenuItem> items);
 
     void setMenuDelegates(Delegate<ShareCollectionData> delegate, ServiceDelegate<PropagateOption> propagate);

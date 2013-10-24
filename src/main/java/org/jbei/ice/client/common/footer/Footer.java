@@ -67,10 +67,7 @@ public class Footer extends Composite {
         panel.add(new Label("All rights reserved."));
 
         HorizontalPanel line3 = new HorizontalPanel();
-        Anchor featureReq = new Anchor("Feature Request", "https://github.com/JBEI/ice/issues/new");
-        line3.add(featureReq);
-        line3.add(new HTML("&nbsp; | &nbsp; "));
-        Anchor bugReport = new Anchor("Report a Bug", "https://github.com/JBEI/ice/issues/new");
+        Anchor bugReport = new Anchor("Submit an Issue", "https://github.com/JBEI/ice/issues/new");
         line3.add(bugReport);
         line3.add(new HTML("&nbsp; | &nbsp; "));
         Anchor api = new Anchor("API", "/api");

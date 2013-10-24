@@ -32,7 +32,7 @@ public class DeleteActionCell<C> extends AbstractCell<C> {
         this.delegate = delegate;
         this.html = new SafeHtmlBuilder().appendHtmlConstant(
                 "<button type=\"button\" class=\"remove_user_button opacity_hover\">"
-                        + "<i class=\"" + FAIconType.REMOVE.getStyleName()
+                        + "<i class=\"" + FAIconType.TIMES.getStyleName()
                         + "\">").appendHtmlConstant("</i></button>").toSafeHtml();
     }
 

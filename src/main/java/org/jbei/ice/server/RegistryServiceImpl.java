@@ -507,6 +507,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             details.setCount(count);
             for (Entry entry : entries) {
                 PartData info = ModelToInfoFactory.createTableViewData(entry, false);
+                try {
+                    info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
+                } catch (ControllerException ce) {
+                    continue;
+                }
                 details.getEntries().add(info);
             }
             return details;
