@@ -464,7 +464,10 @@ public class SequenceController {
 
     public Sequence saveSequence(Sequence partSequence) throws ControllerException {
         try {
-            return dao.saveSequence(partSequence);
+            Sequence sequence = dao.saveSequence(partSequence);
+            if (sequence != null)
+                ApplicationController.scheduleBlastIndexRebuildTask(true);
+            return sequence;
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

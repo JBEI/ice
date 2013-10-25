@@ -501,7 +501,6 @@ public class EntryController {
                     sequence.setSequenceUser(sequenceString);
                     sequence.setEntry(strain);
                     sequenceController.saveSequence(sequence);
-                    ApplicationController.scheduleBlastIndexRebuildTask(true);
                 }
             } catch (IOException e) {
                 Logger.error(e);
@@ -538,7 +537,6 @@ public class EntryController {
                     sequence.setSequenceUser(sequenceString);
                     sequence.setEntry(plasmid);
                     sequenceController.saveSequence(sequence);
-                    ApplicationController.scheduleBlastIndexRebuildTask(true);
                 }
             } catch (IOException e) {
                 Logger.error(e);
@@ -600,7 +598,6 @@ public class EntryController {
                             sequence.setSequenceUser(sequenceString);
                             sequence.setEntry(entry);
                             sequenceController.saveSequence(sequence);
-                            ApplicationController.scheduleBlastIndexRebuildTask(true);
                         }
                     } catch (IOException e) {
                         Logger.error(e);
@@ -885,6 +882,7 @@ public class EntryController {
 
             for (Entry entry : results) {
                 PartData info = ModelToInfoFactory.createTableViewData(entry, false);
+                info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
                 details.getEntries().add(info);
             }
         } catch (DAOException de) {
