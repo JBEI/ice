@@ -36,6 +36,7 @@ import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
+import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
@@ -431,31 +432,35 @@ public class BulkUploadController {
 
     public BulkUploadAutoUpdate autoUpdateBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
             EntryAddType addType) throws ControllerException {
-        // deal with bulk upload
-        BulkUpload draft;
-        try {
-            draft = dao.retrieveById(autoUpdate.getBulkUploadId());
-            if (draft == null) {
-                // validate add type and entrytype
-                if (addType != EntryAddType.STRAIN_WITH_PLASMID && EntryType.nameToType(addType.name()) != autoUpdate
-                        .getType()) {
-                    throw new ControllerException("Incompatible add type [" + addType.toString()
-                                                          + "] and auto update entry type ["
-                                                          + autoUpdate.getType().toString() + "]");
-                }
+        BulkUpload draft = null;
+        if (autoUpdate.getEditMode() != EditMode.BULK_EDIT) {
+            // deal with bulk upload
 
-                draft = new BulkUpload();
-                draft.setName("Untitled");
-                draft.setAccount(account);
-                draft.setStatus(BulkUploadStatus.IN_PROGRESS);
-                draft.setImportType(addType.toString());
-                draft.setCreationTime(new Date(System.currentTimeMillis()));
-                draft.setLastUpdateTime(draft.getCreationTime());
-                dao.save(draft);
-                autoUpdate.setBulkUploadId(draft.getId());
+            try {
+                draft = dao.retrieveById(autoUpdate.getBulkUploadId());
+                if (draft == null) {
+                    // validate add type and entrytype
+                    if (addType != EntryAddType.STRAIN_WITH_PLASMID && EntryType.nameToType(
+                            addType.name()) != autoUpdate
+                            .getType()) {
+                        throw new ControllerException("Incompatible add type [" + addType.toString()
+                                                              + "] and auto update entry type ["
+                                                              + autoUpdate.getType().toString() + "]");
+                    }
+
+                    draft = new BulkUpload();
+                    draft.setName("Untitled");
+                    draft.setAccount(account);
+                    draft.setStatus(BulkUploadStatus.IN_PROGRESS);
+                    draft.setImportType(addType.toString());
+                    draft.setCreationTime(new Date(System.currentTimeMillis()));
+                    draft.setLastUpdateTime(draft.getCreationTime());
+                    dao.save(draft);
+                    autoUpdate.setBulkUploadId(draft.getId());
+                }
+            } catch (DAOException de) {
+                throw new ControllerException(de);
             }
-        } catch (DAOException de) {
-            throw new ControllerException(de);
         }
 
         // for strain with plasmid this is the strain
@@ -498,7 +503,9 @@ public class BulkUploadController {
             }
 
             autoUpdate.setEntryId(entry.getId());
-            draft.getContents().add(entry);
+            if (draft != null) {
+                draft.getContents().add(entry);
+            }
         } else {
             // entry not null (fetch plasmid for strain) if this is a strain with plasmid
             if (addType == EntryAddType.STRAIN_WITH_PLASMID && !entry.getLinkedEntries().isEmpty()) {
@@ -520,14 +527,15 @@ public class BulkUploadController {
                 }
             }
 
-            if (otherEntry != null) {
+            if (otherEntry != null && autoUpdate.getEditMode() != EditMode.BULK_EDIT) {
                 if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
                     otherEntry.setVisibility(Visibility.DRAFT.getValue());
 
                 entryController.update(account, otherEntry);
             }
 
-            if (entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
+            if ((entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
+                    && autoUpdate.getEditMode() != EditMode.BULK_EDIT)
                 entry.setVisibility(Visibility.DRAFT.getValue());
 
             // set the plasmids and update
@@ -542,12 +550,14 @@ public class BulkUploadController {
         }
 
         // update bulk upload. even if no new entry was created, entries belonging to it was updated
-        try {
-            draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
-            autoUpdate.setLastUpdate(draft.getLastUpdateTime());
-            dao.update(draft);
-        } catch (DAOException de) {
-            throw new ControllerException(de);
+        if (draft != null) {
+            try {
+                draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
+                autoUpdate.setLastUpdate(draft.getLastUpdateTime());
+                dao.update(draft);
+            } catch (DAOException de) {
+                throw new ControllerException(de);
+            }
         }
         return autoUpdate;
     }

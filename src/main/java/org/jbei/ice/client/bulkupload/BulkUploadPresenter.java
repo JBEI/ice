@@ -19,7 +19,6 @@ import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.bulkupload.model.BulkUploadModel;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
-import org.jbei.ice.client.bulkupload.sheet.EditMode;
 import org.jbei.ice.client.bulkupload.sheet.Sheet;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.event.FeedbackEvent;
@@ -28,6 +27,8 @@ import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
+import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
@@ -411,7 +412,12 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     return;
                 }
 
-                loadBulkUpload(event.getData().get(0));
+                BulkUploadInfo info = event.getData().get(0);
+                if (info.getStatus() == BulkUploadStatus.PENDING_APPROVAL)
+                    editMode = EditMode.ADMIN_APPROVAL;
+                else
+                    editMode = EditMode.DEFAULT;
+                loadBulkUpload(info);
             }
         });
     }

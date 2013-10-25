@@ -12,6 +12,7 @@ import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -169,6 +170,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
     public void resetWidth() {
         sheetTableFocusPanelWrapper.setWidth((Window.getClientWidth() - 40) + "px");
         headerWrapper.setWidth((Window.getClientWidth() - 15) + "px");
+    }
+
+    public EditMode getEditMode() {
+        return this.editMode;
     }
 
     private void addWindowResizeHandler() {

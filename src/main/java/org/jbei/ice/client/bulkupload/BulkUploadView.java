@@ -8,7 +8,6 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
-import org.jbei.ice.client.bulkupload.sheet.EditMode;
 import org.jbei.ice.client.bulkupload.widget.CreatorWidget;
 import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
 import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
@@ -23,6 +22,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -334,7 +334,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     public void setLoading(boolean set) {
         HTML html = new HTML(
                 "<div style=\"margin-top: 17px; border: 1px solid #e4e4e4; background-color: #f3f3f3; padding: 10px; "
-                        + "opacity: 0.3\"><i class=\"fa-spinner fa-spin fa-3x\"></i><br><h2>LOADING " +
+                        + "opacity: 0.3\"><i class=\"fa fa-spinner fa-spin fa-3x\"></i><br><h2>LOADING " +
                         "CONTENT</h2></div>");
         mainContent.setWidget(1, 0, html);
         mainContent.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);

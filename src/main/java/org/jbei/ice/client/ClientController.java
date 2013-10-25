@@ -9,7 +9,6 @@ import org.jbei.ice.client.bulkupload.BulkUploadPresenter;
 import org.jbei.ice.client.bulkupload.BulkUploadView;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
-import org.jbei.ice.client.bulkupload.sheet.EditMode;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.collection.view.CollectionsView;
@@ -25,6 +24,7 @@ import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.search.advanced.SearchView;
+import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.user.User;
 
