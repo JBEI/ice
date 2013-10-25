@@ -276,4 +276,6 @@ public interface RegistryServiceAsync {
 
     void setRegistryPartnerStatus(String sid, RegistryPartner partner, AsyncCallback<RegistryPartner> async) throws
             AuthenticationException;
+
+    void getBulkEditData(String sid, ArrayList<Long> partIds, AsyncCallback<BulkUploadInfo> async);
 }

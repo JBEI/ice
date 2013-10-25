@@ -3,6 +3,8 @@ package org.jbei.ice.client.collection.menu;
 import org.jbei.ice.client.common.widget.FAIconType;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -33,6 +35,7 @@ public class BulkEdit implements IsWidget {
             + "\" style=\"opacity:0.85; color: #0082C0\"></i> Bulk Edit";
 
     private final Button bulkEdit;
+    private HandlerRegistration handlerRegistration;
 
     public BulkEdit() {
         BulkEditResource.INSTANCE.cellListStyle().ensureInjected();
@@ -48,5 +51,11 @@ public class BulkEdit implements IsWidget {
     @Override
     public Widget asWidget() {
         return bulkEdit;
+    }
+
+    public void setClickHandler(ClickHandler handler) {
+        if (handlerRegistration != null)
+            handlerRegistration.removeHandler();
+        handlerRegistration = bulkEdit.addClickHandler(handler);
     }
 }

@@ -363,6 +363,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
+    public void addBulkEditHandler(ClickHandler handler) {
+        bulkEdit.setClickHandler(handler);
+    }
+
+    @Override
     public void updateSubMenuFolder(OptionSelect optionSelect) {
         subMenu.updateOption(optionSelect);
     }

@@ -241,4 +241,6 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     RegistryPartner setRegistryPartnerStatus(String sid, RegistryPartner partner) throws AuthenticationException;
+
+    BulkUploadInfo getBulkEditData(String sid, ArrayList<Long> partIds) throws AuthenticationException;
 }

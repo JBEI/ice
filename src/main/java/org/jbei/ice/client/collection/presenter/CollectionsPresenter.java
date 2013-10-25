@@ -238,6 +238,9 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         display.addTransferHandler(new TransferHandler());
 
+        // bulk edit handler
+        display.addBulkEditHandler(new BulkEditHandler(model.getService(), model.getEventBus(), collectionsDataTable));
+
         // permission delegate for the menu (user)
         display.setMenuDelegates(model.createPermissionDelegate(), model.createPropagateDelegate());
 
@@ -347,7 +350,9 @@ public class CollectionsPresenter extends AbstractPresenter {
                 boolean hasSelection = (selectionModel.getSelectedSet().size() > 0);
                 display.enableExportAs(hasSelection);
 
-                display.enableBulkEdit(sameSelectedType(selectionModel.getSelectedSet()));
+                Set<PartData> selected = selectionModel.getSelectedSet();
+                boolean enableBulkEdit = selected != null && selected.size() > 1 && sameSelectedType(selected);
+                display.enableBulkEdit(enableBulkEdit);
 
                 boolean canRemove = currentFolder.getOwner() != null
                         && ClientController.account.getEmail().equals(currentFolder.getOwner().getEmail());
@@ -490,7 +495,9 @@ public class CollectionsPresenter extends AbstractPresenter {
                     boolean enable = (searchPresenter.getResultSelectedSet().size() > 0);
                     display.setCanMove(false);
                     display.enableExportAs(enable);
-                    display.enableBulkEdit(hasSameSelectedType(searchPresenter.getResultSelectedSet()));
+                    Set<SearchResult> selected = searchPresenter.getResultSelectedSet();
+                    boolean enableBulkEdit = selected != null && selected.size() > 1 && hasSameSelectedType(selected);
+                    display.enableBulkEdit(enableBulkEdit);
                 }
             });
         }

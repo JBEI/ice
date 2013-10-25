@@ -23,6 +23,7 @@ public class BulkUploadInfo implements IDTOModel {
     private Date created;
     private Date lastUpdate;
     private User account;
+    private BulkUploadStatus status;
     private ArrayList<PartData> entryList;
     private ArrayList<PreferenceInfo> preferences;
     private ArrayList<AccessPermission> accessPermissions;
@@ -99,5 +100,13 @@ public class BulkUploadInfo implements IDTOModel {
 
     public ArrayList<AccessPermission> getAccessPermissions() {
         return accessPermissions;
+    }
+
+    public BulkUploadStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BulkUploadStatus status) {
+        this.status = status;
     }
 }

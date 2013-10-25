@@ -35,6 +35,7 @@ import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
@@ -183,6 +184,43 @@ public class BulkUploadController {
         }
 
         // convert
+        draftInfo.getEntryList().addAll(convertParts(account, type, contents));
+
+        HashMap<PreferenceKey, String> userSaved = null;
+        try {
+            ArrayList<PreferenceKey> keys = new ArrayList<>();
+            keys.add(PreferenceKey.FUNDING_SOURCE);
+            keys.add(PreferenceKey.PRINCIPAL_INVESTIGATOR);
+            userSaved = preferencesController.retrieveAccountPreferences(account, keys);
+        } catch (ControllerException ce) {
+            // bulk upload should continue to work in the event of this exception
+            Logger.warn(ce.getMessage());
+        }
+
+        // retrieve preferences (if any: this is where you also add user's saved preferences if it does not exist)
+        for (Preference preference : draft.getPreferences()) {
+            PreferenceKey preferenceKey = PreferenceKey.fromString(preference.getKey());
+            if (preferenceKey != null && userSaved != null && userSaved.containsKey(preferenceKey))
+                userSaved.remove(preferenceKey); // bulk preferences has precedence over user saved
+
+            PreferenceInfo preferenceInfo = Preference.toDTO(preference);
+            if (preferenceInfo != null)
+                draftInfo.getPreferences().add(preferenceInfo);
+        }
+
+        if (userSaved != null && !userSaved.isEmpty()) {
+            for (Map.Entry<PreferenceKey, String> entry : userSaved.entrySet()) {
+                PreferenceInfo preferenceInfo = new PreferenceInfo(true, entry.getKey().toString(), entry.getValue());
+                draftInfo.getPreferences().add(preferenceInfo);
+            }
+        }
+        return draftInfo;
+    }
+
+    protected ArrayList<PartData> convertParts(Account account, EntryAddType type, ArrayList<Entry> contents)
+            throws ControllerException {
+        ArrayList<PartData> addList = new ArrayList<>();
+
         for (Entry entry : contents) {
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
             boolean hasSequence = sequenceController.hasSequence(entry.getId());
@@ -204,7 +242,7 @@ public class BulkUploadController {
 
             // this conditional statement makes sure that plasmids are ignored if we are dealing
             // with strain with plasmid
-            if (type == EntryAddType.STRAIN_WITH_PLASMID) {
+            if (type != null && type == EntryAddType.STRAIN_WITH_PLASMID) {
                 if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getName()) &&
                         !entry.getLinkedEntries().isEmpty()) {
                     // get plasmids
@@ -236,38 +274,26 @@ public class BulkUploadController {
                 info.setSampleMap(sampleStorageArrayList);
             }
 
-            draftInfo.getEntryList().add(info);
+            addList.add(info);
         }
 
-        HashMap<PreferenceKey, String> userSaved = null;
-        try {
-            ArrayList<PreferenceKey> keys = new ArrayList<>();
-            keys.add(PreferenceKey.FUNDING_SOURCE);
-            keys.add(PreferenceKey.PRINCIPAL_INVESTIGATOR);
-            userSaved = preferencesController.retrieveAccountPreferences(account, keys);
-        } catch (ControllerException ce) {
-            // bulk upload should continue to work in the event of this exception
-            Logger.warn(ce.getMessage());
-        }
+        return addList;
+    }
 
-        // retrieve preferences (if any: this is where you also add user's saved preferences if it does not exist)
-        for (Preference preference : draft.getPreferences()) {
-            PreferenceKey preferenceKey = PreferenceKey.fromString(preference.getKey());
-            if (preferenceKey != null && userSaved != null && userSaved.containsKey(preferenceKey))
-                userSaved.remove(preferenceKey); // bulk preferences has precedence over user saved
-
-            PreferenceInfo preferenceInfo = Preference.toDTO(preference);
-            if (preferenceInfo != null)
-                draftInfo.getPreferences().add(preferenceInfo);
-        }
-
-        if (userSaved != null && !userSaved.isEmpty()) {
-            for (Map.Entry<PreferenceKey, String> entry : userSaved.entrySet()) {
-                PreferenceInfo preferenceInfo = new PreferenceInfo(true, entry.getKey().toString(), entry.getValue());
-                draftInfo.getPreferences().add(preferenceInfo);
-            }
-        }
-        return draftInfo;
+    /**
+     * Retrieves list of parts that are intended to be edited in bulk. User must
+     * have write permissions on all parts
+     *
+     * @param account user account making request. Should have write permissions on all accounts
+     * @param partIds unique part identifiers
+     * @return list of retrieved part data wrapped in the bulk upload data transfer object
+     * @throws ControllerException
+     */
+    public BulkUploadInfo getPartsForBulkEdit(Account account, ArrayList<Long> partIds) throws ControllerException {
+        ArrayList<Entry> parts = entryController.getEntriesByIdSet(account, partIds);
+        BulkUploadInfo bulkUploadInfo = new BulkUploadInfo();
+        bulkUploadInfo.getEntryList().addAll(convertParts(account, null, parts));
+        return bulkUploadInfo;
     }
 
     protected SampleStorage retrieveSampleStorage(Entry entry) {

@@ -27,9 +27,9 @@ public interface IBulkUploadView {
 
     void showFeedback(String msg, boolean isError);
 
-    void setSavedDraftsData(ArrayList<BulkUploadMenuItem> data, String lastSaved, IDeleteMenuHandler handler);
+    void setSavedDraftsData(ArrayList<BulkUploadMenuItem> data, boolean hide, IDeleteMenuHandler handler);
 
-    void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, IRevertBulkUploadHandler handler);
+    void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, boolean hide, IRevertBulkUploadHandler handler);
 
     SingleSelectionModel<BulkUploadMenuItem> getDraftMenuModel();
 
@@ -43,7 +43,7 @@ public interface IBulkUploadView {
 
     void setToggleMenuVisibility(boolean visible);
 
-    void setSheet(NewBulkInput input, boolean isNew, boolean isValidation);
+    void setSheet(NewBulkInput input);
 
     void setUpdatingVisibility(boolean visible);
 
@@ -67,7 +67,7 @@ public interface IBulkUploadView {
 
     void setDraftNameSetHandler(Delegate<String> handler);
 
-    void setLastUpdated(Date date);
+    void setLastUpdated(Date date, boolean show);
 
     void setLoading(boolean set);
 

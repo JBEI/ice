@@ -19,6 +19,7 @@ import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.bulkupload.model.BulkUploadModel;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
+import org.jbei.ice.client.bulkupload.sheet.EditMode;
 import org.jbei.ice.client.bulkupload.sheet.Sheet;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.event.FeedbackEvent;
@@ -29,6 +30,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
@@ -59,9 +61,21 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private ServiceDelegate<BulkUploadAutoUpdate> autoUpdateDelegate;
     private ServiceDelegate<PreferenceInfo> updatePreferenceDelegate;
     private ServiceDelegate<HashMap<Long, SheetCellData>> fileDelete;
+    private EditMode editMode;
 
-    public BulkUploadPresenter(RegistryServiceAsync service, HandlerManager eventBus, final IBulkUploadView display) {
+    /**
+     * Constructor for bulk edit
+     */
+    public BulkUploadPresenter(RegistryServiceAsync service, HandlerManager eventBus, IBulkUploadView view,
+            BulkUploadInfo bulkUploadInfo) {
+        this(service, eventBus, view, EditMode.BULK_EDIT);
+        this.loadBulkUpload(bulkUploadInfo);
+    }
+
+    public BulkUploadPresenter(RegistryServiceAsync service, HandlerManager eventBus, final IBulkUploadView display,
+            EditMode editMode) {
         super(service, eventBus);
+        this.editMode = editMode;
         this.view = display;
         this.model = new BulkUploadModel(service, eventBus);
         sheetCache = new HashMap<EntryAddType, NewBulkInput>();
@@ -100,7 +114,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
             @Override
             public void execute(Long id) {
                 if (id != null) {
-                    loadBulkImport(id, false);
+                    retrieveBulkImport(id);
                     retrieveSavedDrafts();
                 }
             }
@@ -186,7 +200,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                         }
                         currentInput.setId(result.getBulkUploadId());
                         view.updateBulkUploadDraftInfo(info);
-                        view.setLastUpdated(result.getLastUpdate());
+                        view.setLastUpdated(result.getLastUpdate(), true);
                         view.setUpdatingVisibility(false);
                     }
 
@@ -232,9 +246,9 @@ public class BulkUploadPresenter extends AbstractPresenter {
      * about it from the server and then displays the data to the user
      */
     private void setMenuSelectionModel() {
-        view.getDraftMenuModel().addSelectionChangeHandler(new MenuSelectionHandler(view.getDraftMenuModel(), false));
+        view.getDraftMenuModel().addSelectionChangeHandler(new MenuSelectionHandler(view.getDraftMenuModel()));
         view.getPendingMenuModel().addSelectionChangeHandler(
-                new MenuSelectionHandler(view.getPendingMenuModel(), true));
+                new MenuSelectionHandler(view.getPendingMenuModel()));
     }
 
     // for new sheet selections
@@ -256,12 +270,14 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     Sheet sheet = new Sheet(selection, updatePreferenceDelegate);
                     sheet.setAutoUpdateDelegate(autoUpdateDelegate);
                     sheet.setDeleteEntryFileDelegate(fileDelete);
-                    currentInput = new NewBulkInput(selection, sheet);
-                    sheetCache.put(selection, currentInput);
+                    currentInput = new NewBulkInput(selection, sheet, EditMode.NEW);
+                    if (editMode != EditMode.BULK_EDIT)
+                        sheetCache.put(selection, currentInput);
+                    editMode = EditMode.NEW;
                     model.retrieveStorageSchemes(selection, currentInput, null);
                 }
 
-                view.setSheet(currentInput, true, false);
+                view.setSheet(currentInput);
                 view.setDraftMenuVisibility(false, false);
                 currentInput.getSheet().resetWidth();
                 createSelection.setSelected(selection, false);
@@ -310,6 +326,10 @@ public class BulkUploadPresenter extends AbstractPresenter {
             @Override
             public void onDataRetrieval(SavedDraftsEvent event) {
                 savedDrafts.clear();
+                if (event == null || event.getData() == null || event.getData().isEmpty()) {
+                    return;
+                }
+
                 Date date = new Date(0);
 
                 for (BulkUploadInfo info : event.getData()) {
@@ -323,11 +343,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
                         date = info.getLastUpdate();
                 }
 
-                if (!savedDrafts.isEmpty()) {
-                    view.setSavedDraftsData(savedDrafts, DateUtilities.formatShorterDate(date),
-                                            new DeleteBulkUploadHandler(model.getService(), model.getEventBus()));
-                } else
-                    view.setToggleMenuVisibility(false);
+                view.setSavedDraftsData(savedDrafts, editMode == EditMode.BULK_EDIT,
+                                        new DeleteBulkUploadHandler(model.getService(), model.getEventBus()));
             }
         });
     }
@@ -351,8 +368,9 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 }
 
                 if (!data.isEmpty()) {
-                    view.setPendingDraftsData(data, new RevertPendingBulkUploadHandler(model.getService(),
-                                                                                       model.getEventBus()));
+                    view.setPendingDraftsData(
+                            data, editMode == EditMode.BULK_EDIT,
+                            new RevertPendingBulkUploadHandler(model.getService(), model.getEventBus()));
                 }
             }
         });
@@ -382,7 +400,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
         container.add(this.view.asWidget());
     }
 
-    private void loadBulkImport(long bulkImportId, final boolean isValidation) {
+    private void retrieveBulkImport(long bulkImportId) {
         view.setLoading(true);
         model.retrieveBulkImport(bulkImportId, 0, 1000, new SavedDraftsEventHandler() {
 
@@ -393,52 +411,88 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     return;
                 }
 
-                BulkUploadInfo info = event.getData().get(0);
-                PartData firstEntry = info.getEntryList().isEmpty() ? null : info.getEntryList().get(0);
-                Sheet sheet = new Sheet(info.getType(), updatePreferenceDelegate, info);
-                sheet.setAutoUpdateDelegate(autoUpdateDelegate);
-                sheet.setDeleteEntryFileDelegate(fileDelete);
-                currentInput = new NewBulkInput(info.getType(), sheet);
-                currentInput.setId(info.getId());
+                loadBulkUpload(event.getData().get(0));
+            }
+        });
+    }
+
+    protected void loadBulkUpload(BulkUploadInfo info) {
+        EntryAddType type = info.getType();
+        if (type == null) {
+            // try to determine type
+            PartData data = info.getEntryList().get(0);
+            switch (data.getType()) {
+                case PART:
+                    type = EntryAddType.PART;
+                    break;
+
+                case STRAIN:
+                    if (data.getInfo() != null && data.getInfo().getType() == EntryType.PLASMID) {
+                        type = EntryAddType.STRAIN_WITH_PLASMID;
+                    } else {
+                        type = EntryAddType.STRAIN;
+                    }
+                    break;
+
+                case PLASMID:
+                    type = EntryAddType.PLASMID;
+                    break;
+
+                case ARABIDOPSIS:
+                    type = EntryAddType.ARABIDOPSIS;
+                    break;
+            }
+        }
+
+        info.setType(type);
+        Sheet sheet = new Sheet(type, updatePreferenceDelegate, info, editMode);
+        sheet.setAutoUpdateDelegate(autoUpdateDelegate);
+        sheet.setDeleteEntryFileDelegate(fileDelete);
+
+        currentInput = new NewBulkInput(info.getType(), sheet, editMode);
+        currentInput.setId(info.getId());
 //                    if (firstEntry != null) {
 //                        model.retrieveStorageSchemes(info.getType(), currentInput, firstEntry.getOneSampleStorage());
 //                    }
 
-                // bulk upload permissions
-                ArrayList<OptionSelect> groups = new ArrayList<OptionSelect>();
-                for (AccessPermission accessPermission : info.getAccessPermissions()) {
-                    if (accessPermission.getArticle() != AccessPermission.Article.GROUP)
-                        continue;
+        // bulk upload permissions
+        ArrayList<OptionSelect> groups = new ArrayList<OptionSelect>();
+        for (AccessPermission accessPermission : info.getAccessPermissions()) {
+            if (accessPermission.getArticle() != AccessPermission.Article.GROUP)
+                continue;
 
-                    groups.add(new OptionSelect(accessPermission.getArticleId(), accessPermission.getDisplay()));
-                }
-                view.setSelectedPermissionGroups(groups);
+            groups.add(new OptionSelect(accessPermission.getArticleId(), accessPermission.getDisplay()));
+        }
+        view.setSelectedPermissionGroups(groups);
 
-                String name = info.getName();
+        // use name only if it is not a bulk edit
+        if (editMode != EditMode.BULK_EDIT) {
+            String name = info.getName();
 
-                // setting name to creation date is none exist
-                if (name == null) {
-                    name = DateUtilities.formatDate(info.getCreated());
-                    info.setName(name);
-                }
-                currentInput.setName(name);
-
-                view.setSheet(currentInput, false, isValidation);
-                view.setDraftMenuVisibility(false, false);
-
-                // assume uniform values for all entries in regards to creator (same for permissions)
-                String creator = ClientController.account.getFullName();
-                String creatorEmail = ClientController.account.getEmail();
-                if (firstEntry != null) {
-                    if (firstEntry.getCreatorEmail() != null && !firstEntry.getCreatorEmail().isEmpty()
-                            && firstEntry.getCreator() != null && !firstEntry.getCreator().isEmpty()) {
-                        creator = firstEntry.getCreator();
-                        creatorEmail = firstEntry.getCreatorEmail();
-                    }
-                }
-                view.setCreatorInformation(creator, creatorEmail);
+            // setting name to creation date is none exist
+            if (name == null) {
+                name = DateUtilities.formatDate(info.getCreated());
+                info.setName(name);
             }
-        });
+            currentInput.setName(name);
+        }
+
+        view.setSheet(currentInput);
+        view.setDraftMenuVisibility(false, false);
+
+        // assume uniform values for all entries in regards to creator
+        String creator = ClientController.account.getFullName();
+        String creatorEmail = ClientController.account.getEmail();
+        PartData firstEntry = info.getEntryList().isEmpty() ? null : info.getEntryList().get(0);
+
+        if (firstEntry != null) {
+            if (firstEntry.getCreatorEmail() != null && !firstEntry.getCreatorEmail().isEmpty()
+                    && firstEntry.getCreator() != null && !firstEntry.getCreator().isEmpty()) {
+                creator = firstEntry.getCreator();
+                creatorEmail = firstEntry.getCreatorEmail();
+            }
+        }
+        view.setCreatorInformation(creator, creatorEmail);
     }
 
     //
@@ -535,17 +589,15 @@ public class BulkUploadPresenter extends AbstractPresenter {
     private class MenuSelectionHandler implements SelectionChangeEvent.Handler {
 
         private final SingleSelectionModel<BulkUploadMenuItem> selection;
-        private final boolean isValidation;
 
-        public MenuSelectionHandler(SingleSelectionModel<BulkUploadMenuItem> selection, boolean isValidation) {
+        public MenuSelectionHandler(SingleSelectionModel<BulkUploadMenuItem> selection) {
             this.selection = selection;
-            this.isValidation = isValidation;
         }
 
         @Override
         public void onSelectionChange(SelectionChangeEvent event) {
             final BulkUploadMenuItem item = selection.getSelectedObject();
-            loadBulkImport(item.getId(), isValidation);
+            retrieveBulkImport(item.getId());
         }
     }
 }

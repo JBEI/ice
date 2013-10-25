@@ -101,6 +101,8 @@ public interface ICollectionView {
 
     void addRemoveHandler(ClickHandler handler);
 
+    void addBulkEditHandler(ClickHandler handler);
+
     void setCanMove(boolean enableMove);
 
     SingleSelectionModel<ExportAsOption> getExportAsModel();

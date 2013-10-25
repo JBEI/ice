@@ -978,6 +978,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public BulkUploadInfo getBulkEditData(String sid, ArrayList<Long> partIds) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        BulkUploadController controller = ControllerFactory.getBulkUploadController();
+        try {
+            Logger.info(account.getEmail() + ": retrieving \"" + partIds.size() + "\" for bulk edit");
+            return controller.getPartsForBulkEdit(account, partIds);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
     public boolean submitBulkUploadDraft(String sid, long draftId, ArrayList<UserGroup> readGroups)
             throws AuthenticationException {
         try {
