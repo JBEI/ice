@@ -472,20 +472,25 @@ public class HibernateSearch {
 
     protected void checkEnableHasAttribute(org.hibernate.search.FullTextQuery fullTextQuery,
             SearchQuery.Parameters parameters) {
+        ArrayList<String> terms = new ArrayList<>();
+
         if (parameters.getHasSample()) {
-            fullTextQuery.enableFullTextFilter("boolean")
-                         .setParameter("field", "hasSample");
+            terms.add("hasSample");
         }
 
         if (parameters.getHasAttachment()) {
-            fullTextQuery.enableFullTextFilter("boolean")
-                         .setParameter("field", "hasAttachment");
+            terms.add("hasAttachment");
         }
 
         if (parameters.getHasSequence()) {
-            fullTextQuery.enableFullTextFilter("boolean")
-                         .setParameter("field", "hasSequence");
+            terms.add("hasSequence");
         }
+
+        if (terms.isEmpty())
+            return;
+
+        fullTextQuery.enableFullTextFilter("boolean")
+                     .setParameter("field", terms);
     }
 
     protected HashMap<String, SearchResult> checkEnableBlast(Account account, FullTextQuery fullTextQuery,
