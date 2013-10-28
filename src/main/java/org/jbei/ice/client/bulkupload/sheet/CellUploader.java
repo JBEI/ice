@@ -36,7 +36,7 @@ public class CellUploader extends Composite {
     private HandlerRegistration registration;
 
     public CellUploader(final EntryInfoDelegate delegate, final EntryAddType addType, final EntryType type) {
-        fileUploadImg = new HTML("<i class=\"" + FAIconType.UPLOAD_ALT.getStyleName() + "\"></i>");
+        fileUploadImg = new HTML("<i class=\"" + FAIconType.UPLOAD.getStyleName() + "\"></i>");
         fileUploadImg.addStyleName("cursor_pointer");
         fileUploadImg.addStyleName("opacity_hover");
         fileUploadImg.addStyleName("font-75em");

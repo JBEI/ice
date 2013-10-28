@@ -57,7 +57,7 @@ public class MenuHeader extends Composite {
                 if (collapsed) {
                     expandCollapseIcon.setType(FAIconType.FOLDER_OPEN);
                 } else {
-                    expandCollapseIcon.setType(FAIconType.FOLDER_CLOSE);
+                    expandCollapseIcon.setType(FAIconType.FOLDER);
                 }
                 collapsed = !collapsed;
                 handler.onClick(event);

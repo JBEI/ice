@@ -10,7 +10,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
  */
 public enum UploadOption {
 
-    FILE(FAIconType.UPLOAD_ALT, "File Upload", "file"),
+    FILE(FAIconType.UPLOAD, "File Upload", "file"),
     PASTE(FAIconType.PASTE, "Paste Sequence", "paste");
 
     private String display;

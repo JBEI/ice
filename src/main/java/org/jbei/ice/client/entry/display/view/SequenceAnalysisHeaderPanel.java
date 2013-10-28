@@ -42,7 +42,7 @@ public class SequenceAnalysisHeaderPanel extends Composite {
         panel.add(delete, "trace_file_delete");
 
         // upload button
-        upload = new Button("<i class=\"" + FAIconType.UPLOAD_ALT.getStyleName() + "\"></i> Upload File(s)");
+        upload = new Button("<i class=\"" + FAIconType.UPLOAD.getStyleName() + "\"></i> Upload File(s)");
         panel.add(upload, "trace_file_upload");
         upload.setVisible(false);
         this.setStyleName("pad_top");
