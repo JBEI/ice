@@ -24,6 +24,24 @@ public class EntryBooleanPropertiesBridge implements FieldBridge, ParameterizedB
     public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
         if (value == null)
             return;
-        luceneOptions.addFieldToDocument(field, Boolean.toString(true), document);
+
+        Entry entry = (Entry) value;
+        boolean booleanValue = false;
+
+        switch (field) {
+            case "hasSample":
+                booleanValue = (entry.getSamples() != null && !entry.getSamples().isEmpty());
+                break;
+
+            case "hasAttachment":
+                booleanValue = (entry.getAttachments() != null && !entry.getAttachments().isEmpty());
+                break;
+
+            case "hasSequence":
+                booleanValue = (entry.getSequence() != null);
+                break;
+        }
+
+        luceneOptions.addFieldToDocument(field, Boolean.toString(booleanValue), document);
     }
 }

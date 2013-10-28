@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.entry.filter;
 
-import java.util.HashSet;
-
 import org.apache.lucene.search.FieldCacheTermsFilter;
 import org.apache.lucene.search.Filter;
 import org.hibernate.search.annotations.Factory;
@@ -14,21 +12,22 @@ import org.hibernate.search.filter.StandardFilterKey;
  */
 public class EntryHasFilterFactory {
 
-    private HashSet<String> recordIds;
+    private String field;
 
     // injected
-    public void setRecordIds(HashSet<String> ids) {
-        this.recordIds = ids;
+    public void setField(String field) {
+        this.field = field;
     }
 
     @Key
     public FilterKey getKey() {
-        return new StandardFilterKey();
+        StandardFilterKey filterKey = new StandardFilterKey();
+        filterKey.addParameter(field);
+        return filterKey;
     }
 
     @Factory
     public Filter getFilter() {
-        String[] a = new String[]{};
-        return new FieldCacheTermsFilter("recordId", recordIds.toArray(a));
+        return new FieldCacheTermsFilter(this.field, "true");
     }
 }
