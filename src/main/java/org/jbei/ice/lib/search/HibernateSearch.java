@@ -370,10 +370,6 @@ public class HibernateSearch {
         // check sample
         checkEnableHasAttribute(fullTextQuery, searchQuery.getParameters());
 
-        // enable has attachment/sequence/sample (if needed)
-
-//        checkEnableHasAttribute(qb, booleanQuery, searchQuery);
-
         // check if there is also a blast search
         HashMap<String, SearchResult> blastInfo;
         try {
@@ -472,17 +468,20 @@ public class HibernateSearch {
 
     protected void checkEnableHasAttribute(org.hibernate.search.FullTextQuery fullTextQuery,
             SearchQuery.Parameters parameters) {
+        if (parameters == null)
+            return;
+
         ArrayList<String> terms = new ArrayList<>();
 
-        if (parameters.getHasSample()) {
+        if (parameters.getHasSample() != null && parameters.getHasSample()) {
             terms.add("hasSample");
         }
 
-        if (parameters.getHasAttachment()) {
+        if (parameters.getHasAttachment() != null && parameters.getHasAttachment()) {
             terms.add("hasAttachment");
         }
 
-        if (parameters.getHasSequence()) {
+        if (parameters.getHasSequence() != null && parameters.getHasSequence()) {
             terms.add("hasSequence");
         }
 
