@@ -240,7 +240,7 @@ public class ArabidopsisForm extends EntryForm<ArabidopsisSeedData> {
     }
 
     @Override
-    public String getHeaderDisplay() {
-        return EntryAddType.ARABIDOPSIS.getDisplay();
+    public EntryAddType getFormAddType() {
+        return EntryAddType.ARABIDOPSIS;
     }
 }

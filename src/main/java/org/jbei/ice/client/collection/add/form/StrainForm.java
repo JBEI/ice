@@ -191,7 +191,7 @@ public class StrainForm extends EntryForm<StrainData> {
     }
 
     @Override
-    public String getHeaderDisplay() {
-        return EntryAddType.STRAIN.getDisplay();
+    public EntryAddType getFormAddType() {
+        return EntryAddType.STRAIN;
     }
 }

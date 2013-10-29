@@ -294,9 +294,24 @@ public class EntryController {
         ArrayList<SampleStorage> sampleMap = part.getSampleStorage();
 
         if (part.getInfo() != null) {
-            Entry enclosed = InfoToModelFactory.infoToEntry(part.getInfo());
-            Entry created = createStrainWithPlasmid(account, entry, enclosed, part.getAccessPermissions());
-            part.setRecordId(created.getRecordId());
+            // check if enclosed already exists
+            Entry enclosed = get(account, part.getInfo().getId());
+            if (enclosed == null) {
+                enclosed = InfoToModelFactory.infoToEntry(part.getInfo());
+                Entry created = createStrainWithPlasmid(account, entry, enclosed, part.getAccessPermissions());
+                part.setRecordId(created.getRecordId());
+            } else {
+                // already exists, create strain and link
+                updatePart(account, part.getInfo());
+                enclosed = get(account, part.getInfo().getId());
+                entry = createEntry(account, entry, part.getAccessPermissions());
+                entry.getLinkedEntries().add(enclosed);
+                try {
+                    dao.update(entry);
+                } catch (DAOException e) {
+                    Logger.error(e);
+                }
+            }
         } else {
             entry = createEntry(account, entry, part.getAccessPermissions());
             part.setRecordId(entry.getRecordId());

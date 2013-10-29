@@ -25,7 +25,6 @@ import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -35,13 +34,9 @@ public class BulkUploadControllerTest {
 
     private BulkUploadController controller;
 
-    @BeforeClass
-    public static void init() {
-        HibernateHelper.initializeMock();
-    }
-
     @Before
     public void setUp() throws Exception {
+        HibernateHelper.initializeMock();
         HibernateHelper.beginTransaction();
         controller = new BulkUploadController();
     }

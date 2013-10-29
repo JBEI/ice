@@ -100,6 +100,9 @@ public class EntryPresenter extends AbstractPresenter {
                 if (entryAddPresenter != null)
                     formUpdate.setPreferences(entryAddPresenter.getPreferences());
 
+                SequenceViewPanelPresenter sequencePresenter = formUpdate.getSequenceViewPresenter();
+                new PasteSequenceDelegate(sequencePresenter);
+
                 display.showUpdateForm(formUpdate, currentPart);
             }
         });
@@ -175,7 +178,8 @@ public class EntryPresenter extends AbstractPresenter {
 
         this.formSubmit = newForm;
         display.showNewForm(newForm);
-        display.setEntryHeader("create new " + newForm.getHeaderDisplay(), "", ClientController.account.getFullName(),
+        display.setEntryHeader("create new " + newForm.getFormAddType().getDisplay(), "",
+                               ClientController.account.getFullName(),
                                ClientController.account.getEmail(), (new Date(System.currentTimeMillis())));
         display.getPermissionsWidget().setCanEdit(true);
         if (!entryAddPresenter.getDefaultPermissions().isEmpty()) {
@@ -581,12 +585,18 @@ public class EntryPresenter extends AbstractPresenter {
             if (this.presenter == null)
                 return;
 
+            final EntryAddType addType = formSubmit == null ? null : formSubmit.getFormAddType();
             new IceAsyncCallback<PartData>() {
 
                 @Override
                 protected void callService(AsyncCallback<PartData> callback) throws AuthenticationException {
                     boolean isFile = !presenter.isPastedSequence();
-                    service.saveSequence(ClientController.sessionId, currentPart, sequence, isFile, callback);
+
+                    if (addType == EntryAddType.STRAIN_WITH_PLASMID && currentPart.getInfo() != null) {
+                        PartData plasmidInfo = currentPart.getInfo();
+                        service.saveSequence(ClientController.sessionId, plasmidInfo, sequence, isFile, callback);
+                    } else
+                        service.saveSequence(ClientController.sessionId, currentPart, sequence, isFile, callback);
                 }
 
                 @Override
@@ -603,7 +613,10 @@ public class EntryPresenter extends AbstractPresenter {
                     presenter.getPartData().setId(result.getId());
                     presenter.getPartData().setRecordId(result.getRecordId());
 
-                    currentPart = presenter.getPartData();
+                    if (addType == EntryAddType.STRAIN_WITH_PLASMID)
+                        currentPart.setInfo(presenter.getPartData());
+                    else
+                        currentPart = presenter.getPartData();
 
                     // display the flash widget for uploaded sequence
                     presenter.updateSequenceView();

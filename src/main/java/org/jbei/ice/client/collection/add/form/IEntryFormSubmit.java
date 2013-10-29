@@ -3,6 +3,7 @@ package org.jbei.ice.client.collection.add.form;
 import java.util.HashMap;
 
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
@@ -32,7 +33,7 @@ public interface IEntryFormSubmit {
 
     void setPreferences(HashMap<PreferenceKey, String> preferences);
 
-    String getHeaderDisplay();
-
     SequenceViewPanelPresenter getSequenceViewPresenter();
+
+    EntryAddType getFormAddType();
 }

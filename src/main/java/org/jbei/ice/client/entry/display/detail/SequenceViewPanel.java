@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Widget that displays the sequence file on the general view
@@ -36,8 +35,10 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     private HTMLPanel headerPanel;
     private final SequenceViewPanelPresenter presenter;
     private DeleteSequenceHandler deleteHandler;
+    private String header;
 
-    public SequenceViewPanel(PartData partData) {
+    public SequenceViewPanel(PartData partData, String header) {
+        this.header = header;
         this.partData = partData;
         layout = new FlexTable();
         layout.setCellPadding(0);
@@ -51,8 +52,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         sequenceUpload = new SequenceFileUpload();
         sequenceUpload.asWidget().addStyleName("display-inline");
 
-        layout.setWidget(0, 0, createSequenceHeader());
-        layout.getFlexCellFormatter().setColSpan(0, 0, 6);
+        createSequenceHeader();
 
         layout.setWidget(1, 0, new Label(""));
         layout.getFlexCellFormatter().setHeight(1, 0, "10px");
@@ -68,15 +68,27 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         ScrollPanel panel = new ScrollPanel();
         VerticalPanel verticalPanel = new VerticalPanel();
         verticalPanel.setWidth("100%");
-        HTML html = new HTML(imgUrl);
+        HTML imageHtml = new HTML(imgUrl);
 
-        verticalPanel.add(html);
+        verticalPanel.add(imageHtml);
         panel.add(verticalPanel);
         layout.setWidget(2, 0, panel);
         layout.getFlexCellFormatter().setColSpan(2, 0, 6);
 
         updateSequenceContents();
-        html.setWidth(layout.getOffsetWidth() + "px");
+        imageHtml.setWidth(layout.getOffsetWidth() + "px");
+
+        // new header with only the update option
+        String html = "<span style=\"color: #233559; "
+                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">" + header.toUpperCase() + "</span>"
+                + "<div style=\"float: right\">"
+                + "<span id=\"sequence_options\"></span></div>";
+
+        HTMLPanel newHeader = new HTMLPanel(html);
+        newHeader.setStyleName("entry_sequence_sub_header");
+        newHeader.add(sequenceUpload.asWidget(), "sequence_options");
+        layout.setWidget(0, 0, newHeader);
+
         this.presenter = new SequenceViewPanelPresenter(this);
     }
 
@@ -90,25 +102,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
         // new header with only the update option
         String html = "<span style=\"color: #233559; "
-                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">SEQUENCE</span>"
-                + "<div style=\"float: right\">"
-                + "<span id=\"sequence_options\"></span></div>";
-
-        HTMLPanel newHeader = new HTMLPanel(html);
-        newHeader.setStyleName("entry_sequence_sub_header");
-        newHeader.add(sequenceUpload.asWidget(), "sequence_options");
-        layout.setWidget(0, 0, newHeader);
-    }
-
-    public void switchToNewPartMode(PartData partData) {
-        this.partData = partData;
-
-        // new header with only the update option
-        updateSequenceContents();
-
-        // new header with only the update option
-        String html = "<span style=\"color: #233559; "
-                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">SEQUENCE</span>"
+                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">" + header.toUpperCase() + "</span>"
                 + "<div style=\"float: right\">"
                 + "<span id=\"sequence_options\"></span></div>";
 
@@ -162,9 +156,9 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         }
     }
 
-    private Widget createSequenceHeader() {
+    private void createSequenceHeader() {
         String html = "<span style=\"color: #233559; "
-                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">SEQUENCE</span>"
+                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">" + header.toUpperCase() + "</span>"
                 + "<div style=\"float: right\"><span id=\"delete_sequence_link\"></span>"
                 + "<span id=\"sequence_link\"></span>"
                 + "<span id=\"header_separator_pipe\"></span>"
@@ -178,7 +172,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         headerPanel = new HTMLPanel(html);
         headerPanel.setStyleName("entry_sequence_sub_header");
         updateSequenceHeaders();
-        return headerPanel;
+        layout.getFlexCellFormatter().setColSpan(0, 0, 6);
     }
 
     @Override
@@ -234,6 +228,8 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
                 headerPanel.add(sequenceUpload.asWidget(), "sequence_options");
             }
         }
+
+        layout.setWidget(0, 0, headerPanel);
     }
 
     @Override

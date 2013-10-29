@@ -144,13 +144,11 @@ public abstract class EntryForm<T extends PartData> extends Composite implements
         ip = createTextArea("640px", "50px");
         notesText = new TextArea();
 
-        sequencePanel = new SequenceViewPanel(entryInfo);
+        sequencePanel = new SequenceViewPanel(entryInfo, "sequence");
 
         // are we creating a new part or updating an existing one
         if (this.entryInfo.getId() > 0)
             this.sequencePanel.switchToEditMode();
-        else
-            this.sequencePanel.switchToNewPartMode(this.entryInfo);
     }
 
     public T getEntryInfo() {

@@ -28,15 +28,11 @@ public class SubMenuOptionsPresenter<T extends OptionSelect> {
 
     static interface View<T> {
 
-        void setOptions(List<T> options);
-
         void addOption(T option);
 
         void setSelectionModel(SelectionModel<T> selectionModel, CellPreviewEvent.Handler<T> selectionEventManager);
 
         void setSubmitEnable(boolean enable);
-
-        void setClearEnable(boolean enable);
 
         void addClearHandler(ClickHandler handler);
 
@@ -44,19 +40,15 @@ public class SubMenuOptionsPresenter<T extends OptionSelect> {
         void hideOptions();
     }
 
-    private final View<T> view;
     private final ListDataProvider<T> dataProvider;
     private final MultiSelectionModel<T> model;
 
     public SubMenuOptionsPresenter(final View<T> view) {
-        this.view = view;
         dataProvider = new ListDataProvider<T>();
         model = new MultiSelectionModel<T>();
 
-        this.view.setSelectionModel(model, DefaultSelectionEventManager.<T>createCheckboxManager());
-        this.view.setSubmitEnable(false);
-        this.view.setClearEnable(false);
-
+        view.setSelectionModel(model, DefaultSelectionEventManager.<T>createCheckboxManager());
+        view.setSubmitEnable(false);
         // logic to enable and disable submission button
         model.addSelectionChangeHandler(new Handler() {
 
@@ -64,12 +56,11 @@ public class SubMenuOptionsPresenter<T extends OptionSelect> {
             public void onSelectionChange(SelectionChangeEvent event) {
                 boolean enable = (model.getSelectedSet().size() > 0);
                 view.setSubmitEnable(enable);
-                view.setClearEnable(enable);
             }
         });
 
         // clear button clickhandler
-        this.view.addClearHandler(new ClickHandler() {
+        view.addClearHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -111,10 +102,6 @@ public class SubMenuOptionsPresenter<T extends OptionSelect> {
             index += 1;
         }
         data.set(index, option);
-    }
-
-    public void setOptions(List<T> options) {
-        dataProvider.setList(options);
     }
 
     public boolean isSelected(T option) {

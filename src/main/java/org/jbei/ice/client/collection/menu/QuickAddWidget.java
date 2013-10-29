@@ -50,7 +50,7 @@ public class QuickAddWidget extends Composite {
 
         cancel = new Icon(FAIconType.TIMES);
         cancel.addStyleName("delete_icon");
-        add = new Icon(FAIconType.OK_SIGN);
+        add = new Icon(FAIconType.CHECK_SQUARE);
         add.addStyleName("edit_icon");
         addCancelHandler();
 

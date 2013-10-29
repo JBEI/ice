@@ -119,7 +119,7 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         addInput.setWidth("200px");
 
         addPartnerPanel.add(addInput, "add_partner_input");
-        Button addPartnerSubmit = new Button("<i class=\"" + FAIconType.OK.getStyleName() + "\"></i>");
+        Button addPartnerSubmit = new Button("<i class=\"" + FAIconType.CHECK.getStyleName() + "\"></i>");
 
         addPartnerSubmit.addClickHandler(new ClickHandler() {
             @Override

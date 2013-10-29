@@ -98,7 +98,7 @@ public class PartForm extends EntryForm<PartData> {
     }
 
     @Override
-    public String getHeaderDisplay() {
-        return EntryAddType.PART.getDisplay();
+    public EntryAddType getFormAddType() {
+        return EntryAddType.PART;
     }
 }

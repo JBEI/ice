@@ -36,7 +36,7 @@ public class EditGroupCell extends Composite {
         initWidget(panel);
 
         // submit
-        submit = new HTML("<i class=\"" + FAIconType.OK.getStyleName() + "\"></i>");
+        submit = new HTML("<i class=\"" + FAIconType.CHECK.getStyleName() + "\"></i>");
         submit.setStyleName("display-inline");
         submit.addStyleName("add_icon");
 

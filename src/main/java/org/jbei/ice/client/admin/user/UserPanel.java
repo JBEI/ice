@@ -249,7 +249,7 @@ public class UserPanel extends Composite implements IAdminPanel {
         public void showPassword(String password) {
             String message = "<div style=\"padding: 8px 14px; font-size: 14px; text-shadow: 0 1px 0 #f3f3f3; "
                     + "background-color: #dff0d8; border-color: #468847; border-radius: 4px;\">"
-                    + "<i style=\"color: #468847\" class=\"" + FAIconType.OK.getStyleName()
+                    + "<i style=\"color: #468847\" class=\"" + FAIconType.CHECK.getStyleName()
                     + "\"></i> Account with id \"" + userId.getText().trim() + "\" created successfully. "
                     + "The password is shown below <br><br><b style=\"font-size: 16px\">"
                     + password + "</b></div>";
