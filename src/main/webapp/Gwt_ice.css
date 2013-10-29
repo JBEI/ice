@@ -826,8 +826,7 @@ ul#indented li a:hover {
 }
 
 .user_collection_user_menu_row:hover, .system_collection_user_menu_row:hover {
-    background-color: #f1f6fb;
-    border: 1px solid #aab2bd;
+    background-color: #F3F1D9;
     cursor: pointer;
     color: #70822e;
 }
