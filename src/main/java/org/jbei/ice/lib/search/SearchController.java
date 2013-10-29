@@ -128,23 +128,23 @@ public class SearchController {
         // no filter type indicates a term or phrase query
         Iterator<String> iterable;
         HibernateSearch hibernateSearch = HibernateSearch.getInstance();
+        HashMap<String, String> results = ControllerFactory.getPreferencesController().
+                retrieveUserPreferenceList(account, Arrays.asList(SearchBoostField.values()));
+        HashMap<String, Float> mapping = new HashMap<>();
+        for (Map.Entry<String, String> entry : results.entrySet()) {
+            try {
+                String field = SearchBoostField.valueOf(entry.getKey()).getField();
+                mapping.put(field, Float.valueOf(entry.getValue()));
+            } catch (NumberFormatException nfe) {
+                Logger.error(nfe);
+            }
+        }
 
         if (queryString != null && !queryString.isEmpty()) {
             iterable = Splitter.on(" ").omitEmptyStrings().split(queryString).iterator();
-            HashMap<String, String> results = ControllerFactory.getPreferencesController().
-                    retrieveUserPreferenceList(account, Arrays.asList(SearchBoostField.values()));
-            HashMap<String, Float> mapping = new HashMap<>();
-            for (Map.Entry<String, String> entry : results.entrySet()) {
-                try {
-                    String field = SearchBoostField.valueOf(entry.getKey()).getField();
-                    mapping.put(field, Float.valueOf(entry.getValue()));
-                } catch (NumberFormatException nfe) {
-                    Logger.error(nfe);
-                }
-            }
             return hibernateSearch.executeSearch(account, iterable, query, projectName, projectURI, mapping);
         } else {
-            return hibernateSearch.executeSearchNoTerms(account, query, projectName, projectURI);
+            return hibernateSearch.executeSearchNoTerms(account, query, projectName, projectURI, mapping);
         }
     }
 

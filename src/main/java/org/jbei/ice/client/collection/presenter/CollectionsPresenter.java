@@ -417,7 +417,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         return true;
     }
 
-
     private void initExportAsHandler() {
         display.getExportAsModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 

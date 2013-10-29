@@ -122,18 +122,24 @@ public class SearchDataProvider extends HasEntryDataViewDataProvider<SearchResul
         }
 
         results.addAll(searchResults.getResults());
-        final Range range = this.dataTable.getVisibleRange();
-
         resultSize = (int) searchResults.getResultCount();
-        if (searchResults.getResults().size() < range.getLength() && searchResults.getResults().size() != resultSize) {
-            resultSize = searchResults.getResults().size();
-        }
         updateRowCount(resultSize, true);
 
-        // retrieve the first page of results and updateRowData
-        final int rangeStart = 0;
-        int rangeEnd = range.getLength() > resultSize ? resultSize : range.getLength();
+        final Range range = this.dataTable.getVisibleRange();
+        int rangeStart = 0;
+        int rangeEnd = rangeStart + range.getLength();
+        if (rangeEnd > resultSize)
+            rangeEnd = resultSize;
+
         updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
         dataTable.setPageStart(0);
+
+        rangeStart = rangeEnd;
+        if (rangeEnd < resultSize) {
+            rangeEnd += range.getLength();
+            if (rangeEnd > resultSize)
+                rangeEnd = resultSize;
+            cacheMore(lastSortField, lastSortAsc, rangeStart, 2 * rangeEnd);
+        }
     }
 }

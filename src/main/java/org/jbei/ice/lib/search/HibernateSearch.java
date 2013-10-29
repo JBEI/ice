@@ -112,8 +112,8 @@ public class HibernateSearch {
         return booleanQuery;
     }
 
-    public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery,
-            String projectName, String projectURL) {
+    public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery, String projectName,
+            String projectURL, HashMap<String, Float> userBoost) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null) {
             entryTypes = new ArrayList<>();
@@ -150,8 +150,8 @@ public class HibernateSearch {
             booleanQuery.add(deletedQuery, BooleanClause.Occur.MUST_NOT);
         }
 
-//        booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, null,
-//                searchQuery.getBioSafetyOption(), userBoost);
+        booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, null,
+                                              searchQuery.getBioSafetyOption(), userBoost);
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery);
@@ -341,7 +341,7 @@ public class HibernateSearch {
         }
 
         if (booleanQuery.getClauses().length == 0)
-            return executeSearchNoTerms(account, searchQuery, projectName, projectURL);
+            return executeSearchNoTerms(account, searchQuery, projectName, projectURL, userBoost);
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
