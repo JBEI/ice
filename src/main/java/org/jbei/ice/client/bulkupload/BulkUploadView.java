@@ -450,9 +450,9 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             updating.setHTML("&nbsp;<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
                                      + "<i class=\"fa-spinner fa-spin fa-1x\"></i> Saving</span>");
         } else {
-            updating.setHTML(
-                    "&nbsp;<span style=\"font-size: 11px; font-weight: normal; vertical-align: middle; color: #999\">"
-                            + "Updated: " + lastUpdated + "</span>");
+            String text = lastUpdated == null ? "Updated" : "Updated: " + lastUpdated;
+            updating.setHTML("&nbsp;<span style=\"font-size: 11px; font-weight: normal; "
+                                     + "vertical-align: middle; color: #999\">" + text + "</span>");
         }
         updating.setVisible(true);
     }
