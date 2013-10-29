@@ -62,7 +62,7 @@ public class BulkUploadAutoUpdate implements IDTOModel {
         StringBuilder sb = new StringBuilder();
         int i = 0;
         for (Map.Entry<EntryField, String> set : keyValue.entrySet()) {
-            sb.append("AutoUpdate [mode = ").append(editMode.toString()).append(")] (entry:").append(entryId)
+            sb.append("AutoUpdate [mode = ").append(editMode.toString()).append("] (entry:").append(entryId)
               .append(", bulkupload:").append(bulkUploadId).append(
                     ", field:").append(set.getKey()).append(", value:").append(set.getValue()).append(", row:").append(
                     row).append(")");

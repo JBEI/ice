@@ -297,8 +297,14 @@ public class InfoToModelFactory {
 
             case BIOSAFETY_LEVEL:
                 Integer level = BioSafetyOption.intValue(value);
-                if (level == null)
-                    break;
+                if (level == null) {
+                    if (value.contains("1"))
+                        level = 1;
+                    else if (value.contains("2"))
+                        level = 2;
+                    else
+                        break;
+                }
                 entry.setBioSafetyLevel(level);
                 if (plasmid != null) {
                     plasmid.setBioSafetyLevel(level);
@@ -483,7 +489,8 @@ public class InfoToModelFactory {
                 return plasmid;
 
             case CIRCULAR:
-                plasmid.setCircular("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
+                plasmid.setCircular("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value)
+                                            || "circular".equalsIgnoreCase(value));
                 return plasmid;
 
             case ORIGIN_OF_REPLICATION:
