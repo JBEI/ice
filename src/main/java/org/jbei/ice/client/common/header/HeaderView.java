@@ -146,7 +146,7 @@ public class HeaderView extends Composite {
         loggedInContentsPanel.setHTML(0, 2, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
 
         // logout link
-        String logoutHtmlStr = "<i style=\"color: #757575\" class=\"" + FAIconType.SIGNOUT.getStyleName();
+        String logoutHtmlStr = "<i style=\"color: #757575\" class=\"" + FAIconType.SIGN_OUT.getStyleName();
         SafeHtml html = SafeHtmlUtils.fromSafeConstant(logoutHtmlStr + "\"></i> Log Out");
         Hyperlink logout = new Hyperlink(html, Page.LOGOUT.getLink());
         loggedInContentsPanel.setWidget(0, 5, logout);

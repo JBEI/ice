@@ -21,7 +21,6 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -91,6 +90,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         });
 
         clear = new HTML("Clear");
+        clear.setStyleName("font-75em");
         clear.addStyleName("footer_feedback_widget");
 
         final Widget popup = createPopupWidget();
@@ -114,12 +114,16 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         FlexTable wrapper = new FlexTable();
         wrapper.addStyleName("bg_white");
         wrapper.setWidget(0, 0, table);
-        wrapper.getFlexCellFormatter().setColSpan(0, 0, 2);
+        wrapper.getFlexCellFormatter().setColSpan(0, 0, 3);
 
-        wrapper.setWidget(1, 0, clear);
+        wrapper.setHTML(1, 0, "&nbsp;");
+
         wrapper.setWidget(1, 1, submitButton);
-        wrapper.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_RIGHT);
-        wrapper.getFlexCellFormatter().setWidth(1, 1, "46px");
+        wrapper.getFlexCellFormatter().setWidth(1, 1, "50px");
+
+        wrapper.setWidget(1, 2, clear);
+        wrapper.getFlexCellFormatter().setWidth(1, 2, "40px");
+
         return wrapper;
     }
 
@@ -198,7 +202,13 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         return presenter.getSelectedItems();
     }
 
+    public void setEnabled(boolean enable) {
+        this.addWidget.setEnabled(enable);
+    }
+
+    //
     // inner classes
+    //
     private static class EnterClickHandler implements KeyPressHandler {
 
         private final Button hasClick;
@@ -214,9 +224,5 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
                 return;
             hasClick.click();
         }
-    }
-
-    public void setEnabled(boolean enable) {
-        this.addWidget.setEnabled(enable);
     }
 }
