@@ -657,6 +657,7 @@ public class EntryController {
     }
 
     public void setStrainPlasmids(Account account, Strain strain, String plasmids) {
+        strain.getLinkedEntries().clear();
         if (plasmids != null && !plasmids.isEmpty()) {
             for (String plasmid : plasmids.split(",")) {
                 try {
@@ -974,6 +975,7 @@ public class EntryController {
 
         Entry entry = InfoToModelFactory.infoToEntry(part, existing);
         try {
+            entry.getLinkedEntries().clear();
             if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
                 for (PartData data : part.getLinkedParts()) {
                     Entry linked = dao.getByPartNumber(data.getPartId());
@@ -991,16 +993,10 @@ public class EntryController {
             Logger.error(e);
         }
 
-        boolean scheduleRebuild = sequenceController.hasSequence(entry.getId());
-
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
             entry.setVisibility(Visibility.OK.getValue());
             dao.update(entry);
-
-            if (scheduleRebuild) {
-                ApplicationController.scheduleBlastIndexRebuildTask(true);
-            }
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
