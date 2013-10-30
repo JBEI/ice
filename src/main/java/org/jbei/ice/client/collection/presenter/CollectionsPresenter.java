@@ -239,7 +239,18 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.addTransferHandler(new TransferHandler());
 
         // bulk edit handler
-        display.addBulkEditHandler(new BulkEditHandler(model.getService(), model.getEventBus(), collectionsDataTable));
+        display.addBulkEditHandler(new BulkEditHandler(model.getService(), model.getEventBus(), new IHasEntryId() {
+            @Override
+            public Set<Long> getSelectedEntrySet() {
+                switch (mode) {
+                    default:
+                    case COLLECTION:
+                        return collectionsDataTable.getSelectedEntrySet();
+                    case SEARCH:
+                        return searchPresenter.getEntrySet();
+                }
+            }
+        }));
 
         // permission delegate for the menu (user)
         display.setMenuDelegates(model.createPermissionDelegate(), model.createPropagateDelegate());

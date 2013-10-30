@@ -254,14 +254,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
         layout.setWidget(1, 1, sheetTableFocusPanelWrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
 
-        createHeaderCells(presenter.getPreferenceDelegate());
-
         int rowCount;
 
-        if (editMode == EditMode.BULK_EDIT)
+        if (editMode == EditMode.BULK_EDIT) {
             rowCount = presenter.getEntryRowCount();
-        else
+            createHeaderCells(null);
+        } else {
             rowCount = presenter.getEntryRowCount() < ROW_COUNT ? ROW_COUNT : presenter.getEntryRowCount();
+            createHeaderCells(presenter.getPreferenceDelegate());
+        }
 
         // add rows
         for (row = 0; row < rowCount; row += 1) {

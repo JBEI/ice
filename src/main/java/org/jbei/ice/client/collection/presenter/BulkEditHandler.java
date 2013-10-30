@@ -6,7 +6,7 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
-import org.jbei.ice.client.collection.table.CollectionDataTable;
+import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 
@@ -22,11 +22,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public class BulkEditHandler implements ClickHandler {
 
-    private final CollectionDataTable dataTable;
+    private final IHasEntryId dataTable;
     private final HandlerManager eventBus;
     private final RegistryServiceAsync service;
 
-    public BulkEditHandler(RegistryServiceAsync service, HandlerManager eventBus, CollectionDataTable dataTable) {
+    public BulkEditHandler(RegistryServiceAsync service, HandlerManager eventBus, IHasEntryId dataTable) {
         this.eventBus = eventBus;
         this.dataTable = dataTable;
         this.service = service;
