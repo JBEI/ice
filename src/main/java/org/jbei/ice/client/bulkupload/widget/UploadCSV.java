@@ -97,7 +97,9 @@ public class UploadCSV extends Composite {
                         delegate.execute(Long.decode(msg.trim()));
                         dialog.hideDialog();
                     } catch (NumberFormatException nfe) {
-                        layout.setErrorMessage("There was an unknown problem creating the parts from the file");
+                        String errorMsg = "Error: There was a server error uploading the parts from the file or " +
+                                "reading the file";
+                        layout.setErrorMessage(errorMsg);
                     }
                 } else
                     layout.setErrorMessage(msg);
@@ -112,6 +114,7 @@ public class UploadCSV extends Composite {
                 if (fileUpload.getFilename().isEmpty())
                     return;
 
+                layout.reset();
                 formPanel.setAction(
                         "/upload?sid=" + ClientController.sessionId + "&type=bulk_csv&upload=" + addType.name());
                 formPanel.submit();
