@@ -80,11 +80,15 @@ public class SearchController {
                     if (tmpResults.getResultCount() == 0)
                         continue;
 
-                    results.getResults().addAll(tmpResults.getResults());
+                    if (results.getResults() == null) {
+                        results.setResults(tmpResults.getResults());
+                    } else {
+                        results.getResults().addAll(tmpResults.getResults());
+                    }
                     results.setResultCount(results.getResultCount() + tmpResults.getResultCount());
                 }
             } catch (Exception e) {
-                Logger.error(e.getMessage());
+                Logger.error(e);
             }
         }
 
