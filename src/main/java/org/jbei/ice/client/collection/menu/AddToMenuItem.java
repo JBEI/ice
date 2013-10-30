@@ -76,7 +76,9 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         });
 
         // message to display when no collections are created
-        table.setEmptyTableWidget(new HTML("<i class=\"font-75em\">No user collections available.</i>"));
+        HTML emptyWidget = new HTML("<i style=\"color: #999\">No user collections available</i>");
+        emptyWidget.addStyleName("font-75em");
+        table.setEmptyTableWidget(emptyWidget);
 
         submitButton = new Button("Submit");
         submitButton.addKeyPressHandler(new EnterClickHandler(submitButton));
