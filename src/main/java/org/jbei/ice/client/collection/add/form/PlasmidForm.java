@@ -207,7 +207,7 @@ public class PlasmidForm extends EntryForm<PlasmidData> {
     }
 
     @Override
-    public String getHeaderDisplay() {
-        return EntryAddType.PLASMID.getDisplay();
+    public EntryAddType getFormAddType() {
+        return EntryAddType.PLASMID;
     }
 }

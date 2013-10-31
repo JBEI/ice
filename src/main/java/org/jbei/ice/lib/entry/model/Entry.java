@@ -11,11 +11,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.filter.BlastFilterFactory;
 import org.jbei.ice.lib.entry.filter.EntryHasFilterFactory;
 import org.jbei.ice.lib.entry.filter.EntrySecurityFilterFactory;
+import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
 
@@ -76,7 +79,6 @@ import org.jbei.ice.lib.entry.model.Parameter;
  */
 @Entity
 @Indexed(index = "Entry")
-
 @FullTextFilterDefs({
                             @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class),
                             @FullTextFilterDef(name = "blastFilter", impl = BlastFilterFactory.class),
@@ -197,19 +199,20 @@ public class Entry implements IModel {
     private String principalInvestigator;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
-    @IndexedEmbedded
+    @IndexedEmbedded(depth = 1)
     private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
-    @IndexedEmbedded
+    @IndexedEmbedded(depth = 1)
     private final Set<Link> links = new LinkedHashSet<>();
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
+    @IndexedEmbedded(depth = 1)
     private final List<Parameter> parameters = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "entry",
                orphanRemoval = true, fetch = FetchType.EAGER)
-    @IndexedEmbedded
+    @IndexedEmbedded(depth = 1)
     private final Set<Permission> permissions = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents")
@@ -219,6 +222,18 @@ public class Entry implements IModel {
     @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
                inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
     private Set<Entry> linkedEntries = new HashSet<>();
+
+    @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
+    @IndexedEmbedded(depth = 1)
+    private final Set<Sample> samples = new HashSet<>();
+
+    @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
+    @IndexedEmbedded(depth = 1)
+    private final Set<Attachment> attachments = new HashSet<>();
+
+    @OneToOne(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
+    @IndexedEmbedded(depth = 1)
+    private Sequence sequence;
 
     public Entry() {
         setStatus("Complete");
@@ -545,5 +560,21 @@ public class Entry implements IModel {
 
     public void setPrincipalInvestigator(String principalInvestigator) {
         this.principalInvestigator = principalInvestigator;
+    }
+
+    public Set<Sample> getSamples() {
+        return samples;
+    }
+
+    public Set<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    public Sequence getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Sequence sequence) {
+        this.sequence = sequence;
     }
 }

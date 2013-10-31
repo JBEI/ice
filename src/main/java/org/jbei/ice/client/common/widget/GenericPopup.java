@@ -73,7 +73,7 @@ public class GenericPopup extends Composite {
             }
         };
 
-        close = new HTML("<i class=\"" + FAIconType.REMOVE_SIGN.getStyleName() + "\"></i> Close");
+        close = new HTML("<i class=\"" + FAIconType.TIMES.getStyleName() + "\"></i> Close");
         close.setStyleName("opacity_hover");
         close.addStyleName("font-75em");
         close.addClickHandler(closeHandler);

@@ -98,7 +98,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
         writeList.setCellSpacing(0);
         writeList.setStyleName("permission_list");
 
-        addReadPermission = new HTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
+        addReadPermission = new HTML("<i class=\"" + FAIconType.PLUS_CIRCLE.getStyleName() + "\"></i>");
         addReadPermission.addStyleName("edit_icon");
         addReadPermission.addStyleName("font-12em");
 
@@ -122,7 +122,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
     protected void initReadList() {
         String iconStyle = FAIconType.GLOBE.getStyleName() + " blue";
         readList.setHTML(0, 0, "<i class=\"" + iconStyle + "\"></i> Public");
-        Icon deleteIcon = new Icon(FAIconType.REMOVE);
+        Icon deleteIcon = new Icon(FAIconType.TIMES);
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -135,7 +135,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
     }
 
     protected void createSuggestWidget() {
-        HTML deleteIcon = new HTML("<i class=\"delete_icon " + FAIconType.REMOVE.getStyleName() + "\"></i>");
+        HTML deleteIcon = new HTML("<i class=\"delete_icon " + FAIconType.TIMES.getStyleName() + "\"></i>");
         deleteIcon.setStyleName("display-inline");
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
@@ -239,7 +239,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
 
         table.setHTML(row, 0, "<i class=\"" + iconStyle + "\"></i> " + display);
         table.getCellFormatter().setWidth(row, 0, "160px");
-        Icon deleteIcon = new Icon(FAIconType.REMOVE);
+        Icon deleteIcon = new Icon(FAIconType.TIMES);
         deleteIcon.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -325,7 +325,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
                 writeLabelPanel.setStyleName("permission_tab_inactive");
                 layout.setWidget(3, 0, readList);
                 addWritePermission.setHTML("<span>" + writeList.getRowCount() + "</span>");
-                addReadPermission.setHTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
+                addReadPermission.setHTML("<i class=\"" + FAIconType.PLUS_CIRCLE.getStyleName() + "\"></i>");
             } else {
                 if (cell.getCellIndex() == 0)
                     return;
@@ -336,7 +336,7 @@ public class PartPermissionWidget extends Composite implements PermissionPresent
                 writeLabelPanel.setStyleName("permission_tab_active");
                 layout.setWidget(3, 0, writeList);
                 addReadPermission.setHTML("<span>" + presenter.getReadListCount() + "</span>");
-                addWritePermission.setHTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + "\"></i>");
+                addWritePermission.setHTML("<i class=\"" + FAIconType.PLUS_CIRCLE.getStyleName() + "\"></i>");
             }
 
             layout.getRowFormatter().setVisible(4, !isViewingWriteTab);

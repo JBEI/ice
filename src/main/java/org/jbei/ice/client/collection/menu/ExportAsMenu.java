@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
+import org.jbei.ice.lib.shared.ExportAsOption;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
@@ -37,7 +38,7 @@ public class ExportAsMenu implements IsWidget {
         Style cellListStyle();
     }
 
-    private static final String LABEL = "<i class=\"" + FAIconType.DOWNLOAD_ALT.getStyleName()
+    private static final String LABEL = "<i class=\"" + FAIconType.DOWNLOAD.getStyleName()
             + "\" style=\"opacity:0.85; color: #0082C0\"></i> "
             + "Export As <i class=\"" + FAIconType.CARET_DOWN.getStyleName() + "\"></i>";
     private final Button exportAs;

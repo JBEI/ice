@@ -12,6 +12,9 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 
 /**
+ * Header fields for bulk upload and operations to act on them.
+ * Each {@link org.jbei.ice.lib.shared.EntryAddType} has different headers
+ *
  * @author Hector Plahar
  */
 public abstract class BulkUploadHeaders {

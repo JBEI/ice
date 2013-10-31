@@ -38,12 +38,13 @@ public class Dialog {
             dialogBox.setHTML(html);
         }
 
-        cancel = new Label("Cancel");
+        cancel = new Label("Close");
         cancel.setStyleName("footer_feedback_widget");
         cancel.addStyleName("font-80em");
         cancel.addStyleName("display-inline");
 
         submitButton = new Button("Submit");
+        submitButton.setVisible(false);
 
         cancel.addClickHandler(new ClickHandler() {
             @Override
@@ -66,6 +67,8 @@ public class Dialog {
             registration.removeHandler();
 
         registration = submitButton.addClickHandler(handler);
+        submitButton.setVisible(true);
+        cancel.setText("Cancel");
     }
 
     protected Widget createWrapperWidget(Widget widget) {

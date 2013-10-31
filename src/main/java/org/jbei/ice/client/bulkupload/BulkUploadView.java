@@ -12,6 +12,7 @@ import org.jbei.ice.client.bulkupload.widget.CreatorWidget;
 import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
 import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkupload.widget.SavedDraftsMenu;
+import org.jbei.ice.client.bulkupload.widget.UploadCSV;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.AbstractLayout;
@@ -21,6 +22,7 @@ import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -56,7 +58,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private FeedbackPanel feedback;
     private FlexTable layout;
     private ToggleButton toggle;
-    private Button saveButton;
+    private Button submit;
     private Button approveButton;
     private HTML reset;
     private SaveDraftInput draftInput;
@@ -66,6 +68,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private String lastUpdated;
     private HTML bulkImportDisplay;
     private HTMLPanel bulkImportHeader;
+    private UploadCSV uploadCSV;
 //    private SampleSelectionWidget sampleSelection;
 
     private HorizontalPanel headerPanel;
@@ -87,7 +90,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         toggle.setVisible(false);
         toggle.setTitle("Toggle Drafts Menu");
 
-        saveButton = new Button("Submit");
+        submit = new Button("Submit");
 
         reset = new HTML("Reset");
         reset.setStyleName("display-inline");
@@ -99,12 +102,13 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         draftInput.setVisible(false);
 
         updating = new HTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
-                                    + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
+                                    + "<i class=\"fa-spinner fa-spin fa-1x\"></i> Saving</span>");
         updating.setStyleName("display-inline");
         updating.addStyleName("relative_top_3");
         updating.setVisible(false);
         selection = new PermissionsSelection();
         creator = new CreatorWidget(ClientController.account.getFullName(), ClientController.account.getEmail());
+        uploadCSV = new UploadCSV();
 
         uploadName = new HTML();
         uploadName.setStyleName("display-inline");
@@ -118,8 +122,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                         + "&nbsp;&nbsp;<span style=\"vertical-align: middle; float:left\" "
                         + "id=\"updating_icon\"></span></span>"
                         + "<span style=\"float: right;\">"
-//                        + "<span id=\"bulk_import_upload_csv\"></span>"
-//                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
+                        + "<span id=\"bulk_import_upload_csv\"></span>"
+                        + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
                         + "<span id=\"bulk_import_permission_selection\"></span>"
                         + "<span style=\"font-weight: normal; color: #ccc\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>"
                         + "<span id=\"creator\"></span>"
@@ -132,7 +136,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         bulkImportHeader.add(draftInput, "draft_name");
         bulkImportHeader.add(uploadName, "upload_name");
         bulkImportHeader.add(updating, "updating_icon");
-//        bulkImportHeader.add(uploadCSV, "bulk_import_upload_csv");
+        bulkImportHeader.add(uploadCSV, "bulk_import_upload_csv");
         bulkImportHeader.add(selection.asWidget(), "bulk_import_permission_selection");
         bulkImportHeader.add(creator.asWidget(), "creator");
         initHandlers();
@@ -158,7 +162,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                     return;
                 }
                 updating.setHTML("<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
-                                         + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
+                                         + "<i class=\"fa-spinner fa-spin fa-1x\"></i> Saving</span>");
                 updating.setVisible(false);
             }
         });
@@ -188,8 +192,13 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setPermissionDelegate(ServiceDelegate<Set<UserGroup>> handler) {
-        selection.setPermissionUpdateDelegate(handler);
+    public Set<UserGroup> getSelectedPermissionGroups() {
+        return selection.getSelectedGroups();
+    }
+
+    @Override
+    public void setCSVUploadSuccessDelegate(ServiceDelegate<Long> handler) {
+        this.uploadCSV.setDelegate(handler);
     }
 
     @Override
@@ -232,7 +241,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
 
     @Override
     public void setSubmitHandler(ClickHandler submitHandler) {
-        this.saveButton.addClickHandler(submitHandler);
+        this.submit.addClickHandler(submitHandler);
     }
 
     @Override
@@ -272,8 +281,14 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setLastUpdated(Date date) {
+    public void setLastUpdated(Date date, boolean show) {
         lastUpdated = DateUtilities.formatShorterDate(date);
+        if (show) {
+            updating.setHTML(
+                    "<span style=\"font-size: 11px; font-weight: normal; vertical-align: middle; color: #999\">"
+                            + "Updated: " + lastUpdated + "</span>");
+            updating.setVisible(true);
+        }
     }
 
     @Override
@@ -306,8 +321,12 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                                     + "<p>After submitting a saved draft or bulk upload, "
                                     + "an administrator must approve your"
                                     + " submission before they will show up in search listings for others. You will "
-                                    + "however still be able to view and modify them on the collections page" +
-                                    ".</p></div>");
+                                    + "however still be able to view and modify them on the collections page.</p>"
+                                    + "<p>To upload data from a file, make sure it is saved as a comma-separated value"
+                                    + " (CSV) file with the field delimiter set to a comma (,) "
+                                    + "and the text delimiter set to a quote (\"). After uploading the part information"
+                                    + ", you can use the bulk upload interface to associate sequence files manually."
+                                    + "</div>");
         return mainContent;
     }
 
@@ -315,7 +334,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     public void setLoading(boolean set) {
         HTML html = new HTML(
                 "<div style=\"margin-top: 17px; border: 1px solid #e4e4e4; background-color: #f3f3f3; padding: 10px; "
-                        + "opacity: 0.3\"><i class=\"icon-spinner icon-spin icon-3x\"></i><br><h2>LOADING " +
+                        + "opacity: 0.3\"><i class=\"fa fa-spinner fa-spin fa-3x\"></i><br><h2>LOADING " +
                         "CONTENT</h2></div>");
         mainContent.setWidget(1, 0, html);
         mainContent.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
@@ -331,7 +350,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setSheet(NewBulkInput bulkImport, boolean isNew, boolean isValidation) {
+    public void setSheet(NewBulkInput bulkImport) {
         FlexTable panel = new FlexTable();
         panel.setCellPadding(0);
         panel.setCellSpacing(0);
@@ -339,37 +358,55 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         sheet = bulkImport;
         feedback.setVisible(false);
         panel.setWidget(0, 0, feedback);
-        Widget widget;
-
-        if (!isNew) {
-            if (isValidation) {
-                widget = approveButton;
-            } else {
-                String html = "<span id=\"save_button\"></span> &nbsp; <span id=\"reset_label\"></span>";
-                HTMLPanel htmlPanel = new HTMLPanel(html);
-                htmlPanel.add(saveButton, "save_button");
-                htmlPanel.add(reset, "reset_label");
-                widget = htmlPanel;
-            }
-        } else {
-            draftInput.reset();
-            String html = "<span id=\"save_button\"></span>&nbsp;<span id=\"reset_label\"></span>";
-            HTMLPanel htmlPanel = new HTMLPanel(html);
-            htmlPanel.add(saveButton, "save_button");
-            htmlPanel.add(reset, "reset_label");
-            widget = htmlPanel;
-            lastUpdated = null;
-            updating.setVisible(false);
-        }
-        panel.setWidget(0, 1, widget);
         panel.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_RIGHT);
         mainContent.setWidget(0, 1, panel);
 
-        String name = bulkImport.getName() == null ? "Untitled" : bulkImport.getName();
-        uploadName.setHTML(name);
+        switch (bulkImport.getEditMode()) {
+            case NEW:
+            default:
+                // new draft. reset
+                draftInput.reset();
+                String html = "<span id=\"save_button\"></span>&nbsp;<span id=\"reset_label\"></span>";
+                HTMLPanel htmlPanel = new HTMLPanel(html);
+                htmlPanel.add(submit, "save_button");
+                htmlPanel.add(reset, "reset_label");
+                lastUpdated = null;
+                updating.setVisible(false);
+                panel.setWidget(0, 1, htmlPanel);
+                break;
+
+            case ADMIN_APPROVAL:
+                panel.setWidget(0, 1, approveButton);
+                break;
+
+            // default edit mode
+            case DEFAULT:
+                String defaultHtml = "<span id=\"save_button\"></span> &nbsp; <span id=\"reset_label\"></span>";
+                HTMLPanel defaultHtmlPanel = new HTMLPanel(defaultHtml);
+                defaultHtmlPanel.add(submit, "save_button");
+                defaultHtmlPanel.add(reset, "reset_label");
+                panel.setWidget(0, 1, defaultHtmlPanel);
+                break;
+
+            case BULK_EDIT:
+                lastUpdated = null;
+                updating.setVisible(false);
+                break;
+        }
+
+        String title;
+
+        if (bulkImport.getEditMode() == EditMode.BULK_EDIT) {
+            title = " bulk edit";
+        } else {
+            title = " bulk upload";
+            String name = bulkImport.getName() == null ? "Untitled" : bulkImport.getName();
+            uploadName.setHTML(name);
+        }
+
         bulkImportDisplay.setHTML("<span style=\"color: #888; letter-spacing: -1px; text-transform: uppercase; "
                                           + "vertical-align: middle; float: left\">"
-                                          + bulkImport.getImportType().getDisplay() + " bulk upload&nbsp;</span>");
+                                          + bulkImport.getImportType().getDisplay() + title + "&nbsp;</span>");
 
 //        // TODO
 //        if (sampleSelection == null) {
@@ -383,6 +420,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
 
         mainContent.setWidget(2, 0, bulkImport.getSheet());
         mainContent.getFlexCellFormatter().setColSpan(2, 0, 3);
+
+        uploadCSV.setAddType(sheet.getImportType());
     }
 
     @Override
@@ -409,11 +448,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     public void setUpdatingVisibility(boolean visible) {
         if (visible) {
             updating.setHTML("&nbsp;<span style=\"font-size: 11px; font-weight: normal; color: #999\">"
-                                     + "<i class=\"icon-spinner icon-spin icon-1x\"></i> Saving</span>");
+                                     + "<i class=\"fa-spinner fa-spin fa-1x\"></i> Saving</span>");
         } else {
-            updating.setHTML(
-                    "&nbsp;<span style=\"font-size: 11px; font-weight: normal; vertical-align: middle; color: #999\">"
-                            + "Updated: " + lastUpdated + "</span>");
+            String text = lastUpdated == null ? "Updated" : "Updated: " + lastUpdated;
+            updating.setHTML("&nbsp;<span style=\"font-size: 11px; font-weight: normal; "
+                                     + "vertical-align: middle; color: #999\">" + text + "</span>");
         }
         updating.setVisible(true);
     }
@@ -427,9 +466,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setSavedDraftsData(ArrayList<BulkUploadMenuItem> data, String lastSaved, IDeleteMenuHandler handler) {
+    public void setSavedDraftsData(ArrayList<BulkUploadMenuItem> data, boolean hideMenu, IDeleteMenuHandler handler) {
+        if (data.isEmpty())
+            return;
+
         draftsMenu.setMenuItems(data, handler);
-        this.lastUpdated = lastSaved;
 
         menuPanel.setVisible(true);
         layout.getFlexCellFormatter().setWidth(0, 0, "220px");
@@ -438,16 +479,15 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         layout.getFlexCellFormatter().setWidth(0, 1, "10px");
 
         toggle.setVisible(true);
-        toggle.setDown(true);
+        toggle.setDown(false);
         headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_CENTER);
-
-        updating.setHTML("<span style=\"font-size: 11px; font-weight: normal; vertical-align: middle; color: #999\">"
-                                 + "Updated: " + lastSaved + "</span>");
-        updating.setVisible(true);
+        if (hideMenu)
+            setDraftMenuVisibility(false, false);
     }
 
     @Override
-    public void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, IRevertBulkUploadHandler handler) {
+    public void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, boolean hideMenu,
+            IRevertBulkUploadHandler handler) {
         pendingDraftsMenu.setMenuItems(data, handler);
         pendingDraftsMenu.setVisible(true);
         menuPanel.setVisible(true);
@@ -460,6 +500,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         toggle.setVisible(true);
         toggle.setDown(true);
         headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_CENTER);
+        if (hideMenu)
+            setDraftMenuVisibility(false, false);
     }
 
     @Override

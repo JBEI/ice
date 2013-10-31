@@ -164,6 +164,8 @@ public class Group implements IModel {
             user.setParentId(parent.getId());
         }
         user.setType(group.getType());
+        if (group.getOwner() != null)
+            user.setOwnerEmail(group.getOwner().getEmail());
         return user;
     }
 }

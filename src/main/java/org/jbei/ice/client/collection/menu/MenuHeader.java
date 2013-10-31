@@ -29,7 +29,7 @@ public class MenuHeader extends Composite {
         headerLabel.setStyleName("display-inline");
         headerLabel.addStyleName("cursor_pointer");
         // quick collection add
-        quickAddIcon = new HTML("<i class=\"" + FAIconType.PLUS_SIGN.getStyleName() + " font-12em\"></i>");
+        quickAddIcon = new HTML("<i class=\"" + FAIconType.PLUS_CIRCLE.getStyleName() + " font-12em\"></i>");
         quickAddIcon.setVisible(addQuickEdit);
         quickAddIcon.addStyleName("edit_icon");
         quickAddIcon.setTitle("Create a new collection");
@@ -57,7 +57,7 @@ public class MenuHeader extends Composite {
                 if (collapsed) {
                     expandCollapseIcon.setType(FAIconType.FOLDER_OPEN);
                 } else {
-                    expandCollapseIcon.setType(FAIconType.FOLDER_CLOSE);
+                    expandCollapseIcon.setType(FAIconType.FOLDER);
                 }
                 collapsed = !collapsed;
                 handler.onClick(event);

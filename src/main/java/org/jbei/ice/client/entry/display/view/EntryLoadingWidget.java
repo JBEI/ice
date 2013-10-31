@@ -29,7 +29,7 @@ public class EntryLoadingWidget extends Composite {
         else
             panel.setHeight("450px");
         panel.setStyleName("entry_loading_indicator");
-        panel.setHTML(0, 0, "<i class=\"icon-spinner icon-spin icon-3x\"></i><br><h1>LOADING CONTENT</h1>");
+        panel.setHTML(0, 0, "<i class=\"fa fa-spinner fa-spin fa-3x\"></i><br><h1>LOADING CONTENT</h1>");
         panel.getFlexCellFormatter().setAlignment(0, 0, HasAlignment.ALIGN_CENTER, HasAlignment.ALIGN_MIDDLE);
     }
 
@@ -37,7 +37,7 @@ public class EntryLoadingWidget extends Composite {
         panel.setHeight("300px");
         panel.setStyleName("alert_indicator");
         panel.setHTML(0, 0, "<span style=\"line-height: 1px\">"
-                + "<i class=\"" + FAIconType.WARNING_SIGN.getStyleName()
+                + "<i class=\"" + FAIconType.WARNING.getStyleName()
                 + "\" style=\"font-size: 9em; color: darkred\"></i>"
                 + "<br><h2>COULD NOT LOAD CONTENT</h2>"
                 + "<h5>THIS IS LIKELY DUE TO INSUFFICIENT ACCESS PRIVILEGES OR THE PART DOES NOT EXIST</h5></span>");

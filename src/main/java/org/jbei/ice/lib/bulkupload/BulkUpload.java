@@ -13,6 +13,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
 import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
@@ -134,6 +135,18 @@ public class BulkUpload implements IModel {
         return preferences;
     }
 
+    public BulkUploadStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BulkUploadStatus status) {
+        this.status = status;
+    }
+
+    public Set<Permission> getPermissions() {
+        return permissions;
+    }
+
     public static BulkUploadInfo toDTO(BulkUpload draft) {
         if (draft == null)
             return null;
@@ -142,6 +155,7 @@ public class BulkUpload implements IModel {
         bulkUploadInfo.setCreated(draft.getCreationTime());
         bulkUploadInfo.setId(draft.getId());
         bulkUploadInfo.setLastUpdate(draft.getLastUpdateTime());
+        bulkUploadInfo.setStatus(draft.getStatus());
 
         // draft account
         Account draftAccount = draft.getAccount();
@@ -157,17 +171,5 @@ public class BulkUpload implements IModel {
             bulkUploadInfo.getAccessPermissions().add(Permission.toDTO(permission));
         }
         return bulkUploadInfo;
-    }
-
-    public BulkUploadStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(BulkUploadStatus status) {
-        this.status = status;
-    }
-
-    public Set<Permission> getPermissions() {
-        return permissions;
     }
 }

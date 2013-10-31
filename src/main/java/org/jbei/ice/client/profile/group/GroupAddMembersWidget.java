@@ -118,7 +118,7 @@ public class GroupAddMembersWidget extends Composite {
             }
         });
 
-        addUser = new Button("<i class=\"" + FAIconType.OK.getStyleName() + "\"></i> Add");
+        addUser = new Button("<i class=\"" + FAIconType.CHECK.getStyleName() + "\"></i> Add");
         addUser.setEnabled(false);
     }
 
@@ -208,7 +208,7 @@ public class GroupAddMembersWidget extends Composite {
                 while ((selected = listBox.getSelectedIndex()) != -1) {
                     String value = listBox.getValue(selected);
                     listBox.removeItem(selected);
-                    long id = Long.decode(value).longValue();
+                    long id = Long.decode(value);
                     User info = available.get(id);
                     selectedGroupMembersWidget.addMember(info);
                     listList.remove(info);

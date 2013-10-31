@@ -12,6 +12,10 @@ import org.jbei.ice.lib.shared.dto.group.UserGroup;
  */
 public class AdminGroupPanel extends GroupPanel implements IAdminPanel {
 
+    public AdminGroupPanel() {
+        super(true);
+    }
+
     public UserGroup getNewGroup() {
         return groupsWidget.getNewGroup(GroupType.PUBLIC);
     }

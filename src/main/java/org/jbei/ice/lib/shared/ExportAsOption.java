@@ -1,4 +1,6 @@
-package org.jbei.ice.client.collection.menu;
+package org.jbei.ice.lib.shared;
+
+import org.jbei.ice.lib.shared.dto.IDTOModel;
 
 /**
  * Options for the "Export As" menu typically found at the top of
@@ -6,14 +8,17 @@ package org.jbei.ice.client.collection.menu;
  *
  * @author Hector Plahar
  */
-public enum ExportAsOption {
+public enum ExportAsOption implements IDTOModel {
 
-    EXCEL("Excel"), XML("XML");
+    CSV("CSV"), XML("XML");
 
     private String display;
 
     ExportAsOption(String display) {
         this.display = display;
+    }
+
+    private ExportAsOption() {
     }
 
     @Override

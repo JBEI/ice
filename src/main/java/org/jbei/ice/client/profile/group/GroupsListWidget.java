@@ -42,13 +42,16 @@ public class GroupsListWidget extends Composite {
     private ServiceDelegate<String> emailVerifierDelegate;
     private ServiceDelegate<UserGroup> retrieveMembersDelegate;
     private Mode mode;
+    private final boolean addOption;
 
-    public GroupsListWidget() {
+    public GroupsListWidget(boolean addOptions) {
+        this.addOption = addOptions;
         groupList = new FlexTable();
         groupList.setCellPadding(0);
         groupList.setCellSpacing(0);
         groupList.getFlexCellFormatter().setWidth(0, 0, "400px");
 
+        // create and hide widget for create new group
         newGroupCell = new CreateGroupCell();
         groupList.setWidget(0, 0, newGroupCell);
         groupList.getFlexCellFormatter().setVisible(0, 0, false);
@@ -56,7 +59,6 @@ public class GroupsListWidget extends Composite {
         newGroupCell.setVisible(false);
 
         groupMembers = new GroupMembersWidget();
-        groupMembers.setVisible(false);
         groupMembers.setWidth("400px");
 
         layout = new FlexTable();
@@ -64,7 +66,6 @@ public class GroupsListWidget extends Composite {
 
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
-        layout.setStyleName("margin-top-20");
         layout.setWidget(0, 0, groupList);
         layout.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
 
@@ -99,7 +100,7 @@ public class GroupsListWidget extends Composite {
                 if (emailVerifierDelegate == null)
                     return;
 
-                String email = createGroupMembersWidget.getRegisteredUserEmailInput();
+                String email = createGroupMembersWidget.getRegisteredUserEmailInput().trim();
                 if (email == null || email.isEmpty())
                     return;
 
@@ -114,7 +115,7 @@ public class GroupsListWidget extends Composite {
                     return;
 
                 mode = Mode.ADDING_MEMBER;
-                String email = addMembersWidget.getRegisteredUserEmailInput();
+                String email = addMembersWidget.getRegisteredUserEmailInput().trim();
                 if (email == null || email.isEmpty())
                     return;
 
@@ -350,15 +351,12 @@ public class GroupsListWidget extends Composite {
     // inner classes
     //
     private enum Mode {
-        ADDING_MEMBER, EDIT_GROUP, DELETE_GROUP, VIEW_GROUP_LIST, VIEW_GROUP_MEMBERS;
+        ADDING_MEMBER, EDIT_GROUP, DELETE_GROUP, VIEW_GROUP_LIST, VIEW_GROUP_MEMBERS
     }
 
     private class Cell extends Composite {
 
         private final UserGroup user;
-        private final HTML addUser;
-        private final HTML editGroup;
-        private final HTML deleteGroup;
         private FlexTable panel;
 
         public Cell(UserGroup user) {
@@ -378,38 +376,47 @@ public class GroupsListWidget extends Composite {
             this.panel.setWidget(0, 0, htmlPanel);
             this.panel.getFlexCellFormatter().setWidth(0, 0, "300px");
 
-            // add
-            addUser = new HTML("<i class=\"" + FAIconType.USER.getStyleName() + "\"></i>"
-                                       + "<i style=\"vertical-align: text-bottom; font-size: 9px\" class=\""
-                                       + FAIconType.PLUS.getStyleName() + "\"></i>");
-            addUser.setStyleName("display-inline");
-            addUser.addStyleName("add_icon");
-            addUser.setTitle("Add Group Member");
+            HTMLPanel actionPanel;
 
-            // edit
-            editGroup = new HTML("<i class=\"" + FAIconType.EDIT.getStyleName() + "\"></i>");
-            editGroup.setStyleName("display-inline");
-            editGroup.addStyleName("edit_icon");
-            editGroup.setTitle("Edit Group");
+            if (addOption) {
+                // add
+                HTML addUser = new HTML("<i class=\"" + FAIconType.USER.getStyleName() + "\"></i>"
+                                                + "<i style=\"vertical-align: text-bottom; font-size: 9px\" class=\""
+                                                + FAIconType.PLUS.getStyleName() + "\"></i>");
+                addUser.setStyleName("display-inline");
+                addUser.addStyleName("add_icon");
+                addUser.setTitle("Add Group Member");
 
-            // delete
-            deleteGroup = new HTML("<i class=\"" + FAIconType.TRASH.getStyleName() + "\"></i>");
-            deleteGroup.setStyleName("display-inline");
-            deleteGroup.addStyleName("delete_icon");
-            deleteGroup.setTitle("Delete Group");
+                // edit
+                HTML editGroup = new HTML("<i class=\"" + FAIconType.EDIT.getStyleName() + "\"></i>");
+                editGroup.setStyleName("display-inline");
+                editGroup.addStyleName("edit_icon");
+                editGroup.setTitle("Edit Group");
 
-            HTMLPanel actionPanel = new HTMLPanel("<span id=\"add_user\"></span>"
-                                                          + "&nbsp;<span style=\"color: #DDD\">|</span>&nbsp;"
-                                                          + "<span id=\"edit_group\"></span>"
-                                                          + "&nbsp;<span style=\"color: #DDD\">|</span>&nbsp;"
-                                                          + "<span id=\"delete_group\"></span> &nbsp;");
+                // delete
+                HTML deleteGroup = new HTML("<i class=\"" + FAIconType.TRASH.getStyleName() + "\"></i>");
+                deleteGroup.setStyleName("display-inline");
+                deleteGroup.addStyleName("delete_icon");
+                deleteGroup.setTitle("Delete Group");
+
+                actionPanel = new HTMLPanel("<span id=\"add_user\"></span>"
+                                                    + "&nbsp;<span style=\"color: #DDD\">|</span>&nbsp;"
+                                                    + "<span id=\"edit_group\"></span>"
+                                                    + "&nbsp;<span style=\"color: #DDD\">|</span>&nbsp;"
+                                                    + "<span id=\"delete_group\"></span> &nbsp;");
+
+                actionPanel.add(addUser, "add_user");
+                actionPanel.add(editGroup, "edit_group");
+                actionPanel.add(deleteGroup, "delete_group");
+
+                setClickHandlers(addUser, editGroup, deleteGroup);
+            } else {
+                actionPanel = new HTMLPanel("&nbsp;");
+            }
+
             actionPanel.setStyleName("action_panel");
-            actionPanel.add(addUser, "add_user");
-            actionPanel.add(editGroup, "edit_group");
-            actionPanel.add(deleteGroup, "delete_group");
-
             this.panel.setWidget(0, 1, actionPanel);
-            setClickHandlers();
+            this.panel.getFlexCellFormatter().setWidth(0, 1, "90px");
         }
 
         public void updateGroupCount(long newCount) {
@@ -426,7 +433,7 @@ public class GroupsListWidget extends Composite {
             return user;
         }
 
-        protected void setClickHandlers() {
+        protected void setClickHandlers(HTML addUser, HTML editGroup, HTML deleteGroup) {
             addUser.addClickHandler(new ClickHandler() {
 
                 @Override

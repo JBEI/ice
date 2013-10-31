@@ -1,4 +1,6 @@
-package org.jbei.ice.lib.bulkupload;
+package org.jbei.ice.lib.shared.dto.bulkupload;
+
+import org.jbei.ice.lib.shared.dto.IDTOModel;
 
 /**
  * Status used to indicate whether a bulk upload is pending approval or still being worked
@@ -6,9 +8,12 @@ package org.jbei.ice.lib.bulkupload;
  *
  * @author Hector Plahar
  */
-public enum BulkUploadStatus {
+public enum BulkUploadStatus implements IDTOModel {
 
     PENDING_APPROVAL,
 
-    IN_PROGRESS
+    IN_PROGRESS;
+
+    private BulkUploadStatus() {
+    }
 }

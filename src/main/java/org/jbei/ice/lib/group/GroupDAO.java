@@ -100,6 +100,21 @@ class GroupDAO extends HibernateRepository<Group> {
         }
     }
 
+    public Set<Group> retrieveMemberGroups(Account account) throws DAOException {
+        Criteria criteria = currentSession().createCriteria(Group.class);
+        // groups created
+        List list = criteria.add(Restrictions.eq("owner", account)).list();
+        HashSet<Group> groups = new HashSet<Group>(list);
+
+        criteria = currentSession().createCriteria(Group.class);
+        criteria.createAlias("members", "m");
+        criteria.add(Restrictions.eq("m.email", account.getEmail()));
+        list = criteria.list();
+        if (list != null)
+            groups.addAll(list);
+        return groups;
+    }
+
     public ArrayList<Group> retrieveGroups(Account account, GroupType type) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Group.class);

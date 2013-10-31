@@ -23,25 +23,44 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public abstract class GroupPanel extends Composite {
 
-    protected GroupsListWidget groupsWidget;
+    protected GroupsListWidget groupsWidget;        // widget for groups user created
+    protected GroupsListWidget memberGroupWidget;   // widget for groups user is a member of
     private VerticalPanel vPanel;
     private Button createGroup;
 
-    public GroupPanel() {
+    public GroupPanel(boolean isAdminPanel) {
         ScrollPanel scrollPanel = new ScrollPanel();
         initWidget(scrollPanel);
         initComponents();
 
-        vPanel.add(new HTML("&nbsp;"));
-        vPanel.add(createGroup);
-        vPanel.add(groupsWidget);
+        if (isAdminPanel) {
+            vPanel.add(new HTML("&nbsp;"));
+            vPanel.add(createGroup);
+            vPanel.add(groupsWidget);
+        } else {
+            vPanel.add(new HTML("&nbsp;"));
+            vPanel.add(createGroup);
+
+            HTML header = new HTML("Groups you created");
+            header.setStyleName("general_sub_header");
+            header.setWidth("800px");
+            vPanel.add(header);
+            vPanel.add(groupsWidget);
+
+            HTML memberHeader = new HTML("Groups you are a member of");
+            memberHeader.setStyleName("general_sub_header");
+            memberHeader.setWidth("800px");
+            vPanel.add(memberHeader);
+            vPanel.add(memberGroupWidget);
+        }
 
         scrollPanel.add(vPanel);
         addCreateGroupHandler();
     }
 
     protected void initComponents() {
-        groupsWidget = new GroupsListWidget();
+        groupsWidget = new GroupsListWidget(true);
+        memberGroupWidget = new GroupsListWidget(false);
         vPanel = new VerticalPanel();
         vPanel.setWidth("100%");
         createGroup = new Button("<i class=\"blue " + FAIconType.GROUP.getStyleName() + "\"></i>"
@@ -91,6 +110,10 @@ public abstract class GroupPanel extends Composite {
         groupsWidget.setGroupList(list);
     }
 
+    public void displayMemberGroups(ArrayList<UserGroup> list) {
+        memberGroupWidget.setGroupList(list);
+    }
+
     public void addGroupDisplay(UserGroup user) {
         groupsWidget.addGroup(user);
     }
@@ -103,8 +126,16 @@ public abstract class GroupPanel extends Composite {
         groupsWidget.setSelectionHandler(handler);
     }
 
+    public void setMemberGroupSelectionHandler(ServiceDelegate<UserGroup> handler) {
+        memberGroupWidget.setSelectionHandler(handler);
+    }
+
     public void setGroupMembers(UserGroup userGroup, ArrayList<User> list) {
         groupsWidget.setGroupMembers(userGroup, list);
+    }
+
+    public void setMemberGroupMembers(UserGroup userGroup, ArrayList<User> list) {
+        memberGroupWidget.setGroupMembers(userGroup, list);
     }
 
     public void setAvailableAccounts(ArrayList<User> result) {

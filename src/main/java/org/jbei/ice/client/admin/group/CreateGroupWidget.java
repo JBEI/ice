@@ -82,7 +82,7 @@ public class CreateGroupWidget {
         groupDescription = new TextBox();
         groupDescription.setStyleName("input_box");
         closeLink = new HTML("<span style=\"color: #888; font-size: 0.70em; float: right\">Close <i class=\""
-                                     + FAIconType.REMOVE_SIGN.getStyleName() + "\"></i></span>");
+                                     + FAIconType.TIMES.getStyleName() + "\"></i></span>");
         createButton = new Button("Create");
         cancelButton = new Button("Cancel");
         table = new SelectGroupMemberTable();

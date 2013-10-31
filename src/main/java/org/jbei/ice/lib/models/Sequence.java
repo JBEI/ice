@@ -14,7 +14,6 @@ import org.jbei.ice.lib.utils.UtilityException;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
-import org.hibernate.search.annotations.Indexed;
 
 /**
  * Stores the unique sequence for an {@link org.jbei.ice.lib.entry.model.Entry} object.
@@ -32,7 +31,6 @@ import org.hibernate.search.annotations.Indexed;
  */
 @Entity
 @Table(name = "sequences")
-@Indexed(index = "Sequence")
 @SequenceGenerator(name = "sequence", sequenceName = "sequences_id_seq", allocationSize = 1)
 public class Sequence implements IModel {
     private static final long serialVersionUID = 1L;

@@ -16,15 +16,20 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Interface for bulk upload view
+ *
+ * @author Hector Plahar
+ */
 public interface IBulkUploadView {
 
     Widget asWidget();
 
     void showFeedback(String msg, boolean isError);
 
-    void setSavedDraftsData(ArrayList<BulkUploadMenuItem> data, String lastSaved, IDeleteMenuHandler handler);
+    void setSavedDraftsData(ArrayList<BulkUploadMenuItem> data, boolean hide, IDeleteMenuHandler handler);
 
-    void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, IRevertBulkUploadHandler handler);
+    void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, boolean hide, IRevertBulkUploadHandler handler);
 
     SingleSelectionModel<BulkUploadMenuItem> getDraftMenuModel();
 
@@ -38,7 +43,7 @@ public interface IBulkUploadView {
 
     void setToggleMenuVisibility(boolean visible);
 
-    void setSheet(NewBulkInput input, boolean isNew, boolean isValidation);
+    void setSheet(NewBulkInput input);
 
     void setUpdatingVisibility(boolean visible);
 
@@ -62,7 +67,7 @@ public interface IBulkUploadView {
 
     void setDraftNameSetHandler(Delegate<String> handler);
 
-    void setLastUpdated(Date date);
+    void setLastUpdated(Date date, boolean show);
 
     void setLoading(boolean set);
 
@@ -70,5 +75,7 @@ public interface IBulkUploadView {
 
     void setSelectedPermissionGroups(ArrayList<OptionSelect> groups);
 
-    void setPermissionDelegate(ServiceDelegate<Set<UserGroup>> handler);
+    Set<UserGroup> getSelectedPermissionGroups();
+
+    void setCSVUploadSuccessDelegate(ServiceDelegate<Long> handler);
 }

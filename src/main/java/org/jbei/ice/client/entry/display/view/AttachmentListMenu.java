@@ -50,7 +50,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         panel.add(new HTML("<i class=\"" + FAIconType.PAPER_CLIP.getStyleName()
                                    + " font-80em\"></i> &nbsp;Attachments"));
 
-        quickAdd = new Icon(FAIconType.PLUS_SIGN);
+        quickAdd = new Icon(FAIconType.PLUS_CIRCLE);
         quickAdd.addStyleName("edit_icon");
 
 

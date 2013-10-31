@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
 
+import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
 /**
@@ -27,6 +28,7 @@ public class SelectionMarker implements IModel {
     @Field
     private String name;
 
+    @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;

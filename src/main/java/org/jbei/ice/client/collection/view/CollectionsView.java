@@ -19,6 +19,7 @@ import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.ExportAsOption;
 import org.jbei.ice.lib.shared.dto.folder.FolderType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -44,6 +45,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
 
     private CreateEntryMenu createNew;
     private CollectionEntryActionMenu subMenu;
+    private BulkEdit bulkEdit;
     private ExportAsMenu exportAs;
     private TransferMenu transferMenu;
     private FeedbackPanel feedback;
@@ -70,9 +72,15 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         subMenu = new CollectionEntryActionMenu();
         rightContents.setWidget(0, cell, subMenu);
 
-        // export as
-        String width = (subMenu.getWidth() + 12) + "px";
+        // bulk edit
+        String width = (subMenu.getWidth() + 10) + "px";
         rightContents.getFlexCellFormatter().setWidth(0, cell, width);
+        bulkEdit = new BulkEdit();
+        cell += 1;
+        rightContents.setWidget(0, cell, bulkEdit);
+
+        // export as
+        rightContents.getFlexCellFormatter().setWidth(0, cell, "97px");
         exportAs = new ExportAsMenu();
         cell += 1;
         rightContents.setWidget(0, cell, exportAs);
@@ -297,6 +305,17 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
+    public void enableBulkEdit(boolean enable) {
+        this.rightContents.getFlexCellFormatter().setVisible(0, 2, true);
+        this.bulkEdit.setEnabled(enable);
+    }
+
+    @Override
+    public void enableBulkEditVisibility(boolean b) {
+        this.rightContents.getFlexCellFormatter().setVisible(0, 2, b);
+    }
+
+    @Override
     public void enableExportAs(boolean enable) {
         this.exportAs.enable(enable);
         if (transferMenu != null)
@@ -341,6 +360,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public void addRemoveHandler(ClickHandler handler) {
         subMenu.addRemoveHandler(handler);
+    }
+
+    @Override
+    public void addBulkEditHandler(ClickHandler handler) {
+        bulkEdit.setClickHandler(handler);
     }
 
     @Override

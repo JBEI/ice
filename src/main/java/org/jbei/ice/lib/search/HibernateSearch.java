@@ -13,11 +13,8 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.filter.SearchFieldFactory;
@@ -115,8 +112,8 @@ public class HibernateSearch {
         return booleanQuery;
     }
 
-    public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery,
-            String projectName, String projectURL) {
+    public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery, String projectName,
+            String projectURL, HashMap<String, Float> userBoost) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null) {
             entryTypes = new ArrayList<>();
@@ -132,8 +129,6 @@ public class HibernateSearch {
 //        for (int i = 0; i < entryTypes.size(); i += 1) {
 //            classes[i] = SearchFieldFactory.entryClass(entryTypes.get(i));
 //        }
-
-        run(session, "entry.canRead", Sequence.class);
 
         for (EntryType type : EntryType.values()) {
             Class<?> clazz = SearchFieldFactory.entryClass(type);
@@ -155,8 +150,8 @@ public class HibernateSearch {
             booleanQuery.add(deletedQuery, BooleanClause.Occur.MUST_NOT);
         }
 
-//        booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, null,
-//                searchQuery.getBioSafetyOption(), userBoost);
+        booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, null,
+                                              searchQuery.getBioSafetyOption(), userBoost);
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery);
@@ -183,7 +178,7 @@ public class HibernateSearch {
         checkEnableSecurityFilter(account, fullTextQuery);
 
         // enable has attachment/sequence/sample (if needed)
-        fullTextQuery = checkEnableHasAttribute(session, fullTextQuery, searchQuery);
+        checkEnableHasAttribute(fullTextQuery, searchQuery.getParameters());
 
         // check if there is also a blast search
         HashMap<String, SearchResult> blastInfo;
@@ -216,6 +211,11 @@ public class HibernateSearch {
                 searchResult = new SearchResult();
                 searchResult.setScore(score);
                 PartData info = ModelToInfoFactory.createTableViewData(entry, true);
+                try {
+                    info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
+                } catch (ControllerException ce) {
+                    continue;
+                }
                 searchResult.setEntryInfo(info);
             }
 
@@ -341,7 +341,7 @@ public class HibernateSearch {
         }
 
         if (booleanQuery.getClauses().length == 0)
-            return executeSearchNoTerms(account, searchQuery, projectName, projectURL);
+            return executeSearchNoTerms(account, searchQuery, projectName, projectURL, userBoost);
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
@@ -367,8 +367,8 @@ public class HibernateSearch {
         // enable security filter if needed
         checkEnableSecurityFilter(account, fullTextQuery);
 
-        // enable has attachment/sequence/sample (if needed)
-        fullTextQuery = checkEnableHasAttribute(session, fullTextQuery, searchQuery);
+        // check sample
+        checkEnableHasAttribute(fullTextQuery, searchQuery.getParameters());
 
         // check if there is also a blast search
         HashMap<String, SearchResult> blastInfo;
@@ -385,7 +385,7 @@ public class HibernateSearch {
 
         resultCount = fullTextQuery.getResultSize();
 
-        // execute search       R
+        // execute search
         result = fullTextQuery.list();
         String email = "Anon";
         if (account != null)
@@ -409,6 +409,11 @@ public class HibernateSearch {
                 PartData info = ModelToInfoFactory.createTableViewData(entry, true);
                 if (info == null)
                     continue;
+                try {
+                    info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
+                } catch (ControllerException ce) {
+                    continue;
+                }
                 searchResult.setEntryInfo(info);
             }
 
@@ -461,6 +466,32 @@ public class HibernateSearch {
                      .setParameter("groupUUids", groupUUIDs);
     }
 
+    protected void checkEnableHasAttribute(org.hibernate.search.FullTextQuery fullTextQuery,
+            SearchQuery.Parameters parameters) {
+        if (parameters == null)
+            return;
+
+        ArrayList<String> terms = new ArrayList<>();
+
+        if (parameters.getHasSample() != null && parameters.getHasSample()) {
+            terms.add("hasSample");
+        }
+
+        if (parameters.getHasAttachment() != null && parameters.getHasAttachment()) {
+            terms.add("hasAttachment");
+        }
+
+        if (parameters.getHasSequence() != null && parameters.getHasSequence()) {
+            terms.add("hasSequence");
+        }
+
+        if (terms.isEmpty())
+            return;
+
+        fullTextQuery.enableFullTextFilter("boolean")
+                     .setParameter("field", terms);
+    }
+
     protected HashMap<String, SearchResult> checkEnableBlast(Account account, FullTextQuery fullTextQuery,
             SearchQuery query) throws BlastException {
         if (!query.hasBlastQuery())
@@ -469,92 +500,6 @@ public class HibernateSearch {
         HashMap<String, SearchResult> rids = BlastPlus.runBlast(account, query.getBlastQuery());
         fullTextQuery.enableFullTextFilter("blastFilter").setParameter("recordIds", new HashSet<>(rids.keySet()));
         return rids;
-    }
-
-    protected org.hibernate.search.FullTextQuery checkEnableHasAttribute(Session session, FullTextQuery fullTextQuery,
-            SearchQuery query) {
-        HashSet<String> results = null;
-        SearchQuery.Parameters parameters = query.getParameters();
-        boolean hasSequence = parameters.getHasSequence() != null && parameters.getHasSequence();
-        boolean hasAttachment = parameters.getHasAttachment() != null && parameters.getHasAttachment();
-        boolean hasSample = parameters.getHasSample() != null && parameters.getHasSample();
-
-        if (!hasSequence && !hasSample && !hasAttachment)
-            return fullTextQuery;
-
-        if (hasSequence)
-            results = run(session, "hasSequence", Sequence.class);
-
-        if (hasSample) {
-            if (results != null)
-                results.retainAll(run(session, "hasSample", Sample.class));
-            else
-                results = run(session, "hasSample", Sample.class);
-        }
-
-        if (hasAttachment) {
-            if (results != null)
-                results.retainAll(run(session, "hasAttachment", Attachment.class));
-            else
-                results = run(session, "hasAttachment", Attachment.class);
-        }
-
-        if (results != null) {
-            fullTextQuery.enableFullTextFilter("boolean").setParameter("recordIds", results);
-        }
-        return fullTextQuery;
-    }
-
-    protected HashSet<String> run(Session session, String field, Class clazz) {
-        FullTextSession fullTextSession = Search.getFullTextSession(session);
-
-        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
-        TermContext termContext = qb.keyword();
-        org.apache.lucene.search.Query query = termContext.onField(field).ignoreFieldBridge().matching("true")
-                                                          .createQuery();
-        BooleanQuery booleanQuery = new BooleanQuery();
-        booleanQuery.add(query, BooleanClause.Occur.MUST);
-
-        // pending visibility
-        org.apache.lucene.search.Query visibilityQuery = qb.keyword()
-                                                           .onField("entry.visibility")
-                                                           .ignoreFieldBridge()
-                                                           .matching(Visibility.PENDING.getValue())
-                                                           .createQuery();
-        booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
-
-        // draft visibility
-        org.apache.lucene.search.Query visibilityDraftQuery = qb.keyword()
-                                                                .onField("entry.visibility")
-                                                                .ignoreFieldBridge()
-                                                                .matching(Visibility.DRAFT.getValue())
-                                                                .createQuery();
-        booleanQuery.add(visibilityDraftQuery, BooleanClause.Occur.MUST_NOT);
-
-        // wrap Lucene query in a org.hibernate.Query
-        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, clazz);
-
-        // execute search
-        List result = fullTextQuery.list();
-        Iterator<Object> iterator = result.iterator();
-        HashSet<String> recordIds = new HashSet<>();
-        while (iterator.hasNext()) {
-            Object object = iterator.next();
-            Entry entry = null;
-            if (clazz == Attachment.class) {
-                entry = ((Attachment) object).getEntry();
-            } else if (clazz == Sequence.class) {
-                entry = ((Sequence) object).getEntry();
-            } else if (clazz == Sample.class) {
-                entry = ((Sample) object).getEntry();
-            }
-
-            if (entry == null)
-                continue;
-
-            recordIds.add(entry.getRecordId());
-        }
-        return recordIds;
     }
 
     protected static String cleanQuery(String query) {

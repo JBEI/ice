@@ -15,7 +15,7 @@ public class IceSequenceOntology {
 
     static {
         map.put("misc_feature", "SO_0000001");
-        map.put("misc_structure", "  SO_0000002");
+        map.put("misc_structure", "SO_0000002");
         map.put("satellite", "SO_0000005");
         map.put("scRNA", "SO_0000013");
         map.put("stem_loop", "SO_0000019");

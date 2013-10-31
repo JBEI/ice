@@ -1,6 +1,5 @@
 package org.jbei.ice.client.common.footer;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.*;
 
 public class Footer extends Composite {
@@ -60,7 +59,7 @@ public class Footer extends Composite {
         panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
         HorizontalPanel line1 = new HorizontalPanel();
-        Anchor registry = new Anchor("JBEI Registry", "http://code.google.com/p/gd-ice/");
+        Anchor registry = new Anchor("JBEI Registry", "https://github.com/JBEI/ice");
         line1.add(new HTML("&copy;&nbsp;"));
         line1.add(registry);
 
@@ -68,15 +67,10 @@ public class Footer extends Composite {
         panel.add(new Label("All rights reserved."));
 
         HorizontalPanel line3 = new HorizontalPanel();
-        Anchor featureReq = new Anchor("Feature Request",
-                                       "http://code.google.com/p/gd-ice/issues/entry?template=Suggest%20Feature");
-        line3.add(featureReq);
-        line3.add(new HTML("&nbsp; | &nbsp; "));
-        Anchor bugReport = new Anchor("Report a Bug",
-                                      "http://code.google.com/p/gd-ice/issues/entry?template=Report%20Bug");
+        Anchor bugReport = new Anchor("Submit an Issue", "https://github.com/JBEI/ice/issues/new");
         line3.add(bugReport);
         line3.add(new HTML("&nbsp; | &nbsp; "));
-        Anchor api = new Anchor("API", GWT.getHostPageBaseURL() + "api");
+        Anchor api = new Anchor("API", "/api");
         line3.add(api);
 
         panel.add(line3);

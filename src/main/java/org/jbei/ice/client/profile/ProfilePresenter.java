@@ -14,7 +14,6 @@ import org.jbei.ice.client.profile.entry.ProfilePartsPresenter;
 import org.jbei.ice.client.profile.group.UserGroupPresenter;
 import org.jbei.ice.client.profile.message.UserMessagesPresenter;
 import org.jbei.ice.client.profile.preferences.UserPreferencesPresenter;
-import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
@@ -182,7 +181,7 @@ public class ProfilePresenter extends AbstractPresenter {
 
             @Override
             protected void callService(AsyncCallback<ArrayList<UserGroup>> callback) throws AuthenticationException {
-                service.retrieveGroups(ClientController.sessionId, GroupType.PRIVATE, callback);
+                service.retrieveUserGroups(ClientController.sessionId, false, callback);
             }
 
             @Override
@@ -190,7 +189,18 @@ public class ProfilePresenter extends AbstractPresenter {
                 if (result == null || currentOption != UserOption.GROUPS)
                     return;
 
-                groupPresenter.setGroups(result);
+                ArrayList<UserGroup> members = new ArrayList<UserGroup>();
+                ArrayList<UserGroup> groups = new ArrayList<UserGroup>();
+                for (UserGroup group : result) {
+                    if (currentAccount.getEmail().equalsIgnoreCase(group.getOwnerEmail()))
+                        groups.add(group);
+                    else
+                        members.add(group);
+                }
+
+                groupPresenter.setGroups(groups);
+                groupPresenter.setMemberGroups(members);
+
                 display.show(currentOption, groupPresenter.getView().asWidget());
             }
         }.go(eventBus);

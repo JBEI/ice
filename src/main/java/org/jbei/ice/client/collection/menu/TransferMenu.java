@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -61,13 +60,13 @@ public class TransferMenu extends Composite {
         CellTable.Style cellTableStyle();
     }
 
-    private static final String LABEL = "<i class=\"" + FAIconType.CLOUD_UPLOAD.getStyleName()
+    private static final String LABEL = "<i class=\"" + FAIconType.SHARE_SQUARE.getStyleName()
             + "\" style=\"opacity:0.85; color: #0082C0\"></i> "
             + "Transfer <i class=\"" + FAIconType.CARET_DOWN.getStyleName() + "\"></i>";
     private final Button transfer;
     private final CellTable<OptionSelect> table;
     private final Button submitButton;
-    private final Button clearButton;
+    private final HTML clear;
     private final ListDataProvider<OptionSelect> dataProvider;
     private final MultiSelectionModel<OptionSelect> model;
     private final PopupHandler addToHandler;
@@ -97,12 +96,15 @@ public class TransferMenu extends Composite {
         });
 
         // message to display when no collections are created
-        table.setEmptyTableWidget(new HTML("<i class=\"font-75em\">No registry partners available.</i>"));
+        HTML emptyWidget = new HTML("<i style=\"color: #999\">No registry partners available</i>");
+        emptyWidget.addStyleName("font-75em");
+        table.setEmptyTableWidget(emptyWidget);
         submitButton = new Button("Submit");
         submitButton.addKeyPressHandler(new EnterClickHandler(submitButton));
 
-        clearButton = new Button("Clear");
-        clearButton.addKeyPressHandler(new EnterClickHandler(clearButton));
+        clear = new HTML("Clear");
+        clear.setStyleName("font-75em");
+        clear.addStyleName("footer_feedback_widget");
 
         final Widget popup = createPopupWidget();
         addToHandler = new PopupHandler(popup, transfer.getElement(), false);
@@ -120,7 +122,6 @@ public class TransferMenu extends Composite {
 
         table.setSelectionModel(model, DefaultSelectionEventManager.<OptionSelect>createCheckboxManager());
         this.submitButton.setEnabled(false);
-        this.clearButton.setEnabled(false);
 
         // logic to enable and disable submission button
         model.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -129,12 +130,11 @@ public class TransferMenu extends Composite {
             public void onSelectionChange(SelectionChangeEvent event) {
                 boolean enable = (model.getSelectedSet().size() > 0);
                 submitButton.setEnabled(enable);
-                clearButton.setEnabled(enable);
             }
         });
 
         // clear button clickhandler
-        this.clearButton.addClickHandler(new ClickHandler() {
+        this.clear.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -165,12 +165,16 @@ public class TransferMenu extends Composite {
         FlexTable wrapper = new FlexTable();
         wrapper.addStyleName("bg_white");
         wrapper.setWidget(0, 0, table);
-        wrapper.getFlexCellFormatter().setColSpan(0, 0, 2);
+        wrapper.getFlexCellFormatter().setColSpan(0, 0, 3);
 
-        wrapper.setWidget(1, 0, submitButton);
-        wrapper.setWidget(1, 1, clearButton);
-        wrapper.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_RIGHT);
-        wrapper.getFlexCellFormatter().setWidth(1, 1, "46px");
+        wrapper.setHTML(1, 0, "&nbsp;");
+
+        wrapper.setWidget(1, 1, submitButton);
+        wrapper.getFlexCellFormatter().setWidth(1, 1, "50px");
+
+        wrapper.setWidget(1, 2, clear);
+        wrapper.getFlexCellFormatter().setWidth(1, 2, "40px");
+
         return wrapper;
     }
 

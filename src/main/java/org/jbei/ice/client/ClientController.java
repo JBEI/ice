@@ -7,6 +7,8 @@ import org.jbei.ice.client.admin.AdminPresenter;
 import org.jbei.ice.client.admin.AdminView;
 import org.jbei.ice.client.bulkupload.BulkUploadPresenter;
 import org.jbei.ice.client.bulkupload.BulkUploadView;
+import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
+import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.collection.view.CollectionsView;
@@ -22,6 +24,7 @@ import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.search.advanced.SearchView;
+import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.user.User;
 
@@ -95,6 +98,17 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
 
         // add log out handler
         this.eventBus.addHandler(LogoutEvent.TYPE, new AppLogoutHandler());
+
+        // bulk edit handler
+        this.eventBus.addHandler(SavedDraftsEvent.TYPE, new SavedDraftsEventHandler() {
+            @Override
+            public void onDataRetrieval(SavedDraftsEvent event) {
+                BulkUploadView uploadView = new BulkUploadView();
+                BulkUploadPresenter presenter = new BulkUploadPresenter(service, eventBus, uploadView,
+                                                                        event.getData().get(0));
+                presenter.go(container);
+            }
+        });
     }
 
     private ServiceDelegate<SearchQuery> createServiceDelegate() {
@@ -189,7 +203,7 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
 
             case BULK_IMPORT:
                 BulkUploadView uploadView = new BulkUploadView();
-                presenter = new BulkUploadPresenter(service, eventBus, uploadView);
+                presenter = new BulkUploadPresenter(service, eventBus, uploadView, EditMode.DEFAULT);
                 break;
 
             case NEWS:

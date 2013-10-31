@@ -5,6 +5,7 @@ import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellUploader;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
 import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
@@ -64,7 +65,15 @@ public class FileInputCell extends SheetCell {
                 else
                     data.setType(EntryField.ATT_FILENAME);
 
-                delegate.deleteUploadedFile(uploader.getCurrentId(), data);
+                long entryId = uploader.getCurrentId();
+                if (entryId == 0 && delegate != null) {
+                    entryId = delegate.getEntryIdForRow(uploader.getCurrentRow());
+                } else {
+                    Window.alert("Could not delete file");
+                    return;
+                }
+
+                delegate.deleteUploadedFile(entryId, data);
                 uploader.resetPanelWidget();
             }
         });
@@ -185,7 +194,7 @@ public class FileInputCell extends SheetCell {
             }
 
             int row = uploader.getCurrentRow();
-            String[] split = message.split(",");
+            String[] split = Utils.split(message, ",");
             SheetCellData datum = new SheetCellData();
             String name = message;
 

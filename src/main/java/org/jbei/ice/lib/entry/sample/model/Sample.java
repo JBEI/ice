@@ -9,9 +9,9 @@ import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
 import org.jbei.ice.lib.models.Storage;
 
 import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
-import org.hibernate.search.annotations.Indexed;
 
 /**
  * Store Sample information.
@@ -23,7 +23,6 @@ import org.hibernate.search.annotations.Indexed;
  */
 @Entity
 @Table(name = "samples")
-@Indexed(index = "Sample")
 @SequenceGenerator(name = "sequence", sequenceName = "samples_id_seq", allocationSize = 1)
 public class Sample implements IModel {
 
@@ -47,6 +46,7 @@ public class Sample implements IModel {
     @Type(type = "org.hibernate.type.TextType")
     private String notes;
 
+    @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false, unique = false)
     @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
@@ -66,7 +66,8 @@ public class Sample implements IModel {
     @JoinColumn(name = "location_id")
     private Storage storage;
 
-    public Sample() {}
+    public Sample() {
+    }
 
     public long getId() {
         return id;

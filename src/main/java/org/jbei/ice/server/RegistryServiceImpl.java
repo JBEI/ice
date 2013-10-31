@@ -46,6 +46,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.ExportAsOption;
 import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.NewsItem;
@@ -188,18 +189,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         try {
             return controller.updatePreference(account, bulkUploadId, addType, info);
-        } catch (ControllerException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public Long updateBulkUploadPermissions(String sid, long id, EntryAddType type,
-            ArrayList<AccessPermission> accessPermissions) throws AuthenticationException {
-        Account account = retrieveAccountForSid(sid);
-        Logger.info(account.getEmail() + ": updating permissions for bulk upload " + id);
-        try {
-            return ControllerFactory.getBulkUploadController().updatePermissions(account, id, type, accessPermissions);
         } catch (ControllerException e) {
             return null;
         }
@@ -519,6 +508,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             details.setCount(count);
             for (Entry entry : entries) {
                 PartData info = ModelToInfoFactory.createTableViewData(entry, false);
+                try {
+                    info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
+                } catch (ControllerException ce) {
+                    continue;
+                }
                 details.getEntries().add(info);
             }
             return details;
@@ -985,13 +979,26 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean submitBulkUploadDraft(String sid, long draftId) throws AuthenticationException {
+    public BulkUploadInfo getBulkEditData(String sid, ArrayList<Long> partIds) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        BulkUploadController controller = ControllerFactory.getBulkUploadController();
+        try {
+            Logger.info(account.getEmail() + ": retrieving \"" + partIds.size() + "\" for bulk edit");
+            return controller.getPartsForBulkEdit(account, partIds);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean submitBulkUploadDraft(String sid, long draftId, ArrayList<UserGroup> readGroups)
+            throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": submitting bulk import draft \"" + draftId);
             BulkUploadController controller = ControllerFactory.getBulkUploadController();
             try {
-                return controller.submitBulkImportDraft(account, draftId);
+                return controller.submitBulkImportDraft(account, draftId, readGroups);
             } catch (PermissionException e) {
                 Logger.warn(e.getMessage());
                 return false;
@@ -1121,11 +1128,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<UserGroup> retrieveUserGroups(String sessionId) throws AuthenticationException {
+    public ArrayList<UserGroup> retrieveUserGroups(String sessionId, boolean includePublicGroup)
+            throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": retrieving user groups");
-            return ControllerFactory.getGroupController().retrieveUserGroups(account);
+            return ControllerFactory.getGroupController().retrieveUserGroups(account, includePublicGroup);
         } catch (ControllerException ce) {
             return null;
         }
@@ -1666,7 +1674,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public String exportParts(String sid, ArrayList<Long> partIds, String export) throws AuthenticationException {
+    public String exportParts(String sid, ArrayList<Long> partIds, ExportAsOption option)
+            throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         EntryController entryController = ControllerFactory.getEntryController();
         Set<String> typeSet = new HashSet<>();
@@ -1687,12 +1696,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             String data;
 
             // actual export
-            switch (export.toLowerCase()) {
-                case "xml":
+            switch (option) {
+                case XML:
                     fileName = fileName + ".xml";
                     data = IceXmlSerializer.serializeToJbeiXml(account, entries);
                     break;
-                case "excel":
+                case CSV:
                 default:
                     fileName = fileName + ".csv";
                     data = IceXlsSerializer.serialize(entries, new TreeSet<>(typeSet));

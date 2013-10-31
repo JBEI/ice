@@ -52,6 +52,10 @@ public class UserGroupPresenter extends PanelPresenter {
         groupPanel.displayGroups(result);
     }
 
+    public void setMemberGroups(ArrayList<UserGroup> result) {
+        groupPanel.displayMemberGroups(result);
+    }
+
     public void addGroupDeleteDelegate() {
         groupPanel.setDeleteGroupDelegate(new ServiceDelegate<UserGroup>() {
 
@@ -208,20 +212,11 @@ public class UserGroupPresenter extends PanelPresenter {
     }
 
     private void addGroupSelectionHandler() {
-        this.groupPanel.setGroupSelectionHandler(new ServiceDelegate<UserGroup>() {
-
-            @Override
-            public void execute(UserGroup userGroup) {
-                if (userGroup == null)
-                    return;
-
-                currentUserGroup = userGroup;
-                retrieveGroupMembers(userGroup);
-            }
-        });
+        this.groupPanel.setGroupSelectionHandler(new GroupSelectionHandler(false));
+        this.groupPanel.setMemberGroupSelectionHandler(new GroupSelectionHandler(true));
     }
 
-    protected void retrieveGroupMembers(final UserGroup user) {
+    protected void retrieveGroupMembers(final UserGroup user, final boolean isMemberGroup) {
         new IceAsyncCallback<ArrayList<User>>() {
 
             @Override
@@ -242,7 +237,10 @@ public class UserGroupPresenter extends PanelPresenter {
                     return;
 
                 currentUserGroup.setMembers(result);
-                groupPanel.setGroupMembers(currentUserGroup, result);
+                if (isMemberGroup)
+                    groupPanel.setMemberGroupMembers(currentUserGroup, result);
+                else
+                    groupPanel.setGroupMembers(currentUserGroup, result);
             }
         }.go(eventBus);
     }
@@ -260,5 +258,23 @@ public class UserGroupPresenter extends PanelPresenter {
                 groupPanel.setAvailableAccounts(result);
             }
         }.go(eventBus);
+    }
+
+    private class GroupSelectionHandler implements ServiceDelegate<UserGroup> {
+
+        private final boolean isMemberGroup;
+
+        public GroupSelectionHandler(boolean isMemberGroups) {
+            this.isMemberGroup = isMemberGroups;
+        }
+
+        @Override
+        public void execute(UserGroup userGroup) {
+            if (userGroup == null)
+                return;
+
+            currentUserGroup = userGroup;
+            retrieveGroupMembers(userGroup, isMemberGroup);
+        }
     }
 }

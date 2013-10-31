@@ -2,6 +2,12 @@ package org.jbei.ice.lib.shared.dto.bulkupload;
 
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 
+/**
+ * Represents the complete list of fields for parts.
+ * These are mostly used in bulk uploads as headers
+ *
+ * @author Hector Plahar
+ */
 public enum EntryField implements IDTOModel {
 
     PI("Principal Investigator", true),

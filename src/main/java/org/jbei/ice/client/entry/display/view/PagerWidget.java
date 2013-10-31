@@ -22,15 +22,15 @@ public class PagerWidget extends Composite {
     private final Icon rightBtn;
 
     public PagerWidget() {
-        goBack = new Icon(FAIconType.CIRCLE_ARROW_LEFT);
+        goBack = new Icon(FAIconType.ARROW_CIRCLE_LEFT);
         goBack.setTitle("Back");
         goBack.addStyleName("entry_go_back");
 
-        leftBtn = new Icon(FAIconType.CHEVRON_SIGN_LEFT);
+        leftBtn = new Icon(FAIconType.CHEVRON_CIRCLE_LEFT);
         leftBtn.removeStyleName("font-awesome");
         leftBtn.addStyleName("context_nav_pager");
 
-        rightBtn = new Icon(FAIconType.CHEVRON_SIGN_RIGHT);
+        rightBtn = new Icon(FAIconType.CHEVRON_CIRCLE_RIGHT);
         rightBtn.removeStyleName("font-awesome");
         rightBtn.addStyleName("context_nav_pager");
 

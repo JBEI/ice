@@ -18,6 +18,7 @@ import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.group.UserGroup;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -83,12 +84,13 @@ public class BulkUploadModel {
         }.go(eventBus);
     }
 
-    public void submitBulkImportDraft(final long bulkImport, final BulkUploadSubmitEventHandler handler) {
+    public void submitBulkImportDraft(final long bulkImport, final ArrayList<UserGroup> readGroups,
+            final BulkUploadSubmitEventHandler handler) {
         new IceAsyncCallback<Boolean>() {
 
             @Override
             protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                service.submitBulkUploadDraft(ClientController.sessionId, bulkImport, callback);
+                service.submitBulkUploadDraft(ClientController.sessionId, bulkImport, readGroups, callback);
             }
 
             @Override

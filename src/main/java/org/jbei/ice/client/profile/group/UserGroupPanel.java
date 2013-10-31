@@ -12,6 +12,10 @@ import org.jbei.ice.lib.shared.dto.group.UserGroup;
  */
 public class UserGroupPanel extends GroupPanel implements IUserProfilePanel {
 
+    public UserGroupPanel() {
+        super(false);
+    }
+
     public UserGroup getNewGroup() {
         return groupsWidget.getNewGroup(GroupType.PRIVATE);
     }

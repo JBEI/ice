@@ -12,9 +12,9 @@ import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
@@ -70,13 +70,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private int dragCol = -1;
     private boolean dragging;
     private String startText;
+    private final EditMode editMode;
 
     public Sheet(EntryAddType type, ServiceDelegate<PreferenceInfo> serviceDelegate) {
-        this(type, serviceDelegate, null);
+        this(type, serviceDelegate, null, EditMode.NEW);
     }
 
-    public Sheet(EntryAddType type, ServiceDelegate<PreferenceInfo> serviceDelegate, BulkUploadInfo info) {
+    public Sheet(EntryAddType type, ServiceDelegate<PreferenceInfo> delegate, BulkUploadInfo info, EditMode mode) {
         headerCol = 0;
+        this.editMode = mode;
 
         layout = new FlexTable();
         layout.setCellPadding(0);
@@ -123,7 +125,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         addScrollHandlers();
 
         // presenter
-        presenter = new SheetPresenter(this, type, info, serviceDelegate);
+        presenter = new SheetPresenter(this, type, info, delegate);
         init();
 
 //        sheetTable.addDomHandler(new MouseMoveHandler() {
@@ -170,6 +172,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
         headerWrapper.setWidth((Window.getClientWidth() - 15) + "px");
     }
 
+    public EditMode getEditMode() {
+        return this.editMode;
+    }
+
     private void addWindowResizeHandler() {
         Window.addResizeHandler(new ResizeHandler() {
 
@@ -183,11 +189,17 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     return;
 
                 int delta = event.getWidth() - previousWidth;
-                if (delta < 0)
-                    delta = 0;
                 previousWidth = event.getWidth();
-                sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + delta) + "px");
-                headerWrapper.setWidth((headerWrapper.getOffsetWidth() + delta) + "px");
+
+                if (delta < 0) {
+                    // contained is larger than container
+                    delta = sheetTableFocusPanelWrapper.getOffsetWidth() - event.getWidth() + 35;
+                    sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() - delta) + "px");
+                    headerWrapper.setWidth((headerWrapper.getOffsetWidth() - delta) + "px");
+                } else {
+                    sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + delta) + "px");
+                    headerWrapper.setWidth((headerWrapper.getOffsetWidth() + delta) + "px");
+                }
 
                 int wrapperHeight = (event.getHeight() - 340);
                 if (wrapperHeight >= 0)
@@ -208,7 +220,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 headerWrapper.setHorizontalScrollPosition(sheetTableFocusPanelWrapper.getHorizontalScrollPosition());
                 colIndexWrapper.setVerticalScrollPosition(sheetTableFocusPanelWrapper.getVerticalScrollPosition());
 
-                if (row >= 1000)
+                if (row >= 1000 || editMode == EditMode.BULK_EDIT)
                     return;
 
                 int vScrollPosition = sheetTableFocusPanelWrapper.getVerticalScrollPosition();
@@ -242,11 +254,16 @@ public class Sheet extends Composite implements SheetPresenter.View {
         layout.setWidget(1, 1, sheetTableFocusPanelWrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
 
-        createHeaderCells(presenter.getPreferenceDelegate());
+        int rowCount;
 
-        int rowCount = presenter.getEntryRowCount() < ROW_COUNT ? ROW_COUNT : presenter.getEntryRowCount();
+        if (editMode == EditMode.BULK_EDIT) {
+            rowCount = presenter.getEntryRowCount();
+            createHeaderCells(null);
+        } else {
+            rowCount = presenter.getEntryRowCount() < ROW_COUNT ? ROW_COUNT : presenter.getEntryRowCount();
+            createHeaderCells(presenter.getPreferenceDelegate());
+        }
 
-        long start = System.currentTimeMillis();
         // add rows
         for (row = 0; row < rowCount; row += 1) {
             presenter.addRow(row);
@@ -256,8 +273,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
             indexCell.setStyleName("index_cell");
             colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
         }
-        long end = System.currentTimeMillis();
-        GWT.log("Adding " + rowCount + " took " + (end - start) + "ms");
     }
 
     private void addPanelHandlers() {

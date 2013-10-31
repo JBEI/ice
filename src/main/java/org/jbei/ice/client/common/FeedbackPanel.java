@@ -52,7 +52,7 @@ public class FeedbackPanel extends Composite {
 
         label = new HTML();
         panel.add(label, MSG_ID);
-        Icon icon = new Icon(FAIconType.REMOVE);
+        Icon icon = new Icon(FAIconType.TIMES);
         panel.add(icon, "close_panel");
         icon.addStyleName("float_right");
         icon.addStyleName("opacity_hover");

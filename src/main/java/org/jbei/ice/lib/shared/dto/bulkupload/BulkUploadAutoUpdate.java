@@ -20,6 +20,7 @@ public class BulkUploadAutoUpdate implements IDTOModel {
     private EntryType type;
     private Date lastUpdate;
     private int row;
+    private EditMode editMode;
 
     // no arg constructor for serializations
     private BulkUploadAutoUpdate() {
@@ -27,8 +28,13 @@ public class BulkUploadAutoUpdate implements IDTOModel {
     }
 
     public BulkUploadAutoUpdate(EntryType type) {
+        this(type, EditMode.DEFAULT);
+    }
+
+    public BulkUploadAutoUpdate(EntryType type, EditMode mode) {
         this.type = type;
         keyValue = new HashMap<EntryField, String>();
+        this.editMode = mode;
     }
 
     public HashMap<EntryField, String> getKeyValue() {
@@ -56,8 +62,10 @@ public class BulkUploadAutoUpdate implements IDTOModel {
         StringBuilder sb = new StringBuilder();
         int i = 0;
         for (Map.Entry<EntryField, String> set : keyValue.entrySet()) {
-            sb.append("AutoUpdate (entry:" + entryId + ", bulkupload:" + bulkUploadId + ", field:" + set.getKey()
-                              + ", value:" + set.getValue() + ", row:" + row + ")");
+            sb.append("AutoUpdate [mode = ").append(editMode.toString()).append("] (entry:").append(entryId)
+              .append(", bulkupload:").append(bulkUploadId).append(
+                    ", field:").append(set.getKey()).append(", value:").append(set.getValue()).append(", row:").append(
+                    row).append(")");
             i += 1;
             if (i < keyValue.size())
                 sb.append("\n");
@@ -83,5 +91,9 @@ public class BulkUploadAutoUpdate implements IDTOModel {
 
     public void setRow(int row) {
         this.row = row;
+    }
+
+    public EditMode getEditMode() {
+        return editMode;
     }
 }

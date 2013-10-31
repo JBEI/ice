@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.client.entry.display.detail.SequenceViewPanel;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.display.model.AutoCompleteSuggestOracle;
 import org.jbei.ice.lib.shared.BioSafetyOption;
@@ -19,6 +20,12 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.*;
 
+/**
+ * Form for uploading strain with a single plasmid. Provides option to also upload
+ * sequence information for the plasmid
+ *
+ * @author Hector Plahar
+ */
 public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSubmit {
 
     private TextBox creator;
@@ -65,18 +72,19 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private final PlasmidData plasmid;
 
     private final FlexTable layout;
+    private SequenceViewPanel sequenceViewPanel;
 
     private HandlerRegistration cancelRegistration;
     private HandlerRegistration submitRegistration;
 
     public NewStrainWithPlasmidForm(StrainData strain) {
         this.layout = new FlexTable();
+        this.strain = strain;
+        this.plasmid = (PlasmidData) strain.getInfo();
+
         initWidget(layout);
         initComponents();
         initLayout();
-
-        this.strain = strain;
-        this.plasmid = (PlasmidData) strain.getInfo();
 
         this.creator.setText(strain.getCreator());
         this.creatorEmail.setText(strain.getCreatorEmail());
@@ -88,6 +96,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         cancel = new HTML("Cancel");
         cancel.setStyleName("footer_feedback_widget");
         cancel.addStyleName("font-85em");
+        sequenceViewPanel = new SequenceViewPanel(this.plasmid, "Plasmid Sequence");
     }
 
     protected void initLayout() {
@@ -99,6 +108,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         layout.setWidget(row, 0, createGeneralWidget());
 
         layout.setWidget(++row, 0, createPlasmidGeneralWidget());
+        layout.setWidget(++row, 0, sequenceViewPanel);
         layout.setWidget(++row, 0, createPlasmidNotesWidget());
 
         layout.setWidget(++row, 0, createStrainGeneralWidget());
@@ -645,12 +655,12 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     @Override
-    public String getHeaderDisplay() {
-        return EntryAddType.STRAIN_WITH_PLASMID.getDisplay();
+    public SequenceViewPanelPresenter getSequenceViewPresenter() {
+        return sequenceViewPanel.getPresenter();
     }
 
     @Override
-    public SequenceViewPanelPresenter getSequenceViewPresenter() {
-        return null;
+    public EntryAddType getFormAddType() {
+        return EntryAddType.STRAIN_WITH_PLASMID;
     }
 }

@@ -250,7 +250,7 @@ public class SearchPresenter extends AbstractPresenter {
             columns.add(super.addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
             columns.add(addSummaryColumn());
             columns.add(addWebPartnerName());
-            columns.add(addNameColumn(120, com.google.gwt.dom.client.Style.Unit.PX));
+            columns.add(addOwnerNameColumn(180, com.google.gwt.dom.client.Style.Unit.PX));
             super.addHasAttachmentColumn();
             super.addHasSequenceColumn();
             columns.add(super.addCreatedColumn(false));
@@ -279,13 +279,12 @@ public class SearchPresenter extends AbstractPresenter {
                         }
                     };
 
-            this.setColumnWidth(partner, 150, Unit.PX);
+            this.setColumnWidth(partner, 180, Unit.PX);
             this.addColumn(partner, "Registry");
             return partner;
         }
 
-        @Override
-        protected DataTableColumn<SearchResult, SafeHtml> addNameColumn(final double width, Unit unit) {
+        protected DataTableColumn<SearchResult, SafeHtml> addOwnerNameColumn(final double width, Unit unit) {
             DataTableColumn<SearchResult, SafeHtml> nameColumn =
                     new DataTableColumn<SearchResult, SafeHtml>(new SafeHtmlCell(), ColumnField.NAME) {
 

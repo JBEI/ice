@@ -119,7 +119,7 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         addInput.setWidth("200px");
 
         addPartnerPanel.add(addInput, "add_partner_input");
-        Button addPartnerSubmit = new Button("<i class=\"" + FAIconType.OK.getStyleName() + "\"></i>");
+        Button addPartnerSubmit = new Button("<i class=\"" + FAIconType.CHECK.getStyleName() + "\"></i>");
 
         addPartnerSubmit.addClickHandler(new ClickHandler() {
             @Override
@@ -139,7 +139,7 @@ public class WebOfRegistriesPanel extends Composite implements IAdminPanel {
         });
 
         addPartnerPanel.add(addPartnerSubmit, "add_partner_submit");
-        Button addPartnerCancel = new Button("<i class=\"" + FAIconType.REMOVE.getStyleName() + "\"></i>");
+        Button addPartnerCancel = new Button("<i class=\"" + FAIconType.TIMES.getStyleName() + "\"></i>");
         addPartnerCancel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
