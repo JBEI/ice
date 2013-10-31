@@ -114,6 +114,11 @@ public class FileUploadServlet extends HttpServlet {
                 FileItemStream fileItemStream = fileItemIterator.next();
 
                 String filePath = fileItemStream.getName();
+                if (filePath.isEmpty()) {
+                    sendServerResponse(response, "Error: Could not upload the file");
+                    return;
+                }
+
                 String fileName = filePath.substring(filePath.lastIndexOf(File.pathSeparatorChar) + 1);
                 File file = new File(tmpDir, fileName);
                 if (file.length() > 3000000l) {
