@@ -418,10 +418,14 @@ public class PermissionsController {
     }
 
     public boolean hasWritePermission(Account account, Folder folder) throws ControllerException {
-        if (accountController.isAdministrator(account))
+        if (accountController.isAdministrator(account) || folder.getOwnerEmail().equalsIgnoreCase(account.getEmail()))
             return true;
 
-        return folder.getOwnerEmail().equalsIgnoreCase(account.getEmail());
+        try {
+            return dao.hasSetWriteFolderPermission(folder, account);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
     }
 
     public boolean enablePublicReadAccess(Account account, long partId) throws ControllerException {

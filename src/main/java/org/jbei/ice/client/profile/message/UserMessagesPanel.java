@@ -147,7 +147,7 @@ public class UserMessagesPanel extends Composite implements IUserProfilePanel {
             layout.setWidth("80%");
             initWidget(layout);
 
-            backIcon = new Icon(FAIconType.CIRCLE_ARROW_LEFT);
+            backIcon = new Icon(FAIconType.ARROW_CIRCLE_LEFT);
             backIcon.addStyleName("display-inline");
             backIcon.removeStyleName("font-awesome");
             backIcon.addStyleName("edit_icon");

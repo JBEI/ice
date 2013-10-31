@@ -48,9 +48,9 @@ public class QuickAddWidget extends Composite {
         layout.setCellSpacing(0);
         initWidget(layout);
 
-        cancel = new Icon(FAIconType.REMOVE);
+        cancel = new Icon(FAIconType.TIMES);
         cancel.addStyleName("delete_icon");
-        add = new Icon(FAIconType.OK_SIGN);
+        add = new Icon(FAIconType.CHECK_SQUARE);
         add.addStyleName("edit_icon");
         addCancelHandler();
 

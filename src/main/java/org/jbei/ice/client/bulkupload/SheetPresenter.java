@@ -21,6 +21,7 @@ import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
@@ -61,6 +62,8 @@ public class SheetPresenter {
         SampleLocation getSampleSelectionLocation();
 
         void createHeaderCells(ServiceDelegate<PreferenceInfo> lockUnlockDelegate);
+
+        EditMode getEditMode();
     }
 
     private final View view;
@@ -321,7 +324,7 @@ public class SheetPresenter {
         }
 
         // submit for auto update
-        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(entryType);
+        BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(entryType, view.getEditMode());
         update.setEntryId(entryId);
         update.getKeyValue().put(header.getHeaderType(), value);
         long bulkUpload = currentInfo == null ? 0 : currentInfo.getId();
@@ -477,8 +480,11 @@ public class SheetPresenter {
             // for each header (col)
             col = 0;
             for (CellColumnHeader header : headers.getHeaders()) {
-                if (header.isLocked())
+                if (header.isLocked()) {
+                    col += 1;
                     continue;
+                }
+
                 SheetCell cell = header.getCell();
                 String errMsg = cell.inputIsValid(row);
                 if (errMsg.isEmpty()) {

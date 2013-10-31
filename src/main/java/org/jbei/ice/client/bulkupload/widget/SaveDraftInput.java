@@ -19,7 +19,7 @@ public class SaveDraftInput extends Composite {
         inputName.setMaxLength(36);
         inputName.getElement().setAttribute("placeholder", "Enter draft name");
         inputName.setStyleName("saved_draft_input");
-        cancel = new Button("<i class=\"" + FAIconType.REMOVE.getStyleName() + "\"></i>");
+        cancel = new Button("<i class=\"" + FAIconType.TIMES.getStyleName() + "\"></i>");
         cancel.addStyleName("remove_filter");
 
         String html = "<span id=\"save_draft_inputbox\"></span>&nbsp;<span id=\"cancel_rename\"></span>";

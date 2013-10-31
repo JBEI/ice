@@ -36,6 +36,9 @@ public enum EntryAddType implements IDTOModel {
     }
 
     public static EntryType addTypeToType(EntryAddType type) {
+        if (type == STRAIN_WITH_PLASMID)
+            return EntryType.STRAIN;
+
         for (EntryType entryType : EntryType.values()) {
             if (type.name().equals(entryType.name()))
                 return entryType;

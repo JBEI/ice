@@ -7,6 +7,7 @@ import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.ExportAsOption;
 import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.NewsItem;
@@ -145,7 +146,7 @@ public interface RegistryService extends RemoteService {
 
     boolean approvePendingBulkImport(String sessionId, long id) throws AuthenticationException;
 
-    boolean submitBulkUploadDraft(String sid, long draftId) throws AuthenticationException;
+    boolean submitBulkUploadDraft(String sid, long draftId, ArrayList<UserGroup> groups) throws AuthenticationException;
 
     HashMap<String, String> retrieveSystemSettings(String sid) throws AuthenticationException;
 
@@ -202,10 +203,8 @@ public interface RegistryService extends RemoteService {
 
     boolean deleteSample(String sessionId, PartSample part) throws AuthenticationException;
 
-    ArrayList<UserGroup> retrieveUserGroups(String sessionId) throws AuthenticationException;
-
-    Long updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
-            ArrayList<AccessPermission> accessPermissions) throws AuthenticationException;
+    ArrayList<UserGroup> retrieveUserGroups(String sessionId, boolean includePublicGroup)
+            throws AuthenticationException;
 
     boolean promoteCollection(String sessionId, long id) throws AuthenticationException;
 
@@ -236,10 +235,12 @@ public interface RegistryService extends RemoteService {
     boolean setPropagatePermissionForFolder(String sid, long folderId, boolean prop)
             throws AuthenticationException;
 
-    String exportParts(String sid, ArrayList<Long> partIds, String export) throws AuthenticationException;
+    String exportParts(String sid, ArrayList<Long> partIds, ExportAsOption option) throws AuthenticationException;
 
     boolean enableOrDisableFolderPublicAccess(String sid, long folderId, boolean isEnable)
             throws AuthenticationException;
 
     RegistryPartner setRegistryPartnerStatus(String sid, RegistryPartner partner) throws AuthenticationException;
+
+    BulkUploadInfo getBulkEditData(String sid, ArrayList<Long> partIds) throws AuthenticationException;
 }

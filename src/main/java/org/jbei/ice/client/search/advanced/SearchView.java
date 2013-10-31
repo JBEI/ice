@@ -52,7 +52,8 @@ public class SearchView extends Composite implements ISearchView {
         tableHeader.setVisible(false);
 
         String noQueryHTML = "<br><br><div style=\"line-height: 1px; opacity: 0.7\">"
-                + "<i class=\"icon-exclamation-sign \" style=\"font-size: 9em; color: orange\"></i>"
+                + "<i class=\"" + FAIconType.EXCLAMATION_TRIANGLE.getStyleName()
+                + "\" style=\"font-size: 9em; color: orange\"></i>"
                 + "<br><h2>NO SEARCH QUERY DETECTED</h2>"
                 + "<h5>PLEASE ENTER SEARCH TERMS AND/OR USE THE FILTERS IN THE DROP DOWN MENU</h5></div>";
 

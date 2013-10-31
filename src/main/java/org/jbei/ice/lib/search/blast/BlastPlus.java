@@ -250,6 +250,8 @@ public class BlastPlus {
         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         final Path blastFolder = Paths.get(dataDir, BLAST_DB_FOLDER);
         File lockFile = Paths.get(blastFolder.toString(), LOCK_FILE_NAME).toFile();
+        if (lockFile.exists())
+            return;
 
         try {
             if (!Files.exists(blastFolder))
@@ -257,6 +259,11 @@ public class BlastPlus {
 
             if (!force && blastDatabaseExists()) {
                 Logger.info("Blast database found in " + blastFolder.toAbsolutePath().toString());
+                return;
+            }
+
+            if (!lockFile.createNewFile()) {
+                Logger.warn("Could not create lock file for blast rebuild");
                 return;
             }
 

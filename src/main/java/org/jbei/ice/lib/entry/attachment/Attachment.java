@@ -7,9 +7,9 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
 
 import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
-import org.hibernate.search.annotations.Indexed;
 
 /**
  * Store information about attachments.
@@ -20,7 +20,6 @@ import org.hibernate.search.annotations.Indexed;
  */
 @Entity
 @Table(name = "attachments")
-@Indexed(index = "Attachment")
 @SequenceGenerator(name = "sequence", sequenceName = "attachments_id_seq", allocationSize = 1)
 public class Attachment implements IModel {
 
@@ -47,6 +46,7 @@ public class Attachment implements IModel {
     @Column(name = "file_id", length = 36, nullable = false)
     private String fileId;
 
+    @ContainedIn
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
@@ -54,7 +54,8 @@ public class Attachment implements IModel {
     }))
     private Entry entry;
 
-    public Attachment() {}
+    public Attachment() {
+    }
 
     /**
      * Attachment constructor.

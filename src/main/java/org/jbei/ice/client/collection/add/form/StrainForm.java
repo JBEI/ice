@@ -34,7 +34,7 @@ public class StrainForm extends EntryForm<StrainData> {
         for (int i = 0; i < strainData.getLinkedParts().size(); i += 1) {
             if (i > 0)
                 plasmidString += ", ";
-            plasmidString += strainData.getLinkedParts().get(i);
+            plasmidString += strainData.getLinkedParts().get(i).getPartId();
         }
         plasmids.setText(plasmidString);
         markers.setText(strainData.getSelectionMarkers());
@@ -166,6 +166,7 @@ public class StrainForm extends EntryForm<StrainData> {
         strain.setHost(this.host.getText());
         strain.setGenotypePhenotype(this.genPhen.getText());
         String plasmidString = ((MultipleTextBox) this.plasmids.getValueBox()).getWholeText();
+        strain.getLinkedParts().clear();
         for (String plasmid : plasmidString.split(",")) {
             PartData data = new PartData();
             data.setType(EntryType.PLASMID);
@@ -190,7 +191,7 @@ public class StrainForm extends EntryForm<StrainData> {
     }
 
     @Override
-    public String getHeaderDisplay() {
-        return EntryAddType.STRAIN.getDisplay();
+    public EntryAddType getFormAddType() {
+        return EntryAddType.STRAIN;
     }
 }

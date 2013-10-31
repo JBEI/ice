@@ -8,6 +8,7 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 import org.hibernate.HibernateException;

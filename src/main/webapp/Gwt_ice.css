@@ -674,7 +674,7 @@ a.cell_mouseover:hover {
 }
 
 .entry_attributes_sub_header {
-    font-size: 16px;
+    font-size: 17px;
     padding: 5px;
     color: #657B83;
     border-bottom: 1px solid #e1e1e1;
@@ -683,7 +683,7 @@ a.cell_mouseover:hover {
 
 @font-face {
     font-family: "BebasNeue";
-    src: url("static/font/BebasNeue.otf") format("opentype");
+    src: url("static/fonts/BebasNeue.otf") format("opentype");
 }
 
 .entry_view_sub_menu_header {
@@ -826,8 +826,7 @@ ul#indented li a:hover {
 }
 
 .user_collection_user_menu_row:hover, .system_collection_user_menu_row:hover {
-    background-color: #f1f6fb;
-    border: 1px solid #aab2bd;
+    background-color: #F3F1D9;
     cursor: pointer;
     color: #70822e;
 }
@@ -905,10 +904,9 @@ ul#indented li a:hover {
 
 /* LOGIN */
 .login_btn {
-    color: #f5f5f5;
+    color: #f1f1f1;
     background-color: #0082C0;
-
-    border: 1px solid #1568d6;
+    border: 1px solid #0082c0;
     font-weight: bold;
     cursor: pointer;
     width: 80px;
@@ -919,21 +917,16 @@ ul#indented li a:hover {
 }
 
 .login_btn:hover {
-    box-shadow: 2px 2px 2px #e6e6e6;
-    border: 1px solid #bbb;
-    background: -webkit-linear-gradient(top, #f5f5f5, #d5d5d5);
-    background: -moz-linear-gradient(top, #f5f5f5, #d5d5d5);
-    color: #888;
+    border: 1px solid #0082c0;
+    color: #fff;
 }
 
 .quick_search_btn {
     background-color: #0082c0;
-    border: 1px solid #6C7A95;
-    color: white;
+    border: 1px solid #0082c0;
+    color: #f1f1f1;
     font-weight: bold;
-    padding: 4px 15px;
     cursor: pointer;
-    border-radius: 2px;
     width: 90px;
     font-size: 0.75em;
     font-family: Arial, serif;
@@ -946,9 +939,7 @@ ul#indented li a:hover {
 }
 
 .quick_search_btn:hover {
-    box-shadow: 2px 2px 2px #f6f6f6;
-    border: 1px solid #bbb;
-    color: #888;
+    color: white;
 }
 
 .search_caption_display {
@@ -1729,7 +1720,7 @@ td.datePickerMonth {
 }
 
 .bulk_upload_locked_header {
-    color: #aa0000;
+    color: #0082C0;
     opacity: 1;
 }
 
@@ -1852,13 +1843,14 @@ td.selected i.font-awesome {
 .group_info_td {
     padding: 3px;
     opacity: 0.8;
-    border-top: 1px solid #eeeeee;
+    border-top: 1px solid #e8e8e8;
     border-bottom: 1px solid #fefde6;
 }
 
 .group_info_td_selected {
-    border: 1px solid #ccc;
-    background-color: #e4e4e4;
+    border-bottom: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    background-color: #e8e8e8;
     opacity: 1;
 }
 
@@ -2015,8 +2007,7 @@ td.selected i.font-awesome {
     color: #bf984c;
 }
 
-.group_list_header {
-    border-bottom: 1px solid #6F7277;
+.general_sub_header {
     color: #4B4A4A;
     font-size: 0.8em;
     font-weight: bold;

@@ -7,6 +7,7 @@ import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.ExportAsOption;
 import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.NewsItem;
@@ -178,7 +179,7 @@ public interface RegistryServiceAsync {
 
     void approvePendingBulkImport(String sessionId, long id, AsyncCallback<Boolean> async);
 
-    void submitBulkUploadDraft(String sid, long draftId, AsyncCallback<Boolean> async);
+    void submitBulkUploadDraft(String sid, long draftId, ArrayList<UserGroup> readGroups, AsyncCallback<Boolean> async);
 
     void getAutoCompleteSuggestion(AutoCompleteField field, SuggestOracle.Request request,
             AsyncCallback<SuggestOracle.Response> async);
@@ -208,10 +209,6 @@ public interface RegistryServiceAsync {
     void updateBulkUploadPreference(String sid, long bulkUploadId, EntryAddType addType, PreferenceInfo info,
             AsyncCallback<Long> callback) throws AuthenticationException;
 
-    void updateBulkUploadPermissions(String sid, long bulkUploadId, EntryAddType addType,
-            ArrayList<AccessPermission> accessPermissions, AsyncCallback<Long> callback)
-            throws AuthenticationException;
-
     void retrieveUserPreferences(String sid, ArrayList<PreferenceKey> keys,
             AsyncCallback<HashMap<PreferenceKey, String>> async) throws AuthenticationException;
 
@@ -240,7 +237,7 @@ public interface RegistryServiceAsync {
 
     void deleteSample(String sessionId, PartSample part, AsyncCallback<Boolean> async);
 
-    void retrieveUserGroups(String sessionId, AsyncCallback<ArrayList<UserGroup>> async);
+    void retrieveUserGroups(String sessionId, boolean includePublicGroup, AsyncCallback<ArrayList<UserGroup>> async);
 
     void promoteCollection(String sessionId, long id, AsyncCallback<Boolean> async);
 
@@ -272,11 +269,13 @@ public interface RegistryServiceAsync {
 
     void setPropagatePermissionForFolder(String sid, long folderId, boolean prop, AsyncCallback<Boolean> async);
 
-    void exportParts(String sid, ArrayList<Long> partIds, String export, AsyncCallback<String> asyncCallback);
+    void exportParts(String sid, ArrayList<Long> partIds, ExportAsOption option, AsyncCallback<String> asyncCallback);
 
     void enableOrDisableFolderPublicAccess(String sid, long folderId, boolean isEnable, AsyncCallback<Boolean> async)
             throws AuthenticationException;
 
     void setRegistryPartnerStatus(String sid, RegistryPartner partner, AsyncCallback<RegistryPartner> async) throws
             AuthenticationException;
+
+    void getBulkEditData(String sid, ArrayList<Long> partIds, AsyncCallback<BulkUploadInfo> async);
 }

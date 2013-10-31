@@ -2,6 +2,7 @@ package org.jbei.ice.lib.executor;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.jbei.ice.lib.logging.Logger;
@@ -15,7 +16,14 @@ public class IceExecutorService {
     private final ExecutorService pool;
 
     private IceExecutorService() {
-        pool = Executors.newFixedThreadPool(5);
+        pool = Executors.newFixedThreadPool(5, new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r);
+                thread.setPriority(Thread.MIN_PRIORITY);
+                return thread;
+            }
+        });
     }
 
     public static IceExecutorService getInstance() {

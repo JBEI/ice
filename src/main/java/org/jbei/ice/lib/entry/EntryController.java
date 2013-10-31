@@ -294,9 +294,24 @@ public class EntryController {
         ArrayList<SampleStorage> sampleMap = part.getSampleStorage();
 
         if (part.getInfo() != null) {
-            Entry enclosed = InfoToModelFactory.infoToEntry(part.getInfo());
-            Entry created = createStrainWithPlasmid(account, entry, enclosed, part.getAccessPermissions());
-            part.setRecordId(created.getRecordId());
+            // check if enclosed already exists
+            Entry enclosed = get(account, part.getInfo().getId());
+            if (enclosed == null) {
+                enclosed = InfoToModelFactory.infoToEntry(part.getInfo());
+                Entry created = createStrainWithPlasmid(account, entry, enclosed, part.getAccessPermissions());
+                part.setRecordId(created.getRecordId());
+            } else {
+                // already exists, create strain and link
+                updatePart(account, part.getInfo());
+                enclosed = get(account, part.getInfo().getId());
+                entry = createEntry(account, entry, part.getAccessPermissions());
+                entry.getLinkedEntries().add(enclosed);
+                try {
+                    dao.update(entry);
+                } catch (DAOException e) {
+                    Logger.error(e);
+                }
+            }
         } else {
             entry = createEntry(account, entry, part.getAccessPermissions());
             part.setRecordId(entry.getRecordId());
@@ -501,7 +516,6 @@ public class EntryController {
                     sequence.setSequenceUser(sequenceString);
                     sequence.setEntry(strain);
                     sequenceController.saveSequence(sequence);
-                    ApplicationController.scheduleBlastIndexRebuildTask(true);
                 }
             } catch (IOException e) {
                 Logger.error(e);
@@ -538,7 +552,6 @@ public class EntryController {
                     sequence.setSequenceUser(sequenceString);
                     sequence.setEntry(plasmid);
                     sequenceController.saveSequence(sequence);
-                    ApplicationController.scheduleBlastIndexRebuildTask(true);
                 }
             } catch (IOException e) {
                 Logger.error(e);
@@ -600,7 +613,6 @@ public class EntryController {
                             sequence.setSequenceUser(sequenceString);
                             sequence.setEntry(entry);
                             sequenceController.saveSequence(sequence);
-                            ApplicationController.scheduleBlastIndexRebuildTask(true);
                         }
                     } catch (IOException e) {
                         Logger.error(e);
@@ -645,6 +657,7 @@ public class EntryController {
     }
 
     public void setStrainPlasmids(Account account, Strain strain, String plasmids) {
+        strain.getLinkedEntries().clear();
         if (plasmids != null && !plasmids.isEmpty()) {
             for (String plasmid : plasmids.split(",")) {
                 try {
@@ -885,6 +898,7 @@ public class EntryController {
 
             for (Entry entry : results) {
                 PartData info = ModelToInfoFactory.createTableViewData(entry, false);
+                info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
                 details.getEntries().add(info);
             }
         } catch (DAOException de) {
@@ -956,10 +970,14 @@ public class EntryController {
 
     public long updatePart(Account account, PartData part) throws ControllerException {
         Entry existing = get(account, part.getId());
+        if (!permissionsController.hasWritePermission(account, existing))
+            throw new ControllerException(account.getEmail() + ": no permission to update " + part.getPartId());
+
         Entry entry = InfoToModelFactory.infoToEntry(part, existing);
-        if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
-            for (PartData data : part.getLinkedParts()) {
-                try {
+        try {
+            entry.getLinkedEntries().clear();
+            if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
+                for (PartData data : part.getLinkedParts()) {
                     Entry linked = dao.getByPartNumber(data.getPartId());
                     if (linked == null)
                         continue;
@@ -969,22 +987,16 @@ public class EntryController {
                     }
 
                     entry.getLinkedEntries().add(linked);
-                } catch (DAOException e) {
-                    Logger.error(e);
                 }
             }
+        } catch (DAOException e) {
+            Logger.error(e);
         }
-
-        boolean scheduleRebuild = sequenceController.hasSequence(entry.getId());
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
             entry.setVisibility(Visibility.OK.getValue());
             dao.update(entry);
-
-            if (scheduleRebuild) {
-                ApplicationController.scheduleBlastIndexRebuildTask(true);
-            }
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

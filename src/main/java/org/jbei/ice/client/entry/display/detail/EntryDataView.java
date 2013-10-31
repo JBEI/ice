@@ -157,7 +157,7 @@ public abstract class EntryDataView<T extends PartData> extends Composite {
     }
 
     public void createSequenceView() {
-        sequencePanel = new SequenceViewPanel(this.info);
+        sequencePanel = new SequenceViewPanel(this.info, "sequence");
         table.setWidget(currentRow, 0, sequencePanel);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
         currentRow += 1;

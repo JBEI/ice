@@ -21,7 +21,6 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -47,7 +46,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
 
     private final CellTable<T> table;
     private final Button submitButton;
-    private final Button clearButton;
+    private final HTML clear;
     private final SubMenuOptionsPresenter<T> presenter;
     private final Button addWidget;
     private final PopupHandler addToHandler;
@@ -77,7 +76,9 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         });
 
         // message to display when no collections are created
-        table.setEmptyTableWidget(new HTML("<i class=\"font-75em\">No user collections available.</i>"));
+        HTML emptyWidget = new HTML("<i style=\"color: #999\">No user collections available</i>");
+        emptyWidget.addStyleName("font-75em");
+        table.setEmptyTableWidget(emptyWidget);
 
         submitButton = new Button("Submit");
         submitButton.addKeyPressHandler(new EnterClickHandler(submitButton));
@@ -90,8 +91,9 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
             }
         });
 
-        clearButton = new Button("Clear");
-        clearButton.addKeyPressHandler(new EnterClickHandler(clearButton));
+        clear = new HTML("Clear");
+        clear.setStyleName("font-75em");
+        clear.addStyleName("footer_feedback_widget");
 
         final Widget popup = createPopupWidget();
         addToHandler = new PopupHandler(popup, addWidget.getElement(), false);
@@ -114,12 +116,16 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         FlexTable wrapper = new FlexTable();
         wrapper.addStyleName("bg_white");
         wrapper.setWidget(0, 0, table);
-        wrapper.getFlexCellFormatter().setColSpan(0, 0, 2);
+        wrapper.getFlexCellFormatter().setColSpan(0, 0, 3);
 
-        wrapper.setWidget(1, 0, submitButton);
-        wrapper.setWidget(1, 1, clearButton);
-        wrapper.getFlexCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_RIGHT);
-        wrapper.getFlexCellFormatter().setWidth(1, 1, "46px");
+        wrapper.setHTML(1, 0, "&nbsp;");
+
+        wrapper.setWidget(1, 1, submitButton);
+        wrapper.getFlexCellFormatter().setWidth(1, 1, "50px");
+
+        wrapper.setWidget(1, 2, clear);
+        wrapper.getFlexCellFormatter().setWidth(1, 2, "40px");
+
         return wrapper;
     }
 
@@ -161,11 +167,6 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
     }
 
     @Override
-    public void setOptions(List<T> options) {
-        presenter.setOptions(options);
-    }
-
-    @Override
     public void addOption(T option) {
         presenter.addOption(option);
     }
@@ -189,13 +190,8 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
     }
 
     @Override
-    public void setClearEnable(boolean enable) {
-        this.clearButton.setEnabled(enable);
-    }
-
-    @Override
     public void addClearHandler(ClickHandler handler) {
-        this.clearButton.addClickHandler(handler);
+        this.clear.addClickHandler(handler);
     }
 
     @Override
@@ -208,7 +204,13 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         return presenter.getSelectedItems();
     }
 
+    public void setEnabled(boolean enable) {
+        this.addWidget.setEnabled(enable);
+    }
+
+    //
     // inner classes
+    //
     private static class EnterClickHandler implements KeyPressHandler {
 
         private final Button hasClick;
@@ -224,9 +226,5 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
                 return;
             hasClick.click();
         }
-    }
-
-    public void setEnabled(boolean enable) {
-        this.addWidget.setEnabled(enable);
     }
 }

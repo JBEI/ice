@@ -38,7 +38,7 @@ public class SheetHeaderUtil {
                 html += (" <span class=\"required\">*</span>");
             HTMLPanel cell = new HTMLPanel(html);
             cell.setStyleName("cell_column_header");
-            if (header.isCanLock()) {
+            if (header.isCanLock() && preferenceInfoServiceDelegate != null) {
                 cell.add(new HeaderLockWidget(header, preferenceInfoServiceDelegate).asWidget(), "header_lock");
             }
             headerTable.setWidget(row, headerCol, cell);

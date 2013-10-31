@@ -92,7 +92,7 @@ public abstract class MoveToHandler implements SubmitHandler {
 
                     @Override
                     public void onFailure() {
-                        view.showFeedbackMessage("An error occured while moving entries. Please try again.", true);
+                        view.showFeedbackMessage("An error occurred while moving entries. Please try again.", true);
                     }
                 });
     }

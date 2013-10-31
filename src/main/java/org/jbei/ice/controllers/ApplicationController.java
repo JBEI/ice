@@ -14,8 +14,8 @@ import org.jbei.ice.lib.shared.dto.ConfigurationKey;
  */
 public class ApplicationController {
 
-    public static final String RELEASE_DATABASE_SCHEMA_VERSION = "3.4.5";
-    public static final String[] SUPPORTED_PREVIOUS_DB_VERSIONS = {"3.1.0", "3.3.0", "3.4"};
+    public static final String RELEASE_DATABASE_SCHEMA_VERSION = "3.5.0";
+    public static final String[] SUPPORTED_PREVIOUS_DB_VERSIONS = {"3.1.0", "3.3.0", "3.4", "3.4.5"};
 
     /**
      * Schedule task to rebuild the blast index
@@ -88,6 +88,10 @@ public class ApplicationController {
             case "3.4":
                 // upgrade from 3.4 to 3.4.5
                 ControllerFactory.getEntryController().upgradeTo3Point4Point5();
+                break;
+
+            case "3.4.5":
+                initializeHibernateSearch();
                 break;
         }
     }

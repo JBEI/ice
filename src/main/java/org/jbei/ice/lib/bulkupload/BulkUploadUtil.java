@@ -8,6 +8,7 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.StatusType;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 import org.apache.commons.lang.StringUtils;
