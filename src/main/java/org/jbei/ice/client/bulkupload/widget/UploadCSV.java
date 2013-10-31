@@ -114,10 +114,10 @@ public class UploadCSV extends Composite {
                 if (fileUpload.getFilename().isEmpty())
                     return;
 
-                layout.reset();
                 formPanel.setAction(
                         "/upload?sid=" + ClientController.sessionId + "&type=bulk_csv&upload=" + addType.name());
                 formPanel.submit();
+                layout.reset();
             }
         });
     }
