@@ -4,12 +4,16 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.jbei.ice.controllers.ControllerFactory;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.vo.IDNASequence;
 
 import org.apache.cxf.helpers.IOUtils;
 
@@ -34,6 +38,22 @@ public class PartFileAdd {
 
         String sequenceString = IOUtils.readStringFromStream(inputStream);
         ControllerFactory.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
+    }
+
+    public static void uploadSequenceToEntry(long entryId, String userId, IDNASequence dnaSequence) throws Exception {
+        Account account = ControllerFactory.getAccountController().getByEmail(userId);
+        Entry entry = ControllerFactory.getEntryController().get(account, entryId);
+
+        Sequence sequence;
+
+        try {
+            sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+            sequence.setEntry(entry);
+            ControllerFactory.getSequenceController().save(account, sequence);
+        } catch (PermissionException e) {
+            Logger.error(e);
+            throw new ControllerException("User does not have permissions to save sequence");
+        }
     }
 
     public static void uploadAttachmentToEntry(long entryId, String userId, InputStream inputStream, String fileName,

@@ -41,6 +41,8 @@ public class FileBulkUpload {
 
         // process sbol
         if (fileName.endsWith(".xml")) {
+            BulkFileSBOLUpload upload = new BulkFileSBOLUpload(account, filePath, addType);
+            return Long.toString(upload.processUpload());
         }
 
         throw new IOException("Unknown file type " + fileName);

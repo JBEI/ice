@@ -59,12 +59,12 @@ public class BulkZipUpload {
 
         // go through zip elements
         while (enumeration.hasMoreElements()) {
-            ZipEntry entry = enumeration.nextElement();
+            ZipEntry zipEntry = enumeration.nextElement();
             // does not go into directories for now
-            if (entry.isDirectory())
+            if (zipEntry.isDirectory())
                 continue;
 
-            String name = entry.getName();
+            String name = zipEntry.getName();
             if (name.contains("/"))
                 name = name.substring(name.lastIndexOf("/") + 1);
 
@@ -73,9 +73,9 @@ public class BulkZipUpload {
                 if (csvFile != null)
                     throw new IOException("Duplicate csv file in zip archive");
 
-                csvFile = IOUtils.toString(zipFile.getInputStream(entry));
+                csvFile = IOUtils.toString(zipFile.getInputStream(zipEntry));
             } else {
-                InputStream inputStream = zipFile.getInputStream(entry);
+                InputStream inputStream = zipFile.getInputStream(zipEntry);
                 files.put(name, inputStream);
             }
         }
@@ -99,6 +99,10 @@ public class BulkZipUpload {
         long bulkUploadId = 0;
 
         for (BulkUploadAutoUpdate update : updates) {
+            // set to correct id after first iteration
+            if (update.getBulkUploadId() <= 0)
+                update.setBulkUploadId(bulkUploadId);
+
             Logger.info(userId + ": " + update.toString());
             update = controller.autoUpdateBulkUpload(userId, update, addType);
             if (bulkUploadId == 0)
