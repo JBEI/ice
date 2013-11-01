@@ -175,7 +175,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Logger.info(account.getEmail() + ": " + wrapper.toString());
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         try {
-            return controller.autoUpdateBulkUpload(account, wrapper, addType);
+            return controller.autoUpdateBulkUpload(account.getEmail(), wrapper, addType);
         } catch (ControllerException de) {
             return null;
         }

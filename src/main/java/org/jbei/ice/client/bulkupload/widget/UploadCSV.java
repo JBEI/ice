@@ -114,8 +114,8 @@ public class UploadCSV extends Composite {
                 if (fileUpload.getFilename().isEmpty())
                     return;
 
-                formPanel.setAction(
-                        "/upload?sid=" + ClientController.sessionId + "&type=bulk_csv&upload=" + addType.name());
+                String url = "/upload?sid=" + ClientController.sessionId + "&type=bulk_csv&upload=" + addType.name();
+                formPanel.setAction(url);
                 formPanel.submit();
                 layout.reset();
             }

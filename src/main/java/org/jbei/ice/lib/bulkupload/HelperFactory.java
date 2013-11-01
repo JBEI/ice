@@ -1,8 +1,7 @@
-package org.jbei.ice.server.servlet.helper;
+package org.jbei.ice.lib.bulkupload;
 
 import java.nio.file.Path;
 
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.shared.EntryAddType;
 
 /**
@@ -13,7 +12,7 @@ import org.jbei.ice.lib.shared.EntryAddType;
  */
 public class HelperFactory {
 
-    public static BulkCSVUpload createCSVUpload(Account account, EntryAddType type, Path csvFilePath) {
+    public static BulkCSVUpload createCSVUpload(String account, EntryAddType type, Path csvFilePath) {
         if (type == null)
             throw new IllegalArgumentException("Cannot create upload object for null entry add type");
 

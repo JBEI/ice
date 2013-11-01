@@ -20,6 +20,7 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -33,8 +34,6 @@ import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
-import org.jbei.ice.server.servlet.helper.BulkCSVUpload;
-import org.jbei.ice.server.servlet.helper.HelperFactory;
 
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileItemIterator;
@@ -257,7 +256,8 @@ public class FileUploadServlet extends HttpServlet {
         BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(type);
         update.setBulkUploadId(bid);
         try {
-            update = ControllerFactory.getBulkUploadController().autoUpdateBulkUpload(account, update, addType);
+            update = ControllerFactory.getBulkUploadController().autoUpdateBulkUpload(account.getEmail(), update,
+                                                                                      addType);
             boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
                     && type == EntryType.PLASMID);
             Entry entry = ControllerFactory.getEntryController().get(account, update.getEntryId());
@@ -416,23 +416,21 @@ public class FileUploadServlet extends HttpServlet {
     }
 
     protected String uploadCSV(Account account, HttpServletRequest request, File file) {
-        if (!file.getName().endsWith(".csv")) {
-            return "Error: Only comma-separated value files with the extension '.csv' are accepted.";
-        }
-
         String entryAddTypeString = request.getParameter("upload");
         EntryAddType addType;
         try {
             addType = EntryAddType.valueOf(entryAddTypeString);
         } catch (IllegalArgumentException ie) {
-            return "Error: CSV upload has unknown type [\"" + entryAddTypeString + "\"]";
+            return "Error: File upload has unknown type [\"" + entryAddTypeString + "\"]";
         }
         if (addType == null)
-            return "Error: CSV upload has unknown type";
+            return "Error: File upload has unknown type";
 
-        BulkCSVUpload upload = HelperFactory.createCSVUpload(account, addType, file.toPath());
-        if (upload == null)
-            return "Error: Upload type [" + addType.toString() + "] is currently unsupported";
-        return upload.processUpload();
+        try {
+            FileBulkUpload bulkUpload = new FileBulkUpload(account.getEmail(), file.toPath(), addType);
+            return bulkUpload.process(true);
+        } catch (IOException ie) {
+            return "Error: " + ie.getMessage();
+        }
     }
 }

@@ -1,8 +1,7 @@
-package org.jbei.ice.server.servlet.helper;
+package org.jbei.ice.lib.bulkupload;
 
 import java.nio.file.Path;
 
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
@@ -13,7 +12,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
  */
 public class StrainWithPlasmidBulkCSVUpload extends PartBulkCSVUpload {
 
-    public StrainWithPlasmidBulkCSVUpload(EntryAddType addType, Account account, Path csvFilePath) {
+    public StrainWithPlasmidBulkCSVUpload(EntryAddType addType, String account, Path csvFilePath) {
         super(addType, account, csvFilePath);
     }
 

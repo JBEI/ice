@@ -1,4 +1,4 @@
-package org.jbei.ice.server.servlet.helper;
+package org.jbei.ice.lib.bulkupload;
 
 import java.util.ArrayList;
 

@@ -1,11 +1,13 @@
-package org.jbei.ice.server.servlet.helper;
+package org.jbei.ice.lib.bulkupload;
 
+import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
 /**
@@ -16,14 +18,14 @@ import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 public abstract class BulkCSVUpload {
 
     protected final Path csvFilePath;
-    protected final Account account;
+    protected final String account;
     protected final EntryAddType addType;
     protected final List<EntryField> headerFields;
     protected final List<EntryField> requiredFields;
 
-    public BulkCSVUpload(EntryAddType addType, Account account, Path csvFilePath) {
+    public BulkCSVUpload(EntryAddType addType, String userId, Path csvFilePath) {
         this.addType = addType;
-        this.account = account;
+        this.account = userId;
         this.csvFilePath = csvFilePath;
         this.headerFields = new LinkedList<EntryField>();
         this.requiredFields = new LinkedList<EntryField>();
@@ -32,7 +34,20 @@ public abstract class BulkCSVUpload {
         populateRequiredFields();
     }
 
-    public abstract String processUpload();
+    public List<EntryField> getRequiredFields() {
+        return new ArrayList<EntryField>(requiredFields);
+    }
+
+    abstract String processUpload();
+
+    /**
+     * Extract bulk upload information from stream
+     *
+     * @param inputStream the <code>InputStream</code> to read from
+     * @return list of <code>BulkUploadAutoUpdates</code> that resulted from converting the stream
+     * @throws Exception
+     */
+    abstract List<BulkUploadAutoUpdate> getBulkUploadUpdates(InputStream inputStream) throws Exception;
 
     /**
      * Sets the headers fields that are supported for upload
@@ -43,5 +58,4 @@ public abstract class BulkCSVUpload {
      * Sets the header fields that are required at a minimum for upload
      */
     abstract void populateRequiredFields();
-
 }

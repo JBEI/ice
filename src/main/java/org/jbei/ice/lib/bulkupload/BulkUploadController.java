@@ -430,8 +430,10 @@ public class BulkUploadController {
         return draftInfo;
     }
 
-    public BulkUploadAutoUpdate autoUpdateBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
+    public BulkUploadAutoUpdate autoUpdateBulkUpload(String userId, BulkUploadAutoUpdate autoUpdate,
             EntryAddType addType) throws ControllerException {
+        Account account = accountController.getByEmail(userId);
+
         BulkUpload draft = null;
         if (autoUpdate.getEditMode() != EditMode.BULK_EDIT) {
             // deal with bulk upload
