@@ -12,7 +12,7 @@ import org.jbei.ice.client.bulkupload.widget.CreatorWidget;
 import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
 import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkupload.widget.SavedDraftsMenu;
-import org.jbei.ice.client.bulkupload.widget.UploadCSV;
+import org.jbei.ice.client.bulkupload.widget.UploadFile;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.AbstractLayout;
@@ -68,7 +68,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private String lastUpdated;
     private HTML bulkImportDisplay;
     private HTMLPanel bulkImportHeader;
-    private UploadCSV uploadCSV;
+    private UploadFile uploadFile;
 //    private SampleSelectionWidget sampleSelection;
 
     private HorizontalPanel headerPanel;
@@ -108,7 +108,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         updating.setVisible(false);
         selection = new PermissionsSelection();
         creator = new CreatorWidget(ClientController.account.getFullName(), ClientController.account.getEmail());
-        uploadCSV = new UploadCSV();
+        uploadFile = new UploadFile();
 
         uploadName = new HTML();
         uploadName.setStyleName("display-inline");
@@ -136,7 +136,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         bulkImportHeader.add(draftInput, "draft_name");
         bulkImportHeader.add(uploadName, "upload_name");
         bulkImportHeader.add(updating, "updating_icon");
-        bulkImportHeader.add(uploadCSV, "bulk_import_upload_csv");
+        bulkImportHeader.add(uploadFile, "bulk_import_upload_csv");
         bulkImportHeader.add(selection.asWidget(), "bulk_import_permission_selection");
         bulkImportHeader.add(creator.asWidget(), "creator");
         initHandlers();
@@ -198,7 +198,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
 
     @Override
     public void setCSVUploadSuccessDelegate(ServiceDelegate<Long> handler) {
-        this.uploadCSV.setDelegate(handler);
+        this.uploadFile.setDelegate(handler);
     }
 
     @Override
@@ -421,7 +421,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         mainContent.setWidget(2, 0, bulkImport.getSheet());
         mainContent.getFlexCellFormatter().setColSpan(2, 0, 3);
 
-        uploadCSV.setAddType(sheet.getImportType());
+        uploadFile.setAddType(sheet.getImportType());
     }
 
     @Override

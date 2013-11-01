@@ -5,7 +5,6 @@ import org.jbei.ice.client.bulkupload.model.SheetCellData;
 import org.jbei.ice.client.bulkupload.sheet.CellUploader;
 import org.jbei.ice.client.bulkupload.widget.CellWidget;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
@@ -194,7 +193,7 @@ public class FileInputCell extends SheetCell {
             }
 
             int row = uploader.getCurrentRow();
-            String[] split = Utils.split(message, ",");
+            String[] split = message.split(",");
             SheetCellData datum = new SheetCellData();
             String name = message;
 

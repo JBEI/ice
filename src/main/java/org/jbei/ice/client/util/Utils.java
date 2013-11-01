@@ -30,8 +30,4 @@ public class Utils {
         var reg2 = /^.+\@(\[?)[a-zA-Z0-9\-\.]+\.([a-zA-Z]{2,3}|[0-9]{1,3}) (\]?)$/; // valid
         return !reg1.test(email) && reg2.test(email);
     }-*/;
-
-    public static native String[] split(String string, String separator) /*-{
-        return string.split(separator);
-    }-*/;
 }
