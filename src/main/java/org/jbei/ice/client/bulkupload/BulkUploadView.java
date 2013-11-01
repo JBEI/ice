@@ -310,23 +310,22 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         mainContent.setWidget(0, 0, headerPanel);
         mainContent.getFlexCellFormatter().setWidth(0, 0, "140px");
 
-        mainContent.setHTML(1, 0,
-                            "<div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; "
-                                    + "margin-top: 17px; background-color: #f1f1f1\"><p>Select the type "
-                                    + "of entry you wish to bulk import.</p> <p>Please note that columns"
-                                    + " with headers indicated by <span class=\"required\">*</span> "
-                                    + "are required. You will not be able to submit the form until you enter a "
-                                    + "value for those fields. The forms are automatically saved as a draft, "
-                                    + "which will only be visible to you.</p>"
-                                    + "<p>After submitting a saved draft or bulk upload, "
-                                    + "an administrator must approve your"
-                                    + " submission before they will show up in search listings for others. You will "
-                                    + "however still be able to view and modify them on the collections page.</p>"
-                                    + "<p>To upload data from a file, make sure it is saved as a comma-separated value"
-                                    + " (CSV) file with the field delimiter set to a comma (,) "
-                                    + "and the text delimiter set to a quote (\"). After uploading the part information"
-                                    + ", you can use the bulk upload interface to associate sequence files manually."
-                                    + "</div>");
+        String html = "<div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; margin-top: 17px; "
+                + "background-color: #f1f1f1\"><span class=\"general_sub_header\" style=\"width: 800px;\">General "
+                + "Instructions</span><p>Select the type of entry you wish to bulk import.</p> <p>Please note that "
+                + "columns with headers indicated by <span class=\"required\">*</span> are required. "
+                + "You will not be able to submit the form until you enter a value for those fields. The forms are "
+                + "automatically saved as a draft, which will only be visible to you.</p>"
+                + "<p>After submitting a saved draft or bulk upload, an administrator must approve your submission "
+                + "before they will show up in search listings for others. You will however still be able to view and "
+                + "modify them on the collections page.</p><span class=\"general_sub_header\" style=\"width: 800px;\">"
+                + "File upload</span><p>There are three forms of file uploads that are supported: Comma-separated value"
+                + " (CSV) file, zip archive or SBOL RDF. <p>To upload a CSV file, select the type "
+                + "of entry you wish to bulk import and download a csv template by clicking on \"File Upload.\""
+                + "Use a zip archive to include sequences and/attachments. Add the sequence and/or attachment files "
+                + "to the zip archive with a plain csv file that also includes the name(s) of the sequence and/or "
+                + "attachment for each entry.</div>";
+        mainContent.setHTML(1, 0, html);
         return mainContent;
     }
 
