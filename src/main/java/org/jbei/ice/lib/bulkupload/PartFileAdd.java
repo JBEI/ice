@@ -50,12 +50,12 @@ public class PartFileAdd {
                     Logger.warn(e.getMessage());
                 }
             }
-
-            Attachment attachment = new Attachment();
-            attachment.setEntry(entry);
-            attachment.setDescription("");
-            attachment.setFileName(fileName);
-            attachmentController.save(account, attachment, inputStream);
         }
+
+        Attachment attachment = new Attachment();
+        attachment.setEntry(entry);
+        attachment.setDescription("");
+        attachment.setFileName(fileName);
+        attachmentController.save(account, attachment, inputStream);
     }
 }

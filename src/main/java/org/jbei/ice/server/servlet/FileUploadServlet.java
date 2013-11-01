@@ -428,7 +428,7 @@ public class FileUploadServlet extends HttpServlet {
 
         try {
             FileBulkUpload bulkUpload = new FileBulkUpload(account.getEmail(), file.toPath(), addType);
-            return bulkUpload.process(true);
+            return bulkUpload.process();
         } catch (IOException ie) {
             return "Error: " + ie.getMessage();
         }

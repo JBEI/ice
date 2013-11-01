@@ -20,8 +20,8 @@ import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.cxf.helpers.IOUtils;
 
 /**
  * Bulk Upload with zip files. It is expected that the zip contains a csv
@@ -54,8 +54,8 @@ public class BulkZipUpload {
         ZipFile zipFile = new ZipFile(zipFilePath.toFile());
         Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
 
-        byte[] csvFile = null;
-        HashMap<String, Byte[]> files = new HashMap<>();
+        String csvFile = null;
+        HashMap<String, InputStream> files = new HashMap<>();
 
         // go through zip elements
         while (enumeration.hasMoreElements()) {
@@ -73,24 +73,17 @@ public class BulkZipUpload {
                 if (csvFile != null)
                     throw new IOException("Duplicate csv file in zip archive");
 
-                csvFile = new byte[Long.valueOf(entry.getSize()).intValue()];
-                try (InputStream inputStream = zipFile.getInputStream(entry)) {
-                    inputStream.read(csvFile);
-                }
+                csvFile = IOUtils.toString(zipFile.getInputStream(entry));
             } else {
-                byte[] bytes = new byte[Long.valueOf(entry.getSize()).intValue()];
-                try (InputStream inputStream = zipFile.getInputStream(entry)) {
-                    inputStream.read(bytes);
-                }
-
-                files.put(name, ArrayUtils.toObject(bytes));
+                InputStream inputStream = zipFile.getInputStream(entry);
+                files.put(name, inputStream);
             }
         }
 
         if (csvFile == null)
             throw new IOException("Could not find a csv file in the zip archive");
 
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile)) {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile.getBytes())) {
             List<BulkUploadAutoUpdate> updates = csvUpload.getBulkUploadUpdates(inputStream);
             verify(updates, files.keySet());
             // create actual registry parts
@@ -100,7 +93,7 @@ public class BulkZipUpload {
         }
     }
 
-    protected long createRegistryParts(List<BulkUploadAutoUpdate> updates, HashMap<String, Byte[]> files)
+    protected long createRegistryParts(List<BulkUploadAutoUpdate> updates, HashMap<String, InputStream> files)
             throws ControllerException {
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         long bulkUploadId = 0;
@@ -126,13 +119,8 @@ public class BulkZipUpload {
                     String value = entrySet.getValue().trim();
                     if (value != null && !value.isEmpty()) {
                         // create attachment
-                        Byte[] bytes = files.get(value);
-                        if (bytes == null)
-                            continue;
-
-                        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(ArrayUtils.toPrimitive(
-                                bytes))) {
-                            PartFileAdd.uploadAttachmentToEntry(entryId, userId, inputStream, value);
+                        try (InputStream stream = files.get(value)) {
+                            PartFileAdd.uploadAttachmentToEntry(entryId, userId, stream, value);
                         } catch (Exception e) {
                             Logger.error(e);
                         }
@@ -144,13 +132,8 @@ public class BulkZipUpload {
                         String value = entrySet.getValue().trim();
                         if (value != null && !value.isEmpty()) {
                             // create sequence
-                            Byte[] bytes = files.get(value);
-                            if (bytes == null)
-                                continue;
-
-                            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(ArrayUtils.toPrimitive(
-                                    bytes))) {
-                                PartFileAdd.uploadSequenceToEntry(entryId, userId, inputStream);
+                            try (InputStream stream = files.get(value)) {
+                                PartFileAdd.uploadSequenceToEntry(entryId, userId, stream);
                             } catch (Exception e) {
                                 Logger.error(e);
                             }

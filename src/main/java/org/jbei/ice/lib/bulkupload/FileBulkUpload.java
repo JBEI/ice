@@ -24,7 +24,7 @@ public class FileBulkUpload {
         this.addType = addType;
     }
 
-    public String process(boolean permitZip) throws IOException {
+    public String process() throws IOException {
         String fileName = filePath.toFile().getName();
 
         // process csv
@@ -33,13 +33,14 @@ public class FileBulkUpload {
             return upload.processUpload();
         }
 
-        if (!permitZip) {
-            throw new IOException("Only comma-separated value files with the extension '.csv' are accepted.");
-        }
-
+        // process zip
         if (fileName.endsWith(".zip")) {
             BulkZipUpload upload = new BulkZipUpload(account, filePath, addType);
             return Long.toString(upload.processUpload());
+        }
+
+        // process sbol
+        if (fileName.endsWith(".xml")) {
         }
 
         throw new IOException("Unknown file type " + fileName);
