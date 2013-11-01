@@ -20,25 +20,33 @@ import org.apache.cxf.helpers.IOUtils;
  */
 public class PartFileAdd {
 
-    public static void uploadSequenceToEntry(long entryId, String userId, InputStream inputStream) throws Exception {
+    public static void uploadSequenceToEntry(long entryId, String userId, InputStream inputStream, boolean getLinkEntry)
+            throws Exception {
         Account account = ControllerFactory.getAccountController().getByEmail(userId);
         Entry entry = ControllerFactory.getEntryController().get(account, entryId);
 
-        // associate with entry  TODO
-//        boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
-//                && type == EntryType.PLASMID);
-//        if (isStrainWithPlasmidPlasmid && !entry.getLinkedEntries().isEmpty()) {
-//            entry = (Entry) entry.getLinkedEntries().toArray()[0];
-//        }
+        // associate with entry
+        if (getLinkEntry) {
+            if (entry.getLinkedEntries().isEmpty())
+                throw new Exception("Could not retrieve associated part");
+            entry = (Entry) entry.getLinkedEntries().toArray()[0];
+        }
 
         String sequenceString = IOUtils.readStringFromStream(inputStream);
         ControllerFactory.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
     }
 
-    public static void uploadAttachmentToEntry(long entryId, String userId, InputStream inputStream, String fileName)
-            throws Exception {
+    public static void uploadAttachmentToEntry(long entryId, String userId, InputStream inputStream, String fileName,
+            boolean getLinkEntry) throws Exception {
         Account account = ControllerFactory.getAccountController().getByEmail(userId);
         Entry entry = ControllerFactory.getEntryController().get(account, entryId);
+
+        // associate with entry
+        if (getLinkEntry) {
+            if (entry.getLinkedEntries().isEmpty())
+                throw new Exception("Could not retrieve associated part");
+            entry = (Entry) entry.getLinkedEntries().toArray()[0];
+        }
 
         AttachmentController attachmentController = ControllerFactory.getAttachmentController();
         ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);

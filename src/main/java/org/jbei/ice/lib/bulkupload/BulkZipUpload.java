@@ -99,9 +99,6 @@ public class BulkZipUpload {
         long bulkUploadId = 0;
 
         for (BulkUploadAutoUpdate update : updates) {
-            if (update.getBulkUploadId() <= 0)
-                update.setBulkUploadId(bulkUploadId);
-
             Logger.info(userId + ": " + update.toString());
             update = controller.autoUpdateBulkUpload(userId, update, addType);
             if (bulkUploadId == 0)
@@ -120,7 +117,10 @@ public class BulkZipUpload {
                     if (value != null && !value.isEmpty()) {
                         // create attachment
                         try (InputStream stream = files.get(value)) {
-                            PartFileAdd.uploadAttachmentToEntry(entryId, userId, stream, value);
+                            boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
+                                    && field == EntryField.PLASMID_SEQ_FILENAME);
+                            PartFileAdd.uploadAttachmentToEntry(entryId, userId, stream, value,
+                                                                isStrainWithPlasmidPlasmid);
                         } catch (Exception e) {
                             Logger.error(e);
                         }
@@ -133,7 +133,9 @@ public class BulkZipUpload {
                         if (value != null && !value.isEmpty()) {
                             // create sequence
                             try (InputStream stream = files.get(value)) {
-                                PartFileAdd.uploadSequenceToEntry(entryId, userId, stream);
+                                boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
+                                        && field == EntryField.PLASMID_SEQ_FILENAME);
+                                PartFileAdd.uploadSequenceToEntry(entryId, userId, stream, isStrainWithPlasmidPlasmid);
                             } catch (Exception e) {
                                 Logger.error(e);
                             }

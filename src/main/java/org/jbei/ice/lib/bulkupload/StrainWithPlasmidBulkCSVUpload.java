@@ -37,6 +37,8 @@ public class StrainWithPlasmidBulkCSVUpload extends PartBulkCSVUpload {
         headerFields.add(EntryField.STRAIN_SUMMARY);
         headerFields.add(EntryField.STRAIN_NOTES);
         headerFields.add(EntryField.STRAIN_REFERENCES);
+        headerFields.add(EntryField.STRAIN_ATT_FILENAME);
+        headerFields.add(EntryField.STRAIN_SEQ_FILENAME);
 
         // plasmid information
         headerFields.add(EntryField.PLASMID_NAME);
@@ -52,6 +54,8 @@ public class StrainWithPlasmidBulkCSVUpload extends PartBulkCSVUpload {
         headerFields.add(EntryField.PLASMID_SUMMARY);
         headerFields.add(EntryField.PLASMID_NOTES);
         headerFields.add(EntryField.PLASMID_REFERENCES);
+        headerFields.add(EntryField.PLASMID_ATT_FILENAME);
+        headerFields.add(EntryField.PLASMID_SEQ_FILENAME);
 
         headerFields.add(EntryField.PARENTAL_STRAIN);
         headerFields.add(EntryField.GENOTYPE_OR_PHENOTYPE);
