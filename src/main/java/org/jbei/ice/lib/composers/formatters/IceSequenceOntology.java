@@ -64,6 +64,7 @@ public class IceSequenceOntology {
         map.put("D_segment", "SO_0000458");
         map.put("J_region", "SO_0000470");
         map.put("polyA_signal", "SO_0000551");
+        map.put("RBS", "SO_0000552");
         map.put("polyA_site", "SO_0000553");
         map.put("5'clip", "SO_0000555");
         map.put("3'clip", "SO_0000557");
