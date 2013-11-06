@@ -3,10 +3,13 @@ package org.jbei.ice.lib.composers.formatters;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
@@ -27,10 +30,12 @@ public class SBOLVisitor {
 
     private final DnaComponent dnaComponent;
     private final String uriString;
+    private Set<String> uris;
 
     public SBOLVisitor() {
         dnaComponent = SBOLFactory.createDnaComponent();
         uriString = Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/entry";
+        uris = new HashSet<>();
     }
 
     public void visit(Sequence sequence) {
@@ -81,11 +86,17 @@ public class SBOLVisitor {
     public void visit(SequenceFeature feature) {
         SequenceAnnotation annotation = SBOLFactory.createSequenceAnnotation();
         String uri = feature.getUri();
+
         if (uri == null || uri.isEmpty()) {
             uri = UUID.randomUUID().toString();
             annotation.setURI(URI.create(uriString + "/sa#" + uri));
-        } else
+        } else {
+            if (uris.contains(uri))
+                return;
+
+            uris.add(uri);
             annotation.setURI(URI.create(uri));
+        }
 
         AnnotationLocation location = null;
         if (feature.getAnnotationLocations() != null && !feature.getAnnotationLocations().isEmpty()) {
@@ -106,6 +117,11 @@ public class SBOLVisitor {
             subComponent.setURI(URI.create(uriString + "/dc#" + dcUri));
             subComponent.setDisplayId(dcUri);
         } else {
+            if (uris.contains(dcUri))
+                return;
+
+            uris.add(dcUri);
+            Logger.info(dcUri);
             subComponent.setURI(URI.create(dcUri));
             String displayId = StringUtils.isBlank(feature.getFeature().getIdentification()) ?
                     dcUri.substring(dcUri.lastIndexOf("/") + 1) : feature.getFeature().getIdentification();

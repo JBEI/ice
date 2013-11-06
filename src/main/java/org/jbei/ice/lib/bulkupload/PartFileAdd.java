@@ -40,7 +40,8 @@ public class PartFileAdd {
         ControllerFactory.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
     }
 
-    public static void uploadSequenceToEntry(long entryId, String userId, IDNASequence dnaSequence) throws Exception {
+    public static void uploadSequenceToEntry(long entryId, String userId, IDNASequence dnaSequence,
+            String sequenceUser) throws Exception {
         Account account = ControllerFactory.getAccountController().getByEmail(userId);
         Entry entry = ControllerFactory.getEntryController().get(account, entryId);
 
@@ -49,6 +50,8 @@ public class PartFileAdd {
         try {
             sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
             sequence.setEntry(entry);
+            if (sequenceUser != null)
+                sequence.setSequenceUser(sequenceUser);
             ControllerFactory.getSequenceController().save(account, sequence);
         } catch (PermissionException e) {
             Logger.error(e);
