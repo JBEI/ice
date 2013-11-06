@@ -75,7 +75,7 @@ public class BulkFileSBOLUpload {
         try {
             SBOLFactory.write(document, stream);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            Logger.error(e);
             return null;
         }
         return stream.toString();

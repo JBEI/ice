@@ -93,8 +93,8 @@ public class Visitor extends SBOLBaseVisitor<RuntimeException> {
                 DNAFeatureLocation location = feature.getLocations().get(0);
                 featuredDNASequence.getFeatures().add(feature);
 
-                Logger.debug("Adding feature [" + location.getGenbankStart() + ", " + location.getEnd() + "] for "
-                                     + feature.getIdentifier());
+                System.out.println("Adding feature [" + location.getGenbankStart() + ", " + location.getEnd() + "] for "
+                                           + feature.getIdentifier());
             }
         }
     }
@@ -103,27 +103,14 @@ public class Visitor extends SBOLBaseVisitor<RuntimeException> {
         List<SequenceAnnotation> annotations = parent.getSubComponent().getAnnotations();
         if (!annotations.isEmpty()) {
             for (SequenceAnnotation sequenceAnnotation : annotations) {
-                int childStart = sequenceAnnotation.getBioStart();
-
-                // generate new pair relative to parent
-                int length = childStart == 1 ? sequenceAnnotation.getBioEnd() :
-                        sequenceAnnotation.getBioEnd() - sequenceAnnotation.getBioStart();
-                int start;
-
-                // get relative current start
-                if (childStart == 1)
-                    start = relativePair.getFirst();
-                else if (relativePair.getFirst() == 1)
-                    start = childStart;
-                else
-                    start = childStart + relativePair.getFirst();
-
                 int strand = sequenceAnnotation.getStrand() == StrandType.POSITIVE ? (relativePair
-                        .getStrand()) : relativePair.getStrand() * -1;
-                int extra = start == 1 ? length : start + length;
-                if (extra > relativePair.getSecond())
-                    extra = relativePair.getSecond();
-                Pair newRelativePair = new Pair(start, extra, strand);
+                        .getStrand()) : (relativePair.getStrand() * -1);
+
+                Pair newRelativePair;
+                if (strand > 0)
+                    newRelativePair = calculatePairForPositiveStrand(sequenceAnnotation, relativePair);
+                else
+                    newRelativePair = calculatePairForNegativeStrand(sequenceAnnotation, relativePair);
 
                 walkTree(sequenceAnnotation, newRelativePair);
 
@@ -131,10 +118,45 @@ public class Visitor extends SBOLBaseVisitor<RuntimeException> {
                 DNAFeatureLocation location = feature.getLocations().get(0);
                 featuredDNASequence.getFeatures().add(feature);
 
-                System.out.println("Adding feature [" + location.getGenbankStart() + ", " + location
-                        .getEnd() + "] l = " + length + " for " + feature.getIdentifier());
+                System.out.println("Adding feature " + strand + "[" + location.getGenbankStart() + ", " + location
+                        .getEnd() + "] for " + feature.getIdentifier());
             }
         }
+    }
+
+    static Pair calculatePairForPositiveStrand(SequenceAnnotation sequenceAnnotation, Pair relativePair) {
+        int childStart = sequenceAnnotation.getBioStart();
+
+        // generate new pair relative to parent
+        int length = childStart == 1 ? sequenceAnnotation.getBioEnd() :
+                sequenceAnnotation.getBioEnd() - sequenceAnnotation.getBioStart();
+        int start;
+
+        // get relative current start
+        if (childStart == 1)
+            start = relativePair.getFirst(); // start at same location as parent e.g. p:[3, 10] c:[1,5]
+        else if (relativePair.getFirst() == 1)
+            start = childStart;             // start at child location e.g. p:[1,10] c:[3,5]
+        else
+            start = childStart + relativePair.getFirst();  // p:[3,10] c:[3,5] (start at 8)
+
+        int extra = start == 1 ? length : start + length;
+        if (extra > relativePair.getSecond())
+            extra = relativePair.getSecond();
+
+        return new Pair(start, extra, 1);
+    }
+
+    static Pair calculatePairForNegativeStrand(SequenceAnnotation sequenceAnnotation, Pair relativePair) {
+        int childStart = sequenceAnnotation.getBioStart();
+        int childEnd = sequenceAnnotation.getBioEnd();
+
+        int end = relativePair.getSecond() - (childStart);
+        int start = relativePair.getSecond() - (childEnd);
+        if (start < relativePair.getFirst()) {
+            start = relativePair.getFirst();
+        }
+        return new Pair(start, end, -1);
     }
 
     static DNAFeature createDNAFeature(SequenceAnnotation annotation, Pair pair) {
