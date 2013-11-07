@@ -1,7 +1,6 @@
 package org.jbei.ice.client.collection.widget;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
@@ -44,7 +43,6 @@ public class CollectionPermissionWidget extends Composite {
     private SuggestBox permissionSuggestions;
     private Delegate<ShareCollectionData> delegate;
     private Callback<ShareCollectionData> callback;
-    private ServiceDelegate<HashMap<Long, Boolean>> publicAccessDelegate;
 
     private boolean isViewingWriteTab;
     private final ArrayList<AccessPermission> readList;  // list of read permissions (includes groups)
@@ -107,18 +105,13 @@ public class CollectionPermissionWidget extends Composite {
         layout.setHTML(1, 0, propagateDesc);
         layout.getRowFormatter().setVisible(1, false);
 
-        permissionLayout = createPermissionWidget();
+        createPermissionWidget();
         layout.setWidget(2, 0, permissionLayout);
         permissionLayout.getRowFormatter().setVisible(3, false);
 
         // input suggest box for adding permissions
         createSuggestWidget();
         setMakePublicHandler();
-    }
-
-    public void setPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> delegate) {
-        publicAccessDelegate = delegate;
-        permissionLayout.getRowFormatter().setVisible(3, (publicAccessDelegate != null));
     }
 
     public void reset() {
@@ -143,8 +136,8 @@ public class CollectionPermissionWidget extends Composite {
         });
     }
 
-    protected FlexTable createPermissionWidget() {
-        final FlexTable permissionLayout = new FlexTable();
+    protected void createPermissionWidget() {
+        permissionLayout = new FlexTable();
         permissionLayout.setCellPadding(0);
         permissionLayout.setCellSpacing(0);
         permissionLayout.setWidth("90%");
@@ -194,8 +187,6 @@ public class CollectionPermissionWidget extends Composite {
                 permissionLayout.getRowFormatter().setVisible(1, (!permissionLayout.getRowFormatter().isVisible(1)));
             }
         });
-
-        return permissionLayout;
     }
 
     protected void createSuggestWidget() {
@@ -227,9 +218,14 @@ public class CollectionPermissionWidget extends Composite {
         permissionLayout.getFlexCellFormatter().setVisible(3, 0, !publicReadAccess);
         readListTable.getRowFormatter().setVisible(0, publicReadAccess);
         isPublicReadEnabled = publicReadAccess;
-        HashMap<Long, Boolean> map = new HashMap<Long, Boolean>();
-        map.put(folderId, publicReadAccess);
-        publicAccessDelegate.execute(map);
+        AccessPermission permission = new AccessPermission();
+        permission.setType(AccessPermission.Type.READ_FOLDER);
+        permission.setTypeId(folderId);
+        ShareCollectionData data = new ShareCollectionData(permission, !publicReadAccess, callback);
+        data.setPublicAccessData(true);
+        delegate.execute(data);
+        if (!publicReadAccess)
+            permissionLayout.setWidget(3, 0, makePublic);
     }
 
     protected void initComponents() {

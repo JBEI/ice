@@ -1,7 +1,6 @@
 package org.jbei.ice.client.collection.view;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -262,11 +261,6 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public void setDemotionDelegate(ServiceDelegate<MenuItem> delegate) {
         this.systemMenu.setDemotionDelegate(delegate);
-    }
-
-    @Override
-    public void setPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> delegate) {
-        this.userMenu.setRemoveAddPublicAccessDelegate(delegate);
     }
 
     @Override

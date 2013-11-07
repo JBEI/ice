@@ -496,10 +496,13 @@ public class PermissionsController {
 
         AccessPermission access = new AccessPermission();
         access.setArticle(AccessPermission.Article.GROUP);
-        access.setArticleId(folder.getId());
+        access.setArticleId(groupController.createOrRetrievePublicGroup().getId());
         access.setType(AccessPermission.Type.READ_FOLDER);
         access.setTypeId(folderId);
-        return addPermission(access, null, folder) != null;
+        if (isEnable)
+            return addPermission(access, null, folder) != null;
+        removePermission(access, null, folder);
+        return true;
     }
 
     public Set<Folder> retrievePermissionFolders(Account account) throws ControllerException {
@@ -667,6 +670,8 @@ public class PermissionsController {
 
         // retrieve folder permissions
         ArrayList<AccessPermission> permissions = retrieveSetFolderPermission(folder, true);
+        if (permissions.isEmpty())
+            return true;
 //        boolean isPublic = get
 
         // if propagate, add permissions to entries contained in here  //TODO : inefficient for large entries/perms

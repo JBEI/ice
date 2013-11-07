@@ -1,7 +1,6 @@
 package org.jbei.ice.client.collection.menu;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -52,7 +51,6 @@ public class CollectionMenu extends Composite {
     private List<HoverOption> cellHoverOptions;
     private ServiceDelegate<MenuItem> promotionDelegate;
     private ServiceDelegate<MenuItem> demotionDelegate;
-    private ServiceDelegate<HashMap<Long, Boolean>> publicDelegate;
 
     // quick add
     private QuickAddWidget quickAddWidget;
@@ -110,10 +108,6 @@ public class CollectionMenu extends Composite {
 
     public void setDemotionDelegate(ServiceDelegate<MenuItem> serviceDelegate) {
         this.demotionDelegate = serviceDelegate;
-    }
-
-    public void setRemoveAddPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> serviceDelegate) {
-        this.publicDelegate = serviceDelegate;
     }
 
     public void setCellHoverOptions(List<HoverOption> options) {
@@ -222,7 +216,7 @@ public class CollectionMenu extends Composite {
         }
 
         if (hasQuickEdit)
-            cell.setShared(userCount, groupCount);
+            cell.setShared(userCount, groupCount, item.isPublicReadAccess());
         cell.setSharerInfo();
         cell.setHoverOptions(cellHoverOptions);
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
@@ -330,7 +324,6 @@ public class CollectionMenu extends Composite {
             folderId = "right" + item.getId();
             action = new HoverCell();
             shareCollectionDialog = new ShareCollectionDialog(this, item.getName(), permissionInfoDelegate, propagate);
-            shareCollectionDialog.setPublicAccessDelegate(publicDelegate);
 
             action.getOptionSelection().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
@@ -503,7 +496,7 @@ public class CollectionMenu extends Composite {
             shared.setHTML(html);
         }
 
-        public void setShared(int userCount, int groupCount) {
+        public void setShared(int userCount, int groupCount, boolean isPublic) {
             int count = userCount + groupCount;
             if (item.getId() <= 0)
                 return;
@@ -511,20 +504,24 @@ public class CollectionMenu extends Composite {
             panel.setStyleName("user_collection_user_menu_row");
             String html = "<span style=\"color: #999; font-size: 9px\">";
 
-            if (count <= 0) {
-                html += "Private</span>";
+            if (isPublic) {
+                html += "Public</span>";
             } else {
-                String userString = "<b>" + userCount + "</b> user";
-                userString += (userCount != 1 ? "s" : "");
-                String groupString = "<b>" + groupCount + "</b> group";
-                groupString += (groupCount != 1 ? "s" : "");
-                html += "Shared with ";
-                if (userCount > 0 && groupCount > 0)
-                    html += (userString + " & " + groupString + " </span>");
-                else if (userCount > 0)
-                    html += (userString + " </span>");
-                else if (groupCount > 0)
-                    html += (groupString + " </span>");
+                if (count <= 0) {
+                    html += "Private</span>";
+                } else {
+                    String userString = "<b>" + userCount + "</b> user";
+                    userString += (userCount != 1 ? "s" : "");
+                    String groupString = "<b>" + groupCount + "</b> group";
+                    groupString += (groupCount != 1 ? "s" : "");
+                    html += "Shared with ";
+                    if (userCount > 0 && groupCount > 0)
+                        html += (userString + " & " + groupString + " </span>");
+                    else if (userCount > 0)
+                        html += (userString + " </span>");
+                    else if (groupCount > 0)
+                        html += (groupString + " </span>");
+                }
             }
 
             shared.setHTML(html);
