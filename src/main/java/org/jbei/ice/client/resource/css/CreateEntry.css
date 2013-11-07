@@ -2,18 +2,19 @@
     height: 28px;
     color: #f2f2f2;
     font-weight: bold;
-    background-color: #709F35;
-    border: 1px solid #3f7f00;
+    background-color: #47a447;
+    border: 1px solid #398439;
     cursor: pointer;
     font-size: 0.75em;
     font-family: Arial;
     padding: 2px 9px 2px 9px;
+    border-radius: 2px;
 }
 
 .subMenuCreateNew:hover {
     color: #FFF;
-    border: 1px solid #333;
-    box-shadow: 0 0 1px 1px #ddd;
+    background-color: #5CB85C;
+    border-color: #4CAE4C;
 }
 
 .cellListKeyboardSelectedItem {
