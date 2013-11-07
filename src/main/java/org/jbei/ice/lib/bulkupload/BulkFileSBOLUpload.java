@@ -7,6 +7,7 @@ import java.nio.file.Path;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.parsers.sbol.ICESBOLParserVisitor;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -43,7 +44,7 @@ public class BulkFileSBOLUpload {
         try {
             // walk top level object
             for (SBOLRootObject rootObject : document.getContents()) {
-                Visitor visitor = new Visitor(EntryAddType.addTypeToType(addType));
+                ICESBOLParserVisitor visitor = new ICESBOLParserVisitor(EntryAddType.addTypeToType(addType));
                 rootObject.accept(visitor);
                 IDNASequence sequence = visitor.getFeaturedDNASequence();
                 BulkUploadAutoUpdate update = visitor.getUpdate();

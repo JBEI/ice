@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
@@ -121,7 +120,6 @@ public class SBOLVisitor {
                 return;
 
             uris.add(dcUri);
-            Logger.info(dcUri);
             subComponent.setURI(URI.create(dcUri));
             String displayId = StringUtils.isBlank(feature.getFeature().getIdentification()) ?
                     dcUri.substring(dcUri.lastIndexOf("/") + 1) : feature.getFeature().getIdentification();

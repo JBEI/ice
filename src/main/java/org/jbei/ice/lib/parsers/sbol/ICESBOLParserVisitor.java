@@ -1,10 +1,11 @@
-package org.jbei.ice.lib.bulkupload;
+package org.jbei.ice.lib.parsers.sbol;
 
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.jbei.ice.lib.bulkupload.DNAFeatureComparator;
 import org.jbei.ice.lib.composers.formatters.IceSequenceOntology;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
@@ -21,14 +22,19 @@ import org.sbolstandard.core.StrandType;
 import org.sbolstandard.core.util.SBOLBaseVisitor;
 
 /**
+ * Implementation of the ICESBOLParserVisitor
+ *
  * @author Hector Plahar
  */
-public class Visitor extends SBOLBaseVisitor<RuntimeException> {
+public class ICESBOLParserVisitor extends SBOLBaseVisitor<RuntimeException> {
 
     private FeaturedDNASequence featuredDNASequence;
     private BulkUploadAutoUpdate update;
 
-    public Visitor(EntryType type) {
+    public ICESBOLParserVisitor() {
+    }
+
+    public ICESBOLParserVisitor(EntryType type) {
         update = new BulkUploadAutoUpdate(type);
     }
 
@@ -45,24 +51,26 @@ public class Visitor extends SBOLBaseVisitor<RuntimeException> {
     public void visit(DnaComponent component) {
         if (featuredDNASequence == null) {
             featuredDNASequence = new FeaturedDNASequence();
-            String name = component.getName();
-            if (name == null || name.trim().isEmpty())
-                update.getKeyValue().put(EntryField.NAME, name);
-            else {
-                update.getKeyValue().put(EntryField.NAME, name);
-                update.getKeyValue().put(EntryField.ALIAS, component.getDisplayId());
+
+            if (update != null) {
+                String name = component.getName();
+                if (name == null || name.trim().isEmpty())
+                    update.getKeyValue().put(EntryField.NAME, name);
+                else {
+                    update.getKeyValue().put(EntryField.NAME, name);
+                    update.getKeyValue().put(EntryField.ALIAS, component.getDisplayId());
+                }
+                update.getKeyValue().put(EntryField.SUMMARY, component.getDescription());
             }
 
             featuredDNASequence.setName(component.getName());
             featuredDNASequence.setIdentifier(component.getDisplayId());
-            String description = component.getDescription();
-            featuredDNASequence.setDescription(description);
-            update.getKeyValue().put(EntryField.SUMMARY, description);
+            featuredDNASequence.setDescription(component.getDescription());
+
             featuredDNASequence.setDcUri(component.getURI().toString());
 
             DnaSequence sequence = component.getDnaSequence();
             if (sequence != null) {
-                System.out.println("Sequence length " + sequence.getNucleotides().length());
                 featuredDNASequence.setSequence(sequence.getNucleotides());
                 featuredDNASequence.setUri(sequence.getURI().toString());
             }
@@ -72,16 +80,6 @@ public class Visitor extends SBOLBaseVisitor<RuntimeException> {
         Logger.debug("Encountered DC " + component.getDisplayId());
 
         if (!annotations.isEmpty()) {
-            // sort the annotations
-//                Collections.sort(annotations, new Comparator<SequenceAnnotation>() {
-//                    @Override
-//                    public int compare(SequenceAnnotation o1, SequenceAnnotation o2) {
-//                        if (o1.getBioStart().intValue() == o2.getBioStart().intValue())
-//                            return o1.getBioEnd().compareTo(o2.getBioEnd());
-//                        return o1.getBioStart().compareTo(o2.getBioStart());
-//                    }
-//                });
-
             // iterate sorted annotations for top level
             for (SequenceAnnotation sequenceAnnotation : annotations) {
                 int strand = sequenceAnnotation.getStrand() == StrandType.POSITIVE ? 1 : -1;
@@ -93,8 +91,8 @@ public class Visitor extends SBOLBaseVisitor<RuntimeException> {
                 DNAFeatureLocation location = feature.getLocations().get(0);
                 featuredDNASequence.getFeatures().add(feature);
 
-                System.out.println("Adding feature [" + location.getGenbankStart() + ", " + location.getEnd() + "] for "
-                                           + feature.getIdentifier());
+                Logger.debug("Adding feature [" + location.getGenbankStart() + ", " + location.getEnd() + "] for "
+                                     + feature.getIdentifier());
             }
         }
     }
@@ -118,7 +116,7 @@ public class Visitor extends SBOLBaseVisitor<RuntimeException> {
                 DNAFeatureLocation location = feature.getLocations().get(0);
                 featuredDNASequence.getFeatures().add(feature);
 
-                System.out.println("Adding feature " + strand + "[" + location.getGenbankStart() + ", " + location
+                Logger.debug("Adding feature " + strand + "[" + location.getGenbankStart() + ", " + location
                         .getEnd() + "] for " + feature.getIdentifier());
             }
         }
@@ -233,5 +231,4 @@ public class Visitor extends SBOLBaseVisitor<RuntimeException> {
             return strand;
         }
     }
-
 }
