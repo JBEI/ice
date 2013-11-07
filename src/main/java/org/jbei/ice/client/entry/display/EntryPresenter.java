@@ -194,10 +194,6 @@ public class EntryPresenter extends AbstractPresenter {
         currentPart = newForm.getEntry();
     }
 
-    public void setDefaultPermissions(ArrayList<AccessPermission> accessPermissions) {
-        display.getPermissionsWidget().setPermissionData(accessPermissions, new DeletePermission());
-    }
-
     protected void setContextNavData() {
         if (currentContext == null)
             return;
