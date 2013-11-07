@@ -320,9 +320,9 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 + "before they will show up in search listings for others. You will however still be able to view and "
                 + "modify them on the collections page.</p><span class=\"general_sub_header\" style=\"width: 800px;\">"
                 + "File upload</span><p>There are three forms of file uploads that are supported: Comma-separated value"
-                + " (CSV) file, zip archive or SBOL RDF. <p>To upload a CSV file, select the type "
+                + " (CSV) file, zip archive or SBOL XML/RDF file. <p>To upload a CSV file, select the type "
                 + "of entry you wish to bulk import and download a csv template by clicking on \"File Upload.\""
-                + "Use a zip archive to include sequences and/attachments. Add the sequence and/or attachment files "
+                + " Use a zip archive to include sequences and/attachments. Add the sequence and/or attachment files "
                 + "to the zip archive with a plain csv file that also includes the name(s) of the sequence and/or "
                 + "attachment for each entry.</div>";
         mainContent.setHTML(1, 0, html);
@@ -421,6 +421,13 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         mainContent.getFlexCellFormatter().setColSpan(2, 0, 3);
 
         uploadFile.setAddType(sheet.getImportType());
+
+        if (draftsMenu.getCount() > 0 || pendingDraftsMenu.getCount() > 0) {
+            setToggleMenuVisibility(true);
+            layout.getFlexCellFormatter().setWidth(0, 0, "220px");
+            layout.getFlexCellFormatter().setWidth(0, 1, "10px");
+            sheet.getSheet().decreaseWidthBy(230);
+        }
     }
 
     @Override
@@ -470,15 +477,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             return;
 
         draftsMenu.setMenuItems(data, handler);
-
-        menuPanel.setVisible(true);
-        layout.getFlexCellFormatter().setWidth(0, 0, "220px");
-
-        layout.setHTML(0, 1, "&nbsp;");
-        layout.getFlexCellFormatter().setWidth(0, 1, "10px");
-
-        toggle.setVisible(true);
-        toggle.setDown(false);
+        adjustLayoutShowMenu();
         headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_CENTER);
         if (hideMenu)
             setDraftMenuVisibility(false, false);
@@ -487,20 +486,28 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     @Override
     public void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, boolean hideMenu,
             IRevertBulkUploadHandler handler) {
+        if (data.isEmpty())
+            return;
+
         pendingDraftsMenu.setMenuItems(data, handler);
         pendingDraftsMenu.setVisible(true);
+        adjustLayoutShowMenu();
+
+        if (hideMenu)
+            setDraftMenuVisibility(false, false);
+    }
+
+    /**
+     * Adjusts main page layout by showing the menu panel
+     */
+    protected void adjustLayoutShowMenu() {
         menuPanel.setVisible(true);
-
         layout.getFlexCellFormatter().setWidth(0, 0, "220px");
-
         layout.setHTML(0, 1, "&nbsp;");
         layout.getFlexCellFormatter().setWidth(0, 1, "10px");
-
         toggle.setVisible(true);
         toggle.setDown(true);
         headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_CENTER);
-        if (hideMenu)
-            setDraftMenuVisibility(false, false);
     }
 
     @Override
@@ -513,6 +520,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_LEFT);
 
         if (!visible) {
+            // hide menu by setting width to 0
             layout.getFlexCellFormatter().setWidth(0, 0, "0px");
             layout.setHTML(0, 1, "");
             layout.getFlexCellFormatter().setWidth(0, 1, "0px");
