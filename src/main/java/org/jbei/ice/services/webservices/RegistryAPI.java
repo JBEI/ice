@@ -138,6 +138,9 @@ public class RegistryAPI implements IRegistryAPI {
     public PartData getPartByUniqueName(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "name") String name) throws ServiceException {
         log(sessionId, "getPartByUniqueName: " + name);
+        if (name == null || name.trim().isEmpty())
+            throw new ServiceException("Cannot retrieve part for empty name value");
+
         try {
             Account account = validateAccount(sessionId);
             String prefix = Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX);
