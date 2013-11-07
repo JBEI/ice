@@ -421,7 +421,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    String generateNextPartNumber(String prefix, String delimiter, String suffix) throws DAOException {
+    synchronized String generateNextPartNumber(String prefix, String delimiter, String suffix) throws DAOException {
         Session session = currentSession();
         try {
             String queryString = "from " + Entry.class.getName() + " where partNumber LIKE '"

@@ -106,31 +106,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
     public Permission retrievePermission(Entry entry, Folder folder, Account account, Group group, boolean canRead,
             boolean canWrite) throws DAOException {
         try {
-            Session session = currentSession();
-            Criteria criteria = session.createCriteria(Permission.class)
-                                       .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
-                                       .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)));
-
-            if (group == null)
-                criteria.add(Restrictions.isNull("group"));
-            else
-                criteria.add(Restrictions.eq("group", group));
-
-            if (folder == null)
-                criteria.add(Restrictions.isNull("folder"));
-            else
-                criteria.add(Restrictions.eq("folder", folder));
-
-            if (account == null)
-                criteria.add(Restrictions.isNull("account"));
-            else
-                criteria.add(Restrictions.eq("account", account));
-
-            if (entry == null)
-                criteria.add(Restrictions.isNull("entry"));
-            else
-                criteria.add(Restrictions.eq("entry", entry));
-
+            Criteria criteria = createPermissionCriteria(entry, folder, account, group, canRead, canWrite);
             return (Permission) criteria.uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
@@ -138,17 +114,50 @@ class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
+    protected Criteria createPermissionCriteria(Entry entry, Folder folder, Account account, Group group,
+            boolean canRead, boolean canWrite) {
+        Session session = currentSession();
+        Criteria criteria = session.createCriteria(Permission.class)
+                                   .add(Restrictions.eq("canWrite", canWrite))
+                                   .add(Restrictions.eq("canRead", canRead));
+
+        if (group == null)
+            criteria.add(Restrictions.isNull("group"));
+        else
+            criteria.add(Restrictions.eq("group", group));
+
+        if (folder == null)
+            criteria.add(Restrictions.isNull("folder"));
+        else
+            criteria.add(Restrictions.eq("folder", folder));
+
+        if (account == null)
+            criteria.add(Restrictions.isNull("account"));
+        else
+            criteria.add(Restrictions.eq("account", account));
+
+        if (entry == null)
+            criteria.add(Restrictions.isNull("entry"));
+        else
+            criteria.add(Restrictions.eq("entry", entry));
+        return criteria;
+    }
+
     public void removePermission(Entry entry, Folder folder, Account account, Group group, boolean canRead,
             boolean canWrite) throws DAOException {
-        Permission permission = retrievePermission(entry, folder, account, group, canRead, canWrite);
-        if (permission == null)
+        Criteria criteria = createPermissionCriteria(entry, folder, account, group, canRead, canWrite);
+        List list = criteria.list();
+        if (list == null || list.isEmpty())
             return;
 
-        try {
-            delete(permission);
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
+        for (Object object : list) {
+            Permission permission = (Permission) object;
+            try {
+                delete(permission);
+            } catch (HibernateException he) {
+                Logger.error(he);
+                throw new DAOException(he);
+            }
         }
     }
 

@@ -3,7 +3,6 @@ package org.jbei.ice.lib.parsers;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SimpleDNASequence;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.biojava.bio.program.abi.ABITrace;
 import org.biojava.bio.symbol.SymbolList;
 
@@ -47,6 +46,6 @@ public class ABIParser extends AbstractParser {
 
     @Override
     public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
-        throw new NotImplementedException("ABI file can't be presented as string!");
+        throw new NoSuchMethodError("ABI file can't be presented as string!");
     }
 }

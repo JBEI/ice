@@ -409,10 +409,13 @@ public class HibernateSearch {
                 PartData info = ModelToInfoFactory.createTableViewData(entry, true);
                 if (info == null)
                     continue;
-                try {
-                    info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
-                } catch (ControllerException ce) {
-                    continue;
+                // for bulk edit
+                if (account != null) {
+                    try {
+                        info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
+                    } catch (ControllerException ce) {
+                        Logger.warn(ce.getMessage());
+                    }
                 }
                 searchResult.setEntryInfo(info);
             }

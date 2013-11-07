@@ -1,6 +1,8 @@
-package org.jbei.ice.server.servlet.helper;
+package org.jbei.ice.lib.bulkupload;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -9,15 +11,13 @@ import java.util.Map;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
 import au.com.bytecode.opencsv.CSVParser;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -27,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
  */
 public class PartBulkCSVUpload extends BulkCSVUpload {
 
-    public PartBulkCSVUpload(EntryAddType addType, Account account, Path csvFilePath) {
+    public PartBulkCSVUpload(EntryAddType addType, String account, Path csvFilePath) {
         super(addType, account, csvFilePath);
     }
 
@@ -50,6 +50,8 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
         headerFields.add(EntryField.REFERENCES);
         headerFields.add(EntryField.LINKS);
         headerFields.add(EntryField.STATUS);
+        headerFields.add(EntryField.ATT_FILENAME);
+        headerFields.add(EntryField.SEQ_FILENAME);
     }
 
     @Override
@@ -63,17 +65,42 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
     @Override
     public String processUpload() {
         // maintains list of fields in the order they are contained in the file
-        List<EntryField> fields = new LinkedList<>();
+        List<BulkUploadAutoUpdate> updates;
+        try {
+            updates = getBulkUploadUpdates(new FileInputStream(csvFilePath.toFile()));
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
 
-        List<BulkUploadAutoUpdate> updates = new LinkedList<>();
+        // validate to ensure all required fields are present
+        String errorString = validate(updates);
+        if (!StringUtils.isBlank(errorString))
+            return errorString;
 
-        int rowsProcessed = 0;
+        // create actual parts in the registry
+        try {
+            return Long.toString(createRegistryParts(updates));
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return "Error: " + ce.getMessage();
+        }
+    }
+
+    @Override
+    List<BulkUploadAutoUpdate> getBulkUploadUpdates(InputStream inputStream) throws Exception {
         CSVParser parser = null;
+        List<BulkUploadAutoUpdate> updates = new LinkedList<>();
+        List<EntryField> fields = new LinkedList<>();
 
         // read file
         try {
-            List<String> lines = FileUtils.readLines(csvFilePath.toFile());
+
+            List<String> lines = IOUtils.readLines(inputStream);
             for (String line : lines) {
+                line = line.trim();
+                if (line.isEmpty())
+                    continue;
+
                 if (parser == null) {
                     // header is a good indicator of what the separator char is (tab vs comma)
                     if (line.contains("\t") && !line.contains(","))
@@ -91,8 +118,8 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
 
                         EntryField field = EntryField.fromString(fieldStr);
                         if (!isValidHeader(field)) {
-                            return "<b>Error<b>: The selected upload type doesn't support the following field ["
-                                    + fieldStr + "]";
+                            throw new Exception("The selected upload type doesn't support the following field ["
+                                                        + fieldStr + "]");
                         }
 
                         fields.add(i, field);
@@ -106,29 +133,16 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
                         autoUpdate.getKeyValue().put(field, valuesArray[i]);
                     }
                     updates.add(autoUpdate);
-                    rowsProcessed += 1;
                 }
             }
         } catch (IOException io) {
             Logger.error(io);
         }
 
-        // limit for performance reasons
-        if (rowsProcessed > 300)
-            return "Error: Your file contains too may rows [" + rowsProcessed + "]. Limit is 300";
+        if (updates.isEmpty())
+            throw new Exception("CSV file could not be read");
 
-        // validate to ensure all required fields are present
-        String errorString = validate(updates);
-        if (!StringUtils.isBlank(errorString))
-            return errorString;
-
-        // create actual parts in the registry
-        try {
-            return Long.toString(createRegistryParts(updates));
-        } catch (ControllerException ce) {
-            Logger.error(ce);
-            return "Error: " + ce.getMessage();
-        }
+        return updates;
     }
 
     protected long createRegistryParts(List<BulkUploadAutoUpdate> updates) throws ControllerException {
@@ -139,7 +153,7 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
             if (update.getBulkUploadId() <= 0)
                 update.setBulkUploadId(bulkUploadId);
 
-            Logger.info(account.getEmail() + ": " + update.toString());
+            Logger.info(account + ": " + update.toString());
             update = controller.autoUpdateBulkUpload(account, update, addType);
             if (bulkUploadId == 0)
                 bulkUploadId = update.getBulkUploadId();
@@ -150,8 +164,8 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
     protected String validate(List<BulkUploadAutoUpdate> updates) {
         for (BulkUploadAutoUpdate update : updates) {
             ArrayList<EntryField> toValidate = new ArrayList<EntryField>(requiredFields);
-            for (Map.Entry<EntryField, String> entry : update.getKeyValue().entrySet()) {
 
+            for (Map.Entry<EntryField, String> entry : update.getKeyValue().entrySet()) {
                 EntryField entryField = entry.getKey();
                 String value = entry.getValue();
 

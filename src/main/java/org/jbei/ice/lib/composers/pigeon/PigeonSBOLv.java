@@ -86,6 +86,7 @@ public class PigeonSBOLv {
         map.put("SO_0000458", "s,2");
         map.put("SO_0000470", "s,2");
         map.put("SO_0000551", "s,2");
+        map.put("SO_0000552", "r,13");
         map.put("SO_0000553", "s,2");
         map.put("SO_0000555", "s,2");
         map.put("SO_0000557", "s,2");

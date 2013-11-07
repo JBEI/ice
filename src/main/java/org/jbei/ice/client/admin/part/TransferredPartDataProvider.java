@@ -8,6 +8,7 @@ import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
+import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
 /**
@@ -23,7 +24,27 @@ public class TransferredPartDataProvider extends EntryDataViewDataProvider {
 
     @Override
     protected void fetchEntryData(ColumnField field, boolean ascending, int start, int factor, boolean reset) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    protected void onRangeChanged(HasData<PartData> display) {
+        if (resultSize == 0)   // display changed its range of interest but no data
+            return;
+
+        // values of range to display from view
+        final Range range = display.getVisibleRange();
+        final int rangeStart = range.getStart();
+        final int rangeEnd = (rangeStart + range.getLength()) > resultSize ? resultSize
+                : (rangeStart + range.getLength());
+
+        // user is sorting
+        if (sortChanged(rangeEnd)) {
+            fetchEntryData(lastSortField, lastSortAsc, 0, range.getLength(), true);
+            return;
+        }
+
+        // sort did not change, use data in cache
+        updateRowData(rangeStart, cachedEntries.subList(rangeStart, rangeEnd));
     }
 
     public void setData(ArrayList<PartData> data, boolean resetSort) {
@@ -49,13 +70,5 @@ public class TransferredPartDataProvider extends EntryDataViewDataProvider {
 
         updateRowData(rangeStart, cachedEntries.subList(rangeStart, rangeEnd));
         table.setPageStart(0);
-
-        rangeStart = rangeEnd;
-        if (rangeEnd < resultSize) {
-            rangeEnd += range.getLength();
-            if (rangeEnd > resultSize)
-                rangeEnd = resultSize;
-            cacheMore(lastSortField, lastSortAsc, rangeStart, 2 * rangeEnd);
-        }
     }
 }

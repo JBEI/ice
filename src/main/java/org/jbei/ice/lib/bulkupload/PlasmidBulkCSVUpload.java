@@ -1,32 +1,31 @@
-package org.jbei.ice.server.servlet.helper;
+package org.jbei.ice.lib.bulkupload;
 
 import java.nio.file.Path;
 
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
 /**
- * Bulk CSV uploader for strains
+ * Bulk CSV Uploader for plasmids
  *
  * @author Hector Plahar
  */
-public class StrainBulkCSVUpload extends PartBulkCSVUpload {
+public class PlasmidBulkCSVUpload extends PartBulkCSVUpload {
 
-    public StrainBulkCSVUpload(EntryAddType addType, Account account, Path csvFilePath) {
+    public PlasmidBulkCSVUpload(EntryAddType addType, String account, Path csvFilePath) {
         super(addType, account, csvFilePath);
     }
 
-    @Override
     protected void populateHeaderFields() {
         super.populateHeaderFields();
-        headerFields.add(EntryField.PARENTAL_STRAIN);
-        headerFields.add(EntryField.GENOTYPE_OR_PHENOTYPE);
-        headerFields.add(EntryField.PLASMIDS);
+        headerFields.add(EntryField.CIRCULAR);
+        headerFields.add(EntryField.BACKBONE);
+        headerFields.add(EntryField.PROMOTERS);
+        headerFields.add(EntryField.REPLICATES_IN);
+        headerFields.add(EntryField.ORIGIN_OF_REPLICATION);
         headerFields.add(EntryField.SELECTION_MARKERS);
     }
 
-    @Override
     protected void populateRequiredFields() {
         super.populateRequiredFields();
         requiredFields.add(EntryField.SELECTION_MARKERS);

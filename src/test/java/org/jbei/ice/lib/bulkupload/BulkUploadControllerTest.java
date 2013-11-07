@@ -58,7 +58,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
 
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.PLASMID);
         Assert.assertNotNull(autoUpdate);
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
@@ -102,7 +102,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
 
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.PLASMID);
         Assert.assertNotNull(autoUpdate);
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
@@ -134,7 +134,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.STRAIN_NAME, "strain");
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "strain summary");
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "strain selection markers");
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, type);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, type);
         Assert.assertNotNull(autoUpdate);
         ArrayList<BulkUploadInfo> userUpload = controller.retrieveByUser(account, account);
         Assert.assertNotNull(userUpload);
@@ -148,9 +148,11 @@ public class BulkUploadControllerTest {
             autoUpdate.getKeyValue().put(EntryField.PI, "PI" + i);
             autoUpdate.getKeyValue().put(EntryField.SUMMARY, "Summary" + i);
             if (i % 2 == 0)
-                Assert.assertNotNull(controller.autoUpdateBulkUpload(account2, autoUpdate, EntryAddType.PART));
+                Assert.assertNotNull(controller.autoUpdateBulkUpload(account2.getEmail(), autoUpdate,
+                                                                     EntryAddType.PART));
             else
-                Assert.assertNotNull(controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.PART));
+                Assert.assertNotNull(controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate,
+                                                                     EntryAddType.PART));
         }
         userUpload = controller.retrieveByUser(account2, account2);
         Assert.assertEquals(count / 2, userUpload.size());
@@ -166,7 +168,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.NAME, "plasmid name");
         autoUpdate.getKeyValue().put(EntryField.PI, "plasmid principal investigator");
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "plasmid select markers");
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.PLASMID);
         Assert.assertNotNull(autoUpdate);
         ControllerFactory.getAccountController().createSystemAccount();
         BulkUploadInfo info = controller.deleteDraftById(account, autoUpdate.getBulkUploadId());
@@ -184,7 +186,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.LINKS, "google");
 
         // first auto update. expect it to create a new bulk upload and entry
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, type);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, type);
         Assert.assertNotNull(autoUpdate);
         long entryId = autoUpdate.getEntryId();
         long bulkId = autoUpdate.getBulkUploadId();
@@ -205,7 +207,7 @@ public class BulkUploadControllerTest {
         autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
 
         // auto update: expect plasmid and bulk upload with no fields set
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, type);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, type);
         Assert.assertNotNull(autoUpdate);
         entryId = autoUpdate.getEntryId();
         bulkId = autoUpdate.getBulkUploadId();
@@ -222,7 +224,7 @@ public class BulkUploadControllerTest {
         Account account = AccountCreator.createTestAccount("testSubmitBulkImportDraft", false);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
         autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN);
         Assert.assertNotNull(autoUpdate);
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
@@ -258,7 +260,7 @@ public class BulkUploadControllerTest {
         Assert.assertEquals(autoUpdate.getBulkUploadId(), id);
 
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN);
 
         Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
 
@@ -289,7 +291,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
 
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.ARABIDOPSIS);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.ARABIDOPSIS);
         Assert.assertNotNull(autoUpdate);
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
@@ -316,7 +318,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
 
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.PLASMID);
         Assert.assertNotNull(autoUpdate);
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
@@ -357,7 +359,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.PLASMID_SUMMARY, "plasmid for strain");
         autoUpdate.getKeyValue().put(EntryField.PLASMID_SELECTION_MARKERS, "plasmid select");
 
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
         Assert.assertNotNull(autoUpdate);
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
@@ -398,7 +400,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "selection");
         autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
         Assert.assertNotNull(autoUpdate);
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
@@ -414,7 +416,7 @@ public class BulkUploadControllerTest {
     public void testUpdatePreference() throws Exception {
         Account account = AccountCreator.createTestAccount("testUpdatePreference", false);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PART);
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.PART);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.PART);
         Assert.assertNotNull(autoUpdate);
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
@@ -436,10 +438,10 @@ public class BulkUploadControllerTest {
     public void testStrainWithOnePlasmidAutoUpdating() throws Exception {
         Account account = AccountCreator.createTestAccount("testAutoUpdating", false);
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
         Assert.assertNotNull(autoUpdate);
         autoUpdate.getKeyValue().put(EntryField.PI, "Nathan");
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
 
         // get entry
         EntryController entryController = new EntryController();
@@ -454,13 +456,13 @@ public class BulkUploadControllerTest {
 
         // add promoters to plasmid
         autoUpdate.getKeyValue().put(EntryField.PLASMID_PROMOTERS, "promoters");
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
         entry = entryController.get(account, autoUpdate.getEntryId());
         plasmid = (Entry) entry.getLinkedEntries().toArray()[0];
         Assert.assertEquals("promoters", ((Plasmid) plasmid).getPromoters());
 
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, "BLS1");
-        autoUpdate = controller.autoUpdateBulkUpload(account, autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
         entry = entryController.get(account, autoUpdate.getEntryId());
         plasmid = (Entry) entry.getLinkedEntries().toArray()[0];
         Assert.assertEquals(1, entry.getBioSafetyLevel().intValue());

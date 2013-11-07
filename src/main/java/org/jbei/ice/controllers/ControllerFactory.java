@@ -5,6 +5,7 @@ import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryTransfers;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.StorageController;
@@ -40,6 +41,7 @@ public class ControllerFactory {
     private static SearchController searchController;
     private static MessageController messageController;
     private static WoRController webController;
+    private static EntryTransfers entryTransfers;
 
     public static PermissionsController getPermissionController() {
         if (permissionsController == null)
@@ -136,5 +138,11 @@ public class ControllerFactory {
         if (webController == null)
             webController = new WoRController();
         return webController;
+    }
+
+    public static EntryTransfers getEntryTransfers() {
+        if (entryTransfers == null)
+            entryTransfers = new EntryTransfers();
+        return entryTransfers;
     }
 }

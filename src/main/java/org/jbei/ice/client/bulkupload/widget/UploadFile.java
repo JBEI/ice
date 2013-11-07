@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Hector Plahar
  */
-public class UploadCSV extends Composite {
+public class UploadFile extends Composite {
 
     private HTML label;
     private HTML templateDownloadLabel;
@@ -37,8 +37,8 @@ public class UploadCSV extends Composite {
     private EntryAddType addType;
     private ServiceDelegate<Long> delegate;
 
-    public UploadCSV() {
-        label = new HTML("<i class=\"" + FAIconType.TABLE.getStyleName() + "\"></i> CSV Upload");
+    public UploadFile() {
+        label = new HTML("<i class=\"" + FAIconType.FILE_TEXT.getStyleName() + "\"></i> File Upload");
         label.setStyleName("bulk_upload_visibility");
         label.addStyleName("opacity_hover");
         initWidget(label);
@@ -85,7 +85,7 @@ public class UploadCSV extends Composite {
 
         final PopupLayout layout = new PopupLayout(formPanel, templateDownloadLabel);
 
-        dialog = new GenericPopup(layout, "<b>CSV Upload</b>");
+        dialog = new GenericPopup(layout, "<b>File Upload</b>");
 
         formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
@@ -114,10 +114,10 @@ public class UploadCSV extends Composite {
                 if (fileUpload.getFilename().isEmpty())
                     return;
 
-                layout.reset();
-                formPanel.setAction(
-                        "/upload?sid=" + ClientController.sessionId + "&type=bulk_csv&upload=" + addType.name());
+                String url = "/upload?sid=" + ClientController.sessionId + "&type=bulk_csv&upload=" + addType.name();
+                formPanel.setAction(url);
                 formPanel.submit();
+                layout.reset();
             }
         });
     }
@@ -142,8 +142,9 @@ public class UploadCSV extends Composite {
                     + "padding-right:10px; color: #3a87ad\" class=\"" + FAIconType.INFO_CIRCLE.getStyleName()
                     + "\"></i>The first line of your CSV file should contain"
                     + " the header information and must be spelled exactly as it appears in the web interface. e.g. "
-                    + "<b>\"Principal Investigator\", \"Funding Source\", \"Intellectual Property\",</b> etc.<br><br>"
-                    + "<span id=\"template_download\"></span> to download a template for the CSV upload.</p>";
+                    + "<b>\"Principal Investigator\", </b> etc. If uploading a zip file, make sure there is exactly "
+                    + "<b>1</b> csv file contained in it.<br><br>"
+                    + "<span id=\"template_download\"></span> to download a CSV template for your selected upload.</p>";
             HTMLPanel panel = new HTMLPanel(html);
             panel.add(label, "template_download");
             label.setStyleName("footer_feedback_widget");

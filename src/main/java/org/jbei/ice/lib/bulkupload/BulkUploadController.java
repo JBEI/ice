@@ -430,8 +430,10 @@ public class BulkUploadController {
         return draftInfo;
     }
 
-    public BulkUploadAutoUpdate autoUpdateBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
+    public BulkUploadAutoUpdate autoUpdateBulkUpload(String userId, BulkUploadAutoUpdate autoUpdate,
             EntryAddType addType) throws ControllerException {
+        Account account = accountController.getByEmail(userId);
+
         BulkUpload draft = null;
         if (autoUpdate.getEditMode() != EditMode.BULK_EDIT) {
             // deal with bulk upload
@@ -439,10 +441,9 @@ public class BulkUploadController {
             try {
                 draft = dao.retrieveById(autoUpdate.getBulkUploadId());
                 if (draft == null) {
-                    // validate add type and entrytype
+                    // validate add type and entry type
                     if (addType != EntryAddType.STRAIN_WITH_PLASMID && EntryType.nameToType(
-                            addType.name()) != autoUpdate
-                            .getType()) {
+                            addType.name()) != autoUpdate.getType()) {
                         throw new ControllerException("Incompatible add type [" + addType.toString()
                                                               + "] and auto update entry type ["
                                                               + autoUpdate.getType().toString() + "]");
@@ -539,7 +540,8 @@ public class BulkUploadController {
                 entry.setVisibility(Visibility.DRAFT.getValue());
 
             // set the plasmids and update
-            if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())) {
+            if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())
+                    && entry.getLinkedEntries().isEmpty()) {
                 Strain strain = (Strain) entry;
                 entryController.setStrainPlasmids(account, strain, strain.getPlasmids());
             }

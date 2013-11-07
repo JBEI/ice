@@ -87,7 +87,6 @@ public class EntryAddPresenter {
             @Override
             public void onSuccess(ArrayList<AccessPermission> result) {
                 accessPermissions = result;
-                entryPresenter.setDefaultPermissions(accessPermissions);
             }
         }.go(eventBus);
     }

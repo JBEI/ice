@@ -41,14 +41,6 @@ public class WoRControllerTest {
     }
 
     @Test
-    public void testIsValidWebPartner() throws Exception {
-        String webPartner = "public-registry.jbei.org";
-        Assert.assertFalse(controller.isValidWebPartner(webPartner));
-        controller.addWebPartner(webPartner, webPartner);
-        Assert.assertTrue(controller.isValidWebPartner(webPartner));
-    }
-
-    @Test
     public void testGetRegistryPartners() throws Exception {
         String partner1 = "public-registry.jbei.org";
         String partner2 = "registry.jbei.org";
@@ -70,16 +62,6 @@ public class WoRControllerTest {
     public void testAddWebPartner() throws Exception {
         String url = "public-registry.jbei.org";
         controller.addWebPartner(url, url);
-    }
-
-    @Test
-    public void testRemoveWebPartner() throws Exception {
-        String webPartner = "public-registry.jbei.org";
-        Assert.assertFalse(controller.isValidWebPartner(webPartner));
-        controller.addWebPartner(webPartner, webPartner);
-        Assert.assertTrue(controller.isValidWebPartner(webPartner));
-        controller.removeWebPartner(webPartner);
-        Assert.assertFalse(controller.isValidWebPartner(webPartner));
     }
 
     @Test

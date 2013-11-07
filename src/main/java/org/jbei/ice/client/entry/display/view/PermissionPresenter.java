@@ -116,7 +116,6 @@ public class PermissionPresenter {
         if (listAccess == null)
             return;
 
-        view.resetPermissionDisplay();
         writeList.clear();
         readList.clear();
 

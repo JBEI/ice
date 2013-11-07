@@ -15,6 +15,7 @@ import org.jbei.ice.lib.shared.dto.search.SearchResults;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.PartTransfer;
+import org.jbei.ice.lib.vo.SequencePartTransfer;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 
 /**
@@ -107,8 +108,9 @@ public interface IRegistryAPI {
     WebOfRegistries setRegistryPartnerAdd(@WebParam(name = "uri") String uri, @WebParam(name = "name") String name,
             @WebParam(name = "add") boolean add) throws ServiceException;
 
-    boolean uploadParts(@WebParam(name = "partnerId") String partnerId, @WebParam(
-            name = "parts") ArrayList<PartTransfer> parts)
+    boolean uploadPartsWithSequences(@WebParam(name = "partnerId") String partnerId,
+            @WebParam(name = "apiKey") String apiKey,
+            @WebParam(name = "sequenceParts") ArrayList<SequencePartTransfer> sequencePartTransfers)
             throws ServiceException;
 
     PartData retrieveStrainForSampleBarcode(@WebParam(name = "sessionId") String sessionId,

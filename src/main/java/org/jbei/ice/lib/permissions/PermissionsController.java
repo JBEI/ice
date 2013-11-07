@@ -134,6 +134,31 @@ public class PermissionsController {
         }
     }
 
+    /**
+     * Removes permissions that are associated with folder. This is typically for
+     * folders that are shared as public folders
+     *
+     * @param account  user account. typically an administrator
+     * @param folderId unique identifier for folder whose permissions are to be removed
+     * @throws ControllerException
+     */
+    public void removeAllFolderPermissions(Account account, long folderId) throws ControllerException {
+        Folder folder = folderController.getFolderById(folderId);
+        if (folder == null) {
+            Logger.warn("Could not find folder with id " + folderId + " for permission removal");
+            return;
+        }
+
+        if (!hasWritePermission(account, folder))
+            throw new ControllerException(account.getEmail() + " not allowed to modify folder " + folderId);
+
+        try {
+            dao.clearPermissions(folder);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
     public void removePermission(Account requestingAccount, AccessPermission access) throws ControllerException {
         EntryController entryController = ControllerFactory.getEntryController();
 
@@ -393,6 +418,9 @@ public class PermissionsController {
     }
 
     public boolean hasWritePermission(Account account, Entry entry) throws ControllerException {
+        if (account == null)
+            return false;
+
         if (isOwnerOrAdministrator(account, entry))
             return true;
 

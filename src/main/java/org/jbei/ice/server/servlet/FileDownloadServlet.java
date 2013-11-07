@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,6 +13,7 @@ import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
@@ -22,9 +22,7 @@ import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.server.servlet.helper.BulkCSVUploadHeaders;
 
 import org.apache.commons.io.IOUtils;
 
@@ -168,26 +166,10 @@ public class FileDownloadServlet extends HttpServlet {
 
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment;filename=" + addType.toLowerCase() + "_csv_upload.csv");
-        ArrayList<EntryField> headers = BulkCSVUploadHeaders.getHeadersForType(entryAddType);
-        if (headers == null)
-            return;
+        byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType);
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < headers.size(); i++) {
-            if (i != 0) {
-                sb.append(",");
-            }
-
-            sb.append('"');
-            sb.append(headers.get(i).toString());
-            if (BulkCSVUploadHeaders.isRequired(headers.get(i), entryAddType))
-                sb.append("*");
-            sb.append('"');
-        }
-
-        sb.append("\n");
-        try {
-            IOUtils.copy(new ByteArrayInputStream(sb.toString().getBytes()), response.getOutputStream());
+        try (ByteArrayInputStream stream = new ByteArrayInputStream(template)) {
+            IOUtils.copy(stream, response.getOutputStream());
         } catch (IOException e) {
             Logger.error(e);
         }

@@ -19,6 +19,7 @@ import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryTransfers;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -174,7 +175,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Logger.info(account.getEmail() + ": " + wrapper.toString());
         BulkUploadController controller = ControllerFactory.getBulkUploadController();
         try {
-            return controller.autoUpdateBulkUpload(account, wrapper, addType);
+            return controller.autoUpdateBulkUpload(account.getEmail(), wrapper, addType);
         } catch (ControllerException de) {
             return null;
         }
@@ -198,7 +199,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         try {
-            ControllerFactory.getEntryController().transferEntries(account, ids, sites);
+            new EntryTransfers().transferEntries(account, ids, sites);
         } catch (ControllerException e) {
             Logger.error(e);
         }
@@ -1638,7 +1639,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<PartData> retrieveTransferredParts(String sessionId) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
         try {
-            return ControllerFactory.getEntryController().getTransferredParts(account);
+            return ControllerFactory.getEntryTransfers().getTransferredParts(account);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1653,7 +1654,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return false;
 
         try {
-            return ControllerFactory.getEntryController().processTransferredParts(account, partIds, accept);
+            return ControllerFactory.getEntryTransfers().processTransferredParts(account, partIds, accept);
         } catch (ControllerException e) {
             Logger.error(e);
             return false;

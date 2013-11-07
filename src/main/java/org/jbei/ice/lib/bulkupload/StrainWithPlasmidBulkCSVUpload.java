@@ -1,8 +1,7 @@
-package org.jbei.ice.server.servlet.helper;
+package org.jbei.ice.lib.bulkupload;
 
 import java.nio.file.Path;
 
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
@@ -13,7 +12,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
  */
 public class StrainWithPlasmidBulkCSVUpload extends PartBulkCSVUpload {
 
-    public StrainWithPlasmidBulkCSVUpload(EntryAddType addType, Account account, Path csvFilePath) {
+    public StrainWithPlasmidBulkCSVUpload(EntryAddType addType, String account, Path csvFilePath) {
         super(addType, account, csvFilePath);
     }
 
@@ -38,6 +37,8 @@ public class StrainWithPlasmidBulkCSVUpload extends PartBulkCSVUpload {
         headerFields.add(EntryField.STRAIN_SUMMARY);
         headerFields.add(EntryField.STRAIN_NOTES);
         headerFields.add(EntryField.STRAIN_REFERENCES);
+        headerFields.add(EntryField.STRAIN_ATT_FILENAME);
+        headerFields.add(EntryField.STRAIN_SEQ_FILENAME);
 
         // plasmid information
         headerFields.add(EntryField.PLASMID_NAME);
@@ -53,6 +54,8 @@ public class StrainWithPlasmidBulkCSVUpload extends PartBulkCSVUpload {
         headerFields.add(EntryField.PLASMID_SUMMARY);
         headerFields.add(EntryField.PLASMID_NOTES);
         headerFields.add(EntryField.PLASMID_REFERENCES);
+        headerFields.add(EntryField.PLASMID_ATT_FILENAME);
+        headerFields.add(EntryField.PLASMID_SEQ_FILENAME);
 
         headerFields.add(EntryField.PARENTAL_STRAIN);
         headerFields.add(EntryField.GENOTYPE_OR_PHENOTYPE);

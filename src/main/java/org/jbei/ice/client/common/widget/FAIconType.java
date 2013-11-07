@@ -37,6 +37,7 @@ public enum FAIconType {
     EYE_OPEN("fa fa-eye-open"),
     FAST_BACKWARD("fa fa-fast-backward"),
     FAST_FORWARD("fa fa-fast-forward"),
+    FILE_TEXT("fa fa-file-text"),
     FOLDER("fa fa-folder"),
     FOLDER_ALT("fa fa-folder-o"),
     FOLDER_OPEN("fa fa-folder-open"),

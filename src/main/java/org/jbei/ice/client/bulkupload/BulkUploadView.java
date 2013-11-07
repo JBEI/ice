@@ -12,7 +12,7 @@ import org.jbei.ice.client.bulkupload.widget.CreatorWidget;
 import org.jbei.ice.client.bulkupload.widget.PermissionsSelection;
 import org.jbei.ice.client.bulkupload.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkupload.widget.SavedDraftsMenu;
-import org.jbei.ice.client.bulkupload.widget.UploadCSV;
+import org.jbei.ice.client.bulkupload.widget.UploadFile;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.AbstractLayout;
@@ -68,7 +68,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private String lastUpdated;
     private HTML bulkImportDisplay;
     private HTMLPanel bulkImportHeader;
-    private UploadCSV uploadCSV;
+    private UploadFile uploadFile;
 //    private SampleSelectionWidget sampleSelection;
 
     private HorizontalPanel headerPanel;
@@ -108,7 +108,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         updating.setVisible(false);
         selection = new PermissionsSelection();
         creator = new CreatorWidget(ClientController.account.getFullName(), ClientController.account.getEmail());
-        uploadCSV = new UploadCSV();
+        uploadFile = new UploadFile();
 
         uploadName = new HTML();
         uploadName.setStyleName("display-inline");
@@ -136,7 +136,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         bulkImportHeader.add(draftInput, "draft_name");
         bulkImportHeader.add(uploadName, "upload_name");
         bulkImportHeader.add(updating, "updating_icon");
-        bulkImportHeader.add(uploadCSV, "bulk_import_upload_csv");
+        bulkImportHeader.add(uploadFile, "bulk_import_upload_csv");
         bulkImportHeader.add(selection.asWidget(), "bulk_import_permission_selection");
         bulkImportHeader.add(creator.asWidget(), "creator");
         initHandlers();
@@ -198,7 +198,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
 
     @Override
     public void setCSVUploadSuccessDelegate(ServiceDelegate<Long> handler) {
-        this.uploadCSV.setDelegate(handler);
+        this.uploadFile.setDelegate(handler);
     }
 
     @Override
@@ -310,23 +310,22 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         mainContent.setWidget(0, 0, headerPanel);
         mainContent.getFlexCellFormatter().setWidth(0, 0, "140px");
 
-        mainContent.setHTML(1, 0,
-                            "<div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; "
-                                    + "margin-top: 17px; background-color: #f1f1f1\"><p>Select the type "
-                                    + "of entry you wish to bulk import.</p> <p>Please note that columns"
-                                    + " with headers indicated by <span class=\"required\">*</span> "
-                                    + "are required. You will not be able to submit the form until you enter a "
-                                    + "value for those fields. The forms are automatically saved as a draft, "
-                                    + "which will only be visible to you.</p>"
-                                    + "<p>After submitting a saved draft or bulk upload, "
-                                    + "an administrator must approve your"
-                                    + " submission before they will show up in search listings for others. You will "
-                                    + "however still be able to view and modify them on the collections page.</p>"
-                                    + "<p>To upload data from a file, make sure it is saved as a comma-separated value"
-                                    + " (CSV) file with the field delimiter set to a comma (,) "
-                                    + "and the text delimiter set to a quote (\"). After uploading the part information"
-                                    + ", you can use the bulk upload interface to associate sequence files manually."
-                                    + "</div>");
+        String html = "<div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; margin-top: 17px; "
+                + "background-color: #f1f1f1\"><span class=\"general_sub_header\" style=\"width: 800px;\">General "
+                + "Instructions</span><p>Select the type of entry you wish to bulk import.</p> <p>Please note that "
+                + "columns with headers indicated by <span class=\"required\">*</span> are required. "
+                + "You will not be able to submit the form until you enter a value for those fields. The forms are "
+                + "automatically saved as a draft, which will only be visible to you.</p>"
+                + "<p>After submitting a saved draft or bulk upload, an administrator must approve your submission "
+                + "before they will show up in search listings for others. You will however still be able to view and "
+                + "modify them on the collections page.</p><span class=\"general_sub_header\" style=\"width: 800px;\">"
+                + "File upload</span><p>There are three forms of file uploads that are supported: Comma-separated value"
+                + " (CSV) file, zip archive or SBOL XML/RDF file. <p>To upload a CSV file, select the type "
+                + "of entry you wish to bulk import and download a csv template by clicking on \"File Upload.\""
+                + " Use a zip archive to include sequences and/attachments. Add the sequence and/or attachment files "
+                + "to the zip archive with a plain csv file that also includes the name(s) of the sequence and/or "
+                + "attachment for each entry.</div>";
+        mainContent.setHTML(1, 0, html);
         return mainContent;
     }
 
@@ -421,7 +420,14 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         mainContent.setWidget(2, 0, bulkImport.getSheet());
         mainContent.getFlexCellFormatter().setColSpan(2, 0, 3);
 
-        uploadCSV.setAddType(sheet.getImportType());
+        uploadFile.setAddType(sheet.getImportType());
+
+        if (draftsMenu.getCount() > 0 || pendingDraftsMenu.getCount() > 0) {
+            setToggleMenuVisibility(true);
+            layout.getFlexCellFormatter().setWidth(0, 0, "220px");
+            layout.getFlexCellFormatter().setWidth(0, 1, "10px");
+            sheet.getSheet().decreaseWidthBy(230);
+        }
     }
 
     @Override
@@ -471,15 +477,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             return;
 
         draftsMenu.setMenuItems(data, handler);
-
-        menuPanel.setVisible(true);
-        layout.getFlexCellFormatter().setWidth(0, 0, "220px");
-
-        layout.setHTML(0, 1, "&nbsp;");
-        layout.getFlexCellFormatter().setWidth(0, 1, "10px");
-
-        toggle.setVisible(true);
-        toggle.setDown(false);
+        adjustLayoutShowMenu();
         headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_CENTER);
         if (hideMenu)
             setDraftMenuVisibility(false, false);
@@ -488,20 +486,28 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     @Override
     public void setPendingDraftsData(ArrayList<BulkUploadMenuItem> data, boolean hideMenu,
             IRevertBulkUploadHandler handler) {
+        if (data.isEmpty())
+            return;
+
         pendingDraftsMenu.setMenuItems(data, handler);
         pendingDraftsMenu.setVisible(true);
+        adjustLayoutShowMenu();
+
+        if (hideMenu)
+            setDraftMenuVisibility(false, false);
+    }
+
+    /**
+     * Adjusts main page layout by showing the menu panel
+     */
+    protected void adjustLayoutShowMenu() {
         menuPanel.setVisible(true);
-
         layout.getFlexCellFormatter().setWidth(0, 0, "220px");
-
         layout.setHTML(0, 1, "&nbsp;");
         layout.getFlexCellFormatter().setWidth(0, 1, "10px");
-
         toggle.setVisible(true);
         toggle.setDown(true);
         headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_CENTER);
-        if (hideMenu)
-            setDraftMenuVisibility(false, false);
     }
 
     @Override
@@ -514,6 +520,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_LEFT);
 
         if (!visible) {
+            // hide menu by setting width to 0
             layout.getFlexCellFormatter().setWidth(0, 0, "0px");
             layout.setHTML(0, 1, "");
             layout.getFlexCellFormatter().setWidth(0, 1, "0px");

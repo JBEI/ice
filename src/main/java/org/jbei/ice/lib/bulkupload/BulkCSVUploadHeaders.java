@@ -1,4 +1,4 @@
-package org.jbei.ice.server.servlet.helper;
+package org.jbei.ice.lib.bulkupload;
 
 import java.util.ArrayList;
 
@@ -89,6 +89,8 @@ public class BulkCSVUploadHeaders {
         headerFields.add(EntryField.REFERENCES);
         headerFields.add(EntryField.LINKS);
         headerFields.add(EntryField.STATUS);
+        headerFields.add(EntryField.ATT_FILENAME);
+        headerFields.add(EntryField.SEQ_FILENAME);
         return headerFields;
     }
 
@@ -147,6 +149,8 @@ public class BulkCSVUploadHeaders {
         headerFields.add(EntryField.STRAIN_SUMMARY);
         headerFields.add(EntryField.STRAIN_NOTES);
         headerFields.add(EntryField.STRAIN_REFERENCES);
+        headerFields.add(EntryField.STRAIN_ATT_FILENAME);
+        headerFields.add(EntryField.STRAIN_SEQ_FILENAME);
 
         // plasmid information
         headerFields.add(EntryField.PLASMID_NAME);
@@ -162,6 +166,8 @@ public class BulkCSVUploadHeaders {
         headerFields.add(EntryField.PLASMID_SUMMARY);
         headerFields.add(EntryField.PLASMID_NOTES);
         headerFields.add(EntryField.PLASMID_REFERENCES);
+        headerFields.add(EntryField.PLASMID_ATT_FILENAME);
+        headerFields.add(EntryField.PLASMID_SEQ_FILENAME);
         return headerFields;
     }
 }
