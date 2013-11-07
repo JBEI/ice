@@ -418,6 +418,9 @@ public class PermissionsController {
     }
 
     public boolean hasWritePermission(Account account, Entry entry) throws ControllerException {
+        if (account == null)
+            return false;
+
         if (isOwnerOrAdministrator(account, entry))
             return true;
 
