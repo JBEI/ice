@@ -82,7 +82,14 @@ public class ICESBOLParserVisitor extends SBOLBaseVisitor<RuntimeException> {
         if (!annotations.isEmpty()) {
             // iterate sorted annotations for top level
             for (SequenceAnnotation sequenceAnnotation : annotations) {
-                int strand = sequenceAnnotation.getStrand() == StrandType.POSITIVE ? 1 : -1;
+                int strand;
+
+                if (sequenceAnnotation.getStrand() == null) {
+                    strand = 1;
+                } else {
+                    strand = sequenceAnnotation.getStrand() == StrandType.POSITIVE ? 1 : -1;
+                }
+
                 Pair relative = new Pair(sequenceAnnotation.getBioStart(), sequenceAnnotation.getBioEnd(), strand);
 
                 walkTree(sequenceAnnotation, relative);
@@ -101,8 +108,14 @@ public class ICESBOLParserVisitor extends SBOLBaseVisitor<RuntimeException> {
         List<SequenceAnnotation> annotations = parent.getSubComponent().getAnnotations();
         if (!annotations.isEmpty()) {
             for (SequenceAnnotation sequenceAnnotation : annotations) {
-                int strand = sequenceAnnotation.getStrand() == StrandType.POSITIVE ? (relativePair
-                        .getStrand()) : (relativePair.getStrand() * -1);
+                int strand;
+
+                if (sequenceAnnotation.getStrand() == null) {
+                    strand = relativePair.getStrand();
+                } else {
+                    strand = sequenceAnnotation.getStrand() == StrandType.POSITIVE ? relativePair
+                            .getStrand() : relativePair.getStrand() * -1;
+                }
 
                 Pair newRelativePair;
                 if (strand > 0)
