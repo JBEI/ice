@@ -24,8 +24,6 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
@@ -99,7 +97,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // then wrap it in a scroll panel that expands to fill area given by browser
         sheetTableFocusPanelWrapper = new ScrollPanel(sheetTable);
-        sheetTableFocusPanelWrapper.setWidth((Window.getClientWidth() - 40) + "px");
+        sheetTableFocusPanelWrapper.setWidth((Window.getClientWidth() - 240) + "px");
         sheetTableFocusPanelWrapper.setHeight((Window.getClientHeight() - 340) + "px");
 
         colIndex = new FlexTable();
@@ -110,7 +108,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
         colIndexWrapper.setHeight((Window.getClientHeight() - 340 - 15) + "px");
 
         addPanelHandlers();
-        addWindowResizeHandler();
 
         currentRow = inputRow = -1;
         currentIndex = inputIndex = -1;
@@ -120,7 +117,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // init
         headerWrapper = new ScrollPanel(header);
-        headerWrapper.setWidth((Window.getClientWidth() - 15) + "px");
+        headerWrapper.setWidth((Window.getClientWidth() - 215) + "px");
 
         addScrollHandlers();
 
@@ -152,64 +149,17 @@ public class Sheet extends Composite implements SheetPresenter.View {
         return this.presenter;
     }
 
+    public void setWrapperWidth(int width) {
+        sheetTableFocusPanelWrapper.setWidth(width + "px");
+        headerWrapper.setWidth((width + 25) + "px");
+    }
+
     public BulkUploadInfo setUpdatedEntry(BulkUploadAutoUpdate bulkUploadAutoUpdate) {
         return presenter.setUpdateEntry(bulkUploadAutoUpdate);
     }
 
-    // experimental
-    public void decreaseWidthBy(int amount) {
-        sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() - amount) + "px");
-        headerWrapper.setWidth((headerWrapper.getOffsetWidth() - amount) + "px");
-    }
-
-    public void increaseWidthBy(int amount) {
-        sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + amount) + "px");
-        headerWrapper.setWidth((headerWrapper.getOffsetWidth() + amount) + "px");
-    }
-
-    public void resetWidth() {
-        sheetTableFocusPanelWrapper.setWidth((Window.getClientWidth() - 40) + "px");
-        headerWrapper.setWidth((Window.getClientWidth() - 15) + "px");
-    }
-
     public EditMode getEditMode() {
         return this.editMode;
-    }
-
-    private void addWindowResizeHandler() {
-        Window.addResizeHandler(new ResizeHandler() {
-
-            private int previousWidth = Window.getClientWidth();
-
-            @Override
-            public void onResize(ResizeEvent event) {
-                // 970 is anticipated width of page window (menu?). "proper" way to do this is detect if
-                // window has horizontal scroll bars
-                if (Window.getClientWidth() < 970)
-                    return;
-
-                int delta = event.getWidth() - previousWidth;
-                previousWidth = event.getWidth();
-
-                if (delta < 0) {
-                    // contained is larger than container
-                    delta = sheetTableFocusPanelWrapper.getOffsetWidth() - event.getWidth() + 35;
-                    sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() - delta) + "px");
-                    headerWrapper.setWidth((headerWrapper.getOffsetWidth() - delta) + "px");
-                } else {
-                    sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + delta) + "px");
-                    headerWrapper.setWidth((headerWrapper.getOffsetWidth() + delta) + "px");
-                }
-
-                int wrapperHeight = (event.getHeight() - 340);
-                if (wrapperHeight >= 0)
-                    sheetTableFocusPanelWrapper.setHeight(wrapperHeight + "px");
-
-                int rowIndexHeight = (event.getHeight() - 340 - 15);
-                if (rowIndexHeight >= 0)
-                    colIndexWrapper.setHeight(rowIndexHeight + "px");
-            }
-        });
     }
 
     private void addScrollHandlers() {

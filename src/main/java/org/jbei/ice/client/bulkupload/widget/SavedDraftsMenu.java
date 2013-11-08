@@ -51,6 +51,9 @@ public class SavedDraftsMenu extends Composite {
         table.setHTML(row, 0, header);
         table.getFlexCellFormatter().setStyleName(row, 0, "collections_menu_header");
 
+        String html = "<span style=\"font-size: 0.75em; color: #666; padding: 4px; font-style:italic\">"
+                + "No data available</span>";
+        table.setHTML(row + 1, 0, html);
         selectionModel = new SingleSelectionModel<BulkUploadMenuItem>();
     }
 

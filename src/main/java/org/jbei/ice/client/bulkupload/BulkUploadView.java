@@ -25,6 +25,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -34,6 +35,11 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -57,7 +63,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private CreateEntryMenu createEntryMenu;
     private FeedbackPanel feedback;
     private FlexTable layout;
-    private ToggleButton toggle;
+    private ToggleButton toggle;   // isDown() implies showing menu
     private Button submit;
     private Button approveButton;
     private HTML reset;
@@ -73,7 +79,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
 
     private HorizontalPanel headerPanel;
     private NewBulkInput sheet;
-    private HTMLPanel menuPanel;
 
     private CreatorWidget creator;
 
@@ -87,7 +92,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         feedback = new FeedbackPanel("450px");
         toggle = new ToggleButton(ImageUtil.getShowSideImage(), ImageUtil.getHideSideImage());
         toggle.setStyleName("bulk_import_menu_toggle");
-        toggle.setVisible(false);
         toggle.setTitle("Toggle Drafts Menu");
 
         submit = new Button("Submit");
@@ -189,6 +193,41 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 }
             }
         });
+
+        toggle.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                boolean showMenu = event.getValue();
+                GWT.log("Toggle " + showMenu);
+                layout.getFlexCellFormatter().setVisible(0, 0, showMenu);
+                setAdjustLayout(showMenu);
+            }
+        });
+
+        Window.addResizeHandler(new ResizeHandler() {
+
+            @Override
+            public void onResize(ResizeEvent event) {
+                boolean menuShowing = layout.getFlexCellFormatter().isVisible(0, 0);
+                setAdjustLayout(menuShowing);
+            }
+        });
+    }
+
+    protected void setAdjustLayout(boolean showMenu) {
+        int width = Window.getClientWidth() - 45;
+        layout.getFlexCellFormatter().setVisible(0, 0, showMenu);
+
+        if (showMenu) {
+            if (sheet != null) {
+                sheet.getSheet().setWrapperWidth((width - 210));
+            }
+        } else {
+            // hide menu
+            if (sheet != null) {
+                sheet.getSheet().setWrapperWidth((width));
+            }
+        }
     }
 
     @Override
@@ -208,18 +247,25 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
 
-        menuPanel = new HTMLPanel(
+        HTMLPanel menuPanel = new HTMLPanel(
                 "<br><span id=\"saved_drafts\"></span><br><span id=\"pending_approvals\"></span><br>");
         menuPanel.add(pendingDraftsMenu, "pending_approvals");
         menuPanel.add(draftsMenu, "saved_drafts");
 
         layout.setWidget(0, 0, menuPanel);
         layout.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
-        menuPanel.setVisible(false);
+
+        layout.getFlexCellFormatter().setWidth(0, 0, "220px");
+        layout.setHTML(0, 1, "&nbsp;");
+        layout.getFlexCellFormatter().setWidth(0, 1, "10px");
 
         // right content. fills entire space when there are no drafts
         layout.setWidget(0, 2, createMainContent());
         layout.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
+
+        layout.getFlexCellFormatter().setVisible(0, 0, false);
+        toggle.setValue(false, false);
+//        setAdjustLayout(false);
 
         return layout;
     }
@@ -232,11 +278,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     @Override
     public void setSelectedPermissionGroups(ArrayList<OptionSelect> groups) {
         selection.setEnabled(groups);
-    }
-
-    @Override
-    public void addToggleMenuHandler(ClickHandler handler) {
-        this.toggle.addClickHandler(handler);
     }
 
     @Override
@@ -275,9 +316,6 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                                                          DateUtilities.formatMediumDate(result.getCreated()),
                                                          result.getType().getDisplay(), email);
         draftsMenu.updateMenuItem(item);
-        if (draftsMenu.getCount() == 1) {
-            setToggleMenuVisibility(true);
-        }
     }
 
     @Override
@@ -323,8 +361,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 + " (CSV) file, zip archive or SBOL XML/RDF file. <p>To upload a CSV file, select the type "
                 + "of entry you wish to bulk import and download a csv template by clicking on \"File Upload.\""
                 + " Use a zip archive to include sequences and/attachments. Add the sequence and/or attachment files "
-                + "to the zip archive with a plain csv file that also includes the name(s) of the sequence and/or "
-                + "attachment for each entry.</div>";
+                + "to the zip archive with a plain csv file. The csv file should the name(s) of the sequence and/or "
+                + "attachment for each entry in the appropriate column.</div>";
         mainContent.setHTML(1, 0, html);
         return mainContent;
     }
@@ -421,13 +459,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         mainContent.getFlexCellFormatter().setColSpan(2, 0, 3);
 
         uploadFile.setAddType(sheet.getImportType());
-
-        if (draftsMenu.getCount() > 0 || pendingDraftsMenu.getCount() > 0) {
-            setToggleMenuVisibility(true);
-            layout.getFlexCellFormatter().setWidth(0, 0, "220px");
-            layout.getFlexCellFormatter().setWidth(0, 1, "10px");
-            sheet.getSheet().decreaseWidthBy(230);
-        }
+        setAdjustLayout(false);
+        toggle.setValue(false, false);
     }
 
     @Override
@@ -477,10 +510,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             return;
 
         draftsMenu.setMenuItems(data, handler);
-        adjustLayoutShowMenu();
         headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_CENTER);
-        if (hideMenu)
-            setDraftMenuVisibility(false, false);
+        toggle.setValue(!hideMenu, true);
     }
 
     @Override
@@ -491,53 +522,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
 
         pendingDraftsMenu.setMenuItems(data, handler);
         pendingDraftsMenu.setVisible(true);
-        adjustLayoutShowMenu();
-
-        if (hideMenu)
-            setDraftMenuVisibility(false, false);
-    }
-
-    /**
-     * Adjusts main page layout by showing the menu panel
-     */
-    protected void adjustLayoutShowMenu() {
-        menuPanel.setVisible(true);
-        layout.getFlexCellFormatter().setWidth(0, 0, "220px");
-        layout.setHTML(0, 1, "&nbsp;");
-        layout.getFlexCellFormatter().setWidth(0, 1, "10px");
-        toggle.setVisible(true);
-        toggle.setDown(true);
-        headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_CENTER);
-    }
-
-    @Override
-    public void setDraftMenuVisibility(boolean visible, boolean isToggleClick) {
-        layout.getWidget(0, 0).setVisible(visible);
-        toggle.setDown(visible);
-        if (visible)
-            headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_CENTER);
-        else
-            headerPanel.setCellHorizontalAlignment(createEntryMenu, HasAlignment.ALIGN_LEFT);
-
-        if (!visible) {
-            // hide menu by setting width to 0
-            layout.getFlexCellFormatter().setWidth(0, 0, "0px");
-            layout.setHTML(0, 1, "");
-            layout.getFlexCellFormatter().setWidth(0, 1, "0px");
-            if (isToggleClick)
-                sheet.getSheet().increaseWidthBy(230);
-        } else {
-            layout.getFlexCellFormatter().setWidth(0, 0, "220px");
-
-            layout.getFlexCellFormatter().setWidth(0, 1, "10px");
-            if (isToggleClick)
-                sheet.getSheet().decreaseWidthBy(230);
-        }
-    }
-
-    @Override
-    public void setToggleMenuVisibility(boolean visible) {
-        toggle.setVisible(visible);
+        toggle.setValue(!hideMenu, true);
     }
 
     @Override
@@ -553,10 +538,5 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     @Override
     public SingleSelectionModel<EntryAddType> getImportCreateModel() {
         return createEntryMenu.getSelectionModel();
-    }
-
-    @Override
-    public boolean getMenuVisibility() {
-        return layout.getWidget(0, 0).isVisible();
     }
 }

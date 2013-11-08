@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -89,7 +88,8 @@ public abstract class SheetCell {
 
     public SheetCellData removeDataForRow(int row) {
         SheetCellData data = rowValues.get(row);
-        GWT.log("Removing " + data + " for row " + row);
+        if (data == null)
+            return null;
         return rowValues.remove(row);
     }
 
