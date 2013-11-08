@@ -942,7 +942,6 @@ ul#indented li a:hover {
     height: 31px;
     text-transform: uppercase;
     border-radius: 1px;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .quick_search_widget_close:hover {
