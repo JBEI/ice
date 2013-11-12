@@ -930,23 +930,18 @@ public class EntryController {
      * @param entry                entry to deleted
      * @param scheduleIndexRebuild True if index rebuild is scheduled.
      * @throws ControllerException
-     * @throws PermissionException
      */
-    private void delete(Account account, Entry entry, boolean scheduleIndexRebuild)
-            throws ControllerException, PermissionException {
+    private void delete(Account account, Entry entry, boolean scheduleIndexRebuild) throws ControllerException {
         if (entry == null) {
-            throw new ControllerException("Failed to save null entry");
+            return;
         }
-        if (!permissionsController.hasWritePermission(account, entry)) {
-            throw new PermissionException("No write permission for entry");
-        }
-        String deletionString = "This entry is deleted. It was owned by " + entry.getOwnerEmail();
-        entry.setLongDescription(deletionString + entry.getLongDescription());
-        Account sysAccount = accountController.getSystemAccount();
-        entry.setOwnerEmail(sysAccount.getEmail());
 
-        permissionsController.clearEntryPermissions(sysAccount, entry);
+        if (!permissionsController.hasWritePermission(account, entry)) {
+            throw new ControllerException(account.getEmail() + ": not allowed to delete entry " + entry.getId());
+        }
+
         entry.setModificationTime(Calendar.getInstance().getTime());
+        entry.setVisibility(Visibility.DELETED.getValue());
 
         try {
             dao.update(entry);

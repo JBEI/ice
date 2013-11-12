@@ -47,6 +47,11 @@ public class VisibilityWidgetPresenter {
                 view.setLabel("Draft");
                 view.setWidgetVisibility(true);
                 break;
+
+            case DELETED:
+                view.setLabel("Deleted");
+                view.setWidgetVisibility(true);
+                break;
         }
     }
 
@@ -64,6 +69,10 @@ public class VisibilityWidgetPresenter {
 
                 case DRAFT:
                     view.setTooltip("This entry is part of bulk import draft");
+                    break;
+
+                case DELETED:
+                    view.setTooltip("This entry has been deleted");
                     break;
             }
         }
