@@ -1,7 +1,6 @@
 package org.jbei.ice.client.collection;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -126,8 +125,6 @@ public interface ICollectionView {
     void setPromotionDelegate(ServiceDelegate<MenuItem> delegate);
 
     void setDemotionDelegate(ServiceDelegate<MenuItem> delegate);
-
-    void setPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> delegate);
 
     void addQuickAddHandler(ClickHandler handler);
 }

@@ -82,7 +82,14 @@ public class ICESBOLParserVisitor extends SBOLBaseVisitor<RuntimeException> {
         if (!annotations.isEmpty()) {
             // iterate sorted annotations for top level
             for (SequenceAnnotation sequenceAnnotation : annotations) {
-                int strand = sequenceAnnotation.getStrand() == StrandType.POSITIVE ? 1 : -1;
+                int strand;
+
+                if (sequenceAnnotation.getStrand() == null) {
+                    strand = 1;
+                } else {
+                    strand = sequenceAnnotation.getStrand() == StrandType.POSITIVE ? 1 : -1;
+                }
+
                 Pair relative = new Pair(sequenceAnnotation.getBioStart(), sequenceAnnotation.getBioEnd(), strand);
 
                 walkTree(sequenceAnnotation, relative);
@@ -101,8 +108,14 @@ public class ICESBOLParserVisitor extends SBOLBaseVisitor<RuntimeException> {
         List<SequenceAnnotation> annotations = parent.getSubComponent().getAnnotations();
         if (!annotations.isEmpty()) {
             for (SequenceAnnotation sequenceAnnotation : annotations) {
-                int strand = sequenceAnnotation.getStrand() == StrandType.POSITIVE ? (relativePair
-                        .getStrand()) : (relativePair.getStrand() * -1);
+                int strand;
+
+                if (sequenceAnnotation.getStrand() == null) {
+                    strand = relativePair.getStrand();
+                } else {
+                    strand = sequenceAnnotation.getStrand() == StrandType.POSITIVE ? relativePair
+                            .getStrand() : relativePair.getStrand() * -1;
+                }
 
                 Pair newRelativePair;
                 if (strand > 0)
@@ -124,37 +137,33 @@ public class ICESBOLParserVisitor extends SBOLBaseVisitor<RuntimeException> {
 
     static Pair calculatePairForPositiveStrand(SequenceAnnotation sequenceAnnotation, Pair relativePair) {
         int childStart = sequenceAnnotation.getBioStart();
+        int childEnd = sequenceAnnotation.getBioEnd();
 
-        // generate new pair relative to parent
-        int length = childStart == 1 ? sequenceAnnotation.getBioEnd() :
-                sequenceAnnotation.getBioEnd() - sequenceAnnotation.getBioStart();
-        int start;
+        int length = childEnd - (childStart - 1);
 
-        // get relative current start
-        if (childStart == 1)
-            start = relativePair.getFirst(); // start at same location as parent e.g. p:[3, 10] c:[1,5]
-        else if (relativePair.getFirst() == 1)
-            start = childStart;             // start at child location e.g. p:[1,10] c:[3,5]
-        else
-            start = childStart + relativePair.getFirst();  // p:[3,10] c:[3,5] (start at 8)
+        if (childStart == 1) {
+            int start = relativePair.getFirst();
+            return new Pair(start, (start + length) - 1, 1);
+        }
 
-        int extra = start == 1 ? length : start + length;
-        if (extra > relativePair.getSecond())
-            extra = relativePair.getSecond();
-
-        return new Pair(start, extra, 1);
+        int start = (relativePair.getFirst() - 1) + childStart;
+        return new Pair(start, (start + length) - 1, 1);
     }
 
     static Pair calculatePairForNegativeStrand(SequenceAnnotation sequenceAnnotation, Pair relativePair) {
         int childStart = sequenceAnnotation.getBioStart();
         int childEnd = sequenceAnnotation.getBioEnd();
 
-        int end = relativePair.getSecond() - (childStart);
-        int start = relativePair.getSecond() - (childEnd);
-        if (start < relativePair.getFirst()) {
-            start = relativePair.getFirst();
+        int end;
+        int sLength = childEnd - (childStart - 1);
+
+        if (childStart == 1) {
+            end = relativePair.getSecond();
+            return new Pair((end - sLength) + 1, end, -1);
+        } else {
+            end = (relativePair.getSecond() - childStart) + 1;
+            return new Pair((end - sLength) + 1, end, -1);
         }
-        return new Pair(start, end, -1);
     }
 
     static DNAFeature createDNAFeature(SequenceAnnotation annotation, Pair pair) {

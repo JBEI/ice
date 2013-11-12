@@ -3,9 +3,7 @@ package org.jbei.ice.client.collection.presenter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
@@ -260,7 +258,6 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         setPromotionDelegate();
         setDemotionDelegate();
-        setPublicAccessDelegate();
     }
 
     private void setTransferWidgetOptions() {
@@ -322,30 +319,6 @@ public class CollectionsPresenter extends AbstractPresenter {
                     @Override
                     public void onSuccess(Boolean result) {
                         History.newItem(Page.COLLECTIONS.getLink());
-                    }
-                }.go(eventBus);
-            }
-        });
-    }
-
-    private void setPublicAccessDelegate() {
-        display.setPublicAccessDelegate(new ServiceDelegate<HashMap<Long, Boolean>>() {
-            @Override
-            public void execute(final HashMap<Long, Boolean> enable) {
-                new IceAsyncCallback<Boolean>() {
-
-                    @Override
-                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                        for (Map.Entry<Long, Boolean> entry : enable.entrySet()) {
-                            service.enableOrDisableFolderPublicAccess(ClientController.sessionId, entry.getKey(),
-                                                                      entry.getValue(), callback);
-                            break;
-                        }
-                    }
-
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        //TODO : view assumes call will succeed and so has already accounted for it in feedback to user
                     }
                 }.go(eventBus);
             }

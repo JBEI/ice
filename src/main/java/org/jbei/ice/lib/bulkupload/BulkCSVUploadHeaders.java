@@ -89,8 +89,8 @@ public class BulkCSVUploadHeaders {
         headerFields.add(EntryField.REFERENCES);
         headerFields.add(EntryField.LINKS);
         headerFields.add(EntryField.STATUS);
-        headerFields.add(EntryField.ATT_FILENAME);
         headerFields.add(EntryField.SEQ_FILENAME);
+        headerFields.add(EntryField.ATT_FILENAME);
         return headerFields;
     }
 

@@ -87,9 +87,6 @@ public class BulkUploadPresenter extends AbstractPresenter {
         setMenuSelectionModel();
         setCreateBulkUploadSelectionModel();
 
-        // toggle menu
-        addToggleMenuHandler();
-
         // retrieveData
         retrieveSavedDrafts();
         retrievePendingIfAdmin();
@@ -232,16 +229,6 @@ public class BulkUploadPresenter extends AbstractPresenter {
         view.setApproveHandler(approveHandler);
     }
 
-    private void addToggleMenuHandler() {
-        view.addToggleMenuHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                view.setDraftMenuVisibility(!view.getMenuVisibility(), true);
-            }
-        });
-    }
-
     /**
      * Sets selection model handler for draft menu. Obtains user selection, retrieves information
      * about it from the server and then displays the data to the user
@@ -279,8 +266,6 @@ public class BulkUploadPresenter extends AbstractPresenter {
                 }
 
                 view.setSheet(currentInput);
-                view.setDraftMenuVisibility(false, false);
-                currentInput.getSheet().resetWidth();
                 createSelection.setSelected(selection, false);
                 retrievePreferences(currentInput.getSheet());
             }
@@ -484,7 +469,6 @@ public class BulkUploadPresenter extends AbstractPresenter {
         }
 
         view.setSheet(currentInput);
-        view.setDraftMenuVisibility(false, false);
 
         // assume uniform values for all entries in regards to creator
         String creator = ClientController.account.getFullName();

@@ -3,16 +3,18 @@ package org.jbei.ice.lib.entry.sample;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -23,12 +25,10 @@ import org.jbei.ice.lib.utils.Utils;
 public class SampleController {
 
     private final SampleDAO dao;
-    private final PermissionsController permissionsController;
     private final StorageController storageController;
 
     public SampleController() {
         dao = new SampleDAO();
-        permissionsController = ControllerFactory.getPermissionController();
         storageController = ControllerFactory.getStorageController();
     }
 
@@ -70,7 +70,7 @@ public class SampleController {
             throw new ControllerException("Failed to check write permissions for null sample!");
         }
 
-        return permissionsController.hasWritePermission(account, sample.getEntry());
+        return ControllerFactory.getPermissionController().hasWritePermission(account, sample.getEntry());
     }
 
     /**
@@ -164,5 +164,68 @@ public class SampleController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public Sample createStrainSample(Account account, String recordId, String rack, String location, String barcode,
+            String label, String strainNamePrefix) throws ControllerException {
+        //check for administrative privileges
+        if (!ControllerFactory.getAccountController().isAdministrator(account)) {
+            throw new ControllerException("Must be an administrator to perform this action");
+        }
+
+        // check if there is an existing sample with barcode
+        SampleController sampleController = ControllerFactory.getSampleController();
+        Storage existing = storageController.retrieveStorageTube(barcode.trim());
+        if (existing != null) {
+            ArrayList<Sample> samples = sampleController.getSamplesByStorage(existing);
+            if (samples != null && !samples.isEmpty()) {
+                Logger.error("Barcode \"" + barcode + "\" already has a sample associated with it");
+                return null;
+            }
+        }
+
+        // retrieve entry for record id
+        Entry entry;
+        EntryController entryController = ControllerFactory.getEntryController();
+        try {
+            entry = entryController.getByRecordId(account, recordId);
+            if (entry == null)
+                throw new ControllerException("Could not locate entry to associate sample with");
+        } catch (PermissionException e) {
+            throw new ControllerException(e);
+        }
+
+        Logger.info("Creating new strain sample [" + rack + ", " + location + ", " + barcode + ", " + label
+                            + "] for entry \"" + entry.getId());
+        // TODO : this is a hack till we migrate to a single strain default
+        Storage strainScheme = null;
+        List<Storage> schemes = storageController.retrieveAllStorageSchemes();
+        for (Storage storage : schemes) {
+            if (storage.getStorageType() == Storage.StorageType.SCHEME
+                    && "Strain Storage Matrix Tubes".equals(storage.getName())) {
+                strainScheme = storage;
+                break;
+            }
+        }
+        if (strainScheme == null) {
+            String errMsg = "Could not locate default strain scheme (Strain Storage Matrix Tubes[Plate, Well, Tube])";
+            Logger.error(errMsg);
+            throw new ControllerException(errMsg);
+        }
+
+        Storage newLocation = storageController.getLocation(strainScheme, new String[]{rack, location, barcode});
+
+        Sample sample = sampleController.createSample(label, account.getEmail(), "");
+        sample.setEntry(entry);
+        sample.setStorage(newLocation);
+        try {
+            sample = saveSample(account, sample);
+            if (strainNamePrefix != null) {
+                entryController.updateWithNextStrainName(strainNamePrefix, entry);
+            }
+        } catch (PermissionException e) {
+            throw new ControllerException(e);
+        }
+        return sample;
     }
 }

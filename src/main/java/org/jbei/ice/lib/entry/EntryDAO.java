@@ -460,6 +460,54 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    synchronized void generateNextStrainNameForEntry(Entry entry, String prefix) throws DAOException {
+        Session session = currentSession();
+        String queryString = "select name from entries where (LEFT(name, 6)) in (";
+        for (int i = 0; i < 10; i += 1) {
+            if (i != 0)
+                queryString += ", ";
+            queryString += ("\'" + prefix + i + "\'");
+        }
+        queryString += ") ORDER by name DESC";
+        Query query = session.createSQLQuery(queryString);
+        query.setMaxResults(5);
+        List results;
+        try {
+            results = query.list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+
+        if (results.isEmpty()) {
+            String name = prefix + "0001";
+            entry.setName(name);
+            session.update(entry);
+            return;
+        }
+
+        @SuppressWarnings("unchecked")
+        ArrayList<Object> tempList = new ArrayList<Object>(results);
+        for (int i = 0; i < results.size(); i += 1) {
+            String name = (String) tempList.get(i);
+            String[] split = name.split(prefix);
+            if (split.length != 2)
+                continue;
+
+            try {
+                int value = Integer.valueOf(split[1]);
+                value += 1;
+                entry.setName(prefix + String.format("%0" + 4 + "d", value));
+                session.update(entry);
+                return;
+            } catch (NumberFormatException nfe) {
+                Logger.warn(nfe.getMessage());
+            }
+        }
+
+        throw new DAOException("Could not parse any of the retrieved strain names");
+    }
+
     // does not check permission (includes pending entries)
     @SuppressWarnings("unchecked")
     public List<Entry> retrieveOwnerEntries(String ownerEmail, ColumnField sort, boolean asc, int start, int limit)
@@ -620,7 +668,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
             clazz = ArabidopsisSeed.class;
         } else
             throw new DAOException("Unrecognized entry type");
-        String hql = "delete from " + clazz.getName() + " where entries_id=:entry";
+
+        // delete from bulk upload entry
+        String hql = "delete from bulk_upload_entry where entry_id=" + entry.getId();
+        currentSession().createSQLQuery(hql).executeUpdate();
+
+        hql = "delete from " + clazz.getName() + " where entries_id=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry.getId()).executeUpdate();
 
         // delete from links
@@ -631,16 +684,10 @@ public class EntryDAO extends HibernateRepository<Entry> {
         hql = "delete from " + SelectionMarker.class.getName() + " where entry=:entry";
         currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
 
-//        // delete from funding source
-//        hql = "delete from " + EntryFundingSource.class.getName() + " where entry=:entry";
-//        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
-
-        // delete from permission
-        hql = "delete from " + Permission.class.getName() + " where entry=:entry";
-        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
-
         // finally delete actual entry
         delete(entry);
+
+        currentSession().clear();
     }
 
     /**

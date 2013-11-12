@@ -1,7 +1,6 @@
 package org.jbei.ice.client.collection.widget;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
@@ -40,10 +39,6 @@ public class ShareCollectionDialog extends Composite implements ICanReset {
 
         initWidget(permissionsWidget);
         popup = new GenericPopup(this, shareHTML);
-    }
-
-    public void setPublicAccessDelegate(ServiceDelegate<HashMap<Long, Boolean>> delegate) {
-        permissionsWidget.setPublicAccessDelegate(delegate);
     }
 
     /**
@@ -104,7 +99,7 @@ public class ShareCollectionDialog extends Composite implements ICanReset {
                 else
                     groupShareCount += 1;
             }
-            cell.setShared(userShareCount, groupShareCount);
+            cell.setShared(userShareCount, groupShareCount, (data.isPublicAccessData() && !data.isDelete()));
         }
 
         @Override

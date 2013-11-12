@@ -88,6 +88,9 @@ public class IceSequenceOntology {
     }
 
     public static URI getURI(String type) {
+        if ("RBS".equalsIgnoreCase(type.trim()))
+            return SequenceOntology.type("SO_0000552");
+
         String soNum = map.get(type);
         if (soNum == null)
             soNum = "SO_0000001";
@@ -103,6 +106,9 @@ public class IceSequenceOntology {
             if (entry.getValue().equalsIgnoreCase(ontology))
                 return entry.getKey();
         }
+
+        if ("SO_0000552".equals(ontology))
+            return "RBS";
 
         return "misc_feature";
     }

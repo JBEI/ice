@@ -2,6 +2,15 @@ html {
     height: 98%;
 }
 
+button:focus {
+    outline: none;
+}
+
+button::-moz-focus-inner {
+    outline: none;
+    border: 0;
+}
+
 body {
     font: normal 100% Helvetica, Arial, sans-serif;
     background: #ffffff;
@@ -922,16 +931,17 @@ ul#indented li a:hover {
 }
 
 .quick_search_btn {
-    background-color: #0082c0;
-    border: 1px solid #0082c0;
-    color: #f1f1f1;
+    background-color: #428BCA;
+    border: 1px solid #357EBD;
+    color: #FFFFFF;
     font-weight: bold;
     cursor: pointer;
     width: 90px;
     font-size: 0.75em;
-    font-family: Arial, serif;
+    font-family: arial, sans-serif, helvetica, serif;
     height: 31px;
     text-transform: uppercase;
+    border-radius: 1px;
 }
 
 .quick_search_widget_close:hover {
@@ -939,6 +949,8 @@ ul#indented li a:hover {
 }
 
 .quick_search_btn:hover {
+    background-color: #3276B1;
+    border: 1px solid #285E8E;
     color: white;
 }
 
@@ -1487,13 +1499,6 @@ td.datePickerMonth {
 }
 
 .dateBoxPopup {
-
-}
-
-/* ADD */
-.add_new_entry_main_content_wrapper {
-    border-top: 2px solid #4787ED;
-    border-bottom: 1px solid #CCC;
 }
 
 .bulk_import_header {
@@ -1585,7 +1590,6 @@ td.datePickerMonth {
     height: 13px;
     width: 13px;
     cursor: pointer;
-    background: transparent url(static/images/close.png) center center no-repeat;
 }
 
 .gwt-DialogBox .Caption {

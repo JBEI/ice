@@ -14,6 +14,7 @@ public class ShareCollectionData {
     private final AccessPermission access;
     private final Callback<ShareCollectionData> infoCallback;
     private final boolean isDelete;
+    private boolean isPublicAccessData;
 
     public ShareCollectionData(AccessPermission access, boolean isDelete, Callback<ShareCollectionData> callback) {
         this.access = access;
@@ -31,5 +32,13 @@ public class ShareCollectionData {
 
     public boolean isDelete() {
         return isDelete;
+    }
+
+    public boolean isPublicAccessData() {
+        return isPublicAccessData;
+    }
+
+    public void setPublicAccessData(boolean publicAccessData) {
+        this.isPublicAccessData = publicAccessData;
     }
 }

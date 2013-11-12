@@ -35,14 +35,6 @@ public interface IBulkUploadView {
 
     SingleSelectionModel<EntryAddType> getImportCreateModel();
 
-    void setDraftMenuVisibility(boolean visible, boolean isToggleClick);
-
-    void addToggleMenuHandler(ClickHandler handler);
-
-    boolean getMenuVisibility();
-
-    void setToggleMenuVisibility(boolean visible);
-
     void setSheet(NewBulkInput input);
 
     void setUpdatingVisibility(boolean visible);

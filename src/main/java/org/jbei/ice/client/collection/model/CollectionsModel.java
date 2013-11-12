@@ -268,35 +268,29 @@ public class CollectionsModel {
 
             @Override
             public void execute(final ShareCollectionData data) {
-                IceAsyncCallback<Boolean> asyncCallback;
-                if (data.isDelete()) {
-                    asyncCallback = new IceAsyncCallback<Boolean>() {
 
-                        @Override
-                        protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                            service.removePermission(ClientController.sessionId, data.getAccess(), callback);
-                        }
+                new IceAsyncCallback<Boolean>() {
 
-                        @Override
-                        public void onSuccess(Boolean result) {
-                            data.getInfoCallback().onSuccess(data);
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                        final String sid = ClientController.sessionId;
+                        if (!data.isPublicAccessData()) {
+                            if (data.isDelete())
+                                service.removePermission(sid, data.getAccess(), callback);
+                            else
+                                service.addPermission(sid, data.getAccess(), callback);
+                        } else {
+                            boolean enable = !data.isDelete();
+                            long folderId = data.getAccess().getTypeId();
+                            service.enableOrDisableFolderPublicAccess(sid, folderId, enable, callback);
                         }
-                    };
-                } else {
-                    asyncCallback = new IceAsyncCallback<Boolean>() {
+                    }
 
-                        @Override
-                        protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                            service.addPermission(ClientController.sessionId, data.getAccess(), callback);
-                        }
-
-                        @Override
-                        public void onSuccess(Boolean result) {
-                            data.getInfoCallback().onSuccess(data);
-                        }
-                    };
-                }
-                asyncCallback.go(eventBus);
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        data.getInfoCallback().onSuccess(data);
+                    }
+                }.go(eventBus);
             }
         };
     }
