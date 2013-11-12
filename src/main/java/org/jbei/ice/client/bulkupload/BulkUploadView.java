@@ -25,7 +25,6 @@ import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -198,9 +197,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 boolean showMenu = event.getValue();
-                GWT.log("Toggle " + showMenu);
                 layout.getFlexCellFormatter().setVisible(0, 0, showMenu);
-                setAdjustLayout(showMenu);
+                setAdjustLayout(showMenu, 45);
             }
         });
 
@@ -209,13 +207,13 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
             @Override
             public void onResize(ResizeEvent event) {
                 boolean menuShowing = layout.getFlexCellFormatter().isVisible(0, 0);
-                setAdjustLayout(menuShowing);
+                setAdjustLayout(menuShowing, 45);
             }
         });
     }
 
-    protected void setAdjustLayout(boolean showMenu) {
-        int width = Window.getClientWidth() - 45;
+    protected void setAdjustLayout(boolean showMenu, int diff) {
+        int width = Window.getClientWidth() - diff;
         layout.getFlexCellFormatter().setVisible(0, 0, showMenu);
 
         if (showMenu) {
@@ -459,7 +457,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         mainContent.getFlexCellFormatter().setColSpan(2, 0, 3);
 
         uploadFile.setAddType(sheet.getImportType());
-        setAdjustLayout(false);
+        setAdjustLayout(false, 38);
         toggle.setValue(false, false);
     }
 
