@@ -127,7 +127,7 @@ public class RegistryAPI implements IRegistryAPI {
      * the same name.
      * <p/>
      * If the name is detected to start with the part number prefix (obtained from database properties)
-     * then the part number is checked instead.
+     * then the part number is checked first.
      *
      * @param sessionId Session key.
      * @param name      Name of the Entry to retrieve.
@@ -389,112 +389,6 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     /**
-     * Genbank formatted {@link Sequence} of the specified part record id
-     *
-     * @param sessionId Session key.
-     * @param entryId   RecordId of the desired Entry.
-     * @return Genbank file formatted string.
-     * @throws SessionException
-     * @throws ServiceException
-     */
-//    @Override
-//    public String getGenBankSequence(@WebParam(name = "sessionId") String sessionId,
-//            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
-//        log(sessionId, "getGenBankSequence: " + entryId);
-//        String genbankSequence = "";
-//        Account account = validateAccount(sessionId);
-//
-//        try {
-//            SequenceController sequenceController = ControllerFactory.getSequenceController();
-//            EntryController entryController = ControllerFactory.getEntryController();
-//            Entry entry = entryController.getByRecordId(account, entryId);
-//            Sequence sequence = sequenceController.getByEntry(entry);
-//
-//            if (sequence != null) {
-//                GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
-//                genbankFormatter.setCircular((sequence.getEntry() instanceof Plasmid) ? ((Plasmid) entry)
-//                        .getCircular() : false);
-//
-//                genbankSequence = sequenceController.compose(sequence, genbankFormatter);
-//            }
-//
-//            log("User '" + account.getEmail() + "' pulled generated genbank sequence: '" + entryId + "'");
-//        } catch (PermissionException e) {
-//            throw new ServiceException(e);
-//        } catch (Exception e) {
-//            Logger.error(e);
-//            throw new ServiceException("Registry Service Internal Error!");
-//        }
-//
-//        return genbankSequence;
-//    }
-
-//    /**
-//     * Fasta formatted {@link Sequence} for the specified part
-//     *
-//     * @param sessionId Session key.
-//     * @param entryId   RecordId of the desired Entry.
-//     * @return Fasta formatted sequence.
-//     * @throws SessionException
-//     * @throws ServiceException
-//     */
-//    @Override
-//    public String getFastaSequence(@WebParam(name = "sessionId") String sessionId,
-//            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
-//        log(sessionId, "getFastaSequence: " + entryId);
-//        String fastaSequence = "";
-//        Account account = validateAccount(sessionId);
-//
-//        try {
-//            SequenceController sequenceController = ControllerFactory.getSequenceController();
-//            EntryController entryController = ControllerFactory.getEntryController();
-//            Entry entry = entryController.getByRecordId(account, entryId);
-//            Sequence sequence = sequenceController.getByEntry(entry);
-//
-//            if (sequence != null) {
-//                fastaSequence = sequenceController.compose(sequence, new FastaFormatter(entry.getName()));
-//            }
-//
-//            log("User '" + account.getEmail() + "' pulled generated fasta sequence: '" + entryId + "'");
-//        } catch (PermissionException e) {
-//            throw new ServiceException(e);
-//        } catch (Exception e) {
-//            Logger.error(e);
-//            throw new ServiceException("Registry Service Internal Error!");
-//        }
-//
-//        return fastaSequence;
-//    }
-
-    /**
-     * Retrieve all the {@link Sample}s of the specified part.
-     *
-     * @param sessionId Session key.
-     * @param entryId   RecordId of the Entry.
-     * @return List of Samples.
-     * @throws SessionException
-     * @throws ServiceException
-     */
-    @Override
-    public ArrayList<Sample> retrieveEntrySamples(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
-        log(sessionId, "retrieveEntrySamples: " + entryId);
-        Account account = validateAccount(sessionId);
-        SampleController sampleController = ControllerFactory.getSampleController();
-        EntryController entryController = ControllerFactory.getEntryController();
-
-//        try {
-        return null; //sampleController.getSamples(entryController.getByRecordId(account, entryId));
-//        } catch (ControllerException e) {
-//            Logger.error(e);
-//
-//            throw new ServiceException("Registry Service Internal Error!");
-//        } catch (PermissionException e) {
-//            throw new ServiceException("No permissions to view entry");
-//        }
-    }
-
-    /**
      * Retrieve the {@link Sample} object associated with a barcode.
      *
      * @param sessionId Session key.
@@ -629,14 +523,12 @@ public class RegistryAPI implements IRegistryAPI {
         return highestFreqPlate;
     }
 
-    // Need moderator privileges to run this
-
     /**
      * Create a {@link Sample} object for the specified strain.
      * <p/>
      * This assumes a plate->well->tube storage scheme.
      *
-     * @param sessionId Session key.
+     * @param sessionId Session key. Must be associated with user with administrative privileges
      * @param recordId  RecordId of the Strain.
      * @param rack      -Rack number.
      * @param location  Location number.
@@ -650,75 +542,13 @@ public class RegistryAPI implements IRegistryAPI {
     public void createStrainSample(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "recordId") String recordId, @WebParam(name = "rack") String rack,
             @WebParam(name = "location") String location,
-            @WebParam(name = "barcode") String barcode, @WebParam(name = "label") String label)
-            throws ServiceException, PermissionException, SessionException {
+            @WebParam(name = "barcode") String barcode, @WebParam(name = "label") String label,
+            @WebParam(name = "prefix") String prefix) throws ServiceException, PermissionException, SessionException {
         log(sessionId, "createStrainsample: " + recordId + "," + location + "," + barcode);
-        Account account;
-        AccountController controller = ControllerFactory.getAccountController();
-
         try {
-            account = controller.getAccountBySessionKey(sessionId);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            throw new ServiceException("Registry Service Internal Error!");
-        }
-
-        try {
-            if (!controller.isAdministrator(account)) {
-                log("Account " + account.getEmail() + " attempting to access createStrainSample()");
-                throw new PermissionException("Account does not have permissions");
-            }
-        } catch (ControllerException e) {
-            log(e.getMessage());
-            throw new ServiceException("Registry Service Internal Error!");
-        }
-
-        // check if there is an existing sample with barcode
-        StorageController storageController = ControllerFactory.getStorageController();
-        SampleController sampleController = ControllerFactory.getSampleController();
-
-        try {
-            Storage storage = storageController.retrieveStorageTube(barcode.trim());
-            if (storage != null) {
-                ArrayList<Sample> samples = sampleController.getSamplesByStorage(storage);
-                if (samples != null && !samples.isEmpty()) {
-                    log("Barcode \"" + barcode + "\" already has a sample associated with it");
-                    return;
-                }
-            }
-        } catch (ControllerException e) {
-            Logger.error(e);
-            throw new ServiceException(e);
-        }
-
-        log("Creating new strain sample for entry \"" + recordId + "\" and label \"" + label + "\"");
-        // TODO : this is a hack till we migrate to a single strain default
-        Storage strainScheme = null;
-        try {
-            List<Storage> schemes = storageController.retrieveAllStorageSchemes();
-            for (Storage storage : schemes) {
-                if (storage.getStorageType() == StorageType.SCHEME
-                        && "Strain Storage Matrix Tubes".equals(storage.getName())) {
-                    strainScheme = storage;
-                    break;
-                }
-            }
-            if (strainScheme == null) {
-                log("Could not locate default strain scheme (Strain Storage Matrix Tubes[Plate, Well, Tube])");
-                throw new ServiceException("Registry Service Internal Error!");
-            }
-
-            Storage newLocation = storageController.getLocation(strainScheme, new String[]{rack,
-                    location, barcode
-            });
-
-            Sample sample = sampleController.createSample(label, account.getEmail(), "");
-            sample.setEntry(ControllerFactory.getEntryController().getByRecordId(account, recordId));
-            sample.setStorage(newLocation);
-            Sample saved = sampleController.saveSample(account, sample);
-            if (saved == null) {
-                throw new ServiceException("Unable to create sample");
-            }
+            Account account = ControllerFactory.getAccountController().getAccountBySessionKey(sessionId);
+            SampleController controller = ControllerFactory.getSampleController();
+            controller.createStrainSample(account, recordId, rack, location, barcode, label, prefix);
         } catch (ControllerException ce) {
             log(ce.getMessage());
             throw new ServiceException(ce.getMessage());

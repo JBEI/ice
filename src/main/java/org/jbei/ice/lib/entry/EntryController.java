@@ -33,6 +33,8 @@ import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
+import org.jbei.ice.lib.folder.Folder;
+import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
@@ -183,6 +185,14 @@ public class EntryController {
                                               Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX));
         } catch (DAOException e) {
             Logger.error(e);
+            throw new ControllerException(e);
+        }
+    }
+
+    public void updateWithNextStrainName(String prefix, Entry entry) throws ControllerException {
+        try {
+            dao.generateNextStrainNameForEntry(entry, prefix);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }
@@ -889,7 +899,8 @@ public class EntryController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public void delete(Account account, long entryId) throws ControllerException, PermissionException {
+    public ArrayList<FolderDetails> delete(Account account, long entryId)
+            throws ControllerException, PermissionException {
         Entry entry;
         try {
             entry = dao.get(entryId);
@@ -897,10 +908,27 @@ public class EntryController {
             throw new ControllerException(de);
         }
         boolean schedule = sequenceController.hasSequence(entry.getId());
-//        if (entry.getVisibility() == Visibility.DRAFT.getValue()) // TODO
-//            fullDelete(entry, schedule);
-//        else
+
+        FolderController folderController = ControllerFactory.getFolderController();
+        ArrayList<FolderDetails> folderList = new ArrayList<>();
+        List<Folder> folders = folderController.getFoldersByEntry(entry);
+        ArrayList<Long> entryIds = new ArrayList<>();
+        entryIds.add(entry.getId());
+        if (folders != null) {
+            for (Folder folder : folders) {
+                try {
+                    Folder returned = folderController.removeFolderContents(account, folder.getId(), entryIds);
+                    FolderDetails details = new FolderDetails(returned.getId(), returned.getName());
+                    long size = folderController.getFolderSize(folder.getId());
+                    details.setCount(size);
+                    folderList.add(details);
+                } catch (ControllerException me) {
+                    Logger.error(me);
+                }
+            }
+        }
         delete(account, entry, schedule);
+        return folderList;
     }
 
     /**
@@ -910,16 +938,24 @@ public class EntryController {
      * @param entry Entry to be deleted
      * @throws ControllerException
      */
-    protected void fullDelete(Entry entry, boolean schedule) throws ControllerException {
+    protected void fullDelete(Account account, Entry entry, boolean schedule) throws ControllerException {
         if (entry == null)
             return;
 
         try {
+            if (schedule) {
+                SequenceController controller = ControllerFactory.getSequenceController();
+                Sequence sequence = controller.getByEntry(entry);
+                if (sequence != null) {
+                    controller.delete(account, sequence);
+                }
+            }
+            permissionsController.clearEntryPermissions(account, entry);
             dao.fullDelete(entry);
             if (schedule) {
                 ApplicationController.scheduleBlastIndexRebuildTask(true);
             }
-        } catch (DAOException de) {
+        } catch (DAOException | PermissionException de) {
             throw new ControllerException(de);
         }
     }
@@ -938,6 +974,11 @@ public class EntryController {
 
         if (!permissionsController.hasWritePermission(account, entry)) {
             throw new ControllerException(account.getEmail() + ": not allowed to delete entry " + entry.getId());
+        }
+
+        if (entry.getVisibility() == Visibility.DELETED.getValue()) {
+            fullDelete(account, entry, scheduleIndexRebuild);
+            return;
         }
 
         entry.setModificationTime(Calendar.getInstance().getTime());

@@ -1557,34 +1557,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account account = retrieveAccountForSid(sessionId);
             Logger.info(account.getEmail() + ": deleting entry " + info.getId());
             EntryController controller = ControllerFactory.getEntryController();
-            FolderController folderController = ControllerFactory.getFolderController();
 
             Entry entry = controller.get(account, info.getId());
             if (entry == null)
                 return null;
 
-            controller.delete(account, entry.getId());
-
-            ArrayList<FolderDetails> folderList = new ArrayList<>();
-            List<Folder> folders = folderController.getFoldersByEntry(entry);
-            ArrayList<Long> entryIds = new ArrayList<>();
-            entryIds.add(entry.getId());
-            if (folders != null) {
-                for (Folder folder : folders) {
-                    try {
-                        Folder returned = folderController.removeFolderContents(account, folder.getId(), entryIds);
-                        FolderDetails details = new FolderDetails(returned.getId(), returned.getName());
-                        long size = folderController.getFolderSize(folder.getId());
-                        details.setCount(size);
-                        folderList.add(details);
-                    } catch (ControllerException me) {
-                        Logger.error(me);
-                    }
-                }
-            }
-
-            return folderList;
-
+            return controller.delete(account, entry.getId());
         } catch (ControllerException ce) {
             Logger.error(ce);
         } catch (PermissionException e) {

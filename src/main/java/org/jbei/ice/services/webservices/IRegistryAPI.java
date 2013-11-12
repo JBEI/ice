@@ -59,18 +59,6 @@ public interface IRegistryAPI {
             @WebParam(name = "entryId") String entryId)
             throws SessionException, ServiceException;
 
-//    String getGenBankSequence(@WebParam(name = "sessionId") String sessionId,
-//            @WebParam(name = "entryId") String entryId)
-//            throws SessionException, ServiceException;
-
-    //    String getFastaSequence(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "entryId") String
-// entryId)
-//            throws SessionException, ServiceException;
-//
-    ArrayList<Sample> retrieveEntrySamples(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "entryId") String entryId)
-            throws SessionException, ServiceException;
-
     ArrayList<Sample> retrieveSamplesByBarcode(
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException;
@@ -81,8 +69,8 @@ public interface IRegistryAPI {
     void createStrainSample(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "recordId") String recordId, @WebParam(name = "rack") String rack,
             @WebParam(name = "location") String location,
-            @WebParam(name = "barcode") String barcode, @WebParam(name = "label") String label)
-            throws ServiceException, PermissionException, SessionException;
+            @WebParam(name = "barcode") String barcode, @WebParam(name = "label") String label,
+            @WebParam(name = "prefix") String prefix) throws ServiceException, PermissionException, SessionException;
 
     List<Sample> checkAndUpdateSamplesStorage(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "samples") Sample[] samples, @WebParam(name = "plateId") String plateId)
