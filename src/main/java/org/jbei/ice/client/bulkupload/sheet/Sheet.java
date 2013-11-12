@@ -97,15 +97,12 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // then wrap it in a scroll panel that expands to fill area given by browser
         sheetTableFocusPanelWrapper = new ScrollPanel(sheetTable);
-        sheetTableFocusPanelWrapper.setWidth((Window.getClientWidth() - 240) + "px");
-        sheetTableFocusPanelWrapper.setHeight((Window.getClientHeight() - 340) + "px");
 
         colIndex = new FlexTable();
         colIndex.setCellPadding(0);
         colIndex.setCellSpacing(0);
         colIndex.setStyleName("sheet_col_index");
         colIndexWrapper = new ScrollPanel(colIndex);
-        colIndexWrapper.setHeight((Window.getClientHeight() - 340 - 15) + "px");
 
         addPanelHandlers();
 
@@ -117,7 +114,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // init
         headerWrapper = new ScrollPanel(header);
-        headerWrapper.setWidth((Window.getClientWidth() - 215) + "px");
 
         addScrollHandlers();
 
@@ -152,6 +148,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
     public void setWrapperWidth(int width) {
         sheetTableFocusPanelWrapper.setWidth(width + "px");
         headerWrapper.setWidth((width + 25) + "px");
+        sheetTableFocusPanelWrapper.setHeight((Window.getClientHeight() - 340) + "px");
+        colIndexWrapper.setHeight((Window.getClientHeight() - 340 - 15) + "px");
     }
 
     public BulkUploadInfo setUpdatedEntry(BulkUploadAutoUpdate bulkUploadAutoUpdate) {
