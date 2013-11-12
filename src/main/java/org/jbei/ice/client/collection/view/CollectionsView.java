@@ -58,7 +58,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         rightContents.setWidth("100%");
 
         createNew = new CreateEntryMenu("Create Entry");
-        feedback = new FeedbackPanel("400px");
+        feedback = new FeedbackPanel("320px");
 
         int cell = 0;
 
