@@ -11,7 +11,6 @@ import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -185,9 +184,8 @@ public abstract class EntryDataView<T extends PartData> extends Composite {
             width = 200;
 
         String notesHtml = description.replaceAll("\n", "<br>").replaceAll("\t", "&nbsp;&nbsp;&nbsp");
-        notes.setHTML(row, 0,
-                      "<span class=\"font-80em\" style=\"display: block; word-wrap: break-word; width: "
-                              + width + "px\">" + SafeHtmlUtils.fromSafeConstant(notesHtml).asString() + "</span>");
+        notes.setHTML(row, 0, "<span class=\"font-80em\" style=\"display: block; word-wrap: break-word; width: "
+                + width + "px\">" + notesHtml + "</span>");
 
         table.setWidget(currentRow, 0, notes);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
