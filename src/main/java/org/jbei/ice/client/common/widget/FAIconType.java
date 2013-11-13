@@ -69,6 +69,7 @@ public enum FAIconType {
     SHARE("fa fa-share"),
     SHARE_SQUARE("fa fa-share-square"),
     SHIELD("fa fa-shield"),
+    SHOPPING_CART("fa fa-shopping-cart"),
     SIGN_IN("fa fa-sign-in"),
     SIGN_OUT("fa fa-sign-out"),
     STEP_BACKWARD("fa fa-step-backward"),

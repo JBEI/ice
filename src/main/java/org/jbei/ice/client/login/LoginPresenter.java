@@ -3,9 +3,9 @@ package org.jbei.ice.client.login;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.event.LoginEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.lib.shared.dto.user.User;
 

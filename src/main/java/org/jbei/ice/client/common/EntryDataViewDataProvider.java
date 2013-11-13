@@ -2,9 +2,9 @@ package org.jbei.ice.client.common;
 
 import java.util.LinkedList;
 
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.column.DataTableColumn;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 

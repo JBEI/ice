@@ -1,4 +1,4 @@
-package org.jbei.ice.client;
+package org.jbei.ice.client.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;

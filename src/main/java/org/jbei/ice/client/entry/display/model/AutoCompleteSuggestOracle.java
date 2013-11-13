@@ -1,7 +1,7 @@
 package org.jbei.ice.client.entry.display.model;
 
-import org.jbei.ice.client.RegistryService;
-import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.service.RegistryService;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 
 import com.google.gwt.core.client.GWT;

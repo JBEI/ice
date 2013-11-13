@@ -52,9 +52,9 @@ public class EntrySamplePanel extends Composite {
         initWidget(table);
         table.setWidth("100%");
 
-        addSample = new Button("Add Sample");
+        addSample = new Button("<i class=\"" + FAIconType.PLUS_CIRCLE.getStyleName() + "\"></i> Create Sample");
         addSample.setVisible(false);
-        requestSample = new Button("Request Sample");
+        requestSample = new Button("<i class=\"" + FAIconType.SHOPPING_CART.getStyleName() + "\"></i> Add to Cart");
         panel = new HTMLPanel("<span id=\"add_sample\"></span>&nbsp;<span id=\"request_sample\"></span>");
         panel.add(addSample, "add_sample");
         panel.add(requestSample, "request_sample");

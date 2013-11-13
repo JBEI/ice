@@ -24,6 +24,7 @@ import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.search.advanced.SearchView;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.user.User;
@@ -38,8 +39,9 @@ import com.google.gwt.user.client.ui.HasWidgets;
 
 public class ClientController extends AbstractPresenter implements ValueChangeHandler<String> {
 
-    // cookie times out in three days (current value set in Ice)
+    // cookie times out in three days if user wants system to "remember" login
     private static final int COOKIE_TIMEOUT = (1000 * 60 * 60 * 24) * 3;
+    // cookie times out in a day if not set to be remembered
     private static final int DAY_TIMEOUT = (1000 * 60 * 60 * 24);
     private static final String COOKIE_NAME = "gd-ice";
     private static final String COOKIE_PATH = "/";

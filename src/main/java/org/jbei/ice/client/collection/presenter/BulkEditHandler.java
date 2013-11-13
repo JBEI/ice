@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;

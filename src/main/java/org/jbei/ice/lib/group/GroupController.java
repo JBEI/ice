@@ -368,6 +368,10 @@ public class GroupController {
         }
     }
 
+    /**
+     * @return list of groups that anyone who is allowed to register automatically becomes a member of
+     * @throws ControllerException
+     */
     public List<Group> getAutoJoinGroups() throws ControllerException {
         try {
             return dao.getAutoJoinGroups();
