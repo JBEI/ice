@@ -142,19 +142,26 @@ public class HeaderView extends Composite {
         // messages
         loggedInContentsPanel.setHTML(0, 1, "");
 
+        // sample shopping cart
+        loggedInContentsPanel.setHTML(0, 2, "");
+
         // pipe
-        loggedInContentsPanel.setHTML(0, 2, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
+        loggedInContentsPanel.setHTML(0, 3, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
 
         // logout link
         String logoutHtmlStr = "<i style=\"color: #757575\" class=\"" + FAIconType.SIGN_OUT.getStyleName();
         SafeHtml html = SafeHtmlUtils.fromSafeConstant(logoutHtmlStr + "\"></i> Log Out");
         Hyperlink logout = new Hyperlink(html, Page.LOGOUT.getLink());
-        loggedInContentsPanel.setWidget(0, 5, logout);
-        loggedInContentsPanel.setHTML(0, 6, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
+        loggedInContentsPanel.setWidget(0, 4, logout);
+
+        // pipe
+        loggedInContentsPanel.setHTML(0, 5, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
+
+        // help
         String helpStr = "<i style=\"color: #757575\" class=\"" + FAIconType.BOOK.getStyleName() + "\"></i> Help";
         SafeHtml helpHtml = SafeHtmlUtils.fromSafeConstant(helpStr);
         Anchor anchor = new Anchor(helpHtml, "https://public-registry.jbei.org/static/help.htm");
-        loggedInContentsPanel.setWidget(0, 7, anchor);
+        loggedInContentsPanel.setWidget(0, 6, anchor);
 
         return loggedInContentsPanel;
     }
@@ -165,8 +172,10 @@ public class HeaderView extends Composite {
             return;
         }
 
-        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #969696\">|</span>&nbsp;&nbsp;"
-                                                 + "<span class=\"badge\">" + newMessageCount + "</span>");
+        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #969696\">|</span>&nbsp;&nbsp;&nbsp;"
+                                                 + "<i style=\"color:#666; cursor:pointer\" class=\""
+                                                 + FAIconType.ENVELOPE.getStyleName() + "\"></i>"
+                                                 + "<sup class=\"badge\">" + newMessageCount + "</sup></span>");
         String title = "You have " + newMessageCount + " new message";
         title += newMessageCount != 1 ? "s" : "";
         emailBadge.setTitle(title);
@@ -181,6 +190,20 @@ public class HeaderView extends Composite {
         });
 
         loggedInContentsPanel.setWidget(0, 1, emailBadge);
+    }
+
+    public void setCartCount(int cartCount) {
+        if (cartCount <= 0) {
+            loggedInContentsPanel.setHTML(0, 2, "");
+            return;
+        }
+
+        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #969696\">|</span>&nbsp;&nbsp;"
+                                                 + "<i style=\"color:#666; cursor:pointer\" class=\""
+                                                 + FAIconType.SHOPPING_CART.getStyleName() + "\"></i>"
+                                                 + "<sup class=\"badge\">" + cartCount + "</sup></span>");
+
+        loggedInContentsPanel.setWidget(0, 2, emailBadge);
     }
 
     public void createHandlers() {
@@ -220,6 +243,7 @@ public class HeaderView extends Composite {
     public void setHeaderData(User account) {
         createLoggedInContents(account);
         setNewMessages(account.getNewMessageCount());
+        setCartCount(account.getSamplesInCartCount());
     }
 
     public void setQueryDelegate(ServiceDelegate<SearchQuery> queryDelegate) {

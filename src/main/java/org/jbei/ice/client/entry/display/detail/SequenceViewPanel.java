@@ -6,7 +6,7 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter.ISequenceView;
-import org.jbei.ice.client.entry.display.view.DeleteSequenceHandler;
+import org.jbei.ice.client.entry.display.handler.DeleteSequenceHandler;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.core.client.GWT;

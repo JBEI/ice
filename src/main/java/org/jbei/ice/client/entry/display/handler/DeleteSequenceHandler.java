@@ -1,4 +1,4 @@
-package org.jbei.ice.client.entry.display.view;
+package org.jbei.ice.client.entry.display.handler;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;

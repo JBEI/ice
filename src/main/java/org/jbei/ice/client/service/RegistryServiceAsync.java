@@ -26,6 +26,7 @@ import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.shared.dto.search.IndexType;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
@@ -251,7 +252,7 @@ public interface RegistryServiceAsync {
 
     void sendComment(String sid, UserComment comment, AsyncCallback<UserComment> callback);
 
-    void requestSample(String sid, long entryID, String details, AsyncCallback<Boolean> callback);
+    void requestSample(String sid, long entryId, SampleRequestType type, AsyncCallback<Integer> callback);
 
     void alertToEntryProblem(String sid, long entryID, String details, AsyncCallback<UserComment> callback);
 

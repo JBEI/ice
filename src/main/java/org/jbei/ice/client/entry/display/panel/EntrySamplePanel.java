@@ -11,12 +11,12 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.widget.Dialog;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.entry.display.model.FlagEntry;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.entry.display.panel.sample.Storage96WellPanel;
 import org.jbei.ice.client.entry.display.view.CreateSampleForm;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -45,7 +45,7 @@ public class EntrySamplePanel extends Composite {
     private final Button requestSample;
     private HandlerRegistration handlerRegistration;
     private final HTMLPanel panel;
-    private Delegate<FlagEntry> delegate;
+    private Delegate<SampleRequestType> requestDelegate;
 
     public EntrySamplePanel() {
         table = new FlexTable();
@@ -95,18 +95,19 @@ public class EntrySamplePanel extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                String msg = "Streak on Agar Plate";
+                SampleRequestType type = SampleRequestType.STREAK_ON_AGAR_PLATE;
                 if (culture.getValue()) {
-                    msg = "Liquid Culture";
+                    type = SampleRequestType.LIQUID_CULTURE;
                 }
-                delegate.execute(new FlagEntry(FlagEntry.FlagOption.REQUEST_SAMPLE, msg));
+
+                requestDelegate.execute(type);
                 dialog.showDialog(false);
             }
         };
     }
 
-    public void setFlagDelegate(Delegate<FlagEntry> delegate) {
-        this.delegate = delegate;
+    public void setSampleRequestDelegate(Delegate<SampleRequestType> requestDelegate) {
+        this.requestDelegate = requestDelegate;
     }
 
     public void reset() {

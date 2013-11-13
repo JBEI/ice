@@ -25,6 +25,7 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.SampleRequests;
 import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.StorageDAO;
 import org.jbei.ice.lib.entry.sample.model.Sample;
@@ -70,6 +71,8 @@ import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.permission.PermissionSuggestion;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.shared.dto.search.IndexType;
 import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
@@ -283,6 +286,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             MessageController messageController = ControllerFactory.getMessageController();
             int count = messageController.getNewMessageCount(account);
             info.setNewMessageCount(count);
+
+            // get samples still in the cart
+            int samplesCount = new SampleRequests().getSampleRequestCount(account, SampleRequestStatus.IN_CART);
+            info.setSamplesInCartCount(samplesCount);
+
             return info;
         } catch (ControllerException e) {
             Logger.error(e);
@@ -409,6 +417,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 MessageController messageController = ControllerFactory.getMessageController();
                 int count = messageController.getNewMessageCount(account);
                 info.setNewMessageCount(count);
+
+                // get samples still in the cart
+                int samplesCount = new SampleRequests().getSampleRequestCount(account, SampleRequestStatus.IN_CART);
+                info.setSamplesInCartCount(samplesCount);
 
                 return info;
             }
@@ -1600,10 +1612,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean requestSample(String sid, long entryID, String details) throws AuthenticationException {
+    public Integer requestSample(String sid, long entryId, SampleRequestType type) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        Logger.info(account.getEmail() + ": requesting sample for entry " + entryID + " with options " + details);
-        return ControllerFactory.getEntryController().requestSample(account, entryID, details);
+        Logger.info(account.getEmail() + ": requesting sample " + type.toString() + " for entry " + entryId);
+        SampleRequests requests = new SampleRequests();
+        int count = requests.requestSample(account, entryId, type);
+        if (count < 0)
+            return null;
+        return count;
     }
 
     @Override

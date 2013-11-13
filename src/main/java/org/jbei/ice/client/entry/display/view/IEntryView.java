@@ -8,13 +8,14 @@ import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.client.entry.display.handler.DeleteSequenceHandler;
 import org.jbei.ice.client.entry.display.handler.HasAttachmentDeleteHandler;
-import org.jbei.ice.client.entry.display.model.FlagEntry;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -102,7 +103,7 @@ public interface IEntryView extends IsWidget {
 
     void addSubmitCommentDelegate(ServiceDelegate<UserComment> delegate);
 
-    void addFlagDelegate(Delegate<FlagEntry> flagEntryDelegate);
+    void addDelegates(Delegate<String> flagEntryDelegate, Delegate<SampleRequestType> sampleRequestDelegate);
 
     void addComment(UserComment comment);
 }

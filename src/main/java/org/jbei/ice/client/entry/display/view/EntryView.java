@@ -14,8 +14,8 @@ import org.jbei.ice.client.entry.display.ViewFactory;
 import org.jbei.ice.client.entry.display.detail.EntryDataView;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanel;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.client.entry.display.handler.DeleteSequenceHandler;
 import org.jbei.ice.client.entry.display.handler.HasAttachmentDeleteHandler;
-import org.jbei.ice.client.entry.display.model.FlagEntry;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.entry.display.panel.EntryCommentPanel;
 import org.jbei.ice.client.entry.display.panel.EntrySamplePanel;
@@ -26,6 +26,7 @@ import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -314,9 +315,9 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void addFlagDelegate(Delegate<FlagEntry> delegate) {
-        entryAction.setFlagDelegate(delegate);
-        samplePanel.setFlagDelegate(delegate);
+    public void addDelegates(Delegate<String> flagEntryDelegate, Delegate<SampleRequestType> sampleRequestDelegate) {
+        entryAction.setFlagDelegate(flagEntryDelegate);
+        samplePanel.setSampleRequestDelegate(sampleRequestDelegate);
     }
 
     @Override

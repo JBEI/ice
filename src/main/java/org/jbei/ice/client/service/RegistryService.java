@@ -26,6 +26,7 @@ import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.shared.dto.search.IndexType;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
@@ -216,7 +217,7 @@ public interface RegistryService extends RemoteService {
 
     UserComment sendComment(String sid, UserComment comment) throws AuthenticationException;
 
-    boolean requestSample(String sid, long entryID, String details) throws AuthenticationException;
+    Integer requestSample(String sid, long entryId, SampleRequestType type) throws AuthenticationException;
 
     UserComment alertToEntryProblem(String sid, long entryID, String details) throws AuthenticationException;
 
