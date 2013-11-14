@@ -43,6 +43,7 @@ public class HeaderView extends Composite {
     private static final HeaderView INSTANCE = new HeaderView();
     private final HeaderMenu headerMenu;
     private ServiceDelegate<SearchQuery> queryServiceDelegate;
+    private final SampleRequestWidget sampleRequestWidget;
 
     public static HeaderView getInstance() {
         return INSTANCE;
@@ -80,6 +81,8 @@ public class HeaderView extends Composite {
         widgetAdvanced = new AdvancedSearchWidget(searchInput);
         widgetAdvanced.setWidth("395px");
         widgetAdvanced.setHeight("150px");
+
+        sampleRequestWidget = new SampleRequestWidget();
 
         createHandlers();
     }
@@ -193,17 +196,13 @@ public class HeaderView extends Composite {
     }
 
     public void setCartCount(int cartCount) {
+        sampleRequestWidget.setRequestCount(cartCount);
+
         if (cartCount <= 0) {
             loggedInContentsPanel.setHTML(0, 2, "");
-            return;
+        } else {
+            loggedInContentsPanel.setWidget(0, 2, sampleRequestWidget);
         }
-
-        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #969696\">|</span>&nbsp;&nbsp;"
-                                                 + "<i style=\"color:#666; cursor:pointer\" class=\""
-                                                 + FAIconType.SHOPPING_CART.getStyleName() + "\"></i>"
-                                                 + "<sup class=\"badge\">" + cartCount + "</sup></span>");
-
-        loggedInContentsPanel.setWidget(0, 2, emailBadge);
     }
 
     public void createHandlers() {

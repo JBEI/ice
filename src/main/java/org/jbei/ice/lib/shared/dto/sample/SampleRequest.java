@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.shared.dto.sample;
 
 import org.jbei.ice.lib.shared.dto.IDTOModel;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 /**
  * Data transfer object for sample requests
@@ -9,19 +10,11 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
  */
 public class SampleRequest implements IDTOModel {
 
-    private long entryId;
     private SampleRequestType requestType;
+    private PartData partData;
+    private SampleRequestStatus requestStatus;
 
     public SampleRequest() {
-    }
-
-
-    public long getEntryId() {
-        return entryId;
-    }
-
-    public void setEntryId(long entryId) {
-        this.entryId = entryId;
     }
 
     public SampleRequestType getRequestType() {
@@ -30,5 +23,21 @@ public class SampleRequest implements IDTOModel {
 
     public void setRequestType(SampleRequestType requestType) {
         this.requestType = requestType;
+    }
+
+    public PartData getPartData() {
+        return partData;
+    }
+
+    public void setPartData(PartData partData) {
+        this.partData = partData;
+    }
+
+    public SampleRequestStatus getRequestStatus() {
+        return requestStatus;
+    }
+
+    public void setRequestStatus(SampleRequestStatus requestStatus) {
+        this.requestStatus = requestStatus;
     }
 }
