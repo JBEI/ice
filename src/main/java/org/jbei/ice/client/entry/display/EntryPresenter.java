@@ -71,8 +71,7 @@ public class EntryPresenter extends AbstractPresenter {
         this.model = new EntryModel(service, this.display, eventBus);
         display.getMenu().setSelectionHandler(new MenuSelectionHandler());
         this.collectionsPresenter = collectionsPresenter;
-        if (collectionsPresenter != null)
-            entryAddPresenter = new EntryAddPresenter(collectionsPresenter, EntryPresenter.this, service, eventBus);
+        entryAddPresenter = new EntryAddPresenter(collectionsPresenter, EntryPresenter.this, service, eventBus);
 
         setContextNavHandlers();
         showCurrentEntryView();
@@ -97,8 +96,7 @@ public class EntryPresenter extends AbstractPresenter {
 
                 formUpdate.addCancelHandler(new FormCancelHandler());
                 formUpdate.addSubmitHandler(new UpdateFormSubmitHandler(formUpdate));
-                if (entryAddPresenter != null)
-                    formUpdate.setPreferences(entryAddPresenter.getPreferences());
+                formUpdate.setPreferences(entryAddPresenter.getPreferences());
 
                 SequenceViewPanelPresenter sequencePresenter = formUpdate.getSequenceViewPresenter();
                 new PasteSequenceDelegate(sequencePresenter);
@@ -182,10 +180,8 @@ public class EntryPresenter extends AbstractPresenter {
                                ClientController.account.getFullName(),
                                ClientController.account.getEmail(), (new Date(System.currentTimeMillis())));
         display.getPermissionsWidget().setCanEdit(true);
-        if (!entryAddPresenter.getDefaultPermissions().isEmpty()) {
-            display.getPermissionsWidget().setPermissionData(entryAddPresenter.getDefaultPermissions(),
-                                                             new DeletePermission());
-        }
+        display.getPermissionsWidget().setPermissionData(ClientController.account.getDefaultPermissions(),
+                                                         new DeletePermission());
         display.getMenu().switchToEditMode(true);
 
         // sequence panel
@@ -193,6 +189,7 @@ public class EntryPresenter extends AbstractPresenter {
         new PasteSequenceDelegate(sequencePresenter);
         currentPart = newForm.getEntry();
     }
+
 
     protected void setContextNavData() {
         if (currentContext == null)

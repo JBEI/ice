@@ -375,7 +375,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
 
             @Override
             public void onSuccess(ArrayList<UserGroup> result) {
-                view.setPermissionGroups(result);
+                view.setPermissionGroups(result, ClientController.account.getDefaultPermissions());
             }
         }.go(eventBus);
     }

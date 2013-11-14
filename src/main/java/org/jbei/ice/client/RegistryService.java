@@ -222,8 +222,6 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<RegistryPartner> setEnableWebOfRegistries(String sessionId, boolean value) throws AuthenticationException;
 
-    ArrayList<AccessPermission> retrieveDefaultPermissions(String sid) throws AuthenticationException;
-
     ArrayList<PartData> retrieveTransferredParts(String sessionId) throws AuthenticationException;
 
     boolean processTransferredParts(String sid, ArrayList<Long> partIds, boolean accept) throws AuthenticationException;

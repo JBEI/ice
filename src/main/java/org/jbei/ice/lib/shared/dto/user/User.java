@@ -1,8 +1,10 @@
 package org.jbei.ice.lib.shared.dto.user;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.lib.shared.dto.IDTOModel;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 /**
  * Data transfer object for user account
@@ -25,11 +27,13 @@ public class User implements IDTOModel {
     private boolean isAdmin;
     private int newMessageCount;
     private AccountType accountType;
+    private ArrayList<AccessPermission> defaultPermissions;
 
     public User() {
         institution = "";
         description = "";
         initials = "";
+        defaultPermissions = new ArrayList<AccessPermission>();
     }
 
     public String getEmail() {
@@ -148,5 +152,9 @@ public class User implements IDTOModel {
 
     public void setAccountType(AccountType accountType) {
         this.accountType = accountType;
+    }
+
+    public ArrayList<AccessPermission> getDefaultPermissions() {
+        return defaultPermissions;
     }
 }

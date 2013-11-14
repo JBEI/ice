@@ -212,9 +212,6 @@ public interface RegistryServiceAsync {
     void retrieveUserPreferences(String sid, ArrayList<PreferenceKey> keys,
             AsyncCallback<HashMap<PreferenceKey, String>> async) throws AuthenticationException;
 
-    void retrieveDefaultPermissions(String sid, AsyncCallback<ArrayList<AccessPermission>> callback)
-            throws AuthenticationException;
-
     void retrieveUserSearchPreferences(String sid, AsyncCallback<HashMap<String, String>> async)
             throws AuthenticationException;
 

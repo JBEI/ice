@@ -148,16 +148,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<AccessPermission> retrieveDefaultPermissions(String sid) throws AuthenticationException {
-        Account account = retrieveAccountForSid(sid);
-        try {
-            return ControllerFactory.getPermissionController().getDefaultPermissions(account);
-        } catch (ControllerException e) {
-            return null;
-        }
-    }
-
-    @Override
     public HashMap<String, String> retrieveUserSearchPreferences(String sid) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         try {
@@ -283,6 +273,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             MessageController messageController = ControllerFactory.getMessageController();
             int count = messageController.getNewMessageCount(account);
             info.setNewMessageCount(count);
+
+            // get default permissions
+            info.getDefaultPermissions().clear();
+            PermissionsController permissionsController = ControllerFactory.getPermissionController();
+            ArrayList<AccessPermission> defaultPermissions = permissionsController.getDefaultPermissions(account);
+            if (defaultPermissions != null)
+                info.getDefaultPermissions().addAll(defaultPermissions);
+
             return info;
         } catch (ControllerException e) {
             Logger.error(e);
@@ -409,6 +407,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 MessageController messageController = ControllerFactory.getMessageController();
                 int count = messageController.getNewMessageCount(account);
                 info.setNewMessageCount(count);
+
+                // get default permissions
+                info.getDefaultPermissions().clear();
+                PermissionsController permissionsController = ControllerFactory.getPermissionController();
+                ArrayList<AccessPermission> defaultPermissions = permissionsController.getDefaultPermissions(account);
+                if (defaultPermissions != null)
+                    info.getDefaultPermissions().addAll(defaultPermissions);
 
                 return info;
             }
