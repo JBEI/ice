@@ -9,6 +9,7 @@ import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -33,20 +34,20 @@ public class RequestSampleHandler implements Delegate<SampleRequestType> {
 
     @Override
     public void execute(final SampleRequestType sampleRequest) {
-        new IceAsyncCallback<Integer>() {
+        new IceAsyncCallback<SampleRequest>() {
 
             @Override
-            protected void callService(AsyncCallback<Integer> callback) throws AuthenticationException {
+            protected void callService(AsyncCallback<SampleRequest> callback) throws AuthenticationException {
                 long entryId = hasEntryId.getPart().getId();
                 service.requestSample(ClientController.sessionId, entryId, sampleRequest, callback);
             }
 
             @Override
-            public void onSuccess(Integer result) {
+            public void onSuccess(SampleRequest result) {
                 String msg;
-                if (result != null && result != -1) {
+                if (result != null) {
                     msg = "Sample request added to cart";
-                    HeaderView.getInstance().setCartCount(result);
+                    HeaderView.getInstance().addToCart(result);
                 } else
                     msg = "Could not add sample to cart";
                 eventBus.fireEvent(new FeedbackEvent(result == null, msg));

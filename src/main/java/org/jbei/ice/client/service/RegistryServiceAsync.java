@@ -254,7 +254,7 @@ public interface RegistryServiceAsync {
 
     void sendComment(String sid, UserComment comment, AsyncCallback<UserComment> callback);
 
-    void requestSample(String sid, long entryId, SampleRequestType type, AsyncCallback<Integer> callback);
+    void requestSample(String sid, long entryId, SampleRequestType type, AsyncCallback<SampleRequest> callback);
 
     void alertToEntryProblem(String sid, long entryID, String details, AsyncCallback<UserComment> callback);
 

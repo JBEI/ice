@@ -261,8 +261,8 @@ public class HeaderView extends Composite {
         sampleRequestWidget.setSubmitRequestsDelegate(requestsDelegate);
     }
 
-    public boolean isInCart(SampleRequest request) {
-        return this.sampleRequestWidget.isInCart(request);
+    public boolean isInCart(long entryId) {
+        return this.sampleRequestWidget.isInCart(entryId);
     }
 
     public void removeFromCart(SampleRequest request) {

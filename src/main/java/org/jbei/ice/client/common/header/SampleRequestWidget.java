@@ -1,6 +1,7 @@
 package org.jbei.ice.client.common.header;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
@@ -143,8 +144,16 @@ public class SampleRequestWidget implements IsWidget {
         return dataProvider.getList().size();
     }
 
-    public boolean isInCart(SampleRequest request) {
-        return this.dataProvider.getList().contains(request);
+    public boolean isInCart(long entryId) {
+        List<SampleRequest> list = this.dataProvider.getList();
+        if (list == null || list.isEmpty())
+            return false;
+
+        for (SampleRequest request : list) {
+            if (request.getPartData().getId() == entryId)
+                return true;
+        }
+        return false;
     }
 
     public int removeFromCart(SampleRequest request) {

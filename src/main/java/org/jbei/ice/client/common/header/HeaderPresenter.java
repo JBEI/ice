@@ -35,7 +35,9 @@ public class HeaderPresenter {
 
     public void submitSampleRequests(ArrayList<SampleRequest> requests) {
         HeaderView.getInstance().resetRequestWidget();
-        FeedbackEvent event = new FeedbackEvent(false, requests.size() + " sample requests submitted");
+        int size = requests.size();
+        String requestString = (size == 1) ? "request" : "requests";
+        FeedbackEvent event = new FeedbackEvent(false, size + " sample " + requestString + " submitted");
         eventBus.fireEvent(event);
     }
 

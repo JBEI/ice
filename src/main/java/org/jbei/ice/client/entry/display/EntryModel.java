@@ -127,7 +127,8 @@ public class EntryModel {
                     }
                     display.setSampleFormVisibility(false);
                     currentInfo.getSampleStorage().add(result);
-                    display.setSampleData(currentInfo.getSampleStorage(), createDeleteSampleHandler());
+                    long id = currentInfo.getId();
+                    display.setSampleData(id, currentInfo.getSampleStorage(), createDeleteSampleHandler());
                     display.getMenu().incrementMenuCount(MenuItem.Menu.SAMPLES);
                 }
             }.go(eventBus);

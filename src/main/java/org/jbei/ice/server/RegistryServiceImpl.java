@@ -27,7 +27,6 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.SampleRequests;
 import org.jbei.ice.lib.entry.sample.StorageController;
-import org.jbei.ice.lib.entry.sample.StorageDAO;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -52,7 +51,6 @@ import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.NewsItem;
 import org.jbei.ice.lib.shared.dto.PartSample;
-import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.shared.dto.autocomplete.AutoCompleteSuggestion;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
@@ -1224,86 +1222,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
         Logger.info(account.getEmail() + ": creating sample for entry with id " + entryId);
-
-        EntryController controller = ControllerFactory.getEntryController();
-        SampleController sampleController = ControllerFactory.getSampleController();
-        StorageController storageController = ControllerFactory.getStorageController();
-
-        Entry entry;
-        try {
-            entry = controller.get(account, entryId);
-            if (entry == null) {
-                Logger.error("Could not retrieve entry with id " + entryId + ". Skipping sample creation");
-                return null;
-            }
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
-
-        PartSample partSample = sampleStorage.getPartSample();
-        LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
-
-        Sample sample = sampleController.createSample(partSample.getLabel(), account.getEmail(), partSample.getNotes());
-        sample.setEntry(entry);
-
-        if (locations == null || locations.isEmpty()) {
-            Logger.info("Creating sample without location");
-
-            // create sample, but not location
-            try {
-                sample = sampleController.saveSample(account, sample);
-                sampleStorage.getPartSample().setSampleId(sample.getId() + "");
-                sampleStorage.getPartSample().setDepositor(account.getEmail());
-                return sampleStorage;
-            } catch (ControllerException e) {
-                Logger.error(e);
-            } catch (PermissionException ce) {
-                Logger.warn(ce.getMessage());
-            }
-            return null;
-        }
-
-        // create sample and location
-        String[] labels = new String[locations.size()];
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < labels.length; i++) {
-            labels[i] = locations.get(i).getDisplay();
-            sb.append(labels[i]);
-            if (i - 1 < labels.length)
-                sb.append("/");
-        }
-
-        Logger.info("Creating sample with locations " + sb.toString());
-        try {
-            Storage scheme = storageController.get(Long.parseLong(partSample.getLocationId()), false);
-            Storage storage = storageController.getLocation(scheme, labels);
-            storage = storageController.update(storage);
-            sample.setStorage(storage);
-            sample = sampleController.saveSample(account, sample);
-            sampleStorage.getStorageList().clear();
-
-            List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
-            if (storages != null) {
-                for (Storage storage1 : storages) {
-                    StorageInfo info = new StorageInfo();
-                    info.setDisplay(storage1.getIndex());
-                    info.setId(storage1.getId());
-                    info.setType(storage1.getStorageType().name());
-                    sampleStorage.getStorageList().add(info);
-                }
-            }
-
-            sampleStorage.getPartSample().setSampleId(sample.getId() + "");
-            sampleStorage.getPartSample().setDepositor(account.getEmail());
-            return sampleStorage;
-        } catch (NumberFormatException | ControllerException e) {
-            Logger.error(e);
-        } catch (PermissionException ce) {
-            Logger.warn(ce.getMessage());
-        }
-
-        return null;
+        SampleController controller = ControllerFactory.getSampleController();
+        return controller.createSample(account, entryId, sampleStorage);
     }
 
     @Override
@@ -1615,14 +1535,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public Integer requestSample(String sid, long entryId, SampleRequestType type) throws AuthenticationException {
+    public SampleRequest requestSample(String sid, long entryId, SampleRequestType type)
+            throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": requesting sample " + type.toString() + " for entry " + entryId);
         SampleRequests requests = new SampleRequests();
-        int count = requests.requestSample(account, entryId, type);
-        if (count < 0)
-            return null;
-        return count;
+        requests.requestSample(account, entryId, type);
+        return requests.getSampleRequest(account, entryId);
     }
 
     @Override

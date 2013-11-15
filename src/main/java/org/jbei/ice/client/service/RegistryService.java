@@ -219,7 +219,7 @@ public interface RegistryService extends RemoteService {
 
     UserComment sendComment(String sid, UserComment comment) throws AuthenticationException;
 
-    Integer requestSample(String sid, long entryId, SampleRequestType type) throws AuthenticationException;
+    SampleRequest requestSample(String sid, long entryId, SampleRequestType type) throws AuthenticationException;
 
     UserComment alertToEntryProblem(String sid, long entryID, String details) throws AuthenticationException;
 

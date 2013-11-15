@@ -69,7 +69,7 @@ public interface IEntryView extends IsWidget {
 
     void setSampleFormVisibility(boolean visible);
 
-    void setSampleData(ArrayList<SampleStorage> data, ServiceDelegate<PartSample> delegate);
+    void setSampleData(long entryId, ArrayList<SampleStorage> data, ServiceDelegate<PartSample> delegate);
 
     void setSampleOptions(SampleLocation sampleLocation);
 

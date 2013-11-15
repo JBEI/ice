@@ -9,6 +9,7 @@ import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.common.header.HeaderView;
 import org.jbei.ice.client.common.widget.Dialog;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
@@ -146,7 +147,7 @@ public class EntrySamplePanel extends Composite {
         this.sampleForm.setVisible(visible);
     }
 
-    public void setData(ArrayList<SampleStorage> data, ServiceDelegate<PartSample> deleteHandler) {
+    public void setData(long entryId, ArrayList<SampleStorage> data, ServiceDelegate<PartSample> deleteHandler) {
         table.removeAllRows();
         table.setWidget(0, 0, panel);
         table.getFlexCellFormatter().setStyleName(0, 0, "pad_top");
@@ -157,6 +158,13 @@ public class EntrySamplePanel extends Composite {
             table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No samples available</i>");
             return;
         }
+
+        // sample data available
+        boolean isInCart = HeaderView.getInstance().isInCart(entryId);
+        if (isInCart) {
+            requestSample.setHTML("<i class=\"" + FAIconType.SHOPPING_CART.getStyleName() + "\"></i> Remove from Cart");
+        } else
+            requestSample.setHTML("<i class=\"" + FAIconType.SHOPPING_CART.getStyleName() + "\"></i> Add to Cart");
 
         Collections.sort(data, new Comparator<SampleStorage>() {
             @Override

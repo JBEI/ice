@@ -302,7 +302,7 @@ public class EntryView extends Composite implements IEntryView {
         attachmentMenu.setMenuItems(items, info.getId());
         attachmentMenu.setCanEdit(info.isCanEdit());
 
-        samplePanel.setData(info.getSampleStorage(), handler);
+        samplePanel.setData(info.getId(), info.getSampleStorage(), handler);
         sequenceAnalysisPanel.setSequenceData(info.getSequenceAnalysis(), info);
         commentPanel.setSampleOptions(info.getSampleStorage());
         entryAction.setSampleOptions(info.getSampleStorage());
@@ -402,8 +402,9 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void setSampleData(ArrayList<SampleStorage> data, ServiceDelegate<PartSample> deleteSampleHandler) {
-        samplePanel.setData(data, deleteSampleHandler);
+    public void setSampleData(long entryId, ArrayList<SampleStorage> data,
+            ServiceDelegate<PartSample> deleteSampleHandler) {
+        samplePanel.setData(entryId, data, deleteSampleHandler);
     }
 
     @Override

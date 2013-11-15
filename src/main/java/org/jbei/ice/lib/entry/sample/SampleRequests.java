@@ -10,8 +10,8 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
-import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
 /**
@@ -27,20 +27,37 @@ public class SampleRequests {
         this.dao = new RequestDAO();
     }
 
+    public SampleRequest getSampleRequest(Account account, long entryId) {
+        Entry entry;
+        try {
+            entry = ControllerFactory.getEntryController().get(account, entryId);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+
+        try {
+            Request request = dao.getSampleRequest(account, entry);
+            return Request.toDTO(request);
+        } catch (DAOException e) {
+            return null;
+        }
+    }
+
     /**
      * Creates a new sample request for the specified user and specified entry.
      *
      * @param account user account
      * @param entryID unique identifier for the entry
      * @param type    type of sample request
-     * @return number of requests that have not been submitted, or -1 on exception
      */
-    public int requestSample(Account account, long entryID, SampleRequestType type) {
+    public void requestSample(Account account, long entryID, SampleRequestType type) {
         Entry entry;
         try {
             entry = ControllerFactory.getEntryController().get(account, entryID);
         } catch (ControllerException e) {
-            return -1;
+            Logger.error(e);
+            return;
         }
 
         if (entry == null)
@@ -54,17 +71,8 @@ public class SampleRequests {
         request.setUpdated(request.getRequested());
         try {
             dao.save(request);
-            return dao.getRequestCount(account, SampleRequestStatus.IN_CART);
         } catch (DAOException e) {
-            return -1;
-        }
-    }
-
-    public int getSampleRequestCount(Account account, SampleRequestStatus status) {
-        try {
-            return dao.getRequestCount(account, status);
-        } catch (DAOException e) {
-            return -1;
+            Logger.error(e);
         }
     }
 

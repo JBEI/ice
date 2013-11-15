@@ -3,8 +3,10 @@ package org.jbei.ice.lib.entry.sample;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
@@ -15,6 +17,8 @@ import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.shared.dto.PartSample;
+import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -166,6 +170,7 @@ public class SampleController {
         }
     }
 
+    // mainly used by the api to create a strain sample record
     public Sample createStrainSample(Account account, String recordId, String rack, String location, String barcode,
             String label, String strainNamePrefix) throws ControllerException {
         //check for administrative privileges
@@ -227,5 +232,87 @@ public class SampleController {
             throw new ControllerException(e);
         }
         return sample;
+    }
+
+    public SampleStorage createSample(Account account, long entryId, SampleStorage sampleStorage) {
+        EntryController controller = ControllerFactory.getEntryController();
+        StorageController storageController = ControllerFactory.getStorageController();
+
+        Entry entry;
+        try {
+            entry = controller.get(account, entryId);
+            if (entry == null) {
+                Logger.error("Could not retrieve entry with id " + entryId + ". Skipping sample creation");
+                return null;
+            }
+
+            if (!ControllerFactory.getPermissionController().hasWritePermission(account, entry)) {
+                Logger.error(account.getEmail() + ": no write permissions to create sample for " + entryId);
+                return null;
+            }
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+
+        PartSample partSample = sampleStorage.getPartSample();
+        LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
+
+        Sample sample = createSample(partSample.getLabel(), account.getEmail(), partSample.getNotes());
+        sample.setEntry(entry);
+
+        if (locations == null || locations.isEmpty()) {
+            Logger.info("Creating sample without location");
+
+            // create sample, but not location
+            try {
+                sample = dao.save(sample);
+                sampleStorage.getPartSample().setSampleId(sample.getId() + "");
+                sampleStorage.getPartSample().setDepositor(account.getEmail());
+                return sampleStorage;
+            } catch (DAOException e) {
+                Logger.error(e);
+            }
+            return null;
+        }
+
+        // create sample and location
+        String[] labels = new String[locations.size()];
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < labels.length; i++) {
+            labels[i] = locations.get(i).getDisplay();
+            sb.append(labels[i]);
+            if (i - 1 < labels.length)
+                sb.append("/");
+        }
+
+        Logger.info("Creating sample with locations " + sb.toString());
+        try {
+            Storage scheme = storageController.get(Long.parseLong(partSample.getLocationId()), false);
+            Storage storage = storageController.getLocation(scheme, labels);
+            storage = storageController.update(storage);
+            sample.setStorage(storage);
+            sample = dao.save(sample);
+            sampleStorage.getStorageList().clear();
+
+            List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
+            if (storages != null) {
+                for (Storage storage1 : storages) {
+                    StorageInfo info = new StorageInfo();
+                    info.setDisplay(storage1.getIndex());
+                    info.setId(storage1.getId());
+                    info.setType(storage1.getStorageType().name());
+                    sampleStorage.getStorageList().add(info);
+                }
+            }
+
+            sampleStorage.getPartSample().setSampleId(sample.getId() + "");
+            sampleStorage.getPartSample().setDepositor(account.getEmail());
+            return sampleStorage;
+        } catch (NumberFormatException | DAOException | ControllerException e) {
+            Logger.error(e);
+        }
+
+        return null;
     }
 }
