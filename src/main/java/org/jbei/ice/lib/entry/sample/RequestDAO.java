@@ -65,4 +65,18 @@ public class RequestDAO extends HibernateRepository<Request> {
             throw new DAOException(he);
         }
     }
+
+    @SuppressWarnings("unchecked")
+    public List<Request> getRequestListInCart(Account account) throws DAOException {
+        Criteria criteria = currentSession().createCriteria(Request.class.getName())
+                .add(Restrictions.eq("account", account))
+                .add(Restrictions.eq("requestStatus", SampleRequestStatus.IN_CART));
+
+        try {
+            return new ArrayList<Request>(criteria.list());
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
 }

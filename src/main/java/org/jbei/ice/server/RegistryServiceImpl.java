@@ -71,6 +71,7 @@ import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.permission.PermissionSuggestion;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.shared.dto.search.IndexType;
@@ -287,16 +288,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             int count = messageController.getNewMessageCount(account);
             info.setNewMessageCount(count);
 
-            // get samples still in the cart
-            int samplesCount = new SampleRequests().getSampleRequestCount(account, SampleRequestStatus.IN_CART);
-            info.setSamplesInCartCount(samplesCount);
-
             return info;
         } catch (ControllerException e) {
             Logger.error(e);
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by " + name);
         }
+        return null;
+    }
+
+    @Override
+    public ArrayList<SampleRequest> getSampleRequests(String sid, SampleRequestStatus status)
+            throws AuthenticationException {
+        SampleRequests requests = new SampleRequests();
+        Account account = retrieveAccountForSid(sid);
+        if (status == SampleRequestStatus.IN_CART)
+            return requests.getSampleRequestsInCart(account);
         return null;
     }
 
@@ -417,10 +424,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 MessageController messageController = ControllerFactory.getMessageController();
                 int count = messageController.getNewMessageCount(account);
                 info.setNewMessageCount(count);
-
-                // get samples still in the cart
-                int samplesCount = new SampleRequests().getSampleRequestCount(account, SampleRequestStatus.IN_CART);
-                info.setSamplesInCartCount(samplesCount);
 
                 return info;
             }

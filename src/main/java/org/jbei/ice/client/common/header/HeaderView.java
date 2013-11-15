@@ -1,11 +1,14 @@
 package org.jbei.ice.client.common.header;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.user.User;
 
@@ -40,12 +43,14 @@ public class HeaderView extends Composite {
     private Button searchBtn;
     private final AdvancedSearchWidget widgetAdvanced;
     private final FlexTable loggedInContentsPanel;
-    private static final HeaderView INSTANCE = new HeaderView();
+    private static HeaderView INSTANCE;
     private final HeaderMenu headerMenu;
     private ServiceDelegate<SearchQuery> queryServiceDelegate;
     private final SampleRequestWidget sampleRequestWidget;
 
     public static HeaderView getInstance() {
+        if (INSTANCE == null)
+            INSTANCE = new HeaderView();
         return INSTANCE;
     }
 
@@ -242,10 +247,41 @@ public class HeaderView extends Composite {
     public void setHeaderData(User account) {
         createLoggedInContents(account);
         setNewMessages(account.getNewMessageCount());
-        setCartCount(account.getSamplesInCartCount());
     }
 
     public void setQueryDelegate(ServiceDelegate<SearchQuery> queryDelegate) {
         queryServiceDelegate = queryDelegate;
+    }
+
+    public void setDeleteRequestSampleDelegate(ServiceDelegate<SampleRequest> delegate) {
+        sampleRequestWidget.setDeleteSampleDelegate(delegate);
+    }
+
+    public void setSubmitSampleRequestsDelegate(ServiceDelegate<ArrayList<SampleRequest>> requestsDelegate) {
+        sampleRequestWidget.setSubmitRequestsDelegate(requestsDelegate);
+    }
+
+    public boolean isInCart(SampleRequest request) {
+        return this.sampleRequestWidget.isInCart(request);
+    }
+
+    public void removeFromCart(SampleRequest request) {
+        int count = sampleRequestWidget.removeFromCart(request);
+        setCartCount(count);
+    }
+
+    public void addToCart(SampleRequest request) {
+        int count = sampleRequestWidget.addToCart(request);
+        setCartCount(count);
+    }
+
+    public void setSampleRequestData(ArrayList<SampleRequest> sampleRequestData) {
+        sampleRequestWidget.setData(sampleRequestData);
+        setCartCount(sampleRequestData.size());
+    }
+
+    public void resetRequestWidget() {
+        sampleRequestWidget.reset();
+        setCartCount(0);
     }
 }

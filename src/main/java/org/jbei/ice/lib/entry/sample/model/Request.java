@@ -6,6 +6,8 @@ import javax.persistence.*;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
@@ -99,5 +101,17 @@ public class Request implements IModel {
 
     public void setEntry(Entry entry) {
         this.entry = entry;
+    }
+
+    public static SampleRequest toDTO(Request request) {
+        SampleRequest sampleRequest = new SampleRequest();
+        sampleRequest.setRequestType(request.getRequestType());
+        sampleRequest.setRequestStatus(request.getRequestStatus());
+        PartData data = new PartData();
+        Entry entry = request.getEntry();
+        data.setId(entry.getId());
+        data.setPartId(entry.getPartNumber());
+        sampleRequest.setPartData(data);
+        return sampleRequest;
     }
 }

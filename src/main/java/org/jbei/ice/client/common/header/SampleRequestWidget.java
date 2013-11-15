@@ -1,24 +1,31 @@
 package org.jbei.ice.client.common.header;
 
+import java.util.ArrayList;
+
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.ServiceDelegate;
+import org.jbei.ice.client.admin.group.DeleteActionCell;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
-import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 
 /**
  * Widget that displays summary list of pending sample requests in the header
@@ -28,11 +35,12 @@ import com.google.gwt.view.client.MultiSelectionModel;
  */
 public class SampleRequestWidget implements IsWidget {
 
-    private final FocusPanel parent;
     private final CellTable<SampleRequest> table;
     private final HTML badge;
-    private final MultiSelectionModel<SampleRequest> model;
-    private final ListDataProvider<SampleRequest> dataProvider;
+    private final Button submitButton;
+    private HandlerRegistration buttonRegistration;
+    private ListDataProvider<SampleRequest> dataProvider;
+    private PopupHandler addToHandler;
 
     interface SelectionResource extends CellTable.Resources {
 
@@ -48,59 +56,77 @@ public class SampleRequestWidget implements IsWidget {
         setRequestCount(0);
 
         table = new CellTable<SampleRequest>(30, SelectionResource.INSTANCE);
-        model = new MultiSelectionModel<SampleRequest>();
+        Label empty = new Label();
+        empty.setText("No samples have been added to cart");
+        empty.setStyleName("no_data_style");
+
+        table.setEmptyTableWidget(empty);
         dataProvider = new ListDataProvider<SampleRequest>();
         dataProvider.addDataDisplay(table);
 
-        parent = new FocusPanel(badge);
+        FlexTable popupWidget = new FlexTable();
+        popupWidget.setStyleName("bg_fc");
+        popupWidget.setWidget(0, 0, table);
 
-        PopupHandler addToHandler = new PopupHandler(table, parent.getElement(), false);
-        parent.addClickHandler(addToHandler);
+        // add submit button
+        submitButton = new Button("Submit");
+        popupWidget.setWidget(1, 0, submitButton);
+        submitButton.setWidth("128px");
+        submitButton.setEnabled(false);
 
-        SampleRequest request = new SampleRequest();
-        request.setRequestType(SampleRequestType.STREAK_ON_AGAR_PLATE);
-        PartData data = new PartData();
-        data.setId(12302);
-        data.setPartId("JBx_1232");
-        request.setPartData(data);
-        dataProvider.getList().add(request);
-
+        addToHandler = new PopupHandler(popupWidget, badge.getElement(), false);
+        badge.addClickHandler(addToHandler);
         initTable();
     }
 
     protected void initTable() {
-        final CheckboxCell columnCell = new CheckboxCell(true, false);
-
-        // selection column
-        Column<SampleRequest, Boolean> selectionCol = new Column<SampleRequest, Boolean>(columnCell) {
-
-            @Override
-            public Boolean getValue(SampleRequest object) {
-                return model.isSelected(object);
-            }
-        };
-
-        table.addColumn(selectionCol);
-        table.setColumnWidth(selectionCol, "5px");
-
         // add part number column
         Column<SampleRequest, SafeHtml> column = new Column<SampleRequest, SafeHtml>(new SafeHtmlCell()) {
 
             @Override
             public SafeHtml getValue(SampleRequest object) {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                sb.appendHtmlConstant("<a href=\"" + object.getPartData().getId() + "\">" + object.getPartData()
-                                                                                                  .getPartId() +
-                                              "</a>");
+                sb.appendHtmlConstant("<a href=\"#" + Page.ENTRY_VIEW.getLink() + ";id=" + object.getPartData().getId()
+                                              + "\">" + object.getPartData().getPartId() + "</a>");
+                if (object.getRequestType() == SampleRequestType.LIQUID_CULTURE) {
+                    sb.appendHtmlConstant("&nbsp;<i class=\"" + FAIconType.FLASK.getStyleName() + "\"></i>");
+                } else {
+                    sb.appendHtmlConstant("&nbsp;<i class=\"" + FAIconType.CIRCLE_ALT.getStyleName() + "\"></i>");
+                }
                 return sb.toSafeHtml();
             }
         };
         table.addColumn(column);
-        table.setColumnWidth(column, "200px");
+        table.setColumnWidth(column, "100px");
+    }
 
-        // add type column
+    public void setDeleteSampleDelegate(ServiceDelegate<SampleRequest> delegate) {
+        if (table.getColumnCount() > 1)
+            return;
 
-        // add delete from table column
+        DeleteActionCell<SampleRequest> cell = new DeleteActionCell<SampleRequest>(delegate);
+        Column<SampleRequest, SampleRequest> deleteColumn = new Column<SampleRequest, SampleRequest>(cell) {
+
+            @Override
+            public SampleRequest getValue(SampleRequest object) {
+                return object;
+            }
+        };
+        table.addColumn(deleteColumn, "");
+        table.setColumnWidth(deleteColumn, "25px");
+    }
+
+    public void setSubmitRequestsDelegate(final ServiceDelegate<ArrayList<SampleRequest>> requestsDelegate) {
+        if (buttonRegistration != null)
+            buttonRegistration.removeHandler();
+
+        buttonRegistration = submitButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                requestsDelegate.execute(new ArrayList<SampleRequest>(dataProvider.getList()));
+                addToHandler.hidePopup();
+            }
+        });
     }
 
     public void setRequestCount(int count) {
@@ -109,10 +135,42 @@ public class SampleRequestWidget implements IsWidget {
                 + FAIconType.SHOPPING_CART.getStyleName() + "\"></i>"
                 + "<sup class=\"badge\">" + count + "</sup></span>";
         badge.setHTML(html);
+        if (submitButton != null)
+            submitButton.setEnabled(dataProvider.getList().size() > 0);
+    }
+
+    public int getItemCount() {
+        return dataProvider.getList().size();
+    }
+
+    public boolean isInCart(SampleRequest request) {
+        return this.dataProvider.getList().contains(request);
+    }
+
+    public int removeFromCart(SampleRequest request) {
+        this.dataProvider.getList().remove(request);
+        return getItemCount();
+    }
+
+    public int addToCart(SampleRequest request) {
+        this.dataProvider.getList().add(request);
+        return getItemCount();
+    }
+
+    public void reset() {
+        dataProvider.getList().clear();
+    }
+
+    public int setData(ArrayList<SampleRequest> sampleRequestData) {
+        dataProvider.getList().clear();
+        if (sampleRequestData == null)
+            return 0;
+        dataProvider.getList().addAll(sampleRequestData);
+        return getItemCount();
     }
 
     @Override
     public Widget asWidget() {
-        return parent;
+        return badge;
     }
 }

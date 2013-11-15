@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.entry.sample;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -8,6 +10,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
@@ -62,6 +65,24 @@ public class SampleRequests {
             return dao.getRequestCount(account, status);
         } catch (DAOException e) {
             return -1;
+        }
+    }
+
+    public ArrayList<SampleRequest> getSampleRequestsInCart(Account account) {
+        if (account == null)
+            return null;
+
+        try {
+            List<Request> requestList = dao.getRequestListInCart(account);
+            if (requestList == null)
+                return null;
+
+            ArrayList<SampleRequest> requests = new ArrayList<>();
+            for (Request request : requestList)
+                requests.add(Request.toDTO(request));
+            return requests;
+        } catch (DAOException e) {
+            return null;
         }
     }
 }

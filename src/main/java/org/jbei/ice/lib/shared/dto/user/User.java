@@ -24,7 +24,6 @@ public class User implements IDTOModel {
     private long visibleEntryCount;
     private boolean isAdmin;
     private int newMessageCount;
-    private int samplesInCartCount;
     private AccountType accountType;
 
     public User() {
@@ -149,13 +148,5 @@ public class User implements IDTOModel {
 
     public void setAccountType(AccountType accountType) {
         this.accountType = accountType;
-    }
-
-    public int getSamplesInCartCount() {
-        return samplesInCartCount;
-    }
-
-    public void setSamplesInCartCount(int samplesInCartCount) {
-        this.samplesInCartCount = samplesInCartCount;
     }
 }

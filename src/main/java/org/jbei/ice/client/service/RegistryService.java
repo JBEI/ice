@@ -26,6 +26,8 @@ import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.shared.dto.search.IndexType;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
@@ -244,4 +246,7 @@ public interface RegistryService extends RemoteService {
     RegistryPartner setRegistryPartnerStatus(String sid, RegistryPartner partner) throws AuthenticationException;
 
     BulkUploadInfo getBulkEditData(String sid, ArrayList<Long> partIds) throws AuthenticationException;
+
+    ArrayList<SampleRequest> getSampleRequests(String sid, SampleRequestStatus status)
+            throws AuthenticationException;
 }
