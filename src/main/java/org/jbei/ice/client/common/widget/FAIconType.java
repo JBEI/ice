@@ -10,7 +10,7 @@ public enum FAIconType {
 
     ARROW_CIRCLE_LEFT("fa fa-arrow-circle-left"),
     ARROW_RIGHT("fa fa-arrow-right"),
-    BAN_CIRCLE("fa fa-ban-circle"),
+    BAN("fa fa-ban"),
     BOOK("fa fa-book"),
     CARET_DOWN("fa fa-caret-down"),
     CARET_LEFT("fa fa-caret-left"),
