@@ -3,6 +3,7 @@ package org.jbei.ice.client.entry.display.view;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
@@ -15,6 +16,7 @@ import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -103,7 +105,10 @@ public interface IEntryView extends IsWidget {
 
     void addSubmitCommentDelegate(ServiceDelegate<UserComment> delegate);
 
-    void addDelegates(Delegate<String> flagEntryDelegate, Delegate<SampleRequestType> sampleRequestDelegate);
+    void addDelegates(Delegate<String> flagEntryDelegate, Delegate<SampleRequestType> sampleRequestDelegate,
+            Delegate<SampleRequestType> removeSampleRequestDelegate);
+
+    Callback<SampleRequest> getRequestCallback();
 
     void addComment(UserComment comment);
 }

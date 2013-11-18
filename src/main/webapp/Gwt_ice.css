@@ -17,6 +17,10 @@ body {
     height: 100%;
 }
 
+.pixel_perfect {
+    font-size: 14px;
+}
+
 .blue {
     color: #007dbc;
 }
@@ -1232,7 +1236,7 @@ a:hover {
 
 .gwt-Button:hover {
     background-color: #f1f2f3;
-    border: 1px solid #888;
+    border: 1px solid #999;
     padding: 4px;
     font-weight: bold;
     color: #222;

@@ -33,12 +33,29 @@ public class HeaderPresenter {
         HeaderView.getInstance().removeFromCart(request);
     }
 
-    public void submitSampleRequests(ArrayList<SampleRequest> requests) {
-        HeaderView.getInstance().resetRequestWidget();
-        int size = requests.size();
-        String requestString = (size == 1) ? "request" : "requests";
-        FeedbackEvent event = new FeedbackEvent(false, size + " sample " + requestString + " submitted");
-        eventBus.fireEvent(event);
+    public void submitSampleRequests(final ArrayList<SampleRequest> requests) {
+        new IceAsyncCallback<Boolean>() {
+
+            @Override
+            protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
+                service.submitSampleRequests(ClientController.sessionId, requests, callback);
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                FeedbackEvent event;
+                if (result) {
+                    HeaderView.getInstance().resetRequestWidget();
+                    int size = requests.size();
+                    String requestString = (size == 1) ? "request" : "requests";
+                    event = new FeedbackEvent(false, size + " sample " + requestString + " submitted");
+                } else {
+                    event = new FeedbackEvent(true, "Error submitting your requests");
+                }
+                eventBus.fireEvent(event);
+            }
+        }.go(eventBus);
+
     }
 
     public void retrievePendingSampleRequests() {

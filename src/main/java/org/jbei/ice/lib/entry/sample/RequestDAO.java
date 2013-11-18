@@ -40,7 +40,7 @@ public class RequestDAO extends HibernateRepository<Request> {
     public int getRequestCount(Account account, SampleRequestStatus status) throws DAOException {
         Criteria criteria = currentSession().createCriteria(Request.class.getName())
                 .add(Restrictions.eq("account", account))
-                .add(Restrictions.eq("requestStatus", status))
+                .add(Restrictions.eq("status", status))
                 .setProjection(Projections.rowCount());
         try {
             Number number = (Number) criteria.uniqueResult();
@@ -71,7 +71,7 @@ public class RequestDAO extends HibernateRepository<Request> {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Request> getRequestList(Account account, int start, int count, String sort, boolean asc)
+    public List<Request> getAccountRequestList(Account account, int start, int count, String sort, boolean asc)
             throws DAOException {
         Criteria criteria = currentSession().createCriteria(Request.class.getName())
                 .add(Restrictions.eq("account", account));
@@ -86,11 +86,26 @@ public class RequestDAO extends HibernateRepository<Request> {
         }
     }
 
+    public List<Request> getAllRequestList() throws DAOException {
+        Criteria criteria = currentSession().createCriteria(Request.class.getName());
+        criteria.setMaxResults(100);
+        criteria.setFirstResult(0);
+        boolean asc = true;
+        String sort = "requested";
+        criteria.addOrder(asc ? Order.asc(sort) : Order.desc(sort));
+        try {
+            return new ArrayList<Request>(criteria.list());
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public List<Request> getRequestListInCart(Account account) throws DAOException {
         Criteria criteria = currentSession().createCriteria(Request.class.getName())
                 .add(Restrictions.eq("account", account))
-                .add(Restrictions.eq("requestStatus", SampleRequestStatus.IN_CART));
+                .add(Restrictions.eq("status", SampleRequestStatus.IN_CART));
 
         try {
             return new ArrayList<Request>(criteria.list());

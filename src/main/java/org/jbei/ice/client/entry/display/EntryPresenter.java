@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
@@ -38,6 +39,7 @@ import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -320,8 +322,12 @@ public class EntryPresenter extends AbstractPresenter implements IHasPartData<Pa
 
     private void setFlagDelegate() {
         AlertHandler alertHandler = new AlertHandler(service, eventBus, display, this);
+        Callback<SampleRequest> requestCallback = display.getRequestCallback();
         RequestSampleHandler requestSampleHandler = new RequestSampleHandler(service, eventBus, this);
-        display.addDelegates(alertHandler, requestSampleHandler);
+        requestSampleHandler.setCallback(requestCallback);
+        RequestSampleHandler removeHandler = new RequestSampleHandler(service, eventBus, this, true);
+        removeHandler.setCallback(requestCallback);
+        display.addDelegates(alertHandler, requestSampleHandler, removeHandler);
     }
 
     private Delegate<Long> retrieveEntryTraceSequenceDetailsDelegate() {

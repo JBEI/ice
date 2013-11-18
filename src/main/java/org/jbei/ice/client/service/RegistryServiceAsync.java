@@ -282,6 +282,13 @@ public interface RegistryServiceAsync {
 
     void getBulkEditData(String sid, ArrayList<Long> partIds, AsyncCallback<BulkUploadInfo> async);
 
-    void getSampleRequests(String sid, SampleRequestStatus status, AsyncCallback<ArrayList<SampleRequest>> async)
-            ;
+    void getSampleRequests(String sid, SampleRequestStatus status, AsyncCallback<ArrayList<SampleRequest>> async);
+
+    void removeSampleRequestFromCart(String sid, long entryId, AsyncCallback<SampleRequest> async);
+
+    void getAllSampleRequests(String sid, AsyncCallback<ArrayList<SampleRequest>> async);
+
+    void updateSampleRequest(String sessionId, SampleRequest request, AsyncCallback<SampleRequest> callback);
+
+    void submitSampleRequests(String sessionId, ArrayList<SampleRequest> requests, AsyncCallback<Boolean> callback);
 }

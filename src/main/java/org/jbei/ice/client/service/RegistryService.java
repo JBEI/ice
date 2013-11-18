@@ -249,4 +249,12 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<SampleRequest> getSampleRequests(String sid, SampleRequestStatus status)
             throws AuthenticationException;
+
+    SampleRequest removeSampleRequestFromCart(String sid, long entryId) throws AuthenticationException;
+
+    ArrayList<SampleRequest> getAllSampleRequests(String sid) throws AuthenticationException;
+
+    SampleRequest updateSampleRequest(String sessionId, SampleRequest request) throws AuthenticationException;
+
+    Boolean submitSampleRequests(String sessionId, ArrayList<SampleRequest> requests) throws AuthenticationException;
 }

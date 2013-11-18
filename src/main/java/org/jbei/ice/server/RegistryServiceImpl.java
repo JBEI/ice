@@ -306,6 +306,34 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public ArrayList<SampleRequest> getAllSampleRequests(String sid) throws AuthenticationException {
+        SampleRequests requests = new SampleRequests();
+        Account account = retrieveAccountForSid(sid);
+        return requests.getPendingRequests(account);
+    }
+
+    @Override
+    public SampleRequest removeSampleRequestFromCart(String sid, long entryId) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        SampleRequests requests = new SampleRequests();
+        return requests.removeSampleFromCart(account, entryId);
+    }
+
+    @Override
+    public SampleRequest updateSampleRequest(String sessionId, SampleRequest request) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        SampleRequests requests = new SampleRequests();
+        return requests.updateRequest(account, request);
+    }
+
+    @Override
+    public Boolean submitSampleRequests(String sessionId, ArrayList<SampleRequest> requests)
+            throws AuthenticationException {
+        Account account = retrieveAccountForSid(sessionId);
+        return new SampleRequests().request(account, requests);
+    }
+
+    @Override
     public AccountResults retrieveAllUserAccounts(String sid, int start, int limit) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
@@ -1540,7 +1568,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Account account = retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": requesting sample " + type.toString() + " for entry " + entryId);
         SampleRequests requests = new SampleRequests();
-        requests.requestSample(account, entryId, type);
+        requests.placeSampleInCart(account, entryId, type);
         return requests.getSampleRequest(account, entryId);
     }
 

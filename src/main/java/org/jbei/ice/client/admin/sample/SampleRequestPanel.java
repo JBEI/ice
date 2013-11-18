@@ -1,6 +1,8 @@
 package org.jbei.ice.client.admin.sample;
 
+import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.admin.IAdminPanel;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -12,8 +14,16 @@ import com.google.gwt.user.client.ui.FlexTable;
  */
 public class SampleRequestPanel extends Composite implements IAdminPanel {
 
-    public SampleRequestPanel() {
+    private final SampleRequestTable sampleTable;
+
+    public SampleRequestPanel(Delegate<SampleRequest> delegate) {
         FlexTable table = new FlexTable();
         initWidget(table);
+        sampleTable = new SampleRequestTable(delegate);
+        table.setWidget(0, 0, sampleTable);
+    }
+
+    public SampleRequestTable getTable() {
+        return this.sampleTable;
     }
 }

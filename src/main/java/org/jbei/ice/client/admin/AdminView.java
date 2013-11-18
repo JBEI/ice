@@ -25,8 +25,7 @@ public class AdminView extends AbstractLayout {
         contentHeader = new HTML("<span style=\"margin-left: 14px; font-size: 12px; "
                                          + " background-color: orange; color: #fefefe;"
                                          + "text-shadow: #333 1px 1px 1px;"
-                                         + " padding: 5px; -webkit-border-radius: 2px; border-radius: 2px;"
-                                         + "-moz-border-radius: 2px;\"><b>Site Administration</b></span>");
+                                         + " padding: 5px; border-radius: 2px;\"><b>Site Administration</b></span>");
         mainContent.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
     }
 

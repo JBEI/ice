@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
@@ -17,6 +18,7 @@ import org.jbei.ice.client.entry.display.panel.sample.Storage96WellPanel;
 import org.jbei.ice.client.entry.display.view.CreateSampleForm;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -47,6 +49,10 @@ public class EntrySamplePanel extends Composite {
     private HandlerRegistration handlerRegistration;
     private final HTMLPanel panel;
     private Delegate<SampleRequestType> requestDelegate;
+    private Delegate<SampleRequestType> removeRequestDelegate;
+    private boolean isRequest;
+    private Dialog requestDialog;
+    private Callback<SampleRequest> callback;
 
     public EntrySamplePanel() {
         table = new FlexTable();
@@ -60,8 +66,29 @@ public class EntrySamplePanel extends Composite {
         panel.add(addSample, "add_sample");
         panel.add(requestSample, "request_sample");
 
+        createCallback();
+        createRequestDialog();
         reset();
         setAddRequestSampleHandler();
+    }
+
+    protected void createCallback() {
+        callback = new Callback<SampleRequest>() {
+            @Override
+            public void onSuccess(SampleRequest request) {
+                if (isRequest) {
+                    requestSample.setHTML("<i class=\"" + FAIconType.BAN.getStyleName()
+                                                  + " red\"></i> Remove from Cart");
+                } else
+                    requestSample.setHTML("<i class=\"" + FAIconType.SHOPPING_CART.getStyleName()
+                                                  + "\"></i> Add to Cart");
+                isRequest = !isRequest;
+            }
+
+            @Override
+            public void onFailure() {
+            }
+        };
     }
 
     public void setAddSampleHandler(ClickHandler handler) {
@@ -71,27 +98,35 @@ public class EntrySamplePanel extends Composite {
         addSample.setVisible(true);
     }
 
+    protected void createRequestDialog() {
+        VerticalPanel panel = new VerticalPanel();
+        panel.setStyleName("font-80em");
+        panel.setWidth("350px");
+        RadioButton culture = new RadioButton("sample", "Liquid Culture");
+        culture.setValue(true);
+        RadioButton streak = new RadioButton("sample", "Streak on Agar Plate");
+        panel.add(culture);
+        panel.add(streak);
+
+        requestDialog = new Dialog(panel, "400px", "Request Sample in the form of:");
+        requestDialog.showDialog(true);
+        requestDialog.setSubmitHandler(createDialogSampleSubmitHandler(culture));
+    }
+
     private void setAddRequestSampleHandler() {
         requestSample.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                VerticalPanel panel = new VerticalPanel();
-                panel.setStyleName("font-80em");
-                panel.setWidth("350px");
-                RadioButton culture = new RadioButton("sample", "Liquid Culture");
-                culture.setValue(true);
-                RadioButton streak = new RadioButton("sample", "Streak on Agar Plate");
-                panel.add(culture);
-                panel.add(streak);
-
-                Dialog dialog = new Dialog(panel, "400px", "Request Sample in the form of:");
-                dialog.showDialog(true);
-                dialog.setSubmitHandler(createDialogSampleSubmitHandler(culture, dialog));
+                if (isRequest)
+                    requestDialog.showDialog(true);
+                else {
+                    removeRequestDelegate.execute(null);
+                }
             }
         });
     }
 
-    private ClickHandler createDialogSampleSubmitHandler(final RadioButton culture, final Dialog dialog) {
+    private ClickHandler createDialogSampleSubmitHandler(final RadioButton culture) {
         return new ClickHandler() {
 
             @Override
@@ -102,22 +137,25 @@ public class EntrySamplePanel extends Composite {
                 }
 
                 requestDelegate.execute(type);
-                dialog.showDialog(false);
+                requestDialog.showDialog(false);
             }
         };
     }
 
-    public void setSampleRequestDelegate(Delegate<SampleRequestType> requestDelegate) {
+    public void setSampleRequestDelegates(Delegate<SampleRequestType> requestDelegate,
+            Delegate<SampleRequestType> removeSampleRequestDelegate) {
         this.requestDelegate = requestDelegate;
+        this.removeRequestDelegate = removeSampleRequestDelegate;
     }
 
     public void reset() {
+        isRequest = true;
         table.removeAllRows();
         table.setWidget(0, 0, panel);
         table.getFlexCellFormatter().setStyleName(0, 0, "pad_top");
 
         table.setHTML(1, 0, "");
-        table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No samples availabe</i>");
+        table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No samples available</i>");
     }
 
     public void setSampleOptions(SampleLocation options) {
@@ -161,8 +199,9 @@ public class EntrySamplePanel extends Composite {
 
         // sample data available
         boolean isInCart = HeaderView.getInstance().isInCart(entryId);
+        isRequest = !isInCart;
         if (isInCart) {
-            requestSample.setHTML("<i class=\"" + FAIconType.SHOPPING_CART.getStyleName() + "\"></i> Remove from Cart");
+            requestSample.setHTML("<i class=\"" + FAIconType.BAN.getStyleName() + " red\"></i> Remove from Cart");
         } else
             requestSample.setHTML("<i class=\"" + FAIconType.SHOPPING_CART.getStyleName() + "\"></i> Add to Cart");
 
@@ -230,6 +269,10 @@ public class EntrySamplePanel extends Composite {
 
     public void setAddSampleVisibility(boolean visible) {
         addSample.setVisible(visible);
+    }
+
+    public Callback<SampleRequest> getCallback() {
+        return callback;
     }
 
     private static class GenericStoragePanel extends Composite {

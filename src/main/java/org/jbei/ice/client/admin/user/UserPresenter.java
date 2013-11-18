@@ -22,15 +22,11 @@ public class UserPresenter extends AdminPanelPresenter {
 
     private final UserPanel view;
     private final UserDataProvider provider;
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
 
     public UserPresenter(final RegistryServiceAsync service, final HandlerManager eventBus) {
         super(service, eventBus);
         this.view = new UserPanel();
         this.provider = new UserDataProvider(view.getUserTable(), service);
-        this.service = service;
-        this.eventBus = eventBus;
         setRegistrationHandler();
     }
 

@@ -18,6 +18,7 @@ import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -207,7 +208,23 @@ public class AdminPresenter extends AbstractPresenter {
 
     // SAMPLE REQUESTS
     private void retrieveSampleRequests() {
-        view.show(currentOption, sampleRequestPresenter.getView().asWidget());
+        new IceAsyncCallback<ArrayList<SampleRequest>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<SampleRequest>> callback)
+                    throws AuthenticationException {
+                service.getAllSampleRequests(ClientController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<SampleRequest> result) {
+                if (currentOption != AdminOption.SAMPLE_REQUESTS)
+                    return;
+
+                sampleRequestPresenter.setData(result);
+                view.show(currentOption, sampleRequestPresenter.getView().asWidget());
+            }
+        }.go(eventBus);
     }
 
     @Override

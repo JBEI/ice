@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
@@ -26,6 +27,7 @@ import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -315,9 +317,15 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void addDelegates(Delegate<String> flagEntryDelegate, Delegate<SampleRequestType> sampleRequestDelegate) {
+    public void addDelegates(Delegate<String> flagEntryDelegate, Delegate<SampleRequestType> sampleRequestDelegate,
+            Delegate<SampleRequestType> removeSampleRequestDelegate) {
         entryAction.setFlagDelegate(flagEntryDelegate);
-        samplePanel.setSampleRequestDelegate(sampleRequestDelegate);
+        samplePanel.setSampleRequestDelegates(sampleRequestDelegate, removeSampleRequestDelegate);
+    }
+
+    @Override
+    public Callback<SampleRequest> getRequestCallback() {
+        return samplePanel.getCallback();
     }
 
     @Override

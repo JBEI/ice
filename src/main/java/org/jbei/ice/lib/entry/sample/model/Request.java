@@ -45,11 +45,11 @@ public class Request implements IModel {
 
     @Column(name = "request_type")
     @Enumerated(value = EnumType.STRING)
-    private SampleRequestType requestType;
+    private SampleRequestType type;
 
     @Column(name = "request_status")
     @Enumerated(value = EnumType.STRING)
-    private SampleRequestStatus requestStatus = SampleRequestStatus.IN_CART;
+    private SampleRequestStatus status = SampleRequestStatus.IN_CART;
 
     public long getId() {
         return this.id;
@@ -79,20 +79,20 @@ public class Request implements IModel {
         this.updated = updated;
     }
 
-    public SampleRequestType getRequestType() {
-        return requestType;
+    public SampleRequestType getType() {
+        return type;
     }
 
-    public void setRequestType(SampleRequestType requestType) {
-        this.requestType = requestType;
+    public void setType(SampleRequestType requestType) {
+        this.type = requestType;
     }
 
-    public SampleRequestStatus getRequestStatus() {
-        return requestStatus;
+    public SampleRequestStatus getStatus() {
+        return status;
     }
 
-    public void setRequestStatus(SampleRequestStatus requestStatus) {
-        this.requestStatus = requestStatus;
+    public void setStatus(SampleRequestStatus requestStatus) {
+        this.status = requestStatus;
     }
 
     public Entry getEntry() {
@@ -105,13 +105,18 @@ public class Request implements IModel {
 
     public static SampleRequest toDTO(Request request) {
         SampleRequest sampleRequest = new SampleRequest();
-        sampleRequest.setRequestType(request.getRequestType());
-        sampleRequest.setRequestStatus(request.getRequestStatus());
+        sampleRequest.setId(request.getId());
+        sampleRequest.setRequestType(request.getType());
+        sampleRequest.setStatus(request.getStatus());
         PartData data = new PartData();
         Entry entry = request.getEntry();
         data.setId(entry.getId());
         data.setPartId(entry.getPartNumber());
         sampleRequest.setPartData(data);
+        sampleRequest.setRequester(Account.toDTO(request.getAccount()));
+        sampleRequest.setRequestTime(request.getRequested().getTime());
+        sampleRequest.setUpdateTime(request.getUpdated() == null
+                                            ? sampleRequest.getRequestTime() : request.getUpdated().getTime());
         return sampleRequest;
     }
 }
