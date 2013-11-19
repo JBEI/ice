@@ -98,7 +98,7 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
             List<String> lines = IOUtils.readLines(inputStream);
             for (String line : lines) {
                 line = line.trim();
-                if (line.isEmpty())
+                if (line.isEmpty() || line.replaceAll(",", "").trim().isEmpty())
                     continue;
 
                 if (parser == null) {
