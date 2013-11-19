@@ -11,8 +11,9 @@ import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.header.HeaderView;
-import org.jbei.ice.client.common.widget.Dialog;
 import org.jbei.ice.client.common.widget.FAIconType;
+import org.jbei.ice.client.common.widget.GenericPopup;
+import org.jbei.ice.client.common.widget.ICanReset;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.entry.display.panel.sample.Storage96WellPanel;
 import org.jbei.ice.client.entry.display.view.CreateSampleForm;
@@ -51,7 +52,7 @@ public class EntrySamplePanel extends Composite {
     private Delegate<SampleRequestType> requestDelegate;
     private Delegate<SampleRequestType> removeRequestDelegate;
     private boolean isRequest;
-    private Dialog requestDialog;
+    private GenericPopup requestDialog;
     private Callback<SampleRequest> callback;
 
     public EntrySamplePanel() {
@@ -99,18 +100,20 @@ public class EntrySamplePanel extends Composite {
     }
 
     protected void createRequestDialog() {
-        VerticalPanel panel = new VerticalPanel();
-        panel.setStyleName("font-80em");
-        panel.setWidth("350px");
-        RadioButton culture = new RadioButton("sample", "Liquid Culture");
-        culture.setValue(true);
-        RadioButton streak = new RadioButton("sample", "Streak on Agar Plate");
-        panel.add(culture);
-        panel.add(streak);
+        final SampleRequestOptionDialogWidget widget = new SampleRequestOptionDialogWidget();
+        requestDialog = new GenericPopup(widget, "<b>Request Sample in the form of</b>", "400px", "Add");
+        requestDialog.addSaveButtonHandler(new ClickHandler() {
 
-        requestDialog = new Dialog(panel, "400px", "Request Sample in the form of:");
-        requestDialog.showDialog(true);
-        requestDialog.setSubmitHandler(createDialogSampleSubmitHandler(culture));
+            @Override
+            public void onClick(ClickEvent event) {
+                SampleRequestType type = SampleRequestType.STREAK_ON_AGAR_PLATE;
+                if (widget.isCultureRequested())
+                    type = SampleRequestType.LIQUID_CULTURE;
+
+                requestDelegate.execute(type);
+                requestDialog.hideDialog();
+            }
+        });
     }
 
     private void setAddRequestSampleHandler() {
@@ -118,28 +121,12 @@ public class EntrySamplePanel extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 if (isRequest)
-                    requestDialog.showDialog(true);
+                    requestDialog.showDialog();
                 else {
                     removeRequestDelegate.execute(null);
                 }
             }
         });
-    }
-
-    private ClickHandler createDialogSampleSubmitHandler(final RadioButton culture) {
-        return new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                SampleRequestType type = SampleRequestType.STREAK_ON_AGAR_PLATE;
-                if (culture.getValue()) {
-                    type = SampleRequestType.LIQUID_CULTURE;
-                }
-
-                requestDelegate.execute(type);
-                requestDialog.showDialog(false);
-            }
-        };
     }
 
     public void setSampleRequestDelegates(Delegate<SampleRequestType> requestDelegate,
@@ -273,6 +260,36 @@ public class EntrySamplePanel extends Composite {
 
     public Callback<SampleRequest> getCallback() {
         return callback;
+    }
+
+    //
+    // inner classes
+    //
+    private static class SampleRequestOptionDialogWidget extends Composite implements ICanReset {
+
+        private RadioButton culture;
+        private RadioButton streak;
+
+        public SampleRequestOptionDialogWidget() {
+            VerticalPanel panel = new VerticalPanel();
+            initWidget(panel);
+            panel.setStyleName("font-80em");
+            panel.setWidth("350px");
+            culture = new RadioButton("sample", "Liquid Culture");
+            culture.setValue(true);
+            streak = new RadioButton("sample", "Streak on Agar Plate");
+            panel.add(culture);
+            panel.add(streak);
+        }
+
+        @Override
+        public void reset() {
+            culture.setValue(true);
+        }
+
+        public boolean isCultureRequested() {
+            return this.culture.getValue();
+        }
     }
 
     private static class GenericStoragePanel extends Composite {
