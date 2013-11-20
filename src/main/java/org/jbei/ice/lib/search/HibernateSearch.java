@@ -113,7 +113,7 @@ public class HibernateSearch {
     }
 
     public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery, String projectName,
-            String projectURL, HashMap<String, Float> userBoost) {
+            String projectURL) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null) {
             entryTypes = new ArrayList<>();
@@ -124,55 +124,45 @@ public class HibernateSearch {
         int resultCount;
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         BooleanQuery booleanQuery = new BooleanQuery();
-        // get classes for search
-//        Class<?>[] classes = new Class<?>[EntryType.values().length];
-//        for (int i = 0; i < entryTypes.size(); i += 1) {
-//            classes[i] = SearchFieldFactory.entryClass(entryTypes.get(i));
-//        }
 
+        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
+
+        ArrayList<Query> except = new ArrayList<>();
         for (EntryType type : EntryType.values()) {
-            Class<?> clazz = SearchFieldFactory.entryClass(type);
+            if (entryTypes.contains(type))
+                continue;
 
-            QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
+            except.add(qb.keyword().onField("recordType").matching(type.getName()).createQuery());
 
-            // pending visibility
-            Query visibilityQuery = qb.keyword().onField("visibility")
-                                      .matching(Visibility.PENDING.getValue()).createQuery();
-            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
-
-            // draft visibility
-            Query visibilityDraftQuery = qb.keyword().onField("visibility")
-                                           .matching(Visibility.DRAFT.getValue()).createQuery();
-            booleanQuery.add(visibilityDraftQuery, BooleanClause.Occur.MUST_NOT);
-
-            // exclude deleted
-            Query deletedQuery = qb.keyword().onField("ownerEmail").matching("system").createQuery();
-            booleanQuery.add(deletedQuery, BooleanClause.Occur.MUST_NOT);
         }
+        // add terms for record types
+        Query[] queries = new Query[]{};
+        Query recordTypeQuery = qb.all().except(except.toArray(queries)).createQuery();
+        booleanQuery.add(recordTypeQuery, BooleanClause.Occur.MUST);
 
-        booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, null,
-                                              searchQuery.getBioSafetyOption(), userBoost);
+        // visibility
+        Query visibilityQuery = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
+        booleanQuery.add(visibilityQuery, BooleanClause.Occur.SHOULD);
 
+        // exclude deleted
+        Query deletedQuery = qb.keyword().onField("ownerEmail").matching("system").createQuery();
+        booleanQuery.add(deletedQuery, BooleanClause.Occur.MUST_NOT);
+
+        // biosafety
+        BioSafetyOption option = searchQuery.getBioSafetyOption();
+        if (option != null) {
+            TermContext bslContext = qb.keyword();
+            org.apache.lucene.search.Query biosafetyQuery =
+                    bslContext.onField("bioSafetyLevel").ignoreFieldBridge().matching(option.getValue()).createQuery();
+            booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
+        }
         // wrap Lucene query in a org.hibernate.Query
-        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery);
-
-        // get max score
-        fullTextQuery.setFirstResult(0); //start from the startth element
-        fullTextQuery.setMaxResults(1);  //return count elements
-        fullTextQuery.setProjection(FullTextQuery.SCORE);
-        List result = fullTextQuery.list();
-        float maxScore = -1f;
-        if (result.size() == 1) {
-            maxScore = (Float) ((Object[]) (result.get(0)))[0];
-        }
-        // end get max score
+        org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery,
+                                                                                               Entry.class);
 
         // get sorting values
         Sort sort = getSort(searchQuery.getParameters().isSortAscending(), searchQuery.getParameters().getSortField());
         fullTextQuery.setSort(sort);
-
-        // projection (specified properties must be stored in the index @Field(store=Store.YES))
-        fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
 
         // enable security filter if needed
         checkEnableSecurityFilter(account, fullTextQuery);
@@ -194,14 +184,11 @@ public class HibernateSearch {
         fullTextQuery.setMaxResults(searchQuery.getParameters().getRetrieveCount());
 
         resultCount = fullTextQuery.getResultSize();
-        result = fullTextQuery.list();
+        List result = fullTextQuery.list();
 
         LinkedList<SearchResult> searchResults = new LinkedList<>();
-        Iterator<Object[]> iterator = result.iterator();
-        while (iterator.hasNext()) {
-            Object[] objects = iterator.next();
-            float score = (Float) objects[0];
-            Entry entry = (Entry) objects[1];
+        for (Object object : result) {
+            Entry entry = (Entry) object;
             SearchResult searchResult;
             if (blastInfo != null) {
                 searchResult = blastInfo.get(Long.toString(entry.getId()));
@@ -209,7 +196,7 @@ public class HibernateSearch {
                     continue;
             } else {
                 searchResult = new SearchResult();
-                searchResult.setScore(score);
+                searchResult.setScore(1f);
                 PartData info = ModelToInfoFactory.createTableViewData(entry, true);
                 try {
                     info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
@@ -219,7 +206,7 @@ public class HibernateSearch {
                 searchResult.setEntryInfo(info);
             }
 
-            searchResult.setMaxScore(maxScore);
+            searchResult.setMaxScore(1f);
             searchResult.setWebPartnerName(projectName);
             searchResult.setWebPartnerURL(projectURL);
             searchResults.add(searchResult);
@@ -231,7 +218,7 @@ public class HibernateSearch {
         String email = "Anon";
         if (account != null)
             email = account.getEmail();
-        Logger.info(email + ": obtained " + resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
+        Logger.info(email + ": obtained " + resultCount + " results for empty query");
         return results;
     }
 
@@ -341,7 +328,7 @@ public class HibernateSearch {
         }
 
         if (booleanQuery.getClauses().length == 0)
-            return executeSearchNoTerms(account, searchQuery, projectName, projectURL, userBoost);
+            return executeSearchNoTerms(account, searchQuery, projectName, projectURL);
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
