@@ -195,7 +195,7 @@ public class SampleRequests {
                 Emailer.send(email, subject, body);
             }
         } catch (DAOException de) {
-            Logger.error("Could not fulfil request");
+            Logger.error("Could not fulfil request", de);
             return false;
         }
         return true;

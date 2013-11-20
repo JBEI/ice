@@ -29,8 +29,22 @@ public class HeaderPresenter {
         this.eventBus = eventBus;
     }
 
-    public void deleteSampleRequest(SampleRequest request) {
-        HeaderView.getInstance().removeFromCart(request);
+    public void deleteSampleRequest(final SampleRequest request) {
+        new IceAsyncCallback<SampleRequest>() {
+
+            @Override
+            protected void callService(AsyncCallback<SampleRequest> callback) throws AuthenticationException {
+                long entryId = request.getPartData().getId();
+                service.removeSampleRequestFromCart(ClientController.sessionId, entryId, callback);
+            }
+
+            @Override
+            public void onSuccess(SampleRequest result) {
+                HeaderView.getInstance().removeFromCart(request);
+            }
+        }.go(eventBus);
+
+
     }
 
     public void submitSampleRequests(final ArrayList<SampleRequest> requests) {

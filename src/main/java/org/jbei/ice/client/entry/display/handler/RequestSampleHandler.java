@@ -74,7 +74,7 @@ public class RequestSampleHandler implements Delegate<SampleRequestType> {
             public void onSuccess(SampleRequest result) {
                 String msg;
                 if (result != null) {
-                    msg = "Sample removed to cart";
+                    msg = "Sample removed from cart";
                     HeaderView.getInstance().removeFromCart(result);
                     if (callback != null)
                         callback.onSuccess(result);

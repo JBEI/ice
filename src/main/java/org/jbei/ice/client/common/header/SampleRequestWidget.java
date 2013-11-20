@@ -97,8 +97,6 @@ public class SampleRequestWidget implements IsWidget {
                     sb.appendHtmlConstant(
                             "&nbsp;<i class=\"" + FAIconType.CIRCLE_ALT.getStyleName() + " display-inline\"></i>");
                 }
-                sb.appendHtmlConstant("<div class=\"permission_footer_link\">")
-                  .appendEscaped(object.getRequestType().toString()).appendHtmlConstant("</div>");
                 return sb.toSafeHtml();
             }
         };
@@ -166,10 +164,13 @@ public class SampleRequestWidget implements IsWidget {
             SampleRequest listRequest = iterator.next();
             if (listRequest.getPartData().getId() == request.getPartData().getId()) {
                 iterator.remove();
-                return getItemCount();
+                break;
             }
         }
-        return getItemCount();
+        int count = getItemCount();
+        if (count == 0)
+            addToHandler.hidePopup();
+        return count;
     }
 
     public int addToCart(SampleRequest request) {

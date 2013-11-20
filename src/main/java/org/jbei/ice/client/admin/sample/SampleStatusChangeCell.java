@@ -51,7 +51,7 @@ public class SampleStatusChangeCell extends AbstractCell<SampleRequest> {
         if (value.getStatus() == SampleRequestStatus.FULFILLED)
             style = FAIconType.CHECK_SQUARE_ALT.getStyleName() + " green";
         else if (value.getStatus() == SampleRequestStatus.PENDING)
-            style = FAIconType.SQUARE_ALT.getStyleName() + " red";
+            style = FAIconType.SQUARE_ALT.getStyleName() + " color_999";
         else
             style = FAIconType.EXCLAMATION_TRIANGLE.getStyleName() + " red";
         sb.appendHtmlConstant("<i class=\"" + style + " pixel_perfect\">").appendHtmlConstant("</i>");
