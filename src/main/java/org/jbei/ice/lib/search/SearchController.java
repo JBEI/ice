@@ -114,7 +114,7 @@ public class SearchController {
         }
 
         String queryString = query.getQueryString();
-        // TODO : split on \" first for phrase query
+        // TODO : split on \" first for phrase query  e.g. this "little piggy"
 
         // blast query only
         if (query.hasBlastQuery() && (queryString == null || queryString.isEmpty())) {
@@ -148,7 +148,7 @@ public class SearchController {
             iterable = Splitter.on(" ").omitEmptyStrings().split(queryString).iterator();
             return hibernateSearch.executeSearch(account, iterable, query, projectName, projectURI, mapping);
         } else {
-            return hibernateSearch.executeSearchNoTerms(account, query, projectName, projectURI, mapping);
+            return hibernateSearch.executeSearchNoTerms(account, query, projectName, projectURI);
         }
     }
 
