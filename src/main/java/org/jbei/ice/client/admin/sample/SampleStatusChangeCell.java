@@ -53,7 +53,7 @@ public class SampleStatusChangeCell extends AbstractCell<SampleRequest> {
         else if (value.getStatus() == SampleRequestStatus.PENDING)
             style = FAIconType.SQUARE_ALT.getStyleName() + " color_999";
         else
-            style = FAIconType.EXCLAMATION_TRIANGLE.getStyleName() + " red";
+            style = FAIconType.SHOPPING_CART.getStyleName() + " blue";
         sb.appendHtmlConstant("<i class=\"" + style + " pixel_perfect\">").appendHtmlConstant("</i>");
     }
 

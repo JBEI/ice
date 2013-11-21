@@ -62,7 +62,7 @@ public class ProfileViewMenu extends Composite {
         currentRowSelection = row;
         for (UserOption option : menuOptions) {
             String html = "<i style=\"display: inline; margin-right: 10px;\" class=\""
-                    + option.getIcon().getStyleName() + " font-awesome\"></i>" + option.toString();
+                    + option.getIcon().getStyleName() + " fa-fw\"></i>" + option.toString();
             layout.setHTML(row, 0, html);
             rowOption.put(row, option);
             row += 1;

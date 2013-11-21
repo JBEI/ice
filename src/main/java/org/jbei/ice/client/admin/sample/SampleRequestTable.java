@@ -28,7 +28,7 @@ public class SampleRequestTable extends CellTable<SampleRequest> {
         static SelectionResource INSTANCE = GWT.create(SelectionResource.class);
 
         @Override
-        @Source("org/jbei/ice/client/resource/css/CollectionMultiSelect.css")
+        @Source("org/jbei/ice/client/resource/css/MessageDataTable.css")
         CellTable.Style cellTableStyle();
     }
 
@@ -102,7 +102,7 @@ public class SampleRequestTable extends CellTable<SampleRequest> {
 
             @Override
             public String getValue(SampleRequest object) {
-                DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("MMM d, yyyy");
+                DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("MMM d, yyyy h:mm a");
                 return dateTimeFormat.format(new Date(object.getRequestTime()));
             }
         };
@@ -114,7 +114,7 @@ public class SampleRequestTable extends CellTable<SampleRequest> {
 
             @Override
             public String getValue(SampleRequest object) {
-                DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("MMM d, yyyy");
+                DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("MMM d, yyyy h:mm a");
                 return dateTimeFormat.format(new Date(object.getUpdateTime()));
             }
         };

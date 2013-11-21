@@ -20,7 +20,8 @@ public class SampleRequestPanel extends Composite implements IAdminPanel {
         FlexTable table = new FlexTable();
         initWidget(table);
         sampleTable = new SampleRequestTable(delegate);
-        table.setWidget(0, 0, sampleTable);
+        table.setHTML(0, 0, "&nbsp;");
+        table.setWidget(1, 0, sampleTable);
     }
 
     public SampleRequestTable getTable() {
