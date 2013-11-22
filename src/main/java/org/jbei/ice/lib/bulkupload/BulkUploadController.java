@@ -16,12 +16,9 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -36,7 +33,6 @@ import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
-import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
@@ -268,12 +264,12 @@ public class BulkUploadController {
                     continue;
             }
 
-            SampleStorage sampleStorage = retrieveSampleStorage(entry);
-            if (sampleStorage != null) {
-                ArrayList<SampleStorage> sampleStorageArrayList = new ArrayList<>();
-                sampleStorageArrayList.add(sampleStorage);
-                info.setSampleMap(sampleStorageArrayList);
-            }
+//            SampleStorage sampleStorage = retrieveSampleStorage(entry);
+//            if (sampleStorage != null) {
+//                ArrayList<SampleStorage> sampleStorageArrayList = new ArrayList<>();
+//                sampleStorageArrayList.add(sampleStorage);
+//                info.setSampleMap(sampleStorageArrayList);
+//            }
 
             addList.add(info);
         }
@@ -432,136 +428,8 @@ public class BulkUploadController {
 
     public BulkUploadAutoUpdate autoUpdateBulkUpload(String userId, BulkUploadAutoUpdate autoUpdate,
             EntryAddType addType) throws ControllerException {
-        Account account = accountController.getByEmail(userId);
-
-        BulkUpload draft = null;
-        if (autoUpdate.getEditMode() != EditMode.BULK_EDIT) {
-            // deal with bulk upload
-
-            try {
-                draft = dao.retrieveById(autoUpdate.getBulkUploadId());
-                if (draft == null) {
-                    // validate add type and entry type
-                    if (addType != EntryAddType.STRAIN_WITH_PLASMID && EntryType.nameToType(
-                            addType.name()) != autoUpdate.getType()) {
-                        throw new ControllerException("Incompatible add type [" + addType.toString()
-                                                              + "] and auto update entry type ["
-                                                              + autoUpdate.getType().toString() + "]");
-                    }
-
-                    draft = new BulkUpload();
-                    draft.setName("Untitled");
-                    draft.setAccount(account);
-                    draft.setStatus(BulkUploadStatus.IN_PROGRESS);
-                    draft.setImportType(addType.toString());
-                    draft.setCreationTime(new Date(System.currentTimeMillis()));
-                    draft.setLastUpdateTime(draft.getCreationTime());
-                    dao.save(draft);
-                    autoUpdate.setBulkUploadId(draft.getId());
-                }
-            } catch (DAOException de) {
-                throw new ControllerException(de);
-            }
-        }
-
-        // for strain with plasmid this is the strain
-        Entry entry = entryController.get(account, autoUpdate.getEntryId());
-        Entry otherEntry = null;  // for strain with plasmid this is the entry
-
-        // if entry is null, create entry
-        if (entry == null) {
-            entry = EntryUtil.createEntryFromType(autoUpdate.getType(), account.getFullName(), account.getEmail());
-            if (entry == null)
-                throw new ControllerException("Don't know what to do with entry type");
-
-            entry = entryController.createEntry(account, entry, null);
-
-            // creates strain/plasmid at the same time for strain with plasmid
-            if (addType == EntryAddType.STRAIN_WITH_PLASMID) {
-                if (autoUpdate.getType() == EntryType.STRAIN) {
-                    // created strain, now create plasmid
-                    otherEntry = new Plasmid();
-                    otherEntry.setOwner(account.getFullName());
-                    otherEntry.setOwnerEmail(account.getEmail());
-                    otherEntry.setCreator(account.getFullName());
-                    otherEntry.setCreatorEmail(account.getEmail());
-                    otherEntry.setVisibility(Visibility.DRAFT.getValue());
-                    entryController.createEntry(account, otherEntry, null);
-                    // link the plasmid to strain (strain gets updated later on)
-                    entry.getLinkedEntries().add(otherEntry);
-                } else {
-                    // created plasmid, now create strain and link
-                    otherEntry = entry;
-                    entry = new Strain();
-                    entry.setOwner(account.getFullName());
-                    entry.setOwnerEmail(account.getEmail());
-                    entry.setCreator(account.getFullName());
-                    entry.setCreatorEmail(account.getEmail());
-                    entry.getLinkedEntries().add(otherEntry);
-                    entry.setVisibility(Visibility.DRAFT.getValue());
-                    entryController.createEntry(account, entry, null);
-                }
-            }
-
-            autoUpdate.setEntryId(entry.getId());
-            if (draft != null) {
-                draft.getContents().add(entry);
-            }
-        } else {
-            // entry not null (fetch plasmid for strain) if this is a strain with plasmid
-            if (addType == EntryAddType.STRAIN_WITH_PLASMID && !entry.getLinkedEntries().isEmpty()) {
-                otherEntry = (Entry) entry.getLinkedEntries().toArray()[0];
-            }
-        }
-
-        try {
-            // now update the values (for strain with plasmid, some values are for both
-            for (Map.Entry<EntryField, String> set : autoUpdate.getKeyValue().entrySet()) {
-                String value = set.getValue();
-                EntryField field = set.getKey();
-
-                Entry[] ret = InfoToModelFactory.infoToEntryForField(entry, otherEntry, value, field);
-                entry = ret[0];
-
-                if (ret.length == 2) {
-                    otherEntry = ret[1];
-                }
-            }
-
-            if (otherEntry != null && autoUpdate.getEditMode() != EditMode.BULK_EDIT) {
-                if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
-                    otherEntry.setVisibility(Visibility.DRAFT.getValue());
-
-                entryController.update(account, otherEntry);
-            }
-
-            if ((entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
-                    && autoUpdate.getEditMode() != EditMode.BULK_EDIT)
-                entry.setVisibility(Visibility.DRAFT.getValue());
-
-            // set the plasmids and update
-            if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())
-                    && entry.getLinkedEntries().isEmpty()) {
-                Strain strain = (Strain) entry;
-                entryController.setStrainPlasmids(account, strain, strain.getPlasmids());
-            }
-
-            entryController.update(account, entry);
-        } catch (PermissionException e) {
-            throw new ControllerException(e);
-        }
-
-        // update bulk upload. even if no new entry was created, entries belonging to it was updated
-        if (draft != null) {
-            try {
-                draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
-                autoUpdate.setLastUpdate(draft.getLastUpdateTime());
-                dao.update(draft);
-            } catch (DAOException de) {
-                throw new ControllerException(de);
-            }
-        }
-        return autoUpdate;
+        BulkEntryCreator creator = new BulkEntryCreator();
+        return creator.createOrUpdateEntry(userId, autoUpdate, addType);
     }
 
     /**

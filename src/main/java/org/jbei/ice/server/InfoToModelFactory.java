@@ -1,5 +1,6 @@
 package org.jbei.ice.server;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -527,7 +528,7 @@ public class InfoToModelFactory {
 
             case HARVEST_DATE:
                 try {
-                    Date date = SimpleDateFormat.getDateInstance().parse(value);
+                    Date date = SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse(value);
                     seed.setHarvestDate(date);
                 } catch (ParseException ia) {
                     Logger.error(ia);

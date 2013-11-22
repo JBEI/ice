@@ -95,6 +95,7 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
         // read file
         try {
 
+            int row = 0;
             List<String> lines = IOUtils.readLines(inputStream);
             for (String line : lines) {
                 line = line.trim();
@@ -127,6 +128,8 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
                 } else {
                     // process values
                     BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryAddType.addTypeToType(addType));
+                    autoUpdate.setRow(row);
+                    row += 1;
                     String[] valuesArray = parser.parseLine(line);
                     for (int i = 0; i < valuesArray.length; i += 1) {
                         EntryField field = fields.get(i);
