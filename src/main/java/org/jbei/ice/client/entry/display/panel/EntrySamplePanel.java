@@ -258,6 +258,10 @@ public class EntrySamplePanel extends Composite {
         addSample.setVisible(visible);
     }
 
+    public void setAddToCartVisibility(boolean visibility) {
+        this.requestSample.setVisible(visibility);
+    }
+
     public Callback<SampleRequest> getCallback() {
         return callback;
     }

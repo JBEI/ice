@@ -334,6 +334,11 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
+    public void setCartVisibility(boolean visible) {
+        samplePanel.setAddToCartVisibility(visible);
+    }
+
+    @Override
     public void setUserCanEdit(boolean canEdit) {
         samplePanel.setAddSampleVisibility(canEdit);
 //        sequenceAnalysisPanel.setCurrentInfo();
