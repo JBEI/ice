@@ -1,5 +1,6 @@
 package org.jbei.ice.client;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -12,6 +13,7 @@ import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.collection.view.CollectionsView;
+import org.jbei.ice.client.common.header.HeaderPresenter;
 import org.jbei.ice.client.common.header.HeaderView;
 import org.jbei.ice.client.event.ILoginEventHandler;
 import org.jbei.ice.client.event.ILogoutEventHandler;
@@ -24,7 +26,9 @@ import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.search.advanced.SearchView;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.user.User;
 
@@ -38,8 +42,9 @@ import com.google.gwt.user.client.ui.HasWidgets;
 
 public class ClientController extends AbstractPresenter implements ValueChangeHandler<String> {
 
-    // cookie times out in three days (current value set in Ice)
+    // cookie times out in three days if user wants system to "remember" login
     private static final int COOKIE_TIMEOUT = (1000 * 60 * 60 * 24) * 3;
+    // cookie times out in a day if not set to be remembered
     private static final int DAY_TIMEOUT = (1000 * 60 * 60 * 24);
     private static final String COOKIE_NAME = "gd-ice";
     private static final String COOKIE_PATH = "/";
@@ -78,9 +83,12 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
             public void onLogin(LoginEvent event) {
                 ClientController.sessionId = event.getSessionId();
                 account = event.getAccountInfo();
-                HeaderView.getInstance().setHeaderData(account);
-                HeaderView.getInstance().setHeader(Page.COLLECTIONS);
-                HeaderView.getInstance().setQueryDelegate(createServiceDelegate());
+                HeaderView header = HeaderView.getInstance();
+                header.setHeaderData(account);
+                header.setHeader(Page.COLLECTIONS);
+                header.setQueryDelegate(createServiceDelegate());
+                header.setDeleteRequestSampleDelegate(createDeleteSampleRequestDelegate());
+                header.setSubmitSampleRequestsDelegate(createSubmitSampleRequestDelegate());
 
                 Date expires;
                 if (!event.isRememberUser())
@@ -121,6 +129,27 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                 CollectionsPresenter presenter = new CollectionsPresenter(service, eventBus, collectionsView,
                                                                           searchView, query);
                 presenter.go(container);
+            }
+        };
+    }
+
+    private ServiceDelegate<SampleRequest> createDeleteSampleRequestDelegate() {
+        return new ServiceDelegate<SampleRequest>() {
+            @Override
+            public void execute(SampleRequest request) {
+                HeaderPresenter presenter = new HeaderPresenter(service, eventBus);
+                presenter.deleteSampleRequest(request);
+            }
+        };
+    }
+
+    private ServiceDelegate<ArrayList<SampleRequest>> createSubmitSampleRequestDelegate() {
+        final HeaderPresenter presenter = new HeaderPresenter(service, eventBus);
+        presenter.retrievePendingSampleRequests();
+        return new ServiceDelegate<ArrayList<SampleRequest>>() {
+            @Override
+            public void execute(ArrayList<SampleRequest> requests) {
+                presenter.submitSampleRequests(requests);
             }
         };
     }
@@ -282,9 +311,12 @@ public class ClientController extends AbstractPresenter implements ValueChangeHa
                         ClientController.sessionId = sessionId;
                         String token = History.getToken();
                         goToPage(token);
-                        HeaderView.getInstance().setHeader(getPage(token));
-                        HeaderView.getInstance().setHeaderData(account);
-                        HeaderView.getInstance().setQueryDelegate(createServiceDelegate());
+                        HeaderView header = HeaderView.getInstance();
+                        header.setHeader(getPage(token));
+                        header.setHeaderData(account);
+                        header.setQueryDelegate(createServiceDelegate());
+                        header.setDeleteRequestSampleDelegate(createDeleteSampleRequestDelegate());
+                        header.setSubmitSampleRequestsDelegate(createSubmitSampleRequestDelegate());
                     } else {
                         ClientController.sessionId = null;
                         ClientController.account = null;

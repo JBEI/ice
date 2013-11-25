@@ -13,6 +13,10 @@ public class StorageInfo implements IDTOModel {
     public StorageInfo() {
     }
 
+    public StorageInfo(String display) {
+        this.display = display;
+    }
+
     public int getChildCount() {
         return childCount;
     }

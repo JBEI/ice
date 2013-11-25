@@ -1,5 +1,8 @@
 package org.jbei.ice.client;
 
+import org.jbei.ice.client.service.RegistryService;
+import org.jbei.ice.client.service.RegistryServiceAsync;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;

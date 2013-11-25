@@ -17,6 +17,10 @@ body {
     height: 100%;
 }
 
+.pixel_perfect {
+    font-size: 14px;
+}
+
 .blue {
     color: #007dbc;
 }
@@ -73,6 +77,10 @@ body {
 
 .color_444 {
     color: #444;
+}
+
+.color_999 {
+    color: #999;
 }
 
 .font-75em {
@@ -734,7 +742,7 @@ ul#indented li a:hover {
 
 /* COLLECTIONS */
 .add_to_popup {
-    border: 1px solid #A5A5A5;
+    border: 1px solid #cecece;
     box-shadow: 4px 4px 7px #DDD;
     z-index: 999;
 }
@@ -1232,7 +1240,7 @@ a:hover {
 
 .gwt-Button:hover {
     background-color: #f1f2f3;
-    border: 1px solid #888;
+    border: 1px solid #999;
     padding: 4px;
     font-weight: bold;
     color: #222;
@@ -1729,22 +1737,13 @@ td.datePickerMonth {
 }
 
 .badge {
-    font-size: 11px;
-    font-weight: bolder;
-    line-height: 14px;
-    color: #ffffff;
-    white-space: nowrap;
-    vertical-align: baseline;
-    background-color: #aa0000;
-    padding: 1px 6px;
-    border-radius: 15px;
-    cursor: pointer;
-    border: 2px solid #ddddff;
-}
-
-.badge:hover {
-    /*color: #111;*/
-    border: 2px solid #F3F1D9;
+    color: white;
+    background-color: #dd2222;
+    padding: 0 4px;
+    border-radius: 10px;
+    font-weight: bold;
+    line-height: 10px;
+    font-size: 9px;
 }
 
 .collection_options {

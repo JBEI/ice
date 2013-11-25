@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.common.widget.Dialog;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.entry.display.model.FlagEntry;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -33,7 +32,7 @@ public class EntryActionWidget extends Composite {
     private HandlerRegistration deleteRegistration;
     private HandlerRegistration editRegistration;
     private FlexTable layout;
-    private Delegate<FlagEntry> delegate;
+    private Delegate<String> delegate;
     private FlexTable dialogLayout;
     private ListBox sampleOptions;
     private HTMLPanel samplePanel;
@@ -137,7 +136,7 @@ public class EntryActionWidget extends Composite {
 
                 area.setStyleName("input_box");
                 msg = getUserInput(msg);
-                delegate.execute(new FlagEntry(FlagEntry.FlagOption.ALERT, msg));
+                delegate.execute(msg);
                 dialog.showDialog(false);
             }
         };
@@ -179,7 +178,7 @@ public class EntryActionWidget extends Composite {
         editRegistration = edit.addClickHandler(handler);
     }
 
-    public void setFlagDelegate(Delegate<FlagEntry> delegate) {
+    public void setFlagDelegate(Delegate<String> delegate) {
         this.delegate = delegate;
     }
 

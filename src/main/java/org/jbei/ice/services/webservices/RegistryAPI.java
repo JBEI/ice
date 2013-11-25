@@ -921,7 +921,7 @@ public class RegistryAPI implements IRegistryAPI {
         }
 
         if (account == null) {
-            Logger.error("Failed to lookup account!");
+            Logger.error("Failed to lookup account by session id " + sessionId);
             throw new ServiceException("Registry Service Internal Error!");
         }
 

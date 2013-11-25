@@ -2,14 +2,13 @@ package org.jbei.ice.client.entry.display;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.EntryAddPresenter;
 import org.jbei.ice.client.collection.add.EntryFormFactory;
@@ -18,11 +17,14 @@ import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter.DeleteEntryHandler;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
+import org.jbei.ice.client.common.entry.IHasPartData;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.client.entry.display.handler.AlertHandler;
+import org.jbei.ice.client.entry.display.handler.DeleteSequenceHandler;
+import org.jbei.ice.client.entry.display.handler.DeleteSequenceTraceHandler;
 import org.jbei.ice.client.entry.display.handler.HasAttachmentDeleteHandler;
-import org.jbei.ice.client.entry.display.model.FlagEntry;
+import org.jbei.ice.client.entry.display.handler.RequestSampleHandler;
 import org.jbei.ice.client.entry.display.view.AttachmentItem;
-import org.jbei.ice.client.entry.display.view.DeleteSequenceHandler;
 import org.jbei.ice.client.entry.display.view.EntryView;
 import org.jbei.ice.client.entry.display.view.IEntryView;
 import org.jbei.ice.client.entry.display.view.MenuItem;
@@ -30,12 +32,14 @@ import org.jbei.ice.client.entry.display.view.MenuItem.Menu;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -53,7 +57,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
  *
  * @author Hector Plahar
  */
-public class EntryPresenter extends AbstractPresenter {
+public class EntryPresenter extends AbstractPresenter implements IHasPartData<PartData> {
 
     private final IEntryView display;
     private final EntryModel model;
@@ -135,7 +139,8 @@ public class EntryPresenter extends AbstractPresenter {
 
         DeleteSequenceHandler deleteHandler = new DeleteSequenceHandler(service, eventBus);
         display.setDeleteSequenceHandler(deleteHandler);
-        display.setSequenceDeleteHandler(new DeleteSequenceTraceHandler());
+        DeleteSequenceTraceHandler handler = new DeleteSequenceTraceHandler(service, eventBus, display, this);
+        display.setSequenceDeleteHandler(handler);
         setCommentSubmitDelegate();
         setFlagDelegate();
     }
@@ -316,54 +321,13 @@ public class EntryPresenter extends AbstractPresenter {
     }
 
     private void setFlagDelegate() {
-        Delegate<FlagEntry> delegate = new Delegate<FlagEntry>() {
-            @Override
-            public void execute(final FlagEntry flagOption) {
-                if (flagOption.getFlagOption() == FlagEntry.FlagOption.ALERT) {
-                    new IceAsyncCallback<UserComment>() {
-
-                        @Override
-                        protected void callService(AsyncCallback<UserComment> callback) throws AuthenticationException {
-                            service.alertToEntryProblem(ClientController.sessionId, currentPart.getId(),
-                                                        flagOption.getMessage(), callback);
-                        }
-
-                        @Override
-                        public void onSuccess(UserComment result) {
-                            String msg;
-                            if (result != null) {
-                                msg = "Notification sent successfully";
-                                display.addComment(result);
-                            } else
-                                msg = "Your notification could not be sent!";
-                            eventBus.fireEvent(new FeedbackEvent(result == null, msg));
-                        }
-                    }.go(eventBus);
-                } else if (flagOption.getFlagOption() == FlagEntry.FlagOption.REQUEST_SAMPLE) {
-                    new IceAsyncCallback<Boolean>() {
-
-                        @Override
-                        protected void callService(AsyncCallback<Boolean> callback) throws AuthenticationException {
-                            service.requestSample(ClientController.sessionId, currentPart.getId(),
-                                                  flagOption.getMessage(), callback);
-                        }
-
-                        @Override
-                        public void onSuccess(Boolean result) {
-                            String msg;
-                            if (result) {
-                                msg = "Notification sent successfully";
-                            } else
-                                msg = "Your notification could not be sent!";
-                            eventBus.fireEvent(new FeedbackEvent(!result, msg));
-                        }
-                    }.go(eventBus);
-                } else {
-                    eventBus.fireEvent(new FeedbackEvent(true, "Invalid selection!"));
-                }
-            }
-        };
-        display.addFlagDelegate(delegate);
+        AlertHandler alertHandler = new AlertHandler(service, eventBus, display, this);
+        Callback<SampleRequest> requestCallback = display.getRequestCallback();
+        RequestSampleHandler requestSampleHandler = new RequestSampleHandler(service, eventBus, this);
+        requestSampleHandler.setCallback(requestCallback);
+        RequestSampleHandler removeHandler = new RequestSampleHandler(service, eventBus, this, true);
+        removeHandler.setCallback(requestCallback);
+        display.addDelegates(alertHandler, requestSampleHandler, removeHandler);
     }
 
     private Delegate<Long> retrieveEntryTraceSequenceDetailsDelegate() {
@@ -473,8 +437,10 @@ public class EntryPresenter extends AbstractPresenter {
 
                 // show/hide sample button
                 display.setUserCanEdit(currentPart.isCanEdit());
-                collectionsPresenter.getView().enableExportAs(currentContext.getPartnerUrl() == null);
-                collectionsPresenter.getView().enableBulkEditVisibility(false);
+                if (collectionsPresenter != null) {
+                    collectionsPresenter.getView().enableExportAs(currentContext.getPartnerUrl() == null);
+                    collectionsPresenter.getView().enableBulkEditVisibility(false);
+                }
 
                 handleMenuSelection(menu);
             }
@@ -545,6 +511,11 @@ public class EntryPresenter extends AbstractPresenter {
                 display.showSampleView();
                 break;
         }
+    }
+
+    @Override
+    public PartData getPart() {
+        return currentPart;
     }
 
     //
@@ -759,40 +730,6 @@ public class EntryPresenter extends AbstractPresenter {
                 @Override
                 public void serverFailure() {
                     eventBus.fireEvent(new FeedbackEvent(true, "Error updating record"));
-                }
-            }.go(eventBus);
-        }
-    }
-
-    /**
-     * Handler for deleting trace sequence files
-     */
-    public class DeleteSequenceTraceHandler implements ClickHandler {
-
-        @Override
-        public void onClick(ClickEvent event) {
-            final long entryId = currentPart.getId();
-            Set<SequenceAnalysisInfo> selected = display.getSequenceTableSelectionModel().getSelectedSet();
-            if (selected == null || selected.isEmpty())
-                return;
-
-            final ArrayList<String> fileIds = new ArrayList<String>();
-            for (SequenceAnalysisInfo info : selected) {
-                fileIds.add(info.getFileId());
-            }
-
-            new IceAsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
-
-                @Override
-                protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback)
-                        throws AuthenticationException {
-                    service.deleteEntryTraceSequences(ClientController.sessionId, entryId, fileIds, callback);
-                }
-
-                @Override
-                public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
-                    display.setSequenceData(result, currentPart);
-                    display.getMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
                 }
             }.go(eventBus);
         }

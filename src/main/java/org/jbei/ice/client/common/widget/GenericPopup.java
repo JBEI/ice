@@ -31,6 +31,7 @@ public class GenericPopup extends Composite {
         layout = new FlexTable();
         initWidget(layout);
         this.resetWidget = widget;
+        saveButton = new Button("Save");
 
         // initialise components used in this widget
         initComponents(width);
@@ -49,6 +50,11 @@ public class GenericPopup extends Composite {
 
     public GenericPopup(ICanReset widget, String title) {
         this(widget, title, "600px");
+    }
+
+    public GenericPopup(ICanReset widget, String title, String width, String saveButtonLabel) {
+        this(widget, title, width);
+        saveButton.setHTML(saveButtonLabel);
     }
 
     public void showDialog() {
@@ -90,8 +96,6 @@ public class GenericPopup extends Composite {
         cancel.addStyleName("footer_feedback_widget");
         cancel.addStyleName("font-75em");
         cancel.addClickHandler(closeHandler);
-
-        saveButton = new Button("Save");
 
         box.setWidget(this);
     }

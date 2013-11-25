@@ -6,17 +6,19 @@ import java.util.HashMap;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.group.GroupPresenter;
 import org.jbei.ice.client.admin.part.AdminTransferredPartPresenter;
+import org.jbei.ice.client.admin.sample.SampleRequestPresenter;
 import org.jbei.ice.client.admin.setting.SystemSettingPresenter;
 import org.jbei.ice.client.admin.user.UserPresenter;
 import org.jbei.ice.client.admin.web.WebOfRegistriesPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -38,6 +40,7 @@ public class AdminPresenter extends AbstractPresenter {
     private SystemSettingPresenter systemSettingPresenter;
     private AdminTransferredPartPresenter partPresenter;
     private WebOfRegistriesPresenter webPresenter;
+    private SampleRequestPresenter sampleRequestPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view, String optionStr) {
         super(service, eventBus);
@@ -93,6 +96,12 @@ public class AdminPresenter extends AbstractPresenter {
                 if (partPresenter == null)
                     partPresenter = new AdminTransferredPartPresenter(service, eventBus);
                 retrievePendingTransfers();
+                break;
+
+            case SAMPLE_REQUESTS:
+                if (sampleRequestPresenter == null)
+                    sampleRequestPresenter = new SampleRequestPresenter(service, eventBus);
+                retrieveSampleRequests();
                 break;
         }
     }
@@ -193,6 +202,27 @@ public class AdminPresenter extends AbstractPresenter {
 
                 partPresenter.setData(result);
                 view.show(currentOption, partPresenter.getView().asWidget());
+            }
+        }.go(eventBus);
+    }
+
+    // SAMPLE REQUESTS
+    private void retrieveSampleRequests() {
+        new IceAsyncCallback<ArrayList<SampleRequest>>() {
+
+            @Override
+            protected void callService(AsyncCallback<ArrayList<SampleRequest>> callback)
+                    throws AuthenticationException {
+                service.getAllSampleRequests(ClientController.sessionId, callback);
+            }
+
+            @Override
+            public void onSuccess(ArrayList<SampleRequest> result) {
+                if (currentOption != AdminOption.SAMPLE_REQUESTS)
+                    return;
+
+                sampleRequestPresenter.setData(result);
+                view.show(currentOption, sampleRequestPresenter.getView().asWidget());
             }
         }.go(eventBus);
     }

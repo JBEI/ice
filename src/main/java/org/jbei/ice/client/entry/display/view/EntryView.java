@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.Page;
@@ -14,8 +15,8 @@ import org.jbei.ice.client.entry.display.ViewFactory;
 import org.jbei.ice.client.entry.display.detail.EntryDataView;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanel;
 import org.jbei.ice.client.entry.display.detail.SequenceViewPanelPresenter;
+import org.jbei.ice.client.entry.display.handler.DeleteSequenceHandler;
 import org.jbei.ice.client.entry.display.handler.HasAttachmentDeleteHandler;
-import org.jbei.ice.client.entry.display.model.FlagEntry;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.entry.display.panel.EntryCommentPanel;
 import org.jbei.ice.client.entry.display.panel.EntrySamplePanel;
@@ -26,6 +27,8 @@ import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -301,7 +304,7 @@ public class EntryView extends Composite implements IEntryView {
         attachmentMenu.setMenuItems(items, info.getId());
         attachmentMenu.setCanEdit(info.isCanEdit());
 
-        samplePanel.setData(info.getSampleStorage(), handler);
+        samplePanel.setData(info.getId(), info.getSampleStorage(), handler);
         sequenceAnalysisPanel.setSequenceData(info.getSequenceAnalysis(), info);
         commentPanel.setSampleOptions(info.getSampleStorage());
         entryAction.setSampleOptions(info.getSampleStorage());
@@ -314,9 +317,15 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void addFlagDelegate(Delegate<FlagEntry> delegate) {
-        entryAction.setFlagDelegate(delegate);
-        samplePanel.setFlagDelegate(delegate);
+    public void addDelegates(Delegate<String> flagEntryDelegate, Delegate<SampleRequestType> sampleRequestDelegate,
+            Delegate<SampleRequestType> removeSampleRequestDelegate) {
+        entryAction.setFlagDelegate(flagEntryDelegate);
+        samplePanel.setSampleRequestDelegates(sampleRequestDelegate, removeSampleRequestDelegate);
+    }
+
+    @Override
+    public Callback<SampleRequest> getRequestCallback() {
+        return samplePanel.getCallback();
     }
 
     @Override
@@ -401,8 +410,9 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void setSampleData(ArrayList<SampleStorage> data, ServiceDelegate<PartSample> deleteSampleHandler) {
-        samplePanel.setData(data, deleteSampleHandler);
+    public void setSampleData(long entryId, ArrayList<SampleStorage> data,
+            ServiceDelegate<PartSample> deleteSampleHandler) {
+        samplePanel.setData(entryId, data, deleteSampleHandler);
     }
 
     @Override

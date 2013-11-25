@@ -4,8 +4,8 @@ import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 
