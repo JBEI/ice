@@ -86,5 +86,6 @@
         <mapping class="org.jbei.ice.lib.message.Message"/>
         <mapping class="org.jbei.ice.lib.account.model.Preference"/>
         <mapping class="org.jbei.ice.lib.net.RemotePartner"/>
+        <mapping class="org.jbei.ice.lib.entry.sample.model.Request"/>
     </session-factory>
 </hibernate-configuration>

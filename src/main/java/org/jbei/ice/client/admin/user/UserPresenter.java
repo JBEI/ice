@@ -1,10 +1,10 @@
 package org.jbei.ice.client.admin.user;
 
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.admin.IAdminPanel;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.user.User;
 
@@ -22,15 +22,11 @@ public class UserPresenter extends AdminPanelPresenter {
 
     private final UserPanel view;
     private final UserDataProvider provider;
-    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
 
     public UserPresenter(final RegistryServiceAsync service, final HandlerManager eventBus) {
         super(service, eventBus);
         this.view = new UserPanel();
         this.provider = new UserDataProvider(view.getUserTable(), service);
-        this.service = service;
-        this.eventBus = eventBus;
         setRegistrationHandler();
     }
 

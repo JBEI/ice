@@ -5,18 +5,22 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Delegate;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.client.common.widget.Dialog;
+import org.jbei.ice.client.common.header.HeaderView;
 import org.jbei.ice.client.common.widget.FAIconType;
-import org.jbei.ice.client.entry.display.model.FlagEntry;
+import org.jbei.ice.client.common.widget.GenericPopup;
+import org.jbei.ice.client.common.widget.ICanReset;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.entry.display.panel.sample.Storage96WellPanel;
 import org.jbei.ice.client.entry.display.view.CreateSampleForm;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -45,22 +49,47 @@ public class EntrySamplePanel extends Composite {
     private final Button requestSample;
     private HandlerRegistration handlerRegistration;
     private final HTMLPanel panel;
-    private Delegate<FlagEntry> delegate;
+    private Delegate<SampleRequestType> requestDelegate;
+    private Delegate<SampleRequestType> removeRequestDelegate;
+    private boolean isRequest;
+    private GenericPopup requestDialog;
+    private Callback<SampleRequest> callback;
 
     public EntrySamplePanel() {
         table = new FlexTable();
         initWidget(table);
         table.setWidth("100%");
 
-        addSample = new Button("Add Sample");
+        addSample = new Button("<i class=\"" + FAIconType.PLUS_CIRCLE.getStyleName() + "\"></i> Create Sample");
         addSample.setVisible(false);
-        requestSample = new Button("Request Sample");
+        requestSample = new Button("<i class=\"" + FAIconType.SHOPPING_CART.getStyleName() + "\"></i> Add to Cart");
         panel = new HTMLPanel("<span id=\"add_sample\"></span>&nbsp;<span id=\"request_sample\"></span>");
         panel.add(addSample, "add_sample");
         panel.add(requestSample, "request_sample");
 
+        createCallback();
+        createRequestDialog();
         reset();
         setAddRequestSampleHandler();
+    }
+
+    protected void createCallback() {
+        callback = new Callback<SampleRequest>() {
+            @Override
+            public void onSuccess(SampleRequest request) {
+                if (isRequest) {
+                    requestSample.setHTML("<i class=\"" + FAIconType.BAN.getStyleName()
+                                                  + " red\"></i> Remove from Cart");
+                } else
+                    requestSample.setHTML("<i class=\"" + FAIconType.SHOPPING_CART.getStyleName()
+                                                  + "\"></i> Add to Cart");
+                isRequest = !isRequest;
+            }
+
+            @Override
+            public void onFailure() {
+            }
+        };
     }
 
     public void setAddSampleHandler(ClickHandler handler) {
@@ -70,52 +99,50 @@ public class EntrySamplePanel extends Composite {
         addSample.setVisible(true);
     }
 
-    private void setAddRequestSampleHandler() {
-        requestSample.addClickHandler(new ClickHandler() {
+    protected void createRequestDialog() {
+        final SampleRequestOptionDialogWidget widget = new SampleRequestOptionDialogWidget();
+        requestDialog = new GenericPopup(widget, "<b>Request Sample in the form of</b>", "400px", "Add");
+        requestDialog.addSaveButtonHandler(new ClickHandler() {
+
             @Override
             public void onClick(ClickEvent event) {
-                VerticalPanel panel = new VerticalPanel();
-                panel.setStyleName("font-80em");
-                panel.setWidth("350px");
-                RadioButton culture = new RadioButton("sample", "Liquid Culture");
-                culture.setValue(true);
-                RadioButton streak = new RadioButton("sample", "Streak on Agar Plate");
-                panel.add(culture);
-                panel.add(streak);
+                SampleRequestType type = SampleRequestType.STREAK_ON_AGAR_PLATE;
+                if (widget.isCultureRequested())
+                    type = SampleRequestType.LIQUID_CULTURE;
 
-                Dialog dialog = new Dialog(panel, "400px", "Request Sample in the form of:");
-                dialog.showDialog(true);
-                dialog.setSubmitHandler(createDialogSampleSubmitHandler(culture, dialog));
+                requestDelegate.execute(type);
+                requestDialog.hideDialog();
             }
         });
     }
 
-    private ClickHandler createDialogSampleSubmitHandler(final RadioButton culture, final Dialog dialog) {
-        return new ClickHandler() {
-
+    private void setAddRequestSampleHandler() {
+        requestSample.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                String msg = "Streak on Agar Plate";
-                if (culture.getValue()) {
-                    msg = "Liquid Culture";
+                if (isRequest)
+                    requestDialog.showDialog();
+                else {
+                    removeRequestDelegate.execute(null);
                 }
-                delegate.execute(new FlagEntry(FlagEntry.FlagOption.REQUEST_SAMPLE, msg));
-                dialog.showDialog(false);
             }
-        };
+        });
     }
 
-    public void setFlagDelegate(Delegate<FlagEntry> delegate) {
-        this.delegate = delegate;
+    public void setSampleRequestDelegates(Delegate<SampleRequestType> requestDelegate,
+            Delegate<SampleRequestType> removeSampleRequestDelegate) {
+        this.requestDelegate = requestDelegate;
+        this.removeRequestDelegate = removeSampleRequestDelegate;
     }
 
     public void reset() {
+        isRequest = true;
         table.removeAllRows();
         table.setWidget(0, 0, panel);
         table.getFlexCellFormatter().setStyleName(0, 0, "pad_top");
 
         table.setHTML(1, 0, "");
-        table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No samples availabe</i>");
+        table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No samples available</i>");
     }
 
     public void setSampleOptions(SampleLocation options) {
@@ -145,7 +172,7 @@ public class EntrySamplePanel extends Composite {
         this.sampleForm.setVisible(visible);
     }
 
-    public void setData(ArrayList<SampleStorage> data, ServiceDelegate<PartSample> deleteHandler) {
+    public void setData(long entryId, ArrayList<SampleStorage> data, ServiceDelegate<PartSample> deleteHandler) {
         table.removeAllRows();
         table.setWidget(0, 0, panel);
         table.getFlexCellFormatter().setStyleName(0, 0, "pad_top");
@@ -156,6 +183,14 @@ public class EntrySamplePanel extends Composite {
             table.setHTML(2, 0, "<i class=\"font-75em pad-top\" style=\"color: #999\">No samples available</i>");
             return;
         }
+
+        // sample data available
+        boolean isInCart = HeaderView.getInstance().isInCart(entryId);
+        isRequest = !isInCart;
+        if (isInCart) {
+            requestSample.setHTML("<i class=\"" + FAIconType.BAN.getStyleName() + " red\"></i> Remove from Cart");
+        } else
+            requestSample.setHTML("<i class=\"" + FAIconType.SHOPPING_CART.getStyleName() + "\"></i> Add to Cart");
 
         Collections.sort(data, new Comparator<SampleStorage>() {
             @Override
@@ -221,6 +256,44 @@ public class EntrySamplePanel extends Composite {
 
     public void setAddSampleVisibility(boolean visible) {
         addSample.setVisible(visible);
+    }
+
+    public void setAddToCartVisibility(boolean visibility) {
+        this.requestSample.setVisible(visibility);
+    }
+
+    public Callback<SampleRequest> getCallback() {
+        return callback;
+    }
+
+    //
+    // inner classes
+    //
+    private static class SampleRequestOptionDialogWidget extends Composite implements ICanReset {
+
+        private RadioButton culture;
+        private RadioButton streak;
+
+        public SampleRequestOptionDialogWidget() {
+            VerticalPanel panel = new VerticalPanel();
+            initWidget(panel);
+            panel.setStyleName("font-80em");
+            panel.setWidth("350px");
+            culture = new RadioButton("sample", "Liquid Culture");
+            culture.setValue(true);
+            streak = new RadioButton("sample", "Streak on Agar Plate");
+            panel.add(culture);
+            panel.add(streak);
+        }
+
+        @Override
+        public void reset() {
+            culture.setValue(true);
+        }
+
+        public boolean isCultureRequested() {
+            return this.culture.getValue();
+        }
     }
 
     private static class GenericStoragePanel extends Composite {

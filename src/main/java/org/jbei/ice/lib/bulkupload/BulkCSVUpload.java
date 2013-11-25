@@ -58,4 +58,11 @@ public abstract class BulkCSVUpload {
      * Sets the header fields that are required at a minimum for upload
      */
     abstract void populateRequiredFields();
+
+    /**
+     * Sample support. Override only if the specialized upload supports samples
+     */
+    protected void processSamples() {
+
+    }
 }

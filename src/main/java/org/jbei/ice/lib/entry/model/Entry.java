@@ -71,8 +71,8 @@ import org.jbei.ice.lib.entry.model.Parameter;
  * numbers,
  * etc) for this entry.</li> <li><b>selectionMarkers:</b> {@link org.jbei.ice.lib.models.SelectionMarker}s for this
  * entry. In the future, this field will propagate to other entries based on inheritance.</li> <li><b>links:</b> URL or
- * other links that point outside of this instance of gd-ice.</li> <lli><b>names: </b> {@link Name}s for this
- * entry.</li> <li><b>partNumbers: </b> {@link PartNumber}s for this entry.</li>
+ * other links that point outside of this instance of gd-ice.</li> <li><b>name: </b> name for this
+ * entry.</li> <li><b>partNumber: </b> human readable unique identifier for this entry.</li>
  * <li><b>parameters: {@link Parameter}s for this entry.</b></li> </ul>
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar

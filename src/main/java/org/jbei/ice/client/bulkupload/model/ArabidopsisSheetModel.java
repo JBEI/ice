@@ -7,6 +7,8 @@ import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.Generation;
+import org.jbei.ice.lib.shared.dto.entry.PlantType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -30,24 +32,16 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedD
                 if (value.isEmpty())
                     break;
 
-                try {
-                    ArabidopsisSeedData.PlantType type = ArabidopsisSeedData.PlantType.valueOf(value);
-                    data.setPlantType(type);
-                } catch (IllegalArgumentException iae) {
-                    GWT.log(iae.getMessage());
-                }
+                PlantType type = PlantType.fromString(value);
+                data.setPlantType(type);
                 break;
 
             case GENERATION:
                 if (value.isEmpty())
                     break;
 
-                try {
-                    ArabidopsisSeedData.Generation generation = ArabidopsisSeedData.Generation.valueOf(value);
-                    data.setGeneration(generation);
-                } catch (IllegalArgumentException iae) {
-                    GWT.log(iae.getMessage());
-                }
+                Generation generation = Generation.fromString(value);
+                data.setGeneration(generation);
                 break;
 
             case HARVEST_DATE:

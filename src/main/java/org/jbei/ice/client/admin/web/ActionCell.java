@@ -33,7 +33,7 @@ public class ActionCell extends AbstractCell<RegistryPartner> {
         this.delegate = delegate;
         this.html = new SafeHtmlBuilder().appendHtmlConstant(
                 "<button type=\"button\" title=\"Block\" class=\"delete_icon\">"
-                        + "<i class=\"" + FAIconType.BAN_CIRCLE.getStyleName()
+                        + "<i class=\"" + FAIconType.BAN.getStyleName()
                         + "\">").appendHtmlConstant("</i></button>").toSafeHtml();
 
         this.approveHtml = new SafeHtmlBuilder().appendHtmlConstant(

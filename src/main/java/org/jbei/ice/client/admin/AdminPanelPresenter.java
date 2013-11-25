@@ -1,6 +1,6 @@
 package org.jbei.ice.client.admin;
 
-import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
 

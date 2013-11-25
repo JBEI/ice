@@ -8,6 +8,7 @@ public enum StatusType implements IDTOModel {
 
     COMPLETE("Complete"),
     IN_PROGRESS("In Progress"),
+    ABANDONED("Abandoned"),
     PLANNED("Planned");
 
     private String displayName;

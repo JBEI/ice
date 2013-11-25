@@ -1,4 +1,4 @@
-package org.jbei.ice.client;
+package org.jbei.ice.client.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +26,9 @@ import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.shared.dto.search.IndexType;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
@@ -248,7 +251,7 @@ public interface RegistryServiceAsync {
 
     void sendComment(String sid, UserComment comment, AsyncCallback<UserComment> callback);
 
-    void requestSample(String sid, long entryID, String details, AsyncCallback<Boolean> callback);
+    void requestSample(String sid, long entryId, SampleRequestType type, AsyncCallback<SampleRequest> callback);
 
     void alertToEntryProblem(String sid, long entryID, String details, AsyncCallback<UserComment> callback);
 
@@ -275,4 +278,14 @@ public interface RegistryServiceAsync {
             AuthenticationException;
 
     void getBulkEditData(String sid, ArrayList<Long> partIds, AsyncCallback<BulkUploadInfo> async);
+
+    void getSampleRequests(String sid, SampleRequestStatus status, AsyncCallback<ArrayList<SampleRequest>> async);
+
+    void removeSampleRequestFromCart(String sid, long entryId, AsyncCallback<SampleRequest> async);
+
+    void getAllSampleRequests(String sid, AsyncCallback<ArrayList<SampleRequest>> async);
+
+    void updateSampleRequest(String sessionId, SampleRequest request, AsyncCallback<SampleRequest> callback);
+
+    void submitSampleRequests(String sessionId, ArrayList<SampleRequest> requests, AsyncCallback<Boolean> callback);
 }

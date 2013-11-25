@@ -1,4 +1,4 @@
-package org.jbei.ice.client;
+package org.jbei.ice.client.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +26,9 @@ import org.jbei.ice.lib.shared.dto.group.UserGroup;
 import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 import org.jbei.ice.lib.shared.dto.message.MessageList;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.shared.dto.search.IndexType;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
@@ -216,7 +219,7 @@ public interface RegistryService extends RemoteService {
 
     UserComment sendComment(String sid, UserComment comment) throws AuthenticationException;
 
-    boolean requestSample(String sid, long entryID, String details) throws AuthenticationException;
+    SampleRequest requestSample(String sid, long entryId, SampleRequestType type) throws AuthenticationException;
 
     UserComment alertToEntryProblem(String sid, long entryID, String details) throws AuthenticationException;
 
@@ -241,4 +244,15 @@ public interface RegistryService extends RemoteService {
     RegistryPartner setRegistryPartnerStatus(String sid, RegistryPartner partner) throws AuthenticationException;
 
     BulkUploadInfo getBulkEditData(String sid, ArrayList<Long> partIds) throws AuthenticationException;
+
+    ArrayList<SampleRequest> getSampleRequests(String sid, SampleRequestStatus status)
+            throws AuthenticationException;
+
+    SampleRequest removeSampleRequestFromCart(String sid, long entryId) throws AuthenticationException;
+
+    ArrayList<SampleRequest> getAllSampleRequests(String sid) throws AuthenticationException;
+
+    SampleRequest updateSampleRequest(String sessionId, SampleRequest request) throws AuthenticationException;
+
+    Boolean submitSampleRequests(String sessionId, ArrayList<SampleRequest> requests) throws AuthenticationException;
 }

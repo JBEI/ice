@@ -71,6 +71,7 @@ public enum EntryField implements IDTOModel {
 
     // sample headers
     SAMPLE_NAME("Sample Name", false),
+    SAMPLE_NOTES("Sample Notes", false),
     SAMPLE_SHELF("Sample Shelf", false),
     SAMPLE_BOX("Sample Box", false),
     SAMPLE_TUBE("Sample Tube", false),
@@ -80,8 +81,8 @@ public enum EntryField implements IDTOModel {
     SAMPLE_DRAWER("Sample Drawer", false),
     SAMPLE_STOCK("Sample Stock", false),
     SAMPLE_JBEI_STRAIN("Sample JBEI Strain", false),
-    SAMPLE_TUBE_NUMBER("Tube Number", false),
-    SAMPLE_TUBE_BARCODE("Tube Barcode", false);
+    SAMPLE_TUBE_NUMBER("Sample Tube Number", false),
+    SAMPLE_TUBE_BARCODE("Sample Tube Barcode", false);
 
     private String label;
     private boolean canLock;

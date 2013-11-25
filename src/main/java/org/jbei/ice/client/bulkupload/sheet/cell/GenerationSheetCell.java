@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.Generation;
 
 /**
  * Sheet cell for generation field used in importing arabidopsis seeds
@@ -11,7 +11,7 @@ import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 public class GenerationSheetCell extends MultiSuggestSheetCell {
 
     public GenerationSheetCell() {
-        super(ArabidopsisSeedData.Generation.getDisplayList(), false);
+        super(Generation.getDisplayList(), false);
     }
 
     @Override
@@ -21,7 +21,7 @@ public class GenerationSheetCell extends MultiSuggestSheetCell {
             return errMsg;
 
         SheetCellData data = getDataForRow(row);
-        if (ArabidopsisSeedData.Generation.displayToEnum(data.getValue()) == null) {
+        if (Generation.fromString(data.getValue()) == null) {
             return "[" + getStatusOptions() + "]";
         }
 
@@ -30,9 +30,9 @@ public class GenerationSheetCell extends MultiSuggestSheetCell {
 
     public String getStatusOptions() {
         StringBuilder builder = new StringBuilder();
-        int size = ArabidopsisSeedData.Generation.getDisplayList().size();
+        int size = Generation.getDisplayList().size();
         for (int i = 0; i < size; i += 1) {
-            String item = ArabidopsisSeedData.Generation.getDisplayList().get(i);
+            String item = Generation.getDisplayList().get(i);
             builder.append(item);
             if (i < size - 1)
                 builder.append(", ");

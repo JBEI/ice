@@ -13,7 +13,8 @@ public enum AdminOption {
     WEB(FAIconType.GLOBE, "Web of Registries", "Enable/Disable information sharing with other ICE instances"),
     USERS(FAIconType.USER, "Manage Users", "Manage user accounts and privileges"),
     GROUPS(FAIconType.GROUP, "Manage Groups", "Create/Edit/Delete/Update groups and organize members"),
-    PARTS(FAIconType.LIST, "Transferred Parts", "Approve/Reject parts transferred from other registries");
+    PARTS(FAIconType.LIST, "Transferred Parts", "Approve/Reject parts transferred from other registries"),
+    SAMPLE_REQUESTS(FAIconType.SHOPPING_CART, "Sample Requests", "Manage sample requests from users");
 
     private final String display;
     private final FAIconType iconType;

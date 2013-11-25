@@ -102,6 +102,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
         try {
             currentSession().save(model);
         } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
             Logger.error(e1);

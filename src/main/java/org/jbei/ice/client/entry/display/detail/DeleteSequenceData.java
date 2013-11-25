@@ -1,7 +1,7 @@
 package org.jbei.ice.client.entry.display.detail;
 
 import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.entry.display.view.DeleteSequenceHandler;
+import org.jbei.ice.client.entry.display.handler.DeleteSequenceHandler;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

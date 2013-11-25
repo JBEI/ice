@@ -1,11 +1,8 @@
 package org.jbei.ice.server;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -18,24 +15,12 @@ import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.Generation;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.PlantType;
-import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.shared.dto.entry.CustomField;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
-import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainData;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
+import org.jbei.ice.lib.shared.dto.entry.*;
 import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
@@ -76,56 +61,56 @@ public class ModelToInfoFactory {
         return info;
     }
 
-    public static ArrayList<SampleStorage> getSamples(Map<Sample, LinkedList<Storage>> samples) {
-        ArrayList<SampleStorage> samplesList = new ArrayList<>();
-        if (samples == null)
-            return samplesList;
+//    public static ArrayList<SampleStorage> getSamples(Map<Sample, LinkedList<Storage>> samples) {
+//        ArrayList<SampleStorage> samplesList = new ArrayList<>();
+//        if (samples == null)
+//            return samplesList;
+//
+//        for (Map.Entry<Sample, LinkedList<Storage>> sample : samples.entrySet()) {
+//            PartSample key = getSampleInfo(sample.getKey());
+//            Storage storage = sample.getKey().getStorage();
+//            if (storage != null) {
+//                key.setLocationId(String.valueOf(storage.getId()));
+//                key.setLocation(storage.getIndex());
+//            }
+//
+//            SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(sample.getValue()));
+//            samplesList.add(sampleStorage);
+//        }
+//        return samplesList;
+//    }
 
-        for (Map.Entry<Sample, LinkedList<Storage>> sample : samples.entrySet()) {
-            PartSample key = getSampleInfo(sample.getKey());
-            Storage storage = sample.getKey().getStorage();
-            if (storage != null) {
-                key.setLocationId(String.valueOf(storage.getId()));
-                key.setLocation(storage.getIndex());
-            }
+//    private static PartSample getSampleInfo(Sample sample) {
+//        PartSample part = new PartSample();
+//        if (sample == null)
+//            return part;
+//
+//        part.setSampleId(Long.toString(sample.getId()));
+//        part.setCreationTime(sample.getCreationTime());
+//        part.setLabel(sample.getLabel());
+//        part.setNotes(sample.getNotes());
+//        part.setDepositor(sample.getDepositor());
+//
+//        Storage storage = sample.getStorage(); // specific storage to this sample. e.g. Tube
+//        if (storage != null) {
+//            part.setLocationId(String.valueOf(storage.getId()));
+//            part.setLocation(storage.getIndex());
+//        }
+//        return part;
+//    }
 
-            SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(sample.getValue()));
-            samplesList.add(sampleStorage);
-        }
-        return samplesList;
-    }
-
-    private static PartSample getSampleInfo(Sample sample) {
-        PartSample part = new PartSample();
-        if (sample == null)
-            return part;
-
-        part.setSampleId(Long.toString(sample.getId()));
-        part.setCreationTime(sample.getCreationTime());
-        part.setLabel(sample.getLabel());
-        part.setNotes(sample.getNotes());
-        part.setDepositor(sample.getDepositor());
-
-        Storage storage = sample.getStorage(); // specific storage to this sample. e.g. Tube
-        if (storage != null) {
-            part.setLocationId(String.valueOf(storage.getId()));
-            part.setLocation(storage.getIndex());
-        }
-        return part;
-    }
-
-    private static LinkedList<StorageInfo> getStorageListInfo(LinkedList<Storage> storageList) {
-        LinkedList<StorageInfo> info = new LinkedList<>();
-
-        if (storageList == null)
-            return info;
-
-        for (Storage storage : storageList) {
-            info.add(getStorageInfo(storage));
-        }
-
-        return info;
-    }
+//    private static LinkedList<StorageInfo> getStorageListInfo(LinkedList<Storage> storageList) {
+//        LinkedList<StorageInfo> info = new LinkedList<>();
+//
+//        if (storageList == null)
+//            return info;
+//
+//        for (Storage storage : storageList) {
+//            info.add(getStorageInfo(storage));
+//        }
+//
+//        return info;
+//    }
 
     public static ArrayList<AttachmentInfo> getAttachments(List<Attachment> attachments) {
         ArrayList<AttachmentInfo> infos = new ArrayList<>();
@@ -196,13 +181,13 @@ public class ModelToInfoFactory {
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
 
-        if (seed.getPlantType() != null && seed.getPlantType() != ArabidopsisSeed.PlantType.NULL) {
-            PlantType type = PlantType.valueOf(seed.getPlantType().name());
+        if (seed.getPlantType() != null && seed.getPlantType() != PlantType.NULL) {
+            PlantType type = PlantType.fromString(seed.getPlantType().name());
             data.setPlantType(type);
         }
 
-        if (seed.getGeneration() != null && seed.getGeneration() != ArabidopsisSeed.Generation.NULL) {
-            Generation generation = Generation.valueOf(seed.getGeneration().name());
+        if (seed.getGeneration() != null && seed.getGeneration() != Generation.UNKNOWN) {
+            Generation generation = Generation.fromString(seed.getGeneration().name());
             data.setGeneration(generation);
         }
         data.setHomozygosity(seed.getHomozygosity());
@@ -435,10 +420,10 @@ public class ModelToInfoFactory {
                 getTipViewCommon(view, entry);
 
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-                PlantType plantType = PlantType.valueOf(seed.getPlantType().toString());
+                PlantType plantType = PlantType.fromString(seed.getPlantType().toString());
                 view.setPlantType(plantType);
 
-                Generation generation = Generation.valueOf(seed.getGeneration().toString());
+                Generation generation = Generation.fromString(seed.getGeneration().toString());
                 view.setGeneration(generation);
                 view.setHomozygosity(seed.getHomozygosity());
                 view.setEcotype(seed.getEcotype());

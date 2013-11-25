@@ -1,11 +1,14 @@
 package org.jbei.ice.client.common.header;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.PopupHandler;
+import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.user.User;
 
@@ -40,11 +43,14 @@ public class HeaderView extends Composite {
     private Button searchBtn;
     private final AdvancedSearchWidget widgetAdvanced;
     private final FlexTable loggedInContentsPanel;
-    private static final HeaderView INSTANCE = new HeaderView();
+    private static HeaderView INSTANCE;
     private final HeaderMenu headerMenu;
     private ServiceDelegate<SearchQuery> queryServiceDelegate;
+    private final SampleRequestWidget sampleRequestWidget;
 
     public static HeaderView getInstance() {
+        if (INSTANCE == null)
+            INSTANCE = new HeaderView();
         return INSTANCE;
     }
 
@@ -80,6 +86,8 @@ public class HeaderView extends Composite {
         widgetAdvanced = new AdvancedSearchWidget(searchInput);
         widgetAdvanced.setWidth("395px");
         widgetAdvanced.setHeight("150px");
+
+        sampleRequestWidget = new SampleRequestWidget();
 
         createHandlers();
     }
@@ -142,19 +150,26 @@ public class HeaderView extends Composite {
         // messages
         loggedInContentsPanel.setHTML(0, 1, "");
 
+        // sample shopping cart
+        loggedInContentsPanel.setHTML(0, 2, "");
+
         // pipe
-        loggedInContentsPanel.setHTML(0, 2, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
+        loggedInContentsPanel.setHTML(0, 3, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
 
         // logout link
         String logoutHtmlStr = "<i style=\"color: #757575\" class=\"" + FAIconType.SIGN_OUT.getStyleName();
         SafeHtml html = SafeHtmlUtils.fromSafeConstant(logoutHtmlStr + "\"></i> Log Out");
         Hyperlink logout = new Hyperlink(html, Page.LOGOUT.getLink());
-        loggedInContentsPanel.setWidget(0, 5, logout);
-        loggedInContentsPanel.setHTML(0, 6, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
+        loggedInContentsPanel.setWidget(0, 4, logout);
+
+        // pipe
+        loggedInContentsPanel.setHTML(0, 5, "<span style=\"color: #969696\">&nbsp;&nbsp;|&nbsp;&nbsp;</span>");
+
+        // help
         String helpStr = "<i style=\"color: #757575\" class=\"" + FAIconType.BOOK.getStyleName() + "\"></i> Help";
         SafeHtml helpHtml = SafeHtmlUtils.fromSafeConstant(helpStr);
         Anchor anchor = new Anchor(helpHtml, "https://public-registry.jbei.org/static/help.htm");
-        loggedInContentsPanel.setWidget(0, 7, anchor);
+        loggedInContentsPanel.setWidget(0, 6, anchor);
 
         return loggedInContentsPanel;
     }
@@ -165,8 +180,10 @@ public class HeaderView extends Composite {
             return;
         }
 
-        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #969696\">|</span>&nbsp;&nbsp;"
-                                                 + "<span class=\"badge\">" + newMessageCount + "</span>");
+        final HTML emailBadge = new HTML("&nbsp;&nbsp;<span style=\"color: #969696\">|</span>&nbsp;&nbsp;&nbsp;"
+                                                 + "<i style=\"color:#666; cursor:pointer\" class=\""
+                                                 + FAIconType.ENVELOPE.getStyleName() + "\"></i>"
+                                                 + "<sup class=\"badge\">" + newMessageCount + "</sup></span>");
         String title = "You have " + newMessageCount + " new message";
         title += newMessageCount != 1 ? "s" : "";
         emailBadge.setTitle(title);
@@ -181,6 +198,16 @@ public class HeaderView extends Composite {
         });
 
         loggedInContentsPanel.setWidget(0, 1, emailBadge);
+    }
+
+    public void setCartCount(int cartCount) {
+        sampleRequestWidget.setRequestCount(cartCount);
+
+        if (cartCount <= 0) {
+            loggedInContentsPanel.setHTML(0, 2, "");
+        } else {
+            loggedInContentsPanel.setWidget(0, 2, sampleRequestWidget);
+        }
     }
 
     public void createHandlers() {
@@ -224,5 +251,37 @@ public class HeaderView extends Composite {
 
     public void setQueryDelegate(ServiceDelegate<SearchQuery> queryDelegate) {
         queryServiceDelegate = queryDelegate;
+    }
+
+    public void setDeleteRequestSampleDelegate(ServiceDelegate<SampleRequest> delegate) {
+        sampleRequestWidget.setDeleteSampleDelegate(delegate);
+    }
+
+    public void setSubmitSampleRequestsDelegate(ServiceDelegate<ArrayList<SampleRequest>> requestsDelegate) {
+        sampleRequestWidget.setSubmitRequestsDelegate(requestsDelegate);
+    }
+
+    public boolean isInCart(long entryId) {
+        return this.sampleRequestWidget.isInCart(entryId);
+    }
+
+    public void removeFromCart(SampleRequest request) {
+        int count = sampleRequestWidget.removeFromCart(request);
+        setCartCount(count);
+    }
+
+    public void addToCart(SampleRequest request) {
+        int count = sampleRequestWidget.addToCart(request);
+        setCartCount(count);
+    }
+
+    public void setSampleRequestData(ArrayList<SampleRequest> sampleRequestData) {
+        sampleRequestWidget.setData(sampleRequestData);
+        setCartCount(sampleRequestData.size());
+    }
+
+    public void resetRequestWidget() {
+        sampleRequestWidget.reset();
+        setCartCount(0);
     }
 }

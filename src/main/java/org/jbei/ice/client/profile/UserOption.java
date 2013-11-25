@@ -14,6 +14,7 @@ public enum UserOption {
     GROUPS(FAIconType.GROUP, "Groups"),
     MESSAGES(FAIconType.ENVELOPE_ALT, "Messages"),
     ENTRIES(FAIconType.TH_LIST, "Entries");
+//    SAMPLE_REQUEST(FAIconType.SHOPPING_CART, "Sample Requests");
 
     private final String display;
     private final FAIconType icon;

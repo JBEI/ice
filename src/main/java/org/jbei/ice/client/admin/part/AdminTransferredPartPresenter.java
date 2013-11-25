@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.client.admin.IAdminPanel;
@@ -13,6 +12,7 @@ import org.jbei.ice.client.entry.display.EntryPresenter;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.event.ShowEntryListEventHandler;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.event.dom.client.ClickEvent;

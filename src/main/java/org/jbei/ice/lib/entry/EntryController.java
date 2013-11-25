@@ -1240,36 +1240,6 @@ public class EntryController {
         return partData;
     }
 
-    public boolean requestSample(Account account, long entryID, String form) {
-        try {
-            Entry entry = dao.get(entryID);
-            String email = ControllerFactory.getConfigurationController().
-                    getPropertyValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
-            if (entry == null || email == null || email.isEmpty()) {
-                Logger.error("Entry could not be retrieve for id " + entryID + " or bulk uploader email is not set");
-                return false;
-            }
-
-            String site = ControllerFactory.getConfigurationController().getPropertyValue(ConfigurationKey.URI_PREFIX);
-            StringBuilder body = new StringBuilder();
-            body.append("A sample request has been received from ")
-                .append(account.getFullName())
-                .append(" (")
-                .append("https://").append(site)
-                .append("/#page=profile;id=").append(account.getId()).append(";s=profile)")
-                .append(" for entry ")
-                .append(entry.getPartNumber())
-                .append(" (https://").append(site).append("/#page=entry;id=").append(entry.getId()).append(")")
-                .append(". \n\nThe requested form is ")
-                .append(form);
-            return Emailer.send(email, ("Sample request for " + entry.getPartNumber()),
-                                body.toString());
-        } catch (DAOException | ControllerException e) {
-            Logger.error(e);
-            return false;
-        }
-    }
-
     public UserComment sendProblemNotification(Account account, long entryId, String msg) {
         try {
             Entry entry = dao.get(entryId);

@@ -3,8 +3,8 @@ package org.jbei.ice.client.admin.user;
 import java.util.LinkedList;
 
 import org.jbei.ice.client.ClientController;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.AccountResults;
 import org.jbei.ice.lib.shared.dto.user.User;

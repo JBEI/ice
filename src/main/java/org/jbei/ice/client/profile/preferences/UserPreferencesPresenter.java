@@ -4,11 +4,11 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.profile.PanelPresenter;
 import org.jbei.ice.client.profile.widget.IUserProfilePanel;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;

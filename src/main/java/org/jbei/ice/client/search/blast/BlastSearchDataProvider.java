@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.entry.HasEntryData;
 import org.jbei.ice.lib.shared.dto.entry.PartData;

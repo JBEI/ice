@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEvent;
 import org.jbei.ice.client.bulkupload.events.BulkUploadSubmitEventHandler;
 import org.jbei.ice.client.bulkupload.events.SavedDraftsEvent;
@@ -14,6 +13,7 @@ import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;

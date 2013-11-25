@@ -1,6 +1,6 @@
 package org.jbei.ice.client.entry.display.detail;
 
-import org.jbei.ice.client.entry.display.view.DeleteSequenceHandler;
+import org.jbei.ice.client.entry.display.handler.DeleteSequenceHandler;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 
 import com.google.gwt.event.dom.client.ClickHandler;

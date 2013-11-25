@@ -7,8 +7,10 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -50,28 +52,15 @@ public class SampleDAO extends HibernateRepository<Sample> {
 
     @SuppressWarnings("unchecked")
     public ArrayList<Sample> getSamplesByEntry(Entry entry) throws DAOException {
-        ArrayList<Sample> samples = null;
+        Criteria criteria = currentSession().createCriteria(Sample.class.getName())
+                .add(Restrictions.eq("entry", entry));
 
-        Session session = currentSession();
         try {
-            String queryString = "from " + Sample.class.getName()
-                    + " as sample where sample.entry = :entry order by sample.id desc";
-
-            Query query = session.createQuery(queryString);
-
-            query.setEntity("entry", entry);
-
-            @SuppressWarnings("rawtypes")
-            List list = query.list();
-
-            if (list != null) {
-                samples = (ArrayList<Sample>) list;
-            }
+            return new ArrayList<Sample>(criteria.list());
         } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException("Failed to retrieve sample by entry: " + entry.getId(), e);
         }
-
-        return samples;
     }
 
     /**

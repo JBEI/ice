@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.ClientController;
 import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.ServiceDelegate;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.display.model.SampleStorage;
@@ -13,6 +12,7 @@ import org.jbei.ice.client.entry.display.view.IEntryView;
 import org.jbei.ice.client.entry.display.view.MenuItem;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
@@ -127,7 +127,8 @@ public class EntryModel {
                     }
                     display.setSampleFormVisibility(false);
                     currentInfo.getSampleStorage().add(result);
-                    display.setSampleData(currentInfo.getSampleStorage(), createDeleteSampleHandler());
+                    long id = currentInfo.getId();
+                    display.setSampleData(id, currentInfo.getSampleStorage(), createDeleteSampleHandler());
                     display.getMenu().incrementMenuCount(MenuItem.Menu.SAMPLES);
                 }
             }.go(eventBus);
