@@ -7,8 +7,8 @@ import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.widget.FAIconType;
 import org.jbei.ice.client.common.widget.Icon;
 import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.lib.shared.dto.group.GroupType;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -95,17 +95,26 @@ public class PermissionsSelection implements IsWidget {
         parent.addClickHandler(addToHandler);
     }
 
-    public void setData(ArrayList<UserGroup> data) {
+    public void setData(ArrayList<UserGroup> data, ArrayList<AccessPermission> defaultPermissions) {
         dataProvider.getList().clear();
         dataProvider.getList().addAll(data);
 
-        for (UserGroup datum : data) {
-            // excluding everyone group which may be set to public
-            if (datum.getType() != GroupType.PUBLIC
-                    || datum.getUuid().equalsIgnoreCase("8746a64b-abd5-4838-a332-02c356bbeac0"))
-                continue;
+        if (dataProvider.getList().isEmpty() || defaultPermissions.isEmpty())
+            return;
 
-            model.setSelected(datum, true);
+        for (UserGroup group : dataProvider.getList()) {
+            for (AccessPermission permission : defaultPermissions) {
+                if (permission.getArticle() != AccessPermission.Article.GROUP)
+                    continue;
+
+                if (group.getId() != permission.getArticleId())
+                    continue;
+
+                if (model.isSelected(group))
+                    continue;
+
+                model.setSelected(group, true);
+            }
         }
     }
 

@@ -18,7 +18,6 @@ import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -39,11 +38,10 @@ public class EntryAddPresenter {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final HashMap<EntryAddType, IEntryFormSubmit> formsCache;
-    private final CollectionsPresenter presenter;
+    private CollectionsPresenter presenter;
     private final EntryPresenter entryPresenter;
     private EntryAddType currentType;
     public HashMap<PreferenceKey, String> preferences;
-    private ArrayList<AccessPermission> accessPermissions;
 
     public EntryAddPresenter(CollectionsPresenter presenter, final EntryPresenter entryPresenter,
             RegistryServiceAsync service, HandlerManager eventBus) {
@@ -72,21 +70,6 @@ public class EntryAddPresenter {
 
                 IEntryFormSubmit formSubmit = formsCache.get(currentType);
                 formSubmit.setPreferences(result);
-            }
-        }.go(eventBus);
-
-        // retrieve default permissions
-        new IceAsyncCallback<ArrayList<AccessPermission>>() {
-
-            @Override
-            protected void callService(AsyncCallback<ArrayList<AccessPermission>> callback)
-                    throws AuthenticationException {
-                EntryAddPresenter.this.service.retrieveDefaultPermissions(ClientController.sessionId, callback);
-            }
-
-            @Override
-            public void onSuccess(ArrayList<AccessPermission> result) {
-                accessPermissions = result;
             }
         }.go(eventBus);
     }
@@ -156,7 +139,8 @@ public class EntryAddPresenter {
 
         final Set<Long> list = new HashSet<Long>();
         list.add((long) 0);
-        presenter.getView().setBusyIndicator(list, true);
+        if (presenter != null)
+            presenter.getView().setBusyIndicator(list, true);
 
         new IceAsyncCallback<Long>() {
 
@@ -182,14 +166,16 @@ public class EntryAddPresenter {
                 ClientController.account.setVisibleEntryCount(ClientController.account.getVisibleEntryCount() + count);
 
                 formsCache.clear();
-                presenter.getView().setBusyIndicator(list, false);
+                if (presenter != null)
+                    presenter.getView().setBusyIndicator(list, false);
                 History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + result.toString());
             }
 
             @Override
             public void serverFailure() {
                 eventBus.fireEvent(new FeedbackEvent(true, "Error creating record"));
-                presenter.getView().setBusyIndicator(list, false);
+                if (presenter != null)
+                    presenter.getView().setBusyIndicator(list, false);
             }
         }.go(eventBus);
     }
@@ -260,11 +246,5 @@ public class EntryAddPresenter {
 
     public HashMap<PreferenceKey, String> getPreferences() {
         return preferences;
-    }
-
-    public ArrayList<AccessPermission> getDefaultPermissions() {
-        if (accessPermissions == null)
-            return new ArrayList<AccessPermission>();
-        return this.accessPermissions;
     }
 }

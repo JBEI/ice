@@ -262,6 +262,15 @@ public class EntryController {
                                                        account.getFullName());
         permissionsController.addPermission(account, access);
 
+        // add read permission for all public groups
+        ArrayList<Group> groups = ControllerFactory.getGroupController().getAllPublicGroupsForAccount(account);
+        for (Group group : groups) {
+            AccessPermission accessPermission = new AccessPermission(AccessPermission.Article.GROUP, group.getId(),
+                                                                     AccessPermission.Type.READ_ENTRY, entry.getId(),
+                                                                     group.getLabel());
+            permissionsController.addPermission(account, accessPermission);
+        }
+
         if (accessPermissions != null) {
             for (AccessPermission accessPermission : accessPermissions) {
                 accessPermission.setTypeId(entry.getId());

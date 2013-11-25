@@ -24,6 +24,7 @@ import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -269,8 +270,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setPermissionGroups(ArrayList<UserGroup> userGroups) {
-        selection.setData(userGroups);
+    public void setPermissionGroups(ArrayList<UserGroup> userGroups, ArrayList<AccessPermission> defaultPermissions) {
+        selection.setData(userGroups, defaultPermissions);
     }
 
     @Override

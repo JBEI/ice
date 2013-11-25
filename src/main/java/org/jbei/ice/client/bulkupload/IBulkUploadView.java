@@ -11,6 +11,7 @@ import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.shared.dto.group.UserGroup;
+import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
@@ -63,7 +64,7 @@ public interface IBulkUploadView {
 
     void setLoading(boolean set);
 
-    void setPermissionGroups(ArrayList<UserGroup> userGroups);
+    void setPermissionGroups(ArrayList<UserGroup> userGroups, ArrayList<AccessPermission> defaultPermissions);
 
     void setSelectedPermissionGroups(ArrayList<OptionSelect> groups);
 
