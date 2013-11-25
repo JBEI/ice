@@ -16,7 +16,9 @@ import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.Generation;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlantType;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 
@@ -73,7 +75,7 @@ public class ArabidopsisSeedHeaders extends PartHeader {
                 break;
 
             case GENERATION:
-                ArabidopsisSeedData.Generation generation = seed.getGeneration();
+                Generation generation = seed.getGeneration();
                 if (generation == null)
                     value = "";
                 else
@@ -81,7 +83,7 @@ public class ArabidopsisSeedHeaders extends PartHeader {
                 break;
 
             case PLANT_TYPE:
-                ArabidopsisSeedData.PlantType plantType = seed.getPlantType();
+                PlantType plantType = seed.getPlantType();
                 if (plantType == null)
                     value = "";
                 else
@@ -92,7 +94,7 @@ public class ArabidopsisSeedHeaders extends PartHeader {
                 if (seed.isSentToAbrc() == null)
                     value = "";
                 else {
-                    if (seed.isSentToAbrc().booleanValue())
+                    if (seed.isSentToAbrc())
                         value = "Yes";
                     else
                         value = "No";

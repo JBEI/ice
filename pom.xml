@@ -4,7 +4,7 @@
     <groupId>org.jbei</groupId>
     <artifactId>gd-ice</artifactId>
     <packaging>war</packaging>
-    <version>3.5.0</version>
+    <version>3.6.0</version>
     <name>gd-ice</name>
     <description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
     <issueManagement>
@@ -284,7 +284,7 @@
                         <configuration>
                             <className>org.jbei.ice.services.webservices.RegistryAPI</className>
                             <genWsdl>true</genWsdl>
-                            <verbose>true</verbose>
+                            <verbose>false</verbose>
                         </configuration>
                         <goals>
                             <goal>java2ws</goal>

@@ -23,7 +23,9 @@ import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.shared.dto.entry.CustomField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.Generation;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlantType;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
@@ -103,19 +105,17 @@ public class InfoToModelFactory {
                 seed.setParents(parents);
 
                 if (seedData.getGeneration() != null) {
-                    ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(
-                            seedData.getGeneration().name());
+                    Generation generation = Generation.fromString(seedData.getGeneration().name());
                     seed.setGeneration(generation);
                 } else {
-                    seed.setGeneration(ArabidopsisSeed.Generation.NULL);
+                    seed.setGeneration(Generation.UNKNOWN);
                 }
 
                 if (seedData.getPlantType() != null) {
-                    ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(
-                            seedData.getPlantType().name());
+                    PlantType plantType = PlantType.fromString(seedData.getPlantType().name());
                     seed.setPlantType(plantType);
                 } else {
-                    seed.setPlantType(ArabidopsisSeed.PlantType.NULL);
+                    seed.setPlantType(PlantType.NULL);
                 }
                 seed.setSentToABRC(seedData.isSentToAbrc());
                 break;
@@ -536,7 +536,7 @@ public class InfoToModelFactory {
                 return seed;
 
             case GENERATION:
-                seed.setGeneration(ArabidopsisSeed.Generation.valueOf(value));
+                seed.setGeneration(Generation.fromString(value));
                 return seed;
 
             case SENT_TO_ABRC:
@@ -544,7 +544,7 @@ public class InfoToModelFactory {
                 return seed;
 
             case PLANT_TYPE:
-                seed.setPlantType(ArabidopsisSeed.PlantType.valueOf(value));
+                seed.setPlantType(PlantType.fromString(value));
                 return seed;
 
             case PARENTS:

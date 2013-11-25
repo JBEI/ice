@@ -26,6 +26,7 @@ public class SeedBulkCSVUpload extends PartBulkCSVUpload {
         headerFields.add(EntryField.PARENTS);
         headerFields.add(EntryField.GENERATION);
         headerFields.add(EntryField.PLANT_TYPE);
+        headerFields.add(EntryField.SELECTION_MARKERS);
         headerFields.add(EntryField.SENT_TO_ABRC);
 
         // default sample

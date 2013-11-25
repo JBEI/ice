@@ -111,4 +111,6 @@ public interface IEntryView extends IsWidget {
     Callback<SampleRequest> getRequestCallback();
 
     void addComment(UserComment comment);
+
+    void setCartVisibility(boolean visible);
 }

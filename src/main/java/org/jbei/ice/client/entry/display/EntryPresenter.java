@@ -36,6 +36,7 @@ import org.jbei.ice.client.service.RegistryServiceAsync;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
+import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
 import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
@@ -440,6 +441,7 @@ public class EntryPresenter extends AbstractPresenter implements IHasPartData<Pa
                 }
 
                 handleMenuSelection(menu);
+                display.setCartVisibility(currentPart.getType() == EntryType.STRAIN);
             }
 
             @Override

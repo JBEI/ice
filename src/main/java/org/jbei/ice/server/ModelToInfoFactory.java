@@ -20,17 +20,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.Generation;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.PlantType;
-import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.shared.dto.entry.CustomField;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
-import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
-import org.jbei.ice.lib.shared.dto.entry.StrainData;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
+import org.jbei.ice.lib.shared.dto.entry.*;
 import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
@@ -191,13 +181,13 @@ public class ModelToInfoFactory {
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
 
-        if (seed.getPlantType() != null && seed.getPlantType() != ArabidopsisSeed.PlantType.NULL) {
-            PlantType type = PlantType.valueOf(seed.getPlantType().name());
+        if (seed.getPlantType() != null && seed.getPlantType() != PlantType.NULL) {
+            PlantType type = PlantType.fromString(seed.getPlantType().name());
             data.setPlantType(type);
         }
 
-        if (seed.getGeneration() != null && seed.getGeneration() != ArabidopsisSeed.Generation.NULL) {
-            Generation generation = Generation.valueOf(seed.getGeneration().name());
+        if (seed.getGeneration() != null && seed.getGeneration() != Generation.UNKNOWN) {
+            Generation generation = Generation.fromString(seed.getGeneration().name());
             data.setGeneration(generation);
         }
         data.setHomozygosity(seed.getHomozygosity());
@@ -430,10 +420,10 @@ public class ModelToInfoFactory {
                 getTipViewCommon(view, entry);
 
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-                PlantType plantType = PlantType.valueOf(seed.getPlantType().toString());
+                PlantType plantType = PlantType.fromString(seed.getPlantType().toString());
                 view.setPlantType(plantType);
 
-                Generation generation = Generation.valueOf(seed.getGeneration().toString());
+                Generation generation = Generation.fromString(seed.getGeneration().toString());
                 view.setGeneration(generation);
                 view.setHomozygosity(seed.getHomozygosity());
                 view.setEcotype(seed.getEcotype());
