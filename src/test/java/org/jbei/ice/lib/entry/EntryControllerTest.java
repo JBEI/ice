@@ -20,7 +20,9 @@ import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.dto.comment.UserComment;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.Generation;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.shared.dto.entry.PlantType;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
 import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 import org.jbei.ice.lib.shared.dto.group.GroupType;
@@ -137,18 +139,18 @@ public class EntryControllerTest {
         Account account = AccountCreator.createTestAccount("testGetByRecordId", false);
         ArabidopsisSeed seed = new ArabidopsisSeed();
         seed.setEcotype("ecotype");
-        seed.setGeneration(ArabidopsisSeed.Generation.M0);
+        seed.setGeneration(Generation.M0);
         seed.setParents("parents");
-        seed.setPlantType(ArabidopsisSeed.PlantType.OVER_EXPRESSION);
+        seed.setPlantType(PlantType.OVER_EXPRESSION);
         seed.setHomozygosity("homozygo");
         controller.createEntry(account, seed, null);
         ArabidopsisSeed ret = (ArabidopsisSeed) controller.getByRecordId(account, seed.getRecordId());
         Assert.assertNotNull(ret);
 
         Assert.assertEquals("ecotype", ret.getEcotype());
-        Assert.assertEquals(ArabidopsisSeed.Generation.M0, ret.getGeneration());
+        Assert.assertEquals(Generation.M0, ret.getGeneration());
         Assert.assertEquals("parents", ret.getParents());
-        Assert.assertEquals(ArabidopsisSeed.PlantType.OVER_EXPRESSION, ret.getPlantType());
+        Assert.assertEquals(PlantType.OVER_EXPRESSION, ret.getPlantType());
         Assert.assertEquals("homozygo", ret.getHomozygosity());
     }
 

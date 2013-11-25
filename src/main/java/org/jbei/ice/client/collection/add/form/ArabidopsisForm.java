@@ -3,9 +3,9 @@ package org.jbei.ice.client.collection.add.form;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.Generation;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData.PlantType;
 import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.shared.dto.entry.Generation;
+import org.jbei.ice.lib.shared.dto.entry.PlantType;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -228,9 +228,9 @@ public class ArabidopsisForm extends EntryForm<ArabidopsisSeedData> {
         String selectionMarkers = ((MultipleTextBox) markers.getValueBox()).getWholeText();
         seed.setSelectionMarkers(selectionMarkers);
 
-        Generation gen = Generation.valueOf(generation.getValue(generation.getSelectedIndex()));
+        Generation gen = Generation.fromString(generation.getValue(generation.getSelectedIndex()));
         seed.setGeneration(gen);
-        PlantType type = PlantType.valueOf(plantType.getValue(plantType.getSelectedIndex()));
+        PlantType type = PlantType.fromString(plantType.getValue(plantType.getSelectedIndex()));
         seed.setPlantType(type);
         seed.setHomozygosity(homozygosity.getText());
         seed.setEcotype(this.ecoType.getText());

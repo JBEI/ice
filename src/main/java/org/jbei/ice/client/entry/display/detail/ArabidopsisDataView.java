@@ -11,8 +11,10 @@ public class ArabidopsisDataView extends EntryDataView<ArabidopsisSeedData> {
 
     @Override
     protected void addShortFieldValues() {
-        addShortField("Plant Type", info.getPlantType().toString());
-        addShortField("Generation", info.getGeneration().toString());
+        String plantType = info.getPlantType() == null ? "" : info.getPlantType().toString();
+        addShortField("Plant Type", plantType);
+        String generation = info.getGeneration() == null ? "" : info.getGeneration().toString();
+        addShortField("Generation", generation);
         addShortField("Homozygosity", info.getHomozygosity());
         addShortField("Ecotype", info.getEcotype());
         String harvestDate = DateUtilities.formatDate(info.getHarvestDate());

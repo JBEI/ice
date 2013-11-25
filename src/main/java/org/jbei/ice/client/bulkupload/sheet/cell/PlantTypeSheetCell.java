@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkupload.sheet.cell;
 
 import org.jbei.ice.client.bulkupload.model.SheetCellData;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.shared.dto.entry.PlantType;
 
 /**
  * @author Hector Plahar
@@ -10,7 +10,7 @@ public class PlantTypeSheetCell extends MultiSuggestSheetCell {
 
     public PlantTypeSheetCell() {
         super(false);
-        this.setOracleData(ArabidopsisSeedData.PlantType.getDisplayList());
+        this.setOracleData(PlantType.getDisplayList());
     }
 
     @Override
@@ -20,7 +20,7 @@ public class PlantTypeSheetCell extends MultiSuggestSheetCell {
             return errMsg;
 
         SheetCellData data = getDataForRow(row);
-        if (ArabidopsisSeedData.PlantType.displayToEnum(data.getValue()) == null) {
+        if (PlantType.fromString(data.getValue()) == null) {
             return "Status must be one of [" + getStatusOptions() + "]";
         }
 
@@ -29,9 +29,9 @@ public class PlantTypeSheetCell extends MultiSuggestSheetCell {
 
     public String getStatusOptions() {
         StringBuilder builder = new StringBuilder();
-        int size = ArabidopsisSeedData.PlantType.getDisplayList().size();
+        int size = PlantType.getDisplayList().size();
         for (int i = 0; i < size; i += 1) {
-            String item = ArabidopsisSeedData.PlantType.getDisplayList().get(i);
+            String item = PlantType.getDisplayList().get(i);
             builder.append(item);
             if (i < size - 1)
                 builder.append(", ");

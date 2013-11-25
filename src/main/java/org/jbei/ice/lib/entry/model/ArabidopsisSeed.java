@@ -11,6 +11,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.shared.dto.entry.Generation;
+import org.jbei.ice.lib.shared.dto.entry.PlantType;
 
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Field;
@@ -39,28 +41,28 @@ public class ArabidopsisSeed extends Entry {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Generation options.
-     *
-     * @author Timothy Ham
-     */
-    public enum Generation {
-        NULL, UNKNOWN, M0, M1, M2, T0, T1, T2, T3, T4, T5;
+//    /**
+//     * Generation options.
+//     *
+//     * @author Timothy Ham
+//     */
+//    public enum Generation {
+//        NULL, UNKNOWN, M0, M1, M2, T0, T1, T2, T3, T4, T5;
+//
+//        @Override
+//        public String toString() {
+//            return name();
+//        }
+//    }
 
-        @Override
-        public String toString() {
-            return name();
-        }
-    }
-
-    /**
-     * Plant types.
-     *
-     * @author Timothy Ham
-     */
-    public enum PlantType {
-        NULL, EMS, OVER_EXPRESSION, RNAI, REPORTER, T_DNA, OTHER
-    }
+//    /**
+//     * Plant types.
+//     *
+//     * @author Timothy Ham
+//     */
+//    public enum PlantType {
+//        NULL, EMS, OVER_EXPRESSION, RNAI, REPORTER, T_DNA, OTHER
+//    }
 
     @Column(name = "homozygosity", nullable = false)
     @Field
