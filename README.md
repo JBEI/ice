@@ -19,4 +19,4 @@ You can try out the software and use our tools on our [Public Registry](http://p
 
 <b>Related Projects</b>
 
-[The VectorEditor project](http://code.google.com/p/vectoreditor/) is used in ICE to display and edit sequences. It also contains other modules such as sequence checker.
+[The VectorEditor project](https://github.com/JBEI/vectoreditor/) is used in ICE to display and edit sequences. It also contains other modules such as sequence checker.
