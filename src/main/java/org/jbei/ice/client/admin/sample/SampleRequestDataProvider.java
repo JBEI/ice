@@ -26,8 +26,14 @@ public class SampleRequestDataProvider extends AsyncDataProvider<SampleRequest> 
     }
 
     public void setData(ArrayList<SampleRequest> requests) {
-        updateRowData(0, requests);
         data.clear();
+        if(requests == null || requests.isEmpty())
+        {
+            updateRowCount(0, true);
+            return;
+        }
+
+        updateRowData(0, requests);
         data.addAll(requests);
     }
 
