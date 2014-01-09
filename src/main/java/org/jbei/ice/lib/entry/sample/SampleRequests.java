@@ -32,23 +32,6 @@ public class SampleRequests {
         this.dao = new RequestDAO();
     }
 
-    public SampleRequest getSampleRequest(Account account, long entryId) {
-        Entry entry;
-        try {
-            entry = ControllerFactory.getEntryController().get(account, entryId);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
-
-        try {
-            Request request = dao.getSampleRequest(account, entry);
-            return Request.toDTO(request);
-        } catch (DAOException e) {
-            return null;
-        }
-    }
-
     /**
      * Creates a new sample request for the specified user and specified entry.
      * The default status is "IN CART"
@@ -57,29 +40,37 @@ public class SampleRequests {
      * @param entryID unique identifier for the entry
      * @param type    type of sample request
      */
-    public void placeSampleInCart(Account account, long entryID, SampleRequestType type) {
+    public SampleRequest placeSampleInCart(Account account, long entryID, SampleRequestType type) {
         Entry entry;
         try {
             entry = ControllerFactory.getEntryController().get(account, entryID);
         } catch (ControllerException e) {
             Logger.error(e);
-            return;
+            return null;
         }
 
         if (entry == null)
             throw new IllegalArgumentException("Cannot find entry with id: " + entryID);
 
-        Request request = new Request();
-        request.setAccount(account);
-        request.setEntry(entry);
-        request.setType(type);
-        request.setRequested(new Date(System.currentTimeMillis()));
-        request.setUpdated(request.getRequested());
+        // check if sample is already in cart with status of "IN CART"
         try {
-            dao.save(request);
+            ArrayList<Request> requests = dao.getSampleRequestByStatus(account, entry, SampleRequestStatus.IN_CART);
+            if (requests != null && !requests.isEmpty())
+                return null;
+
+            Request request = new Request();
+            request.setAccount(account);
+            request.setEntry(entry);
+            request.setType(type);
+            request.setRequested(new Date(System.currentTimeMillis()));
+            request.setUpdated(request.getRequested());
+
+            request = dao.save(request);
+            return Request.toDTO(request);
         } catch (DAOException e) {
             Logger.error(e);
         }
+        return null;
     }
 
     public ArrayList<SampleRequest> getSampleRequestsInCart(Account account) {
@@ -134,7 +125,7 @@ public class SampleRequests {
             throw new IllegalArgumentException("Cannot find entry with id: " + entryId);
 
         try {
-            Request request = dao.getSampleRequest(account, entry);
+            Request request = dao.getSampleRequestInCart(account, entry);
             if (request == null)
                 return null;
 

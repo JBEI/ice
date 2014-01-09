@@ -1572,8 +1572,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Account account = retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": requesting sample " + type.toString() + " for entry " + entryId);
         SampleRequests requests = new SampleRequests();
-        requests.placeSampleInCart(account, entryId, type);
-        return requests.getSampleRequest(account, entryId);
+        return requests.placeSampleInCart(account, entryId, type);
     }
 
     @Override
