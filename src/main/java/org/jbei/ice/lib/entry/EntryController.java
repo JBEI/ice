@@ -29,6 +29,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.SampleCreator;
 import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -336,8 +337,8 @@ public class EntryController {
                 PartSample partSample = sampleStorage.getPartSample();
                 LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
 
-                Sample sample = sampleController.createSample(partSample.getLabel(),
-                                                              account.getEmail(), partSample.getNotes());
+                Sample sample = SampleCreator.createSampleObject(partSample.getLabel(),
+                                                                 account.getEmail(), partSample.getNotes());
                 sample.setEntry(entry);
 
                 if (locations == null || locations.isEmpty()) {

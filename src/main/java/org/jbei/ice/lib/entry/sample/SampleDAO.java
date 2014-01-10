@@ -22,17 +22,6 @@ import org.hibernate.criterion.Restrictions;
  */
 public class SampleDAO extends HibernateRepository<Sample> {
 
-    /**
-     * Save the given {@link Sample} object in the database.
-     *
-     * @param sample sample object to save
-     * @return Saved Sample object.
-     * @throws DAOException
-     */
-    public Sample save(Sample sample) throws DAOException {
-        return super.saveOrUpdate(sample);
-    }
-
     public Sample get(long id) throws DAOException {
         return super.get(Sample.class, id);
     }

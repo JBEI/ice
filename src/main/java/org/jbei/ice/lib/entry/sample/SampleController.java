@@ -1,8 +1,6 @@
 package org.jbei.ice.lib.entry.sample;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,7 +17,6 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.StorageInfo;
-import org.jbei.ice.lib.utils.Utils;
 
 /**
  * ABI to manipulate {@link Sample}s.
@@ -34,30 +31,6 @@ public class SampleController {
     public SampleController() {
         dao = new SampleDAO();
         storageController = ControllerFactory.getStorageController();
-    }
-
-    /**
-     * Create a {@link Sample} object.
-     * <p/>
-     * Generates the UUID and the time stamps.
-     *
-     * @param label     display label for sample
-     * @param depositor name of the depositor
-     * @param notes     associated notes
-     * @return {@link Sample}
-     */
-    public Sample createSample(String label, String depositor, String notes) {
-        String uuid = Utils.generateUUID();
-        Date creationTime = Calendar.getInstance().getTime();
-
-        Sample sample = new Sample();
-        sample.setLabel(label);
-        sample.setDepositor(depositor);
-        sample.setNotes(notes);
-        sample.setUuid(uuid);
-        sample.setCreationTime(creationTime);
-        sample.setModificationTime(null);
-        return sample;
     }
 
     /**
@@ -220,7 +193,7 @@ public class SampleController {
 
         Storage newLocation = storageController.getLocation(strainScheme, new String[]{rack, location, barcode});
 
-        Sample sample = sampleController.createSample(label, account.getEmail(), "");
+        Sample sample = SampleCreator.createSampleObject(label, account.getEmail(), "");
         sample.setEntry(entry);
         sample.setStorage(newLocation);
         try {
@@ -258,7 +231,8 @@ public class SampleController {
         PartSample partSample = sampleStorage.getPartSample();
         LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
 
-        Sample sample = createSample(partSample.getLabel(), account.getEmail(), partSample.getNotes());
+        Sample sample = SampleCreator.createSampleObject(partSample.getLabel(), account.getEmail(),
+                                                         partSample.getNotes());
         sample.setEntry(entry);
 
         if (locations == null || locations.isEmpty()) {

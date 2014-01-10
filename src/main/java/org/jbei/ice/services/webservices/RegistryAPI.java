@@ -556,7 +556,7 @@ public class RegistryAPI implements IRegistryAPI {
     }
 
     /**
-     * Check and automagically update sample storage for the given
+     * Check and automagically update sample storage for the given samples in a plate
      *
      * @param sessionId Session key.
      * @param samples   Samples
