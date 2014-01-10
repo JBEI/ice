@@ -185,6 +185,7 @@ public class SampleController {
                 break;
             }
         }
+
         if (strainScheme == null) {
             String errMsg = "Could not locate default strain scheme (Strain Storage Matrix Tubes[Plate, Well, Tube])";
             Logger.error(errMsg);
@@ -198,7 +199,8 @@ public class SampleController {
         sample.setStorage(newLocation);
         try {
             sample = saveSample(account, sample);
-            if (strainNamePrefix != null) {
+            String name = entry.getName();
+            if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
                 entryController.updateWithNextStrainName(strainNamePrefix, entry);
             }
         } catch (PermissionException e) {
