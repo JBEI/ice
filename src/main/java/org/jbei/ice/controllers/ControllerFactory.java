@@ -8,6 +8,7 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryTransfers;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.SampleRequests;
 import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -42,6 +43,7 @@ public class ControllerFactory {
     private static MessageController messageController;
     private static WoRController webController;
     private static EntryTransfers entryTransfers;
+    private static SampleRequests sampleRequests;
 
     public static PermissionsController getPermissionController() {
         if (permissionsController == null)
@@ -144,5 +146,11 @@ public class ControllerFactory {
         if (entryTransfers == null)
             entryTransfers = new EntryTransfers();
         return entryTransfers;
+    }
+
+    public static SampleRequests getSampleRequests() {
+        if (sampleRequests == null)
+            sampleRequests = new SampleRequests();
+        return sampleRequests;
     }
 }

@@ -283,7 +283,7 @@ public interface RegistryServiceAsync {
 
     void removeSampleRequestFromCart(String sid, long entryId, AsyncCallback<SampleRequest> async);
 
-    void getAllSampleRequests(String sid, AsyncCallback<ArrayList<SampleRequest>> async);
+    void getAllPendingSampleRequests(String sid, AsyncCallback<ArrayList<SampleRequest>> async);
 
     void updateSampleRequest(String sessionId, SampleRequest request, AsyncCallback<SampleRequest> callback);
 

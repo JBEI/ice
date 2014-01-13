@@ -213,7 +213,7 @@ public class AdminPresenter extends AbstractPresenter {
             @Override
             protected void callService(AsyncCallback<ArrayList<SampleRequest>> callback)
                     throws AuthenticationException {
-                service.getAllSampleRequests(ClientController.sessionId, callback);
+                service.getAllPendingSampleRequests(ClientController.sessionId, callback);
             }
 
             @Override

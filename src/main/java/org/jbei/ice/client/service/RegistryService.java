@@ -250,7 +250,7 @@ public interface RegistryService extends RemoteService {
 
     SampleRequest removeSampleRequestFromCart(String sid, long entryId) throws AuthenticationException;
 
-    ArrayList<SampleRequest> getAllSampleRequests(String sid) throws AuthenticationException;
+    ArrayList<SampleRequest> getAllPendingSampleRequests(String sid) throws AuthenticationException;
 
     SampleRequest updateSampleRequest(String sessionId, SampleRequest request) throws AuthenticationException;
 
