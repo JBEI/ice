@@ -25,7 +25,6 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.entry.sample.SampleRequests;
 import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
@@ -295,39 +294,40 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public ArrayList<SampleRequest> getSampleRequests(String sid, SampleRequestStatus status)
             throws AuthenticationException {
-        SampleRequests requests = new SampleRequests();
         Account account = retrieveAccountForSid(sid);
+        Logger.info(account.getEmail() + ": retrieving sample requests in cart");
         if (status == SampleRequestStatus.IN_CART)
-            return requests.getSampleRequestsInCart(account);
+            return ControllerFactory.getSampleRequests().getSampleRequestsInCart(account);
         return null;
     }
 
     @Override
-    public ArrayList<SampleRequest> getAllSampleRequests(String sid) throws AuthenticationException {
-        SampleRequests requests = new SampleRequests();
+    public ArrayList<SampleRequest> getAllPendingSampleRequests(String sid) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        return requests.getPendingRequests(account);
+        Logger.info(account.getEmail() + ": retrieving pending sample requests");
+        return ControllerFactory.getSampleRequests().getPendingRequests(account);
     }
 
     @Override
     public SampleRequest removeSampleRequestFromCart(String sid, long entryId) throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
-        SampleRequests requests = new SampleRequests();
-        return requests.removeSampleFromCart(account, entryId);
+        Logger.info(account.getEmail() + ": removing sample request for " + entryId + " from cart");
+        return ControllerFactory.getSampleRequests().removeSampleFromCart(account, entryId);
     }
 
     @Override
     public SampleRequest updateSampleRequest(String sessionId, SampleRequest request) throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        SampleRequests requests = new SampleRequests();
-        return requests.updateRequest(account, request);
+        Logger.info(account.getEmail() + ": updating sample request " + request.getId());
+        return ControllerFactory.getSampleRequests().updateRequest(account, request);
     }
 
     @Override
     public Boolean submitSampleRequests(String sessionId, ArrayList<SampleRequest> requests)
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sessionId);
-        return new SampleRequests().request(account, requests);
+        Logger.info(account.getEmail() + ": submitting " + requests.size() + " sample requests");
+        return ControllerFactory.getSampleRequests().request(account, requests);
     }
 
     @Override
@@ -1571,8 +1571,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
         Account account = retrieveAccountForSid(sid);
         Logger.info(account.getEmail() + ": requesting sample " + type.toString() + " for entry " + entryId);
-        SampleRequests requests = new SampleRequests();
-        return requests.placeSampleInCart(account, entryId, type);
+        return ControllerFactory.getSampleRequests().placeSampleInCart(account, entryId, type);
     }
 
     @Override
