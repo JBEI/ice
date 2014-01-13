@@ -36,7 +36,7 @@ public class RequestDAO extends HibernateRepository<Request> {
         criteria.add(Restrictions.eq("status", status));
         List list = criteria.list();
         if (list == null)
-            return new ArrayList<Request>();
+            return new ArrayList<>();
         return new ArrayList<Request>(list);
     }
 
@@ -63,7 +63,8 @@ public class RequestDAO extends HibernateRepository<Request> {
     public List<Request> getAccountRequestList(Account account, int start, int count, String sort, boolean asc)
             throws DAOException {
         Criteria criteria = currentSession().createCriteria(Request.class.getName())
-                .add(Restrictions.eq("account", account));
+                .add(Restrictions.eq("account", account))
+                .add(Restrictions.eq("status", SampleRequestStatus.PENDING));
         criteria.setMaxResults(count);
         criteria.setFirstResult(start);
         criteria.addOrder(asc ? Order.asc(sort) : Order.desc(sort));
@@ -75,8 +76,10 @@ public class RequestDAO extends HibernateRepository<Request> {
         }
     }
 
+    // returns all pending requests
     public List<Request> getAllRequestList() throws DAOException {
         Criteria criteria = currentSession().createCriteria(Request.class.getName());
+        criteria.add(Restrictions.eq("status", SampleRequestStatus.PENDING));
         criteria.setMaxResults(100);
         criteria.setFirstResult(0);
         boolean asc = true;

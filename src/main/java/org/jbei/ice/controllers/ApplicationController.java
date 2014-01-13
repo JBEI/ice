@@ -14,7 +14,7 @@ import org.jbei.ice.lib.shared.dto.ConfigurationKey;
  */
 public class ApplicationController {
 
-    public static final String RELEASE_DATABASE_SCHEMA_VERSION = "3.6.0";
+    public static final String RELEASE_DATABASE_SCHEMA_VERSION = "3.6.2";
     public static final String[] SUPPORTED_PREVIOUS_DB_VERSIONS = {"3.1.0", "3.3.0", "3.4", "3.4.5", "3.5.0"};
 
     /**
