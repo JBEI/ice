@@ -3,12 +3,13 @@ package org.jbei.ice.lib.session;
 import java.util.Calendar;
 import java.util.HashMap;
 
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.dao.hibernate.SessionDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.models.SessionData;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -106,7 +107,7 @@ public class PersistentSessionDataWrapper {
     public synchronized void persist(SessionData sessionData) throws DAOException {
         pruneCache();
 
-        dao.save(sessionData);
+        dao.create(sessionData);
     }
 
     /**

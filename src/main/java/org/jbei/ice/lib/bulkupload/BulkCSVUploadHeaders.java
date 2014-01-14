@@ -2,8 +2,8 @@ package org.jbei.ice.lib.bulkupload;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
 /**
  * Headers for each of the entry add types for bulk csv upload

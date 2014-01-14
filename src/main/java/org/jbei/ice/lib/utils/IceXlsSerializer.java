@@ -5,8 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -105,9 +104,9 @@ public class IceXlsSerializer {
         stringBuilder.append("Has Sequence").append("\n");
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
-        SampleController sampleController = ControllerFactory.getSampleController();
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
-        AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+        SampleController sampleController = new SampleController();
+        SequenceController sequenceController = new SequenceController();
+        AttachmentController attachmentController = new AttachmentController();
 
         for (Entry entry : entries) {
             stringBuilder.append(escapeCSVValue(entry.getRecordType())).append(",");

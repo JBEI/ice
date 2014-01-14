@@ -2,7 +2,8 @@ package org.jbei.ice.lib.models;
 
 import javax.persistence.*;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
  * Store the basepair location annotation for a {@link SequenceFeature} object.
@@ -14,7 +15,8 @@ import org.jbei.ice.lib.dao.IModel;
 @Entity
 @Table(name = "sequence_annotation_location")
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_annotation_location_id_seq", allocationSize = 1)
-public class AnnotationLocation implements IModel {
+public class AnnotationLocation implements IDataModel {
+
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -102,4 +104,8 @@ public class AnnotationLocation implements IModel {
         return sequenceFeature;
     }
 
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

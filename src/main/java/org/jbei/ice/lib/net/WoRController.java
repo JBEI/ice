@@ -5,17 +5,19 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
+import org.jbei.ice.lib.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.executor.IceExecutorService;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
-import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
-import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
@@ -31,7 +33,7 @@ public class WoRController {
     private final RemotePartnerDAO dao;
 
     public WoRController() {
-        dao = new RemotePartnerDAO();
+        dao = DAOFactory.getRemotePartnerDAO();
     }
 
     /**
@@ -40,7 +42,7 @@ public class WoRController {
      */
     public boolean isWebEnabled() {
         try {
-            String value = ControllerFactory.getConfigurationController().getPropertyValue(
+            String value = new ConfigurationController().getPropertyValue(
                     ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
             return "yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
         } catch (ControllerException e) {
@@ -65,7 +67,7 @@ public class WoRController {
     }
 
     public WebOfRegistries getRegistryPartners() throws ControllerException {
-        String value = ControllerFactory.getConfigurationController().getPropertyValue(
+        String value = new ConfigurationController().getPropertyValue(
                 ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
         WebOfRegistries webOfRegistries = new WebOfRegistries();
         webOfRegistries.setWebEnabled("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
@@ -81,7 +83,7 @@ public class WoRController {
 
         ArrayList<RegistryPartner> registryPartners = new ArrayList<>();
         for (RemotePartner partner : partners)
-            registryPartners.add(RemotePartner.toDTO(partner));
+            registryPartners.add(partner.toDataTransferObject());
 
         webOfRegistries.setPartners(registryPartners);
 
@@ -148,7 +150,7 @@ public class WoRController {
             partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
             partner.setAuthenticationToken(UUID.randomUUID().toString());
             try {
-                dao.save(partner);
+                dao.create(partner);
             } catch (DAOException de) {
                 throw new ControllerException(de);
             }
@@ -194,7 +196,7 @@ public class WoRController {
      *         exeption
      */
     public ArrayList<RegistryPartner> setEnable(String url, boolean enable) throws ControllerException {
-        ConfigurationController controller = ControllerFactory.getConfigurationController();
+        ConfigurationController controller = new ConfigurationController();
         String NODE_MASTER = Utils.getConfigValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER);
 
         try {
@@ -326,7 +328,7 @@ public class WoRController {
                 partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
                 partner.setAuthenticationToken(UUID.randomUUID().toString());
                 partner.setApiKey(authenticationKey);
-                dao.save(partner);
+                dao.create(partner);
             } else {
                 if (partner.getAuthenticationToken() == null)
                     partner.setAuthenticationToken(UUID.randomUUID().toString());
@@ -341,7 +343,7 @@ public class WoRController {
 
     public RegistryPartner setPartnerStatus(Account account, String url, RemotePartnerStatus status)
             throws ControllerException {
-        if (!ControllerFactory.getAccountController().isAdministrator(account))
+        if (!new AccountController().isAdministrator(account))
             return null;
 
         Logger.info(account.getEmail() + ": setting partner (" + url + ") status to " + status.toString());
@@ -352,7 +354,7 @@ public class WoRController {
 
             partner.setPartnerStatus(status);
             partner = dao.update(partner);
-            return RemotePartner.toDTO(partner);
+            return partner.toDataTransferObject();
         } catch (DAOException de) {
             throw new ControllerException(de);
         }

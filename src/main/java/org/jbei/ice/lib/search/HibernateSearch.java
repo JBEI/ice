@@ -9,24 +9,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.search.SearchQuery;
+import org.jbei.ice.lib.dto.search.SearchResult;
+import org.jbei.ice.lib.dto.search.SearchResults;
+import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.filter.SearchFieldFactory;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
-import org.jbei.ice.lib.shared.dto.search.SearchQuery;
-import org.jbei.ice.lib.shared.dto.search.SearchResult;
-import org.jbei.ice.lib.shared.dto.search.SearchResults;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.server.ModelToInfoFactory;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -50,7 +51,10 @@ import org.hibernate.search.query.dsl.TermContext;
 @SuppressWarnings("unchecked")
 public class HibernateSearch {
 
+    private final EntryAuthorization entryAuthorization;
+
     private HibernateSearch() {
+        entryAuthorization = new EntryAuthorization();
     }
 
     private static class SingletonHolder {
@@ -198,11 +202,7 @@ public class HibernateSearch {
                 searchResult = new SearchResult();
                 searchResult.setScore(1f);
                 PartData info = ModelToInfoFactory.createTableViewData(entry, true);
-                try {
-                    info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
-                } catch (ControllerException ce) {
-                    continue;
-                }
+                info.setCanEdit(entryAuthorization.canWrite(account.getEmail(), entry));
                 searchResult.setEntryInfo(info);
             }
 
@@ -268,7 +268,7 @@ public class HibernateSearch {
 
         Set<String> groupUUIDs = new HashSet<>();
         try {
-            groupUUIDs = ControllerFactory.getGroupController().retrieveAccountGroupUUIDs(account);
+            groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(account);
         } catch (ControllerException e) {
             Logger.error(e);
         }
@@ -398,11 +398,7 @@ public class HibernateSearch {
                     continue;
                 // for bulk edit
                 if (account != null) {
-                    try {
-                        info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
-                    } catch (ControllerException ce) {
-                        Logger.warn(ce.getMessage());
-                    }
+                    info.setCanEdit(entryAuthorization.canWrite(account.getEmail(), entry));
                 }
                 searchResult.setEntryInfo(info);
             }
@@ -446,7 +442,7 @@ public class HibernateSearch {
 
         Set<String> groupUUIDs = new HashSet<>();
         try {
-            groupUUIDs = ControllerFactory.getGroupController().retrieveAccountGroupUUIDs(account);
+            groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(account);
         } catch (ControllerException e) {
             Logger.error(e);
         }

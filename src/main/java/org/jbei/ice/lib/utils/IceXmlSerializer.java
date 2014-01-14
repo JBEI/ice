@@ -8,9 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
@@ -20,11 +21,9 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.permissions.PermissionException;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -115,7 +114,7 @@ public class IceXmlSerializer {
      */
     public static String serializeToJbeiXml(Account account, List<Entry> entries) throws UtilityException {
         ArrayList<Sequence> sequences = new ArrayList<>();
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
+        SequenceController sequenceController = new SequenceController();
         for (Entry entry : entries) {
             try {
                 sequences.add(sequenceController.getByEntry(entry));
@@ -367,7 +366,7 @@ public class IceXmlSerializer {
      * @throws UtilityException
      */
     private static Element getExperimentElement(Entry entry) throws UtilityException {
-        SequenceAnalysisController controller = ControllerFactory.getSequenceAnalysisController();
+        SequenceAnalysisController controller = new SequenceAnalysisController();
         Element result = null;
         DefaultElement expElement = new DefaultElement(EXP, expNamespace);
         DefaultElement tracesElement = new DefaultElement(SEQUENCE_TRACES, expNamespace);
@@ -405,6 +404,7 @@ public class IceXmlSerializer {
 
 
                                                                                                        .readFileToByteArray(
+
                                                                                                                traceFile));
                 } catch (IOException | ControllerException e) {
                     // skip this one

@@ -2,12 +2,11 @@ package org.jbei.ice.lib.net;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.executor.Task;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
@@ -34,7 +33,7 @@ public class WebOfRegistriesContactTask extends Task {
         String myUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
 
         // it is expected that all partners in this task should already be stored but missing an api key
-        WoRController controller = ControllerFactory.getWebController();
+        WoRController controller = new WoRController();
         for (RegistryPartner partner : partners) {
             IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(partner.getUrl());
             if (api == null)

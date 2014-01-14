@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.net;
 
-import org.jbei.ice.controllers.ControllerFactory;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.web.WebOfRegistries;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -34,9 +34,9 @@ public class WoRControllerTest {
     @Test
     public void testIsWebEnabled() throws Exception {
         Assert.assertFalse(controller.isWebEnabled());
-        ControllerFactory.getConfigurationController().setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, "yes");
+        new ConfigurationController().setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, "yes");
         Assert.assertTrue(controller.isWebEnabled());
-        ControllerFactory.getConfigurationController().setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, "no");
+        new ConfigurationController().setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, "no");
         Assert.assertFalse(controller.isWebEnabled());
     }
 
@@ -67,6 +67,6 @@ public class WoRControllerTest {
     @Test
     public void testSetEnable() throws Exception {
         Assert.assertFalse(controller.isWebEnabled());
-        ControllerFactory.getConfigurationController().setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, "yes");
+        new ConfigurationController().setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, "yes");
     }
 }

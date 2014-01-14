@@ -3,13 +3,13 @@ package org.jbei.ice.lib.group;
 import java.util.ArrayList;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.lib.AccountCreator;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.shared.dto.group.GroupType;
-import org.jbei.ice.lib.shared.dto.group.UserGroup;
-import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.dto.group.GroupType;
+import org.jbei.ice.lib.dto.group.UserGroup;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -67,7 +67,6 @@ public class GroupControllerTest {
     public void testSave() throws Exception {
         Account account = AccountCreator.createTestAccount("testSave", false);
         Group group = new Group();
-        group.setAutoJoin(false);
         group.setOwner(account);
         group.setLabel("group label");
         group.setDescription("group description");
@@ -114,7 +113,7 @@ public class GroupControllerTest {
         account.getGroups().add(group2);
 
         // save to add groups to account
-        ControllerFactory.getAccountController().save(account);
+        DAOFactory.getAccountDAO().create(account);
 
         Account account2 = AccountCreator.createTestAccount("testGetMatchingGroups2", false);
         UserGroup g3 = new UserGroup();
@@ -142,14 +141,14 @@ public class GroupControllerTest {
         user = controller.createGroup(a1, user);
         Assert.assertNotNull(user);
 
-        ArrayList<User> infos = new ArrayList<>();
-        infos.add(Account.toDTO(a2));
-        infos.add(Account.toDTO(a3));
+        ArrayList<AccountTransfer> infos = new ArrayList<>();
+        infos.add(a2.toDataTransferObject());
+        infos.add(a3.toDataTransferObject());
 
         infos = controller.setGroupMembers(a1, user, infos);
         Assert.assertNotNull(infos);
         Assert.assertTrue(infos.size() == 2);
-        ArrayList<User> list = controller.retrieveGroupMembers(user.getUuid());
+        ArrayList<AccountTransfer> list = controller.retrieveGroupMembers(user.getUuid());
         Assert.assertNotNull(list);
         Assert.assertEquals(2, list.size());
     }
@@ -169,9 +168,9 @@ public class GroupControllerTest {
         user = controller.createGroup(a1, user);
         Assert.assertNotNull(user);
 
-        ArrayList<User> infos = new ArrayList<>();
-        infos.add(Account.toDTO(a2));
-        infos.add(Account.toDTO(a3));
+        ArrayList<AccountTransfer> infos = new ArrayList<>();
+        infos.add(a2.toDataTransferObject());
+        infos.add(a3.toDataTransferObject());
 
         infos = controller.setGroupMembers(a1, user, infos);
         Assert.assertNotNull(infos);

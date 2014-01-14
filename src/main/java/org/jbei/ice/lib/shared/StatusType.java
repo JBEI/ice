@@ -2,9 +2,7 @@ package org.jbei.ice.lib.shared;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.lib.shared.dto.IDTOModel;
-
-public enum StatusType implements IDTOModel {
+public enum StatusType {
 
     COMPLETE("Complete"),
     IN_PROGRESS("In Progress"),

@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.folder;
 
+import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 
 import org.junit.After;

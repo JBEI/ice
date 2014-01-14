@@ -2,8 +2,8 @@ package org.jbei.ice.lib.bulkupload;
 
 import java.nio.file.Path;
 
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
 /**
  * Bulk CSV Uploader for plasmids

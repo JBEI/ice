@@ -8,11 +8,11 @@ import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.EntryCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
 
 import junit.framework.Assert;
 import org.junit.After;

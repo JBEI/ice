@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.shared;
 
-import org.jbei.ice.lib.shared.dto.IDTOModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
  * Options for the "Export As" menu typically found at the top of
@@ -8,17 +8,15 @@ import org.jbei.ice.lib.shared.dto.IDTOModel;
  *
  * @author Hector Plahar
  */
-public enum ExportAsOption implements IDTOModel {
+public enum ExportAsOption implements IDataTransferModel {
 
-    CSV("CSV"), XML("XML");
+    CSV("CSV"),
+    XML("XML");
 
     private String display;
 
     ExportAsOption(String display) {
         this.display = display;
-    }
-
-    private ExportAsOption() {
     }
 
     @Override

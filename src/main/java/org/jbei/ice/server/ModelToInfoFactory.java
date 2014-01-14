@@ -3,10 +3,13 @@ package org.jbei.ice.server;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.StorageInfo;
+import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
@@ -16,15 +19,11 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.shared.dto.StorageInfo;
-import org.jbei.ice.lib.shared.dto.entry.*;
-import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
- * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.lib.shared.dto.entry.PartData}
+ * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.lib.dto.entry.PartData}
  * data transfer objects
  *
  * @author Hector Plahar
@@ -145,23 +144,19 @@ public class ModelToInfoFactory {
         if (sequences == null)
             return infos;
 
-        AccountController accountController = ControllerFactory.getAccountController();
+        AccountController accountController = new AccountController();
         for (TraceSequence sequence : sequences) {
             SequenceAnalysisInfo info = new SequenceAnalysisInfo();
             info.setCreated(sequence.getCreationTime());
             info.setName(sequence.getFilename());
-            User user = new User();
-            try {
-                Account account = accountController.getByEmail(sequence.getDepositor());
-                if (account != null) {
-                    user.setFirstName(account.getFirstName());
-                    user.setLastName(account.getLastName());
-                    user.setId(account.getId());
-                }
-            } catch (ControllerException e) {
-                Logger.warn(e.getMessage());
+            AccountTransfer accountTransfer = new AccountTransfer();
+            Account account = accountController.getByEmail(sequence.getDepositor());
+            if (account != null) {
+                accountTransfer.setFirstName(account.getFirstName());
+                accountTransfer.setLastName(account.getLastName());
+                accountTransfer.setId(account.getId());
             }
-            info.setDepositor(user);
+            info.setDepositor(accountTransfer);
             infos.add(info);
             info.setFileId(sequence.getFileId());
         }
@@ -234,7 +229,7 @@ public class ModelToInfoFactory {
         info.setCreator(entry.getCreator());
         info.setCreatorEmail(entry.getCreatorEmail());
 
-        AccountController accountController = ControllerFactory.getAccountController();
+        AccountController accountController = new AccountController();
         try {
             long ownerId = accountController.getAccountId(entry.getOwnerEmail());
             info.setOwnerId(ownerId);
@@ -307,17 +302,13 @@ public class ModelToInfoFactory {
         view.setOwnerEmail(entry.getOwnerEmail());
         view.setSelectionMarkers(entry.getSelectionMarkersAsString());
 
-        AccountController accountController = ControllerFactory.getAccountController();
-        try {
-            Account account1;
-            if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
-                view.setOwnerId(account1.getId());
+        AccountController accountController = new AccountController();
+        Account account1;
+        if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
+            view.setOwnerId(account1.getId());
 
-            if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
-                view.setCreatorId(account1.getId());
-        } catch (ControllerException ce) {
-            Logger.warn(ce.getMessage());
-        }
+        if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
+            view.setCreatorId(account1.getId());
 
         view.setKeywords(entry.getKeywords());
         view.setShortDescription(entry.getShortDescription());
@@ -355,23 +346,19 @@ public class ModelToInfoFactory {
             view.setOwner(entry.getOwner());
             view.setOwnerEmail(entry.getOwnerEmail());
 
-            AccountController accountController = ControllerFactory.getAccountController();
-            try {
-                Account account1;
-                if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
-                    view.setOwnerId(account1.getId());
+            AccountController accountController = new AccountController();
+            Account account1;
+            if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
+                view.setOwnerId(account1.getId());
 
-                if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
-                    view.setCreatorId(account1.getId());
-            } catch (ControllerException ce) {
-                Logger.warn(ce.getMessage());
-            }
+            if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
+                view.setCreatorId(account1.getId());
         }
 
         // attachments
         boolean hasAttachment = false;
         try {
-            AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+            AttachmentController attachmentController = new AttachmentController();
             hasAttachment = attachmentController.hasAttachment(entry);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -380,7 +367,7 @@ public class ModelToInfoFactory {
 
         // has sample
         try {
-            SampleController sampleController = ControllerFactory.getSampleController();
+            SampleController sampleController = new SampleController();
             view.setHasSample(sampleController.hasSample(entry));
         } catch (ControllerException e) {
             Logger.error(e);
@@ -388,7 +375,7 @@ public class ModelToInfoFactory {
 
         // has sequence
         try {
-            SequenceController sequenceController = ControllerFactory.getSequenceController();
+            SequenceController sequenceController = new SequenceController();
             view.setHasSequence(sequenceController.hasSequence(entry.getId()));
             view.setHasOriginalSequence(sequenceController.hasOriginalSequence(entry.getId()));
         } catch (ControllerException e) {

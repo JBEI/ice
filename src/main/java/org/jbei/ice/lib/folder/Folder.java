@@ -5,9 +5,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.persistence.*;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.shared.dto.folder.FolderType;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -21,7 +22,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 @Entity
 @Table(name = "folder")
 @SequenceGenerator(name = "sequence", sequenceName = "folder_id_seq", allocationSize = 1)
-public class Folder implements IModel {
+public class Folder implements IDataModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -136,5 +137,10 @@ public class Folder implements IModel {
 
     public void setPropagatePermissions(Boolean propagatePermissions) {
         this.propagatePermissions = propagatePermissions;
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

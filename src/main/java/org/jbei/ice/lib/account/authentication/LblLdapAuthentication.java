@@ -1,0 +1,351 @@
+package org.jbei.ice.lib.account.authentication;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Hashtable;
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.group.Group;
+
+
+/**
+ * Authentication for LBL's LDAP system. Uses local authentication as a fallback
+ * if the account does not exist with LBL LDAP directory
+ *
+ * @author Hector Plahar
+ */
+public class LblLdapAuthentication implements IAuthentication {
+
+    protected DirContext dirContext;
+    protected String searchURL;
+    protected String authenticationURL;
+    protected boolean initialized;
+
+    public boolean authenticated;
+    public String givenName;
+    public String sirName;
+    public String email;
+    public String organization;
+    public String description;
+
+    private final static long JBEI_GROUP_ID = 1;
+
+    public LblLdapAuthentication() {
+        initialize();
+        givenName = "";
+        sirName = "";
+        email = "";
+        organization = "";
+        description = "";
+    }
+
+    @Override
+    public boolean authenticates(String loginId, String password) throws AuthenticationException {
+        if (loginId == null || password == null || loginId.isEmpty() || password.isEmpty()) {
+            throw new AuthenticationException("Username and Password are mandatory!");
+        }
+
+        loginId = loginId.toLowerCase().trim();
+
+        if (isWikiUser(loginId)) {
+            try {
+                boolean authenticated = authenticateWithLDAP(loginId, password);
+                if (!authenticated) {
+                    Logger.warn("Authentication failed for user " + loginId);
+                    return false;
+                }
+            } catch (AuthenticationException ae) {
+                Logger.warn("Authentication failed for user " + loginId);
+                return false;
+            }
+
+            checkCreateAccount(loginId);
+            return true;
+        } else {
+            LocalAuthentication localBackend = new LocalAuthentication();
+            return localBackend.authenticates(loginId, password);
+        }
+    }
+
+    private Group getLblJbeiGroup() {
+        Group group = null;
+        try {
+            group = DAOFactory.getGroupDAO().get(JBEI_GROUP_ID);
+        } catch (RuntimeException re) {
+            Logger.error("Error retrieving JBEI group " + JBEI_GROUP_ID, re);
+        }
+        return group;
+    }
+
+    /**
+     * Intended to be called when the credentials successfully authenticate with ldap.
+     * Ensures an account exists with the login specified in the parameter which also belongs to the
+     * LBL/JBEI group.
+     * <p/>
+     * Since LBL's LDAP mechanism handles authentication, no password information is
+     * managed
+     *
+     * @param loginId unique login identifier
+     */
+    private void checkCreateAccount(String loginId) throws AuthenticationException {
+        AccountController retriever = new AccountController();
+        Account account = retriever.getByEmail(loginId);
+
+        Date currentTime = Calendar.getInstance().getTime();
+        Group group = getLblJbeiGroup();
+
+        if (account == null) {
+            account = new Account();
+            account.setCreationTime(currentTime);
+
+            account.setEmail(getEmail());
+            account.setFirstName(getGivenName());
+            account.setLastName(getSirName());
+            account.setDescription(getDescription());
+            account.setPassword("");
+            account.setModificationTime(currentTime);
+
+            if (group != null)
+                account.getGroups().add(group);
+
+            DAOFactory.getAccountDAO().create(account);
+        } else {
+            if (group != null && !account.getGroups().contains(group)) {
+                account.getGroups().add(group);
+                DAOFactory.getAccountDAO().update(account);
+            }
+        }
+    }
+
+    /**
+     * Authenticate user to the ldap server.
+     *
+     * @param userName
+     * @param passWord
+     * @return True if successfully authenticated.
+     */
+    public boolean authenticateWithLDAP(String userName, String passWord) throws AuthenticationException {
+        DirContext authContext = null;
+
+        try {
+            authenticated = false;
+            String employeeNumber = "";
+
+            //has to look up employee number for binding
+            String filter = "(uid=" + userName + ")";
+            SearchControls cons = new SearchControls();
+            cons.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            cons.setCountLimit(0);
+
+            if (dirContext == null) {
+                dirContext = getContext();
+            }
+            String LDAP_QUERY = "dc=lbl,dc=gov";
+            SearchResult searchResult = dirContext.search(LDAP_QUERY, filter, cons).nextElement();
+
+            Attributes attributes = searchResult.getAttributes();
+            employeeNumber = (String) attributes.get("lblempnum").get();
+
+            if (attributes.get("givenName") != null) {
+                givenName = (String) attributes.get("givenName").get();
+            }
+            if (attributes.get("sn") != null) {
+                sirName = (String) attributes.get("sn").get();
+            }
+            if (attributes.get("mail") != null) {
+                email = (String) attributes.get("mail").get();
+            }
+            email = email.toLowerCase();
+            organization = "Lawrence Berkeley Laboratory";
+            if (attributes.get("description") != null) {
+                description = (String) attributes.get("description").get();
+            }
+            authContext = getAuthenticatedContext(employeeNumber, passWord);
+
+            authContext.close();
+            dirContext.close(); //because authentication should be the last step
+            authenticated = true;
+        } catch (NamingException e) {
+            throw new AuthenticationException("Got LDAP NamingException", e);
+        } finally {
+            if (authContext != null) {
+                try {
+                    authContext.close();
+                } catch (NamingException e) {
+                    throw new AuthenticationException("Got LDAP NamingException", e);
+                }
+            }
+            try {
+                dirContext.close();
+            } catch (NamingException e) {
+                throw new AuthenticationException("Got LDAP NamingException", e);
+            }
+        }
+
+        return authenticated;
+    }
+
+    /**
+     * Check if the user is in the settings file specified ldap group before authenticating.
+     *
+     * @param loginName
+     * @return True if user is in the specified ldap group.
+     */
+    public boolean isWikiUser(String loginName) throws AuthenticationException {
+        boolean result = false;
+        ArrayList<String> whitelistGroups = new ArrayList<String>();
+        String whitelistString = "JBEI,Keasling Lab,DNA DIVA, BIOFAB, Mukhopadhyay GTL, Cell Wall Synthesis";
+        String[] whiteListArray = whitelistString.split(",");
+        for (String element : whiteListArray) {
+            whitelistGroups.add(element);
+        }
+
+        String groupDn = "ou=JBEI-Groups,ou=Groups,dc=lbl,dc=gov";
+        String groupQueryString = "(&(objectClass=groupOfUniqueNames)(uniqueMember={0}))";
+        String userDn = "ou=People,dc=lbl,dc=gov";
+        String userQueryString = "(&(objectclass=lblPerson)(uid={0})(lblAccountStatus=Active))";
+
+        SearchControls searchControls = new SearchControls();
+        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+        searchControls.setCountLimit(0);
+        try {
+            if (dirContext == null) {
+                dirContext = getContext();
+            }
+
+            // find user
+            NamingEnumeration<SearchResult> userResults;
+            String userQuery = MessageFormat.format(userQueryString, loginName);
+            userResults = dirContext.search(userDn, userQuery, searchControls);
+            if (userResults.hasMore()) {
+                // find user groups
+                NamingEnumeration<SearchResult> groupResults;
+                SearchResult user = userResults.next();
+                String query = MessageFormat.format(groupQueryString, user.getNameInNamespace());
+                groupResults = dirContext.search(groupDn, query, searchControls);
+                while (groupResults.hasMore()) {
+                    String name = groupResults.next().getAttributes().get("cn").get().toString();
+                    if (whitelistGroups.contains(name)) {
+                        result = true;
+                    }
+                }
+                groupResults.close();
+            }
+            userResults.close();
+        } catch (NamingException e) {
+            throw new AuthenticationException("Error authenticating with LDAP", e);
+        }
+
+        String msg = null;
+        if (result) {
+            msg = loginName.toLowerCase() + " is in wiki.";
+        } else {
+            msg = loginName.toLowerCase() + " is not in wiki.";
+        }
+
+        Logger.info(LblLdapAuthentication.class.getName() + " " + msg);
+        return result;
+    }
+
+    public boolean isAuthenticated() {
+        return authenticated;
+    }
+
+    public String getGivenName() {
+        return givenName;
+    }
+
+    public String getSirName() {
+        return sirName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Get unauthenticated ldap context.
+     *
+     * @return {@link javax.naming.directory.DirContext} object.
+     * @throws javax.naming.NamingException
+     */
+    protected DirContext getContext() throws NamingException {
+        Hashtable<String, String> env = new Hashtable<String, String>();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        env.put("com.sun.jndi.ldap.connect.pool", "true");
+        env.put("com.sun.jndi.ldap.connect.pool.timeout", "10000");
+
+        env.put("com.sun.jndi.ldap.read.timeout", "5000");
+        env.put("com.sun.jndi.ldap.connect.timeout", "10000");
+
+        env.put(Context.PROVIDER_URL, searchURL);
+        env.put(Context.SECURITY_AUTHENTICATION, "none");
+
+        InitialDirContext result = null;
+        try {
+            result = new InitialDirContext(env);
+        } catch (NamingException e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+        return result;
+    }
+
+    /**
+     * Get authenticated context from the ldap server. Failure means bad user or password.
+     *
+     * @param lblEmployeeNumber
+     * @param passWord
+     * @return {@link javax.naming.directory.DirContext} object.
+     * @throws javax.naming.NamingException
+     */
+    protected DirContext getAuthenticatedContext(String lblEmployeeNumber, String passWord) throws NamingException {
+        String baseDN = "dc=lbl,dc=gov";
+        Hashtable<String, String> env = new Hashtable<String, String>();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        env.put("com.sun.jndi.ldap.connect.pool", "true");
+        env.put("com.sun.jndi.ldap.connect.pool.timeout", "10000");
+
+        env.put("com.sun.jndi.ldap.read.timeout", "5000");
+        env.put("com.sun.jndi.ldap.connect.timeout", "10000");
+
+        env.put(Context.PROVIDER_URL, authenticationURL);
+        env.put(Context.SECURITY_AUTHENTICATION, "simple");
+        env.put(Context.SECURITY_PRINCIPAL, "lblempnum=" + lblEmployeeNumber + ",ou=People," + baseDN);
+        env.put(Context.SECURITY_CREDENTIALS, passWord);
+
+        InitialDirContext result = new InitialDirContext(env);
+
+        return result;
+    }
+
+    private void initialize() {
+        if (!initialized) {
+            searchURL = "ldap://identity.lbl.gov";
+            authenticationURL = "ldaps://identity.lbl.gov:636";
+            initialized = true;
+        }
+    }
+}

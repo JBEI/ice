@@ -1,9 +1,9 @@
 package org.jbei.ice.services.blazeds;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.common.logging.Logger;
 
 /**
  * Base service for BlazeDS.
@@ -20,7 +20,7 @@ public class BaseService {
         Account account;
 
         try {
-            account = ControllerFactory.getAccountController().getAccountBySessionKey(sessionId);
+            account = new AccountController().getAccountBySessionKey(sessionId);
         } catch (ControllerException e) {
             Logger.error("Failed to get account by sessionId: " + sessionId, e);
             return null;

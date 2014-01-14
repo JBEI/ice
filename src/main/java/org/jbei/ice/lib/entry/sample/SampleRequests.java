@@ -4,18 +4,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.RequestDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.sample.SampleRequest;
+import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
+import org.jbei.ice.lib.dto.sample.SampleRequestType;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
-import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
-import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -29,7 +31,7 @@ public class SampleRequests {
     private final RequestDAO dao;
 
     public SampleRequests() {
-        this.dao = new RequestDAO();
+        this.dao = DAOFactory.getRequestDAO();
     }
 
     /**
@@ -43,7 +45,7 @@ public class SampleRequests {
     public SampleRequest placeSampleInCart(Account account, long entryID, SampleRequestType type) {
         Entry entry;
         try {
-            entry = ControllerFactory.getEntryController().get(account, entryID);
+            entry = new EntryController().get(account, entryID);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -65,8 +67,8 @@ public class SampleRequests {
             request.setRequested(new Date(System.currentTimeMillis()));
             request.setUpdated(request.getRequested());
 
-            request = dao.save(request);
-            return Request.toDTO(request);
+            request = dao.create(request);
+            return request.toDataTransferObject();
         } catch (DAOException e) {
             Logger.error(e);
         }
@@ -84,7 +86,7 @@ public class SampleRequests {
 
             ArrayList<SampleRequest> requests = new ArrayList<>();
             for (Request request : requestList)
-                requests.add(Request.toDTO(request));
+                requests.add(request.toDataTransferObject());
             return requests;
         } catch (DAOException e) {
             return null;
@@ -104,7 +106,7 @@ public class SampleRequests {
 
         ArrayList<SampleRequest> results = new ArrayList<>();
         for (Request request : requests) {
-            results.add(Request.toDTO(request));
+            results.add(request.toDataTransferObject());
         }
         return results;
     }
@@ -115,7 +117,7 @@ public class SampleRequests {
 
         Entry entry;
         try {
-            entry = ControllerFactory.getEntryController().get(account, entryId);
+            entry = new EntryController().get(account, entryId);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -129,9 +131,10 @@ public class SampleRequests {
             if (request == null)
                 return null;
 
+            Logger.info(account.getEmail() + ": Removing sample from cart for entry " + entryId);
             dao.delete(request);
 
-            return Request.toDTO(request);
+            return request.toDataTransferObject();
         } catch (DAOException de) {
             Logger.error(de);
             return null;
@@ -153,7 +156,7 @@ public class SampleRequests {
 
             existing.setStatus(request.getStatus());
             existing = dao.update(existing);
-            return Request.toDTO(existing);
+            return existing.toDataTransferObject();
         } catch (DAOException de) {
             return null;
         }

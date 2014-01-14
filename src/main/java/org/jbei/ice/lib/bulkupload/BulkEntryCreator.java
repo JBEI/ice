@@ -5,30 +5,30 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.jbei.ice.client.entry.display.model.SampleStorage;
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.PartSample;
+import org.jbei.ice.lib.dto.StorageInfo;
+import org.jbei.ice.lib.dto.bulkupload.EditMode;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.PartSample;
-import org.jbei.ice.lib.shared.dto.StorageInfo;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
-import org.jbei.ice.lib.shared.dto.bulkupload.EditMode;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.InfoToModelFactory;
 
@@ -45,8 +45,8 @@ public class BulkEntryCreator {
 
     public BulkEntryCreator() {
         dao = new BulkUploadDAO();
-        accountController = ControllerFactory.getAccountController();
-        entryController = ControllerFactory.getEntryController();
+        accountController = new AccountController();
+        entryController = new EntryController();
     }
 
     protected BulkUpload createOrRetrieveBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
@@ -69,7 +69,7 @@ public class BulkEntryCreator {
                 draft.setImportType(addType.toString());
                 draft.setCreationTime(new Date(System.currentTimeMillis()));
                 draft.setLastUpdateTime(draft.getCreationTime());
-                dao.save(draft);
+                dao.create(draft);
             }
             return draft;
         } catch (DAOException de) {
@@ -217,7 +217,7 @@ public class BulkEntryCreator {
         if (uuid == null || uuid.trim().isEmpty())
             return;
 
-        Storage seedRootStorage = ControllerFactory.getStorageController().retrieveByUUID(uuid);
+        Storage seedRootStorage = DAOFactory.getStorageDAO().get(uuid);
         if (seedRootStorage == null)
             return;
 
@@ -249,6 +249,6 @@ public class BulkEntryCreator {
         storageList.add(new StorageInfo(tubeBarcode));
 
         SampleStorage sampleStorage = new SampleStorage(partSample, storageList);
-        ControllerFactory.getSampleController().createSample(account, autoUpdate.getEntryId(), sampleStorage);
+        new SampleController().createSample(account, autoUpdate.getEntryId(), sampleStorage);
     }
 }

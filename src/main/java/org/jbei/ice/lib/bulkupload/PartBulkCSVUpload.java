@@ -9,12 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 
 import au.com.bytecode.opencsv.CSVParser;
 import org.apache.commons.io.IOUtils;
@@ -149,7 +147,7 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
     }
 
     protected long createRegistryParts(List<BulkUploadAutoUpdate> updates) throws ControllerException {
-        BulkUploadController controller = ControllerFactory.getBulkUploadController();
+        BulkUploadController controller = new BulkUploadController();
         long bulkUploadId = 0;
 
         for (BulkUploadAutoUpdate update : updates) {

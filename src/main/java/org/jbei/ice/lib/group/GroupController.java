@@ -2,20 +2,19 @@ package org.jbei.ice.lib.group;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.shared.dto.group.GroupType;
-import org.jbei.ice.lib.shared.dto.group.UserGroup;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
-import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.GroupDAO;
+import org.jbei.ice.lib.dto.group.GroupType;
+import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.utils.Utils;
 
 public class GroupController {
@@ -29,16 +28,11 @@ public class GroupController {
 
     public GroupController() {
         dao = new GroupDAO();
-        accountController = ControllerFactory.getAccountController();
+        accountController = new AccountController();
     }
 
-    public Group getGroupByUUID(String uuid) throws ControllerException {
-        try {
-            return dao.get(uuid);
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
+    public Group getGroupByUUID(String uuid) {
+        return dao.get(uuid);
     }
 
     public Group getGroupById(long id) throws ControllerException {
@@ -66,11 +60,11 @@ public class GroupController {
             ArrayList<UserGroup> userGroups = new ArrayList<>();
             if (includePublicGroup) {
                 Group publicGroup = createOrRetrievePublicGroup();
-                userGroups.add(Group.toDTO(publicGroup));
+                userGroups.add(publicGroup.toDataTransferObject());
             }
 
             for (Group group : result) {
-                UserGroup user = Group.toDTO(group);
+                UserGroup user = group.toDataTransferObject();
                 user.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
                 userGroups.add(user);
             }
@@ -83,31 +77,27 @@ public class GroupController {
     public ArrayList<UserGroup> retrieveGroups(Account account, GroupType type) throws ControllerException {
         ArrayList<UserGroup> userGroups = new ArrayList<>();
 
-        try {
-            ArrayList<Group> result;
-            switch (type) {
-                default:
-                case PRIVATE:
-                    result = dao.retrieveGroups(account, type);
-                    break;
+        ArrayList<Group> result;
+        switch (type) {
+            default:
+            case PRIVATE:
+                result = dao.retrieveGroups(account, type);
+                break;
 
-                case PUBLIC:
-                    if (account.getType() != AccountType.ADMIN)
-                        throw new ControllerException("Cannot retrieve public groups without admin privileges");
+            case PUBLIC:
+                if (account.getType() != AccountType.ADMIN)
+                    throw new ControllerException("Cannot retrieve public groups without admin privileges");
 
-                    result = dao.retrievePublicGroups();
-                    break;
-            }
-
-            for (Group group : result) {
-                UserGroup user = Group.toDTO(group);
-                user.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
-                userGroups.add(user);
-            }
-            return userGroups;
-        } catch (DAOException de) {
-            throw new ControllerException(de);
+                result = dao.retrievePublicGroups();
+                break;
         }
+
+        for (Group group : result) {
+            UserGroup user = group.toDataTransferObject();
+            user.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
+            userGroups.add(user);
+        }
+        return userGroups;
     }
 
     public Set<String> retrieveAccountGroupUUIDs(Account account) throws ControllerException {
@@ -121,19 +111,11 @@ public class GroupController {
         return uuids;
     }
 
-    public Group save(Group group) throws ControllerException {
-        try {
-            if (group.getUuid() == null || group.getUuid().isEmpty())
-                group.setUuid(Utils.generateUUID());
+    public Group save(Group group) {
+        if (group.getUuid() == null || group.getUuid().isEmpty())
+            group.setUuid(Utils.generateUUID());
 
-            if (group.getType() == GroupType.PRIVATE)
-                group.setAutoJoin(false);
-
-            return dao.save(group);
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
+        return dao.create(group);
     }
 
     // create group without parent
@@ -151,19 +133,12 @@ public class GroupController {
         group.setLabel(info.getLabel());
         group.setDescription(info.getDescription() == null ? "" : info.getDescription());
         group.setType(info.getType());
-        if (info.getType() == GroupType.PRIVATE)
-            group.setOwner(account);
-        else {
-            Account systemAccount = accountController.getSystemAccount();
-            group.setOwner(systemAccount);
-            group.setParent(this.createOrRetrievePublicGroup());
-        }
-
+        group.setOwner(account);
         group = save(group);
 
         ArrayList<Account> accounts = new ArrayList<>();
-        for (User user : info.getMembers()) {
-            Account memberAccount = accountController.getByEmail(user.getEmail());
+        for (AccountTransfer accountTransfer : info.getMembers()) {
+            Account memberAccount = accountController.getByEmail(accountTransfer.getEmail());
             if (memberAccount == null)
                 continue;
             memberAccount.getGroups().add(group);
@@ -171,16 +146,12 @@ public class GroupController {
             accounts.add(memberAccount);
         }
 
-        try {
-            group.getMembers().addAll(accounts);
-            group = dao.update(group);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        group.getMembers().addAll(accounts);
+        group = dao.update(group);
 
-        info = Group.toDTO(group);
+        info = group.toDataTransferObject();
         for (Account addedAccount : group.getMembers()) {
-            info.getMembers().add(Account.toDTO(addedAccount));
+            info.getMembers().add(addedAccount.toDataTransferObject());
         }
         info.setMemberCount(info.getMembers().size());
         return info;
@@ -193,24 +164,15 @@ public class GroupController {
             throw new ControllerException(errMsg);
         }
 
-        Group group;
-        try {
-            group = dao.get(user.getId());
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        Group group = dao.get(user.getId());
         if (group == null) {
             throw new ControllerException("Could not find group to update");
         }
 
-        try {
-            group.setLabel(user.getLabel());
-            group.setDescription(user.getDescription());
-            group = dao.update(group);
-            return Group.toDTO(group);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        group.setLabel(user.getLabel());
+        group.setDescription(user.getDescription());
+        group = dao.update(group);
+        return group.toDataTransferObject();
     }
 
     public UserGroup deleteGroup(Account account, UserGroup user) throws ControllerException {
@@ -220,35 +182,23 @@ public class GroupController {
             throw new ControllerException(errMsg);
         }
 
-        Group group;
-        try {
-            group = dao.get(user.getId());
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        Group group = dao.get(user.getId());
         if (group == null) {
             throw new ControllerException("Could not find group to delete");
         }
 
-        try {
-            if (group.getMembers() != null) {
-                for (Account member : group.getMembers()) {
-                    accountController.removeMemberFromGroup(group.getId(), member.getEmail());
-                }
+        if (group.getMembers() != null) {
+            for (Account member : group.getMembers()) {
+                accountController.removeMemberFromGroup(group.getId(), member.getEmail());
             }
-            ControllerFactory.getPermissionController().clearGroupPermissions(account, group);
-            UserGroup userGroup = Group.toDTO(group);
-            dao.delete(group);
-            return userGroup;
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        } catch (PermissionException e) {
-            Logger.warn(e.getMessage());
-            throw new ControllerException(e);
         }
+        DAOFactory.getPermissionDAO().clearPermissions(group);
+        UserGroup userGroup = group.toDataTransferObject();
+        dao.delete(group);
+        return userGroup;
     }
 
-    public Group createOrRetrievePublicGroup() throws ControllerException {
+    public Group createOrRetrievePublicGroup() {
         Group publicGroup = this.getGroupByUUID(PUBLIC_GROUP_UUID);
         if (publicGroup != null)
             return publicGroup;
@@ -278,7 +228,7 @@ public class GroupController {
      * @param account account whose groups are being retrieved
      * @return set of groups retrieved for account
      */
-    public Set<Group> getAllGroups(Account account) throws ControllerException {
+    public Set<Group> getAllGroups(Account account) {
         if (account == null) {
             Set<Group> groups = new HashSet<>();
             groups.add(createOrRetrievePublicGroup());
@@ -286,11 +236,7 @@ public class GroupController {
         }
 
         Set<Long> groupIds = getAllAccountGroups(account);
-        try {
-            return dao.getByIdList(groupIds);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return dao.getByIdList(groupIds);
     }
 
     /**
@@ -299,7 +245,7 @@ public class GroupController {
      * @param account Account to query on.
      * @return Set of Group ids.
      */
-    protected Set<Long> getAllAccountGroups(Account account) throws ControllerException {
+    protected Set<Long> getAllAccountGroups(Account account) {
         HashSet<Long> accountGroups = new HashSet<>();
 
         for (Group group : account.getGroups()) {
@@ -307,12 +253,8 @@ public class GroupController {
         }
 
         // Everyone belongs to the everyone group
-        try {
-            Group everybodyGroup = createOrRetrievePublicGroup();
-            accountGroups.add(everybodyGroup.getId());
-        } catch (ControllerException e) {
-            Logger.warn("could not get everybody group: " + e.toString());
-        }
+        Group everybodyGroup = createOrRetrievePublicGroup();
+        accountGroups.add(everybodyGroup.getId());
         return accountGroups;
     }
 
@@ -332,7 +274,7 @@ public class GroupController {
      * @param groupIds optional set of group ids. Can be empty.
      * @return Set of Parent group ids.
      */
-    protected HashSet<Long> getParentGroups(Group group, HashSet<Long> groupIds) throws ControllerException {
+    protected HashSet<Long> getParentGroups(Group group, HashSet<Long> groupIds) {
         if (groupIds.contains(group.getId())) {
             return groupIds;
         } else {
@@ -346,13 +288,13 @@ public class GroupController {
         return groupIds;
     }
 
-    public ArrayList<User> retrieveGroupMembers(String uuid) throws ControllerException {
+    public ArrayList<AccountTransfer> retrieveGroupMembers(String uuid) throws ControllerException {
         try {
-            ArrayList<User> result = new ArrayList<>();
+            ArrayList<AccountTransfer> result = new ArrayList<>();
             Group group = dao.get(uuid);
             for (Account account : group.getMembers()) {
-                User user = Account.toDTO(account);
-                result.add(user);
+                AccountTransfer accountTransfer = account.toDataTransferObject();
+                result.add(accountTransfer);
             }
             return result;
         } catch (DAOException e) {
@@ -368,35 +310,23 @@ public class GroupController {
         }
     }
 
-    /**
-     * @return list of groups that anyone who is allowed to register automatically becomes a member of
-     * @throws ControllerException
-     */
-    public List<Group> getAutoJoinGroups() throws ControllerException {
-        try {
-            return dao.getAutoJoinGroups();
-        } catch (DAOException de) {
-            throw new ControllerException();
-        }
-    }
-
-    public ArrayList<User> retrieveAccountsForGroupCreation(Account account) throws ControllerException {
+    public ArrayList<AccountTransfer> retrieveAccountsForGroupCreation(Account account) throws ControllerException {
         Set<Group> groups = getAllGroups(account);
-        Set<User> accounts = new HashSet<>();
+        Set<AccountTransfer> accounts = new HashSet<>();
 
         for (Group group : groups) {
             if (group.getType() == GroupType.PRIVATE)
                 continue;
 
-            ArrayList<User> members = retrieveGroupMembers(group.getUuid());
+            ArrayList<AccountTransfer> members = retrieveGroupMembers(group.getUuid());
             accounts.addAll(members);
         }
 
         return new ArrayList<>(accounts);
     }
 
-    public ArrayList<User> setGroupMembers(Account account, UserGroup info, ArrayList<User> members)
-            throws ControllerException {
+    public ArrayList<AccountTransfer> setGroupMembers(Account account, UserGroup info,
+            ArrayList<AccountTransfer> members) throws ControllerException {
         Group group = getGroupById(info.getId());
         if (group == null) {
             String errMsg = "Could retrieve group with id " + info.getId();
@@ -428,8 +358,8 @@ public class GroupController {
 
         // add
         ArrayList<Account> accounts = new ArrayList<>();
-        for (User user : members) {
-            Account memberAccount = accountController.getByEmail(user.getEmail());
+        for (AccountTransfer accountTransfer : members) {
+            Account memberAccount = accountController.getByEmail(accountTransfer.getEmail());
             if (memberAccount == null)
                 continue;
             memberAccount.getGroups().add(group);
@@ -447,7 +377,7 @@ public class GroupController {
 
         members.clear();
         for (Account addedAccount : accounts) {
-            members.add(Account.toDTO(addedAccount));
+            members.add(addedAccount.toDataTransferObject());
         }
         return members;
     }

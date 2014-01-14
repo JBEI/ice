@@ -1,8 +1,7 @@
 package org.jbei.ice.lib.utils;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.entry.sample.StorageController;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 
@@ -22,34 +21,12 @@ public class PopulateInitialDatabase {
      * @throws UtilityException
      */
     public static void initializeDatabase() throws UtilityException {
-        GroupController groupController = ControllerFactory.getGroupController();
+        GroupController groupController = new GroupController();
         Group group1;
-        try {
-            group1 = groupController.getGroupByUUID(GroupController.PUBLIC_GROUP_UUID);
-            if (group1 == null) {
-                groupController.createOrRetrievePublicGroup();
-                createSystemAccount();
-                createAdminAccount();
-                populateDefaultStorageLocationsAndSchemes();
-            }
-        } catch (ControllerException e) {
-            throw new UtilityException(e);
-        }
-    }
-
-    /**
-     * Create default root node Storage for each part types
-     */
-    private static void populateDefaultStorageLocationsAndSchemes() throws UtilityException {
-        StorageController storageController = ControllerFactory.getStorageController();
-
-        try {
-            storageController.createStrainStorageRoot();
-            storageController.createPlasmidStorageRoot();
-            storageController.createPartStorageRoot();
-            storageController.createSeedStorageRoot();
-        } catch (ControllerException e) {
-            throw new UtilityException(e);
+        group1 = groupController.getGroupByUUID(GroupController.PUBLIC_GROUP_UUID);
+        if (group1 == null) {
+            groupController.createOrRetrievePublicGroup();
+            createAdminAccount();
         }
     }
 
@@ -60,20 +37,7 @@ public class PopulateInitialDatabase {
      */
     private static void createAdminAccount() throws UtilityException {
         try {
-            ControllerFactory.getAccountController().createAdminAccount();
-        } catch (ControllerException e) {
-            throw new UtilityException(e);
-        }
-    }
-
-    /**
-     * Check for and create the System account.
-     *
-     * @throws UtilityException
-     */
-    private static void createSystemAccount() throws UtilityException {
-        try {
-            ControllerFactory.getAccountController().createSystemAccount();
+            new AccountController().createAdminAccount();
         } catch (ControllerException e) {
             throw new UtilityException(e);
         }

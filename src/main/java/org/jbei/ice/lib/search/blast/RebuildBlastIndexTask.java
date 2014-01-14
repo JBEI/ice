@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.search.blast;
 
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.executor.Task;
-import org.jbei.ice.lib.logging.Logger;
 
 /**
  * Task to rebuild the blast index

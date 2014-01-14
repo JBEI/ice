@@ -9,19 +9,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
 
 import org.apache.commons.io.IOUtils;
@@ -56,7 +55,7 @@ public class FileDownloadServlet extends HttpServlet {
                 if (!AccountController.isAuthenticated(sid))
                     return;
 
-                AccountController controller = ControllerFactory.getAccountController();
+                AccountController controller = new AccountController();
                 account = controller.getAccountBySessionKey(sid);
                 if (account == null)
                     return;
@@ -104,7 +103,7 @@ public class FileDownloadServlet extends HttpServlet {
     }
 
     private File getTraceSequenceFile(String fileId, HttpServletResponse response) {
-        SequenceAnalysisController controller = ControllerFactory.getSequenceAnalysisController();
+        SequenceAnalysisController controller = new SequenceAnalysisController();
 
         try {
             TraceSequence sequence = controller.getTraceSequenceByFileId(fileId);
@@ -133,7 +132,7 @@ public class FileDownloadServlet extends HttpServlet {
     }
 
     private File getAttachmentFile(Account account, String fileId, HttpServletResponse response) {
-        AttachmentController controller = ControllerFactory.getAttachmentController();
+        AttachmentController controller = new AttachmentController();
         try {
             Attachment attachment = controller.getAttachmentByFileId(fileId);
             if (attachment == null)

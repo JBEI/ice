@@ -3,8 +3,9 @@ package org.jbei.ice.lib.news;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.NewsDAO;
 
 /**
  * @auther Hector Plahar
@@ -28,7 +29,7 @@ public class NewsController {
     public News save(News news) throws ControllerException {
         news.setCreationTime(new Date(System.currentTimeMillis()));
         try {
-            return dao.save(news);
+            return dao.create(news);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

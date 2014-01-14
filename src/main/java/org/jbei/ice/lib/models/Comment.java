@@ -5,9 +5,9 @@ import java.util.Date;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.shared.dto.comment.UserComment;
 
 import org.hibernate.annotations.Type;
 
@@ -20,7 +20,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "comments")
 @SequenceGenerator(name = "sequence", sequenceName = "comments_id_seq", allocationSize = 1)
-public class Comment implements IModel {
+public class Comment implements IDataModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -91,15 +91,13 @@ public class Comment implements IModel {
         this.creationTime = creationTime;
     }
 
-    public static UserComment toDTO(Comment comment) {
-        if (comment == null)
-            return null;
-
+    @Override
+    public UserComment toDataTransferObject() {
         UserComment userComment = new UserComment();
-        userComment.setCommentDate(comment.getCreationTime());
-        userComment.setMessage(comment.getBody());
-        userComment.setUser(Account.toDTO(comment.getAccount()));
-        userComment.setEntryId(comment.getEntry().getId());
+        userComment.setCommentDate(getCreationTime());
+        userComment.setMessage(getBody());
+        userComment.setAccountTransfer(getAccount().toDataTransferObject());
+        userComment.setEntryId(getEntry().getId());
         return userComment;
     }
 }

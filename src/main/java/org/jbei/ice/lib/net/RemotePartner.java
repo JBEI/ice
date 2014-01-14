@@ -3,9 +3,9 @@ package org.jbei.ice.lib.net;
 import java.util.Date;
 import javax.persistence.*;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.shared.dto.web.RegistryPartner;
-import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 
 /**
  * Stores information about partners that this registry is involved with in web of registries configuration.
@@ -35,7 +35,7 @@ import org.jbei.ice.lib.shared.dto.web.RemotePartnerStatus;
 @Entity
 @Table(name = "REMOTE_PARTNER")
 @SequenceGenerator(name = "sequence", sequenceName = "remote_partner_id_seq", allocationSize = 1)
-public class RemotePartner implements IModel {
+public class RemotePartner implements IDataModel {
 
     private static final long serialVersionUID = 1l;
 
@@ -141,24 +141,25 @@ public class RemotePartner implements IModel {
         this.apiKey = apiKey;
     }
 
-    public static RegistryPartner toDTO(RemotePartner partner) {
-        RegistryPartner registryPartner = new RegistryPartner();
-        registryPartner.setId(partner.getId());
-        registryPartner.setName(partner.getName());
-        registryPartner.setUrl(partner.getUrl());
-        registryPartner.setStatus(partner.getPartnerStatus() == null
-                                          ? RemotePartnerStatus.APPROVED.name() : partner.getPartnerStatus().name());
-        registryPartner.setSent(partner.getSent());
-        registryPartner.setFetched(partner.getFetched());
-        registryPartner.setApiKey(partner.getApiKey());
-        return registryPartner;
-    }
-
     public String getAuthenticationToken() {
         return authenticationToken;
     }
 
     public void setAuthenticationToken(String authenticationToken) {
         this.authenticationToken = authenticationToken;
+    }
+
+    @Override
+    public RegistryPartner toDataTransferObject() {
+        RegistryPartner registryPartner = new RegistryPartner();
+        registryPartner.setId(getId());
+        registryPartner.setName(getName());
+        registryPartner.setUrl(getUrl());
+        registryPartner.setStatus(getPartnerStatus() == null
+                                          ? RemotePartnerStatus.APPROVED.name() : getPartnerStatus().name());
+        registryPartner.setSent(getSent());
+        registryPartner.setFetched(getFetched());
+        registryPartner.setApiKey(getApiKey());
+        return registryPartner;
     }
 }

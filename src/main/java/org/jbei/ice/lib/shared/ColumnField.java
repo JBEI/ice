@@ -1,13 +1,13 @@
 package org.jbei.ice.lib.shared;
 
-import org.jbei.ice.lib.shared.dto.IDTOModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
  * Column fields for tables used on the ice platform UI
  *
  * @author Hector Plahar
  */
-public enum ColumnField implements IDTOModel {
+public enum ColumnField implements IDataTransferModel {
 
     SELECTION("Select"),
     TYPE("Type"),

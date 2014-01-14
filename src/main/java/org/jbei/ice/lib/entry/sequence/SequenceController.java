@@ -10,16 +10,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ApplicationController;
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ApplicationController;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.AuthorizationException;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.composers.formatters.FormatterException;
 import org.jbei.ice.lib.composers.formatters.IFormatter;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.entry.EntryAuthorization;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
@@ -27,17 +34,13 @@ import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.parsers.GeneralParser;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.lib.vo.IDNASequence;
 
 /**
  * ABI to manipulate {@link Sequence}s.
@@ -47,11 +50,11 @@ import org.jbei.ice.lib.vo.IDNASequence;
 public class SequenceController {
 
     private final SequenceDAO dao;
-    private final PermissionsController permissionsController;
+    private final EntryAuthorization authorization;
 
     public SequenceController() {
         dao = new SequenceDAO();
-        permissionsController = new PermissionsController();
+        authorization = new EntryAuthorization();
     }
 
     /**
@@ -74,7 +77,7 @@ public class SequenceController {
     }
 
     public void parseAndSaveSequence(Account account, Entry entry, String sequenceString) throws ControllerException {
-        IDNASequence dnaSequence = parse(sequenceString);
+        DNASequence dnaSequence = parse(sequenceString);
 
         if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
             String errorMsg = "Couldn't parse sequence file! Supported formats: "
@@ -85,17 +88,10 @@ public class SequenceController {
             throw new ControllerException(errorMsg);
         }
 
-        Sequence sequence;
-
-        try {
-            sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-            sequence.setSequenceUser(sequenceString);
-            sequence.setEntry(entry);
-            save(account, sequence);
-        } catch (PermissionException e) {
-            Logger.error(e);
-            throw new ControllerException("User does not have permissions to save sequence");
-        }
+        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        sequence.setSequenceUser(sequenceString);
+        sequence.setEntry(entry);
+        save(account, sequence);
     }
 
     /**
@@ -105,26 +101,13 @@ public class SequenceController {
      * @param account  account of user saving sequence
      * @param sequence sequence to save
      * @return Saved Sequence
-     * @throws ControllerException
-     * @throws PermissionException
+     * @throws AuthorizationException if the user does not have the permission to update the entry associated with
+     *                                the sequence
      */
-    public Sequence save(Account account, Sequence sequence) throws ControllerException, PermissionException {
-        if (sequence == null) {
-            throw new ControllerException("Failed to save null sequence!");
-        }
-
-        if (!permissionsController.hasWritePermission(account, sequence.getEntry())) {
-            throw new PermissionException("No write permission for sequence!");
-        }
-
-        Sequence result;
-        try {
-            result = dao.saveSequence(sequence);
-            ApplicationController.scheduleBlastIndexRebuildTask(true);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
+    public Sequence save(Account account, Sequence sequence) throws AuthorizationException {
+        authorization.expectWrite(account.getEmail(), sequence.getEntry());
+        Sequence result = dao.create(sequence);
+        ApplicationController.scheduleBlastIndexRebuildTask(true);
         return result;
     }
 
@@ -141,19 +124,17 @@ public class SequenceController {
             throw new ControllerException("Failed to save null sequence!");
         }
 
-        if (!permissionsController.hasWritePermission(account, sequence.getEntry())) {
-            throw new PermissionException("No write permission for sequence!");
-        }
-
+        authorization.expectWrite(account.getEmail(), sequence.getEntry());
         Sequence result;
+
         try {
             Entry entry = sequence.getEntry();
             entry.setModificationTime(Calendar.getInstance().getTime());
             Sequence oldSequence = getByEntry(entry);
 
             if (oldSequence != null) {
-                String tmpDir = ControllerFactory.getConfigurationController()
-                                                 .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+                String tmpDir = new ConfigurationController()
+                        .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
                 String hash = oldSequence.getFwdHash();
                 try {
                     Files.deleteIfExists(Paths.get(tmpDir, hash + ".png"));
@@ -166,7 +147,7 @@ public class SequenceController {
                 oldSequence.setRevHash(sequence.getRevHash());
                 result = dao.updateSequence(oldSequence, sequence.getSequenceFeatures());
             } else
-                result = dao.saveSequence(sequence);
+                result = dao.create(sequence);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -183,31 +164,19 @@ public class SequenceController {
      * @throws PermissionException
      */
     public void delete(Account account, Sequence sequence) throws ControllerException, PermissionException {
-        if (sequence == null) {
-            throw new ControllerException("Failed to save null sequence!");
-        }
-
-        if (!permissionsController.hasWritePermission(account, sequence.getEntry())) {
-            throw new PermissionException("No write permission for sequence!");
-        }
-
-        try {
-            String tmpDir = ControllerFactory.getConfigurationController()
-                                             .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-            dao.deleteSequence(sequence, tmpDir);
-            ApplicationController.scheduleBlastIndexRebuildTask(true);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        authorization.expectWrite(account.getEmail(), sequence.getEntry());
+        String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+        dao.deleteSequence(sequence, tmpDir);
+        ApplicationController.scheduleBlastIndexRebuildTask(true);
     }
 
     /**
-     * Parse the given String into an {@link IDNASequence} object.
+     * Parse the given String into an {@link DNASequence} object.
      *
      * @param sequence
-     * @return parsed IDNASequence object.
+     * @return parsed DNASequence object.
      */
-    public static IDNASequence parse(String sequence) {
+    public static DNASequence parse(String sequence) {
         return GeneralParser.getInstance().parse(sequence);
     }
 
@@ -230,12 +199,7 @@ public class SequenceController {
     }
 
     public FeaturedDNASequence retrievePartSequence(Account account, String recordId) throws ControllerException {
-        Entry entry;
-        try {
-            entry = ControllerFactory.getEntryController().getByRecordId(account, recordId);
-        } catch (PermissionException e) {
-            throw new ControllerException("No permission to view part");
-        }
+        Entry entry = new EntryController().getByRecordId(account, recordId);
 
         if (entry == null)
             throw new ControllerException("The part could not be located");
@@ -303,12 +267,12 @@ public class SequenceController {
     }
 
     /**
-     * Create a {@link Sequence} object from an {@link IDNASequence} object.
+     * Create a {@link Sequence} object from an {@link DNASequence} object.
      *
      * @param dnaSequence
      * @return Translated Sequence object.
      */
-    public static Sequence dnaSequenceToSequence(IDNASequence dnaSequence) {
+    public static Sequence dnaSequenceToSequence(DNASequence dnaSequence) {
         if (dnaSequence == null) {
             return null;
         }
@@ -464,7 +428,7 @@ public class SequenceController {
 
     public Sequence saveSequence(Sequence partSequence) throws ControllerException {
         try {
-            Sequence sequence = dao.saveSequence(partSequence);
+            Sequence sequence = dao.create(partSequence);
             if (sequence != null)
                 ApplicationController.scheduleBlastIndexRebuildTask(true);
             return sequence;

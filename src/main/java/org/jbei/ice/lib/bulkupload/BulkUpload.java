@@ -6,15 +6,13 @@ import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
 
+import org.jbei.ice.lib.access.Permission;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
-import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * Saved draft of bulk imports. Encapsulates a list of {@link Entry}s that are created and updated
@@ -27,7 +25,7 @@ import org.jbei.ice.lib.shared.dto.user.User;
 @Table(name = "bulk_upload")
 
 @SequenceGenerator(name = "sequence", sequenceName = "bulk_upload_id_seq", allocationSize = 1)
-public class BulkUpload implements IModel {
+public class BulkUpload implements IDataModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
@@ -147,28 +145,25 @@ public class BulkUpload implements IModel {
         return permissions;
     }
 
-    public static BulkUploadInfo toDTO(BulkUpload draft) {
-        if (draft == null)
-            return null;
-
+    public BulkUploadInfo toDataTransferObject() {
         BulkUploadInfo bulkUploadInfo = new BulkUploadInfo();
-        bulkUploadInfo.setCreated(draft.getCreationTime());
-        bulkUploadInfo.setId(draft.getId());
-        bulkUploadInfo.setLastUpdate(draft.getLastUpdateTime());
-        bulkUploadInfo.setStatus(draft.getStatus());
+        bulkUploadInfo.setCreated(getCreationTime());
+        bulkUploadInfo.setId(getId());
+        bulkUploadInfo.setLastUpdate(getLastUpdateTime());
+        bulkUploadInfo.setStatus(getStatus());
 
         // draft account
-        Account draftAccount = draft.getAccount();
-        bulkUploadInfo.setName(draft.getName());
-        User user = new User();
-        user.setEmail(draftAccount.getEmail());
-        user.setFirstName(draftAccount.getFirstName());
-        user.setLastName(draftAccount.getLastName());
-        bulkUploadInfo.setAccount(user);
+        Account draftAccount = getAccount();
+        bulkUploadInfo.setName(getName());
+        AccountTransfer accountTransfer = new AccountTransfer();
+        accountTransfer.setEmail(draftAccount.getEmail());
+        accountTransfer.setFirstName(draftAccount.getFirstName());
+        accountTransfer.setLastName(draftAccount.getLastName());
+        bulkUploadInfo.setAccount(accountTransfer);
 
-        bulkUploadInfo.setType(EntryAddType.stringToType(draft.getImportType()));
-        for (Permission permission : draft.getPermissions()) {
-            bulkUploadInfo.getAccessPermissions().add(Permission.toDTO(permission));
+        bulkUploadInfo.setType(EntryAddType.stringToType(getImportType()));
+        for (Permission permission : getPermissions()) {
+            bulkUploadInfo.getAccessPermissions().add(permission.toDataTransferObject());
         }
         return bulkUploadInfo;
     }

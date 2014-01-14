@@ -10,9 +10,9 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.Generation;
-import org.jbei.ice.lib.shared.dto.entry.PlantType;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.Generation;
+import org.jbei.ice.lib.dto.entry.PlantType;
 
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Field;

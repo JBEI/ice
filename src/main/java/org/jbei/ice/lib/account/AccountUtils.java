@@ -1,8 +1,7 @@
 package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -41,7 +40,7 @@ public class AccountUtils {
 //        }
 //    }
 
-    public static Account fromDTO(User info) {
+    public static Account fromDTO(AccountTransfer info) {
         Account account = new Account();
         account.setFirstName(info.getFirstName());
         account.setLastName(info.getLastName());
@@ -50,7 +49,6 @@ public class AccountUtils {
         account.setDescription(info.getDescription());
         account.setInstitution(info.getInstitution());
         account.setIp("");
-        account.setIsSubscribed(1);
         return account;
     }
 }

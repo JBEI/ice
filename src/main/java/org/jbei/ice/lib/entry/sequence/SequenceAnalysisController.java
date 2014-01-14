@@ -8,10 +8,14 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
@@ -23,15 +27,12 @@ import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqException;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqParser;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 
 /**
@@ -43,12 +44,14 @@ public class SequenceAnalysisController {
 
     private final TraceSequenceDAO traceDao;
     private final PermissionsController permissionsController;
+    private final EntryAuthorization entryAuthorization;
 
     public static final String tracesDirName = "traces";
 
     public SequenceAnalysisController() {
         traceDao = new TraceSequenceDAO();
         permissionsController = new PermissionsController();
+        entryAuthorization = new EntryAuthorization();
     }
 
     /**
@@ -121,9 +124,7 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to delete null Trace Sequence!");
         }
 
-        if (!permissionsController.hasWritePermission(account, traceSequence.getEntry())) {
-            throw new PermissionException("No permissions to delete trace sequence!");
-        }
+        entryAuthorization.expectWrite(account.getEmail(), traceSequence.getEntry());
 
         try {
             File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
@@ -147,7 +148,7 @@ public class SequenceAnalysisController {
 
         List<TraceSequence> traces = null;
 
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
+        SequenceController sequenceController = new SequenceController();
 
         try {
             Sequence sequence = sequenceController.getByEntry(entry);
@@ -193,19 +194,19 @@ public class SequenceAnalysisController {
     }
 
     /**
-     * Parses a given sequence file (Genbank, Fasta, ABI) and return an {@link IDNASequence}.
+     * Parses a given sequence file (Genbank, Fasta, ABI) and return an {@link DNASequence}.
      *
      * @param bytes
-     * @return Parsed Sequence as {@link IDNASequence}.
+     * @return Parsed Sequence as {@link DNASequence}.
      * @throws ControllerException
      */
-    public IDNASequence parse(byte[] bytes) throws ControllerException {
+    public DNASequence parse(byte[] bytes) throws ControllerException {
         if (bytes.length == 0) {
             return null;
         }
 
         // Trying to parse as Fasta, Genbank, etc
-        IDNASequence dnaSequence = GeneralParser.getInstance().parse(bytes);
+        DNASequence dnaSequence = GeneralParser.getInstance().parse(bytes);
 
         if (dnaSequence == null) {
             // Trying to parse as ABI
@@ -401,7 +402,7 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to rebuild alignment for null entry!");
         }
 
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
+        SequenceController sequenceController = new SequenceController();
         Sequence sequence = sequenceController.getByEntry(entry);
 
         if (sequence == null) {

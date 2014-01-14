@@ -6,7 +6,7 @@ import java.util.Iterator;
 import org.jbei.ice.lib.parsers.fasta.FastaParser;
 import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
-import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 
 /**
  * Helper class to set up a list of parsers to iterate over, to try to parse the input file.
@@ -14,6 +14,7 @@ import org.jbei.ice.lib.vo.IDNASequence;
  * @author Zinovii Dmytriv, Timothy Ham
  */
 public class GeneralParser {
+
     private static GeneralParser instance = null;
     private final ArrayList<AbstractParser> parsers = new ArrayList<AbstractParser>();
 
@@ -29,8 +30,8 @@ public class GeneralParser {
         return instance;
     }
 
-    public IDNASequence parse(String sequence) {
-        IDNASequence parsedSequence = null;
+    public DNASequence parse(String sequence) {
+        DNASequence parsedSequence = null;
 
         for (AbstractParser parser : parsers) {
             try {
@@ -44,8 +45,8 @@ public class GeneralParser {
         return parsedSequence;
     }
 
-    public IDNASequence parse(byte[] bytes) {
-        IDNASequence parsedSequence = null;
+    public DNASequence parse(byte[] bytes) {
+        DNASequence parsedSequence = null;
 
         for (AbstractParser parser : parsers) {
             try {

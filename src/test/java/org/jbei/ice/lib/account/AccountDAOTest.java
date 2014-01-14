@@ -2,6 +2,7 @@ package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 
 import org.junit.After;
@@ -37,7 +38,7 @@ public class AccountDAOTest {
         account.setDescription("");
         account.setIp("127.0.0.1");
         account.setPassword("40ntH@cKm3br0");
-        Account saved = dao.save(account);
+        Account saved = dao.create(account);
         Assert.assertNotNull(saved);
         Account ret = dao.get(saved.getId());
         Assert.assertTrue(saved.getEmail().equals(ret.getEmail()));

@@ -7,14 +7,32 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jbei.ice.client.entry.display.model.SampleStorage;
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.Permission;
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.PartSample;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.group.UserGroup;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.dto.sample.SampleStorage;
+import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -23,27 +41,9 @@ import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.model.Permission;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.PartSample;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
-import org.jbei.ice.lib.shared.dto.group.UserGroup;
-import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
-import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
-import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.InfoToModelFactory;
@@ -56,25 +56,24 @@ import org.jbei.ice.server.ModelToInfoFactory;
  */
 public class BulkUploadController {
 
-    private BulkUploadDAO dao;
-    private AccountController accountController;
-    private EntryController entryController;
-    private AttachmentController attachmentController;
-    private SequenceController sequenceController;
-    private SampleController sampleController;
-    private PreferencesController preferencesController;
+    private final BulkUploadDAO dao;
+    private final BulkUploadAuthorization authorization;
+    private final AccountController accountController;
+    private final SampleController sampleController;
+    private final EntryController entryController;
+    private final AttachmentController attachmentController;
+    private final SequenceController sequenceController;
+    private final PreferencesController preferencesController;
 
-    /**
-     * Initialises dao and controller dependencies. These need be injected
-     */
     public BulkUploadController() {
-        dao = new BulkUploadDAO();
-        accountController = ControllerFactory.getAccountController();
-        entryController = ControllerFactory.getEntryController();
-        attachmentController = ControllerFactory.getAttachmentController();
-        sequenceController = ControllerFactory.getSequenceController();
-        sampleController = ControllerFactory.getSampleController();
-        preferencesController = ControllerFactory.getPreferencesController();
+        dao = DAOFactory.getBulkUploadDAO();
+        authorization = new BulkUploadAuthorization();
+        accountController = new AccountController();
+        sampleController = new SampleController();
+        entryController = new EntryController();
+        attachmentController = new AttachmentController();
+        sequenceController = new SequenceController();
+        preferencesController = new PreferencesController();
     }
 
     /**
@@ -85,14 +84,10 @@ public class BulkUploadController {
      * @param account account for user making call. expected to be an administrator
      * @return list of bulk imports pending verification
      * @throws ControllerException
-     * @throws PermissionException
      */
-    public ArrayList<BulkUploadInfo> retrievePendingImports(Account account)
-            throws ControllerException, PermissionException {
-
+    public ArrayList<BulkUploadInfo> retrievePendingImports(Account account) throws ControllerException {
         // check for admin privileges
-        if (!accountController.isAdministrator(account))
-            throw new PermissionException("Administrative privileges are required!");
+        authorization.expectAdmin(account.getEmail());
 
         ArrayList<BulkUploadInfo> infoList = new ArrayList<>();
         ArrayList<BulkUpload> results;
@@ -108,11 +103,11 @@ public class BulkUploadController {
         for (BulkUpload draft : results) {
             BulkUploadInfo info = new BulkUploadInfo();
             Account draftAccount = draft.getAccount();
-            User user = new User();
-            user.setEmail(draftAccount.getEmail());
-            user.setFirstName(draftAccount.getFirstName());
-            user.setLastName(draftAccount.getLastName());
-            info.setAccount(user);
+            AccountTransfer accountTransfer = new AccountTransfer();
+            accountTransfer.setEmail(draftAccount.getEmail());
+            accountTransfer.setFirstName(draftAccount.getFirstName());
+            accountTransfer.setLastName(draftAccount.getLastName());
+            info.setAccount(accountTransfer);
 
             info.setId(draft.getId());
             info.setLastUpdate(draft.getLastUpdateTime());
@@ -150,14 +145,7 @@ public class BulkUploadController {
             throw new ControllerException(e);
         }
 
-        boolean isModerator = accountController.isAdministrator(account);
-        boolean isOwner = account.equals(draft.getAccount());
-
-        // check for permissions to retrieve this bulk import
-        if (!isModerator && !isOwner) {
-            throw new PermissionException("Insufficient privileges by " + account.getEmail()
-                                                  + " to view bulk import for " + draft.getAccount().getEmail());
-        }
+        authorization.expectRead(account.getEmail(), draft);
 
         // convert bulk import db object to data transfer object
         int size = 0;
@@ -166,7 +154,7 @@ public class BulkUploadController {
         } catch (DAOException e) {
             Logger.error(e);
         }
-        BulkUploadInfo draftInfo = BulkUpload.toDTO(draft);
+        BulkUploadInfo draftInfo = draft.toDataTransferObject();
         draftInfo.setCount(size);
         EntryAddType type = EntryAddType.stringToType(draft.getImportType());
         EntryType retrieveType = type == EntryAddType.STRAIN_WITH_PLASMID ? EntryType.STRAIN : null;
@@ -188,7 +176,7 @@ public class BulkUploadController {
             ArrayList<PreferenceKey> keys = new ArrayList<>();
             keys.add(PreferenceKey.FUNDING_SOURCE);
             keys.add(PreferenceKey.PRINCIPAL_INVESTIGATOR);
-            userSaved = preferencesController.retrieveAccountPreferences(account, keys);
+            userSaved = new PreferencesController().retrieveAccountPreferences(account, keys);
         } catch (ControllerException ce) {
             // bulk upload should continue to work in the event of this exception
             Logger.warn(ce.getMessage());
@@ -200,7 +188,7 @@ public class BulkUploadController {
             if (preferenceKey != null && userSaved != null && userSaved.containsKey(preferenceKey))
                 userSaved.remove(preferenceKey); // bulk preferences has precedence over user saved
 
-            PreferenceInfo preferenceInfo = Preference.toDTO(preference);
+            PreferenceInfo preferenceInfo = preference.toDataTransferObject();
             if (preferenceInfo != null)
                 draftInfo.getPreferences().add(preferenceInfo);
         }
@@ -233,7 +221,7 @@ public class BulkUploadController {
             Set<Permission> entryPermissions = entry.getPermissions();
             if (entryPermissions != null && !entryPermissions.isEmpty()) {
                 for (Permission permission : entryPermissions) {
-                    info.getAccessPermissions().add(Permission.toDTO(permission));
+                    info.getAccessPermissions().add(permission.toDataTransferObject());
                 }
             }
 
@@ -256,7 +244,7 @@ public class BulkUploadController {
                     Set<Permission> permissions = plasmid.getPermissions();
                     if (permissions != null && !permissions.isEmpty()) {
                         for (Permission permission : permissions) {
-                            plasmidInfo.getAccessPermissions().add(Permission.toDTO(permission));
+                            plasmidInfo.getAccessPermissions().add(permission.toDataTransferObject());
                         }
                     }
                     info.setInfo(plasmidInfo);
@@ -373,11 +361,11 @@ public class BulkUploadController {
             draftInfo.setCount(draft.getContents().size());
 
             // set the account info
-            User user = new User();
-            user.setEmail(draftAccount.getEmail());
-            user.setFirstName(draftAccount.getFirstName());
-            user.setLastName(draftAccount.getLastName());
-            draftInfo.setAccount(user);
+            AccountTransfer accountTransfer = new AccountTransfer();
+            accountTransfer.setEmail(draftAccount.getEmail());
+            accountTransfer.setFirstName(draftAccount.getFirstName());
+            accountTransfer.setLastName(draftAccount.getLastName());
+            draftInfo.setAccount(accountTransfer);
             infoArrayList.add(draftInfo);
         }
 
@@ -396,33 +384,28 @@ public class BulkUploadController {
      */
     public BulkUploadInfo deleteDraftById(Account requesting, long draftId)
             throws ControllerException, PermissionException {
-        BulkUpload draft;
-        try {
-            draft = dao.retrieveById(draftId);
-            if (draft == null)
-                throw new ControllerException("Could not retrieve draft with id \"" + draftId + "\"");
+        BulkUpload draft = dao.retrieveById(draftId);
+        if (draft == null)
+            throw new ControllerException("Could not retrieve draft with id \"" + draftId + "\"");
 
-            Account draftAccount = draft.getAccount();
-            if (!requesting.equals(draftAccount) && !accountController.isAdministrator(requesting))
-                throw new PermissionException("No permissions to delete draft " + draftId);
+        Account draftAccount = draft.getAccount();
+        if (!requesting.equals(draftAccount) && !accountController.isAdministrator(requesting))
+            throw new PermissionException("No permissions to delete draft " + draftId);
 
-            // delete all associated entries. for strain with plasmids both are returned
-            for (Entry entry : draft.getContents()) {
-                try {
-                    entryController.delete(requesting, entry.getId());
-                } catch (PermissionException pe) {
-                    Logger.warn("Could not delete entry " + entry.getRecordId() + " for bulk upload " + draftId);
-                }
+        // delete all associated entries. for strain with plasmids both are returned
+        for (Entry entry : draft.getContents()) {
+            try {
+                entryController.delete(requesting, entry.getId());
+            } catch (PermissionException pe) {
+                Logger.warn("Could not delete entry " + entry.getRecordId() + " for bulk upload " + draftId);
             }
-
-            dao.delete(draft);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
         }
 
-        BulkUploadInfo draftInfo = BulkUpload.toDTO(draft);
-        User user = Account.toDTO(draft.getAccount());
-        draftInfo.setAccount(user);
+        dao.delete(draft);
+
+        BulkUploadInfo draftInfo = draft.toDataTransferObject();
+        AccountTransfer accountTransfer = draft.getAccount().toDataTransferObject();
+        draftInfo.setAccount(accountTransfer);
         return draftInfo;
     }
 
@@ -578,6 +561,7 @@ public class BulkUploadController {
                 plasmid.setVisibility(Visibility.OK.getValue());
             }
 
+            PermissionsController permissionsController = new PermissionsController();
             // set permissions
             for (Permission permission : bulkUpload.getPermissions()) {
                 // add permission for entry
@@ -586,10 +570,10 @@ public class BulkUploadController {
                 access.setTypeId(entry.getId());
                 access.setArticleId(permission.getGroup().getId());
                 access.setArticle(AccessPermission.Article.GROUP);
-                ControllerFactory.getPermissionController().addPermission(account, access);
+                permissionsController.addPermission(account, access);
                 if (plasmid != null) {
                     access.setTypeId(plasmid.getId());
-                    ControllerFactory.getPermissionController().addPermission(account, access);
+                    permissionsController.addPermission(account, access);
                 }
             }
             entryController.update(account, entry);
@@ -635,7 +619,7 @@ public class BulkUploadController {
 
             // update permissions
             for (UserGroup userGroup : groups) {
-                Group group = ControllerFactory.getGroupController().getGroupById(userGroup.getId());
+                Group group = new GroupController().getGroupById(userGroup.getId());
                 if (group == null)
                     continue;
 
@@ -660,7 +644,7 @@ public class BulkUploadController {
                 access.setType(AccessPermission.Type.READ_ENTRY);
                 access.setArticleId(group.getId());
 
-                Permission permission = ControllerFactory.getPermissionController().recordGroupPermission(access);
+                Permission permission = new PermissionsController().recordGroupPermission(access);
                 upload.getPermissions().add(permission);
             }
 
@@ -672,17 +656,11 @@ public class BulkUploadController {
 
     public long updatePreference(Account account, long bulkUploadId, EntryAddType addType, PreferenceInfo info)
             throws ControllerException {
-        BulkUpload upload;
-
-        try {
-            upload = dao.retrieveById(bulkUploadId);
-            if (upload == null) {
-                upload = BulkUploadUtil.createNewBulkUpload(addType);
-                upload.setAccount(account);
-                upload = dao.save(upload);
-            }
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+        BulkUpload upload = dao.retrieveById(bulkUploadId);
+        if (upload == null) {
+            upload = BulkUploadUtil.createNewBulkUpload(addType);
+            upload.setAccount(account);
+            upload = dao.create(upload);
         }
 
         if (!upload.getAccount().equals(account) && account.getType() != AccountType.ADMIN)
@@ -697,11 +675,7 @@ public class BulkUploadController {
                 upload.getPreferences().remove(preference);
         }
         upload.setLastUpdateTime(new Date(System.currentTimeMillis()));
-        try {
-            dao.update(upload);
-            return upload.getId();
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        dao.update(upload);
+        return upload.getId();
     }
 }

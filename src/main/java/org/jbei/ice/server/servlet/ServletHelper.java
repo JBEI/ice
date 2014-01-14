@@ -7,16 +7,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.servlet.http.Cookie;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 
 /**
  * Helper class for the servlets
@@ -47,7 +46,7 @@ public class ServletHelper {
                     if (!AccountController.isAuthenticated(sid))
                         return null;
 
-                    AccountController controller = ControllerFactory.getAccountController();
+                    AccountController controller = new AccountController();
                     return controller.getAccountBySessionKey(sid);
                 }
             }
@@ -60,7 +59,7 @@ public class ServletHelper {
     public static String uploadSequence(File sequenceFile) {
         try {
             String sequence = FileUtils.readFileToString(sequenceFile);
-            IDNASequence dnaSequence = SequenceController.parse(sequence);
+            DNASequence dnaSequence = SequenceController.parse(sequence);
 
             if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
                 return "Error: Couldn't parse sequence file! Supported formats: "

@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.shared;
 
-import org.jbei.ice.lib.shared.dto.IDTOModel;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.entry.EntryType;
 
-public enum EntryAddType implements IDTOModel {
+public enum EntryAddType implements IDataTransferModel {
 
     PLASMID("Plasmid"),
     STRAIN("Strain"),

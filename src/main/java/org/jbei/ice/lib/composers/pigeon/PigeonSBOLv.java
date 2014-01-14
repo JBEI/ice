@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.composers.formatters.SBOLVisitor;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
 
 import org.apache.http.HttpResponse;

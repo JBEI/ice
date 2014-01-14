@@ -4,11 +4,23 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.EntryCreator;
+import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.dto.comment.UserComment;
+import org.jbei.ice.lib.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.Generation;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PlantType;
+import org.jbei.ice.lib.dto.entry.PlasmidData;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.group.GroupType;
+import org.jbei.ice.lib.dto.group.UserGroup;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
@@ -16,19 +28,6 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.permissions.PermissionsController;
-import org.jbei.ice.lib.shared.dto.comment.UserComment;
-import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.Generation;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.PlantType;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
-import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
-import org.jbei.ice.lib.shared.dto.group.GroupType;
-import org.jbei.ice.lib.shared.dto.group.UserGroup;
-import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
-import org.jbei.ice.lib.shared.dto.user.User;
 import org.jbei.ice.server.InfoToModelFactory;
 import org.jbei.ice.server.ModelToInfoFactory;
 
@@ -110,7 +109,7 @@ public class EntryControllerTest {
         UserGroup user = new UserGroup();
         user.setLabel("public group");
         user.setType(GroupType.PUBLIC);
-        user.getMembers().add(Account.toDTO(account));
+        user.getMembers().add(account.toDataTransferObject());
         user = groupController.createGroup(admin, user);
         Assert.assertNotNull(user);
         Assert.assertTrue(user.getId() > 0);
@@ -118,11 +117,9 @@ public class EntryControllerTest {
         Entry part = new Part();
         part = controller.createEntry(account, part);
         Assert.assertNotNull(part);
-        PermissionsController permissionsController = new PermissionsController();
         Group group = groupController.getGroupById(user.getId());
         HashSet<Group> groups = new HashSet<>();
         groups.add(group);
-        Assert.assertTrue(permissionsController.groupHasReadPermission(groups, part));
     }
 
     @Test
@@ -220,8 +217,7 @@ public class EntryControllerTest {
         data.setCircular(true);
         data.setRecordId(plasmid.getRecordId());
         Entry existing = controller.getByRecordId(account, data.getRecordId());
-        ArrayList<AccessPermission> p = ControllerFactory.getPermissionController()
-                                                         .retrieveSetEntryPermissions(account, plasmid);
+        ArrayList<AccessPermission> p = new PermissionsController().retrieveSetEntryPermissions(plasmid);
         data.setAccessPermissions(p);
 
         Entry entry = InfoToModelFactory.infoToEntry(data, existing);
@@ -306,7 +302,7 @@ public class EntryControllerTest {
         Assert.assertEquals(1, count);
 
         // add account 1 to group
-        GroupController groupController = ControllerFactory.getGroupController();
+        GroupController groupController = new GroupController();
         UserGroup newUserGroup = new UserGroup();
         newUserGroup.setLabel("test Group");
         newUserGroup.setDescription("test Group");
@@ -314,15 +310,15 @@ public class EntryControllerTest {
         newUserGroup = groupController.createGroup(account1, newUserGroup);
         Assert.assertNotNull(newUserGroup);
         Assert.assertTrue(newUserGroup.getId() > 0);
-        ArrayList<User> members = new ArrayList<>();
-        members.add(Account.toDTO(account1));
+        ArrayList<AccountTransfer> members = new ArrayList<>();
+        members.add(account1.toDataTransferObject());
         Assert.assertNotNull(groupController.setGroupMembers(account1, newUserGroup, members));
         AccessPermission accessPermission = new AccessPermission();
         accessPermission.setArticle(AccessPermission.Article.GROUP);
         accessPermission.setArticleId(newUserGroup.getId());
         accessPermission.setType(AccessPermission.Type.READ_ENTRY);
         accessPermission.setTypeId(plasmid.getId());
-        ControllerFactory.getPermissionController().addPermission(account1, accessPermission);
+        new PermissionsController().addPermission(account1, accessPermission);
 
         count = controller.getNumberOfVisibleEntries(account1);
         Assert.assertEquals(1, count);
@@ -338,8 +334,8 @@ public class EntryControllerTest {
         user.setLabel("test");
         user.setDescription("test");
         user.setType(GroupType.PRIVATE);
-        user.getMembers().add(Account.toDTO(account));
-        user = ControllerFactory.getGroupController().createGroup(account, user);
+        user.getMembers().add(account.toDataTransferObject());
+        user = new GroupController().createGroup(account, user);
         Assert.assertNotNull(user);
 
         // when user belongs to a group with permissions for entry account already has
@@ -357,7 +353,7 @@ public class EntryControllerTest {
                 accessPermission.setType(AccessPermission.Type.READ_ENTRY);
                 accessPermission.setTypeId(entry.getId());
                 accessPermission.setArticleId(user.getId());
-                ControllerFactory.getPermissionController().addPermission(account, accessPermission);
+                new PermissionsController().addPermission(account, accessPermission);
             }
         }
 

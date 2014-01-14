@@ -3,24 +3,21 @@ package org.jbei.ice.lib.bulkupload;
 import java.util.ArrayList;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.StatusType;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadInfo;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
-import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
 import junit.framework.Assert;
 import org.junit.After;
@@ -170,7 +167,6 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "plasmid select markers");
         autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.PLASMID);
         Assert.assertNotNull(autoUpdate);
-        ControllerFactory.getAccountController().createSystemAccount();
         BulkUploadInfo info = controller.deleteDraftById(account, autoUpdate.getBulkUploadId());
         Assert.assertNotNull(info);
         Assert.assertEquals(autoUpdate.getBulkUploadId(), info.getId());
@@ -192,8 +188,6 @@ public class BulkUploadControllerTest {
         long bulkId = autoUpdate.getBulkUploadId();
         Assert.assertTrue(entryId > 0);
         Assert.assertTrue(bulkId > 0);
-
-        ControllerFactory.getAccountController().createSystemAccount();
 
         BulkUploadInfo bulkUploadInfo = controller.retrieveById(account, bulkId, 0, 1000);
         Assert.assertNotNull(bulkUploadInfo);
@@ -405,7 +399,6 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
         long id = autoUpdate.getBulkUploadId();
-        ControllerFactory.getAccountController().createSystemAccount();
         controller.renameDraft(account, id, "My draft");
         BulkUploadInfo info = controller.retrieveById(account, id, 0, 1000);
         Assert.assertNotNull(info);

@@ -86,17 +86,6 @@
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
-    <!-- GWT -->
-    <servlet>
-        <servlet-name>gwtIceServlet</servlet-name>
-        <servlet-class>org.jbei.ice.server.RegistryServiceImpl</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>gwtIceServlet</servlet-name>
-        <url-pattern>/gwt_ice/ice</url-pattern>
-    </servlet-mapping>
-
     <servlet>
         <servlet-name>FileUploadServlet</servlet-name>
         <servlet-class>org.jbei.ice.server.servlet.FileUploadServlet</servlet-class>

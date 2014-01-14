@@ -3,11 +3,9 @@ package org.jbei.ice.lib.utils;
 import java.util.List;
 import java.util.Set;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part.AssemblyStandard;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
@@ -59,12 +57,8 @@ public class RawAssemblyUtils implements IAssemblyUtils {
                 oldSequenceFeatures.add(newSequenceFeature);
             }
         }
-        try {
-            SequenceController controller = ControllerFactory.getSequenceController();
-            controller.saveSequence(partSequence);
-        } catch (ControllerException e) {
-            throw new UtilityException(e);
-        }
+
+        DAOFactory.getSequenceDAO().create(partSequence);
         return partSequence;
     }
 

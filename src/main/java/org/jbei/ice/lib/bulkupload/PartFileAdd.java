@@ -3,17 +3,17 @@ package org.jbei.ice.lib.bulkupload;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 
 import org.apache.cxf.helpers.IOUtils;
 
@@ -26,8 +26,8 @@ public class PartFileAdd {
 
     public static void uploadSequenceToEntry(long entryId, String userId, InputStream inputStream, boolean getLinkEntry)
             throws Exception {
-        Account account = ControllerFactory.getAccountController().getByEmail(userId);
-        Entry entry = ControllerFactory.getEntryController().get(account, entryId);
+        Account account = new AccountController().getByEmail(userId);
+        Entry entry = new EntryController().get(account, entryId);
 
         // associate with entry
         if (getLinkEntry) {
@@ -37,32 +37,25 @@ public class PartFileAdd {
         }
 
         String sequenceString = IOUtils.readStringFromStream(inputStream);
-        ControllerFactory.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
+        new SequenceController().parseAndSaveSequence(account, entry, sequenceString);
     }
 
-    public static void uploadSequenceToEntry(long entryId, String userId, IDNASequence dnaSequence,
+    public static void uploadSequenceToEntry(long entryId, String userId, DNASequence dnaSequence,
             String sequenceUser) throws Exception {
-        Account account = ControllerFactory.getAccountController().getByEmail(userId);
-        Entry entry = ControllerFactory.getEntryController().get(account, entryId);
+        Account account = new AccountController().getByEmail(userId);
+        Entry entry = new EntryController().get(account, entryId);
 
-        Sequence sequence;
-
-        try {
-            sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-            sequence.setEntry(entry);
-            if (sequenceUser != null)
-                sequence.setSequenceUser(sequenceUser);
-            ControllerFactory.getSequenceController().save(account, sequence);
-        } catch (PermissionException e) {
-            Logger.error(e);
-            throw new ControllerException("User does not have permissions to save sequence");
-        }
+        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        sequence.setEntry(entry);
+        if (sequenceUser != null)
+            sequence.setSequenceUser(sequenceUser);
+        new SequenceController().save(account, sequence);
     }
 
     public static void uploadAttachmentToEntry(long entryId, String userId, InputStream inputStream, String fileName,
             boolean getLinkEntry) throws Exception {
-        Account account = ControllerFactory.getAccountController().getByEmail(userId);
-        Entry entry = ControllerFactory.getEntryController().get(account, entryId);
+        Account account = new AccountController().getByEmail(userId);
+        Entry entry = new EntryController().get(account, entryId);
 
         // associate with entry
         if (getLinkEntry) {
@@ -71,7 +64,7 @@ public class PartFileAdd {
             entry = (Entry) entry.getLinkedEntries().toArray()[0];
         }
 
-        AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+        AttachmentController attachmentController = new AttachmentController();
         ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
         if (attachments != null && !attachments.isEmpty()) {
             for (Attachment attachment : attachments) {

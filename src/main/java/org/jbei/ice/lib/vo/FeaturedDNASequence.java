@@ -10,7 +10,8 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Zinovii Dmytriv
  */
 @XmlRootElement
-public class FeaturedDNASequence extends SimpleDNASequence {
+public class FeaturedDNASequence extends DNASequence {
+
     private static final long serialVersionUID = 1L;
 
     private List<DNAFeature> features = new LinkedList<>();

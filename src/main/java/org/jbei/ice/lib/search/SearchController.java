@@ -3,26 +3,29 @@ package org.jbei.ice.lib.search;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.account.AccountType;
+import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.SearchDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.search.IndexType;
+import org.jbei.ice.lib.dto.search.SearchBoostField;
+import org.jbei.ice.lib.dto.search.SearchQuery;
+import org.jbei.ice.lib.dto.search.SearchResult;
+import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.executor.IceExecutorService;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.search.IndexType;
-import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
-import org.jbei.ice.lib.shared.dto.search.SearchQuery;
-import org.jbei.ice.lib.shared.dto.search.SearchResult;
-import org.jbei.ice.lib.shared.dto.search.SearchResults;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
@@ -64,7 +67,7 @@ public class SearchController {
             String myUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
             String apiKey;
             try {
-                apiKey = ControllerFactory.getWebController().getApiKey(name.getNamespaceURI());
+                apiKey = new WoRController().getApiKey(name.getNamespaceURI());
                 if (apiKey == null)
                     continue;
             } catch (ControllerException e) {
@@ -108,7 +111,7 @@ public class SearchController {
         String projectName = "";
         String projectURI = "";
         if (isAPISearch) {
-            ConfigurationController configurationController = ControllerFactory.getConfigurationController();
+            ConfigurationController configurationController = new ConfigurationController();
             projectName = configurationController.getPropertyValue(ConfigurationKey.PROJECT_NAME);
             projectURI = configurationController.getPropertyValue(ConfigurationKey.URI_PREFIX);
         }
@@ -132,8 +135,8 @@ public class SearchController {
         // no filter type indicates a term or phrase query
         Iterator<String> iterable;
         HibernateSearch hibernateSearch = HibernateSearch.getInstance();
-        HashMap<String, String> results = ControllerFactory.getPreferencesController().
-                retrieveUserPreferenceList(account, Arrays.asList(SearchBoostField.values()));
+        List<SearchBoostField> boostFields = Arrays.asList(SearchBoostField.values());
+        HashMap<String, String> results = new PreferencesController().retrieveUserPreferenceList(account, boostFields);
         HashMap<String, Float> mapping = new HashMap<>();
         for (Map.Entry<String, String> entry : results.entrySet()) {
             try {

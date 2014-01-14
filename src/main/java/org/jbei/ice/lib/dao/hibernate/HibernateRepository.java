@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dao.IRepository;
-import org.jbei.ice.lib.logging.Logger;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -18,10 +17,10 @@ import org.hibernate.Session;
  * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
  */
 
-public class HibernateRepository<T extends IModel> implements IRepository {
+public abstract class HibernateRepository<T extends IDataModel> implements IRepository<T> {
 
     /**
-     * Start a new Hibernate {@link Session}.
+     * Obtain the current hibernate {@link Session}.
      *
      * @return {@link Session}
      */
@@ -30,82 +29,49 @@ public class HibernateRepository<T extends IModel> implements IRepository {
     }
 
     /**
-     * Delete an {@link IModel} object from the database.
+     * Deletes an {@link IDataModel} from the database.
      *
-     * @param model model to delete
-     * @throws DAOException
+     * @param object model to delete
+     * @throws DAOException on Hibernate Exception or invalid parameter
      */
-    public void delete(T model) throws DAOException {
-        if (model == null) {
-            throw new DAOException("Failed to delete null model!");
-        }
-
+    public void delete(T object) {
         try {
-            currentSession().delete(model);
+            currentSession().delete(object);
         } catch (HibernateException e) {
             throw new DAOException("dbDelete failed!", e);
-        } catch (Exception e) {
-            Logger.error(e);
-            throw new DAOException("Unknown database exception ", e);
         }
-    }
-
-    public T update(T model) throws DAOException {
-        try {
-            currentSession().update(model);
-        } catch (HibernateException e) {
-            Logger.error(e);
-            throw new DAOException("dbDelete failed!", e);
-        } catch (Exception e) {
-            Logger.error(e);
-            throw new DAOException("Unknown database exception ", e);
-        }
-        return model;
     }
 
     /**
-     * Saves or updates an {@link IModel} object into the database.
+     * Updates an existing object in the database
      *
-     * @param model {@link IModel} object to save
-     * @return Object saved object
-     * @throws DAOException in the event of a problem saving or null model parameter
+     * @param object Object to update
+     * @return updated object
+     * @throws DAOException on Hibernate Exception or invalid parameter
      */
-    protected T saveOrUpdate(T model) throws DAOException {
-        if (model == null) {
-            throw new DAOException("Failed to save null model!");
-        }
-
+    public T update(T object) {
         try {
-            currentSession().saveOrUpdate(model);
+            currentSession().update(object);
         } catch (HibernateException e) {
-            throw new DAOException("dbSave failed!", e);
-        } catch (Exception e1) {
-            Logger.error(e1);
-            throw new DAOException("Unknown database exception ", e1);
+            throw new DAOException("dbDelete failed!", e);
         }
-
-        return model;
+        return object;
     }
 
-    /**
-     * Saves or updates an {@link IModel} object into the database.
-     *
-     * @param model {@link IModel} object to save
-     * @return Object saved object
-     * @throws DAOException in the event of a problem saving or null model parameter
-     */
-    public T save(T model) throws DAOException {
-        if (model == null) {
-            throw new DAOException("Failed to save null model!");
-        }
 
+    /**
+     * Creates new object in the database
+     *
+     * @param model {@link IDataModel} object to create
+     * @return Object created {@link IDataModel} object
+     * @throws DAOException in the event of a problem saving or invalid parameter
+     */
+    public T create(T model) {
         try {
             currentSession().save(model);
         } catch (HibernateException e) {
-            Logger.error(e);
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
-            Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         }
 
@@ -113,22 +79,19 @@ public class HibernateRepository<T extends IModel> implements IRepository {
     }
 
     /**
-     * Retrieve an {@link IModel} object from the database by Class and database id.
+     * Retrieve an {@link org.jbei.ice.lib.dao.IDataModel} object from the database by Class and database id.
      *
-     * @param theClass
-     * @param id
+     * @param clazz class type for {@link IDataModel}
+     * @param id    unique synthetic identifier for {@link IDataModel}
      * @return IModel object from the database.
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    protected T get(Class<T> theClass, long id) throws DAOException {
+    protected T get(Class<T> clazz, long id) throws DAOException {
         try {
-            return (T) currentSession().get(theClass, id);
+            return (T) currentSession().get(clazz, id);
         } catch (HibernateException e) {
-            throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and id=" + id, e);
-        } catch (Exception e1) {
-            Logger.error(e1);
-            throw new DAOException("Unknown database exception ", e1);
+            throw new DAOException("Could not retrieve " + clazz.getSimpleName() + " with id \"" + id + "\"", e);
         }
     }
 
@@ -144,16 +107,12 @@ public class HibernateRepository<T extends IModel> implements IRepository {
 
         } catch (HibernateException e) {
             throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and uuid=" + uuid, e);
-        } catch (Exception e1) {
-            // Something really bad happened.
-            Logger.error(e1);
-            throw new DAOException("Unknown database exception ", e1);
         }
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    protected List<T> retrieveAll(Class<T> theClass) throws DAOException {
+    protected List<T> getAll(Class<T> theClass) throws DAOException {
         Session session = currentSession();
 
         try {

@@ -19,8 +19,8 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.lib.vo.IDNASequence;
 
 import org.apache.commons.io.IOUtils;
 
@@ -96,12 +96,12 @@ public class IceGenbankParser extends AbstractParser {
     }
 
     @Override
-    public IDNASequence parse(byte[] bytes) throws InvalidFormatParserException {
+    public DNASequence parse(byte[] bytes) throws InvalidFormatParserException {
         return parse(new String(bytes));
     }
 
     @Override
-    public IDNASequence parse(File file) throws IOException, InvalidFormatParserException {
+    public DNASequence parse(File file) throws IOException, InvalidFormatParserException {
         String s = IOUtils.toString(new FileInputStream(file));
         IceGenbankParser iceGenbankParser = new IceGenbankParser();
         return iceGenbankParser.parse(s);
@@ -109,7 +109,7 @@ public class IceGenbankParser extends AbstractParser {
 
     // TODO parse source feature tag with xdb_ref
     @Override
-    public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
+    public DNASequence parse(String textSequence) throws InvalidFormatParserException {
         FeaturedDNASequence sequence = null;
         try {
             textSequence = cleanSequence(textSequence);

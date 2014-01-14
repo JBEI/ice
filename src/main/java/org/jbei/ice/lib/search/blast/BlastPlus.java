@@ -26,21 +26,21 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PlasmidData;
+import org.jbei.ice.lib.dto.entry.StrainData;
+import org.jbei.ice.lib.dto.search.BlastProgram;
+import org.jbei.ice.lib.dto.search.BlastQuery;
+import org.jbei.ice.lib.dto.search.SearchResult;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
-import org.jbei.ice.lib.shared.dto.entry.StrainData;
-import org.jbei.ice.lib.shared.dto.search.BlastProgram;
-import org.jbei.ice.lib.shared.dto.search.BlastQuery;
-import org.jbei.ice.lib.shared.dto.search.SearchResult;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -151,7 +151,7 @@ public class BlastPlus {
             info.setEntryInfo(view);
 
             try {
-                String summary = ControllerFactory.getEntryController().getEntrySummary(info.getEntryInfo().getId());
+                String summary = new EntryController().getEntrySummary(info.getEntryInfo().getId());
                 info.getEntryInfo().setShortDescription(summary);
             } catch (ControllerException e) {
                 Logger.error(e);
@@ -446,7 +446,7 @@ public class BlastPlus {
      */
     private static void writeBigFastaFile(BufferedWriter writer) throws BlastException {
         Set<Sequence> sequencesList;
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
+        SequenceController sequenceController = new SequenceController();
         try {
             sequencesList = sequenceController.getAllSequences();
         } catch (ControllerException e) {

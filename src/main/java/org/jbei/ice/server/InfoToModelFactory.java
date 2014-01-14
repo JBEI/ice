@@ -9,6 +9,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.ArabidopsisSeedData;
+import org.jbei.ice.lib.dto.entry.CustomField;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.Generation;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PlantType;
+import org.jbei.ice.lib.dto.entry.PlasmidData;
+import org.jbei.ice.lib.dto.entry.StrainData;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
@@ -16,19 +27,8 @@ import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.BioSafetyOption;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
-import org.jbei.ice.lib.shared.dto.entry.CustomField;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.Generation;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.PlantType;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
-import org.jbei.ice.lib.shared.dto.entry.StrainData;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
 
 import org.apache.commons.lang.StringUtils;
 

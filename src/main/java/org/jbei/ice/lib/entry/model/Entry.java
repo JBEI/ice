@@ -10,7 +10,10 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.access.Permission;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.filter.BlastFilterFactory;
 import org.jbei.ice.lib.entry.filter.EntryHasFilterFactory;
@@ -19,8 +22,6 @@ import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.permissions.model.Permission;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
 
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;
@@ -88,7 +89,7 @@ import org.jbei.ice.lib.entry.model.Parameter;
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
 @XmlRootElement
-public class Entry implements IModel {
+public class Entry implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -576,5 +577,10 @@ public class Entry implements IModel {
 
     public void setSequence(Sequence sequence) {
         this.sequence = sequence;
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

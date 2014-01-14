@@ -15,14 +15,31 @@ import java.util.List;
 import java.util.Set;
 import javax.activation.DataHandler;
 
-import org.jbei.ice.client.entry.display.model.SampleStorage;
-import org.jbei.ice.controllers.ApplicationController;
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ApplicationController;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.composers.pigeon.PigeonSBOLv;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.CommentDAO;
+import org.jbei.ice.lib.dao.hibernate.EntryDAO;
+import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.PartSample;
+import org.jbei.ice.lib.dto.StorageInfo;
+import org.jbei.ice.lib.dto.comment.UserComment;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -33,34 +50,20 @@ import org.jbei.ice.lib.entry.sample.SampleCreator;
 import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Comment;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.PartSample;
-import org.jbei.ice.lib.shared.dto.StorageInfo;
-import org.jbei.ice.lib.shared.dto.comment.UserComment;
-import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.shared.dto.entry.AutoCompleteField;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
-import org.jbei.ice.lib.shared.dto.folder.FolderDetails;
-import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.PartAttachment;
 import org.jbei.ice.lib.vo.PartTransfer;
 import org.jbei.ice.server.InfoToModelFactory;
@@ -82,13 +85,15 @@ public class EntryController {
     private PermissionsController permissionsController;
     private AccountController accountController;
     private SequenceController sequenceController;
+    private final EntryAuthorization authorization;
 
     public EntryController() {
-        dao = new EntryDAO();
-        commentDAO = new CommentDAO();
-        permissionsController = ControllerFactory.getPermissionController();
-        accountController = ControllerFactory.getAccountController();
-        sequenceController = ControllerFactory.getSequenceController();
+        dao = DAOFactory.getEntryDAO();
+        commentDAO = DAOFactory.getCommentDAO();
+        permissionsController = new PermissionsController();
+        accountController = new AccountController();
+        sequenceController = new SequenceController();
+        authorization = new EntryAuthorization();
     }
 
     public Set<String> getMatchingAutoCompleteField(AutoCompleteField field, String token, int limit)
@@ -252,7 +257,7 @@ public class EntryController {
             entry.setBioSafetyLevel(0);
 
         try {
-            entry = dao.save(entry);
+            entry = dao.create(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -264,7 +269,7 @@ public class EntryController {
         permissionsController.addPermission(account, access);
 
         // add read permission for all public groups
-        ArrayList<Group> groups = ControllerFactory.getGroupController().getAllPublicGroupsForAccount(account);
+        ArrayList<Group> groups = new GroupController().getAllPublicGroupsForAccount(account);
         for (Group group : groups) {
             AccessPermission accessPermission = new AccessPermission(AccessPermission.Article.GROUP, group.getId(),
                                                                      AccessPermission.Type.READ_ENTRY, entry.getId(),
@@ -295,7 +300,7 @@ public class EntryController {
                     if (linked == null)
                         continue;
 
-                    if (!permissionsController.hasReadPermission(account, linked)) {
+                    if (!authorization.canRead(account.getEmail(), linked)) {
                         continue;
                     }
 
@@ -305,8 +310,8 @@ public class EntryController {
                 }
             }
         }
-        SampleController sampleController = ControllerFactory.getSampleController();
-        StorageController storageController = ControllerFactory.getStorageController();
+        SampleController sampleController = new SampleController();
+        StorageController storageController = new StorageController();
         ArrayList<SampleStorage> sampleMap = part.getSampleStorage();
 
         if (part.getInfo() != null) {
@@ -343,16 +348,8 @@ public class EntryController {
 
                 if (locations == null || locations.isEmpty()) {
                     // create sample, but not location
-                    try {
-                        Logger.info("Creating sample without location");
-                        sampleController.saveSample(account, sample);
-                    } catch (PermissionException e) {
-                        Logger.warn(e.getMessage());
-                        sample = null;
-                    } catch (ControllerException e) {
-                        Logger.error(e);
-                        sample = null;
-                    }
+                    Logger.info("Creating sample without location");
+                    sampleController.saveSample(account, sample);
                 } else {
                     // create sample and location
                     String[] labels = new String[locations.size()];
@@ -378,20 +375,14 @@ public class EntryController {
                 }
 
                 if (sample != null) {
-                    try {
-                        sampleController.saveSample(account, sample);
-                    } catch (ControllerException e) {
-                        Logger.error(e);
-                    } catch (PermissionException ce) {
-                        Logger.warn(ce.getMessage());
-                    }
+                    sampleController.saveSample(account, sample);
                 }
             }
         }
 
         // save attachments
         if (part.getAttachments() != null) {
-            AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+            AttachmentController attachmentController = new AttachmentController();
             String attDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY) + File.separator
                     + AttachmentController.attachmentDirName;
             for (AttachmentInfo attachmentInfo : part.getAttachments()) {
@@ -432,7 +423,7 @@ public class EntryController {
                 attachment.setEntry(strain);
                 attachment.setDescription(partAttachment.getDescription());
                 attachment.setFileName(partAttachment.getName());
-                AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+                AttachmentController attachmentController = new AttachmentController();
                 try {
                     attachmentController.save(account, attachment, handler.getInputStream());
                 } catch (IOException e) {
@@ -446,7 +437,7 @@ public class EntryController {
             String sequenceString;
             try {
                 sequenceString = IOUtils.toString(strainTransfer.getSequence().getAttachmentData().getInputStream());
-                IDNASequence dnaSequence = SequenceController.parse(sequenceString);
+                DNASequence dnaSequence = SequenceController.parse(sequenceString);
                 if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
                     Logger.error("Couldn't parse sequence file!");
                 } else {
@@ -468,7 +459,7 @@ public class EntryController {
                 attachment.setEntry(plasmid);
                 attachment.setDescription(partAttachment.getDescription());
                 attachment.setFileName(partAttachment.getName());
-                AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+                AttachmentController attachmentController = new AttachmentController();
                 try {
                     attachmentController.save(account, attachment, handler.getInputStream());
                 } catch (IOException e) {
@@ -482,7 +473,7 @@ public class EntryController {
             String sequenceString;
             try {
                 sequenceString = IOUtils.toString(plasmidTransfer.getSequence().getAttachmentData().getInputStream());
-                IDNASequence dnaSequence = SequenceController.parse(sequenceString);
+                DNASequence dnaSequence = SequenceController.parse(sequenceString);
                 if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
                     Logger.error("Couldn't parse sequence file!");
                 } else {
@@ -509,23 +500,14 @@ public class EntryController {
      * @throws ControllerException
      */
     public Entry get(Account account, long id) throws ControllerException {
-        Entry entry;
+        Entry entry = dao.get(id);
+        if (entry == null)
+            return null;
 
-        try {
-            entry = dao.get(id);
-            if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
-                throw new ControllerException(account.getEmail() + ": No read permission for entry " + id);
-            }
+        authorization.expectRead(account.getEmail(), entry);
 
-            if (entry == null)
-                return null;
-
-            // get reverse for linked entries
-            entry.getLinkedEntries().addAll(dao.getReverseLinkedEntries(id));
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
+        // get reverse for linked entries
+        entry.getLinkedEntries().addAll(dao.getReverseLinkedEntries(id));
         return entry;
     }
 
@@ -533,19 +515,15 @@ public class EntryController {
         strain.getLinkedEntries().clear();
         if (plasmids != null && !plasmids.isEmpty()) {
             for (String plasmid : plasmids.split(",")) {
-                try {
-                    Entry linked = dao.getByPartNumber(plasmid.trim());
-                    if (linked == null)
-                        continue;
+                Entry linked = dao.getByPartNumber(plasmid.trim());
+                if (linked == null)
+                    continue;
 
-                    if (!permissionsController.hasReadPermission(account, linked)) {
-                        continue;
-                    }
-
-                    strain.getLinkedEntries().add(linked);
-                } catch (DAOException | ControllerException e) {
-                    Logger.error(e);
+                if (!authorization.canRead(account.getEmail(), linked)) {
+                    continue;
                 }
+
+                strain.getLinkedEntries().add(linked);
             }
 
             try {
@@ -562,24 +540,13 @@ public class EntryController {
      * @param recordId universally unique identifier that was assigned to entry on create
      * @return entry retrieved from the database.
      * @throws ControllerException
-     * @throws PermissionException
      */
-    public Entry getByRecordId(Account account, String recordId) throws ControllerException, PermissionException {
-        Entry entry;
-
-        try {
-            entry = dao.getByRecordId(recordId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
+    public Entry getByRecordId(Account account, String recordId) throws ControllerException {
+        Entry entry = dao.getByRecordId(recordId);
         if (entry == null)
             return null;
 
-        if (!permissionsController.hasReadPermission(account, entry)) {
-            throw new PermissionException("No read permission for entry!");
-        }
-
+        authorization.expectRead(account.getEmail(), entry);
         return entry;
     }
 
@@ -594,9 +561,7 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        if (!permissionsController.hasReadPermission(account, entry)) {
-            throw new ControllerException("No read permission for part with recordId " + recordId);
-        }
+        authorization.expectRead(account.getEmail(), entry);
 
         PartData info = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
@@ -707,10 +672,7 @@ public class EntryController {
         if (entry == null)
             return null;
 
-        if (!permissionsController.hasReadPermission(account, entry)) {
-            throw new PermissionException("No read permission for entry!");
-        }
-
+        authorization.expectRead(account.getEmail(), entry);
         PartData info = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
         info.setHasSequence(hasSequence);
@@ -730,19 +692,11 @@ public class EntryController {
      * @throws PermissionException
      */
     public PartData getByUniqueName(Account account, String name) throws ControllerException, PermissionException {
-        Entry entry;
-        try {
-            entry = dao.getByUniqueName(name);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
+        Entry entry = dao.getByUniqueName(name);
         if (entry == null)
             return null;
 
-        if (!permissionsController.hasReadPermission(account, entry)) {
-            throw new PermissionException("No read permission for entry!");
-        }
+        authorization.expectRead(account.getEmail(), entry);
 
         PartData info = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceController.hasSequence(entry.getId());
@@ -763,7 +717,7 @@ public class EntryController {
             } else {
                 // retrieve groups for account and filter by permission
                 Set<Group> accountGroups = new HashSet<>(account.getGroups());
-                GroupController controller = ControllerFactory.getGroupController();
+                GroupController controller = new GroupController();
                 Group everybodyGroup = controller.createOrRetrievePublicGroup();
                 accountGroups.add(everybodyGroup);
                 results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit);
@@ -771,7 +725,7 @@ public class EntryController {
 
             for (Entry entry : results) {
                 PartData info = ModelToInfoFactory.createTableViewData(entry, false);
-                info.setCanEdit(ControllerFactory.getPermissionController().hasWritePermission(account, entry));
+                info.setCanEdit(authorization.canWrite(account.getEmail(), entry));
                 details.getEntries().add(info);
             }
         } catch (DAOException de) {
@@ -798,7 +752,7 @@ public class EntryController {
         }
 
         Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        GroupController controller = ControllerFactory.getGroupController();
+        GroupController controller = new GroupController();
         Group everybodyGroup = controller.createOrRetrievePublicGroup();
         accountGroups.add(everybodyGroup);
         try {
@@ -810,82 +764,62 @@ public class EntryController {
 
     public List<Entry> retrieveOwnerEntries(Account account, String ownerEmail,
             ColumnField sort, boolean asc, int start, int limit) throws ControllerException {
-        try {
-            if (accountController.isAdministrator(account) || account.getEmail().equals(ownerEmail)) {
-                return dao.retrieveOwnerEntries(ownerEmail, sort, asc, start, limit);
-            }
-
-            Set<Group> accountGroups = new HashSet<>(account.getGroups());
-            GroupController controller = ControllerFactory.getGroupController();
-            Group everybodyGroup = controller.createOrRetrievePublicGroup();
-            accountGroups.add(everybodyGroup);
-            return dao.retrieveUserEntries(account, ownerEmail, accountGroups, sort, asc, start, limit);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+        if (accountController.isAdministrator(account) || account.getEmail().equals(ownerEmail)) {
+            return dao.retrieveOwnerEntries(ownerEmail, sort, asc, start, limit);
         }
+
+        Set<Group> accountGroups = new HashSet<>(account.getGroups());
+        GroupController controller = new GroupController();
+        Group everybodyGroup = controller.createOrRetrievePublicGroup();
+        accountGroups.add(everybodyGroup);
+        return dao.retrieveUserEntries(account, ownerEmail, accountGroups, sort, asc, start, limit);
     }
 
     public long getNumberOfOwnerEntries(Account account, String ownerEmail) throws ControllerException {
-        try {
-            if (accountController.isAdministrator(account) || account.getEmail().equals(ownerEmail)) {
-                return dao.ownerEntryCount(ownerEmail);
-            }
-
-            Set<Group> accountGroups = new HashSet<>(account.getGroups());
-            GroupController controller = ControllerFactory.getGroupController();
-            Group everybodyGroup = controller.createOrRetrievePublicGroup();
-            accountGroups.add(everybodyGroup);
-            return dao.ownerEntryCount(account, ownerEmail, accountGroups);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+        if (accountController.isAdministrator(account) || account.getEmail().equals(ownerEmail)) {
+            return dao.ownerEntryCount(ownerEmail);
         }
+
+        Set<Group> accountGroups = new HashSet<>(account.getGroups());
+        GroupController controller = new GroupController();
+        Group everybodyGroup = controller.createOrRetrievePublicGroup();
+        accountGroups.add(everybodyGroup);
+        return dao.ownerEntryCount(account, ownerEmail, accountGroups);
     }
 
     public long updatePart(Account account, PartData part) throws ControllerException {
-        Entry existing = get(account, part.getId());
-        if (!permissionsController.hasWritePermission(account, existing))
-            throw new ControllerException(account.getEmail() + ": no permission to update " + part.getPartId());
+        Entry existing = dao.get(part.getId());
+        authorization.expectWrite(account.getEmail(), existing);
 
         Entry entry = InfoToModelFactory.infoToEntry(part, existing);
-        try {
-            entry.getLinkedEntries().clear();
-            if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
-                for (PartData data : part.getLinkedParts()) {
-                    Entry linked = dao.getByPartNumber(data.getPartId());
-                    if (linked == null)
-                        continue;
+        entry.getLinkedEntries().clear();
+        if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
+            for (PartData data : part.getLinkedParts()) {
+                Entry linked = dao.getByPartNumber(data.getPartId());
+                if (linked == null)
+                    continue;
 
-                    if (!permissionsController.hasReadPermission(account, linked)) {
-                        continue;
-                    }
-
-                    entry.getLinkedEntries().add(linked);
+                if (!authorization.canRead(account.getEmail(), linked)) {
+                    continue;
                 }
+
+                entry.getLinkedEntries().add(linked);
             }
-        } catch (DAOException e) {
-            Logger.error(e);
         }
 
-        try {
-            entry.setModificationTime(Calendar.getInstance().getTime());
-            entry.setVisibility(Visibility.OK.getValue());
-            dao.update(entry);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        entry.setModificationTime(Calendar.getInstance().getTime());
+        entry.setVisibility(Visibility.OK.getValue());
+        dao.update(entry);
 
         return entry.getId();
     }
 
     public void update(Account account, Entry entry) throws ControllerException, PermissionException {
         if (entry == null) {
-            throw new ControllerException("Failed to update null entry!");
+            return;
         }
 
-        if (!permissionsController.hasWritePermission(account, entry)) {
-            throw new PermissionException("No write permission for entry!");
-        }
-
+        authorization.expectWrite(account.getEmail(), entry);
         boolean scheduleRebuild = sequenceController.hasSequence(entry.getId());
 
         try {
@@ -919,7 +853,7 @@ public class EntryController {
         }
         boolean schedule = sequenceController.hasSequence(entry.getId());
 
-        FolderController folderController = ControllerFactory.getFolderController();
+        FolderController folderController = new FolderController();
         ArrayList<FolderDetails> folderList = new ArrayList<>();
         List<Folder> folders = folderController.getFoldersByEntry(entry);
         ArrayList<Long> entryIds = new ArrayList<>();
@@ -954,13 +888,13 @@ public class EntryController {
 
         try {
             if (schedule) {
-                SequenceController controller = ControllerFactory.getSequenceController();
+                SequenceController controller = new SequenceController();
                 Sequence sequence = controller.getByEntry(entry);
                 if (sequence != null) {
                     controller.delete(account, sequence);
                 }
             }
-            permissionsController.clearEntryPermissions(account, entry);
+            DAOFactory.getPermissionDAO().clearPermissions(entry);
             dao.fullDelete(entry);
             if (schedule) {
                 ApplicationController.scheduleBlastIndexRebuildTask(true);
@@ -982,9 +916,7 @@ public class EntryController {
             return;
         }
 
-        if (!permissionsController.hasWritePermission(account, entry)) {
-            throw new ControllerException(account.getEmail() + ": not allowed to delete entry " + entry.getId());
-        }
+        authorization.expectWrite(account.getEmail(), entry);
 
         if (entry.getVisibility() == Visibility.DELETED.getValue()) {
             fullDelete(account, entry, scheduleIndexRebuild);
@@ -1018,15 +950,8 @@ public class EntryController {
     List<Long> filterEntriesByPermission(Account account, List<Long> ids) throws ControllerException {
         ArrayList<Long> result = new ArrayList<>();
         for (Long id : ids) {
-            Entry entry;
-            try {
-                entry = dao.get(id);
-            } catch (DAOException e) {
-                Logger.error(e);
-                continue;
-            }
-
-            if (permissionsController.hasReadPermission(account, entry)) {
+            Entry entry = dao.get(id);
+            if (authorization.canRead(account.getEmail(), entry)) {
                 result.add(id);
             }
         }
@@ -1046,12 +971,8 @@ public class EntryController {
     public UserComment addCommentToEntry(Account account, UserComment userComment) throws ControllerException {
         Entry entry = get(account, userComment.getEntryId());
         Comment comment = new Comment(entry, account, userComment.getMessage());
-        try {
-            comment = commentDAO.save(comment);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-        return Comment.toDTO(comment);
+        comment = commentDAO.create(comment);
+        return comment.toDataTransferObject();
     }
 
     public PartData retrieveEntryTipDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
@@ -1069,15 +990,8 @@ public class EntryController {
     }
 
     public PartData retrieveEntryTipDetails(Account account, long entryId) throws ControllerException {
-        Entry entry;
-
-        try {
-            entry = dao.get(entryId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        if (!permissionsController.hasReadPermission(account, entry))
+        Entry entry = dao.get(entryId);
+        if (!authorization.canRead(account.getEmail(), entry))
             return null;
 
         return ModelToInfoFactory.createTipView(entry);
@@ -1093,8 +1007,8 @@ public class EntryController {
 
             if (hasSequence && info.getSbolVisualURL() != null) {
                 // retrieve cached pigeon image or generate and cache
-                String tmpDir = ControllerFactory.getConfigurationController()
-                                                 .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+                String tmpDir = new ConfigurationController()
+                        .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
 
                 String hash = Utils.generateUUID();
                 URI uri = PigeonSBOLv.postToPigeon(info.getSbolVisualURL());
@@ -1117,19 +1031,15 @@ public class EntryController {
     }
 
     public void updatePartStatus(Account account, String recordId, String newStatus) throws ControllerException {
-        try {
-            Entry entry = getByRecordId(account, recordId);
-            entry.setStatus(newStatus);
-            dao.update(entry);
+        Entry entry = getByRecordId(account, recordId);
+        entry.setStatus(newStatus);
+        dao.update(entry);
 
-            if (entry.getLinkedEntries() != null) {
-                for (Entry linkedEntry : entry.getLinkedEntries()) {
-                    linkedEntry.setStatus(newStatus);
-                    dao.update(entry);
-                }
+        if (entry.getLinkedEntries() != null) {
+            for (Entry linkedEntry : entry.getLinkedEntries()) {
+                linkedEntry.setStatus(newStatus);
+                dao.update(entry);
             }
-        } catch (DAOException | PermissionException e) {
-            throw new ControllerException(e);
         }
     }
 
@@ -1146,13 +1056,13 @@ public class EntryController {
 
         // attachments
         try {
-            ArrayList<Attachment> attachments = ControllerFactory.getAttachmentController().getByEntry(account, entry);
+            ArrayList<Attachment> attachments = new AttachmentController().getByEntry(account, entry);
             ArrayList<AttachmentInfo> attachmentInfos = ModelToInfoFactory.getAttachments(attachments);
             partData.setAttachments(attachmentInfos);
             partData.setHasAttachment(!attachmentInfos.isEmpty());
 
             // samples
-            ArrayList<Sample> samples = ControllerFactory.getSampleController().getSamples(entry);
+            ArrayList<Sample> samples = new SampleController().getSamples(entry);
             ArrayList<SampleStorage> sampleStorages = new ArrayList<>();
             if (samples != null && !samples.isEmpty()) {
                 for (Sample sample : samples) {
@@ -1198,27 +1108,23 @@ public class EntryController {
         // comments
         ArrayList<Comment> comments = commentDAO.retrieveComments(entry);
         for (Comment comment : comments) {
-            partData.getComments().add(Comment.toDTO(comment));
+            partData.getComments().add(comment.toDataTransferObject());
         }
 
         // permissions
-        partData.setCanEdit(permissionsController.hasWritePermission(account, entry));
+        partData.setCanEdit(authorization.canWrite(account.getEmail(), entry));
 
         // viewing permissions is restricted to users who have write access
         if (partData.isCanEdit()) {
-            try {
-                ArrayList<AccessPermission> accessPermissions =
-                        permissionsController.retrieveSetEntryPermissions(account, entry);
-                partData.setAccessPermissions(accessPermissions);
-                partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
-            } catch (PermissionException e) {
-                Logger.error(e);
-            }
+            ArrayList<AccessPermission> accessPermissions =
+                    permissionsController.retrieveSetEntryPermissions(entry);
+            partData.setAccessPermissions(accessPermissions);
+            partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
         }
 
         // retrieve cached pigeon image or generate and cache
-        String tmpDir = ControllerFactory.getConfigurationController()
-                                         .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+        String tmpDir = new ConfigurationController()
+                .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         if (hasSequence) {
             Sequence sequence = sequenceController.getByEntry(entry);
             String hash = sequence.getFwdHash();
@@ -1250,12 +1156,11 @@ public class EntryController {
             }
 
             Comment comment = new Comment(entry, account, msg);
-            comment = commentDAO.save(comment);
+            comment = commentDAO.create(comment);
 
-            String email = ControllerFactory.getConfigurationController().
-                    getPropertyValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
+            String email = new ConfigurationController().getPropertyValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
             if (email != null && !email.isEmpty()) {
-                String site = ControllerFactory.getConfigurationController().getPropertyValue(
+                String site = new ConfigurationController().getPropertyValue(
                         ConfigurationKey.URI_PREFIX);
                 StringBuilder body = new StringBuilder();
                 body.append("A problem notification was sent by ")
@@ -1271,33 +1176,10 @@ public class EntryController {
                     Logger.warn("Could not send email for problem notification");
             }
 
-            return Comment.toDTO(comment);
-        } catch (DAOException | ControllerException e) {
+            return comment.toDataTransferObject();
+        } catch (ControllerException e) {
             Logger.error(e);
         }
         return null;
-    }
-
-    public void upgradeTo3Point4() throws ControllerException {
-        try {
-            Logger.info("Upgrading entries. This may take several minutes...please wait");
-            String prefix = ControllerFactory.getConfigurationController()
-                                             .getConfiguration(ConfigurationKey.PART_NUMBER_PREFIX).getValue();
-            dao.upgradeNamesAndPartNumbers(prefix);
-            dao.upgradeLinks();
-            Logger.info("Entry upgrade complete");
-        } catch (DAOException e) {
-            Logger.error(e);
-        }
-    }
-
-    public void upgradeTo3Point4Point5() throws ControllerException {
-        try {
-            Logger.info("Upgrading funding sources. Please wait....");
-            dao.upgradeFundingSources();
-            Logger.info("Funding Source upgrade complete");
-        } catch (DAOException e) {
-            Logger.error(e);
-        }
     }
 }

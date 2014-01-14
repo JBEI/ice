@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
 
 import org.apache.commons.lang.StringUtils;

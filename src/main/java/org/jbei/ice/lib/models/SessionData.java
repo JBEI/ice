@@ -11,7 +11,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -21,7 +22,7 @@ import org.jbei.ice.lib.utils.Utils;
  */
 @Entity
 @Table(name = "session_data")
-public class SessionData implements IModel {
+public class SessionData implements IDataModel {
 
     private static final long serialVersionUID = 1L;
     private static Long DEFAULT_EXPIRATION = 259200000L; // 3 days = 259200000 ms
@@ -93,5 +94,10 @@ public class SessionData implements IModel {
     private static String generateSessionKey(String secret) {
         String temp = java.util.UUID.randomUUID().toString() + secret + ";" + Calendar.getInstance().getTimeInMillis();
         return Utils.encryptSHA(temp);
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

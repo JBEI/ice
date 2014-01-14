@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dao.hibernate;
 
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.common.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -19,7 +19,8 @@ public class HibernateHelper {
     private static SessionFactory sessionFactory;
 
     // singleton
-    private HibernateHelper() {}
+    private HibernateHelper() {
+    }
 
     /**
      * Open a new {@link Session} from the sessionFactory.

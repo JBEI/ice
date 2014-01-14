@@ -8,8 +8,8 @@ import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
 import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.lib.vo.IDNASequence;
 
 import org.junit.Test;
 
@@ -60,7 +60,7 @@ public class IceGenbankParserTest {
     @Test
     public void testSynLocusCase() throws FileNotFoundException, IOException,
             InvalidFormatParserException {
-        IDNASequence parsed = tryParsing("SYNPUC19V.gb");
+        DNASequence parsed = tryParsing("SYNPUC19V.gb");
         parsed.getSequence();
     }
 

@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.parsers;
 
-import org.jbei.ice.lib.vo.IDNASequence;
-import org.jbei.ice.lib.vo.SimpleDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 
 import org.biojava.bio.program.abi.ABITrace;
 import org.biojava.bio.symbol.SymbolList;
@@ -12,6 +11,7 @@ import org.biojava.bio.symbol.SymbolList;
  * @author Zinovii Dmytriv, Timothy Ham
  */
 public class ABIParser extends AbstractParser {
+
     private static final String ABI_PARSER = "ABI";
 
     @Override
@@ -26,26 +26,24 @@ public class ABIParser extends AbstractParser {
     }
 
     @Override
-    public IDNASequence parse(byte[] bytes) throws InvalidFormatParserException {
-        SimpleDNASequence simpleDNASequence = null;
+    public DNASequence parse(byte[] bytes) throws InvalidFormatParserException {
+        DNASequence DNASequence = null;
 
         try {
             ABITrace abiTrace = new ABITrace(bytes);
-
             SymbolList symbolList = abiTrace.getSequence();
-
             if (symbolList != null) {
-                simpleDNASequence = new SimpleDNASequence(symbolList.seqString().toLowerCase());
+                DNASequence = new DNASequence(symbolList.seqString().toLowerCase());
             }
         } catch (Exception e) {
             throw new InvalidFormatParserException(e);
         }
 
-        return simpleDNASequence;
+        return DNASequence;
     }
 
     @Override
-    public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
+    public DNASequence parse(String textSequence) throws InvalidFormatParserException {
         throw new NoSuchMethodError("ABI file can't be presented as string!");
     }
 }

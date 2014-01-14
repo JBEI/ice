@@ -16,24 +16,25 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.bulkupload.BulkUploadAutoUpdate;
+import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileItemIterator;
@@ -86,7 +87,7 @@ public class FileUploadServlet extends HttpServlet {
             if (account == null) {
                 if (!AccountController.isAuthenticated(sid))
                     return;
-                AccountController controller = ControllerFactory.getAccountController();
+                AccountController controller = new AccountController();
                 account = controller.getAccountBySessionKey(sid);
                 if (account == null)
                     return;
@@ -191,7 +192,7 @@ public class FileUploadServlet extends HttpServlet {
 
         EntryType type = EntryType.valueOf(entryType);
         EntryAddType addType = EntryAddType.valueOf(entryAddType);
-        EntryController entryController = ControllerFactory.getEntryController();
+        EntryController entryController = new EntryController();
 
         Entry entry;
         try {
@@ -206,7 +207,7 @@ public class FileUploadServlet extends HttpServlet {
             }
 
             // associate with entry
-            AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+            AttachmentController attachmentController = new AttachmentController();
 
             boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
                     && type == EntryType.PLASMID);
@@ -216,7 +217,7 @@ public class FileUploadServlet extends HttpServlet {
 
             if (isSequence) {
                 String sequenceString = FileUtils.readFileToString(file);
-                ControllerFactory.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
+                new SequenceController().parseAndSaveSequence(account, entry, sequenceString);
                 return saveName;
             } else {
                 try (FileInputStream inputStream = new FileInputStream(file)) {
@@ -256,11 +257,10 @@ public class FileUploadServlet extends HttpServlet {
         BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(type);
         update.setBulkUploadId(bid);
         try {
-            update = ControllerFactory.getBulkUploadController().autoUpdateBulkUpload(account.getEmail(), update,
-                                                                                      addType);
+            update = new BulkUploadController().autoUpdateBulkUpload(account.getEmail(), update, addType);
             boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
                     && type == EntryType.PLASMID);
-            Entry entry = ControllerFactory.getEntryController().get(account, update.getEntryId());
+            Entry entry = new EntryController().get(account, update.getEntryId());
 
             if (isStrainWithPlasmidPlasmid && !entry.getLinkedEntries().isEmpty()) {
                 entry = (Entry) entry.getLinkedEntries().toArray()[0];
@@ -268,13 +268,13 @@ public class FileUploadServlet extends HttpServlet {
 
             if (isSequence) {
                 String sequenceString = FileUtils.readFileToString(file);
-                ControllerFactory.getSequenceController().parseAndSaveSequence(account, entry, sequenceString);
+                new SequenceController().parseAndSaveSequence(account, entry, sequenceString);
                 return Long.toString(update.getBulkUploadId()) + ","
                         + Long.toString(update.getEntryId()) + "," + saveName;
             }
 
             // if attachment
-            AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+            AttachmentController attachmentController = new AttachmentController();
             FileInputStream inputStream = new FileInputStream(file);
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
             if (attachments != null && !attachments.isEmpty()) {
@@ -306,7 +306,7 @@ public class FileUploadServlet extends HttpServlet {
     // TODO : this needs to go to manager/controller
     private String uploadSequenceTraceFile(File file, String entryId, Account account, String uploadFileName)
             throws IOException {
-        EntryController controller = ControllerFactory.getEntryController();
+        EntryController controller = new EntryController();
         Entry entry = null;
         try {
             entry = controller.get(account, Long.decode(entryId));
@@ -317,8 +317,8 @@ public class FileUploadServlet extends HttpServlet {
         if (entry == null)
             return "Unknown entry (" + entryId + "). Upload aborted";
 
-        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
-        IDNASequence dnaSequence;
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        DNASequence dnaSequence;
 
         ArrayList<ByteHolder> byteHolders = new ArrayList<>();
         FileInputStream inputStream = new FileInputStream(file);
@@ -386,7 +386,7 @@ public class FileUploadServlet extends HttpServlet {
 
     // TODO : check for path information in filename. safari includes it
     private String uploadAttachment(Account account, File file, String entryId, String desc, String filename) {
-        EntryController controller = ControllerFactory.getEntryController();
+        EntryController controller = new EntryController();
         Entry entry;
         try {
             entry = controller.get(account, Long.decode(entryId));
@@ -396,7 +396,7 @@ public class FileUploadServlet extends HttpServlet {
                 attachment.setEntry(entry);
                 attachment.setDescription(desc);
                 attachment.setFileName(filename);
-                AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+                AttachmentController attachmentController = new AttachmentController();
                 Attachment saved = attachmentController.save(account, attachment, new FileInputStream(file));
                 if (saved != null)
                     return saved.getFileId() + "," + filename;

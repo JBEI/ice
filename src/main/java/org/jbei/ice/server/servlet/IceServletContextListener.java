@@ -7,10 +7,10 @@ import java.util.Enumeration;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.ApplicationController;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.executor.IceExecutorService;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 import org.hibernate.SessionFactory;

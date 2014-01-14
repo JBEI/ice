@@ -8,7 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
  * Place to store installation specific values. For example, uuids for default site install groups.
@@ -18,7 +19,7 @@ import org.jbei.ice.lib.dao.IModel;
 @Entity
 @Table(name = "configuration")
 @SequenceGenerator(name = "sequence", sequenceName = "configuration_id_seq", allocationSize = 1)
-public class Configuration implements IModel {
+public class Configuration implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -62,5 +63,10 @@ public class Configuration implements IModel {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

@@ -2,12 +2,12 @@ package org.jbei.ice.lib.search.filter;
 
 import java.util.HashSet;
 
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 /**
  * @author Hector Plahar

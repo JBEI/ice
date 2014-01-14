@@ -1,12 +1,13 @@
 package org.jbei.ice.lib.dao;
 
 /**
- * Exception class for DAO objects.
+ * Unchecked exception for DAO operations.
  *
- * @author Zinovii Dmytriv
+ * @author Hector Plahar
  */
-public class DAOException extends Exception {
-    private static final long serialVersionUID = 8785165201632857140L;
+public class DAOException extends RuntimeException {
+
+    private static final long serialVersionUID = 1L;
 
     public DAOException() {
         super();

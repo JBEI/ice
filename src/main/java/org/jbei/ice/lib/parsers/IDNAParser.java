@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 
 /**
- * An object that parser sequences and generates an annotated {@link IDNASequence} object.
+ * An object that parser sequences and generates an annotated {@link DNASequence} object.
  *
  * @author Zinovii Dmytriv, Timothy Ham
  */
@@ -27,16 +27,16 @@ public interface IDNAParser {
     Boolean hasErrors();
 
     /**
-     * Parse the given bytes to {@link IDNASequence} annotated sequence.
+     * Parse the given bytes to {@link DNASequence} annotated sequence.
      *
      * @param bytes
      * @return Annotated sequence.
      * @throws InvalidFormatParserException
      */
-    IDNASequence parse(byte[] bytes) throws InvalidFormatParserException;
+    DNASequence parse(byte[] bytes) throws InvalidFormatParserException;
 
     /**
-     * Parse the given file to {@link IDNASequence} annotated sequence.
+     * Parse the given file to {@link DNASequence} annotated sequence.
      *
      * @param file File to parse.
      * @return Annotated sequence.
@@ -44,14 +44,14 @@ public interface IDNAParser {
      * @throws IOException
      * @throws InvalidFormatParserException
      */
-    IDNASequence parse(File file) throws FileNotFoundException, IOException, InvalidFormatParserException;
+    DNASequence parse(File file) throws FileNotFoundException, IOException, InvalidFormatParserException;
 
     /**
-     * Parse the given string to {@link IDNASequence} annotated sequence.
+     * Parse the given string to {@link DNASequence} annotated sequence.
      *
      * @param textSequence
-     * @return parsed IDNASequence.
+     * @return parsed DNASequence.
      * @throws InvalidFormatParserException
      */
-    IDNASequence parse(String textSequence) throws InvalidFormatParserException;
+    DNASequence parse(String textSequence) throws InvalidFormatParserException;
 }

@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.parsers;
 
-import org.jbei.ice.lib.vo.IDNASequence;
-import org.jbei.ice.lib.vo.SimpleDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 
 import org.biojava.bio.BioException;
 import org.biojava.bio.seq.DNATools;
@@ -25,7 +24,7 @@ public class PlainParser extends AbstractParser {
     }
 
     @Override
-    public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
+    public DNASequence parse(String textSequence) throws InvalidFormatParserException {
         textSequence = cleanSequence(textSequence);
 
         SymbolList sl = null;
@@ -37,11 +36,11 @@ public class PlainParser extends AbstractParser {
         } catch (BioException e) {
             throw new InvalidFormatParserException("Couldn't parse Plain sequence!", e);
         }
-        return new SimpleDNASequence(sl.seqString());
+        return new DNASequence(sl.seqString());
     }
 
     @Override
-    public IDNASequence parse(byte[] bytes) throws InvalidFormatParserException {
+    public DNASequence parse(byte[] bytes) throws InvalidFormatParserException {
         return null;
     }
 

@@ -2,7 +2,8 @@ package org.jbei.ice.lib.account.model;
 
 import javax.persistence.*;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 import org.hibernate.annotations.Type;
 
@@ -14,7 +15,8 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "account_preferences")
 @SequenceGenerator(name = "sequence", sequenceName = "account_preferences_id_seq", allocationSize = 1)
-public class AccountPreferences implements IModel {
+
+public class AccountPreferences implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -78,4 +80,8 @@ public class AccountPreferences implements IModel {
         this.account = account;
     }
 
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

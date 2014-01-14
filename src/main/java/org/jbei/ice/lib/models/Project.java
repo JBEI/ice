@@ -4,7 +4,8 @@ import java.util.Date;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 import org.hibernate.annotations.Type;
 
@@ -16,7 +17,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "projects")
 @SequenceGenerator(name = "sequence", sequenceName = "projects_id_seq", allocationSize = 1)
-public class Project implements IModel {
+public class Project implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -141,5 +142,10 @@ public class Project implements IModel {
 
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

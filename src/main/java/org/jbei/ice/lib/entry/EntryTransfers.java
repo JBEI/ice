@@ -10,27 +10,30 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
-import org.jbei.ice.controllers.ApplicationController;
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ApplicationController;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.EntryDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
+import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.PartAttachment;
 import org.jbei.ice.lib.vo.SequencePartTransfer;
 import org.jbei.ice.lib.vo.TraceSequenceAttachment;
@@ -53,7 +56,7 @@ public class EntryTransfers {
     private final EntryDAO dao;
 
     public EntryTransfers() {
-        this.dao = new EntryDAO();
+        this.dao = DAOFactory.getEntryDAO();
     }
 
     public void transferEntries(Account account, ArrayList<Long> ids, ArrayList<String> sites)
@@ -64,8 +67,8 @@ public class EntryTransfers {
         Logger.info(account.getEmail() + ": requesting transfer of " + ids.size() + " entries");
 
         // retrieve entries
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
-        AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+        SequenceController sequenceController = new SequenceController();
+        AttachmentController attachmentController = new AttachmentController();
         ArrayList<SequencePartTransfer> parts = new ArrayList<>();
 
         for (long id : ids) {
@@ -100,7 +103,7 @@ public class EntryTransfers {
                     }
 
                     // trace sequences
-                    SequenceAnalysisController controller = ControllerFactory.getSequenceAnalysisController();
+                    SequenceAnalysisController controller = new SequenceAnalysisController();
                     List<TraceSequence> traceSequences = controller.getTraceSequences(entry);
                     if (traceSequences != null) {
                         ArrayList<TraceSequenceAttachment> attachments = new ArrayList<>();
@@ -130,7 +133,7 @@ public class EntryTransfers {
             }
         }
 
-        String siteUrl = ControllerFactory.getConfigurationController().getPropertyValue(ConfigurationKey.URI_PREFIX);
+        String siteUrl = new ConfigurationController().getPropertyValue(ConfigurationKey.URI_PREFIX);
 
         for (String url : sites) {
             IRegistryAPI api = RegistryAPIServiceClient.getInstance().getAPIPortForURL(url);
@@ -140,7 +143,7 @@ public class EntryTransfers {
             }
 
             try {
-                String apiKey = ControllerFactory.getWebController().getApiKey(url);
+                String apiKey = new WoRController().getApiKey(url);
                 api.uploadPartsWithSequences(siteUrl, apiKey, parts);
             } catch (ServiceException e) {
                 Logger.error(e);
@@ -156,7 +159,7 @@ public class EntryTransfers {
             for (SequencePartTransfer part : parts) {
                 Entry entry = InfoToModelFactory.infoToEntry(part.getPart());
                 entry.setVisibility(Visibility.TRANSFERRED.getValue());
-                entry.setPartNumber(ControllerFactory.getEntryController().getNextPartNumber());
+                entry.setPartNumber(new EntryController().getNextPartNumber());
 
                 // always assign new record id to uploaded part and maintain any existing as legacy version
                 String newRecordId = Utils.generateUUID();
@@ -168,12 +171,7 @@ public class EntryTransfers {
                     entry.setRecordId(newRecordId);
                 }
 
-                try {
-                    entry = dao.save(entry);
-                } catch (DAOException e) {
-                    Logger.error(e);
-                    continue;
-                }
+                entry = dao.create(entry);
 
                 // check attachments
                 if (part.getAttachments() != null && !part.getAttachments().isEmpty()) {
@@ -183,7 +181,7 @@ public class EntryTransfers {
                         attachment.setEntry(entry);
                         attachment.setDescription(partAttachment.getDescription());
                         attachment.setFileName(partAttachment.getName());
-                        AttachmentController attachmentController = ControllerFactory.getAttachmentController();
+                        AttachmentController attachmentController = new AttachmentController();
                         try {
                             attachmentController.save(null, attachment, handler.getInputStream());
                         } catch (IOException e) {
@@ -197,18 +195,18 @@ public class EntryTransfers {
                 if (featuredDNASequence != null) {
                     Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
                     sequence.setEntry(entry);
-                    ControllerFactory.getSequenceController().saveSequence(sequence);
+                    new SequenceController().saveSequence(sequence);
                     ApplicationController.scheduleBlastIndexRebuildTask(true);
                 }
 
                 // check trace sequences
-                SequenceAnalysisController analysisController = ControllerFactory.getSequenceAnalysisController();
+                SequenceAnalysisController analysisController = new SequenceAnalysisController();
                 ArrayList<TraceSequenceAttachment> traceSequences = part.getTraceSequences();
                 if (traceSequences != null) {
                     for (TraceSequenceAttachment traceSequence : traceSequences) {
                         try {
                             byte[] bytes = IOUtils.toByteArray(traceSequence.getData().getInputStream());
-                            IDNASequence dnaSequence = analysisController.parse(bytes);
+                            DNASequence dnaSequence = analysisController.parse(bytes);
                             if (dnaSequence == null || dnaSequence.getSequence() == null) {
                                 Logger.error("Could not parse trace sequence file " + traceSequence.getFilename());
                                 continue;

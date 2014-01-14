@@ -8,37 +8,37 @@ import java.util.List;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.authentication.InvalidCredentialsException;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.StrainData;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.dto.search.SearchQuery;
+import org.jbei.ice.lib.dto.search.SearchResults;
+import org.jbei.ice.lib.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryTransfers;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.net.WoRController;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.SearchController;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.StrainData;
-import org.jbei.ice.lib.shared.dto.permission.AccessPermission;
-import org.jbei.ice.lib.shared.dto.search.SearchQuery;
-import org.jbei.ice.lib.shared.dto.search.SearchResults;
-import org.jbei.ice.lib.shared.dto.user.User;
-import org.jbei.ice.lib.shared.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.PartTransfer;
 import org.jbei.ice.lib.vo.SequencePartTransfer;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
@@ -67,8 +67,8 @@ public class RegistryAPI implements IRegistryAPI {
         String sessionId;
 
         try {
-            AccountController controller = ControllerFactory.getAccountController();
-            User info = controller.authenticate(login, password);
+            AccountController controller = new AccountController();
+            AccountTransfer info = controller.authenticate(login, password);
             sessionId = info.getSessionId();
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by user: " + login);
@@ -145,8 +145,8 @@ public class RegistryAPI implements IRegistryAPI {
             Account account = validateAccount(sessionId);
             String prefix = Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX);
             if (prefix != null && name.startsWith(prefix))
-                return ControllerFactory.getEntryController().getByPartNumber(account, name);
-            return ControllerFactory.getEntryController().getByUniqueName(account, name);
+                return new EntryController().getByPartNumber(account, name);
+            return new EntryController().getByUniqueName(account, name);
         } catch (Exception e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -164,8 +164,8 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean hasSequence(@WebParam(name = "entryId") String recordId) throws ServiceException {
         try {
             log("hasSequence " + recordId);
-            PartData entry = ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
-            return ControllerFactory.getSequenceController().hasSequence(entry.getId());
+            PartData entry = new EntryController().getPublicEntryByRecordId(recordId);
+            return new SequenceController().hasSequence(entry.getId());
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
         }
@@ -183,8 +183,8 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean hasUploadedSequence(@WebParam(name = "recordId") String recordId) throws ServiceException {
         try {
             log("hasSequence " + recordId);
-            PartData entry = ControllerFactory.getEntryController().getPublicEntryByRecordId(recordId);
-            return ControllerFactory.getSequenceController().hasOriginalSequence(entry.getId());
+            PartData entry = new EntryController().getPublicEntryByRecordId(recordId);
+            return new SequenceController().hasOriginalSequence(entry.getId());
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
         }
@@ -206,7 +206,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            return ControllerFactory.getEntryController().getPartByRecordId(account, recordId);
+            return new EntryController().getPartByRecordId(account, recordId);
         } catch (Exception e) {
             Logger.error(e);
             throw new ServiceException(e);
@@ -225,7 +225,7 @@ public class RegistryAPI implements IRegistryAPI {
     public PartData getPublicPart(@WebParam(name = "entryId") long entryId) throws ServiceException {
         log("getByEntryId" + entryId);
         try {
-            return ControllerFactory.getEntryController().getPublicEntryById(entryId);
+            return new EntryController().getPublicEntryById(entryId);
         } catch (Exception e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -248,7 +248,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ControllerFactory.getEntryController();
+            EntryController entryController = new EntryController();
             return entryController.getByPartNumber(account, partNumber);
         } catch (PermissionException e) {
             Logger.error(account.getEmail() + " attempting to retrieve entry by part number " + partNumber
@@ -276,7 +276,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = ControllerFactory.getEntryController();
+            EntryController entryController = new EntryController();
             entryController.delete(account, entryId);
             log("User '" + account.getEmail() + "' removed entry: '" + entryId + "'");
         } catch (PermissionException e) {
@@ -304,7 +304,7 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = ControllerFactory.getSequenceController();
+            SequenceController sequenceController = new SequenceController();
             log("User '" + account.getEmail() + "' pulled sequence: '" + entryId + "'");
             return sequenceController.retrievePartSequence(account, entryId);
         } catch (Exception e) {
@@ -317,7 +317,7 @@ public class RegistryAPI implements IRegistryAPI {
     public FeaturedDNASequence getPublicSequence(@WebParam(name = "recordId") String recordId) throws ServiceException {
         log("getPublicSequence: " + recordId);
         try {
-            return ControllerFactory.getEntryController().getPublicSequence(recordId);
+            return new EntryController().getPublicSequence(recordId);
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
         }
@@ -340,8 +340,8 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = ControllerFactory.getSequenceController();
-            EntryController entryController = ControllerFactory.getEntryController();
+            SequenceController sequenceController = new SequenceController();
+            EntryController entryController = new EntryController();
             Sequence sequence = sequenceController.getByEntry(entryController.getByRecordId(account, entryId));
 
             if (sequence != null) {
@@ -349,8 +349,6 @@ public class RegistryAPI implements IRegistryAPI {
             }
 
             log("User '" + account.getEmail() + "' pulled original genbank sequence: '" + entryId + "'");
-        } catch (PermissionException e) {
-            throw new ServiceException(e);
         } catch (Exception e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -368,7 +366,7 @@ public class RegistryAPI implements IRegistryAPI {
         try {
             Account account = validateAccount(sessionId);
             Logger.info(account.getEmail() + ": remotely creating strain with plasmid");
-            EntryController controller = ControllerFactory.getEntryController();
+            EntryController controller = new EntryController();
             return controller.createStrainWithPlasmid(account, strainTransfer, plasmidTransfer, permissions);
         } catch (SessionException | ControllerException se) {
             throw new ServiceException(se);
@@ -381,7 +379,7 @@ public class RegistryAPI implements IRegistryAPI {
             throws ServiceException {
         try {
             Account account = validateAccount(sessionId);
-            ControllerFactory.getEntryController().updatePartStatus(account, recordId, status);
+            new EntryController().updatePartStatus(account, recordId, status);
             return true;
         } catch (SessionException | ControllerException e) {
             throw new ServiceException(e);
@@ -402,8 +400,8 @@ public class RegistryAPI implements IRegistryAPI {
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException {
         log(sessionId, "retrieveSamplesByBarcode: " + barcode);
-        SampleController sampleController = ControllerFactory.getSampleController();
-        StorageController storageController = ControllerFactory.getStorageController();
+        SampleController sampleController = new SampleController();
+        StorageController storageController = new StorageController();
 
         try {
             Storage storage = storageController.retrieveStorageTube(barcode.trim());
@@ -421,8 +419,8 @@ public class RegistryAPI implements IRegistryAPI {
     public StrainData retrieveStrainForSampleBarcode(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException {
         log(sessionId, "retrieveEntryForSampleBarcode: " + barcode);
-        SampleController sampleController = ControllerFactory.getSampleController();
-        StorageController storageController = ControllerFactory.getStorageController();
+        SampleController sampleController = new SampleController();
+        StorageController storageController = new StorageController();
 
         try {
             Storage storage = storageController.retrieveStorageTube(barcode.trim());
@@ -463,7 +461,7 @@ public class RegistryAPI implements IRegistryAPI {
     public String samplePlate(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "samples") Sample[] samples) throws SessionException, ServiceException {
         log(sessionId, "samplePlate");
-        StorageController storageController = ControllerFactory.getStorageController();
+        StorageController storageController = new StorageController();
         HashMap<String, Integer> plateIndex = new HashMap<>();
 
         Sample initial = samples[0];
@@ -546,8 +544,8 @@ public class RegistryAPI implements IRegistryAPI {
             @WebParam(name = "prefix") String prefix) throws ServiceException, PermissionException, SessionException {
         log(sessionId, "createStrainsample: " + recordId + "," + location + "," + barcode);
         try {
-            Account account = ControllerFactory.getAccountController().getAccountBySessionKey(sessionId);
-            SampleController controller = ControllerFactory.getSampleController();
+            Account account = new AccountController().getAccountBySessionKey(sessionId);
+            SampleController controller = new SampleController();
             controller.createStrainSample(account, recordId, rack, location, barcode, label, prefix);
         } catch (ControllerException ce) {
             log(ce.getMessage());
@@ -571,8 +569,8 @@ public class RegistryAPI implements IRegistryAPI {
             @WebParam(name = "samples") Sample[] samples, @WebParam(name = "plateId") String plateId)
             throws SessionException, ServiceException {
         log(sessionId, "checkAndUpdateSamplesStorage: " + plateId);
-        StorageController storageController = ControllerFactory.getStorageController();
-        SampleController sampleController = ControllerFactory.getSampleController();
+        StorageController storageController = new StorageController();
+        SampleController sampleController = new SampleController();
 
         // count of plates seen so far
         List<Sample> retSamples = new LinkedList<>();
@@ -673,8 +671,8 @@ public class RegistryAPI implements IRegistryAPI {
         log(sessionId, "listTraceSequenceFiles: " + recordId);
         Account account = validateAccount(sessionId);
         List<TraceSequence> result = new ArrayList<>();
-        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
-        EntryController entryController = ControllerFactory.getEntryController();
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        EntryController entryController = new EntryController();
 
         List<TraceSequence> traces;
         try {
@@ -682,7 +680,7 @@ public class RegistryAPI implements IRegistryAPI {
             if (traces == null) {
                 return result;
             }
-        } catch (ControllerException | PermissionException e) {
+        } catch (ControllerException e) {
             throw new ServiceException("Could not retrieve traces: " + e.getMessage());
         }
         for (TraceSequence trace : traces) {
@@ -715,8 +713,8 @@ public class RegistryAPI implements IRegistryAPI {
             @WebParam(name = "base64FileData") String base64FileData) throws ServiceException, SessionException {
         log(sessionId, "uploadTraceSequenceFile: " + recordId + "," + fileName);
 
-        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
-        EntryController entryController = ControllerFactory.getEntryController();
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        EntryController entryController = new EntryController();
         byte[] bytes = SerializationUtils.deserializeBase64StringToBytes(base64FileData);
         if (bytes == null) {
             throw new ServiceException("Invalid File Data!");
@@ -727,7 +725,7 @@ public class RegistryAPI implements IRegistryAPI {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         String sequence;
         try {
-            IDNASequence temp = sequenceAnalysisController.parse(bytes);
+            DNASequence temp = sequenceAnalysisController.parse(bytes);
 
             if (temp == null) {
                 throw new ServiceException("Could not parse trace file!");
@@ -744,7 +742,7 @@ public class RegistryAPI implements IRegistryAPI {
             result = sequenceAnalysisController.uploadTraceSequence(entryController.getByRecordId(account, recordId),
                                                                     fileName, depositor, sequence, inputStream);
             sequenceAnalysisController.rebuildAllAlignments(entryController.getByRecordId(account, recordId));
-        } catch (ControllerException | PermissionException e) {
+        } catch (ControllerException e) {
             log(e.getMessage());
             throw new ServiceException("Could not upload trace sequence!: " + e.getMessage());
         }
@@ -765,7 +763,7 @@ public class RegistryAPI implements IRegistryAPI {
     public SequenceTraceFile getTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
         log(sessionId, "getTraceSequenceFile: " + fileId);
-        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
         SequenceTraceFile traceFile;
         try {
             TraceSequence traceSequence = sequenceAnalysisController.getTraceSequenceByFileId(fileId);
@@ -795,7 +793,7 @@ public class RegistryAPI implements IRegistryAPI {
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
         log(sessionId, "deleteTraceSequenceFile: " + fileId);
         Account account = validateAccount(sessionId);
-        SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
 
         TraceSequence traceSequence;
         try {
@@ -818,11 +816,11 @@ public class RegistryAPI implements IRegistryAPI {
     public SearchResults runSearch(@WebParam(name = "uri") String uri, @WebParam(name = "apiKey") String apiKey,
             @WebParam(name = "searchQuery") SearchQuery query) throws ServiceException {
         try {
-            if (!ControllerFactory.getWebController().isValidApiKey(uri, apiKey))
+            if (!new WoRController().isValidApiKey(uri, apiKey))
                 return null;
 
             Logger.info("Registry API: web search");
-            SearchController controller = ControllerFactory.getSearchController();
+            SearchController controller = new SearchController();
 
             return controller.runLocalSearch(null, query, true);
         } catch (ControllerException e) {
@@ -836,10 +834,10 @@ public class RegistryAPI implements IRegistryAPI {
         try {
             if (add) {
                 Logger.info("API: adding web of registry partner " + name + "(" + uri + ")");
-                return ControllerFactory.getWebController().addWebPartner(uri, name);
+                return new WoRController().addWebPartner(uri, name);
             } else {
                 Logger.info("API: removing web of registry partner " + name + "(" + uri + ")");
-                ControllerFactory.getWebController().removeWebPartner(uri);
+                new WoRController().removeWebPartner(uri);
                 return null;
             }
         } catch (ControllerException ce) {
@@ -851,7 +849,7 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean uploadPartsWithSequences(@WebParam(name = "partnerId") String partnerId, @WebParam(
             name = "apiKey") String apiKey, @WebParam(name = "sequenceParts") ArrayList<SequencePartTransfer>
             sequencePartTransfers) throws ServiceException {
-        WoRController controller = ControllerFactory.getWebController();
+        WoRController controller = new WoRController();
         try {
             if (!controller.isWebEnabled() || !controller.isValidWebPartner(partnerId, apiKey))
                 return false;
@@ -860,7 +858,7 @@ public class RegistryAPI implements IRegistryAPI {
         }
 
         Logger.info("Registry API: transmit sequence entries from " + partnerId);
-        return ControllerFactory.getEntryTransfers().recordParts(sequencePartTransfers);
+        return new EntryTransfers().recordParts(sequencePartTransfers);
     }
 
     @Override
@@ -879,7 +877,7 @@ public class RegistryAPI implements IRegistryAPI {
 
         // is valid. create a record if one does not exist , save authKey as apiKey and generate authentication token
         try {
-            return ControllerFactory.getWebController().requestApiKeyForNewPartner(url, name, authenticationKey);
+            return new WoRController().requestApiKeyForNewPartner(url, name, authenticationKey);
         } catch (ControllerException e) {
             throw new ServiceException("Could not generate api key");
         }
@@ -889,7 +887,7 @@ public class RegistryAPI implements IRegistryAPI {
     public boolean isValidApiKey(@WebParam(name = "url") String url, @WebParam(name = "apiKey") String apiKey)
             throws ServiceException {
         try {
-            return ControllerFactory.getWebController().isValidApiKey(url, apiKey);
+            return new WoRController().isValidApiKey(url, apiKey);
         } catch (ControllerException e) {
             throw new ServiceException("Could not verify api key");
         }
@@ -911,7 +909,7 @@ public class RegistryAPI implements IRegistryAPI {
         }
 
         Account account;
-        AccountController controller = ControllerFactory.getAccountController();
+        AccountController controller = new AccountController();
 
         try {
             account = controller.getAccountBySessionKey(sessionId);

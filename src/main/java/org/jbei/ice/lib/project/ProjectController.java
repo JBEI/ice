@@ -3,11 +3,13 @@ package org.jbei.ice.lib.project;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.ProjectDAO;
 import org.jbei.ice.lib.models.Project;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -19,7 +21,7 @@ public class ProjectController {
     private final ProjectDAO dao;
 
     public ProjectController() {
-        dao = new ProjectDAO();
+        dao = DAOFactory.getProjectDAO();
     }
 
     /**
@@ -97,7 +99,7 @@ public class ProjectController {
         Project savedProject;
 
         try {
-            savedProject = dao.saveProject(project);
+            savedProject = dao.create(project);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

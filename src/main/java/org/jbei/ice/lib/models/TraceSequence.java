@@ -4,7 +4,8 @@ import java.util.Date;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.entry.model.Entry;
 
 import org.hibernate.annotations.Type;
@@ -17,7 +18,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "trace_sequence")
 @SequenceGenerator(name = "sequence", sequenceName = "trace_sequence_id_seq", allocationSize = 1)
-public class TraceSequence implements IModel {
+public class TraceSequence implements IDataModel {
     private static final long serialVersionUID = -850409542887009114L;
 
     @XmlTransient
@@ -139,5 +140,10 @@ public class TraceSequence implements IModel {
 
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

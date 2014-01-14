@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.search;
 
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.executor.Task;
-import org.jbei.ice.lib.logging.Logger;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;

@@ -10,7 +10,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.utils.SequenceUtils;
 
 import org.hibernate.annotations.Type;
@@ -28,7 +29,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "features")
 @SequenceGenerator(name = "sequence", sequenceName = "features_id_seq", allocationSize = 1)
-public class Feature implements IModel {
+public class Feature implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -140,5 +141,10 @@ public class Feature implements IModel {
 
     public void setUri(String uri) {
         this.uri = uri;
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

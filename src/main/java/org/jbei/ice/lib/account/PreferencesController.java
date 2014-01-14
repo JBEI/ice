@@ -5,12 +5,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
-import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.PreferencesDAO;
+import org.jbei.ice.lib.dto.search.SearchBoostField;
+import org.jbei.ice.lib.dto.user.PreferenceKey;
 
 /**
  * Controller for managing user preferences.
@@ -22,7 +24,7 @@ public class PreferencesController {
     private final PreferencesDAO dao;
 
     public PreferencesController() {
-        dao = new PreferencesDAO();
+        dao = DAOFactory.getPreferencesDAO();
     }
 
     public HashMap<PreferenceKey, String> retrieveAccountPreferences(Account account, ArrayList<PreferenceKey> keys)
@@ -80,7 +82,7 @@ public class PreferencesController {
     // really an update
     public boolean saveSetting(Account account, String key, String value) throws ControllerException {
         try {
-            return dao.saveOrUpdatePreference(account, key, value) != null;
+            return dao.createOrUpdatePreference(account, key, value) != null;
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -89,7 +91,7 @@ public class PreferencesController {
     public Preference createPreference(Account account, String key, String value) throws ControllerException {
         Preference preference = new Preference(account, key.toUpperCase(), value);
         try {
-            return dao.save(preference);
+            return dao.create(preference);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

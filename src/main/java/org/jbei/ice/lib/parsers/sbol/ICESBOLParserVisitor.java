@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.jbei.ice.lib.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.bulkupload.DNAFeatureComparator;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.composers.formatters.IceSequenceOntology;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;

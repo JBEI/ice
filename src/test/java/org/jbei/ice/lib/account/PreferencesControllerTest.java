@@ -9,8 +9,8 @@ import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
-import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.dto.search.SearchBoostField;
+import org.jbei.ice.lib.dto.user.PreferenceKey;
 
 import org.junit.After;
 import org.junit.Assert;

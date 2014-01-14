@@ -2,14 +2,14 @@ package org.jbei.ice.lib.shared;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.lib.shared.dto.IDTOModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
  * BioSafety Option options
  *
  * @author Hector Plahar
  */
-public enum BioSafetyOption implements IDTOModel {
+public enum BioSafetyOption implements IDataTransferModel {
 
     LEVEL_ONE("Level 1", "1"),
     LEVEL_TWO("Level 2", "2");
