@@ -71,8 +71,8 @@ class PermissionDAO extends HibernateRepository<Permission> {
         try {
             Session session = currentSession();
             Criteria criteria = session.createCriteria(Permission.class)
-                                       .add(Restrictions.eq("canWrite", Boolean.valueOf(canWrite)))
-                                       .add(Restrictions.eq("canRead", Boolean.valueOf(canRead)));
+                                       .add(Restrictions.eq("canWrite", canWrite))
+                                       .add(Restrictions.eq("canRead", canRead));
 
             if (groups == null || groups.isEmpty())
                 criteria.add(Restrictions.isNull("group"));
@@ -96,7 +96,7 @@ class PermissionDAO extends HibernateRepository<Permission> {
 
             criteria.setProjection(Projections.rowCount());
             Number integer = (Number) criteria.uniqueResult();
-            return integer.intValue() == 1;
+            return integer.intValue() != 0;
         } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
