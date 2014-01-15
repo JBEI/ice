@@ -13,6 +13,8 @@ import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -55,7 +57,6 @@ public class RequestDAO extends HibernateRepository<Request> {
             }
             return (Request) list.get(0);
         } catch (HibernateException he) {
-            Logger.error(he);
             throw new DAOException(he);
         }
     }
@@ -71,24 +72,23 @@ public class RequestDAO extends HibernateRepository<Request> {
         try {
             return new ArrayList<Request>(criteria.list());
         } catch (HibernateException he) {
-            Logger.error(he);
             throw new DAOException(he);
         }
     }
 
     // returns all pending requests
     public List<Request> getAllRequestList() throws DAOException {
-        Criteria criteria = currentSession().createCriteria(Request.class.getName());
-        criteria.add(Restrictions.eq("status", SampleRequestStatus.PENDING));
-        criteria.setMaxResults(100);
-        criteria.setFirstResult(0);
-        boolean asc = true;
-        String sort = "requested";
-        criteria.addOrder(asc ? Order.asc(sort) : Order.desc(sort));
+        Session session = currentSession();
+        Query query = session.createQuery("from " + Request.class.getName() + " where status in :status");
+        ArrayList<SampleRequestStatus> statusList = new ArrayList<>();
+        statusList.add(SampleRequestStatus.PENDING);
+        statusList.add(SampleRequestStatus.FULFILLED);
+        query.setParameterList("status", statusList);
+
         try {
-            return new ArrayList<Request>(criteria.list());
+            List list = query.list();
+            return new ArrayList<Request>(list);
         } catch (HibernateException he) {
-            Logger.error(he);
             throw new DAOException(he);
         }
     }
@@ -101,7 +101,6 @@ public class RequestDAO extends HibernateRepository<Request> {
         try {
             return new ArrayList<Request>(criteria.list());
         } catch (HibernateException he) {
-            Logger.error(he);
             throw new DAOException(he);
         }
     }
