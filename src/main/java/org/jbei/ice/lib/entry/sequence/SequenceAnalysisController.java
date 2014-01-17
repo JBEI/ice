@@ -10,9 +10,9 @@ import java.util.List;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.entry.EntryAuthorization;
@@ -43,14 +43,12 @@ import org.jbei.ice.lib.vo.SequenceTraceFile;
 public class SequenceAnalysisController {
 
     private final TraceSequenceDAO traceDao;
-    private final PermissionsController permissionsController;
     private final EntryAuthorization entryAuthorization;
 
     public static final String tracesDirName = "traces";
 
     public SequenceAnalysisController() {
-        traceDao = new TraceSequenceDAO();
-        permissionsController = new PermissionsController();
+        traceDao = DAOFactory.getTraceSequenceDAO();
         entryAuthorization = new EntryAuthorization();
     }
 

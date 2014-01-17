@@ -5,6 +5,7 @@ import java.util.Date;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.NewsDAO;
 
 /**
@@ -14,7 +15,7 @@ public class NewsController {
     private final NewsDAO dao;
 
     public NewsController() {
-        this.dao = new NewsDAO();
+        this.dao = DAOFactory.getNewsDAO();
     }
 
     public News update(News news) throws ControllerException {

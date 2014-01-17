@@ -59,40 +59,10 @@ public class DAOFactory {
         return commentDAO;
     }
 
-    public static ProjectDAO getProjectDAO() {
-        if (projectDAO == null)
-            projectDAO = new ProjectDAO();
-        return projectDAO;
-    }
-
-    public static RemotePartnerDAO getRemotePartnerDAO() {
-        if (remotePartnerDAO == null)
-            remotePartnerDAO = new RemotePartnerDAO();
-        return remotePartnerDAO;
-    }
-
-    public static RequestDAO getRequestDAO() {
-        if (requestDAO == null)
-            requestDAO = new RequestDAO();
-        return requestDAO;
-    }
-
-    public static PermissionDAO getPermissionDAO() {
-        if (permissionDAO == null)
-            permissionDAO = new PermissionDAO();
-        return permissionDAO;
-    }
-
-    public static PreferencesDAO getPreferencesDAO() {
-        if (preferencesDAO == null)
-            preferencesDAO = new PreferencesDAO();
-        return preferencesDAO;
-    }
-
-    public static SampleDAO getSampleDAO() {
-        if (sampleDAO == null)
-            sampleDAO = new SampleDAO();
-        return sampleDAO;
+    public static ConfigurationDAO getConfigurationDAO() {
+        if (configurationDAO == null)
+            configurationDAO = new ConfigurationDAO();
+        return configurationDAO;
     }
 
     public static EntryDAO getEntryDAO() {
@@ -119,6 +89,54 @@ public class DAOFactory {
         return messageDAO;
     }
 
+    public static NewsDAO getNewsDAO() {
+        if (newsDAO == null)
+            newsDAO = new NewsDAO();
+        return newsDAO;
+    }
+
+    public static PermissionDAO getPermissionDAO() {
+        if (permissionDAO == null)
+            permissionDAO = new PermissionDAO();
+        return permissionDAO;
+    }
+
+    public static PreferencesDAO getPreferencesDAO() {
+        if (preferencesDAO == null)
+            preferencesDAO = new PreferencesDAO();
+        return preferencesDAO;
+    }
+
+    public static ProjectDAO getProjectDAO() {
+        if (projectDAO == null)
+            projectDAO = new ProjectDAO();
+        return projectDAO;
+    }
+
+    public static RemotePartnerDAO getRemotePartnerDAO() {
+        if (remotePartnerDAO == null)
+            remotePartnerDAO = new RemotePartnerDAO();
+        return remotePartnerDAO;
+    }
+
+    public static RequestDAO getRequestDAO() {
+        if (requestDAO == null)
+            requestDAO = new RequestDAO();
+        return requestDAO;
+    }
+
+    public static SampleDAO getSampleDAO() {
+        if (sampleDAO == null)
+            sampleDAO = new SampleDAO();
+        return sampleDAO;
+    }
+
+    public static SearchDAO getSearchDAO() {
+        if (searchDAO == null)
+            searchDAO = new SearchDAO();
+        return searchDAO;
+    }
+
     public static SequenceDAO getSequenceDAO() {
         if (sequenceDAO == null)
             sequenceDAO = new SequenceDAO();
@@ -129,5 +147,11 @@ public class DAOFactory {
         if (storageDAO == null)
             storageDAO = new StorageDAO();
         return storageDAO;
+    }
+
+    public static TraceSequenceDAO getTraceSequenceDAO() {
+        if (traceSequenceDAO == null)
+            traceSequenceDAO = new TraceSequenceDAO();
+        return traceSequenceDAO;
     }
 }

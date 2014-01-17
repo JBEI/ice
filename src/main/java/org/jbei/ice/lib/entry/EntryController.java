@@ -66,10 +66,10 @@ import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.PartAttachment;
 import org.jbei.ice.lib.vo.PartTransfer;
-import org.jbei.ice.server.InfoToModelFactory;
-import org.jbei.ice.server.ModelToInfoFactory;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.ServiceException;
+import org.jbei.ice.servlet.InfoToModelFactory;
+import org.jbei.ice.servlet.ModelToInfoFactory;
 
 import org.apache.commons.io.IOUtils;
 

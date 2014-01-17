@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.ConfigurationDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.models.Configuration;
@@ -15,7 +16,7 @@ public class ConfigurationController {
     private final ConfigurationDAO dao;
 
     public ConfigurationController() {
-        dao = new ConfigurationDAO();
+        dao = DAOFactory.getConfigurationDAO();
     }
 
     public String retrieveDatabaseVersion() throws ControllerException {
@@ -50,7 +51,7 @@ public class ConfigurationController {
     }
 
     public HashMap<String, String> retrieveSystemSettings() throws ControllerException {
-        HashMap<String, String> results = new HashMap<String, String>();
+        HashMap<String, String> results = new HashMap<>();
         for (Configuration configuration : dao.getAll()) {
             results.put(configuration.getKey(), configuration.getValue());
         }

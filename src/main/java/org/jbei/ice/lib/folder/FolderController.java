@@ -17,7 +17,6 @@ import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
@@ -27,7 +26,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.server.ModelToInfoFactory;
+import org.jbei.ice.servlet.ModelToInfoFactory;
 
 /**
  * @author Hector Plahar
@@ -36,14 +35,12 @@ public class FolderController {
 
     private final FolderDAO dao;
     private final AccountController accountController;
-    private final FolderAuthorization authorization;
     private final PermissionDAO permissionDAO;
     private final PermissionsController permissionsController;
 
     public FolderController() {
         dao = DAOFactory.getFolderDAO();
         accountController = new AccountController();
-        authorization = new FolderAuthorization();
         permissionDAO = new PermissionDAO();
         permissionsController = new PermissionsController();
     }

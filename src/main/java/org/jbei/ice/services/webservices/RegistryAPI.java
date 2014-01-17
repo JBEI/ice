@@ -42,7 +42,7 @@ import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.PartTransfer;
 import org.jbei.ice.lib.vo.SequencePartTransfer;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
-import org.jbei.ice.server.ModelToInfoFactory;
+import org.jbei.ice.servlet.ModelToInfoFactory;
 
 /**
  * SOAP API methods.

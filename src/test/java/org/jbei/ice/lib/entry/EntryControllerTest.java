@@ -28,8 +28,8 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.server.InfoToModelFactory;
-import org.jbei.ice.server.ModelToInfoFactory;
+import org.jbei.ice.servlet.InfoToModelFactory;
+import org.jbei.ice.servlet.ModelToInfoFactory;
 
 import junit.framework.Assert;
 import org.junit.After;

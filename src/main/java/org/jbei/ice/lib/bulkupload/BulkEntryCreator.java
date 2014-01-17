@@ -30,7 +30,7 @@ import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.server.InfoToModelFactory;
+import org.jbei.ice.servlet.InfoToModelFactory;
 
 /**
  * Creates entries for bulk uploads

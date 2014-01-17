@@ -46,8 +46,8 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.server.InfoToModelFactory;
-import org.jbei.ice.server.ModelToInfoFactory;
+import org.jbei.ice.servlet.InfoToModelFactory;
+import org.jbei.ice.servlet.ModelToInfoFactory;
 
 /**
  * Controller for dealing with bulk imports (including drafts)

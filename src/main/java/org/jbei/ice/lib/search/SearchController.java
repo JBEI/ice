@@ -15,6 +15,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.SearchDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.search.IndexType;
@@ -42,7 +43,7 @@ public class SearchController {
     private final SearchDAO dao;
 
     public SearchController() {
-        dao = new SearchDAO();
+        dao = DAOFactory.getSearchDAO();
     }
 
     public SearchResults runSearch(Account account, SearchQuery query, boolean searchWeb) throws ControllerException {

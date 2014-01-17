@@ -16,7 +16,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.shared.BioSafetyOption;
-import org.jbei.ice.server.InfoToModelFactory;
+import org.jbei.ice.servlet.InfoToModelFactory;
 
 import junit.framework.Assert;
 import org.junit.After;

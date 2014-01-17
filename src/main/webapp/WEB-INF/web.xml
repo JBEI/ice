@@ -2,6 +2,7 @@
 <web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
          version="2.4">
+    <description>Inventory for Composable Elements</description>
 
     <security-constraint>
         <web-resource-collection>
@@ -17,11 +18,11 @@
 
     <filter>
         <filter-name>IceFilter</filter-name>
-        <filter-class>org.jbei.ice.server.servlet.filter.IceFilter</filter-class>
+        <filter-class>org.jbei.ice.servlet.filter.IceFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>IceFilter</filter-name>
-        <url-pattern>/gwt_ice/ice</url-pattern>
+        <url-pattern>/ice</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
@@ -72,7 +73,7 @@
     </listener>
 
     <listener>
-        <listener-class>org.jbei.ice.server.servlet.IceServletContextListener</listener-class>
+        <listener-class>org.jbei.ice.servlet.IceServletContextListener</listener-class>
     </listener>
 
     <servlet>
@@ -88,7 +89,7 @@
 
     <servlet>
         <servlet-name>FileUploadServlet</servlet-name>
-        <servlet-class>org.jbei.ice.server.servlet.FileUploadServlet</servlet-class>
+        <servlet-class>org.jbei.ice.servlet.FileUploadServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -99,7 +100,7 @@
     <!--  file download -->
     <servlet>
         <servlet-name>FileDownloadServlet</servlet-name>
-        <servlet-class>org.jbei.ice.server.servlet.FileDownloadServlet</servlet-class>
+        <servlet-class>org.jbei.ice.servlet.FileDownloadServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -110,7 +111,7 @@
     <!--  sequence download -->
     <servlet>
         <servlet-name>SequenceDownloadServlet</servlet-name>
-        <servlet-class>org.jbei.ice.server.servlet.SequenceDownloadServlet</servlet-class>
+        <servlet-class>org.jbei.ice.servlet.SequenceDownloadServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -118,8 +119,19 @@
         <url-pattern>/sequence</url-pattern>
     </servlet-mapping>
 
+    <!-- main ice servlet -->
+    <servlet>
+        <servlet-name>IceServlet</servlet-name>
+        <servlet-class>org.jbei.ice.servlet.IceServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>IceServlet</servlet-name>
+        <url-pattern>/ice</url-pattern>
+    </servlet-mapping>
+
     <welcome-file-list>
-        <welcome-file>Gwt_ice.html</welcome-file>
+        <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 
     <session-config>

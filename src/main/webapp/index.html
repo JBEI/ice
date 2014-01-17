@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en" data-ng-app="iceApp">
+<head>
+    <meta charset="utf-8">
+    <title>ICE - Inventory of Composable Elements</title>
+    <link rel="stylesheet" href="css/app.css"/>
+    <!-- In production use:
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+-->
+    <script src="lib/angular/angular.js"></script>
+    <script src="lib/angular/angular-route.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/directives.js"></script>
+
+</head>
+<body ng-controller="EntryController">
+<ul ng-cloak>
+    <li data-ng-repeat="datum in result.data">{{datum.name}}</li>
+</ul>
+
+
+</body>
+</html>
