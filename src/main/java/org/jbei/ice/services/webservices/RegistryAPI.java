@@ -15,6 +15,7 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.StrainData;
@@ -29,7 +30,6 @@ import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.models.TraceSequence;
@@ -165,7 +165,7 @@ public class RegistryAPI implements IRegistryAPI {
         try {
             log("hasSequence " + recordId);
             PartData entry = new EntryController().getPublicEntryByRecordId(recordId);
-            return new SequenceController().hasSequence(entry.getId());
+            return DAOFactory.getSequenceDAO().hasSequence(entry.getId());
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
         }
@@ -184,7 +184,7 @@ public class RegistryAPI implements IRegistryAPI {
         try {
             log("hasSequence " + recordId);
             PartData entry = new EntryController().getPublicEntryByRecordId(recordId);
-            return new SequenceController().hasOriginalSequence(entry.getId());
+            return DAOFactory.getSequenceDAO().hasOriginalSequence(entry.getId());
         } catch (ControllerException ce) {
             throw new ServiceException(ce);
         }
@@ -206,7 +206,8 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            return new EntryController().getPartByRecordId(account, recordId);
+            return null;
+//            return DAOFactory.getEntryDAO().getByRecordId(recordId);
         } catch (Exception e) {
             Logger.error(e);
             throw new ServiceException(e);
@@ -340,13 +341,15 @@ public class RegistryAPI implements IRegistryAPI {
         Account account = validateAccount(sessionId);
 
         try {
-            SequenceController sequenceController = new SequenceController();
-            EntryController entryController = new EntryController();
-            Sequence sequence = sequenceController.getByEntry(entryController.getByRecordId(account, entryId));
-
-            if (sequence != null) {
-                genbankSequence = sequence.getSequenceUser();
-            }
+//            SequenceController sequenceController = new SequenceController();
+//            EntryController entryController = new EntryController();
+//            Entry entry = DAOFactory.getEntryDAO().get(entryId);
+//
+//            Sequence sequence = sequenceController.getByEntry(entryController.getByRecordId(account, ));
+//
+//            if (sequence != null) {
+//                genbankSequence = sequence.getSequenceUser();
+//            }
 
             log("User '" + account.getEmail() + "' pulled original genbank sequence: '" + entryId + "'");
         } catch (Exception e) {
@@ -362,15 +365,16 @@ public class RegistryAPI implements IRegistryAPI {
             @WebParam(name = "strain") PartTransfer strainTransfer,
             @WebParam(name = "plasmid") PartTransfer plasmidTransfer,
             @WebParam(name = "permissions") ArrayList<AccessPermission> permissions) throws ServiceException {
+        return null;
 
-        try {
-            Account account = validateAccount(sessionId);
-            Logger.info(account.getEmail() + ": remotely creating strain with plasmid");
-            EntryController controller = new EntryController();
-            return controller.createStrainWithPlasmid(account, strainTransfer, plasmidTransfer, permissions);
-        } catch (SessionException | ControllerException se) {
-            throw new ServiceException(se);
-        }
+//        try {
+//            Account account = validateAccount(sessionId);
+//            Logger.info(account.getEmail() + ": remotely creating strain with plasmid");
+//            EntryController controller = new EntryController();
+////            return controller.createStrainWithPlasmid(account, strainTransfer, plasmidTransfer, permissions);
+//        } catch (SessionException | ControllerException se) {
+//            throw new ServiceException(se);
+//        }
     }
 
     @Override
@@ -674,23 +678,23 @@ public class RegistryAPI implements IRegistryAPI {
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
         EntryController entryController = new EntryController();
 
-        List<TraceSequence> traces;
-        try {
-            traces = sequenceAnalysisController.getTraceSequences(entryController.getByRecordId(account, recordId));
-            if (traces == null) {
-                return result;
-            }
-        } catch (ControllerException e) {
-            throw new ServiceException("Could not retrieve traces: " + e.getMessage());
-        }
-        for (TraceSequence trace : traces) {
-            //null out entry to reduce output.
-            trace.setEntry(null);
-            // null out traceSequenceAlignment.traceSequence, as it causes infinite nesting  in xml for some reason.
-            if (trace.getTraceSequenceAlignment() != null)
-                trace.getTraceSequenceAlignment().setTraceSequence(null);
-            result.add(trace);
-        }
+//        List<TraceSequence> traces;
+//        try {
+//            traces = sequenceAnalysisController.getTraceSequences(entryController.getByRecordId(account, recordId));
+//            if (traces == null) {
+//                return result;
+//            }
+//        } catch (ControllerException e) {
+//            throw new ServiceException("Could not retrieve traces: " + e.getMessage());
+//        }
+//        for (TraceSequence trace : traces) {
+//            //null out entry to reduce output.
+//            trace.setEntry(null);
+//            // null out traceSequenceAlignment.traceSequence, as it causes infinite nesting  in xml for some reason.
+//            if (trace.getTraceSequenceAlignment() != null)
+//                trace.getTraceSequenceAlignment().setTraceSequence(null);
+//            result.add(trace);
+//        }
 
         return result;
     }
@@ -737,17 +741,18 @@ public class RegistryAPI implements IRegistryAPI {
             throw new ServiceException("Could not parse trace file!: " + e.getMessage());
         }
 
-        TraceSequence result;
-        try {
-            result = sequenceAnalysisController.uploadTraceSequence(entryController.getByRecordId(account, recordId),
-                                                                    fileName, depositor, sequence, inputStream);
-            sequenceAnalysisController.rebuildAllAlignments(entryController.getByRecordId(account, recordId));
-        } catch (ControllerException e) {
-            log(e.getMessage());
-            throw new ServiceException("Could not upload trace sequence!: " + e.getMessage());
-        }
-
-        return result.getFileId();
+//        TraceSequence result;
+//        try {
+//            result = sequenceAnalysisController.uploadTraceSequence(entryController.getByRecordId(account, recordId),
+//                                                                    fileName, depositor, sequence, inputStream);
+//            sequenceAnalysisController.rebuildAllAlignments(entryController.getByRecordId(account, recordId));
+//        } catch (ControllerException e) {
+//            log(e.getMessage());
+//            throw new ServiceException("Could not upload trace sequence!: " + e.getMessage());
+//        }
+//
+//        return result.getFileId();
+        return "";
     }
 
     /**

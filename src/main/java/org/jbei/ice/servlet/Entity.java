@@ -5,7 +5,7 @@ package org.jbei.ice.servlet;
  */
 public enum Entity {
 
-    ACCOUNT('1'),
+    PART('1'),
     ACTIVITY('2'),
     ASSEMBLY('3'),
     BIN('4'),

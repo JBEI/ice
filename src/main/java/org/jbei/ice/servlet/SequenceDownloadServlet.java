@@ -12,14 +12,15 @@ import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.composers.formatters.FastaFormatter;
-import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
-import org.jbei.ice.lib.composers.formatters.SBOLFormatter;
-import org.jbei.ice.lib.composers.pigeon.PigeonSBOLv;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.FastaFormatter;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOLFormatter;
+import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.models.Sequence;
 
 import org.apache.commons.io.IOUtils;
@@ -61,8 +62,8 @@ public class SequenceDownloadServlet extends HttpServlet {
         EntryController entryController = new EntryController();
         Entry entry;
         try {
-            entry = entryController.get(account, Long.parseLong(entryId));
-        } catch (NumberFormatException | ControllerException e) {
+            entry = DAOFactory.getEntryDAO().get(Long.parseLong(entryId));
+        } catch (NumberFormatException e) {
             Logger.error(e);
             return;
         }
@@ -110,16 +111,9 @@ public class SequenceDownloadServlet extends HttpServlet {
 
     private void getOriginal(HttpServletResponse response, Entry entry, Account account) {
         SequenceController sequenceController = new SequenceController();
-        Sequence sequence;
-
-        try {
-            sequence = sequenceController.getByEntry(entry);
-            if (sequence == null) {
-                Logger.info("No sequence associated with entry " + entry.getId());
-                return;
-            }
-        } catch (ControllerException e) {
-            Logger.error(e);
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
+        if (sequence == null) {
+            Logger.info("No sequence associated with entry " + entry.getId());
             return;
         }
 
@@ -147,15 +141,9 @@ public class SequenceDownloadServlet extends HttpServlet {
         GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
         genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false); // TODO
 
-        Sequence sequence;
-        try {
-            sequence = sequenceController.getByEntry(entry);
-            if (sequence == null) {
-                Logger.info("No sequence associated with entry " + entry.getId());
-                return;
-            }
-        } catch (ControllerException e) {
-            Logger.error(e);
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
+        if (sequence == null) {
+            Logger.info("No sequence associated with entry " + entry.getId());
             return;
         }
 
@@ -187,16 +175,9 @@ public class SequenceDownloadServlet extends HttpServlet {
 
     private void getFasta(HttpServletResponse response, Entry entry) {
         SequenceController sequenceController = new SequenceController();
-        Sequence sequence;
-
-        try {
-            sequence = sequenceController.getByEntry(entry);
-            if (sequence == null) {
-                Logger.info("No sequence associated with entry " + entry.getId());
-                return;
-            }
-        } catch (ControllerException e) {
-            Logger.error(e);
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
+        if (sequence == null) {
+            Logger.info("No sequence associated with entry " + entry.getId());
             return;
         }
 
@@ -224,16 +205,9 @@ public class SequenceDownloadServlet extends HttpServlet {
 
     private void getSBOL(HttpServletResponse response, Entry entry) {
         SequenceController sequenceController = new SequenceController();
-        Sequence sequence;
-
-        try {
-            sequence = sequenceController.getByEntry(entry);
-            if (sequence == null) {
-                Logger.warn("No sequence associated with entry " + entry.getId());
-                return;
-            }
-        } catch (ControllerException e) {
-            Logger.error(e);
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
+        if (sequence == null) {
+            Logger.warn("No sequence associated with entry " + entry.getId());
             return;
         }
 
@@ -259,16 +233,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getSBOLv(HttpServletResponse response, Entry entry) {
-        SequenceController sequenceController = new SequenceController();
-        Sequence sequence;
-
-        try {
-            sequence = sequenceController.getByEntry(entry);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return;
-        }
-
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
         URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
         response.setContentType("image/png");
         String filename = getFileName(entry) + ".png";
@@ -286,15 +251,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getPigeonScript(HttpServletResponse response, Entry entry) {
-        SequenceController sequenceController = new SequenceController();
-        Sequence sequence;
-
-        try {
-            sequence = sequenceController.getByEntry(entry);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return;
-        }
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
 
         String pigeonScript = PigeonSBOLv.generatePigeonScript(sequence);
         try {

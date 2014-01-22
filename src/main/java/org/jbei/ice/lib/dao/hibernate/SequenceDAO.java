@@ -218,6 +218,13 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         }
     }
 
+    /**
+     * Determines if the user uploaded a sequence file and associated it with an entry
+     *
+     * @param entryId unique identifier for entry
+     * @return true if there is a sequence file that was originally uploaded by user, false otherwise
+     * @throws org.jbei.ice.DAOException
+     */
     public boolean hasOriginalSequence(long entryId) throws DAOException {
         Session session = currentSession();
         try {
@@ -383,6 +390,6 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
 
     @Override
     public Sequence get(long id) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return super.get(Sequence.class, id);
     }
 }

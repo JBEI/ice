@@ -258,7 +258,7 @@ public class GroupController {
         return accountGroups;
     }
 
-    public ArrayList<Group> getAllPublicGroupsForAccount(Account account) throws ControllerException {
+    public ArrayList<Group> getAllPublicGroupsForAccount(Account account) {
         ArrayList<Group> groups = new ArrayList<>();
         for (Group group : account.getGroups()) {
             if (group.getType() == GroupType.PUBLIC)

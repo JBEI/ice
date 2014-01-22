@@ -2,7 +2,7 @@ package org.jbei.ice.lib.access;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.EntryCreator;
+import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
@@ -47,7 +47,7 @@ public class PermissionsControllerTest {
 
         Assert.assertTrue(threwException);
         Account account = AccountCreator.createTestAccount("testRecordPermission", false);
-        Strain strain = EntryCreator.createTestStrain(account);
+        Strain strain = TestEntryCreator.createTestStrain(account);
         permission.setArticle(AccessPermission.Article.ACCOUNT);
         permission.setTypeId(strain.getId());
     }
@@ -57,7 +57,7 @@ public class PermissionsControllerTest {
         Account account = AccountCreator.createTestAccount("testAddPermission", false);
         Account account2 = AccountCreator.createTestAccount("testAddPermission2", false);
         Account account3 = AccountCreator.createTestAccount("testAddPermission3", false);
-        Strain strain = EntryCreator.createTestStrain(account);
+        Strain strain = TestEntryCreator.createTestStrain(account);
         AccessPermission access = new AccessPermission(AccessPermission.Article.ACCOUNT, account2.getId(),
                                                        AccessPermission.Type.READ_ENTRY, strain.getId(),
                                                        account.getFullName());
@@ -118,7 +118,7 @@ public class PermissionsControllerTest {
         Account account = AccountCreator.createTestAccount("testRemovePermission", false);
         Account account2 = AccountCreator.createTestAccount("testRemovePermission2", false);
 
-        Strain strain = EntryCreator.createTestStrain(account);
+        Strain strain = TestEntryCreator.createTestStrain(account);
 
         // read permission for account2
         AccessPermission access = new AccessPermission(AccessPermission.Article.ACCOUNT, account2.getId(),

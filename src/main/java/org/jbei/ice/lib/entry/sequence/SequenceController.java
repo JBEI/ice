@@ -16,17 +16,17 @@ import org.jbei.ice.lib.access.AuthorizationException;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.composers.formatters.FormatterException;
-import org.jbei.ice.lib.composers.formatters.IFormatter;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.FormatterException;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.IFormatter;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
@@ -55,25 +55,6 @@ public class SequenceController {
     public SequenceController() {
         dao = new SequenceDAO();
         authorization = new EntryAuthorization();
-    }
-
-    /**
-     * Retrieve the {@link Sequence} associated with the given {@link Entry} from the database.
-     *
-     * @param entry entry whose sequence is being retrieved
-     * @return Sequence
-     * @throws ControllerException
-     */
-    public Sequence getByEntry(Entry entry) throws ControllerException {
-        Sequence sequence;
-
-        try {
-            sequence = dao.getByEntry(entry);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return sequence;
     }
 
     public void parseAndSaveSequence(Account account, Entry entry, String sequenceString) throws ControllerException {
@@ -130,7 +111,7 @@ public class SequenceController {
         try {
             Entry entry = sequence.getEntry();
             entry.setModificationTime(Calendar.getInstance().getTime());
-            Sequence oldSequence = getByEntry(entry);
+            Sequence oldSequence = dao.getByEntry(entry);
 
             if (oldSequence != null) {
                 String tmpDir = new ConfigurationController()
@@ -199,12 +180,12 @@ public class SequenceController {
     }
 
     public FeaturedDNASequence retrievePartSequence(Account account, String recordId) throws ControllerException {
-        Entry entry = new EntryController().getByRecordId(account, recordId);
+        Entry entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
 
         if (entry == null)
             throw new ControllerException("The part could not be located");
 
-        Sequence sequence = getByEntry(entry);
+        Sequence sequence = dao.getByEntry(entry);
         if (sequence == null)
             return null;
 
@@ -381,49 +362,6 @@ public class SequenceController {
         }
 
         return sequence;
-    }
-
-    public boolean hasSequence(long entryId) throws ControllerException {
-        try {
-            return dao.hasSequence(entryId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    /**
-     * Determines if the user uploaded a sequence file and associated it with an entry
-     *
-     * @param entryId unique identifier for entry
-     * @return true if there is a sequence file that was originally uploaded by user, false otherwise
-     * @throws ControllerException
-     */
-    public boolean hasOriginalSequence(long entryId) throws ControllerException {
-        try {
-            return dao.hasOriginalSequence(entryId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    /**
-     * @return sequences for entries which are not deleted, not pending and not drafts
-     * @throws ControllerException
-     */
-    public Set<Sequence> getAllSequences() throws ControllerException {
-        try {
-            return dao.getAllSequences();
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public ArrayList<Feature> getAllFeatures() throws ControllerException {
-        try {
-            return dao.getAllFeatures();
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
     }
 
     public Sequence saveSequence(Sequence partSequence) throws ControllerException {

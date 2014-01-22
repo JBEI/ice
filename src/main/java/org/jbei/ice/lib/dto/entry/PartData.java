@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.dto.entry;
 
 import java.util.ArrayList;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
 import org.jbei.ice.lib.dao.IDataTransferModel;
@@ -8,6 +9,7 @@ import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.SampleStorage;
 
+@XmlRootElement
 @XmlSeeAlso({StrainData.class, PlasmidData.class, ArabidopsisSeedData.class})
 public class PartData implements IDataTransferModel {
 
@@ -63,11 +65,11 @@ public class PartData implements IDataTransferModel {
 
     public PartData(EntryType type) {
         this.type = type;
-        sampleStorage = new ArrayList<SampleStorage>();
-        accessPermissions = new ArrayList<AccessPermission>();
-        comments = new ArrayList<UserComment>();
-        linkedParts = new ArrayList<PartData>();
-        sequenceAnalysis = new ArrayList<SequenceAnalysisInfo>();
+        sampleStorage = new ArrayList<>();
+        accessPermissions = new ArrayList<>();
+        comments = new ArrayList<>();
+        linkedParts = new ArrayList<>();
+        sequenceAnalysis = new ArrayList<>();
     }
 
     public String getRecordId() {

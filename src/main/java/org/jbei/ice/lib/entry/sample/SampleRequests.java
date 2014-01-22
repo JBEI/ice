@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.RequestDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.sample.SampleRequestType;
-import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
 import org.jbei.ice.lib.utils.Emailer;
@@ -29,9 +28,11 @@ import org.jbei.ice.lib.utils.Utils;
 public class SampleRequests {
 
     private final RequestDAO dao;
+    private final EntryDAO entryDAO;
 
     public SampleRequests() {
         this.dao = DAOFactory.getRequestDAO();
+        this.entryDAO = DAOFactory.getEntryDAO();
     }
 
     /**
@@ -43,13 +44,7 @@ public class SampleRequests {
      * @param type    type of sample request
      */
     public SampleRequest placeSampleInCart(Account account, long entryID, SampleRequestType type) {
-        Entry entry;
-        try {
-            entry = new EntryController().get(account, entryID);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
+        Entry entry = entryDAO.get(entryID);
 
         if (entry == null)
             throw new IllegalArgumentException("Cannot find entry with id: " + entryID);
@@ -115,13 +110,7 @@ public class SampleRequests {
         if (account == null)
             return null;
 
-        Entry entry;
-        try {
-            entry = new EntryController().get(account, entryId);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
+        Entry entry = entryDAO.get(entryId);
 
         if (entry == null)
             throw new IllegalArgumentException("Cannot find entry with id: " + entryId);

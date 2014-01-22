@@ -149,7 +149,7 @@ public class SequenceAnalysisController {
         SequenceController sequenceController = new SequenceController();
 
         try {
-            Sequence sequence = sequenceController.getByEntry(entry);
+            Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
 
             if (sequence == null) { // it will remove invalid alignments
                 rebuildAllAlignments(entry);
@@ -401,7 +401,7 @@ public class SequenceAnalysisController {
         }
 
         SequenceController sequenceController = new SequenceController();
-        Sequence sequence = sequenceController.getByEntry(entry);
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
 
         if (sequence == null) {
             return;

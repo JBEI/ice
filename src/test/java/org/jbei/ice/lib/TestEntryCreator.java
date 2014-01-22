@@ -1,7 +1,7 @@
 package org.jbei.ice.lib;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.model.Strain;
 
 /**
@@ -10,13 +10,12 @@ import org.jbei.ice.lib.entry.model.Strain;
  *
  * @author Hector Plahar
  */
-public class EntryCreator {
+public class TestEntryCreator {
 
     public static Strain createTestStrain(Account account) throws Exception {
-        EntryController controller = new EntryController();
         Strain strain = new Strain();
         strain.setName("sTrain");
-        strain = (Strain) controller.createEntry(account, strain, null);
+        strain = (Strain) new EntryCreator().createEntry(account, strain, null);
         return strain;
     }
 }

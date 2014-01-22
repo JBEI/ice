@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
@@ -12,7 +14,6 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
-import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.shared.BioSafetyOption;
@@ -192,8 +193,8 @@ public class BulkUploadControllerTest {
         BulkUploadInfo bulkUploadInfo = controller.retrieveById(account, bulkId, 0, 1000);
         Assert.assertNotNull(bulkUploadInfo);
 
-        EntryController entryController = new EntryController();
-        Entry entry = entryController.get(account, entryId);
+        EntryDAO dao = DAOFactory.getEntryDAO();
+        Entry entry = dao.get(entryId);
         Assert.assertNotNull(entry);
         Assert.assertNotNull(entry.getLinks());
         Assert.assertEquals(1, entry.getLinks().size());
@@ -209,7 +210,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(entryId > 0);
         Assert.assertTrue(bulkId > 0);
 
-        entry = entryController.get(account, entryId);
+        entry = dao.get(entryId);
         Assert.assertNotNull(entry);
     }
 
@@ -225,8 +226,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(autoUpdate.getLastUpdate() != null);
 
         // check that the entry has been created and has visibility of draft
-        EntryController entryController = new EntryController();
-        Entry entry = entryController.get(account, autoUpdate.getEntryId());
+        Entry entry = DAOFactory.getEntryDAO().get(autoUpdate.getEntryId());
         Assert.assertNotNull(entry);
         Assert.assertEquals("JBEI-0001", entry.getName());
         Assert.assertTrue(entry.getVisibility().equals(Integer.valueOf(Visibility.DRAFT.getValue())));
@@ -331,8 +331,7 @@ public class BulkUploadControllerTest {
         Assert.assertNull(info);
 
         // entry must still exist and have a visibility of OK
-        EntryController entryController = new EntryController();
-        Entry entry = entryController.get(account, autoUpdate.getEntryId());
+        Entry entry = DAOFactory.getEntryDAO().get(autoUpdate.getEntryId());
         Assert.assertNotNull(entry);
         Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
 
@@ -360,7 +359,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(autoUpdate.getLastUpdate() != null);
 
         long id = autoUpdate.getEntryId();
-        Entry strain = entryController.get(account, id);
+        Entry strain = DAOFactory.getEntryDAO().get(id);
         Set<Entry> linked = strain.getLinkedEntries();
         Assert.assertEquals(1, linked.size());
 
@@ -369,7 +368,7 @@ public class BulkUploadControllerTest {
                                   plasmid.getVisibility() == Visibility.DRAFT.getValue());
 
         Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
-        strain = entryController.get(account, id);
+        strain = DAOFactory.getEntryDAO().get(id);
         linked = strain.getLinkedEntries();
         plasmid = (Entry) linked.toArray()[0];
         Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
@@ -377,7 +376,7 @@ public class BulkUploadControllerTest {
 
         Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
 
-        strain = entryController.get(account, id);
+        strain = DAOFactory.getEntryDAO().get(id);
         linked = strain.getLinkedEntries();
         plasmid = (Entry) linked.toArray()[0];
         Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
@@ -437,8 +436,7 @@ public class BulkUploadControllerTest {
         autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
 
         // get entry
-        EntryController entryController = new EntryController();
-        Entry entry = entryController.get(account, autoUpdate.getEntryId());
+        Entry entry = DAOFactory.getEntryDAO().get(autoUpdate.getEntryId());
         Assert.assertNotNull(entry);
         Assert.assertEquals(entry.getRecordType().toLowerCase(), EntryType.STRAIN.toString().toLowerCase());
 
@@ -450,13 +448,13 @@ public class BulkUploadControllerTest {
         // add promoters to plasmid
         autoUpdate.getKeyValue().put(EntryField.PLASMID_PROMOTERS, "promoters");
         autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
-        entry = entryController.get(account, autoUpdate.getEntryId());
+        entry = DAOFactory.getEntryDAO().get(autoUpdate.getEntryId());
         plasmid = (Entry) entry.getLinkedEntries().toArray()[0];
         Assert.assertEquals("promoters", ((Plasmid) plasmid).getPromoters());
 
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, "BLS1");
         autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryAddType.STRAIN_WITH_PLASMID);
-        entry = entryController.get(account, autoUpdate.getEntryId());
+        entry = DAOFactory.getEntryDAO().get(autoUpdate.getEntryId());
         plasmid = (Entry) entry.getLinkedEntries().toArray()[0];
         Assert.assertEquals(1, entry.getBioSafetyLevel().intValue());
         Assert.assertEquals(1, plasmid.getBioSafetyLevel().intValue());

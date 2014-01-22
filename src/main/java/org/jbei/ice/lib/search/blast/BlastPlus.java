@@ -26,9 +26,9 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -38,8 +38,7 @@ import org.jbei.ice.lib.dto.entry.StrainData;
 import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
@@ -150,12 +149,8 @@ public class BlastPlus {
             info = new SearchResult();
             info.setEntryInfo(view);
 
-            try {
-                String summary = new EntryController().getEntrySummary(info.getEntryInfo().getId());
-                info.getEntryInfo().setShortDescription(summary);
-            } catch (ControllerException e) {
-                Logger.error(e);
-            }
+            String summary = new EntryRetriever().getEntrySummary(info.getEntryInfo().getId());
+            info.getEntryInfo().setShortDescription(summary);
 //                searchResult.setAlignmentLength(alignmentLength);
 //                searchResult.setPercentId(percentId);
         }
@@ -446,12 +441,7 @@ public class BlastPlus {
      */
     private static void writeBigFastaFile(BufferedWriter writer) throws BlastException {
         Set<Sequence> sequencesList;
-        SequenceController sequenceController = new SequenceController();
-        try {
-            sequencesList = sequenceController.getAllSequences();
-        } catch (ControllerException e) {
-            throw new BlastException(e);
-        }
+        sequencesList = DAOFactory.getSequenceDAO().getAllSequences();
         for (Sequence sequence : sequencesList) {
             long id = sequence.getEntry().getId();
 //            boolean circular = false;

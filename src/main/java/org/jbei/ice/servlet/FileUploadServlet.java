@@ -24,9 +24,11 @@ import org.jbei.ice.lib.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -192,14 +194,9 @@ public class FileUploadServlet extends HttpServlet {
 
         EntryType type = EntryType.valueOf(entryType);
         EntryAddType addType = EntryAddType.valueOf(entryAddType);
-        EntryController entryController = new EntryController();
+        EntryRetriever retriever = new EntryRetriever();
 
-        Entry entry;
-        try {
-            entry = entryController.get(account, entryId);
-        } catch (ControllerException ce) {
-            return "Error";
-        }
+        Entry entry = DAOFactory.getEntryDAO().get(entryId);
 
         try {
             if (entry == null) {
@@ -260,7 +257,7 @@ public class FileUploadServlet extends HttpServlet {
             update = new BulkUploadController().autoUpdateBulkUpload(account.getEmail(), update, addType);
             boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
                     && type == EntryType.PLASMID);
-            Entry entry = new EntryController().get(account, update.getEntryId());
+            Entry entry = DAOFactory.getEntryDAO().get(update.getEntryId());
 
             if (isStrainWithPlasmidPlasmid && !entry.getLinkedEntries().isEmpty()) {
                 entry = (Entry) entry.getLinkedEntries().toArray()[0];
@@ -309,8 +306,8 @@ public class FileUploadServlet extends HttpServlet {
         EntryController controller = new EntryController();
         Entry entry = null;
         try {
-            entry = controller.get(account, Long.decode(entryId));
-        } catch (NumberFormatException | ControllerException e) {
+            entry = DAOFactory.getEntryDAO().get(Long.decode(entryId));
+        } catch (NumberFormatException e) {
             Logger.error(e);
         }
 
@@ -389,7 +386,7 @@ public class FileUploadServlet extends HttpServlet {
         EntryController controller = new EntryController();
         Entry entry;
         try {
-            entry = controller.get(account, Long.decode(entryId));
+            entry = DAOFactory.getEntryDAO().get(Long.decode(entryId));
 
             if (entry != null) {
                 Attachment attachment = new Attachment();

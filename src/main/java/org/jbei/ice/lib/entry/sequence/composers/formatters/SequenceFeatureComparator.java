@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.composers.formatters;
+package org.jbei.ice.lib.entry.sequence.composers.formatters;
 
 import java.util.Comparator;
 

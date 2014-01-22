@@ -19,13 +19,13 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.models.Project;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
@@ -61,16 +61,15 @@ public class RegistryAMFAPI extends BaseService {
      */
     public Entry getEntry(String sessionId, String entryId) {
         Account account = getAccountBySessionId(sessionId);
-        if (account == null) {
-            return null;
-        }
+        return null;
+//        }
 
-        try {
-            return new EntryController().getByRecordId(account, entryId);
-        } catch (ControllerException e) {
-            Logger.error("Failed to get entry!", e);
-            return null;
-        }
+//        try {
+//            return new EntryController().getByRecordId(account, entryId);
+//        } catch (ControllerException e) {
+//            Logger.error("Failed to get entry!", e);
+//            return null;
+//        }
     }
 
     /**
@@ -108,12 +107,13 @@ public class RegistryAMFAPI extends BaseService {
         EntryController entryController = new EntryController();
         Entry entry;
 
-        try {
-            entry = entryController.getByRecordId(account, entryId);
-        } catch (ControllerException e) {
-            Logger.error("Failed to get entry!", e);
+//        try {
+//            entry = entryController.getByRecordId(account, entryId);
+//        } catch (ControllerException e) {
+//            Logger.error("Failed to get entry!", e);
+        if (true)
             return null;
-        }
+//        }
         // TODO : this is a bit of a hack. basically searching through all partners to see if they have this entry
         if (entry == null) {
             Service service = RegistryAPIServiceClient.getService();
@@ -136,13 +136,8 @@ public class RegistryAMFAPI extends BaseService {
         }
         // TODO
 
-        try {
-            Sequence sequence = new SequenceController().getByEntry(entry);
-            return new SequenceController().sequenceToDNASequence(sequence);
-        } catch (ControllerException e) {
-            Logger.error("Failed to get entry!", e);
-            return null;
-        }
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
+        return new SequenceController().sequenceToDNASequence(sequence);
     }
 
     /**
@@ -163,12 +158,12 @@ public class RegistryAMFAPI extends BaseService {
         SequenceController sequenceController = new SequenceController();
 
         try {
-            Entry entry = entryController.getByRecordId(account, entryId);
+            Entry entry = null;// entryController.getByRecordId(account, entryId);
             if (entry == null) {
                 return false;
             }
 
-            Sequence existing = sequenceController.getByEntry(entry);
+            Sequence existing = DAOFactory.getSequenceDAO().getByEntry(entry);
             if (existing != null) {
                 Files.deleteIfExists(Paths.get(existing.getFwdHash() + ".png"));
             }
@@ -204,7 +199,7 @@ public class RegistryAMFAPI extends BaseService {
         Entry entry;
         List<TraceSequence> traces;
         try {
-            entry = entryController.getByRecordId(account, entryId);
+            entry = null; //entryController.getByRecordId(account, entryId);
 
             if (entry == null) {
                 return null;

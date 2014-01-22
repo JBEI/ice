@@ -244,7 +244,12 @@ public class AccountController {
      * @throws ControllerException
      */
     public Account getByEmail(String email) {
-        return dao.getByEmail(email);
+        try {
+            return dao.getByEmail(email);
+        } catch (DAOException de) {
+            Logger.debug("Could not retrieve by email " + email);
+            return null;
+        }
     }
 
     public long getAccountId(String email) throws ControllerException {

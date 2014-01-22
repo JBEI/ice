@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.EntryCreator;
+import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -56,7 +56,7 @@ public class FolderControllerTest {
         // create 100 test strains
         HashMap<String, Entry> parts = new HashMap<>();
         for (int i = 0; i < size; i += 1) {
-            Strain strain = EntryCreator.createTestStrain(account);
+            Strain strain = TestEntryCreator.createTestStrain(account);
             Assert.assertNotNull(strain);
             parts.put(strain.getPartNumber(), strain);
         }

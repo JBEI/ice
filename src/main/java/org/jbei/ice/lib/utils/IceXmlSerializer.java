@@ -12,6 +12,7 @@ import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
@@ -116,11 +117,7 @@ public class IceXmlSerializer {
         ArrayList<Sequence> sequences = new ArrayList<>();
         SequenceController sequenceController = new SequenceController();
         for (Entry entry : entries) {
-            try {
-                sequences.add(sequenceController.getByEntry(entry));
-            } catch (ControllerException e) {
-                throw new UtilityException(e);
-            }
+            sequences.add(DAOFactory.getSequenceDAO().getByEntry(entry));
         }
 
         OutputFormat format = OutputFormat.createPrettyPrint();

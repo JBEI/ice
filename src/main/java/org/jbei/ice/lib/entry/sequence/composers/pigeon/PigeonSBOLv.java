@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.composers.pigeon;
+package org.jbei.ice.lib.entry.sequence.composers.pigeon;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.composers.formatters.SBOLVisitor;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOLVisitor;
 import org.jbei.ice.lib.models.Sequence;
 
 import org.apache.http.HttpResponse;

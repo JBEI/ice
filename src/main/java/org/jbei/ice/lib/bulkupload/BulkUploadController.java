@@ -21,6 +21,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
+import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.PartSample;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
@@ -39,7 +40,6 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.Storage;
@@ -62,7 +62,6 @@ public class BulkUploadController {
     private final SampleController sampleController;
     private final EntryController entryController;
     private final AttachmentController attachmentController;
-    private final SequenceController sequenceController;
     private final PreferencesController preferencesController;
 
     public BulkUploadController() {
@@ -72,7 +71,6 @@ public class BulkUploadController {
         sampleController = new SampleController();
         entryController = new EntryController();
         attachmentController = new AttachmentController();
-        sequenceController = new SequenceController();
         preferencesController = new PreferencesController();
     }
 
@@ -205,11 +203,12 @@ public class BulkUploadController {
     protected ArrayList<PartData> convertParts(Account account, EntryAddType type, ArrayList<Entry> contents)
             throws ControllerException {
         ArrayList<PartData> addList = new ArrayList<>();
+        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
 
         for (Entry entry : contents) {
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
-            boolean hasSequence = sequenceController.hasSequence(entry.getId());
-            boolean hasOriginalSequence = sequenceController.hasOriginalSequence(entry.getId());
+            boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
+            boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
             PartData info = ModelToInfoFactory.getInfo(entry);
             ArrayList<AttachmentInfo> attachmentInfos = ModelToInfoFactory.getAttachments(attachments);
             info.setAttachments(attachmentInfos);
@@ -233,8 +232,8 @@ public class BulkUploadController {
                     // get plasmids
                     Entry plasmid = (Entry) entry.getLinkedEntries().toArray()[0];
                     attachments = attachmentController.getByEntry(account, plasmid);
-                    hasSequence = sequenceController.hasSequence(plasmid.getId());
-                    hasOriginalSequence = sequenceController.hasOriginalSequence(plasmid.getId());
+                    hasSequence = sequenceDAO.hasSequence(plasmid.getId());
+                    hasOriginalSequence = sequenceDAO.hasOriginalSequence(plasmid.getId());
                     PartData plasmidInfo = ModelToInfoFactory.getInfo(plasmid);
                     ArrayList<AttachmentInfo> partAttachments = ModelToInfoFactory.getAttachments(attachments);
                     plasmidInfo.setAttachments(partAttachments);

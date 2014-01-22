@@ -3,7 +3,7 @@ package org.jbei.ice.lib.dao;
 import java.io.Serializable;
 
 /**
- * Interface data objects
+ * Interface for data objects persisted in the database
  *
  * @author Hector Plahar
  */

@@ -80,7 +80,7 @@ public class EntryTransfers {
                     Entry entry = dao.get(id);
                     partData = ModelToInfoFactory.getInfo(entry);
                     part.setPart(partData);
-                    Sequence sequence = sequenceController.getByEntry(entry);
+                    Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
 
                     // convert sequence
                     if (sequence != null) {
@@ -159,7 +159,7 @@ public class EntryTransfers {
             for (SequencePartTransfer part : parts) {
                 Entry entry = InfoToModelFactory.infoToEntry(part.getPart());
                 entry.setVisibility(Visibility.TRANSFERRED.getValue());
-                entry.setPartNumber(new EntryController().getNextPartNumber());
+                entry.setPartNumber(EntryUtil.getNextPartNumber());
 
                 // always assign new record id to uploaded part and maintain any existing as legacy version
                 String newRecordId = Utils.generateUUID();

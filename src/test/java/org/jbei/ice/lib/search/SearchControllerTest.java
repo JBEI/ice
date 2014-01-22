@@ -11,7 +11,7 @@ import org.jbei.ice.lib.dto.entry.PlasmidData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
-import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.folder.FolderController;
@@ -58,7 +58,7 @@ public class SearchControllerTest {
         data.setFundingSource("DOE");
         data.setPrincipalInvestigator("Nathan");
         Entry entry = InfoToModelFactory.infoToEntry(data);
-        entry = new EntryController().createEntry(account, entry);
+        entry = new EntryCreator().createEntry(account, entry);
         Assert.assertNotNull(entry);
         Assert.assertTrue(entry.getId() > 0);
         HibernateHelper.commitTransaction();   // commit triggers indexing
@@ -100,7 +100,7 @@ public class SearchControllerTest {
         partInfo.setStatus("Complete");
         partInfo.setShortDescription("test");
         Entry entry = InfoToModelFactory.infoToEntry(partInfo, null);
-        new EntryController().createEntry(a1, entry);
+        new EntryCreator().createEntry(a1, entry);
         Assert.assertNotNull(entry);
         Assert.assertTrue(entry.getId() > 0);
         HibernateHelper.commitTransaction();   // commit triggers indexing

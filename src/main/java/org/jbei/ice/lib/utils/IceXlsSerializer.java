@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -211,7 +212,7 @@ public class IceXlsSerializer {
 
             stringBuilder.append(attachmentController.hasAttachment(entry) ? "Yes" : "No").append(",");
             stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append(",");
-            stringBuilder.append((sequenceController.hasSequence(entry.getId())) ? "Yes" : "No").append("\n");
+            stringBuilder.append((DAOFactory.getSequenceDAO().hasSequence(entry.getId())) ? "Yes" : "No").append("\n");
         }
 
         return stringBuilder.toString();

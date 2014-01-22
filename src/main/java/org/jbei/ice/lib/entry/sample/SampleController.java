@@ -17,6 +17,7 @@ import org.jbei.ice.lib.dto.StorageInfo;
 import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryEditor;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.models.Storage;
@@ -139,7 +140,7 @@ public class SampleController {
         // retrieve entry for record id
         Entry entry;
         EntryController entryController = new EntryController();
-        entry = entryController.getByRecordId(account, recordId);
+        entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
         if (entry == null)
             throw new ControllerException("Could not locate entry to associate sample with");
 
@@ -170,7 +171,7 @@ public class SampleController {
         sample = saveSample(account, sample);
         String name = entry.getName();
         if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
-            entryController.updateWithNextStrainName(strainNamePrefix, entry);
+            new EntryEditor().updateWithNextStrainName(strainNamePrefix, entry);
         }
         return sample;
     }

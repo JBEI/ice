@@ -109,26 +109,21 @@ public class PermissionsController {
         }
 
         // does the permissions already exists
-        try {
-            if (dao.hasPermission(entry, folder, account, group, access.isCanRead(), access.isCanWrite())) {
-                return dao.retrievePermission(entry, folder, account, group, access.isCanRead(), access.isCanWrite());
-            }
-
-            // add the permission if not
-            Permission permission = new Permission();
-            permission.setEntry(entry);
-            if (entry != null)
-                entry.getPermissions().add(permission);
-            permission.setGroup(group);
-            permission.setFolder(folder);
-            permission.setAccount(account);
-            permission.setCanRead(access.isCanRead());
-            permission.setCanWrite(access.isCanWrite());
-            return dao.create(permission);
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
+        if (dao.hasPermission(entry, folder, account, group, access.isCanRead(), access.isCanWrite())) {
+            return dao.retrievePermission(entry, folder, account, group, access.isCanRead(), access.isCanWrite());
         }
+
+        // add the permission if not
+        Permission permission = new Permission();
+        permission.setEntry(entry);
+        if (entry != null)
+            entry.getPermissions().add(permission);
+        permission.setGroup(group);
+        permission.setFolder(folder);
+        permission.setAccount(account);
+        permission.setCanRead(access.isCanRead());
+        permission.setCanWrite(access.isCanWrite());
+        return dao.create(permission);
     }
 
     /**
@@ -268,7 +263,6 @@ public class PermissionsController {
             throw new ControllerException(e);
         }
     }
-
 
     public boolean hasWritePermission(Account account, Folder folder) throws ControllerException {
         if (accountController.isAdministrator(account) || folder.getOwnerEmail().equalsIgnoreCase(account.getEmail()))

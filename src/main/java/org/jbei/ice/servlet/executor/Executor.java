@@ -21,5 +21,33 @@ public abstract class Executor<T extends Action> {
         return Operation.fromString(action.getAction());
     }
 
-    public abstract Result execute();
+    public Result execute() {
+
+        switch (getOperation()) {
+            case CREATE:
+                return create();
+
+            case RETRIEVE:
+                return retrieve();
+
+            case UPDATE:
+                return update();
+
+            case DELETE:
+                return delete();
+
+            default:
+                return executeOther();
+        }
+    }
+
+    protected abstract Result create();
+
+    protected abstract Result retrieve();
+
+    protected abstract Result update();
+
+    protected abstract Result delete();
+
+    protected abstract Result executeOther();
 }

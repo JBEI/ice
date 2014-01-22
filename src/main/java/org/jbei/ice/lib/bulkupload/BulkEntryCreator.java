@@ -13,6 +13,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
+import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.PartSample;
 import org.jbei.ice.lib.dto.StorageInfo;
@@ -22,6 +23,8 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryCreator;
+import org.jbei.ice.lib.entry.EntryEditor;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
@@ -40,11 +43,15 @@ import org.jbei.ice.servlet.InfoToModelFactory;
 public class BulkEntryCreator {
 
     private final BulkUploadDAO dao;
+    private final EntryDAO entryDAO;
+    private final EntryCreator creator;
     private final AccountController accountController;
     private final EntryController entryController;
 
     public BulkEntryCreator() {
-        dao = new BulkUploadDAO();
+        dao = DAOFactory.getBulkUploadDAO();
+        entryDAO = DAOFactory.getEntryDAO();
+        creator = new EntryCreator();
         accountController = new AccountController();
         entryController = new EntryController();
     }
@@ -99,7 +106,7 @@ public class BulkEntryCreator {
         }
 
         // for strain with plasmid this is the strain
-        Entry entry = entryController.get(account, autoUpdate.getEntryId());
+        Entry entry = entryDAO.get(autoUpdate.getEntryId());
         Entry otherEntry = null;  // for strain with plasmid this is the entry
 
         // if entry is null, create entry
@@ -108,7 +115,7 @@ public class BulkEntryCreator {
             if (entry == null)
                 throw new ControllerException("Don't know what to do with entry type");
 
-            entry = entryController.createEntry(account, entry, null);
+            entry = creator.createEntry(account, entry, null);
 
             // creates strain/plasmid at the same time for strain with plasmid
             if (addType == EntryAddType.STRAIN_WITH_PLASMID) {
@@ -120,7 +127,7 @@ public class BulkEntryCreator {
                     otherEntry.setCreator(account.getFullName());
                     otherEntry.setCreatorEmail(account.getEmail());
                     otherEntry.setVisibility(Visibility.DRAFT.getValue());
-                    entryController.createEntry(account, otherEntry, null);
+                    creator.createEntry(account, otherEntry, null);
                     // link the plasmid to strain (strain gets updated later on)
                     entry.getLinkedEntries().add(otherEntry);
                 } else {
@@ -133,7 +140,7 @@ public class BulkEntryCreator {
                     entry.setCreatorEmail(account.getEmail());
                     entry.getLinkedEntries().add(otherEntry);
                     entry.setVisibility(Visibility.DRAFT.getValue());
-                    entryController.createEntry(account, entry, null);
+                    creator.createEntry(account, entry, null);
                 }
             }
 
@@ -175,11 +182,12 @@ public class BulkEntryCreator {
                     entry.setVisibility(Visibility.DRAFT.getValue());
             }
 
+            EntryEditor editor = new EntryEditor();
             // set the plasmids and update
             if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())
                     && entry.getLinkedEntries().isEmpty()) {
                 Strain strain = (Strain) entry;
-                entryController.setStrainPlasmids(account, strain, strain.getPlasmids());
+                editor.setStrainPlasmids(account, strain, strain.getPlasmids());
             }
 
             entryController.update(account, entry);

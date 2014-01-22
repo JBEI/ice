@@ -8,6 +8,8 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.StorageInfo;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.entry.attachment.Attachment;
@@ -374,13 +376,10 @@ public class ModelToInfoFactory {
         }
 
         // has sequence
-        try {
-            SequenceController sequenceController = new SequenceController();
-            view.setHasSequence(sequenceController.hasSequence(entry.getId()));
-            view.setHasOriginalSequence(sequenceController.hasOriginalSequence(entry.getId()));
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
+        SequenceController sequenceController = new SequenceController();
+        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
+        view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
+        view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
 
         return view;
     }

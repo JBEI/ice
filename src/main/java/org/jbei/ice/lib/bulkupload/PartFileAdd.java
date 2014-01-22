@@ -7,7 +7,7 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -27,7 +27,7 @@ public class PartFileAdd {
     public static void uploadSequenceToEntry(long entryId, String userId, InputStream inputStream, boolean getLinkEntry)
             throws Exception {
         Account account = new AccountController().getByEmail(userId);
-        Entry entry = new EntryController().get(account, entryId);
+        Entry entry = DAOFactory.getEntryDAO().get(entryId);
 
         // associate with entry
         if (getLinkEntry) {
@@ -43,7 +43,7 @@ public class PartFileAdd {
     public static void uploadSequenceToEntry(long entryId, String userId, DNASequence dnaSequence,
             String sequenceUser) throws Exception {
         Account account = new AccountController().getByEmail(userId);
-        Entry entry = new EntryController().get(account, entryId);
+        Entry entry = DAOFactory.getEntryDAO().get(entryId);
 
         Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(entry);
@@ -55,7 +55,7 @@ public class PartFileAdd {
     public static void uploadAttachmentToEntry(long entryId, String userId, InputStream inputStream, String fileName,
             boolean getLinkEntry) throws Exception {
         Account account = new AccountController().getByEmail(userId);
-        Entry entry = new EntryController().get(account, entryId);
+        Entry entry = DAOFactory.getEntryDAO().get(entryId);
 
         // associate with entry
         if (getLinkEntry) {

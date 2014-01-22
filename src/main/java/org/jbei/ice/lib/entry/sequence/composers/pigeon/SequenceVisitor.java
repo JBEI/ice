@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.composers.pigeon;
+package org.jbei.ice.lib.entry.sequence.composers.pigeon;
 
 import java.util.Set;
 

@@ -14,7 +14,7 @@ public abstract class Action<T extends IDataTransferModel> {
     private String entity;
     private String userId;
     private Paging paging;
-    private T params;
+    private T data;
 
     public Action() {
     }
@@ -48,11 +48,11 @@ public abstract class Action<T extends IDataTransferModel> {
         this.paging = paging;
     }
 
-    public T getParams() {
-        return params;
+    public T getData() {
+        return data;
     }
 
-    public void setParams(T params) {
-        this.params = params;
+    public void setData(T data) {
+        this.data = data;
     }
 }
