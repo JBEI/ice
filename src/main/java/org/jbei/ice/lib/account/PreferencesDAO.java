@@ -66,7 +66,8 @@ class PreferencesDAO extends HibernateRepository<Preference> {
         while (iterator.hasNext()) {
             Preference preference = (Preference) iterator.next();
             if (keys.contains(preference.getKey().toUpperCase())) {
-                results.put(preference.getKey().toUpperCase().trim(), preference.getValue().trim());
+                String key = preference.getKey().toUpperCase().trim().replace("BOOST_", "");
+                results.put(key, preference.getValue().trim());
             }
         }
 

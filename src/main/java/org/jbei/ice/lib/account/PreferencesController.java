@@ -9,6 +9,7 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
@@ -69,8 +70,9 @@ public class PreferencesController {
             throws ControllerException {
         try {
             HashSet<String> values = new HashSet<>();
-            for (SearchBoostField field : fields)
+            for (SearchBoostField field : fields) {
                 values.add("BOOST_" + field.name());
+            }
             return dao.retrievePreferenceValues(account, values);
         } catch (DAOException de) {
             throw new ControllerException(de);
@@ -79,6 +81,16 @@ public class PreferencesController {
 
     // really an update
     public boolean saveSetting(Account account, String key, String value) throws ControllerException {
+        // check if a search boost setting
+        try {
+            SearchBoostField boostField = SearchBoostField.valueOf(key.toUpperCase());
+            if (boostField != null) {
+                key = "BOOST_" + boostField.name();
+            }
+        } catch (Exception e) {
+            Logger.debug(e.getMessage());
+        }
+
         try {
             return dao.saveOrUpdatePreference(account, key, value) != null;
         } catch (DAOException e) {
