@@ -16,6 +16,7 @@ public class AccountTransfer implements IDataTransferModel {
     private long id;
     private String sessionId;
     private String email;
+    private String password;
     private String initials;
     private String firstName;
     private String lastName;
@@ -156,5 +157,13 @@ public class AccountTransfer implements IDataTransferModel {
 
     public ArrayList<AccessPermission> getDefaultPermissions() {
         return defaultPermissions;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

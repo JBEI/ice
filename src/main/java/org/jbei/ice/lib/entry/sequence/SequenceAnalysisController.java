@@ -11,7 +11,6 @@ import java.util.List;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -84,11 +83,7 @@ public class SequenceAnalysisController {
         TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence, date);
         File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
 
-        try {
-            return traceDao.create(tracesDir, traceSequence, inputStream);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return traceDao.create(tracesDir, traceSequence, inputStream);
     }
 
     /**
@@ -124,12 +119,8 @@ public class SequenceAnalysisController {
 
         entryAuthorization.expectWrite(account.getEmail(), traceSequence.getEntry());
 
-        try {
-            File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
-            traceDao.delete(tracesDir, traceSequence);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
+        traceDao.delete(tracesDir, traceSequence);
     }
 
     /**
@@ -144,51 +135,40 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to get trace sequences for null entry!");
         }
 
-        List<TraceSequence> traces = null;
+        List<TraceSequence> traces;
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
 
-        SequenceController sequenceController = new SequenceController();
+        if (sequence == null) { // it will remove invalid alignments
+            rebuildAllAlignments(entry);
 
-        try {
-            Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
+            traces = TraceSequenceDAO.getByEntry(entry);
+        } else {
+            traces = TraceSequenceDAO.getByEntry(entry);
 
-            if (sequence == null) { // it will remove invalid alignments
-                rebuildAllAlignments(entry);
+            boolean wasUpdated = false;
+            for (TraceSequence traceSequence : traces) {
+                if (traceSequence.getTraceSequenceAlignment() == null
+                        || traceSequence.getTraceSequenceAlignment().getSequenceHash() == null
+                        || traceSequence.getTraceSequenceAlignment().getSequenceHash()
+                                        .isEmpty()
+                        || !traceSequence.getTraceSequenceAlignment().getSequenceHash()
+                                         .equals(sequence.getFwdHash())) {
+                    buildOrRebuildAlignment(traceSequence, sequence);
 
-                traces = TraceSequenceDAO.getByEntry(entry);
-            } else {
-                traces = TraceSequenceDAO.getByEntry(entry);
-
-                boolean wasUpdated = false;
-                for (TraceSequence traceSequence : traces) {
-                    if (traceSequence.getTraceSequenceAlignment() == null
-                            || traceSequence.getTraceSequenceAlignment().getSequenceHash() == null
-                            || traceSequence.getTraceSequenceAlignment().getSequenceHash()
-                                            .isEmpty()
-                            || !traceSequence.getTraceSequenceAlignment().getSequenceHash()
-                                             .equals(sequence.getFwdHash())) {
-                        buildOrRebuildAlignment(traceSequence, sequence);
-
-                        wasUpdated = true;
-                    }
-                }
-
-                if (wasUpdated) { // fetch again because alignment has been updated
-                    traces = TraceSequenceDAO.getByEntry(entry);
+                    wasUpdated = true;
                 }
             }
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+
+            if (wasUpdated) { // fetch again because alignment has been updated
+                traces = TraceSequenceDAO.getByEntry(entry);
+            }
         }
 
         return traces;
     }
 
     public TraceSequence getTraceSequenceByFileId(String fileId) throws ControllerException {
-        try {
-            return traceDao.getByFileId(fileId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return traceDao.getByFileId(fileId);
     }
 
     /**
@@ -381,8 +361,6 @@ public class SequenceAnalysisController {
             }
         } catch (Bl2SeqException e) {
             throw new ControllerException(e);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
         }
     }
 
@@ -400,7 +378,6 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to rebuild alignment for null entry!");
         }
 
-        SequenceController sequenceController = new SequenceController();
         Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
 
         if (sequence == null) {
