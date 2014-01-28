@@ -20,8 +20,6 @@ import org.jbei.ice.lib.dao.hibernate.AccountPreferencesDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.models.SessionData;
-import org.jbei.ice.lib.session.PersistentSessionDataWrapper;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -241,15 +239,9 @@ public class AccountController {
      *
      * @param email unique identifier for account, typically email
      * @return {@link Account}
-     * @throws ControllerException
      */
     public Account getByEmail(String email) {
-        try {
-            return dao.getByEmail(email);
-        } catch (DAOException de) {
-            Logger.debug("Could not retrieve by email " + email);
-            return null;
-        }
+        return dao.getByEmail(email);
     }
 
     public long getAccountId(String email) throws ControllerException {
@@ -262,6 +254,13 @@ public class AccountController {
         if (account == null)
             throw new ControllerException("Could not retrieve account for " + email);
         return account.getId();
+    }
+
+    public Account getAccountBySessionKey(String sessionKey) throws ControllerException {
+        String userId = SessionHandler.getUserIdBySession(sessionKey);
+        if (userId == null)
+            throw new ControllerException("Could not retrieve user id for session " + sessionKey);
+        return dao.getByEmail(userId);
     }
 
     /**
@@ -318,21 +317,6 @@ public class AccountController {
     }
 
     /**
-     * Retrieve the {@link Account} by session key.
-     *
-     * @param sessionKey
-     * @return Account associated with the session key.
-     * @throws ControllerException
-     */
-    public Account getAccountBySessionKey(String sessionKey) throws ControllerException {
-        try {
-            return dao.getAccountByAuthToken(sessionKey);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    /**
      * Return the {@link AccountPreferences} of the given account.
      *
      * @param account
@@ -362,13 +346,11 @@ public class AccountController {
      * @param login
      * @param password
      * @param ip       IP Address of the user.
-     * @return {@link SessionData}
      * @throws InvalidCredentialsException
      * @throws ControllerException
      */
-    public SessionData authenticate(String login, String password, String ip)
+    public boolean authenticate(String login, String password, String ip)
             throws InvalidCredentialsException, ControllerException {
-        SessionData result = null;
         IAuthentication authentication = new UserIdAuthentication();
 
         try {
@@ -378,7 +360,7 @@ public class AccountController {
                 } catch (InterruptedException ie) {
                     Logger.warn(ie.getMessage());
                 }
-                return null;
+                return false;
             }
         } catch (AuthenticationException e2) {
             try {
@@ -402,14 +384,10 @@ public class AccountController {
             account.setIp(ip);
             account.setLastLoginTime(Calendar.getInstance().getTime());
             save(account);
-            try {
-                result = PersistentSessionDataWrapper.getInstance().newSessionData(account);
-            } catch (DAOException e) {
-                throw new ControllerException(e);
-            }
+            SessionHandler.createNewSessionForUser(account.getEmail());
         }
 
-        return result;
+        return true;
     }
 
     /**
@@ -428,11 +406,10 @@ public class AccountController {
      */
     public AccountTransfer authenticate(String login, String password)
             throws InvalidCredentialsException, ControllerException {
-        SessionData sessionData = authenticate(login, password, "");
-        if (sessionData == null)
+        if (!authenticate(login, password, ""))
             return null;
 
-        Account account = sessionData.getAccount();
+        Account account = dao.getByEmail(login);
         AccountTransfer info = account.toDataTransferObject();
         if (info == null)
             return info;
@@ -441,40 +418,27 @@ public class AccountController {
         info.setId(account.getId());
         boolean isAdmin = isAdministrator(account);
         info.setAdmin(isAdmin);
-        info.setSessionId(sessionData.getSessionKey());
+        info.setSessionId(SessionHandler.createNewSessionForUser(login));
         return info;
     }
 
     /**
      * See if the given sessionKey is still authenticated with the system.
      *
-     * @param sessionKey
+     * @param sessionKey unique session identifier
      * @return True if sessionKey is still authenticated (active) to the system.
-     * @throws ControllerException
      */
-    public static boolean isAuthenticated(String sessionKey) throws ControllerException {
-        boolean result = false;
-        try {
-            SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(sessionKey);
-            if (sessionData != null) {
-                result = true;
-            }
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-        return result;
+    public static boolean isAuthenticated(String sessionKey) {
+        return SessionHandler.isValidSession(sessionKey);
     }
 
     /**
      * De-authenticate the given sessionKey. The user is logged out from the system.
      *
-     * @param sessionKey
-     * @throws ControllerException
+     * @param sessionKey unique session identifier
      */
-    public static void deauthenticate(String sessionKey) throws ControllerException {
-        if (isAuthenticated(sessionKey)) {
-            PersistentSessionDataWrapper.getInstance().delete(sessionKey);
-        }
+    public static void invalidate(String sessionKey) {
+        SessionHandler.invalidateSession(sessionKey);
     }
 
     /**

@@ -1,8 +1,10 @@
 package org.jbei.ice.services.rest;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -28,8 +30,11 @@ public class PartResource {
     @GET
     @Produces("application/json")
     @Path("/{id}")
-    public PartData read(@Context UriInfo info, @PathParam("id") long partId) { //}, @PathParam("start") int start) {
+    public PartData read(@Context UriInfo info, @PathParam("id") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @Context final HttpServletResponse response) { //}, @PathParam("start") int start) {
         try {
+            Logger.info(userAgentHeader);
             HibernateHelper.beginTransaction();
             Entry entry = DAOFactory.getEntryDAO().get(partId);
             return ModelToInfoFactory.createTipView(entry);

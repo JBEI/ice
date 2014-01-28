@@ -3,7 +3,11 @@ package org.jbei.ice.services.rest;
 import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
+
+import org.glassfish.jersey.server.ContainerRequest;
 
 /**
  * @author Hector Plahar
@@ -13,31 +17,28 @@ public class IceAuthenticationFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-//        requestContext.getHeaders();
-//        String auth = requestContext.getHeaderString()
-
-//        final SecurityContext securityContext = requestContext.getSecurityContext();
-//
-//        if (securityContext == null ||
-//                !securityContext.isUserInRole("privileged")) {
-//
-//            requestContext.abortWith(Response
-//                                             .status(Response.Status.UNAUTHORIZED)
-//                                             .entity("User cannot access the resource.")
-//                                             .build());
-//        }
-        /*
-        //GET, POST, PUT, DELETE, ...
-        String method = containerRequest.getMethod();
-        // myresource/get/56bCA for example
-        String path = containerRequest.getPath(true);
-
-        //We do allow wadl to be retrieve
-        if(method.equals("GET") && (path.equals("application.wadl") || path.equals("application.wadl/xsd0.xsd")){
-            return containerRequest;
+        final SecurityContext securityContext = requestContext.getSecurityContext();
+        if (!securityContext.isSecure()) {
+            requestContext.abortWith(Response.status(Response.Status.EXPECTATION_FAILED)
+                                             .entity("HTTPS only supported")
+                                             .build());
         }
 
-        //Get the authentification passed in HTTP headers parameters
+        ContainerRequest request = (ContainerRequest) requestContext;
+        String path = request.getPath(true);
+        String method = request.getMethod();
+
+        if (("PUT".equals(method) || "POST".equals(method)) && path.equals("/accesstoken"))
+            return;
+
+        String auth = requestContext.getHeaderString("X-ICE-Authentication-SessionId");
+        if (auth == null) {
+            requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
+                                             .entity("User cannot access the resource.")
+                                             .build());
+        }
+
+        /*
         String auth = containerRequest.getHeaderValue("authorization");
 
         //If the user does not have the right (does not provide any HTTP Basic Auth)
@@ -62,8 +63,6 @@ public class IceAuthenticationFilter implements ContainerRequestFilter {
         }
 
         //TODO : HERE YOU SHOULD ADD PARAMETER TO REQUEST, TO REMEMBER USER ON YOUR REST SERVICE...
-
-        return containerRequest;
          */
     }
 }

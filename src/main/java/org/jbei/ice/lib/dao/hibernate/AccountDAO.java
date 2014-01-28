@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.models.SessionData;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -67,32 +66,7 @@ public class AccountDAO extends HibernateRepository<Account> {
                 account = (Account) result;
             }
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve Account by email: " + email);
-        }
-        return account;
-    }
-
-    /**
-     * Retrieve the {@link Account} by the authorization token.
-     *
-     * @param authToken token
-     * @return Account.
-     * @throws DAOException
-     */
-    public Account getAccountByAuthToken(String authToken) throws DAOException {
-        Account account = null;
-        String queryString = "from " + SessionData.class.getName()
-                + " sessionData where sessionData.sessionKey = :sessionKey";
-        Session session = currentSession();
-        try {
-            Query query = session.createQuery(queryString);
-            query.setString("sessionKey", authToken);
-            SessionData sessionData = (SessionData) query.uniqueResult();
-            if (sessionData != null) {
-                account = sessionData.getAccount();
-            }
-        } catch (HibernateException e) {
-            throw new DAOException("Failed to get Account by token: " + authToken);
+            throw new DAOException("Failed to retrieve Account by email: " + email, e);
         }
         return account;
     }

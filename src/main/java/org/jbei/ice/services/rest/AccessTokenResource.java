@@ -14,6 +14,7 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.entry.EntryController;
 
 /**
@@ -32,9 +33,11 @@ public class AccessTokenResource {
     public AccountTransfer create(@Context UriInfo uriInfo, AccountTransfer transfer) {
         String name = transfer.getEmail();
         String pass = transfer.getPassword();
+        HibernateHelper.beginTransaction();
 
         try {
             AccountController controller = new AccountController();
+
             AccountTransfer info = controller.authenticate(name, pass);
             if (info == null) {
                 return null;
@@ -45,14 +48,13 @@ public class AccessTokenResource {
             EntryController entryController = new EntryController();
             long visibleEntryCount = entryController.getNumberOfVisibleEntries(account);
             info.setVisibleEntryCount(visibleEntryCount);
+            HibernateHelper.commitTransaction();
+            return info;
         } catch (ControllerException e) {
             Logger.error(e);
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by " + name);
         }
         return null;
-
     }
-
-
 }

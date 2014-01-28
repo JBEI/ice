@@ -91,7 +91,7 @@ public class RegistryAPI implements IRegistryAPI {
     @Override
     public void logout(@WebParam(name = "sessionId") String sessionId) throws ServiceException {
         try {
-            AccountController.deauthenticate(sessionId);
+            AccountController.invalidate(sessionId);
             log(sessionId, "Logged out");
         } catch (Exception e) {
             Logger.error(e);
