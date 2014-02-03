@@ -1,0 +1,62 @@
+<table class="login_layout" cellpadding="0" cellspacing="0">
+    <tr>
+        <td>
+            <ng-include src="'/partials/institution.html'"></ng-include>
+        </td>
+        <td width="50px">&nbsp;</td>
+        <td>
+            <form name="registerForm" data-ng-submit="submit()">
+                <table>
+                    <tr>
+                        <td colspan="3"><img style="margin-bottom: 30px;" src="img/logo.png"></td>
+                    </tr>
+                    <tr>
+                        <td width="100px" style="vertical-align: top;"><span class="font-80em"
+                                                                             style="white-space:nowrap">Given Name <span
+                                class="required">*</span></span></td>
+                        <td><input type="text" class="input_box pad-2" style="width: 205px;" data-ng-model="firstName">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="100px" style="vertical-align: top;"><span class="font-80em"
+                                                                             style="white-space:nowrap">Family Name <span
+                                class="required">*</span></span></td>
+                        <td><input type="text" class="input_box pad-2" style="width: 205px;" data-ng-model="lastName">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="100px" style="vertical-align: top;"><span class="font-80em"
+                                                                             style="white-space:nowrap">Email <span
+                                class="required">*</span></span></td>
+                        <td>
+                            <div><input type="text" class="input_box pad-2" style="width: 205px;" data-ng-model="email">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="100px" style="vertical-align: top;"><span class="font-80em"
+                                                                             style="white-space:nowrap">Institution <span
+                                class="required">*</span></span></td>
+                        <td><input type="text" class="input_box pad-2" style="width: 205px;"
+                                   data-ng-model="institution"></td>
+                    </tr>
+                    <tr>
+                        <td width="100px" style="vertical-align: top;"><span class="font-80em"
+                                                                             style="white-space:nowrap">About yourself</span>
+                        </td>
+                        <td><textarea class="input_box" style="width: 205px; height: 60px;"
+                                      data-ng-model="about"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center">
+                            <div>
+                                <button type="submit" class="login_btn">Submit</button>
+                                <a href="/login">Cancel</a></div>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+
+        </td>
+    </tr>
+</table>

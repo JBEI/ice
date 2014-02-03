@@ -153,6 +153,11 @@
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 
+    <error-page>
+        <error-code>404</error-code>
+        <location>/</location>
+    </error-page>
+
     <session-config>
         <session-timeout>10</session-timeout>
     </session-config>

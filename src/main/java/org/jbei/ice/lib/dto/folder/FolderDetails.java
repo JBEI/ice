@@ -2,6 +2,7 @@ package org.jbei.ice.lib.dto.folder;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dao.IDataTransferModel;
@@ -14,6 +15,7 @@ import org.jbei.ice.lib.dto.permission.AccessPermission;
  * @author Hector Plahar
  */
 
+@XmlRootElement
 public class FolderDetails implements IDataTransferModel {
 
     private long id;
@@ -21,7 +23,7 @@ public class FolderDetails implements IDataTransferModel {
     private long count = -1;
     private String description;
     private boolean propagatePermission;
-    private LinkedList<PartData> entries = new LinkedList<PartData>();
+    private LinkedList<PartData> entries = new LinkedList<>();
     private FolderType type;
     private AccountTransfer owner;    // owner or person sharing this folder
     private ArrayList<AccessPermission> accessPermissions;

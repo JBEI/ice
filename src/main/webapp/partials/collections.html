@@ -1,0 +1,81 @@
+<table cellspacing="0" cellpadding="0" width="210px">
+
+    <!--<span data-ng-repeat="folder in allFolders">{{folder.folderName}}</span>-->
+
+    <!-- header -->
+    <tr>
+        <td style="padding: 10px"><img src="img/logo.png" alt="ICE" height="84px"></td>
+    </tr>
+
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+
+    <tr>
+        <td class="collections_header">
+            COLLECTIONS
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="system_collection_user_menu_row">
+                <i class="fa fa-folder fa-fw" style="font-size: 14px; color: #a1a0a0;"></i> &nbsp;<span
+                    class="collection_user_menu">Available</span>
+                <span class="menu_count">{{collection.available}}</span>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td style="background-color: #f1f1f1;">
+            <div class="system_collection_user_menu_row">
+                <i class="fa fa-folder-open fa-fw" style="font-size: 14px; color: #233559; opacity: 0.8"></i>
+                &nbsp;<span
+                    class="collection_user_menu"><b style="color: #233559">Personal</b></span> <span class="menu_count"><i
+                    class="fa fa-plus-square"></i></span>
+            </div>
+
+            <!-- details of personal -->
+            <table cellspacing="0" cellpadding="0" width="219px" style="margin-left: 5px;">
+                <tr data-ng-repeat="folder in personalFolders">
+                    <td>
+                        <div class="system_collection_user_menu_row" style="background-color: #f9f9f9">
+                            <i class="fa fa-folder-o fa-fw"
+                               style="font-size: 12px; color: #a1a0a0; padding-left: 9px"></i> &nbsp;<span
+                                class="font-75em">{{folder.folderName | limitTo:26}}</span>&nbsp;<span
+                                class="menu_count">{{folder.count}}</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="system_collection_user_menu_row" style="background-color: #f9f9f9">
+                            <i class="fa fa-folder-o fa-fw"
+                               style="font-size: 12px; color: #a1a0a0; padding-left: 9px"></i> &nbsp;<span
+                                class="font-75em">Parts: sgRNAs</span> <span class="menu_count"><i
+                                class="fa fa-caret-down"
+                                style="font-size: 14px; padding: 0 3px 0 3px; border-radius: 2px; border: 1px solid"></i></span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="system_collection_user_menu_row">
+                <i class="fa fa-folder fa-fw" style="font-size: 14px; color: #a1a0a0;"></i><i class="fa fa-users"
+                                                                                              style=" position: relative; left: -13px; font-size: 9px; color: #f1f1f1;"></i><span
+                    class="collection_user_menu">Shared</span>
+                <span class="menu_count">{{collection.shared}}</span>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="system_collection_user_menu_row">
+                <i class="fa fa-trash-o fa-fw" style="font-size: 14px; color: #a1a0a0;"></i> &nbsp;<span
+                    class="collection_user_menu">Deleted</span><span class="menu_count">{{collection.deleted}}</span>
+            </div>
+        </td>
+    </tr>
+</table>

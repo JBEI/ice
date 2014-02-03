@@ -1,14 +1,23 @@
 <!doctype html>
 <html lang="en" data-ng-app="iceApp">
 <head>
+    <base href="/">
+
     <meta charset="utf-8">
     <title>ICE - Inventory of Composable Elements</title>
-    <link rel="stylesheet" href="css/app.css"/>
-    <!-- In production use:
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
--->
+    <link href="css/font-awesome.css" rel="stylesheet">
+    <link href="css/ice.css" rel="stylesheet">
+
+
+    <!--<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">-->
+
+    <!--<script src="lib/angular-ui/angular-ui.js" />-->
+
+
     <script src="lib/angular/angular.js"></script>
     <script src="lib/angular/angular-route.js"></script>
+    <script src="lib/angular/angular-resource.js"></script>
+    <script src="lib/angular/angular-cookies.js"></script>
     <script src="js/app.js"></script>
     <script src="js/services.js"></script>
     <script src="js/controllers.js"></script>
@@ -16,11 +25,73 @@
     <script src="js/directives.js"></script>
 </head>
 
-<body ng-controller="EntryController">
-<ul ng-cloak>
-    <li data-ng-repeat="datum in result.data">{{datum.name}}</li>
-</ul>
+<body>
+<div data-ng-view style="height:100%"></div>
 
+<table cellpadding="0" cellspacing="0" style="width: 100%;">
+    <tr>
+        <td colspan="2">
+            <table cellspacing="0" cellpadding="0" class="footer_line" style="width: 100%;"></table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table cellspacing="0" cellpadding="0">
+                <tr>
+                    <td align="left" style="vertical-align: top;"><img src="img/doe-bioenergy-research-cent.gif"></td>
+                    <td align="left" style="vertical-align: top;"><img src="img/lbnl-logo.gif"></td>
+                    <td align="left" style="vertical-align: top;"><img src="img/sandia-lab-logo.gif"></td>
+                    <td align="left" style="vertical-align: top;"><img src="img/ucb-logo.gif"></td>
+                    <td align="left" style="vertical-align: top;"><img src="img/ucdavis-logo.gif"></td>
+                    <td align="left" style="vertical-align: top;"><img src="img/carnegie-insitution-logo.gif"></td>
+                    <td align="left" style="vertical-align: top;"><img src="img/llnl-logo.gif"></td>
+                    <td align="left" style="vertical-align: top;"><img src="img/pnw.png"></td>
+                </tr>
+            </table>
+        </td>
+        <td align="right">
+            <table cellspacing="0" cellpadding="0" class="font-80em">
+                <tr>
+                    <td align="right" style="vertical-align: top;">
+                        <table cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td align="left" style="vertical-align: top;">
+                                    <div>©&nbsp;</div>
+                                </td>
+                                <td align="left" style="vertical-align: top;"><a href="https://github.com/JBEI/ice">JBEI
+                                    Registry</a></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right" style="vertical-align: top;">
+                        <div>All rights reserved.</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right" style="vertical-align: top;">
+                        <table cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td align="left" style="vertical-align: top;"><a
+                                        href="https://github.com/JBEI/ice/issues/new">Submit
+                                    an Issue</a></td>
+                                <td align="left" style="vertical-align: top;">
+                                    <div>&nbsp; | &nbsp;</div>
+                                </td>
+                                <td align="left" style="vertical-align: top;"><a href="/api">Help</a>
+                                </td>
+                                <td align="left" style="vertical-align: top;">
+                                    <div>&nbsp; | &nbsp; v3.6.3</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>

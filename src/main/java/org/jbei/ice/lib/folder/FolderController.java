@@ -14,6 +14,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -37,12 +38,14 @@ public class FolderController {
     private final AccountController accountController;
     private final PermissionDAO permissionDAO;
     private final PermissionsController permissionsController;
+    private final AccountDAO accountDAO;
 
     public FolderController() {
         dao = DAOFactory.getFolderDAO();
         accountController = new AccountController();
-        permissionDAO = new PermissionDAO();
+        permissionDAO = DAOFactory.getPermissionDAO();
         permissionsController = new PermissionsController();
+        accountDAO = DAOFactory.getAccountDAO();
     }
 
     public Folder removeFolderContents(Account account, long folderId, ArrayList<Long> entryIds)
@@ -142,7 +145,8 @@ public class FolderController {
             details.setAccessPermissions(controller.retrieveSetFolderPermission(folder, false));
             details.setPublicReadAccess(controller.isPublicVisible(folder));
             Account owner = accountController.getByEmail(folder.getOwnerEmail());
-            details.setOwner(owner.toDataTransferObject());
+            if (owner != null)
+                details.setOwner(owner.toDataTransferObject());
             EntryAuthorization entryAuthorization = new EntryAuthorization();
 
             ArrayList<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit);
@@ -241,8 +245,42 @@ public class FolderController {
         }
     }
 
-    public ArrayList<FolderDetails> retrieveFoldersForUser(Account account) throws ControllerException {
+    public Collection getFolderStats(String userId) {
+        Account account = getAccount(userId);
+        if (account == null)
+            return null;
+
+        Collection collection = new Collection();
+        collection.setAvailable(32);
+        collection.setDeleted(4);
+        collection.setPersonal(123);
+        collection.setShared(2);
+        return collection;
+    }
+
+    public ArrayList<FolderDetails> getUserFolders(String userId) {
+        Account account = getAccount(userId);
+        List<Folder> folders = dao.getFoldersByOwner(account);
+        ArrayList<FolderDetails> folderDetails = new ArrayList<>();
+        for (Folder folder : folders) {
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+            long folderSize = dao.getFolderSize(folder.getId());
+            details.setCount(folderSize);
+        }
+        return folderDetails;
+    }
+
+    protected Account getAccount(String userId) {
+        Account account = accountDAO.getByEmail(userId);
+        if (account == null)
+            throw new IllegalArgumentException("No account with id " + userId);
+        return account;
+    }
+
+    // available folders
+    public ArrayList<FolderDetails> retrieveFoldersForUser(String userId) throws ControllerException {
         ArrayList<FolderDetails> results = new ArrayList<>();
+        Account account = getAccount(userId);
 
         try {
             // publicly visible collections are owned by the system
@@ -254,7 +292,7 @@ public class FolderController {
                 details.setCount(folderSize);
                 details.setDescription(folder.getDescription());
                 details.setType(FolderType.PUBLIC);
-                if (account.getType() == AccountType.ADMIN) {
+                if (account != null && account.getType() == AccountType.ADMIN) {
                     ArrayList<AccessPermission> accesses = permissionsController.retrieveSetFolderPermission(folder,
                                                                                                              false);
                     details.setAccessPermissions(accesses);

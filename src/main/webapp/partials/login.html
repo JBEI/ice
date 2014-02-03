@@ -1,0 +1,29 @@
+<table cellspacing="0" cellpadding="0" height="100%" class="login_layout">
+    <tr>
+        <td>
+            <ng-include src="'partials/institution.html'"></ng-include>
+        </td>
+        <td width="50px">&nbsp;</td>
+        <td>
+            <div><br><img src="img/logo.png"><br><br><span data-ng-if="errMsg != undefined">{{errMsg}}</span><br>
+
+                <form name="loginForm" data-ng-submit="submit()">
+                    <input type="text" class="login_input" placeholder="Username" data-ng-model="userId"/>
+                    <br>
+                    <input type="password" class="login_input" placeholder="Password" data-ng-model="userPassword"/>
+                    <br><span
+                        id="remember_user_login_checkbox"><input type="checkbox" value="on" tabindex="0"/><span
+                        class="font-80em">Remember me on this computer</span><br><span id="login_button"><button
+                        type="submit" class="login_btn">Sign in
+                </button></span> &nbsp; <a href="/register">
+                    Create account</a></span>
+                </form>
+
+                <div id="forgot_password" style="margin-top: 45px;">
+                    <div class="footer_feedback_widget display-inline font-80em">Forgot your password?
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>

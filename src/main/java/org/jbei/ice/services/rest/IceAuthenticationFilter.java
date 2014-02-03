@@ -28,7 +28,8 @@ public class IceAuthenticationFilter implements ContainerRequestFilter {
         String path = request.getPath(true);
         String method = request.getMethod();
 
-        if (("PUT".equals(method) || "POST".equals(method)) && path.equals("/accesstoken"))
+        if (("PUT".equals(method) || "POST".equals(method)) && (path.equals("/accesstoken") || path.equals
+                ("/profile")))
             return;
 
         String auth = requestContext.getHeaderString("X-ICE-Authentication-SessionId");
