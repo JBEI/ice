@@ -25,19 +25,23 @@ public class PartHeader extends BulkUploadHeaders {
         headers.add(new CellColumnHeader(EntryField.PI, preferences, true));
         headers.add(new CellColumnHeader(EntryField.FUNDING_SOURCE, preferences));
         headers.add(new CellColumnHeader(EntryField.IP, preferences));
-        headers.add(new CellColumnHeader(EntryField.BIOSAFETY_LEVEL, preferences, true, new BioSafetySheetCell()));
-        headers.add(new CellColumnHeader(EntryField.NAME, preferences, true));
-        headers.add(new CellColumnHeader(EntryField.ALIAS, preferences));
-        headers.add(new CellColumnHeader(EntryField.KEYWORDS, preferences));
-        headers.add(new CellColumnHeader(EntryField.SUMMARY, preferences, true));
-        headers.add(new CellColumnHeader(EntryField.NOTES, preferences));
+        headers.add(new CellColumnHeader(EntryField.BIOSAFETY_LEVEL, preferences, true, new BioSafetySheetCell(),
+                                         "Level 1 or Level 2"));
+        headers.add(new CellColumnHeader(EntryField.NAME, preferences, true, "Part Name e.g.pTSH117"));
+        headers.add(new CellColumnHeader(EntryField.ALIAS, preferences, false, "Part Alias"));
+        headers.add(new CellColumnHeader(EntryField.KEYWORDS, preferences, false));
+        headers.add(new CellColumnHeader(EntryField.SUMMARY, preferences, true, "Short description of the part"));
+        headers.add(new CellColumnHeader(EntryField.NOTES, preferences, false,
+                                         "More details about the part, if available"));
         headers.add(new CellColumnHeader(EntryField.REFERENCES, preferences));
-        headers.add(new CellColumnHeader(EntryField.LINKS, preferences));
+        headers.add(new CellColumnHeader(EntryField.LINKS, preferences, false, "Comma separated"));
         headers.add(new CellColumnHeader(EntryField.STATUS, preferences, true, new StatusSheetCell()));
         headers.add(new CellColumnHeader(EntryField.SEQ_FILENAME, preferences, false,
-                                         new FileInputCell(true, delegate, addType, type)));
+                                         new FileInputCell(true, delegate, addType, type),
+                                         "Click on the cell to upload file"));
         headers.add(new CellColumnHeader(EntryField.ATT_FILENAME, preferences, false,
-                                         new FileInputCell(false, delegate, addType, type)));
+                                         new FileInputCell(false, delegate, addType, type),
+                                         "Click on the cell to upload file"));
     }
 
     @Override

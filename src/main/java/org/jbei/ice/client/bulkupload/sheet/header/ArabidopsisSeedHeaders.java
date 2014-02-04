@@ -35,11 +35,13 @@ public class ArabidopsisSeedHeaders extends PartHeader {
                                          new AutoCompleteSheetCell(AutoCompleteField.SELECTION_MARKERS)));
         headers.add(new CellColumnHeader(EntryField.HOMOZYGOSITY, preferences));
         headers.add(new CellColumnHeader(EntryField.HARVEST_DATE, preferences, false, new DateInputCell()));
-        headers.add(new CellColumnHeader(EntryField.ECOTYPE, preferences));
+        headers.add(new CellColumnHeader(EntryField.ECOTYPE, preferences, false, "If known"));
         headers.add(new CellColumnHeader(EntryField.PARENTS, preferences));
-        headers.add(new CellColumnHeader(EntryField.GENERATION, preferences, true, new GenerationSheetCell()));
+        headers.add(new CellColumnHeader(EntryField.GENERATION, preferences, true, new GenerationSheetCell()
+        ));
         headers.add(new CellColumnHeader(EntryField.PLANT_TYPE, preferences, true, new PlantTypeSheetCell()));
-        headers.add(new CellColumnHeader(EntryField.SENT_TO_ABRC, preferences, false, new BooleanSheetCell()));
+        headers.add(new CellColumnHeader(EntryField.SENT_TO_ABRC, preferences, false, new BooleanSheetCell(),
+                                         "Yes or No"));
     }
 
     @Override

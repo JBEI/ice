@@ -35,45 +35,52 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
         //strain information
         headers.add(new CellColumnHeader(EntryField.STRAIN_NAME, preferences, true, "e.g. JBEI-0001"));
         headers.add(new CellColumnHeader(EntryField.STRAIN_ALIAS, preferences));
-        headers.add(new CellColumnHeader(EntryField.STRAIN_LINKS, preferences));
+        headers.add(new CellColumnHeader(EntryField.STRAIN_LINKS, preferences, false, "Comma separated list"));
         headers.add(new CellColumnHeader(EntryField.STRAIN_SELECTION_MARKERS, preferences, true,
                                          new AutoCompleteSheetCell(AutoCompleteField.SELECTION_MARKERS)));
         headers.add(new CellColumnHeader(EntryField.STRAIN_PARENTAL_STRAIN, preferences));
         headers.add(new CellColumnHeader(EntryField.STRAIN_GEN_PHEN, preferences));
         headers.add(new CellColumnHeader(EntryField.STRAIN_KEYWORDS, preferences));
-        headers.add(new CellColumnHeader(EntryField.STRAIN_SUMMARY, preferences, true));
-        headers.add(new CellColumnHeader(EntryField.STRAIN_NOTES, preferences));
+        headers.add(new CellColumnHeader(EntryField.STRAIN_SUMMARY, preferences, true,
+                                         "Short description of the strain"));
+        headers.add(new CellColumnHeader(EntryField.STRAIN_NOTES, preferences, false,
+                                         "More details about the strain, if available"));
         headers.add(new CellColumnHeader(EntryField.STRAIN_REFERENCES, preferences));
         headers.add(new CellColumnHeader(EntryField.STRAIN_SEQ_FILENAME, preferences, false,
                                          new FileInputCell(true, delegate, EntryAddType.STRAIN_WITH_PLASMID,
-                                                           EntryType.STRAIN)));
+                                                           EntryType.STRAIN), "Click on the cell to upload file"));
         headers.add(new CellColumnHeader(EntryField.STRAIN_ATT_FILENAME, preferences, false,
                                          new FileInputCell(false, delegate, EntryAddType.STRAIN_WITH_PLASMID,
-                                                           EntryType.STRAIN)));
+                                                           EntryType.STRAIN), "Click on the cell to upload file"));
 
         // plasmid information
         headers.add(new CellColumnHeader(EntryField.PLASMID_NAME, preferences, true, "e.g. pTSH117"));
-        headers.add(new CellColumnHeader(EntryField.PLASMID_ALIAS, preferences));
-        headers.add(new CellColumnHeader(EntryField.PLASMID_LINKS, preferences));
+        headers.add(new CellColumnHeader(EntryField.PLASMID_ALIAS, preferences, false, "Part Alias"));
+        headers.add(new CellColumnHeader(EntryField.PLASMID_LINKS, preferences, false, "Comma separated list"));
         headers.add(new CellColumnHeader(EntryField.PLASMID_SELECTION_MARKERS, preferences, true,
-                                         new AutoCompleteSheetCell(AutoCompleteField.SELECTION_MARKERS)));
-        headers.add(new CellColumnHeader(EntryField.CIRCULAR, preferences, false, new BooleanSheetCell()));
+                                         new AutoCompleteSheetCell(AutoCompleteField.SELECTION_MARKERS),
+                                         "Comma separated list"));
+        headers.add(new CellColumnHeader(EntryField.CIRCULAR, preferences, false, new BooleanSheetCell(), "Yes or No"));
         headers.add(new CellColumnHeader(EntryField.PLASMID_BACKBONE, preferences));
         headers.add(new CellColumnHeader(EntryField.PLASMID_PROMOTERS, preferences, false,
-                                         new AutoCompleteSheetCell(AutoCompleteField.PROMOTERS)));
-        headers.add(new CellColumnHeader(EntryField.REPLICATES_IN, preferences, false));
+                                         new AutoCompleteSheetCell(AutoCompleteField.PROMOTERS),
+                                         "Comma separated list"));
+        headers.add(new CellColumnHeader(EntryField.REPLICATES_IN, preferences, false, "Comma separated list"));
         headers.add(new CellColumnHeader(EntryField.PLASMID_ORIGIN_OF_REPLICATION, preferences, false,
-                                         new AutoCompleteSheetCell(AutoCompleteField.ORIGIN_OF_REPLICATION)));
+                                         new AutoCompleteSheetCell(AutoCompleteField.ORIGIN_OF_REPLICATION),
+                                         "Comma separated list"));
         headers.add(new CellColumnHeader(EntryField.PLASMID_KEYWORDS, preferences));
-        headers.add(new CellColumnHeader(EntryField.PLASMID_SUMMARY, preferences, true));
-        headers.add(new CellColumnHeader(EntryField.PLASMID_NOTES, preferences));
+        headers.add(new CellColumnHeader(EntryField.PLASMID_SUMMARY, preferences, true,
+                                         "Short description of the plasmid"));
+        headers.add(new CellColumnHeader(EntryField.PLASMID_NOTES, preferences, false,
+                                         "More details about the plasmid, if known"));
         headers.add(new CellColumnHeader(EntryField.PLASMID_REFERENCES, preferences));
         headers.add(new CellColumnHeader(EntryField.PLASMID_SEQ_FILENAME, preferences, false,
                                          new FileInputCell(true, delegate, EntryAddType.STRAIN_WITH_PLASMID,
-                                                           EntryType.PLASMID)));
+                                                           EntryType.PLASMID), "Click on the cell to upload file"));
         headers.add(new CellColumnHeader(EntryField.PLASMID_ATT_FILENAME, preferences, false,
                                          new FileInputCell(false, delegate, EntryAddType.STRAIN_WITH_PLASMID,
-                                                           EntryType.PLASMID)));
+                                                           EntryType.PLASMID), "Click on the cell to upload file"));
     }
 
     public static boolean isPlasmidHeader(EntryField header) {
