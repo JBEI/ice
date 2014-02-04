@@ -104,7 +104,7 @@ public class SampleController {
     public ArrayList<Sample> getSamples(Entry entry) throws ControllerException {
         ArrayList<Sample> samples;
         try {
-            samples = dao.getSamplesByEntry(entry);
+            samples = new ArrayList<>(dao.getSamplesByEntry(entry));
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
