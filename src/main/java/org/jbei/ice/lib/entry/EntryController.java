@@ -24,7 +24,6 @@ import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.CommentDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
-import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.PartSample;
 import org.jbei.ice.lib.dto.comment.UserComment;
@@ -603,7 +602,7 @@ public class EntryController {
         }
 
         // sequence analysis
-        List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
+        List<TraceSequence> sequences = DAOFactory.getTraceSequenceDAO().getByEntry(entry);
         partData.setSequenceAnalysis(ModelToInfoFactory.getSequenceAnalysis(sequences));
 
         // comments

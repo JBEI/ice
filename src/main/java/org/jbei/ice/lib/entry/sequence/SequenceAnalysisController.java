@@ -141,26 +141,23 @@ public class SequenceAnalysisController {
         if (sequence == null) { // it will remove invalid alignments
             rebuildAllAlignments(entry);
 
-            traces = TraceSequenceDAO.getByEntry(entry);
+            traces = traceDao.getByEntry(entry);
         } else {
-            traces = TraceSequenceDAO.getByEntry(entry);
+            traces = traceDao.getByEntry(entry);
 
             boolean wasUpdated = false;
             for (TraceSequence traceSequence : traces) {
                 if (traceSequence.getTraceSequenceAlignment() == null
                         || traceSequence.getTraceSequenceAlignment().getSequenceHash() == null
-                        || traceSequence.getTraceSequenceAlignment().getSequenceHash()
-                                        .isEmpty()
-                        || !traceSequence.getTraceSequenceAlignment().getSequenceHash()
-                                         .equals(sequence.getFwdHash())) {
+                        || traceSequence.getTraceSequenceAlignment().getSequenceHash().isEmpty()
+                        || !traceSequence.getTraceSequenceAlignment().getSequenceHash().equals(sequence.getFwdHash())) {
                     buildOrRebuildAlignment(traceSequence, sequence);
-
                     wasUpdated = true;
                 }
             }
 
             if (wasUpdated) { // fetch again because alignment has been updated
-                traces = TraceSequenceDAO.getByEntry(entry);
+                traces = traceDao.getByEntry(entry);
             }
         }
 

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.TraceSequence;
@@ -18,9 +17,9 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 /**
- * TraceSequence to manipulate {@link TraceSequence} objects.
+ * Data accessor for {@link TraceSequence}s
  *
- * @author Zinovii Dmytriv, Timothy Ham
+ * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
  */
 public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
 
@@ -34,14 +33,10 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      */
     public TraceSequence create(File tracesFile, TraceSequence traceSequence, InputStream inputStream)
             throws DAOException {
-        if (traceSequence == null) {
-            throw new DAOException("Couldn't save TraceSequence. TraceSequence is null!");
-        }
-
         TraceSequence result;
         try {
             if (getByFileId(traceSequence.getFileId()) != null) {
-                throw new DAOException("TraceSequence by this fileId already exists!");
+                throw new DAOException("TraceSequence with fileId " + traceSequence.getFileId() + " already exists!");
             }
 
             writeTraceSequenceToFile(tracesFile, traceSequence.getFileId(), inputStream);
@@ -69,7 +64,6 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      * @throws DAOException
      */
     public TraceSequence save(TraceSequence traceSequence) throws DAOException {
-
         TraceSequenceAlignment traceSequenceAlignment = traceSequence.getTraceSequenceAlignment();
         Session session = currentSession();
         try {
@@ -80,7 +74,6 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
         } catch (HibernateException e) {
             throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
-            Logger.error(e1);
             throw new DAOException("Unknown database exception ", e1);
         }
     }
@@ -139,7 +132,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      * @throws IOException
      * @throws DAOException
      */
-    private static void writeTraceSequenceToFile(File traceFilesDirectory, String fileName, InputStream inputStream)
+    private void writeTraceSequenceToFile(File traceFilesDirectory, String fileName, InputStream inputStream)
             throws IOException, DAOException {
         try {
             File file = new File(traceFilesDirectory + File.separator + fileName);
@@ -150,18 +143,12 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
                 }
             }
 
-            if (!file.exists()) {
-                if (!file.createNewFile()) {
-                    throw new DAOException("Could not create trace file " + file.getName());
-                }
+            if (!file.exists() && !file.createNewFile()) {
+                throw new DAOException("Could not create trace file " + file.getName());
             }
 
-            FileOutputStream outputStream = new FileOutputStream(file);
-
-            try {
+            try (FileOutputStream outputStream = new FileOutputStream(file)) {
                 IOUtils.copy(inputStream, outputStream);
-            } finally {
-                outputStream.close();
             }
         } catch (SecurityException e) {
             throw new DAOException(e);
@@ -193,11 +180,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public static List<TraceSequence> getByEntry(Entry entry) throws DAOException {
-        if (entry == null) {
-            throw new DAOException("Failed to get TraceSequences for null entry!");
-        }
-
+    public List<TraceSequence> getByEntry(Entry entry) throws DAOException {
         List<TraceSequence> result = null;
 
         Session session = currentSession();
@@ -219,26 +202,8 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
         return result;
     }
 
-    /**
-     * // TODO : move to a common file manager
-     * Retrieve the {@link File} object from disk associated with the given {@link TraceSequence}
-     * object.
-     *
-     * @param traceSequence
-     * @return Trace file.
-     * @throws DAOException
-     */
-    public static File getFile(File traceFilesDirectory, TraceSequence traceSequence) throws DAOException {
-        File file = new File(traceFilesDirectory + File.separator + traceSequence.getFileId());
-
-        if (!file.canRead()) {
-            throw new DAOException("Failed to open file for read!");
-        }
-        return file;
-    }
-
     @Override
     public TraceSequence get(long id) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return super.get(TraceSequence.class, id);
     }
 }
