@@ -288,4 +288,6 @@ public interface RegistryServiceAsync {
     void updateSampleRequest(String sessionId, SampleRequest request, AsyncCallback<SampleRequest> callback);
 
     void submitSampleRequests(String sessionId, ArrayList<SampleRequest> requests, AsyncCallback<Boolean> callback);
+
+    void clearEntryTraceSequences(String sid, long entryId, AsyncCallback<Boolean> async);
 }

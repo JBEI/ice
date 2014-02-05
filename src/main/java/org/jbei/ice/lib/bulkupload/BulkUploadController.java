@@ -228,6 +228,7 @@ public class BulkUploadController {
             info.setHasAttachment(!attachmentInfos.isEmpty());
             info.setHasSequence(hasSequence);
             info.setHasOriginalSequence(hasOriginalSequence);
+            info.setSequenceAnalysis(ModelToInfoFactory.getTraceSequences(entry));
 
             // retrieve permission
             Set<Permission> entryPermissions = entry.getPermissions();

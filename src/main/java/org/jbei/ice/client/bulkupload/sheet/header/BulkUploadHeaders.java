@@ -10,6 +10,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.entry.SequenceInfo;
 
 /**
  * Header fields for bulk upload and operations to act on them.
@@ -18,6 +19,7 @@ import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
  * @author Hector Plahar
  */
 public abstract class BulkUploadHeaders {
+
     protected ArrayList<CellColumnHeader> headers = new ArrayList<CellColumnHeader>();
 
     public ArrayList<CellColumnHeader> getHeaders() {
@@ -137,33 +139,45 @@ public abstract class BulkUploadHeaders {
 
             case SEQ_FILENAME:
             case STRAIN_SEQ_FILENAME:
+                if (!info.isHasSequence())
+                    break;
+
+                SequenceInfo sequenceInfo = info.getSequence();
+                if (sequenceInfo != null) {
+                    value = sequenceInfo.getName();
+                    id = sequenceInfo.getFileId();
+                } else {
+                    value = "has sequence";
+                }
+                break;
+
+            case SEQ_TRACE_FILES:
                 ArrayList<SequenceAnalysisInfo> sequenceInfos = info.getSequenceAnalysis();
                 if (sequenceInfos == null || sequenceInfos.isEmpty()) {
-                    value = "";
-                    if (info.isHasSequence())
-                        value = "has sequence";
                     break;
                 }
 
-                // currently support upload of a single sequence only
+                if (sequenceInfos.size() > 1) {
+                    value = "Multiple Files";
+                    break;
+                }
+
                 SequenceAnalysisInfo seqInfo = sequenceInfos.get(0);
                 value = seqInfo.getName();
                 id = seqInfo.getFileId();
                 break;
 
             case PLASMID_SEQ_FILENAME:
-                ArrayList<SequenceAnalysisInfo> plasmidSequenceList = info.getInfo().getSequenceAnalysis();
-                if (plasmidSequenceList == null || plasmidSequenceList.isEmpty()) {
-                    value = "";
-                    if (info.getInfo().isHasSequence())
-                        value = "has sequence";
+                if (!info.getInfo().isHasSequence())
                     break;
-                }
 
-                // currently support upload of a single sequence only
-                SequenceAnalysisInfo plasmidSequenceInfo = plasmidSequenceList.get(0);
-                value = plasmidSequenceInfo.getName();
-                id = plasmidSequenceInfo.getFileId();
+                SequenceInfo plasmidSequence = info.getInfo().getSequence();
+                if (plasmidSequence != null) {
+                    value = plasmidSequence.getName();
+                    id = plasmidSequence.getFileId();
+                } else {
+                    value = "has sequence";
+                }
                 break;
         }
 

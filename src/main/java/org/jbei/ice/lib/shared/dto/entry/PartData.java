@@ -46,6 +46,7 @@ public class PartData implements IDTOModel {
     private ArrayList<AttachmentInfo> attachments;
     private ArrayList<SampleStorage> sampleStorage;
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
+    private SequenceInfo sequence;
     private ArrayList<CustomField> parameters;
     private boolean canEdit; // whether current user that requested this entry info has write privs
     private Visibility visible;
@@ -420,5 +421,13 @@ public class PartData implements IDTOModel {
 
     public void setPrincipalInvestigatorEmail(String principalInvestigatorEmail) {
         this.principalInvestigatorEmail = principalInvestigatorEmail;
+    }
+
+    public SequenceInfo getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(SequenceInfo sequence) {
+        this.sequence = sequence;
     }
 }

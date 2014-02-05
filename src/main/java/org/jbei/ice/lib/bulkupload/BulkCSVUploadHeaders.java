@@ -91,6 +91,7 @@ public class BulkCSVUploadHeaders {
         headerFields.add(EntryField.STATUS);
         headerFields.add(EntryField.SEQ_FILENAME);
         headerFields.add(EntryField.ATT_FILENAME);
+        headerFields.add(EntryField.SEQ_TRACE_FILES);
         return headerFields;
     }
 

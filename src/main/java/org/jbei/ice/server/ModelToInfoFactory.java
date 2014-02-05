@@ -15,6 +15,7 @@ import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
@@ -138,6 +139,27 @@ public class ModelToInfoFactory {
         info.setId(storage.getId());
         info.setType(storage.getStorageType().name());
         return info;
+    }
+
+    // only fetches name and fileId
+    public static ArrayList<SequenceAnalysisInfo> getTraceSequences(Entry entry) {
+        SequenceAnalysisController controller = ControllerFactory.getSequenceAnalysisController();
+        try {
+            List<TraceSequence> traceSequences = controller.getTraceSequences(entry);
+            if (traceSequences == null || traceSequences.isEmpty())
+                return new ArrayList<>();
+
+            ArrayList<SequenceAnalysisInfo> list = new ArrayList<>();
+            for (TraceSequence traceSequence : traceSequences) {
+                SequenceAnalysisInfo info = new SequenceAnalysisInfo();
+                info.setFileId(traceSequence.getFileId());
+                info.setName(traceSequence.getFilename());
+                list.add(info);
+            }
+            return list;
+        } catch (ControllerException e) {
+            return null;
+        }
     }
 
     public static ArrayList<SequenceAnalysisInfo> getSequenceAnalysis(List<TraceSequence> sequences) {

@@ -683,6 +683,20 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public Boolean clearEntryTraceSequences(String sid, long entryId) throws AuthenticationException {
+        Account account = retrieveAccountForSid(sid);
+        try {
+            Entry entry = ControllerFactory.getEntryController().get(account, entryId);
+            if (entry == null)
+                return false;
+            return ControllerFactory.getSequenceAnalysisController().deleteAllEntryTraceSequences(account, entry);
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
+        }
+    }
+
+    @Override
     public PartData retrieveEntryDetails(String sid, long id, String url) throws AuthenticationException {
         EntryController controller = ControllerFactory.getEntryController();
         Account account = retrieveAccountForSid(sid);

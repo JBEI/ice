@@ -8,7 +8,7 @@ import org.jbei.ice.lib.shared.dto.PartSample;
 import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.entry.SequenceInfo;
 
 /**
  * Extracts common elements of entries from sheet
@@ -79,31 +79,21 @@ public abstract class SingleInfoSheetModel<T extends PartData> extends SheetMode
                 break;
 
             case SEQ_FILENAME:
-                // we are reusing sequence analysis info here. It is for trace files
-                ArrayList<SequenceAnalysisInfo> seq = info.getSequenceAnalysis();
+                SequenceInfo seq = info.getSequence();
                 if (seq == null) {
-                    seq = new ArrayList<SequenceAnalysisInfo>();
-                    info.setSequenceAnalysis(seq);
+                    seq = new SequenceInfo();
+                    info.setSequence(seq);
                 }
 
-                SequenceAnalysisInfo analysisInfo = seq.isEmpty() ? null : seq.get(0);
                 String seqFileId = datum.getId();
                 if (seqFileId == null || seqFileId.isEmpty()) {
-                    if (analysisInfo != null) {
-                        analysisInfo.setFileId("");
-                        analysisInfo.setName("");
-                    }
+                    seq.setFileId("");
+                    seq.setName("");
                     break;
                 }
 
-                seq.clear();
-
-                if (analysisInfo == null)
-                    analysisInfo = new SequenceAnalysisInfo();
-
-                analysisInfo.setName(value);
-                analysisInfo.setFileId(datum.getId());
-                seq.add(analysisInfo);
+                seq.setName(value);
+                seq.setFileId(datum.getId());
                 info.setHasSequence(true);
                 info.setHasOriginalSequence(true);
                 break;

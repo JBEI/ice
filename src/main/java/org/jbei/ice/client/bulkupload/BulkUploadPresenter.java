@@ -137,11 +137,16 @@ public class BulkUploadPresenter extends AbstractPresenter {
                             service.removeSequence(ClientController.sessionId, entryId, callback);
                         } else if (field == EntryField.ATT_FILENAME || field.toString().contains("Attachment File")) {
                             service.deleteEntryAttachment(ClientController.sessionId, sheetCellData.getId(), callback);
+                        } else if (field == EntryField.SEQ_TRACE_FILES
+                                || field.toString().contains(EntryField.SEQ_TRACE_FILES.toString())) {
+                            service.clearEntryTraceSequences(ClientController.sessionId, entryId, callback);
                         }
                     }
 
                     @Override
                     public void onSuccess(Boolean result) {
+                        if (result == null || !result)
+                            Window.alert("Server error deleting file");
                     }
                 }.go(eventBus);
             }

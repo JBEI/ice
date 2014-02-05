@@ -47,12 +47,11 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                                          "More details about the strain, if available"));
         headers.add(new CellColumnHeader(EntryField.STRAIN_REFERENCES, preferences));
         headers.add(new CellColumnHeader(EntryField.STRAIN_SEQ_FILENAME, preferences, false,
-                                         new FileInputCell(true, delegate, EntryAddType.STRAIN_WITH_PLASMID,
+                                         new FileInputCell(true, false, delegate, EntryAddType.STRAIN_WITH_PLASMID,
                                                            EntryType.STRAIN), "Click on the cell to upload file"));
         headers.add(new CellColumnHeader(EntryField.STRAIN_ATT_FILENAME, preferences, false,
-                                         new FileInputCell(false, delegate, EntryAddType.STRAIN_WITH_PLASMID,
+                                         new FileInputCell(false, false, delegate, EntryAddType.STRAIN_WITH_PLASMID,
                                                            EntryType.STRAIN), "Click on the cell to upload file"));
-
         // plasmid information
         headers.add(new CellColumnHeader(EntryField.PLASMID_NAME, preferences, true, "e.g. pTSH117"));
         headers.add(new CellColumnHeader(EntryField.PLASMID_ALIAS, preferences, false, "Part Alias"));
@@ -76,10 +75,10 @@ public class StrainWithPlasmidHeaders extends BulkUploadHeaders {
                                          "More details about the plasmid, if known"));
         headers.add(new CellColumnHeader(EntryField.PLASMID_REFERENCES, preferences));
         headers.add(new CellColumnHeader(EntryField.PLASMID_SEQ_FILENAME, preferences, false,
-                                         new FileInputCell(true, delegate, EntryAddType.STRAIN_WITH_PLASMID,
+                                         new FileInputCell(true, false, delegate, EntryAddType.STRAIN_WITH_PLASMID,
                                                            EntryType.PLASMID), "Click on the cell to upload file"));
         headers.add(new CellColumnHeader(EntryField.PLASMID_ATT_FILENAME, preferences, false,
-                                         new FileInputCell(false, delegate, EntryAddType.STRAIN_WITH_PLASMID,
+                                         new FileInputCell(false, false, delegate, EntryAddType.STRAIN_WITH_PLASMID,
                                                            EntryType.PLASMID), "Click on the cell to upload file"));
     }
 

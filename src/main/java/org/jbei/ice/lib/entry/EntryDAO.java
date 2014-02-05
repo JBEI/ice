@@ -427,7 +427,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             String queryString = "from " + Entry.class.getName() + " where partNumber LIKE '"
                     + prefix + "%' ORDER BY partNumber DESC";
             Query query = session.createQuery(queryString);
-            query.setMaxResults(2);
+            query.setMaxResults(1);
 
             ArrayList<Entry> tempList = new ArrayList<Entry>(query.list());
             Entry entryPartNumber = null;

@@ -113,38 +113,30 @@ public class BulkZipUpload {
             // create sequence or attachment if any
             for (Map.Entry<EntryField, String> entrySet : update.getKeyValue().entrySet()) {
                 EntryField field = entrySet.getKey();
+                String value = entrySet.getValue().trim();
+                if (value == null || value.isEmpty())
+                    continue;
 
-                // create attachment based on name
-                if (field == EntryField.ATT_FILENAME || field == EntryField.STRAIN_ATT_FILENAME
-                        || field == EntryField.PLASMID_ATT_FILENAME) {
-                    String value = entrySet.getValue().trim();
-                    if (value != null && !value.isEmpty()) {
+                try (InputStream stream = files.get(value)) {
+                    // create attachment based on name
+                    if (field == EntryField.ATT_FILENAME || field == EntryField.STRAIN_ATT_FILENAME
+                            || field == EntryField.PLASMID_ATT_FILENAME) {
                         // create attachment
-                        try (InputStream stream = files.get(value)) {
-                            boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
-                                    && field == EntryField.PLASMID_SEQ_FILENAME);
-                            PartFileAdd.uploadAttachmentToEntry(entryId, userId, stream, value,
-                                                                isStrainWithPlasmidPlasmid);
-                        } catch (Exception e) {
-                            Logger.error(e);
-                        }
-                    }
-                } else {
-                    // create sequence based on name
-                    if (field == EntryField.SEQ_FILENAME || field == EntryField.STRAIN_SEQ_FILENAME
+                        boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
+                                && field == EntryField.PLASMID_SEQ_FILENAME);
+                        PartFileAdd.uploadAttachmentToEntry(entryId, userId, stream, value, isStrainWithPlasmidPlasmid);
+                    } else if (field == EntryField.SEQ_FILENAME || field == EntryField.STRAIN_SEQ_FILENAME
                             || field == EntryField.PLASMID_SEQ_FILENAME) {
-                        String value = entrySet.getValue().trim();
-                        if (value != null && !value.isEmpty()) {
-                            // create sequence
-                            try (InputStream stream = files.get(value)) {
-                                boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
-                                        && field == EntryField.PLASMID_SEQ_FILENAME);
-                                PartFileAdd.uploadSequenceToEntry(entryId, userId, stream, isStrainWithPlasmidPlasmid);
-                            } catch (Exception e) {
-                                Logger.error(e);
-                            }
-                        }
+                        // create sequence based on name
+                        boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
+                                && field == EntryField.PLASMID_SEQ_FILENAME);
+                        PartFileAdd.uploadSequenceToEntry(entryId, userId, stream, isStrainWithPlasmidPlasmid);
+                    } else if (field == EntryField.SEQ_TRACE_FILES) {
+                        // TODO : strain with plasmid upload current has no support for trace sequence upload
+                        PartFileAdd.uploadTraceSequenceToEntry(entryId, userId, value, stream, true);
                     }
+                } catch (Exception e) {
+                    Logger.error(e);
                 }
             }
         }
@@ -156,7 +148,7 @@ public class BulkZipUpload {
 
         // for each auto update
         for (BulkUploadAutoUpdate update : updates) {
-            ArrayList<EntryField> toValidate = new ArrayList<EntryField>(csvUpload.getRequiredFields());
+            ArrayList<EntryField> toValidate = new ArrayList<>(csvUpload.getRequiredFields());
 
             // for each field in the update
             for (Map.Entry<EntryField, String> entry : update.getKeyValue().entrySet()) {
@@ -164,7 +156,8 @@ public class BulkZipUpload {
                 String value = entry.getValue().trim();
 
                 // check attachment and sequence files
-                if (entryField == EntryField.ATT_FILENAME || entryField == EntryField.SEQ_FILENAME) {
+                if (entryField == EntryField.ATT_FILENAME || entryField == EntryField.SEQ_FILENAME ||
+                        entryField == EntryField.SEQ_TRACE_FILES) {
                     if (!value.isEmpty() && !fileNames.contains(value))
                         throw new Exception("File with name \"" + value + "\" not found in the zip archive");
                 }
