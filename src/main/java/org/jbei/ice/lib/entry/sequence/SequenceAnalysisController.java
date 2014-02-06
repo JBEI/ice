@@ -138,7 +138,11 @@ public class SequenceAnalysisController {
                             }
                             ByteHolder byteHolder = new ByteHolder();
                             byteHolder.setBytes(byteArrayOutputStream.toByteArray());
-                            byteHolder.setName(zipEntry.getName());
+                            String name = zipEntry.getName();
+                            int index = zipEntry.getName().lastIndexOf("/");
+                            if (index != -1 && index < name.length())
+                                name = name.substring(index + 1);
+                            byteHolder.setName(name);
                             byteHolders.add(byteHolder);
                         }
                     } else {
