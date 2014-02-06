@@ -83,7 +83,8 @@ public class BulkZipUpload {
         if (csvFile == null)
             throw new IOException("Could not find a csv file in the zip archive");
 
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile.getBytes())) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile.getBytes());
+        try {
             List<BulkUploadAutoUpdate> updates = csvUpload.getBulkUploadUpdates(inputStream);
             verify(updates, files.keySet());
             // create actual registry parts
@@ -116,8 +117,9 @@ public class BulkZipUpload {
                 String value = entrySet.getValue().trim();
                 if (value == null || value.isEmpty())
                     continue;
+                InputStream stream = files.get(value);
 
-                try (InputStream stream = files.get(value)) {
+                try {
                     // create attachment based on name
                     if (field == EntryField.ATT_FILENAME || field == EntryField.STRAIN_ATT_FILENAME
                             || field == EntryField.PLASMID_ATT_FILENAME) {
