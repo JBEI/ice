@@ -23,6 +23,7 @@ import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.Visibility;
+import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
 import org.jbei.ice.lib.shared.dto.search.SearchQuery;
 import org.jbei.ice.lib.shared.dto.search.SearchResult;
 import org.jbei.ice.lib.shared.dto.search.SearchResults;
@@ -82,6 +83,13 @@ public class HibernateSearch {
                     Float boost = userBoost.get(field);
                     if (boost != null)
                         fieldQuery.setBoost(boost);
+                    else {
+                        // set default boost
+                        SearchBoostField boostField = SearchBoostField.boostFieldForField(field);
+                        if (boostField != null) {
+                            fieldQuery.setBoost(boostField.getDefaultBoost());
+                        }
+                    }
                     booleanQuery.add(fieldQuery, BooleanClause.Occur.SHOULD);
                 }
             }

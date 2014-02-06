@@ -153,7 +153,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
     public Entry getByPartNumber(String partNumber) throws DAOException {
         Session session = currentSession();
         try {
-            Criteria criteria = session.createCriteria(Entry.class).add(Restrictions.eq("partNumber", partNumber));
+            Criteria criteria = session.createCriteria(Entry.class).add(Restrictions.eq("partNumber", partNumber))
+                                       .add(Restrictions.eq("visibility", 9));
             Object object = criteria.uniqueResult();
             if (object != null) {
                 return (Entry) object;
@@ -427,7 +428,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             String queryString = "from " + Entry.class.getName() + " where partNumber LIKE '"
                     + prefix + "%' ORDER BY partNumber DESC";
             Query query = session.createQuery(queryString);
-            query.setMaxResults(2);
+            query.setMaxResults(1);
 
             ArrayList<Entry> tempList = new ArrayList<Entry>(query.list());
             Entry entryPartNumber = null;

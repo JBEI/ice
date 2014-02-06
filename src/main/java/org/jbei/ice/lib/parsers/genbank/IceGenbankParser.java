@@ -348,6 +348,9 @@ public class IceGenbankParser extends AbstractParser {
                     /* peak at the next line. If next line doesn't start with a key, append 
                     next line to locationString */
                     while (true) {
+                        if (lines.length <= i + 1)
+                            break;
+
                         String nextLine = lines[i + 1].trim();
                         if (nextLine.startsWith("/")) {
                             break;

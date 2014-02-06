@@ -100,12 +100,17 @@ public class FolderController {
         if (account.getEmail().equals(folder.getOwnerEmail()))
             return true;
 
+        Group publicGroup = ControllerFactory.getGroupController().createOrRetrievePublicGroup();
+
         // now check actual permissions
         Set<Folder> folders = new HashSet<>();
         folders.add(folder);
         PermissionsController controller = ControllerFactory.getPermissionController();
-        if (controller.groupHasReadPermission(account.getGroups(), folders)
-                || controller.groupHasWritePermission(account.getGroups(), folders))
+        Set<Group> groups = account.getGroups();
+        groups.add(publicGroup);
+
+        if (controller.groupHasReadPermission(groups, folders)
+                || controller.groupHasWritePermission(groups, folders))
             return true;
 
         return controller.accountHasReadPermission(account, folders)

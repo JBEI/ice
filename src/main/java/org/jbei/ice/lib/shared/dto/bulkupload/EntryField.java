@@ -24,6 +24,7 @@ public enum EntryField implements IDTOModel {
     STATUS("Status", true),
     SEQ_FILENAME("Sequence File", false),
     ATT_FILENAME("Attachment File", false),
+    SEQ_TRACE_FILES("Sequence Trace File(s)", false),
     SELECTION_MARKERS("Selection Markers", true),
     PARENTAL_STRAIN("Parent Strain", false),
     GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false),

@@ -24,6 +24,14 @@ import org.apache.cxf.helpers.IOUtils;
  */
 public class PartFileAdd {
 
+    public static void uploadTraceSequenceToEntry(long entryId, String userId, String name, InputStream inputStream,
+            boolean deleteExisting) throws Exception {
+        Account account = ControllerFactory.getAccountController().getByEmail(userId);
+        Entry entry = ControllerFactory.getEntryController().get(account, entryId);
+        ControllerFactory.getSequenceAnalysisController().uploadTraceSequenceFile(account, entry, name, inputStream,
+                                                                                  deleteExisting);
+    }
+
     public static void uploadSequenceToEntry(long entryId, String userId, InputStream inputStream, boolean getLinkEntry)
             throws Exception {
         Account account = ControllerFactory.getAccountController().getByEmail(userId);

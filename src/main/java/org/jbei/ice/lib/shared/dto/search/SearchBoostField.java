@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.shared.dto.search;
 
-import java.util.HashSet;
-
 import org.jbei.ice.lib.shared.dto.IDTOModel;
 
 /**
@@ -14,21 +12,21 @@ public enum SearchBoostField implements IDTOModel {
     OWNER("owner"),
     OWNER_EMAIL("ownerEmail"),
     CREATOR("creator"),
-    NAME("names.name"),
-    ALIAS("alias"),
-    KEYWORDS("keywords"),
-    SUMMARY("shortDescription"),
+    NAME("name", 3f),
+    ALIAS("alias", true),
+    KEYWORDS("keywords", 1.8f),
+    SUMMARY("shortDescription", true),
     NOTES("longDescription"),
     CREATOR_EMAIL("creatorEmail"),
 
     INTELLECTUAL_PROPERTY("intellectualProperty"),
     REFERENCES("references"),
-    PART_ID("partNumbers.partNumber"),
+    PART_ID("partNumber", 1.7f),
     LINK("links.link"),
-    //    LINK_URL("links.url"),
+
     SELECTION_MARKER("selectionMarkers.name"),
-    FUNDING_SOURCE("entryFundingSources.fundingSource.fundingSource"),
-    PRINCIPAL_INVESTIGATOR("entryFundingSources.fundingSource.principalInvestigator"),
+    FUNDING_SOURCE("fundingSource"),
+    PRINCIPAL_INVESTIGATOR("principalInvestigator"),
 
     // strain fields
     STRAIN_PLASMIDS("plasmids"),
@@ -36,7 +34,7 @@ public enum SearchBoostField implements IDTOModel {
     PARENT_STRAIN("host"),
 
     // plasmid fields
-    BACKBONE("backbone"),
+    BACKBONE("backbone", true),
     PROMOTERS("promoters"),
     REPLICATES_IN("replicatesIn"),
     ORIGIN_OF_REPLICATION("originOfReplication"),
@@ -48,9 +46,24 @@ public enum SearchBoostField implements IDTOModel {
     PLANT_TYPE("plantType");
 
     private String field; // actual field value. Should correspond to value in the SearchFieldFactory
+    private float defaultBoost;
+    private boolean userBoostable;
 
     private SearchBoostField(String field) {
         this.field = field;
+        this.defaultBoost = 1.0f;
+        userBoostable = false;
+    }
+
+    private SearchBoostField(String field, float defaultBoost) {
+        this.field = field;
+        this.defaultBoost = defaultBoost;
+        this.userBoostable = true;
+    }
+
+    private SearchBoostField(String field, boolean userBoostable) {
+        this(field);
+        this.userBoostable = userBoostable;
     }
 
     private SearchBoostField() {
@@ -60,12 +73,8 @@ public enum SearchBoostField implements IDTOModel {
         return this.field;
     }
 
-    public static HashSet<String> getFields() {
-        HashSet<String> fields = new HashSet<String>();
-        for (SearchBoostField boostField : SearchBoostField.values()) {
-            fields.add(boostField.getField());
-        }
-        return fields;
+    public float getDefaultBoost() {
+        return this.defaultBoost;
     }
 
     /**
@@ -78,5 +87,9 @@ public enum SearchBoostField implements IDTOModel {
                 return boostField;
         }
         return null;
+    }
+
+    public boolean isUserBoostable() {
+        return userBoostable;
     }
 }

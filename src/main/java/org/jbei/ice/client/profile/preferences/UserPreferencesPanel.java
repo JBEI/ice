@@ -59,10 +59,12 @@ public class UserPreferencesPanel extends Composite implements IUserProfilePanel
             if ((widget instanceof PreferencesPanel)) {
                 PreferencesPanel panel = (PreferencesPanel) widget;
                 panel.updateConfigSetting(row, value);
-            } else if (widget instanceof SearchPreferencesPanel) {
-                SearchPreferencesPanel panel = (SearchPreferencesPanel) widget;
-                panel.updateConfigSetting(row, value);
             }
+
+//            else if (widget instanceof SearchPreferencesPanel) {
+//                SearchPreferencesPanel panel = (SearchPreferencesPanel) widget;
+//                panel.updateConfigSetting(row, value);
+//            }
         }
     }
 }

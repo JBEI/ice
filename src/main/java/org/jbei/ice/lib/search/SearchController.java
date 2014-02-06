@@ -137,9 +137,12 @@ public class SearchController {
         HashMap<String, Float> mapping = new HashMap<>();
         for (Map.Entry<String, String> entry : results.entrySet()) {
             try {
-                String field = SearchBoostField.valueOf(entry.getKey()).getField();
+                String key = entry.getKey();
+                if (key.startsWith("BOOST_"))
+                    key = key.substring(6);
+                String field = SearchBoostField.valueOf(key).getField();
                 mapping.put(field, Float.valueOf(entry.getValue()));
-            } catch (NumberFormatException nfe) {
+            } catch (Exception nfe) {
                 Logger.error(nfe);
             }
         }

@@ -1882,11 +1882,18 @@ td.selected i.font-awesome {
     text-transform: uppercase;
     color: #222;
     width: 250px;
+    padding: 5px;
 }
 
 .setting_value {
     font-size: 0.75em;
     width: 400px;
+}
+
+.pref_panel_desc {
+    font-style: italic;
+    color: #c4c4c4;
+    font-size: 12px;
 }
 
 .web_results_header {

@@ -33,6 +33,7 @@ public class CellUploader extends Composite {
     private FileUpload fileUpload;
     private int currentRow;
     private boolean sequenceUpload;
+    private boolean traceSequenceUpload;
     private HandlerRegistration registration;
 
     public CellUploader(final EntryInfoDelegate delegate, final EntryAddType addType, final EntryType type) {
@@ -89,6 +90,7 @@ public class CellUploader extends Composite {
                 long bid = delegate.getBulkUploadId();
                 formPanel.setAction("/upload?type=bulk_file_upload&is_sequence="
                                             + Boolean.toString(sequenceUpload)
+                                            + "&is_trace=" + Boolean.toString(traceSequenceUpload)
                                             + "&sid=" + ClientController.sessionId + "&eid=" + currentId
                                             + "&bid=" + bid + "&entry_type=" + typeName
                                             + "&entry_add_type=" + addTypeName);
@@ -144,5 +146,9 @@ public class CellUploader extends Composite {
 
     public void setSequenceUpload(boolean sequenceUpload) {
         this.sequenceUpload = sequenceUpload;
+    }
+
+    public void setTraceSequenceUpload(boolean value) {
+        this.traceSequenceUpload = value;
     }
 }

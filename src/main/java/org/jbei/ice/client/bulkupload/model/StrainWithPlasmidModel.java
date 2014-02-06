@@ -7,7 +7,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.shared.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.shared.dto.entry.PartData;
 import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
-import org.jbei.ice.lib.shared.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.shared.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.shared.dto.entry.StrainData;
 
 public class StrainWithPlasmidModel extends SheetModel<StrainData> {
@@ -103,30 +103,21 @@ public class StrainWithPlasmidModel extends SheetModel<StrainData> {
                 break;
 
             case STRAIN_SEQ_FILENAME:
-                ArrayList<SequenceAnalysisInfo> seq = strain.getSequenceAnalysis();
+                SequenceInfo seq = strain.getSequence();
                 if (seq == null) {
-                    seq = new ArrayList<SequenceAnalysisInfo>();
-                    strain.setSequenceAnalysis(seq);
+                    seq = new SequenceInfo();
+                    strain.setSequence(seq);
                 }
 
-                SequenceAnalysisInfo analysisInfo = seq.isEmpty() ? null : seq.get(0);
                 String seqFileId = datum.getId();
                 if (seqFileId == null || seqFileId.isEmpty()) {
-                    if (analysisInfo != null) {
-                        analysisInfo.setFileId("");
-                        analysisInfo.setName("");
-                    }
+                    seq.setFileId("");
+                    seq.setName("");
                     break;
                 }
 
-                seq.clear();
-
-                if (analysisInfo == null)
-                    analysisInfo = new SequenceAnalysisInfo();
-
-                analysisInfo.setName(value);
-                analysisInfo.setFileId(datum.getId());
-                seq.add(analysisInfo);
+                seq.setName(value);
+                seq.setFileId(datum.getId());
                 strain.setHasSequence(true);
                 strain.setHasOriginalSequence(true);
                 break;
@@ -238,33 +229,24 @@ public class StrainWithPlasmidModel extends SheetModel<StrainData> {
                 break;
 
             case PLASMID_SEQ_FILENAME:
-                ArrayList<SequenceAnalysisInfo> seq = data.getSequenceAnalysis();
+                SequenceInfo seq = data.getSequence();
                 if (seq == null) {
-                    seq = new ArrayList<SequenceAnalysisInfo>();
-                    data.setSequenceAnalysis(seq);
+                    seq = new SequenceInfo();
+                    data.setSequence(seq);
                 }
 
-                SequenceAnalysisInfo analysisInfo = seq.isEmpty() ? null : seq.get(0);
                 String seqFileId = datum.getId();
                 if (seqFileId == null || seqFileId.isEmpty()) {
-                    if (analysisInfo != null) {
-                        analysisInfo.setFileId("");
-                        analysisInfo.setName("");
-                    }
+                    seq.setFileId("");
+                    seq.setName("");
+                    break;
                 }
 
-                seq.clear();
-
-                if (analysisInfo == null)
-                    analysisInfo = new SequenceAnalysisInfo();
-
-                analysisInfo.setName(value);
-                analysisInfo.setFileId(datum.getId());
-                seq.add(analysisInfo);
+                seq.setName(value);
+                seq.setFileId(datum.getId());
                 data.setHasSequence(true);
                 data.setHasOriginalSequence(true);
                 break;
-
             case PLASMID_ATT_FILENAME:
                 ArrayList<AttachmentInfo> attInfo = data.getAttachments();
                 if (attInfo == null) {

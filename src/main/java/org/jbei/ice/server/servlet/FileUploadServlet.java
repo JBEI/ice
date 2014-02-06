@@ -1,7 +1,5 @@
 package org.jbei.ice.server.servlet;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,8 +7,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +29,6 @@ import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.shared.dto.entry.EntryType;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.IDNASequence;
 
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileItemIterator;
@@ -43,7 +38,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 /**
  * Servlet that handles file uploads. If an upload type (e.g. sequence or attachment)
@@ -76,6 +70,7 @@ public class FileUploadServlet extends HttpServlet {
         String bulkUploadId = request.getParameter("bid");
         String sid = request.getParameter("sid");
         String isSequenceStr = request.getParameter("is_sequence");
+        String isTraceStr = request.getParameter("is_trace");
         String entryType = request.getParameter("entry_type");
         String entryAddType = request.getParameter("entry_add_type");
 
@@ -133,7 +128,7 @@ public class FileUploadServlet extends HttpServlet {
 
                     case TRACE_SEQUENCE:
                         try {
-                            result = uploadSequenceTraceFile(file, entryId, account, fileName);
+                            result = uploadSequenceTraceFile(file, entryId, account, fileName, false);
                         } catch (IOException e) {
                             Logger.error(e);
                         }
@@ -142,8 +137,9 @@ public class FileUploadServlet extends HttpServlet {
                     case BULK_UPLOAD_FILE_TYPE:
                         long entryIdl = Long.decode(entryId);
                         Boolean isSequence = Boolean.parseBoolean(isSequenceStr);
+                        Boolean isTrace = Boolean.parseBoolean(isTraceStr);
                         result = uploadBulkUploadFile(account, file, bulkUploadId, entryIdl, fileName, isSequence,
-                                                      entryType, entryAddType);
+                                                      isTrace, entryType, entryAddType);
                         break;
 
                     case BULK_CSV_UPLOAD:
@@ -180,7 +176,7 @@ public class FileUploadServlet extends HttpServlet {
     }
 
     public String uploadBulkUploadFile(Account account, File file, String bulkUploadIdStr, long entryId,
-            String saveName, boolean isSequence, String entryType, String entryAddType) {
+            String saveName, boolean isSequence, boolean isTrace, String entryType, String entryAddType) {
         long bulkUploadId;
         try {
             bulkUploadId = Long.decode(bulkUploadIdStr);
@@ -202,7 +198,8 @@ public class FileUploadServlet extends HttpServlet {
 
         try {
             if (entry == null) {
-                return uploadToNewEntry(account, file, saveName, isSequence, type, addType, bulkUploadId);
+                return uploadToNewEntry(account, file, saveName, isSequence, isTrace, type, addType, bulkUploadId,
+                                        true);
             }
 
             // associate with entry
@@ -212,6 +209,10 @@ public class FileUploadServlet extends HttpServlet {
                     && type == EntryType.PLASMID);
             if (isStrainWithPlasmidPlasmid && !entry.getLinkedEntries().isEmpty()) {
                 entry = (Entry) entry.getLinkedEntries().toArray()[0];
+            }
+
+            if (isTrace) {
+                return uploadSequenceTraceFile(file, entry.getId() + "", account, saveName, true);
             }
 
             if (isSequence) {
@@ -250,9 +251,8 @@ public class FileUploadServlet extends HttpServlet {
         }
     }
 
-    public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, EntryType type,
-            EntryAddType addType, long bid) {
-
+    public String uploadToNewEntry(Account account, File file, String saveName, boolean isSequence, boolean isTrace,
+            EntryType type, EntryAddType addType, long bid, boolean deleteExisting) {
         BulkUploadAutoUpdate update = new BulkUploadAutoUpdate(type);
         update.setBulkUploadId(bid);
         try {
@@ -264,6 +264,11 @@ public class FileUploadServlet extends HttpServlet {
 
             if (isStrainWithPlasmidPlasmid && !entry.getLinkedEntries().isEmpty()) {
                 entry = (Entry) entry.getLinkedEntries().toArray()[0];
+            }
+
+            // check if trace sequence
+            if (isTrace) {
+                return uploadSequenceTraceFile(file, entry.getId() + "", account, saveName, deleteExisting);
             }
 
             if (isSequence) {
@@ -304,8 +309,8 @@ public class FileUploadServlet extends HttpServlet {
     }
 
     // TODO : this needs to go to manager/controller
-    private String uploadSequenceTraceFile(File file, String entryId, Account account, String uploadFileName)
-            throws IOException {
+    private String uploadSequenceTraceFile(File file, String entryId, Account account, String uploadFileName,
+            boolean deleteExisting) throws IOException {
         EntryController controller = ControllerFactory.getEntryController();
         Entry entry = null;
         try {
@@ -315,72 +320,17 @@ public class FileUploadServlet extends HttpServlet {
         }
 
         if (entry == null)
-            return "Unknown entry (" + entryId + "). Upload aborted";
+            return "Error: Unknown entry (" + entryId + "). Upload aborted";
 
         SequenceAnalysisController sequenceAnalysisController = ControllerFactory.getSequenceAnalysisController();
-        IDNASequence dnaSequence;
 
-        ArrayList<ByteHolder> byteHolders = new ArrayList<>();
-        FileInputStream inputStream = new FileInputStream(file);
-
-        if (uploadFileName.toLowerCase().endsWith(".zip")) {
-            try (ZipInputStream zis = new ZipInputStream(inputStream)) {
-                ZipEntry zipEntry;
-                while (true) {
-                    zipEntry = zis.getNextEntry();
-
-                    if (zipEntry != null) {
-                        if (!zipEntry.isDirectory() && !zipEntry.getName().startsWith("__MACOSX")) {
-                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                            int c;
-                            while ((c = zis.read()) != -1) {
-                                byteArrayOutputStream.write(c);
-                            }
-                            ByteHolder byteHolder = new ByteHolder();
-                            byteHolder.setBytes(byteArrayOutputStream.toByteArray());
-                            byteHolder.setName(zipEntry.getName());
-                            byteHolders.add(byteHolder);
-                        }
-                    } else {
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                String errMsg = ("Could not parse zip file.");
-                Logger.error(errMsg);
-                return errMsg;
-            }
-        } else {
-            ByteHolder byteHolder = new ByteHolder();
-            byteHolder.setBytes(IOUtils.toByteArray(inputStream));
-            byteHolder.setName(uploadFileName);
-            byteHolders.add(byteHolder);
-        }
-
-        String currentFileName = "";
-        try {
-            for (ByteHolder byteHolder : byteHolders) {
-                currentFileName = byteHolder.getName();
-                dnaSequence = sequenceAnalysisController.parse(byteHolder.getBytes());
-                if (dnaSequence == null || dnaSequence.getSequence() == null) {
-                    String errMsg = ("Could not parse \"" + currentFileName
-                            + "\". Only Fasta, GenBank & ABI files are supported.");
-                    Logger.error(errMsg);
-                    return errMsg;
-                }
-
-                sequenceAnalysisController.uploadTraceSequence(entry, byteHolder.getName(),
-                                                               account.getEmail(),
-                                                               dnaSequence.getSequence().toLowerCase(),
-                                                               new ByteArrayInputStream(byteHolder.getBytes()));
-            }
-            sequenceAnalysisController.rebuildAllAlignments(entry);
-            return "";
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            sequenceAnalysisController.uploadTraceSequenceFile(account, entry, uploadFileName, inputStream,
+                                                               deleteExisting);
+            return uploadFileName;
         } catch (ControllerException e) {
-            String errMsg = ("Could not parse \"" + currentFileName
-                    + "\". Only Fasta, GenBank & ABI files are supported.");
-            Logger.error(errMsg);
-            return errMsg;
+            Logger.error(e.getMessage());
+            return "Error: " + e.getMessage();
         }
     }
 

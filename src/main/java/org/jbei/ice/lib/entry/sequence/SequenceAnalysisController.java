@@ -1,12 +1,17 @@
 package org.jbei.ice.lib.entry.sequence;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.jbei.ice.controllers.ControllerFactory;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -33,6 +38,9 @@ import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
+import org.jbei.ice.server.servlet.ByteHolder;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * ABI to manipulate DNA sequence trace analysis
@@ -108,6 +116,73 @@ public class SequenceAnalysisController {
         return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(), new Date(), inputStream);
     }
 
+    public void uploadTraceSequenceFile(Account account, Entry entry, String uploadFileName, InputStream inputStream,
+            boolean deleteExisting) throws ControllerException {
+        if (deleteExisting)
+            deleteAllEntryTraceSequences(account, entry);
+
+        ArrayList<ByteHolder> byteHolders = new ArrayList<>();
+
+        if (uploadFileName.toLowerCase().endsWith(".zip")) {
+            try (ZipInputStream zis = new ZipInputStream(inputStream)) {
+                ZipEntry zipEntry;
+                while (true) {
+                    zipEntry = zis.getNextEntry();
+
+                    if (zipEntry != null) {
+                        if (!zipEntry.isDirectory() && !zipEntry.getName().startsWith("__MACOSX")) {
+                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                            int c;
+                            while ((c = zis.read()) != -1) {
+                                byteArrayOutputStream.write(c);
+                            }
+                            ByteHolder byteHolder = new ByteHolder();
+                            byteHolder.setBytes(byteArrayOutputStream.toByteArray());
+                            String name = zipEntry.getName();
+                            int index = zipEntry.getName().lastIndexOf("/");
+                            if (index != -1 && index < name.length())
+                                name = name.substring(index + 1);
+                            byteHolder.setName(name);
+                            byteHolders.add(byteHolder);
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                String errMsg = "Error: Could not parse zip file";
+                throw new ControllerException(errMsg);
+            }
+        } else {
+            ByteHolder byteHolder = new ByteHolder();
+            try {
+                byteHolder.setBytes(IOUtils.toByteArray(inputStream));
+            } catch (IOException ioe) {
+                throw new ControllerException("Error: " + ioe.getMessage());
+            }
+            byteHolder.setName(uploadFileName);
+            byteHolders.add(byteHolder);
+        }
+
+        String currentFileName;
+        IDNASequence dnaSequence;
+        for (ByteHolder byteHolder : byteHolders) {
+            currentFileName = byteHolder.getName();
+            dnaSequence = parse(byteHolder.getBytes());
+            if (dnaSequence == null || dnaSequence.getSequence() == null) {
+                String errMsg = "Error: Could not parse \"" + currentFileName
+                        + "\". Only Fasta, GenBank & ABI files are supported";
+                throw new ControllerException(errMsg);
+            }
+
+            uploadTraceSequence(entry, byteHolder.getName(),
+                                account.getEmail(),
+                                dnaSequence.getSequence().toLowerCase(),
+                                new ByteArrayInputStream(byteHolder.getBytes()));
+        }
+        rebuildAllAlignments(entry);
+    }
+
     /**
      * Remove a {@link TraceSequence} from the database and disk.
      *
@@ -115,6 +190,7 @@ public class SequenceAnalysisController {
      * @throws ControllerException
      * @throws PermissionException
      */
+
     public void removeTraceSequence(Account account, TraceSequence traceSequence) throws ControllerException,
             PermissionException {
         if (traceSequence == null) {
@@ -145,7 +221,7 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to get trace sequences for null entry!");
         }
 
-        List<TraceSequence> traces = null;
+        List<TraceSequence> traces;
 
         SequenceController sequenceController = ControllerFactory.getSequenceController();
 
@@ -301,9 +377,7 @@ public class SequenceAnalysisController {
         String bl2seqOutput;
         try {
             bl2seqOutput = BlastPlus.runBlast2Seq(entrySequenceString, traceSequenceString);
-        } catch (BlastException e) {
-            throw new ControllerException(e);
-        } catch (ProgramTookTooLongException e) {
+        } catch (BlastException | ProgramTookTooLongException e) {
             throw new ControllerException(e);
         }
 
@@ -380,9 +454,7 @@ public class SequenceAnalysisController {
                     traceDao.save(traceSequence);
                 }
             }
-        } catch (Bl2SeqException e) {
-            throw new ControllerException(e);
-        } catch (DAOException e) {
+        } catch (Bl2SeqException | DAOException e) {
             throw new ControllerException(e);
         }
     }
@@ -411,6 +483,23 @@ public class SequenceAnalysisController {
         List<TraceSequence> traceSequences = getTraceSequences(entry);
         for (TraceSequence traceSequence : traceSequences) {
             buildOrRebuildAlignment(traceSequence, sequence);
+        }
+    }
+
+    public boolean deleteAllEntryTraceSequences(Account account, Entry entry) throws ControllerException {
+        if (!permissionsController.hasWritePermission(account, entry))
+            throw new ControllerException(account.getEmail() + ": no write privileges for entry " + entry.getId());
+        try {
+            List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
+            if (sequences == null || sequences.isEmpty())
+                return true;
+
+            for (TraceSequence sequence : sequences) {
+                removeTraceSequence(account, sequence);
+            }
+            return true;
+        } catch (DAOException | PermissionException de) {
+            throw new ControllerException(de);
         }
     }
 }

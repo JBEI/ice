@@ -31,7 +31,7 @@ public class UserPreferencesPresenter extends PanelPresenter {
     }
 
     public void setSearchPreferences(HashMap<String, String> settings) {
-//        panel.setSearchData(settings);
+        panel.setSearchData(settings);
     }
 
     public ServiceDelegate<RowData> getServiceDelegate() {
@@ -48,7 +48,8 @@ public class UserPreferencesPresenter extends PanelPresenter {
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        panel.setConfigValue(rowData.getSection(), rowData.getRow(), rowData.getValue());
+                        if (rowData.getField() == null)
+                            panel.setConfigValue(rowData.getSection(), rowData.getRow(), rowData.getValue());
                     }
                 }.go(eventBus);
             }

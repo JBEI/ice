@@ -28,16 +28,19 @@ public class FileInputCell extends SheetCell {
 
     private final CellUploader uploader;
     private final boolean sequenceUpload;
+    private final boolean traceSeqUpload;
     private final EntryInfoDelegate delegate;
     private final EntryType entryType;
     private final Label cellLabel;
     private final HTMLPanel panel;
 
-    public FileInputCell(boolean sequenceUpload, EntryInfoDelegate delegate, EntryAddType addType, EntryType type) {
+    public FileInputCell(boolean sequenceUpload, boolean traceSeqUpload,
+            EntryInfoDelegate delegate, EntryAddType addType, EntryType type) {
         super();
         cellLabel = new Label();
         cellLabel.setStyleName("display-inline");
         this.sequenceUpload = sequenceUpload;
+        this.traceSeqUpload = traceSeqUpload;
         this.delegate = delegate;
         this.entryType = type;
         String html = "<span><span id=\"name_link\"></span> <span id=\"delete_link\"></span></span>";
@@ -59,10 +62,14 @@ public class FileInputCell extends SheetCell {
             @Override
             public void onClick(ClickEvent event) {
                 SheetCellData data = removeDataForRow(uploader.getCurrentRow());
-                if (sequenceUpload)
-                    data.setType(EntryField.SEQ_FILENAME);
-                else
-                    data.setType(EntryField.ATT_FILENAME);
+                if (!traceSeqUpload) {
+                    if (sequenceUpload)
+                        data.setType(EntryField.SEQ_FILENAME);
+                    else
+                        data.setType(EntryField.ATT_FILENAME);
+                } else {
+                    data.setType(EntryField.SEQ_TRACE_FILES);
+                }
 
                 long entryId = uploader.getCurrentId();
                 if (entryId == 0 && delegate != null) {
@@ -121,6 +128,7 @@ public class FileInputCell extends SheetCell {
     public void setFocus(int row) {
         uploader.setCurrentRow(row);
         uploader.setSequenceUpload(sequenceUpload);
+        uploader.setTraceSequenceUpload(traceSeqUpload);
         uploader.submitClick();
     }
 
@@ -170,6 +178,7 @@ public class FileInputCell extends SheetCell {
                 public void onFocus(FocusEvent event) {
                     focusPanel.setStyleName("cell_border");
                     uploader.setSequenceUpload(sequenceUpload);
+                    uploader.setTraceSequenceUpload(traceSeqUpload);
                 }
             });
             return focusPanel;

@@ -52,6 +52,7 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
         headerFields.add(EntryField.STATUS);
         headerFields.add(EntryField.ATT_FILENAME);
         headerFields.add(EntryField.SEQ_FILENAME);
+        headerFields.add(EntryField.SEQ_TRACE_FILES);
     }
 
     @Override

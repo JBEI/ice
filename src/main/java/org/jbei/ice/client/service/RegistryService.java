@@ -255,4 +255,6 @@ public interface RegistryService extends RemoteService {
     SampleRequest updateSampleRequest(String sessionId, SampleRequest request) throws AuthenticationException;
 
     Boolean submitSampleRequests(String sessionId, ArrayList<SampleRequest> requests) throws AuthenticationException;
+
+    Boolean clearEntryTraceSequences(String sid, long entryId) throws AuthenticationException;
 }

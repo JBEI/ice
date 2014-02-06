@@ -359,9 +359,9 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
                 + "File upload</span><p>There are three forms of file uploads that are supported: Comma-separated value"
                 + " (CSV) file, zip archive or SBOL XML/RDF file. <p>To upload a CSV file, select the type "
                 + "of entry you wish to bulk import and download a csv template by clicking on \"File Upload.\""
-                + " Use a zip archive to include sequences and/attachments. Add the sequence and/or attachment files "
-                + "to the zip archive with a plain csv file. The csv file should the name(s) of the sequence and/or "
-                + "attachment for each entry in the appropriate column.</div>";
+                + " Use a zip archive to include sequences and/or attachments. Add the sequence and/or attachment "
+                + "files to the zip archive with a plain csv file. The csv file should the name(s) of the sequence "
+                + "and/or attachment for each entry in the appropriate column.</div>";
         mainContent.setHTML(1, 0, html);
         return mainContent;
     }

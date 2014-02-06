@@ -1,7 +1,9 @@
 package org.jbei.ice.lib.entry.sample;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
@@ -40,12 +42,12 @@ public class SampleDAO extends HibernateRepository<Sample> {
     }
 
     @SuppressWarnings("unchecked")
-    public ArrayList<Sample> getSamplesByEntry(Entry entry) throws DAOException {
+    public Set<Sample> getSamplesByEntry(Entry entry) throws DAOException {
         Criteria criteria = currentSession().createCriteria(Sample.class.getName())
                 .add(Restrictions.eq("entry", entry));
 
         try {
-            return new ArrayList<Sample>(criteria.list());
+            return new HashSet<Sample>(criteria.list());
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve sample by entry: " + entry.getId(), e);
