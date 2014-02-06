@@ -153,7 +153,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
     public Entry getByPartNumber(String partNumber) throws DAOException {
         Session session = currentSession();
         try {
-            Criteria criteria = session.createCriteria(Entry.class).add(Restrictions.eq("partNumber", partNumber));
+            Criteria criteria = session.createCriteria(Entry.class).add(Restrictions.eq("partNumber", partNumber))
+                                       .add(Restrictions.eq("visibility", 9));
             Object object = criteria.uniqueResult();
             if (object != null) {
                 return (Entry) object;
