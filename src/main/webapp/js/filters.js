@@ -1,7 +1,5 @@
 'use strict';
 
-/* Filters */
-
 angular.module('iceApp.filters', []).
     filter('interpolate', ['version', function (version) {
     return function (text) {

@@ -23,6 +23,7 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.CommentDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
+import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.PartSample;
@@ -368,7 +369,8 @@ public class EntryController {
 
         FolderController folderController = new FolderController();
         ArrayList<FolderDetails> folderList = new ArrayList<>();
-        List<Folder> folders = folderController.getFoldersByEntry(entry);
+        FolderDAO folderDAO = DAOFactory.getFolderDAO();
+        List<Folder> folders = folderDAO.getFoldersByEntry(entry);
         ArrayList<Long> entryIds = new ArrayList<>();
         entryIds.add(entry.getId());
         if (folders != null) {
@@ -376,7 +378,7 @@ public class EntryController {
                 try {
                     Folder returned = folderController.removeFolderContents(account, folder.getId(), entryIds);
                     FolderDetails details = new FolderDetails(returned.getId(), returned.getName());
-                    long size = folderController.getFolderSize(folder.getId());
+                    long size = folderDAO.getFolderSize(folder.getId());
                     details.setCount(size);
                     folderList.add(details);
                 } catch (ControllerException me) {

@@ -1,0 +1,22 @@
+<!-- details of a selected folder -->
+<table cellspacing="0" cellpadding="0" width="219px" style="margin-left: 5px;">
+    <tr ng-hide="hideAddCollection" ng-init="hideAddCollection=true">
+        <td>
+            <input type="text" class="input_box" placeholder="Enter collection name" maxlength="35"
+                   style="width: 190px;" ng-Keypress="createCollection($event)" ng-Model="addCollectionName">
+        </td>
+    </tr>
+    <tr data-ng-repeat="folder in selectedCollection">
+        <td>
+            <div class="system_collection_user_menu_row" style="background-color: #f9f9f9"
+                 ng-Mouseover="showSubMenu=true" ng-Mouseleave="showSubMenu=false" ng-click="selection(folder)">
+                <i class="fa fa-folder-o fa-fw"
+                   style="font-size: 12px; color: #a1a0a0; padding-left: 9px"></i> &nbsp;<span
+                    class="font-75em">{{folder.folderName | limitTo:26}}</span>&nbsp;
+                <span ng-show="!showSubMenu" class="menu_count">{{folder.count}}</span>
+                <i class="fa fa-caret-down menu_count" ng-show="showSubMenu" ng-init="showSubMenu=false"
+                   style="font-size: 14px; padding: 0 3px 0 3px; border-radius: 2px; border: 1px solid"></i>
+            </div>
+        </td>
+    </tr>
+</table>

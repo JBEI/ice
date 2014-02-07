@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PlasmidData;
@@ -123,7 +124,7 @@ public class SearchControllerTest {
         ArrayList<Entry> list = new ArrayList<>();
         list.add(entry);
         Assert.assertNotNull(folderController.addFolderContents(a1, folder.getId(), list));
-        List<Folder> folders = folderController.getFoldersByEntry(entry);
+        List<Folder> folders = DAOFactory.getFolderDAO().getFoldersByEntry(entry);
         Assert.assertNotNull(folders);
         Assert.assertEquals(1, folders.size());
         Assert.assertEquals(folder.getId(), folders.get(0).getId());

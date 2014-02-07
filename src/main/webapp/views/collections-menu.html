@@ -1,0 +1,40 @@
+<table cellspacing="0" cellpadding="0" width="210px">
+    <tr>
+        <td style="padding: 10px"><img src="/img/logo.png" alt="ICE" height="84px"></td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="collections_header">
+            COLLECTIONS
+        </td>
+    </tr>
+    <tr ng-repeat="collection in collectionList">
+        <td ng-class="{bg_f1:currentPath(collection.path)}">
+            <div class="system_collection_user_menu_row" ng-click='selectCollection(collection.path)'>
+                <i class="fa {{collection.icon}} fa-fw" style="font-size: 14px; color: #a1a0a0;"></i>
+                &nbsp;<span class="collection_user_menu"
+                            ng-class="{collection_menu_selection:currentPath(collection.path)}">
+                {{collection.name}}</span>
+                <span class="menu_count">{{collection.available}}</span>
+            </div>
+
+            <ice.menu.collections.details ng-show="currentPath(collection.path)"></ice.menu.collections.details>
+
+        </td>
+    </tr>
+    <tr>
+        <td style="background-color: #f1f1f1;">
+            <div class="system_collection_user_menu_row">
+                <i class="fa fa-folder-open fa-fw" style="font-size: 14px; color: #233559; opacity: 0.8"></i>
+                &nbsp;<span
+                    class="collection_user_menu"><b style="color: #233559">Personal</b></span> <span class="menu_count">
+                <i ng-click="hideAddCollection=!hideAddCollection"
+                   class="fa fa-plus-square"></i></span>
+            </div>
+
+            <ice.menu.collections.details></ice.menu.collections.details>
+        </td>
+    </tr>
+</table>

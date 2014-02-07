@@ -7,6 +7,7 @@ import java.util.HashSet;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
@@ -38,7 +39,7 @@ public class FolderControllerTest {
         Account account = AccountCreator.createTestAccount("testCreateNewFolder", false);
         FolderDetails folder = controller.createNewFolder(account, "test", "testing folder creation", null);
         Assert.assertNotNull(folder);
-        Folder f = controller.getFolderById(folder.getId());
+        Folder f = DAOFactory.getFolderDAO().get(folder.getId());
         Assert.assertNotNull(f);
         Assert.assertEquals("test", f.getName());
         Assert.assertEquals("testing folder creation", f.getDescription());
@@ -70,7 +71,8 @@ public class FolderControllerTest {
         HashSet<Long> set = new HashSet<>();
 
         // retrieve (supported sort types created, status, name, part_id, type)
-        FolderDetails details = controller.retrieveFolderContents(account, folder.getId(), ColumnField.PART_ID, false,
+        FolderDetails details = controller.retrieveFolderContents(account.getEmail(), folder.getId(),
+                                                                  ColumnField.PART_ID, false,
                                                                   0, 15);
         Assert.assertNotNull(details);
 
@@ -86,7 +88,7 @@ public class FolderControllerTest {
             }
             // check remaining
             Assert.assertEquals((size - (it * pageSize)), parts.size());
-            details = controller.retrieveFolderContents(account, folder.getId(), ColumnField.PART_ID, false,
+            details = controller.retrieveFolderContents(account.getEmail(), folder.getId(), ColumnField.PART_ID, false,
                                                         pageSize * it, pageSize);
             it += 1;
         }

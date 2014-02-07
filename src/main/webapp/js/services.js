@@ -25,7 +25,7 @@ iceServices.factory('Folders', ['$resource', '$cookieStore', function ($resource
 //        }
     return function (sessionId) {
 
-        return $resource('/rest/folders', {}, {
+        return $resource('/rest/folders', {folderId:'@id'}, {
             query:{
                 method:'GET',
                 responseType:"json",
@@ -36,6 +36,25 @@ iceServices.factory('Folders', ['$resource', '$cookieStore', function ($resource
                 method:'GET',
                 url:"/rest/folders/all",
                 isArray:true,
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            personal:{
+                method:'GET',
+                url:"/rest/folders/user",
+                isArray:true,
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            userEntries:{
+                method:'GET',
+                url:"/rest/folders/personal",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            folder:{
+                method:'GET',
+                url:"/rest/folders/:folderId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });

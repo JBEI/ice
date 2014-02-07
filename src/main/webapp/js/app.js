@@ -10,7 +10,10 @@ var iceApp = angular.module('iceApp', [
     'iceApp.controllers'
 ]);
 
-iceApp.run(function (Authentication, $location) {
+iceApp.run(function (Authentication, $location, $rootScope) {
+    $rootScope.logout = function () {
+        Authentication.logout();
+    };
 //    if ($location.$$path === "/login")
 //        return;
 //
@@ -44,25 +47,29 @@ iceApp.config(['$routeProvider', '$locationProvider', function ($routeProvider, 
 
     $routeProvider
         .when("/", {
-            controller:'IceController',
-            templateUrl:'/partials/main.htm'
+            controller:'CollectionController',
+            templateUrl:'/views/folder.html'
 //            resolve: resolve
         })
         .when("/login", {
             controller:'LoginController',
-            templateUrl:'/partials/login.html'
+            templateUrl:'/views/login.html'
         })
         .when('/entry/:id', {
             controller:'EntryController',
-            templateUrl:'/partials/entry.html'
+            templateUrl:'/views/entry.html'
         })
         .when('/profile/:profileId', {
             controller:'UserController',
-            templateUrl:'/partials/profile.html'
+            templateUrl:'/views/profile.html'
         })
         .when('/register', {
             controller:'RegisterController',
-            templateUrl:'/partials/register.html'
+            templateUrl:'/views/register.html'
+        })
+        .when('/folders/:id', {
+            controller:'CollectionController',
+            templateUrl:'/views/folder.html'
         })
         .otherwise({redirectTo:'/'});
 }]);

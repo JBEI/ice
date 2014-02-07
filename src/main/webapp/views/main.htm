@@ -1,0 +1,233 @@
+<table cellspacing="0" cellpadding="0">
+<tr>
+<td valign="top">
+
+    <ice.menu.collections></ice.menu.collections>
+
+    <br>
+
+    <ice.menu.wor></ice.menu.wor>
+
+    <br>
+
+    <ice.menu.tags></ice.menu.tags>
+
+<td style="vertical-align: text-top; padding-left: 20px" width="100%">
+
+<!-- table right -->
+<table cellspacing="0" cellpadding="0" width="100%">
+
+<!-- very top of header. Account and logout links -->
+<tr>
+    <!-- search -->
+    <td style="background-color: #f1f1f1;" colspan="6">
+
+        <!-- table for search, menu, and profile and other options (logout) -->
+        <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <!-- search -->
+                    <table cellspacing="1" cellpadding="4">
+                        <tr>
+                            <td rowspan="2">
+                                <table cellspacing="0" cellpadding="0" class="quick_search">
+                                    <tr>
+                                        <td><input type="text" class="quick_search_input"
+                                                   placeholder="Enter search terms and/or use the drop down menu">
+                                        </td>
+                                        <td class="search_arrow_td">
+                                            <div class="quick_search_arrow_panel">
+                                                <span id="search_arrow"
+                                                      style="position: relative; left: 6px; top: 6px; font-size: 0.9em">
+                                                    <i class="fa fa-caret-down font-awesome"></i>
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td rowspan="2">
+                                <button type="button" class="quick_search_btn">Search</button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+
+                <!-- links -->
+                <td colspan="2" style="text-align: right;" class="font-80em">
+                    <span style="vertical-align: top;"><a href="/profile/{{user.id}}">{{user.email}}</a></span>
+                    &nbsp;
+                    <span style="vertical-align: top;"><i class="fa fa-bell"
+                                                          style="color: #757575; font-size: 14px"></i><sup
+                            class="badge">4</sup></span>
+                    &nbsp;
+                    <span style="vertical-align: top;"><i class="fa fa-envelope"
+                                                          style="color: #757575; font-size: 14px"></i><sup
+                            class="badge">8</sup></span>
+                    &nbsp;
+                    <span style="vertical-align: top;"><i class="fa fa-shopping-cart"
+                                                          style="color: #757575; font-size: 14px"></i><sup
+                            class="badge">5</sup></span>
+                    &nbsp;
+                            <span><i class="fa fa-sign-out" style="color: #757575; font-size: 20px"
+                                     data-ng-click="logout()"></i></span>
+                    &nbsp;
+                </td>
+            </tr>
+        </table>
+        <!-- end table for search, menu, and profile and other options (logout)  -->
+
+    </td>
+</tr>
+
+<tr>
+    <td colspan="6" style="height: 29px">&nbsp;</td>
+</tr>
+
+<!-- sub menu -->
+<tr>
+    <td width="115px">
+        <button type="button" class="subMenuCreateNew">Create Entry <i class="fa fa-caret-down"></i></button>
+        <!--<div class="btn-group" ng-class="{open: open}">-->
+        <!--<button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"-->
+        <!--ng-click="open=!open">-->
+        <!--Create Entry <span class="caret"></span>-->
+        <!--</button>-->
+        <!--<ul class="dropdown-menu" role="menu">-->
+        <!--<li><a href="#">Action</a></li>-->
+        <!--<li><a href="#">Another action</a></li>-->
+        <!--<li><a href="#">Something else here</a></li>-->
+        <!--<li class="divider"></li>-->
+        <!--<li><a href="#">Separated link</a></li>-->
+        <!--</ul>-->
+        <!--</div>-->
+    </td>
+    <td width="252px">
+        <table cellspacing="0" cellpadding="0" style="width: 240px;">
+            <tr>
+                <td>
+                    <button type="button" class="buttonGroupItem buttonAddTo">
+                        <i style="opacity:0.85;" class="fa fa-plus"></i> Add To
+                        <i class="fa fa-caret-down"></i></button>
+                </td>
+                <td>
+                    <button type="button" class="buttonGroupItem buttonRemove">
+                        <i style="opacity:0.85;" class="fa fa-minus"></i> Remove
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="buttonGroupItem buttonMoveTo">
+                        <i style="opacity:0.85;" class="fa fa-arrows"></i> Move
+                        To <i class="fa fa-caret-down"></i></button>
+                </td>
+            </tr>
+        </table>
+    </td>
+    <td width="247px">
+        <button type="button" class="subMenuBulkEdit" disabled="true">
+            <i style="opacity:0.85; color: #0082C0" class="fa fa-edit"></i> Edit
+        </button>
+        <button type="button" class="subMenuBulkEdit" disabled="true">
+            <i style="opacity:0.85;" class="fa fa-trash-o red"></i> Delete
+        </button>
+        <button type="button" class="subMenuBulkEdit" disabled="true">
+            <i style="opacity:0.85; color: #0082C0" class="fa fa-undo"></i> Restore
+        </button>
+    </td>
+    <td width="107px">
+        <button type="button" class="subMenuExport"><i style="opacity:0.85; color: #0082C0"
+                                                       class="fa fa-download"></i>
+            Export As <i class="fa fa-caret-down"></i></button>
+    </td>
+    <td>
+        <button type="button" class="subMenuTransfer"><i style="opacity:0.85; color: #0082C0"
+                                                         class="fa fa-share-square"></i> Transfer <i
+                class="fa fa-caret-down"></i></button>
+    </td>
+</tr>
+
+<!-- space -->
+<tr>
+    <td colspan="6" style="height: 18px"></td>
+</tr>
+
+
+<!-- bread crumb -->
+<tr>
+    <td colspan="6">
+        <table cellpadding="0" cellspacing="0" width="100%" class="breadcrumb">
+            <tr>
+                <td>{{folder.folderName}}</td>
+                <td style="text-align: center; width: 48px;"><i class="fa fa-bars" style="font-size: 14px"></i>
+                    <i class="fa fa-th-large" style="font-size: 14px"></i></td>
+            </tr>
+        </table>
+    </td>
+</tr>
+
+
+<tr>
+    <td colspan="6">
+        <table cellspacing="0" class="data_table">
+            <tr>
+                <th style="padding: 5px; background-color: #fff; border-top: 1px solid #aaa; border-bottom: 1px solid #aaa; border-left: 1px solid #e6e6e6; width:10px">
+                    <i class="fa fa-check-square fa-fw" style="color: #999; font-size: 14px;"></i></th>
+                <th style="padding: 5px; background-color: #fff; border-top: 1px solid #aaa; border-bottom: 1px solid #aaa; border-left: 1px solid #e6e6e6;">
+                    Type
+                </th>
+                <th style="padding: 5px; background-color: #fff; border-top: 1px solid #aaa; border-bottom: 1px solid #aaa; border-left: 1px solid #e6e6e6; width: 110px">
+                    Part ID
+                </th>
+                <th style="padding: 5px; background-color: #fff; border-top: 1px solid #aaa; border-bottom: 1px solid #aaa; border-left: 1px solid #e6e6e6; width:230px">
+                    Name
+                </th>
+                <th style="padding: 5px; background-color: #fff; border-top: 1px solid #aaa; border-bottom: 1px solid #aaa; border-left: 1px solid #e6e6e6;">
+                    Summary
+                </th>
+                <th style="padding: 5px; background-color: #fff; border-top: 1px solid #aaa; border-bottom: 1px solid #aaa; border-left: 1px solid #e6e6e6;">
+                    Status
+                </th>
+                <th style="padding: 5px; background-color: #fff; border-top: 1px solid #aaa; border-bottom: 1px solid #aaa; border-left: 1px solid #e6e6e6; width:10px">
+                    <i class="fa fa-paperclip fa-fw" style="font-size: 14px; "></i></th>
+                <th style="padding: 5px; background-color: #fff; border-top: 1px solid #aaa; border-bottom: 1px solid #aaa; border-left: 1px solid #e6e6e6; width:10px">
+                    <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
+                </th>
+                <th style="padding: 5px; background-color: #fff; border-top: 1px solid #aaa; border-bottom: 1px solid #aaa; border-left: 1px solid #e6e6e6; width:10px">
+                    <img src="img/dna.svg" width="14px" alt="has dna"/></th>
+                <th style="padding: 5px; background-color: #fff; border-top: 1px solid #aaa; border-bottom: 1px solid #aaa; border-left: 1px solid #e6e6e6;width:160px; white-space:nowrap">
+                    Created
+                </th>
+            </tr>
+
+            <tbody style="opacity: 0.8">
+            <tr data-ng-show='!folder'>
+                <td>Loading...</td>
+            </tr>
+            <tr data-ng-repeat="entry in folder.entries">
+                <td width="10px"><i class="fa fa-check-square fa-fw" style="color: #999; font-size: 14px;"></i>
+                </td>
+                <td>{{entry.type}}</td>
+                <td><a href='/entry/{{entry.id}}' class="cell_mouseover">{{entry.partId}}</a></td>
+                <td>{{entry.name}}</td>
+                <td>
+                    <div title="sdf"
+                         style="width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        {{entry.shortDescription}}
+                    </div>
+                </td>
+                <td>{{entry.status}}</td>
+                <td><i class="fa fa-paperclip fa-fw" style="color: #555; font-size: 14px;"></i></td>
+                <td><i class="fa fa-flask fa-fw" style="color: #555; font-size: 14px;"></i></td>
+                <td><img src="img/dna.svg" width="14px"/></td>
+                <td style="width:160px; white-space:nowrap">Nov 14, 2013</td>
+            </tr>
+
+            </tbody>
+        </table>
+    </td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
