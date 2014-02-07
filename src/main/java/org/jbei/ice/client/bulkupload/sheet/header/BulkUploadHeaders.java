@@ -125,6 +125,9 @@ public abstract class BulkUploadHeaders {
                 break;
 
             case PLASMID_ATT_FILENAME:
+                if (info.getInfo() == null)
+                    break;
+
                 ArrayList<AttachmentInfo> plasmidAttachmentList = info.getInfo().getAttachments();
                 if (plasmidAttachmentList == null || plasmidAttachmentList.isEmpty()) {
                     value = "";
@@ -168,7 +171,7 @@ public abstract class BulkUploadHeaders {
                 break;
 
             case PLASMID_SEQ_FILENAME:
-                if (!info.getInfo().isHasSequence())
+                if (info.getInfo() == null || !info.getInfo().isHasSequence())
                     break;
 
                 SequenceInfo plasmidSequence = info.getInfo().getSequence();
