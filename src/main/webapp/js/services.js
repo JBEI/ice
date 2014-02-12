@@ -15,6 +15,39 @@ iceServices.factory('Entry', ['$resource', '$cookieStore', function ($resource, 
     });
 }]);
 
+iceServices.factory('Utils', function () {
+});
+
+iceServices.factory('Import', function ($resource, $cookieStore, $http) {
+//    return $resource('/rest/import/:importId', {importId:'@id'}, {
+//        query:{
+//            method:'GET',
+//            headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+//        },
+//
+//        headers:{
+//            method:'GET',
+//            isArray:true,
+//            url:"/rest/import/fields/:type",
+//            headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+//        }
+//    });
+    return {
+        list:function (id, offset, result) {
+            var sid = $cookieStore.get("sessionId");
+            return $http.get('/rest/import/' + id,
+                {headers:{'X-ICE-Authentication-SessionId':sid}, params:{'offset':offset, 'size':20}}).
+                success(result).
+//            function (data) {
+//                    console.log(data);
+//                }).
+                error(function (data, status) {
+                    console.log(status);
+                });
+        }
+    }
+});
+
 iceServices.factory('Folders', ['$resource', '$cookieStore', function ($resource, $cookieStore) {
 //    var User = $resource('/rest/accesstoken', {}, {headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}});
 //    var user = User.get(function(value, headers) {
@@ -36,6 +69,13 @@ iceServices.factory('Folders', ['$resource', '$cookieStore', function ($resource
                 method:'GET',
                 url:"/rest/folders/all",
                 isArray:true,
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            // get all available entries TODO: paging
+            available:{
+                method:'GET',
+                url:"/rest/folders/available",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -80,7 +120,6 @@ iceServices.factory('Authentication', ['$resource', '$cookieStore', '$http', '$r
                     $rootScope.user = data;
                     $cookieStore.put('userId', data.email);
                     $cookieStore.put('sessionId', data.sessionId);
-                    console.log($cookieStore.get("sessionId"));
                     $location.path('/');
                 }).
                 error(function (data, status, headers, config) {
@@ -116,10 +155,10 @@ iceServices.factory('Authentication', ['$resource', '$cookieStore', '$http', '$r
         // logs out user by invalidating the session id
         logout:function () {
             var sid = $cookieStore.get("sessionId");
-            return $http.delete('/rest/accesstoken', {headers:{'X-ICE-Authencation-SessionId':sid}}).
+            return $http.delete('/rest/accesstoken', {headers:{'X-ICE-Authentication-SessionId':sid}}).
                 success(function () {
                     $rootScope.user = undefined;
-                    cookieStore.remove('userId');
+                    $cookieStore.remove('userId');
                     $cookieStore.remove('sessionId');
                     $location.path('/login');
                 });

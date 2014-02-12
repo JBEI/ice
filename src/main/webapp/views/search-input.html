@@ -1,0 +1,24 @@
+<!-- search -->
+<table cellspacing="1" cellpadding="4">
+    <tr>
+        <td rowspan="2">
+            <table cellspacing="0" cellpadding="0" class="quick_search">
+                <tr>
+                    <td><input type="text" class="quick_search_input" ng-model="queryText"
+                               placeholder="Enter search terms and/or use the drop down menu">
+                    </td>
+                    <td class="search_arrow_td">
+                        <div class="quick_search_arrow_panel">
+                                                <span style="position: relative; left: 6px; top: 6px; font-size: 0.9em">
+                                                    <i class="fa fa-caret-down font-awesome"></i>
+                                                </span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td rowspan="2">
+            <button type="button" class="quick_search_btn" ng-click="search()">Search</button>
+        </td>
+    </tr>
+</table>

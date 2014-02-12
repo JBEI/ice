@@ -32,6 +32,9 @@ public class IceAuthenticationFilter implements ContainerRequestFilter {
                 ("/profile")))
             return;
 
+        if (("GET".equals(method) && path.equals("/search")))
+            return;
+
         String auth = requestContext.getHeaderString("X-ICE-Authentication-SessionId");
         if (auth == null) {
             requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)

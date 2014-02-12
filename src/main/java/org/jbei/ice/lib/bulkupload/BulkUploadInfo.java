@@ -5,9 +5,11 @@ import java.util.Date;
 
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.bulkupload.Headers;
 import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.shared.EntryAddType;
 
 /**
@@ -28,11 +30,16 @@ public class BulkUploadInfo implements IDataTransferModel {
     private ArrayList<PartData> entryList;
     private ArrayList<PreferenceInfo> preferences;
     private ArrayList<AccessPermission> accessPermissions;
+    private ArrayList<BulkUploadAutoUpdate> updates;
+    private ArrayList<Headers> headers;
+    private ArrayList<Entry> entries;
 
     public BulkUploadInfo() {
-        entryList = new ArrayList<PartData>();
-        preferences = new ArrayList<PreferenceInfo>();
-        accessPermissions = new ArrayList<AccessPermission>();
+        entryList = new ArrayList<>();
+        preferences = new ArrayList<>();
+        accessPermissions = new ArrayList<>();
+        updates = new ArrayList<>();
+        headers = new ArrayList<>();
     }
 
     public long getId() {
@@ -109,5 +116,25 @@ public class BulkUploadInfo implements IDataTransferModel {
 
     public void setStatus(BulkUploadStatus status) {
         this.status = status;
+    }
+
+    public ArrayList<BulkUploadAutoUpdate> getUpdates() {
+        return updates;
+    }
+
+    public ArrayList<Headers> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(ArrayList<Headers> headers) {
+        this.headers = headers;
+    }
+
+    public ArrayList<Entry> getEntries() {
+        return entries;
+    }
+
+    public void setEntries(ArrayList<Entry> entries) {
+        this.entries = entries;
     }
 }

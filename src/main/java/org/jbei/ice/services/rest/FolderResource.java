@@ -58,7 +58,7 @@ public class FolderResource extends RestResource {
         try {
             HibernateHelper.beginTransaction();
             String sid = getUserIdFromSessionHeader(userAgentHeader);
-            return controller.retrieveFoldersForUser(sid);
+            return controller.retrieveFoldersForUser(sid);   // TODO : return system collection
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -75,7 +75,7 @@ public class FolderResource extends RestResource {
         try {
             HibernateHelper.beginTransaction();
             String sid = getUserIdFromSessionHeader(userAgentHeader);
-            return controller.getUserFolders(sid);
+            return controller.getUserFolders(sid);  // TODO : return user collection
         } finally {
             HibernateHelper.commitTransaction();
         }
@@ -102,10 +102,10 @@ public class FolderResource extends RestResource {
             } catch (NumberFormatException nfe) {
             }
 
+            EntryController entryController = new EntryController();
+            FolderDetails details = new FolderDetails();
             switch (folderId) {
                 case "personal":
-                    EntryController entryController = new EntryController();
-                    FolderDetails details = new FolderDetails();
                     details.setType(FolderType.SHARED);
                     Account account = DAOFactory.getAccountDAO().getByEmail(userId);
                     List<Entry> entries = entryController.retrieveOwnerEntries(account, userId, null,
@@ -122,6 +122,21 @@ public class FolderResource extends RestResource {
                         details.getEntries().add(info);
                     }
                     return details;
+
+                case "available":
+                    try {
+                        FolderDetails retrieved = entryController.retrieveVisibleEntries(userId, field, false, offset,
+                                                                                         limit);
+                        details.setEntries(retrieved.getEntries());
+//                        if (details.getCount() < 0) {
+//                            long count = entryController.getNumberOfVisibleEntries(account);
+//                            details.setCount(count);
+//                        }
+                        return details;
+                    } catch (ControllerException e) {
+                        Logger.error(e);
+                        return null;
+                    }
 
                 default:
                     return null;

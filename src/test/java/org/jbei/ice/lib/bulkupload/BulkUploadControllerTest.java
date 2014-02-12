@@ -63,14 +63,14 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(autoUpdate.getLastUpdate() != null);
 
         // check that the bulk upload has been created
-        BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
+        BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull("Null bulk upload", info);
 
         Assert.assertTrue("Submitting draft", controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(),
                                                                                null));
 
         // entries associated with bulk upload must be pending
-        info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 10);
+        info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 10);
         Assert.assertNotNull(info);
         Assert.assertTrue("Invalid entry count", info.getEntryList().size() == 1);
         Assert.assertTrue(info.getEntryList().get(0).getVisibility() == Visibility.PENDING);
@@ -90,7 +90,7 @@ public class BulkUploadControllerTest {
     @Test
     public void testRetrieveById() throws Exception {
         Account account = AccountCreator.createTestAccount("testRetrieveById", false);
-        Assert.assertNull(controller.retrieveById(account, 100l, 0, 1));
+        Assert.assertNull(controller.retrieveById(account.getEmail(), 100l, 0, 1));
 
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
         autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
@@ -107,10 +107,10 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(autoUpdate.getLastUpdate() != null);
 
         // check that the bulk upload has been created
-        BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
+        BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull(info);
         Assert.assertEquals(0, info.getEntryList().size());
-        info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 10);
+        info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 10);
         Assert.assertNotNull(info);
         Assert.assertEquals(1, info.getEntryList().size());
     }
@@ -172,7 +172,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(info);
         Assert.assertEquals(autoUpdate.getBulkUploadId(), info.getId());
 //        Assert.assertEquals(1, info.getCount());
-        Assert.assertNull(controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0));
+        Assert.assertNull(controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0));
     }
 
     @Test
@@ -190,7 +190,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(entryId > 0);
         Assert.assertTrue(bulkId > 0);
 
-        BulkUploadInfo bulkUploadInfo = controller.retrieveById(account, bulkId, 0, 1000);
+        BulkUploadInfo bulkUploadInfo = controller.retrieveById(account.getEmail(), bulkId, 0, 1000);
         Assert.assertNotNull(bulkUploadInfo);
 
         EntryDAO dao = DAOFactory.getEntryDAO();
@@ -233,7 +233,7 @@ public class BulkUploadControllerTest {
 
 
         // check that the bulk upload has been created
-        BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
+        BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull(info);
 
         // try to submit. should be rejected because the required fields are not present
@@ -259,7 +259,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
 
         // entries associated with bulk upload must be pending
-        info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 10);
+        info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 10);
         Assert.assertNotNull(info);
         Assert.assertTrue(info.getEntryList().size() == 1);
         Assert.assertTrue(info.getEntryList().get(0).getVisibility().equals(Visibility.PENDING));
@@ -291,12 +291,12 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
         Assert.assertTrue(autoUpdate.getLastUpdate() != null);
 
-        Assert.assertNotNull(controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0));
+        Assert.assertNotNull(controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0));
 
         // try to revert. not submitted
         Assert.assertFalse(controller.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
         Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
-        BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
+        BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull(info);
         Assert.assertTrue(controller.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
     }
@@ -327,7 +327,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
 
         // bulk upload should be deleted
-        BulkUploadInfo info = controller.retrieveById(account, autoUpdate.getBulkUploadId(), 0, 0);
+        BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNull(info);
 
         // entry must still exist and have a visibility of OK
@@ -399,7 +399,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
         long id = autoUpdate.getBulkUploadId();
         controller.renameDraft(account, id, "My draft");
-        BulkUploadInfo info = controller.retrieveById(account, id, 0, 1000);
+        BulkUploadInfo info = controller.retrieveById(account.getEmail(), id, 0, 1000);
         Assert.assertNotNull(info);
         Assert.assertTrue(info.getName().equals("My draft"));
     }

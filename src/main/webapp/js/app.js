@@ -67,24 +67,20 @@ iceApp.config(['$routeProvider', '$locationProvider', function ($routeProvider, 
             controller:'RegisterController',
             templateUrl:'/views/register.html'
         })
-        .when('/folders/:id', {
+        .when('/folders/:collection', {
             controller:'CollectionController',
             templateUrl:'/views/folder.html'
         })
+        .when('/folders/:collection/:id', {
+            controller:'CollectionFolderController',
+            templateUrl:'/views/folder.html'
+        })
+        .when('/test/upload/:id', {
+            controller:'UploadController',
+            templateUrl:'/views/upload.html'
+        })
+        .when('/search', {
+            controller:'SearchController'
+        })
         .otherwise({redirectTo:'/'});
 }]);
-
-//    LOGIN("login"),
-//    MAIN("main"),
-//    COLLECTIONS("collections"),
-//    ADD_ENTRY("add"),
-//    BULK_IMPORT("bulk"),
-//    ENTRY_VIEW("entry"),
-//    PROFILE("profile"),
-//    ADMIN("admin"),
-//    QUERY("query"),
-//    LOGOUT("logout"),
-//    NEWS("news");
-
-// collection/entry/view/id
-

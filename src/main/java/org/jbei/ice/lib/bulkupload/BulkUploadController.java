@@ -25,6 +25,7 @@ import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.PartSample;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.bulkupload.Headers;
 import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -125,13 +126,13 @@ public class BulkUploadController {
      * Retrieves bulk import and entries associated with it that are referenced by the id in the parameter. Only
      * owners or administrators are allowed to retrieve bulk imports
      *
-     * @param account account for user requesting
-     * @param id      unique identifier for bulk import
+     * @param userId identifier for account of user requesting
+     * @param id     unique identifier for bulk import
      * @return data transfer object with the retrieved bulk import data and associated entries
      * @throws ControllerException
      * @throws PermissionException
      */
-    public BulkUploadInfo retrieveById(Account account, long id, int start, int limit)
+    public BulkUploadInfo retrieveById(String userId, long id, int start, int limit)
             throws ControllerException, PermissionException {
         BulkUpload draft;
 
@@ -143,6 +144,7 @@ public class BulkUploadController {
             throw new ControllerException(e);
         }
 
+        Account account = accountController.getByEmail(userId);
         authorization.expectRead(account.getEmail(), draft);
 
         // convert bulk import db object to data transfer object
@@ -198,6 +200,32 @@ public class BulkUploadController {
             }
         }
         return draftInfo;
+    }
+
+    public BulkUploadInfo getBulkImport(String userId, long id) {
+        BulkUpload draft = dao.retrieveById(id);
+        if (draft == null)
+            return null;
+
+        Account account = accountController.getByEmail(userId);
+        authorization.expectRead(account.getEmail(), draft);
+
+        // retrieve the entries associated with the bulk import
+        EntryAddType type = EntryAddType.stringToType(draft.getImportType());
+
+        BulkUploadInfo info = draft.toDataTransferObject();
+
+        long tStart = System.currentTimeMillis();
+        for (Entry entry : draft.getContents()) {
+            info.getUpdates().add(EntryToFieldFactory.getUpdate(entry));
+        }
+        System.out.println("took " + (System.currentTimeMillis() - tStart));
+        // get headers
+        info.getHeaders().clear();
+        for (EntryField field : BulkCSVUploadHeaders.getHeadersForType(type)) {
+            info.getHeaders().add(new Headers(field, type));
+        }
+        return info;
     }
 
     protected ArrayList<PartData> convertParts(Account account, EntryAddType type, ArrayList<Entry> contents)

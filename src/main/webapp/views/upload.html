@@ -1,0 +1,178 @@
+<table cellpadding="0" cellspacing="0" style="width: 100%;">
+    <tr>
+        <td width="10px">&nbsp;</td>
+        <td style="vertical-align: top;">
+            <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                <tbody>
+                <tr>
+                    <td width="140px">
+                        <table cellspacing="0" cellpadding="0" style="width: 140px;">
+                            <tr>
+                                <td align="left" style="vertical-align: top;">
+                                    <div tabindex="0" class="bulk_import_menu_toggle bulk_import_menu_toggle-up"
+                                         role="button" title="Toggle Drafts Menu"><input
+                                            type="text" tabindex="-1"
+                                            style="opacity: 0; height: 1px; width: 1px; z-index: -1; overflow: hidden;
+                            position: absolute;">
+                                    </div>
+                                </td>
+                                <td align="center" style="vertical-align: top;">
+                                    <button type="button" class="subMenuCreateNew">Select Type<i
+                                            class="fa fa-caret-down"></i></button>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                            <tr>
+                                <td>
+                                    <div class="GGUHJJACBK" style="width: 450px;"><span id="close_panel"><i
+                                            class="fa fa-times font-awesome float_right opacity_hover"></i></span></div>
+                                </td>
+                                <td align="right">
+                                    <div><span id="save_button"><button type="button" class="gwt-Button">Submit</button></span>
+                                        &nbsp; <span id="reset_label">
+                            <div class="display-inline footer_feedback_widget font-80em">Reset</div></span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="3">
+                        <div class="bulk_import_header">
+            <span id="bulk_import_display_type">
+                <span style="color: #888; letter-spacing: -1px; text-transform: uppercase; vertical-align: middle; float: left">Strain bulk upload&nbsp;</span>
+        </span>
+            <span style="vertical-align: middle; float:left" id="upload_name"><div
+                    class="display-inline cursor_pointer">Untitled
+            </div></span><span style="vertical-align: middle; float:left" id="draft_name"><div
+                                class="display-inline"><span
+                                id="save_draft_inputbox"><input type="text" class="saved_draft_input" maxlength="36"
+                                                                placeholder="Enter draft name"></span>&nbsp;<span
+                                id="cancel_rename"><button type="button" class="gwt-Button remove_filter"><i
+                                class="fa fa-times"></i></button></span></div></span>&nbsp;&nbsp;<span
+                                style="vertical-align: middle; float:left" id="updating_icon"><div
+                                class="display-inline relative_top_3"><span
+                                style="font-size: 11px; font-weight: normal; color: #999"><i
+                                class="fa fa-spinner fa-spin fa-1x"></i> Saving</span></div></span><span
+                                style="float: right;"><span id="bulk_import_upload_csv"><div
+                                class="bulk_upload_visibility opacity_hover"><i class="fa fa-file-text"></i> File Upload
+                        </div></span><span
+                                style="font-weight: normal; color: #ccc">&nbsp;&nbsp;|&nbsp;&nbsp;</span><span
+                                id="bulk_import_permission_selection"><div tabindex="0"
+                                                                           class="bulk_upload_visibility opacity_hover">
+                            <input type="text" tabindex="-1"
+                                   style="opacity: 0; height: 1px; width: 1px; z-index: -1; overflow: hidden; position: absolute;">
+
+                            <div class="display-inline" title="Set read permissions for entries"><span
+                                    id="permission_icon"><i class="fa fa-shield display-inline"
+                                                            title="Click to set permissions"></i></span> Permissions <i
+                                    class="fa fa-caret-down"></i></div>
+                        </div></span><span
+                                style="font-weight: normal; color: #ccc">&nbsp;&nbsp;|&nbsp;&nbsp;</span><span
+                                id="creator"><div tabindex="0" class="bulk_upload_creator opacity_hover"><input
+                                type="text" tabindex="-1"
+                                style="opacity: 0; height: 1px; width: 1px; z-index: -1; overflow: hidden; position: absolute;">
+
+                            <div class="display-inline" title="Person who made this part"><span><i
+                                    class="fa fa-user display-inline"></i></span> Creator <i
+                                    class="fa fa-caret-down"></i></div>
+                        </div></span></span></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <table cellpadding="0" cellspacing="0">
+                            <tbody>
+                            <tr>
+                                <td colspan="2">
+                                    <div style="overflow: hidden; position: relative; zoom: 1; width: 1313px;">
+                                        <div style="position: relative; zoom: 1;">
+                                            <table cellpadding="0" cellspacing="0" class="sheet_header_table"
+                                                   style="width: 100%;">
+                                                <tr>
+                                                    <td class="leader_cell_column_header_td">
+                                                        <div class="leader_cell_column_header">&nbsp;</div>
+                                                    </td>
+
+                                                    <td class="cell_column_header_td" ng-repeat="header in headers">
+                                                        <div class="cell_column_header">
+                                                            <div
+                                                                    tabindex="0" class="opacity_hover display-inline">
+                                                                <input
+                                                                        type="text" tabindex="-1"
+                                                                        style="opacity: 0; height: 1px; width: 1px; z-index: -1; overflow: hidden;
+                                    position: absolute;">
+
+                                                                <div class="display-inline"><i
+                                                                        class="fa fa-lock bulk_upload_locked_header display-inline opacity_hover"
+                                                                        title="{{header.value}}"></i></div>
+                                                            </div>
+                                                            {{header.value}}<span ng-show="{{header.canLock}}"
+                                                                                  class="required">*</span></div>
+                                                    </td>
+
+                                                    <td class="tail_cell_column_header_td">
+                                                        <div class="tail_cell_column_header">&nbsp;</div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!---->
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: top;">
+                                    <div style="overflow: hidden; position: relative; zoom: 1; height: 215px;">
+                                        <div style="position: relative; zoom: 1;">
+                                            <table cellpadding="0" cellspacing="0" class="sheet_col_index">
+                                                <tr ng-repeat="iRow in rowCount track by $index">
+                                                    <td class="index_td_cell">
+                                                        <div class="index_cell">{{$index+1}}</div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="vertical-align: top;">
+                                    <div style="overflow: auto; position: relative; zoom: 1; width: 1288px; height: 230px;"
+                                         ng-init="retrieveRows()"
+                                         ice-infinite-scroll="doSomething()">
+                                        <div style="position: relative; zoom: 1;">
+                                            <table cellpadding="0" cellspacing="0" class="sheet_table"
+                                                   style="width: 100%;">
+                                                <tr ng-repeat="j in updates">
+                                                    <td ng-repeat="header in headers">
+                                                        <div class="cell_border">
+                                                            <input type="text" tabindex="-1" style="opacity: 0; height: 1px;
+                                                                     width: 1px; z-index: -1; overflow: hidden;
+                                                                     position: absolute;">
+
+                                                            <div class="font-75em cell cell_focus">
+                                                                {{getColumnIndex(j.keyValue, $index) |
+                                                                truncate:24}}
+                                                            </div>
+
+                                                            <!--<div class="font-75em cell"></div>-->
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+</table>

@@ -109,6 +109,10 @@ public enum EntryField implements IDataTransferModel {
 
     @Override
     public String toString() {
+        return this.name();
+    }
+
+    public String getLabel() {
         return this.label;
     }
 }

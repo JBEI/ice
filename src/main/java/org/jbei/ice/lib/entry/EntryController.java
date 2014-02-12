@@ -220,30 +220,28 @@ public class EntryController {
         return info;
     }
 
-    public FolderDetails retrieveVisibleEntries(Account account, ColumnField field, boolean asc, int start, int limit)
+    public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit)
             throws ControllerException {
         Set<Entry> results;
         FolderDetails details = new FolderDetails();
-        try {
-            if (accountController.isAdministrator(account)) {
-                // no filters
-                results = dao.retrieveAllEntries(field, asc, start, limit);
-            } else {
-                // retrieve groups for account and filter by permission
-                Set<Group> accountGroups = new HashSet<>(account.getGroups());
-                GroupController controller = new GroupController();
-                Group everybodyGroup = controller.createOrRetrievePublicGroup();
-                accountGroups.add(everybodyGroup);
-                results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit);
-            }
+        Account account = accountController.getByEmail(userId);
 
-            for (Entry entry : results) {
-                PartData info = ModelToInfoFactory.createTableViewData(entry, false);
-                info.setCanEdit(authorization.canWrite(account.getEmail(), entry));
-                details.getEntries().add(info);
-            }
-        } catch (DAOException de) {
-            throw new ControllerException(de);
+        if (accountController.isAdministrator(account)) {
+            // no filters
+            results = dao.retrieveAllEntries(field, asc, start, limit);
+        } else {
+            // retrieve groups for account and filter by permission
+            Set<Group> accountGroups = new HashSet<>(account.getGroups());
+            GroupController controller = new GroupController();
+            Group everybodyGroup = controller.createOrRetrievePublicGroup();
+            accountGroups.add(everybodyGroup);
+            results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit);
+        }
+
+        for (Entry entry : results) {
+            PartData info = ModelToInfoFactory.createTableViewData(entry, false);
+            info.setCanEdit(authorization.canWrite(account.getEmail(), entry));
+            details.getEntries().add(info);
         }
 
         return details;

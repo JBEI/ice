@@ -67,25 +67,25 @@ public class SearchControllerTest {
         HibernateHelper.beginTransaction();
         SearchQuery query = new SearchQuery();
         query.setQueryString("testPlasmid");
-        SearchResults results = controller.runSearch(account, query, false);
+        SearchResults results = controller.runSearch(account.getEmail(), query, false);
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.getResultCount());
 
         // search for promoters
         query.setQueryString("pTet");
-        results = controller.runSearch(account, query, false);
+        results = controller.runSearch(account.getEmail(), query, false);
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.getResultCount());
 
         // search email
         query.setQueryString(account.getEmail());
-        results = controller.runSearch(account, query, false);
+        results = controller.runSearch(account.getEmail(), query, false);
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.getResultCount());
 
         // fake search
         query.setQueryString("FAKE_SEARCH");
-        results = controller.runSearch(account, query, false);
+        results = controller.runSearch(account.getEmail(), query, false);
         Assert.assertNotNull(results);
         Assert.assertEquals(0, results.getResultCount());
     }
@@ -109,12 +109,12 @@ public class SearchControllerTest {
         HibernateHelper.beginTransaction();
         SearchQuery query = new SearchQuery();
         query.setQueryString("test");
-        SearchResults results = controller.runSearch(a1, query, false);
+        SearchResults results = controller.runSearch(a1.getEmail(), query, false);
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.getResultCount());
 
         // attempt with a2 (should not have permissions)
-        results = controller.runSearch(a2, query, false);
+        results = controller.runSearch(a2.getEmail(), query, false);
         Assert.assertNotNull(results);
         Assert.assertEquals(0, results.getResultCount());
 

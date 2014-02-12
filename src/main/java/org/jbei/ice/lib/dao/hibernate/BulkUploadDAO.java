@@ -67,9 +67,7 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         try {
             Query query = session
                     .createSQLQuery("select count(*) from bulk_upload_entry where bulk_upload_id = " + draftId);
-            int count = ((Number) query.uniqueResult()).intValue();
-            return count;
-
+            return ((Number) query.uniqueResult()).intValue();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -107,6 +105,6 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
 
     @Override
     public BulkUpload get(long id) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return super.get(BulkUpload.class, id);
     }
 }

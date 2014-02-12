@@ -46,10 +46,10 @@ public class SearchController {
         dao = DAOFactory.getSearchDAO();
     }
 
-    public SearchResults runSearch(Account account, SearchQuery query, boolean searchWeb) throws ControllerException {
+    public SearchResults runSearch(String userId, SearchQuery query, boolean searchWeb) throws ControllerException {
         if (searchWeb)
             return runWebSearch(query);
-        return runLocalSearch(account, query, false);
+        return runLocalSearch(userId, query, false);
     }
 
     public SearchResults runWebSearch(SearchQuery query) {
@@ -102,12 +102,12 @@ public class SearchController {
     /**
      * Executes search using parameters specified in the query.
      *
-     * @param account
+     * @param userId
      * @param query
      * @return
      * @throws ControllerException
      */
-    public SearchResults runLocalSearch(Account account, SearchQuery query, boolean isAPISearch)
+    public SearchResults runLocalSearch(String userId, SearchQuery query, boolean isAPISearch)
             throws ControllerException {
         String projectName = "";
         String projectURI = "";
@@ -119,6 +119,8 @@ public class SearchController {
 
         String queryString = query.getQueryString();
         // TODO : split on \" first for phrase query  e.g. this "little piggy"
+
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
         // blast query only
         if (query.hasBlastQuery() && (queryString == null || queryString.isEmpty())) {

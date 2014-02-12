@@ -13,28 +13,30 @@
     <tr ng-repeat="collection in collectionList">
         <td ng-class="{bg_f1:currentPath(collection.path)}">
             <div class="system_collection_user_menu_row" ng-click='selectCollection(collection.path)'>
-                <i class="fa {{collection.icon}} fa-fw" style="font-size: 14px; color: #a1a0a0;"></i>
+                <i class="fa fa-fw" style="font-size: 14px; color: #a1a0a0;"
+                   ng-class="currentPathOpenIcon(collection)"></i>
                 &nbsp;<span class="collection_user_menu"
                             ng-class="{collection_menu_selection:currentPath(collection.path)}">
                 {{collection.name}}</span>
-                <span class="menu_count">{{collection.available}}</span>
+                <span class="menu_count"><span>{{collection.available}}</span>
+                     <!--<i ng-click="hideAddCollection=!hideAddCollection" class="fa fa-plus-square"></i>-->
+                   </span>
             </div>
 
             <ice.menu.collections.details ng-show="currentPath(collection.path)"></ice.menu.collections.details>
-
         </td>
     </tr>
-    <tr>
-        <td style="background-color: #f1f1f1;">
-            <div class="system_collection_user_menu_row">
-                <i class="fa fa-folder-open fa-fw" style="font-size: 14px; color: #233559; opacity: 0.8"></i>
-                &nbsp;<span
-                    class="collection_user_menu"><b style="color: #233559">Personal</b></span> <span class="menu_count">
-                <i ng-click="hideAddCollection=!hideAddCollection"
-                   class="fa fa-plus-square"></i></span>
-            </div>
+    <!--<tr>-->
+    <!--<td style="background-color: #f1f1f1;">-->
+    <!--<div class="system_collection_user_menu_row">-->
+    <!--<i class="fa fa-folder-open fa-fw" style="font-size: 14px; color: #233559; opacity: 0.8"></i>-->
+    <!--&nbsp;<span-->
+    <!--class="collection_user_menu"><b style="color: #233559">Personal</b></span> <span class="menu_count">-->
+    <!--<i ng-click="hideAddCollection=!hideAddCollection"-->
+    <!--class="fa fa-plus-square"></i></span>-->
+    <!--</div>-->
 
-            <ice.menu.collections.details></ice.menu.collections.details>
-        </td>
-    </tr>
+    <!--<ice.menu.collections.details></ice.menu.collections.details>-->
+    <!--</td>-->
+    <!--</tr>-->
 </table>
