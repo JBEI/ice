@@ -9,7 +9,7 @@ import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
 import org.jbei.ice.lib.account.authentication.InvalidCredentialsException;
-import org.jbei.ice.lib.account.authentication.UserIdAuthentication;
+import org.jbei.ice.lib.account.authentication.LocalAuthentication;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -351,7 +351,7 @@ public class AccountController {
      */
     public boolean authenticate(String login, String password, String ip)
             throws InvalidCredentialsException, ControllerException {
-        IAuthentication authentication = new UserIdAuthentication();
+        IAuthentication authentication = new LocalAuthentication();
 
         try {
             if (!authentication.authenticates(login.trim(), password)) {
