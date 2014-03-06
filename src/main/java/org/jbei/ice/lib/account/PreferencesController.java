@@ -13,6 +13,8 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
 import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
 
+import org.apache.commons.lang.math.NumberUtils;
+
 /**
  * Controller for managing user preferences.
  *
@@ -81,14 +83,16 @@ public class PreferencesController {
 
     // really an update
     public boolean saveSetting(Account account, String key, String value) throws ControllerException {
-        // check if a search boost setting
-        try {
-            SearchBoostField boostField = SearchBoostField.valueOf(key.toUpperCase());
-            if (boostField != null) {
-                key = "BOOST_" + boostField.name();
+        // check if a search boost setting. hack: expecting that search boosts will only use numeric values TODO
+        if (NumberUtils.isNumber(value)) {
+            try {
+                SearchBoostField boostField = SearchBoostField.valueOf(key.toUpperCase());
+                if (boostField != null) {
+                    key = "BOOST_" + boostField.name();
+                }
+            } catch (Exception e) {
+                Logger.debug(e.getMessage());
             }
-        } catch (Exception e) {
-            Logger.debug(e.getMessage());
         }
 
         try {
