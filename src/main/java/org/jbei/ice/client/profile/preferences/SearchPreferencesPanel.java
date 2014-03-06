@@ -46,7 +46,8 @@ public class SearchPreferencesPanel extends Composite {
                         + "font-weight: bold; font-style: italic; font-size: 0.85em; text-transform: uppercase\">"
                         + panelHeader
                         + "</span>"
-                        + " <span class=\"pref_panel_desc\">(Select a value to boost the result for that field)</span>"
+                        + " <span class=\"pref_panel_desc\">(Select a value to boost the result for that field. "
+                        + "<b>1=least important, 5=most important</b>)</span>"
                         + "</div>");
 
         headerPanel.setStyleName("entry_sequence_sub_header");
