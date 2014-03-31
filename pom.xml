@@ -4,7 +4,7 @@
     <groupId>org.jbei</groupId>
     <artifactId>gd-ice</artifactId>
     <packaging>war</packaging>
-    <version>3.7.1</version>
+    <version>3.7.2</version>
     <name>gd-ice</name>
     <description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
     <issueManagement>
@@ -21,15 +21,10 @@
             <archive>http://groups.google.com/group/gd-ice</archive>
         </mailingList>
     </mailingLists>
-    <scm>
-        <connection>scm:git:https://code.google.com/p/gd-ice/</connection>
-        <developerConnection>scm:git:https://code.google.com/p/gd-ice/</developerConnection>
-        <url>http://code.google.com/p/gd-ice/source/checkout</url>
-    </scm>
     <licenses>
         <license>
             <name>The new BSD License</name>
-            <url>http://code.google.com/p/gd-ice/source/browse/LICENSE.txt</url>
+            <url>https://github.com/JBEI/ice/blob/master/LICENSE.txt</url>
             <distribution>manual</distribution>
         </license>
     </licenses>

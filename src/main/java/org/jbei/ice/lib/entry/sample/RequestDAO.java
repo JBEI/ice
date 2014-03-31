@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.entry.sample;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.jbei.ice.lib.account.model.Account;
@@ -11,12 +12,8 @@ import org.jbei.ice.lib.entry.sample.model.Request;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
 
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * Data accessor object for Sample Request objects
@@ -32,30 +29,35 @@ public class RequestDAO extends HibernateRepository<Request> {
 
     public ArrayList<Request> getSampleRequestByStatus(Account account, Entry entry, SampleRequestStatus status)
             throws DAOException {
-        Criteria criteria = currentSession().createCriteria(Request.class.getName());
-        criteria.add(Restrictions.eq("account", account));
-        criteria.add(Restrictions.eq("entry", entry));
-        criteria.add(Restrictions.eq("status", status));
-        List list = criteria.list();
+        String sql = "from " + Request.class.getName() + " where status=:status and entry=:entry and account=:account";
+        Query query = currentSession().createQuery(sql);
+        query.setParameter("status", status);
+        query.setParameter("entry", entry);
+        query.setParameter("account", account);
+
+        List list = query.list();
         if (list == null)
             return new ArrayList<>();
         return new ArrayList<Request>(list);
     }
 
     public Request getSampleRequestInCart(Account account, Entry entry) throws DAOException {
-        Criteria criteria = currentSession().createCriteria(Request.class.getName())
-                .add(Restrictions.eq("account", account))
-                .add(Restrictions.eq("entry", entry))
-                .add(Restrictions.eq("status", SampleRequestStatus.IN_CART));
+        String sql = "from " + Request.class.getName() + " where status=:status and entry=:entry and account=:account";
+        Query query = currentSession().createQuery(sql);
+        query.setParameter("status", SampleRequestStatus.IN_CART);
+        query.setParameter("entry", entry);
+        query.setParameter("account", account);
+
         try {
-            List list = criteria.list();
+            List list = query.list();
             if (list.isEmpty())
                 return null;
 
-            if (list.size() > 1) {
-                Logger.error("Multiple sample requests found for entry " + entry.getId());
+            HashSet<Request> inCart = new HashSet<Request>(list);
+            if (inCart.size() > 1) {
+                Logger.error("Multiple sample requests found in cart for entry " + entry.getId());
             }
-            return (Request) list.get(0);
+            return (Request) inCart.toArray()[0];
         } catch (HibernateException he) {
             throw new DAOException(he);
         }
@@ -63,14 +65,20 @@ public class RequestDAO extends HibernateRepository<Request> {
 
     public List<Request> getAccountRequestList(Account account, int start, int count, String sort, boolean asc)
             throws DAOException {
-        Criteria criteria = currentSession().createCriteria(Request.class.getName())
-                .add(Restrictions.eq("account", account))
-                .add(Restrictions.eq("status", SampleRequestStatus.PENDING));
-        criteria.setMaxResults(count);
-        criteria.setFirstResult(start);
-        criteria.addOrder(asc ? Order.asc(sort) : Order.desc(sort));
+        String sql = "from " + Request.class.getName() + " where status=:status and account=:account order by " + sort;
+        if (asc)
+            sql += " asc";
+        else
+            sql += " desc";
+
+        Query query = currentSession().createQuery(sql);
+        query.setParameter("status", SampleRequestStatus.PENDING);
+        query.setParameter("account", account);
+
+        query.setMaxResults(count);
+        query.setFirstResult(start);
         try {
-            return new ArrayList<Request>(criteria.list());
+            return new ArrayList<Request>(query.list());
         } catch (HibernateException he) {
             throw new DAOException(he);
         }
@@ -78,12 +86,9 @@ public class RequestDAO extends HibernateRepository<Request> {
 
     // returns all pending requests
     public List<Request> getAllRequestList() throws DAOException {
-        Session session = currentSession();
-        Query query = session.createQuery("from " + Request.class.getName() + " where status in :status");
-        ArrayList<SampleRequestStatus> statusList = new ArrayList<>();
-        statusList.add(SampleRequestStatus.PENDING);
-        statusList.add(SampleRequestStatus.FULFILLED);
-        query.setParameterList("status", statusList);
+        String sql = "from " + Request.class.getName() + " request where status=:status order by request.id desc";
+        Query query = currentSession().createQuery(sql);
+        query.setParameter("status", SampleRequestStatus.PENDING);
 
         try {
             List list = query.list();
@@ -94,12 +99,13 @@ public class RequestDAO extends HibernateRepository<Request> {
     }
 
     public List<Request> getRequestListInCart(Account account) throws DAOException {
-        Criteria criteria = currentSession().createCriteria(Request.class.getName())
-                .add(Restrictions.eq("account", account))
-                .add(Restrictions.eq("status", SampleRequestStatus.IN_CART));
+        String sql = "from " + Request.class.getName() + " request where status=:status and account=:account";
+        Query query = currentSession().createQuery(sql);
+        query.setParameter("account", account);
+        query.setParameter("status", SampleRequestStatus.IN_CART);
 
         try {
-            return new ArrayList<Request>(criteria.list());
+            return new ArrayList<Request>(query.list());
         } catch (HibernateException he) {
             throw new DAOException(he);
         }
