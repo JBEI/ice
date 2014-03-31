@@ -33,9 +33,9 @@ public class SampleRequestTable extends CellTable<SampleRequest> {
     }
 
     public SampleRequestTable(Delegate<SampleRequest> delegate) {
-        super(30, SelectionResource.INSTANCE);
+        super(100, SelectionResource.INSTANCE);
         Label empty = new Label();
-        empty.setText("No sample request data available");
+        empty.setText("No pending sample requests");
         empty.setStyleName("no_data_style");
         this.setEmptyTableWidget(empty);
 
@@ -107,6 +107,7 @@ public class SampleRequestTable extends CellTable<SampleRequest> {
             }
         };
         addColumn(column, "Requested");
+        setColumnWidth(column, "160px");
     }
 
     private void addUpdatedColumn() {
@@ -119,6 +120,7 @@ public class SampleRequestTable extends CellTable<SampleRequest> {
             }
         };
         addColumn(column, "Updated");
+        setColumnWidth(column, "160px");
     }
 
     private void addActionColumn(Delegate<SampleRequest> delegate) {
@@ -131,6 +133,6 @@ public class SampleRequestTable extends CellTable<SampleRequest> {
             }
         };
         addColumn(deleteColumn, "");
-        setColumnWidth(deleteColumn, "25px");
+        setColumnWidth(deleteColumn, "30px");
     }
 }
