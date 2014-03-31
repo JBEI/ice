@@ -14,7 +14,6 @@ import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -78,12 +77,9 @@ public class RequestDAO extends HibernateRepository<Request> {
 
     // returns all pending requests
     public List<Request> getAllRequestList() throws DAOException {
-        Session session = currentSession();
-        Query query = session.createQuery("from " + Request.class.getName() + " where status in :status");
-        ArrayList<SampleRequestStatus> statusList = new ArrayList<>();
-        statusList.add(SampleRequestStatus.PENDING);
-        statusList.add(SampleRequestStatus.FULFILLED);
-        query.setParameterList("status", statusList);
+        String sql = "from " + Request.class.getName() + " request where status=:status order by request.id desc";
+        Query query = currentSession().createQuery(sql);
+        query.setParameter("status", SampleRequestStatus.PENDING);
 
         try {
             List list = query.list();
