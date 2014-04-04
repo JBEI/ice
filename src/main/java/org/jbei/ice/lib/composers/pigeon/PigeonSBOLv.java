@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class PigeonSBOLv {
     private static final String PIGEON_URL = "http://cidar1.bu.edu:5801/pigeon1.php";
     private static final String PIGEON_URL2 = "http://cidar1.bu.edu:5801/pigeon.php";
     private static final HashMap<String, String> map = new HashMap<>();
+    private static final HashSet<String> unsupportedReverse = new HashSet<>();
 
     static {
         map.put("SO_0000001", "?, 13");
@@ -109,6 +111,14 @@ public class PigeonSBOLv {
         map.put("SO_0001836", "?, 13");
         map.put("SO_0005836", "?, 13");
         map.put("SO_0005850", "?, 13");
+
+        // "<" not supported for these codes
+        unsupportedReverse.add("?");
+        unsupportedReverse.add("s");
+        unsupportedReverse.add("|");
+        unsupportedReverse.add("z");
+        unsupportedReverse.add("x");
+        unsupportedReverse.add("d");
     }
 
     public static URI generatePigeonVisual(Sequence sequence) {
@@ -161,8 +171,7 @@ public class PigeonSBOLv {
             if (pigeonTypeAndColor != null && !pigeonTypeAndColor.isEmpty()) {
                 String[] split = pigeonTypeAndColor.split(",");
                 String pigeonType;
-                if (strandType != null && strandType == StrandType.NEGATIVE && !split[0].equalsIgnoreCase("s")
-                        && !split[0].equalsIgnoreCase("x") && !split[0].equalsIgnoreCase("z"))
+                if (strandType != null && strandType == StrandType.NEGATIVE && !unsupportedReverse.contains(split[0]))
                     pigeonType = "<" + split[0];
                 else
                     pigeonType = split[0];

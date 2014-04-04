@@ -25,6 +25,7 @@ import org.jbei.ice.lib.shared.dto.entry.Visibility;
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.*;
+import org.hibernate.search.annotations.Index;
 
 import org.jbei.ice.lib.entry.model.Parameter;
 
