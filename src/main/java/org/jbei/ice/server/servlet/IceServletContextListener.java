@@ -14,9 +14,6 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.internal.SessionFactoryImpl;
-import org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider;
-import org.hibernate.service.jdbc.connections.spi.ConnectionProvider;
 
 /**
  * Ice servlet context listener for running initializing
@@ -52,13 +49,6 @@ public class IceServletContextListener implements ServletContextListener {
 
     // work
     private void closeSessionFactory(SessionFactory factory) {
-        if (factory instanceof SessionFactoryImpl) {
-            SessionFactoryImpl sf = (SessionFactoryImpl) factory;
-            ConnectionProvider conn = sf.getConnectionProvider();
-            if (conn instanceof C3P0ConnectionProvider) {
-                ((C3P0ConnectionProvider) conn).close();
-            }
-        }
         factory.close();
     }
 

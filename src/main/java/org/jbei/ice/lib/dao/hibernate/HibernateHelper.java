@@ -4,9 +4,9 @@ import org.jbei.ice.lib.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 
 /**
  * Helper class to Initialize Hibernate, and obtain new sessions.
@@ -68,11 +68,11 @@ public class HibernateHelper {
                     configuration = new Configuration().configure("mock_hibernate.cfg.xml");
                 } else {
                     // Create the SessionFactory from hibernate.cfg.xml
-                    configuration = new Configuration().configure();
+                    configuration = new Configuration().configure("hibernate.cfg.xml");
                 }
 
-                ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(
-                        configuration.getProperties()).buildServiceRegistry();
+                ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
+                        configuration.getProperties()).build();
                 sessionFactory = configuration.buildSessionFactory(serviceRegistry);
             } catch (Throwable e) {
                 String msg = "Could not initialize hibernate!!!";
