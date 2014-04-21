@@ -31,6 +31,7 @@ import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.project.ProjectController;
+import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
 import org.jbei.ice.lib.utils.TraceAlignmentHelper;
@@ -45,6 +46,8 @@ import org.jbei.ice.services.blazeds.vo.UserRestrictionEnzymes;
 import org.jbei.ice.services.webservices.IRegistryAPI;
 import org.jbei.ice.services.webservices.RegistryAPIServiceClient;
 import org.jbei.ice.services.webservices.ServiceException;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * BlazeDS service calls for Flex applications.
@@ -128,6 +131,20 @@ public class RegistryAMFAPI extends BaseService {
 
         try {
             entry = entryController.getByRecordId(account, entryId);
+            if (entry != null) {
+                Sequence sequence = ControllerFactory.getSequenceController().getByEntry(entry);
+                FeaturedDNASequence featuredDNASequence = ControllerFactory.getSequenceController()
+                                                                           .sequenceToDNASequence(sequence);
+                featuredDNASequence.setIdentifier(entry.getPartNumber());
+                String uriPrefix = ControllerFactory.getConfigurationController()
+                                                    .getPropertyValue(ConfigurationKey.URI_PREFIX);
+
+                if (!StringUtils.isEmpty(uriPrefix)) {
+                    featuredDNASequence.setUri(uriPrefix + "/#page=entry;id=" + entry.getId());
+                }
+                return featuredDNASequence;
+            }
+
         } catch (ControllerException e) {
             Logger.error("Failed to get entry!", e);
             return null;
@@ -135,35 +152,28 @@ public class RegistryAMFAPI extends BaseService {
             Logger.warn(getLoggerPrefix() + account.getFullName() + " tried to access entry without permissions.");
             return null;
         }
-        // TODO : this is a bit of a hack. basically searching through all partners to see if they have this entry
-        if (entry == null) {
-            Service service = RegistryAPIServiceClient.getService();
-            Iterator<QName> ports = service.getPorts();
-            while (ports.hasNext()) {
-                QName name = ports.next();
-                if (name.getNamespaceURI() == null)
-                    continue;
 
-                IRegistryAPI hw = service.getPort(name, IRegistryAPI.class);
-                try {
-                    FeaturedDNASequence featuredDNASequence = hw.getPublicSequence(entryId);
-                    if (featuredDNASequence != null) {
-                        return featuredDNASequence;
-                    }
-                } catch (ServiceException e) {
-                    Logger.error(e);
+        // TODO : this is a bit of a hack. when no found locally, basically searching through all partners to
+        // see if they have this entry
+        Service service = RegistryAPIServiceClient.getService();
+        Iterator<QName> ports = service.getPorts();
+        while (ports.hasNext()) {
+            QName name = ports.next();
+            if (name.getNamespaceURI() == null)
+                continue;
+
+            IRegistryAPI hw = service.getPort(name, IRegistryAPI.class);
+            try {
+                FeaturedDNASequence featuredDNASequence = hw.getPublicSequence(entryId);
+                if (featuredDNASequence != null) {
+                    return featuredDNASequence;
                 }
+            } catch (ServiceException e) {
+                Logger.error(e);
             }
         }
         // TODO
-
-        try {
-            Sequence sequence = ControllerFactory.getSequenceController().getByEntry(entry);
-            return ControllerFactory.getSequenceController().sequenceToDNASequence(sequence);
-        } catch (ControllerException e) {
-            Logger.error("Failed to get entry!", e);
-            return null;
-        }
+        return null;
     }
 
     /**
