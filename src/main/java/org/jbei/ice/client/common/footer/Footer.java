@@ -72,7 +72,7 @@ public class Footer extends Composite {
         line3.add(new HTML("&nbsp; | &nbsp;"));
         Anchor api = new Anchor("API", "/api");
         line3.add(api);
-        line3.add(new HTML("&nbsp; | &nbsp; v3.7.3"));
+        line3.add(new HTML("&nbsp; | &nbsp; v3.7.4"));
 
         panel.add(line3);
         return panel;
