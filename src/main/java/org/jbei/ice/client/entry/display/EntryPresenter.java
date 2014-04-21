@@ -262,7 +262,7 @@ public class EntryPresenter extends AbstractPresenter implements IHasPartData<Pa
 
                 PartData nextInfo = nav.getNext(currentInfo);
                 long currentId = nextInfo.getId();
-                if (currentContext.getPartnerUrl() == null)
+                if (currentContext.getPartnerUrl() == null || currentContext.getPartnerUrl().trim().isEmpty())
                     History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId, false);
 //                EntryPresenter.this.currentPart = nextInfo;
                 currentContext.setId(currentId);
