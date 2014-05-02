@@ -64,6 +64,8 @@ class AccountDAO extends HibernateRepository<Account> {
      * @throws DAOException
      */
     public Account getByEmail(String email) throws DAOException {
+        if (email == null)
+            return null;
         Account account = null;
         Session session = currentSession();
         try {
