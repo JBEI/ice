@@ -133,6 +133,8 @@ public class RegistryAMFAPI extends BaseService {
             entry = entryController.getByRecordId(account, entryId);
             if (entry != null) {
                 Sequence sequence = ControllerFactory.getSequenceController().getByEntry(entry);
+                if (sequence == null)
+                    return null;
                 FeaturedDNASequence featuredDNASequence = ControllerFactory.getSequenceController()
                                                                            .sequenceToDNASequence(sequence);
                 featuredDNASequence.setIdentifier(entry.getPartNumber());
