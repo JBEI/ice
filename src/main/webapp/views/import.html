@@ -1,0 +1,48 @@
+<div class="container-fluid">
+    <div class="row entry_general_header_td" ng-init="saving=false">
+
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-2" style="white-space: nowrap; margin-top: 12px">
+                    <h4 class="display-inline"><strong style="color: #888;">{{importType.toUpperCase()}} UPLOAD</strong>
+                        <strong style="white-space: nowrap" ng-mouseover="showUploadNameEditIcon=true" ng-show="uploadNameEditMode==false"
+                                ng-mouseout="showUploadNameEditIcon=false" ng-click="uploadNameEditMode=true">{{bulkUpload.name}}
+                            <i ng-show="showUploadNameEditIcon" class="fa fa-pencil edit_icon" style="margin-left: 5px;
+                font-size: 14px;"></i></strong></h4>
+                    <span style="opacity: 0.7" data-ng-if="saving"><i class="fa fa-gear fa-spin fa-1x"></i> <small>
+                    Saving...</small>
+                    </span>
+
+                    <small style="opacity: 0.7" data-ng-if="saving===false&&bulkUpload.lastUpdate">
+                        Last Updated: {{bulkUpload.lastUpdate | date:'medium'}}
+                    </small>
+                </div>
+
+                <div class="col-md-4" style="margin-left: -30px; margin-top: 7px">
+                    <div class="input-group" ng-if="uploadNameEditMode===true">
+                        <form ng-submit="saveUploadName()">
+                            <input type="text" ng-model="bulkUpload.name" class="input_box" maxlength="125"
+                                   style="width: 205px;">
+                        </form>
+                        <span class="input-group-addon" data-ng-click="setNameEditMode(false)"
+                              style="padding:3px; background-color: #f1f1f1;width: 19px">
+                            <i class="fa fa-times delete_icon"></i></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6" style="white-space: nowrap; margin-top: 12px">
+                    <span class="pull-right font-90em">
+                        <button class="btn-link" ng-click="fileUploadModal()"><i class="fa fa-file-text">&nbsp;</i>File Upload
+                        </button><span style="font-weight: normal; color: #ccc">&nbsp;|&nbsp;</span>
+                        <i class="fa fa-shield" title="Click to set permissions"></i> Permissions
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="wrapper">
+    <div id="dataTable" style="padding-left: 0; overflow: auto; position: fixed; right:0; left: 244px; top: 175px"
+         class="font-90em"></div>
+</div>

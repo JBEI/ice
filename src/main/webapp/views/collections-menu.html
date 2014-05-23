@@ -1,0 +1,32 @@
+<table cellspacing="0" cellpadding="0" width="224px">
+    <tr>
+        <td style="padding: 10px"><img src="/img/logo.png" alt="ICE" height="84px"></td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="collections_header">
+            COLLECTIONS
+        </td>
+    </tr>
+    <tr ng-repeat="collection in collectionList">
+        <td ng-class="{bg_f1:collection.display.toLowerCase()===selectedFolder}" ng-init="showAddCollection=false">
+            <div class="system_collection_user_menu_row" ng-click='selectCollection(collection.name)'
+                 ng-mouseenter="showAddCollection=collection.name==='personal'" ng-mouseleave="showAddCollection=false">
+                <i ng-show="collection.name!==selectedFolder" class="fa fa-fw"
+                   style="font-size: 14px; color: #a1a0a0;" ng-class="collection.icon"></i>
+                <i ng-show="collection.name===selectedFolder" class="fa fa-fw"
+                   style="font-size: 14px; color: #a1a0a0;" ng-class="collection.iconOpen"></i>&nbsp;<span class="collection_user_menu"
+                            ng-class="{collection_menu_selection:collection.name===selectedFolder}">{{collection.display}}</span>
+                <span class="menu_count">
+                    <span ng-hide="showAddCollection">{{(collection.count | number) || 0}}</span>
+                    <i ng-show="showAddCollection" ng-click="hideAddCollection=!hideAddCollection"
+                       class="fa fa-plus edit_icon" style="font-size: 14px" stop-event="click"></i>
+                </span>
+            </div>
+
+            <ice.menu.collections.details ng-show="selectedFolder===collection.name"></ice.menu.collections.details>
+        </td>
+    </tr>
+</table>

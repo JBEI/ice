@@ -1,0 +1,55 @@
+<table cellpadding="0" cellspacing="0" class="entry_attribute" ng-init="showAttachmentInput=false" ng-file-drop
+       ng-controller="EntryAttachmentController">
+    <tr>
+        <td class="entry_attributes_sub_header" colspan="2">
+            <i class="fa fa-paperclip font-90em"></i>&nbsp;Attachments
+            <i style="margin-top: 4px" class="fa fa-plus-circle font-awesome edit_icon pull-right"
+               ng-click="showAttachmentInput=true"></i>
+        </td>
+    </tr>
+
+    <tr ng-show="showAttachmentInput">
+        <td style="background-color: #f1f1f1; padding: 5px;">
+            <input type="file" ng-file-select class="font-70em" style="width: 170px">
+
+            <input type="text" style="width: 170px" ng-model="attachmentDescription" class="font-75em"
+                   placeholder="Optional file description">
+
+            <div style="height: 5px; width: 170px; background-color: #f5f5f5;">
+                <div class="progress-bar" role="progressbar" ng-style="{ 'width': uploader.progress + '%' }"></div>
+            </div>
+
+            <div class="pad-8 text-center">
+                <button type="button" ng-click="uploader.uploadAll()" class="btn btn-xs btn-primary"
+                        ng-disabled="!uploader.getNotUploadedItems().length">Submit
+                </button>
+                <button type="button" class="btn btn-xs btn-default" ng-click="cancel()">Cancel</button>
+            </div>
+        </td>
+    </tr>
+    <tr ng-hide="showAttachmentInput||(attachments&&attachments.length)">
+        <td class="font-75em pad-6"><i style="color: #999">No attachments available</i></td>
+    </tr>
+    <tr ng-repeat="attachment in attachments">
+        <td class="entry_detail_view_row" ng-click="downloadAttachment(attachment)">
+            <div ng-hide="confirmDelete($index)">
+                <span class="font-90em">{{attachment.filename | fileTruncate:26:false}}</span>
+                <i stop-event="click" ng-if="entry.canEdit" class="fa fa-trash-o delete_icon pull-right"
+                   ng-click="setConfirmDelete($index, true)"></i><br>
+                <span style="color: #999;font-size: 11px">{{attachment.description || "No description provided"}}</span>
+            </div>
+
+            <div ng-show="confirmDelete($index)">
+                <i class="fa fa-exclamation-triangle alert_color"></i> <span class="font-90em color_444">Delete?</span>
+
+                <div class="pull-right">
+                    <button stop-event="click" class="btn btn-xs btn-primary" ng-click="deleteAttachment($index, attachment)">Yes</button>
+                    <button stop-event="click" class="btn btn-xs btn-default" ng-click="setConfirmDelete($index, false)">No</button>
+                </div>
+                <br>
+                <span style="color: #999;font-size: 11px">Action is permanent</span>
+            </div>
+
+        </td>
+    </tr>
+</table>

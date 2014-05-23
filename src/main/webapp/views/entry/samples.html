@@ -1,0 +1,68 @@
+<div ng-controller="EntrySampleController">
+    <div class="row pad_top">
+        <button type="button" class="ice-button"><i style="font-size: 14px; color: #007dbc" class="fa fa-plus"></i>Add
+            Sample
+        </button>
+        &nbsp;
+        <button ng-click="openAddToCart()" type="button" class="ice-button"><i
+                style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Add to Cart
+        </button>
+    </div>
+
+    <div class="row pad_top" ng-repeat="sample in samples">
+        <div class="col-md-6">
+            <table class="entry_sample_panel">
+                <tr>
+                    <td colspan="{{Plate96Cols.length}}" align="center" class="bg_cc"><b></b></td>
+                </tr>
+                <tr ng-repeat="row in Plate96Rows">
+                    <td ng-repeat="col in Plate96Cols track by $id(col)" class="border-1">{{row}}<b
+                            style="vertical-align: sub; font-size: 7px">{{col}}</b></td>
+                    <!--<td class="border-1-selected bg_coral" title="0105793581">H<b-->
+                    <!--style="vertical-align: sub; font-size: 7px">7</b></td>-->
+                </tr>
+                <tr>
+                    <td class="bg_cc" colspan="12" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM
+                        by <a href="#page=profile;id=afschlatter@lbl.gov">afschlatter@lbl.gov</a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="row pad_top">
+        <div class="col-md-6">
+        <table class="entry_sample_panel">
+                <tr>
+                    <td colspan="{{Plate96Cols.length}}" align="center" class="bg_cc"><b> PLATE 000000000090</b></td>
+                </tr>
+                <tr ng-repeat="row in Plate96Rows">
+                    <td ng-repeat="col in Plate96Cols track by $id(col)" class="border-1">{{row}}<b
+                            style="vertical-align: sub; font-size: 7px">{{col}}</b></td>
+                    <!--<td class="border-1-selected bg_coral" title="0105793581">H<b-->
+                    <!--style="vertical-align: sub; font-size: 7px">7</b></td>-->
+                </tr>
+                <tr>
+                    <td class="bg_cc" colspan="12" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM
+                        by <a href="#page=profile;id=afschlatter@lbl.gov">afschlatter@lbl.gov</a></td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-md-6 text-center">
+            <table class="entry_sample_panel">
+                <tr>
+                    <td colspan="{{Plate96Cols.length}}" align="center" class="bg_cc"><b> PLATE 000000000090</b></td>
+                </tr>
+                <tr ng-repeat="row in Plate96Rows">
+                    <td ng-repeat="col in Plate96Cols track by $id(col)" class="border-1">{{row}}<b
+                            style="vertical-align: sub; font-size: 7px">{{col}}</b></td>
+                    <!--<td class="border-1-selected bg_coral" title="0105793581">H<b-->
+                    <!--style="vertical-align: sub; font-size: 7px">7</b></td>-->
+                </tr>
+                <tr>
+                    <td class="bg_cc" colspan="12" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM
+                        by <a href="#page=profile;id=afschlatter@lbl.gov">afschlatter@lbl.gov</a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

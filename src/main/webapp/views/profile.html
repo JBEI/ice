@@ -1,0 +1,27 @@
+<div class="container-fluid" ng-controller="ProfileController">
+    <div class="row entry_general_header_td" style="height: 60px">
+
+        <div class="col-md-12">
+            <h4><strong style="color: #888;">PROFILE</strong>
+                <strong>{{profile.firstName}} {{profile.lastName}}</strong><br>
+                <small class="font-65em">{{profile.institution}}</small>
+            </h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10">
+            <ng-include src="profileOptionSelection"></ng-include>
+        </div>
+        <div class="col-md-2" style="padding-right: 0">
+            <table class="profile_menu pull-right" cellpadding="0" cellspacing="0">
+                <tr ng-repeat="menuOption in profileMenuOptions">
+                    <td ng-class="{selected:menuOption.selected}" ng-click="showSelection($index)">
+                        <i class="fa {{menuOption.icon}}" style="font-size: 14px; margin-right: 10px;"></i>{{menuOption.display}}
+                        <!--<span class="menu-count">12</span>-->
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

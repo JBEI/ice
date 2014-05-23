@@ -1,0 +1,35 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <h4>Bulk Import File Upload</h4>
+</div>
+
+<div class="modal-body">
+    <div style="padding: 6px; border: 1px solid #eee; background-color: #f1f1f1; font-size: 0.90em; border-radius: 3px; ">
+        <i style="font-size:60px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>The
+        first line of your CSV file should contain the header
+        information and must be spelled exactly as it appears in the web
+        interface. e.g. <b>"Principal Investigator", </b> etc. If uploading a zip file, make sure there is exactly
+        <b>1</b> csv file contained in it. <br><br>
+
+        <div class="text-center"><a href="">Click here to download a CSV template</a> for your selected upload.</div>
+    </div>
+    <br>
+
+    <div ng-if="uploadError" class="alert alert-danger"><i class="fa fa-exclamation-triangle"></i> {{uploadError}}</div>
+
+    <input ng-if="!processing && !modalClose" type="file" ng-file-select class="font-90em" >
+
+    <div style="height: 12px; width: 100%" ng-if="!processing && !modalClose">
+        <div class="progress-bar" role="progressbar" ng-style="{ 'width': importUploader.progress + '%' }"></div>
+    </div>
+
+    <div class="alert alert-info" ng-if="processing">
+        <i class="fa fa-spin fa-gear"></i> Processing upload. This may take several minutes ...
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button ng-if="!modalClose && !processing" type="button" ng-click="uploadFile()" class="btn btn-primary"
+            ng-disabled="!importUploader.getNotUploadedItems().length">Upload File</button>
+    <button class="btn btn-default" ng-click="cancel()">{{modalClose || 'Cancel'}}</button>
+</div>

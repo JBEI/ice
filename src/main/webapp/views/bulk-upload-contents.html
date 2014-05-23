@@ -1,0 +1,37 @@
+<div class="container-fluid">
+    <div class="row entry_general_header_td">
+        <div class="col-md-12">
+            <h4><strong style="color: #888;text-transform: uppercase;">Bulk Upload Drafts</strong></h4>
+        </div>
+    </div>
+
+    <div class="row" ng-init="predicate='lastUpdate'">
+        <table cellspacing="0" class="data_table">
+            <tr data-ng-show='contents && contents.length > 0'>
+                <th style="width: 110px; cursor: pointer" ng-click="predicate = 'name'; reverse=!reverse">
+                    Name
+                </th>
+                <th style="width: 110px; cursor: pointer" ng-click="predicate = 'type'; reverse=!reverse">
+                    Type
+                </th>
+                <th style="width: 110px; cursor: pointer" ng-click="predicate = 'count'; reverse=!reverse">
+                    No of Entries
+                </th>
+                <th style="width: 110px; cursor: pointer" ng-click="predicate = 'created'; reverse=!reverse">
+                    Created
+                </th>
+                <th style="width: 110px; cursor: pointer" ng-click="predicate = 'lastUpdate'; reverse=!reverse">
+                    Updated
+                </th>
+            </tr>
+
+            <tr ng-repeat="upload in contents | orderBy:predicate:reverse">
+                <td><a ng-href="/upload/{{upload.id}}">{{upload.name}}</a></td>
+                <td>{{upload.type}}</td>
+                <td>{{upload.count}}</td>
+                <td>{{upload.created}}</td>
+                <td>{{upload.lastUpdate}}</td>
+            </tr>
+            </table>
+    </div>
+</div>

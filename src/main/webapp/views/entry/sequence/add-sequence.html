@@ -1,0 +1,29 @@
+<i style="color: #999">No sequence data provided. Upload sequence file or select
+    '<a class="cursor_pointer" ng-click="isPaste=true">Paste Sequence</a>'
+    to enter the raw sequence text.</i>
+<alert type="'info'" style="margin-bottom: 10px; margin-top: 10px">
+    <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats are
+    Genbank, Fasta and SBOL
+</alert>
+
+<alert type="'danger'" style="margin-bottom: 10px" ng-if="serverError">
+    <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing file
+</alert>
+
+<!--file upload-->
+<span ng-if="!isPaste && !processingFile">
+                <div class="margin-top-20"><input ng-file-select type="file"/></div>
+                <div style="height: 7px; background-color: #f9f9f9;">
+                    <div class="progress-bar" role="progressbar"
+                         ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
+                </div>
+            </span>
+
+<span ng-if="processingFile">
+                <i class="fa fa-spinner fa-gear"></i> Processing file {{processingFile}}
+            </span>
+
+<!--sequence paste-->
+<textarea ng-show="isPaste===true &&!processingFile" ng-model="pastedSequence" class="input_box"
+          placeholder="Paste sequence" rows="14"
+          style="width: 100%; height: 100%;"></textarea>

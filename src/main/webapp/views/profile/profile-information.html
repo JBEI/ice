@@ -1,0 +1,96 @@
+<div class="row pad_top">
+    <button type="button" ng-click="editClick(true, false, false)" class="ice-button">
+        <i style="font-size: 14px" class="blue fa fa-envelope"></i> Send Message
+    </button>
+    &nbsp;
+    <button type="button" ng-click="editClick(false, true, false)" class="ice-button">
+        <i style="font-size: 14px" class="blue fa fa-edit"></i> Edit Profile
+    </button>
+    &nbsp;
+    <button type="button" ng-click="editClick(false, false, true)" class="ice-button">
+        <i style="font-size: 14px" class="blue fa fa-key"></i> Change Password
+    </button>
+</div>
+
+<div class="row pad_top" ng-show="!showChangePassword && !showEditProfile && !showSendMessage"><i style="color: #999;">{{profile.description
+    || 'No profile description provided.'}}</i></div>
+
+<div class="row margin-top-10 panel panel-default font-95em " ng-if="showEditProfile" ng-init="switchtoEditMode()">
+    <form class="panel-body" role="form" ng-submit="updateProfile()" >
+        <div class="col-md-2 pad-top-5">
+            <span style="white-space:nowrap">First name <span class="required">*</span> </span>
+        </div>
+
+        <div class="col-md-10 pad-top-5">
+            <input type="text" class="input_box" ng-model="editProfile.firstName" maxlength="125" style="width: 235px;">
+        </div>
+        <div class="col-md-2 pad-top-5">
+            <span style="white-space:nowrap">Last name <span class="required">*</span></span>
+        </div>
+
+        <div class="col-md-10 pad-top-5">
+            <input type="text" class="input_box" ng-model="editProfile.lastName" maxlength="125" style="width: 235px;">
+        </div>
+        <div class="col-md-2 pad-top-5">
+            <span style="white-space:nowrap">Institution</span>
+        </div>
+        <div class="col-md-10 pad-top-5">
+            <input type="text" class="input_box" ng-model="editProfile.institution" maxlength="125" style="width: 235px;">
+        </div>
+
+        <div class="col-md-2 pad-top-5">
+            <span style="white-space:nowrap">About</span>
+        </div>
+        <div class="col-md-10 pad-top-5">
+            <textarea rows="3" cols="30" ng-model="editProfile.description" class="input_box" placeholder="Enter profile description"></textarea>
+        </div>
+
+        <br>
+
+        <div class="col-xs-offset-2 col-md-10 pad_top">
+            <button type="submit" class="btn btn-xs btn-primary">Save</button>
+            <button type="button" ng-click="editClick(false, false, false)" class="btn btn-xs btn-default">Cancel
+            </button>
+        </div>
+    </form>
+</div>
+
+<!--<div>-->
+<!--<pre>-->
+<!--{{settings | json}}-->
+<!--</pre>-->
+<!--</div>-->
+<div class="row margin-top-10 panel panel-default" ng-if="showChangePassword">
+    <div class="panel-body">
+        <form class="font-95em" role="form">
+            <div class="col-md-2 pad-top-5">
+                <span style="white-space:nowrap">Current password <span class="required">*</span> </span>
+            </div>
+            <div class="col-md-10 pad-top-5">
+                <input type="text" class="input_box" maxlength="125" style="width: 205px;">
+            </div>
+
+            <div class="col-md-2 pad-top-5">
+                <span style="white-space:nowrap">New password <span class="required">*</span></span>
+            </div>
+            <div class="col-md-10 pad-top-5">
+                <input type="text" class="input_box" maxlength="125" style="width: 205px;">
+            </div>
+
+            <div class="col-md-2 pad-top-5">
+                <span style="white-space:nowrap">Confirm new password</span>
+            </div>
+            <div class="col-md-10 pad-top-5">
+                <input type="text" class="input_box" maxlength="125" style="width: 205px;">
+            </div>
+
+            <br>
+
+            <div class="col-xs-offset-2 col-md-10 pad_top">
+                <button type="submit" ng-click="updatePassword()" class="btn btn-xs btn-primary">Save</button>
+                <button type="button" ng-click="editClick(false, false, false)" class="btn btn-xs btn-default">Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

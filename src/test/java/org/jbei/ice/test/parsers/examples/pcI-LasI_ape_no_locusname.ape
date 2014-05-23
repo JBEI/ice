@@ -1,0 +1,85 @@
+LOCUS                854 bp ds-DNA     linear       07-SEP-2010
+DEFINITION  
+ACCESSION   
+VERSION     
+SOURCE      
+  ORGANISM  
+COMMENT     
+COMMENT     ApEinfo:methylated:1
+FEATURES             Location/Qualifiers
+     misc_feature    71..75
+                     /label=Scar
+                     /ApEinfo_fwdcolor=#c0c0c0
+                     /ApEinfo_revcolor=green
+     misc_feature    58..69
+                     /label=RBS
+                     /ApEinfo_fwdcolor=#ff0080
+                     /ApEinfo_revcolor=green
+     misc_feature    76..77
+                     /label=SCAR
+                     /ApEinfo_fwdcolor=#c0c0c0
+                     /ApEinfo_revcolor=#c0c0c0
+     misc_feature    70..75
+                     /label=SCAR(1)
+                     /ApEinfo_label=SCAR
+                     /ApEinfo_fwdcolor=#c0c0c0
+                     /ApEinfo_revcolor=#c0c0c0
+     misc_feature    814..854
+                     /label=Terminator
+                     /ApEinfo_fwdcolor=#804000
+                     /ApEinfo_revcolor=green
+     misc_feature    726..805
+                     /label=Terminator(1)
+                     /ApEinfo_label=Terminator
+                     /ApEinfo_fwdcolor=#804000
+                     /ApEinfo_revcolor=green
+     misc_feature    58..69
+                     /label=B0034 RBS
+                     /ApEinfo_fwdcolor=#ff0080
+                     /ApEinfo_revcolor=green
+     misc_feature    50..57
+                     /label=SCAR(2)
+                     /ApEinfo_label=SCAR
+                     /ApEinfo_fwdcolor=#c0c0c0
+                     /ApEinfo_revcolor=#c0c0c0
+     misc_feature    70..77
+                     /label=SCAR(3)
+                     /ApEinfo_label=SCAR
+                     /ApEinfo_fwdcolor=#c0c0c0
+                     /ApEinfo_revcolor=#c0c0c0
+     misc_feature    718..725
+                     /label=SCAR(4)
+                     /ApEinfo_label=SCAR
+                     /ApEinfo_fwdcolor=#c0c0c0
+                     /ApEinfo_revcolor=#c0c0c0
+     misc_feature    806..813
+                     /label=SCAR(5)
+                     /ApEinfo_label=SCAR
+                     /ApEinfo_fwdcolor=#c0c0c0
+                     /ApEinfo_revcolor=#c0c0c0
+     misc_feature    1..49
+                     /label=pcI
+                     /ApEinfo_fwdcolor=#800000
+                     /ApEinfo_revcolor=#800000
+     misc_feature    814..852
+                     /label=Terminator(2)
+                     /ApEinfo_label=Terminator
+                     /ApEinfo_fwdcolor=#804000
+                     /ApEinfo_revcolor=#804000
+ORIGIN
+        1 taacaccgtg cgtgttgact attttacctc tggcggtgat aatggttgct actagagaaa
+       61 gaggagaaat actagatgat cgttcagatc ggtcgtcgtg aagagttcga caaaaaactg
+      121 ctgggtgaaa tgcacaaact gcgtgctcag gttttcaaag aacgtaaagg ttgggacgtt
+      181 tccgttatcg acgaaatgga aatcgacggt tacgacgctc tgtccccgta ctacatgctg
+      241 atccaggaag acaccccgga agctcaggtt ttcggttgct ggcgtatcCT Ggacaccacc
+      301 ggtccgtaca tgctgaaaaa caccttcccg gaactgctgc acggtaaaga agctccgtgc
+      361 tccccgcaca tctgggaact gtcccgtttc gctatcaact ccggtcagaa aggttccctg
+      421 ggtttctccg actgcaccct ggaagctatg cgtgctctgg ctcgttactc cttgcagaac
+      481 gacatccaga ccctggttac cgttaccacc gttggtgttg aaaaaatgat gatccgtgct
+      541 ggtctggacg tttcccgttt cggtccgcac ctgaaaatcg gtatcgaacg tgctgttgct
+      601 ctgcgtatcg aactgaacgc taaaacccag atcgctctgt acggtggtgt tctggttgaa
+      661 cagcgtctgg ctgtttccgc tgctaacgac gaaaactacg ctctggttgc ttaataatac
+      721 tagagccagg catcaaataa aacgaaaggc tcagtcgaaa gactgggcct ttcgttttat
+      781 ctgttgtttg tcggtgaacg ctctctacta gagtcacact ggctcacctt cgggtgggcc
+      841 tttctgcgtt tata    
+//

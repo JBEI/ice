@@ -1,0 +1,109 @@
+<table cellspacing="0" cellpadding="0">
+    <tr>
+        <td valign="top" ng-hide="hideSideBar">
+
+            <ice.menu.collections></ice.menu.collections>
+            <br>
+            <ice.menu.wor></ice.menu.wor>
+
+            <!--<br>-->
+            <!---->
+            <!--<ice.menu.tags></ice.menu.tags>-->
+
+        <td style="vertical-align: text-top; padding-left: 20px" width="100%">
+
+            <!-- table right -->
+            <table cellspacing="0" cellpadding="0" width="100%">
+
+                <!-- very top of header. Account and logout links -->
+                <tr>
+                    <!-- search -->
+                    <td style="background-color: #f1f1f1; padding:6px" colspan="6">
+
+                        <!-- table for search, menu, and profile and other options (e.g. logout) -->
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td>
+                                    <ice-search-input filters="searchFilters"
+                                                      runUserSearch="runUserSearch()"></ice-search-input>
+                                </td>
+
+                                <!-- links -->
+                                <td colspan="2" style="text-align: right;" class="font-90em">
+                            <span style="vertical-align: top;"><a
+                                    ng-href="/profile/{{user.id}}">{{user.email}}</a></span>
+                                    &nbsp;
+                    <span style="vertical-align: top;" class="form-group">
+                        <button style="background: transparent; border: none !important;" title=""
+                                data-placement="bottom"
+                                data-content="contents" data-template="/views/popover.html" data-trigger="focus"
+                                bs-popover>
+                            <i class="fa fa-bell" style="color: #757575; font-size: 14px"></i><sup
+                                class="count-badge">4</sup></button>  </span>
+                                    &nbsp;
+                    <span style="vertical-align: top;"><i class="fa fa-envelope"
+                                                          style="color: #757575; font-size: 14px"></i><sup
+                            class="count-badge">8</sup></span>
+                                    &nbsp;
+                    <span style="vertical-align: top;"><i class="fa fa-shopping-cart"
+                                                          style="color: #757575; font-size: 14px"></i><sup
+                            class="count-badge">5</sup></span>
+                                    &nbsp;
+                            <span><i class="fa fa-sign-out" style="color: #757575; font-size: 20px"
+                                     data-ng-click="logout()"></i></span>
+                                    &nbsp;
+                                </td>
+                            </tr>
+                        </table>
+                        <!-- end table for search, menu, and profile and other options (logout)  -->
+
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="height: 29px">&nbsp;</td>
+                </tr>
+
+                <!-- sub menu [Create Entry, Add To, etc] -->
+                <tr>
+                    <td style="width: 155px">
+                        <div class="btn-group">
+                            <button type="button" class="subMenuCreateNew btn-sm dropdown-toggle"
+                                    style="font-size: 13px"
+                                    ng-click="createType='create'">Create Entry <span class="caret"></span>
+                            </button>
+
+                            <button type="button" style="padding: 5px 5px"
+                                    class="btn-xs subMenuCreateNew dropdown-toggle"
+                                    title="Bulk Import" ng-click="createType='upload'">
+                                <i class="fa fa-fw fa-table" style="font-size: 14px"></i>
+                            </button>
+
+                            <ul class="dropdown-menu">
+                                <li ng-repeat="choice in items">
+                                    <a ng-href="/{{createType}}/{{choice.type}}" class="cursor_pointer">
+                                        <i ng-if="createType==='upload'"
+                                           class="opacity_4 color_444 fa fa-fw fa-table"></i> {{choice.name}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                    <td>
+                        <ice-action-menu></ice-action-menu>
+                    </td>
+                </tr>
+
+                <!-- space -->
+                <tr>
+                    <td colspan="6" style="height: 25px"></td>
+                </tr>
+
+                <!-- content autoscroll=false-->
+                <tr>
+                    <td ui-view autoscroll="false" colspan="6"></td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>

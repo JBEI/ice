@@ -1,0 +1,23 @@
+<table cellspacing="0" cellpadding="0" width="224px" ng-if="wor">
+    <tr>
+        <td class="collections_header">
+            WEB OF REGISTRIES
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="system_collection_user_menu_row">
+                <i class="fa fa-files-o color_444" style="font-size: 14px"></i> <span class="collection_user_menu">Browse All</span>
+            </div>
+        </td>
+    </tr>
+
+    <tr ng-repeat="partner in wor.partners">
+        <td>
+            <div class="system_collection_user_menu_row">
+                <i class="fa fa-dot-circle-o color_444" style="font-size: 14px"></i>
+                <span class="collection_user_menu">{{partner.name}}</span> <i class="fa fa-edit"></i>
+            </div>
+        </td>
+    </tr>
+</table>

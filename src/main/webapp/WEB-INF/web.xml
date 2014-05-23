@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+         version="2.4">
+    <description>Inventory for Composable Elements</description>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Protected Context</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <display-name>ice</display-name>
+
+    <filter>
+        <filter-name>IceFilter</filter-name>
+        <filter-class>org.jbei.ice.servlet.filter.IceFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>IceFilter</filter-name>
+        <url-pattern>/ice</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>IceFilter</filter-name>
+        <url-pattern>/download</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>org.jbei.ice.servlet.IceServletContextListener</listener-class>
+    </listener>
+
+    <!-- main ice servlet -->
+    <servlet>
+        <servlet-name>IceServlet</servlet-name>
+        <servlet-class>org.jbei.ice.servlet.IceServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>FileDownloadServlet</servlet-name>
+        <servlet-class>org.jbei.ice.servlet.FileDownloadServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>IceServlet</servlet-name>
+        <url-pattern>/ice</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>FileDownloadServlet</servlet-name>
+        <url-pattern>/download</url-pattern>
+    </servlet-mapping>
+
+    <!-- jersey rest service -->
+    <servlet>
+        <servlet-name>Jersey REST Servlet</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>org.jbei.ice.services.rest;org.jbei.ice.services.rest.writer</param-value>
+        </init-param>
+        <init-param>
+            <param-name>jersey.config.server.provider.scanning.recursive</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>org.jbei.ice.services.rest.multipart.IceApplication</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Jersey REST Servlet</servlet-name>
+        <url-pattern>/rest/*</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/</location>
+    </error-page>
+
+    <session-config>
+        <session-timeout>10</session-timeout>
+    </session-config>
+</web-app>

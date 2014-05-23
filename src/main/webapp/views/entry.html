@@ -1,0 +1,64 @@
+<div class="container-fluid" data-ng-show="!entry">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <i class="fa fa-3x fa-spinner fa-spin"></i> Loading...
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid" ng-if="entry">
+    <div class="row entry_general_header_td" style="height: 60px;">
+
+        <div class="col-md-10" ng-if="entry">
+            <i ng-if="context" class="pull-left fa fa-arrow-circle-left entry_go_back cursor_pointer" title="Back"></i>
+
+            <h4>
+                <strong style="color: #888;">{{entry.type}}</strong>
+                <strong>{{entry.name}}</strong>
+                    <small ng-if="entry.visible !== 'OK'" class="label label-danger" style="font-size: 12px; position: relative; top: -4px">{{entry.visible}}</small>
+                    <small style="font-size: 12px; position: relative; top: -4px" tooltip="Available on web of registries" tooltip-placement="right" tooltip-trigger="mouseenter"
+                       ng-if="entry.publicRead" class="label label-info cursor_pointer" ><i class="fa fa-globe"></i> Public</small>
+                    <a ng-if="entry.parent" ng-href="/entry/{{entry.parent.id}}" style="font-size: 12px; color: white; position: relative; top: -4px" class="small label label-default cursor_pointer"><i class="fa fa-level-up"></i></a>
+                <br>
+                <small class="font-65em">{{entry.creationTime | date:'medium'}} - <a
+                        ng-href="/profile/{{entry.ownerId}}">{{entry.owner}}</a></small>
+            </h4>
+        </div>
+        <div class="col-md-2" style=" margin-top: 15px; white-space: nowrap;" ng-if="context">
+            <button type="button" class="btn btn-link outline-none" ng-disabled="context.offset===0"
+                    ng-click="prevEntryInContext()">
+                <i class="fa fa-arrow-left context_nav_pager"></i></button>
+            <strong class="font-90em">{{context.offset+1 | number}} / {{context.count | number}}</strong>
+            <button type="button" class="btn btn-link outline-none" ng-disabled="context.offset===context.count-1"
+                    ng-click="nextEntryInContext()">
+                <i class="fa fa-arrow-right context_nav_pager"></i></button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10">
+            <ng-include src="selection"></ng-include>
+        </div>
+
+        <!--right menu-->
+        <div class="col-md-2" style="padding-right: 0">
+            <table cellpadding="0" cellspacing="0" class="entry_detail_submenu pull-right">
+                <tr ng-repeat="subMenu in subDetails">
+                    <td ng-class="{selected:subMenu.selected}" ng-click="showSelection($index)" >
+                        <i class="fa {{subMenu.icon}}" style="font-size: 14px;"></i> &nbsp;{{subMenu.display}}
+                        <span ng-if="subMenu.countName" style="float: right; color: #999;">{{entryStatistics[(subMenu.countName)] || 0}}</span>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="pad_top pull-right">
+                <ice-entry-attachment></ice-entry-attachment>
+            </div>
+
+            <div class="pad_top pull-right">
+                <ice-entry-permission entry='entry'></ice-entry-permission>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,65 @@
+<div class="row pad_top">
+    <button type="button" ng-click="rebuildLuceneIndex()" class="ice-button">
+        <i style="font-size: 14px" class="blue fa fa-refresh"></i> Rebuild Indexes
+    </button>
+    &nbsp;
+    <button type="button" ng-click="rebuildBlastIndex()" class="ice-button">
+        <i style="font-size: 14px" class="blue fa fa-refresh"></i> Rebuild Blast
+    </button>
+</div>
+
+<!--settings are retrieved by the main controller since they are used throughout the site-->
+<div class="row pad_top" ng-init="getSetting()">
+    <tabset>
+        <tab heading="General Settings">
+            <div class="row pad_top" ng-repeat="setting in generalSettings">
+                <div class="col-md-3 entryLabel text-right">
+                    <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
+                </div>
+                <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
+                    <div data-ng-if="!setting.editMode">{{setting.value}}<span ng-click="setting.editMode=true">
+                        <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"
+                           style="margin-left: 5px; font-size: 14px;"></i></span>
+                    </div>
+
+                    <div class="input-group" data-ng-if="setting.editMode">
+                        <form ng-submit="submitSetting(setting)">
+                            <input type="text" ng-model="setting.value" class="input_box_group" maxlength="125"
+                                   style="width: 205px;">
+                        </form>
+        <span class="input-group-addon" data-ng-click="setting.editMode=false" style="padding:3px; background-color:
+         #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
+                    </div>
+                </div>
+            </div>
+        </tab>
+
+        <tab heading="Email Settings">
+            <div class="row pad_top" ng-repeat="setting in emailSettings">
+                <div class="col-md-3 entryLabel text-right">
+                    <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
+                </div>
+                <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
+                    <div data-ng-if="!setting.editMode">{{setting.value}}<span ng-click="setting.editMode=true">
+                         <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"
+                            style="margin-left: 5px; font-size: 14px;"></i></span>
+                    </div>
+
+                    <div class="input-group" data-ng-if="setting.editMode">
+                        <form ng-submit="submitSetting(setting)">
+                            <input type="text" ng-model="setting.value" class="input_box_group" maxlength="125"
+                                   style="width: 205px;">
+                        </form>
+        <span class="input-group-addon" data-ng-click="setting.editMode=false" style="padding:3px; background-color:
+     #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
+                    </div>
+                </div>
+            </div>
+        </tab>
+
+    </tabset>
+</div>
+
+
+
+

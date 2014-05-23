@@ -1,0 +1,43 @@
+<div ng-controller="EntryCommentController">
+    <div class="row pad_top">
+        <button type="button" data-ng-click="addComment=true" class="ice-button">
+            <i style="font-size: 14px; color: #007dbc" class="fa fa-comment"></i> Add Comment
+        </button>
+
+        <div class="pad-top-5" data-ng-show="addComment" style="margin-left:50px">
+            <form name="createCommentForm" data-ng-submit="createComment()" class="entry-form">
+                <textarea class="input_box" data-ng-model="newComment.message" placeholder="Enter comment" rows="6"
+                          cols="70"></textarea>
+
+                <div data-ng-if="entrySamples"><b class="font-75em" style="vertical-align: top">Affected Samples</b><br>
+                    <select class="pull_down">
+                        <option data-ng-repeat="sample in entrySamples" value="sample.id">sample.label</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                    <button type="button" data-ng-click="addComment=false" class="btn btn-default btn-sm">Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="comment margin-top-20"
+             ng-repeat="comment in (comments = (entryComments | orderBy: 'id':true))">
+            <span class="close pull-left">{{entryComments.length - $index}}</span>
+            <span style="color: #999;"
+                  class="attachment_small_text pull-right">{{comment.commentDate | uppercase}}</span>
+            <br>
+            <br>{{comment.message}} {{comment.accountTransfer.}}
+            <br><br>
+
+            <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+            <div class="pull-left"><a ng-ref="/profile/{{comment.accountTransfer.id}}">{{comment.accountTransfer.firstName}}
+                {{comment.accountTransfer.lastName}}</a></div>
+            <div class="pull-right delete_icon"><i class="fa fa-trash-o"></i></div>
+        </div>
+    </div>
+</div>
+

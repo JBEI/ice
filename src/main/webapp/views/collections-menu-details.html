@@ -1,0 +1,31 @@
+<!-- details (sub folders) of a selected folder -->
+<table cellspacing="0" cellpadding="0" width="219px" style="margin-left: 5px;">
+    <tr ng-show="hideAddCollection===false" ng-init="hideAddCollection=true">
+        <td>
+            <form ng-submit="createCollection()">
+                <div class="input-group ">
+                    <input type="text" class="input_box" placeholder="Enter collection name" maxlength="35"
+                           style="width: 200px;" ng-model="newCollectionName">
+                    <span class="input-group-addon"
+                          style="padding:0; background-color: #f1f1f1; width: 19px;"><i
+                            ng-click="hideAddCollection=true" class="fa fa-times delete_icon"></i></span>
+                </div>
+            </form>
+        </td>
+    </tr>
+
+    <tr data-ng-repeat="folder in selectedCollectionFolders">
+        <td>
+            <div class="system_collection_user_menu_row" style="background-color: #f9f9f9"
+                 ng-Mouseover="showSubMenu=true" ng-Mouseleave="showSubMenu=false"
+                 ng-click="selectCollectionFolder(folder)">
+                <i class="fa fa-folder-o fa-fw"
+                   style="font-size: 12px; color: #a1a0a0; padding-left: 9px"></i> &nbsp;&nbsp;<span
+                    class="font-85em">{{folder.folderName | limitTo:25}}</span>&nbsp;
+                <span ng-show="!showSubMenu" class="menu_count">{{folder.count | number}}</span>
+                <i class="fa fa-times menu_count delete_icon" ng-show="showSubMenu" ng-init="showSubMenu=false"
+                   style="font-size: 14px;" ng-click="deleteCollection(folder)" stop-event="click"></i>
+            </div>
+        </td>
+    </tr>
+</table>

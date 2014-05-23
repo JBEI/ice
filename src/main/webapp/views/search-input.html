@@ -1,0 +1,84 @@
+<form>
+    <table cellpadding="0" cellspacing="0" class="dropdown" style="white-space: nowrap;">
+        <tr>
+            <td class="quick_search">
+                <input type="search" class="quick_search_input" ng-model="queryText"
+                                            placeholder="Enter search term(s) and/or use the drop down menu">
+                <i class="fa fa-caret-down dropdown-toggle cursor_pointer"
+                   style="padding: 4px 5px 4px 3px; position: relative; top: 2px; color: #999"></i>
+
+                <div class="dropdown-menu" stop-event='click' style="padding: 12px">
+                    <span style="letter-spacing:-1px; color:#555;">&nbsp;<b>TYPE</b>&nbsp;&nbsp;</span>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" ng-model="searchTypes.all" ng-change="check('all')">All
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" ng-model="searchTypes.strain" ng-change="check('strain')">Strain
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" ng-model="searchTypes.plasmid" ng-change="check('plasmid')">Plasmid
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" ng-model="searchTypes.part" ng-change="check('part')">Part
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox"  ng-model="searchTypes.arabidopsis" ng-change="check('arabidopsis')">Arabidopsis
+                    </label>
+
+                    <div class="divider"></div>
+
+                    <span style="letter-spacing:-1px; color:#555;"><b>BLAST</b></span>
+
+                    <select class="pull_down">
+                        <option value="BLAST_N">Nucleotide Search (blastn)</option>
+                        <option value="TBLAST_X">Nucleotide Translated Search (tblastx)</option>
+                    </select>
+
+                    <br>
+                    <textarea class="margin-top-5" rows="9" placeholder="Enter Sequence" style="width: 100%"
+                              class="input-sm" ng-model="sequenceText"></textarea>
+
+                    <div class="divider"></div>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" value="option1">Has Attachment
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" value="option1">Has Sample
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" value="option1">Has Sequence
+                    </label>
+
+                    <div class="divider"></div>
+
+                    <span style="letter-spacing:-1px; color:#555;"><b>BIO SAFETY LEVEL</b></span>
+
+
+                    <select class="pull_down">
+                        <option value="1">Level 1</option>
+                        <option value="2">Level 2</option>
+                    </select>
+
+                    <div class="divider"></div>
+
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-sm btn-primary">Search</button>
+                        <button type="button" class="btn btn-sm btn-default">Reset</button>
+                    </div>
+                </div>
+            </td>
+            <td> &nbsp;
+                <button style="width: 80px;" type="submit" class="btn btn-primary btn-sm" ng-click="search()">
+                    <b>SEARCH</b></button>
+            </td>
+        </tr>
+    </table>
+</form>
+
