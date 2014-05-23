@@ -2,9 +2,7 @@ target/
 *~
 .*
 war/
-src/main/webapp/gwt_ice/
 src/main/webapp/WEB-INF/deploy/
-gwt-unitCache/
 *.class
 
 # Package Files #
