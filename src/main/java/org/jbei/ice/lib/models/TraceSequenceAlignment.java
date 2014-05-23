@@ -5,7 +5,7 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IDataModel;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.entry.TraceSequenceAlignmentInfo;
 
 import org.hibernate.annotations.Type;
 
@@ -182,7 +182,16 @@ public class TraceSequenceAlignment implements IDataModel {
     }
 
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public TraceSequenceAlignmentInfo toDataTransferObject() {
+        TraceSequenceAlignmentInfo alignmentInfo = new TraceSequenceAlignmentInfo();
+        alignmentInfo.setScore(score);
+        alignmentInfo.setStrand(strand);
+        alignmentInfo.setQueryStart(queryStart);
+        alignmentInfo.setQueryEnd(queryEnd);
+        alignmentInfo.setSubjectStart(subjectStart);
+        alignmentInfo.setSubjectEnd(subjectEnd);
+        alignmentInfo.setQueryAlignment(queryAlignment);
+        alignmentInfo.setSubjectAlignment(subjectAlignment);
+        return alignmentInfo;
     }
 }

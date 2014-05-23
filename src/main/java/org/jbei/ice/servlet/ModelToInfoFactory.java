@@ -145,17 +145,21 @@ public class ModelToInfoFactory {
         return info;
     }
 
-    public static ArrayList<SequenceAnalysisInfo> getSequenceAnalysis(List<TraceSequence> sequences) {
-        ArrayList<SequenceAnalysisInfo> infos = new ArrayList<>();
+    public static ArrayList<TraceSequenceAnalysis> getSequenceAnalysis(List<TraceSequence> sequences) {
+        ArrayList<TraceSequenceAnalysis> infos = new ArrayList<>();
         if (sequences == null)
             return infos;
 
         AccountController accountController = new AccountController();
         for (TraceSequence sequence : sequences) {
-            SequenceAnalysisInfo info = new SequenceAnalysisInfo();
+            TraceSequenceAnalysis info = new TraceSequenceAnalysis();
             info.setId(sequence.getId());
             info.setCreated(sequence.getCreationTime());
-            info.setName(sequence.getFilename());
+            info.setFilename(sequence.getFilename());
+            info.setSequence(sequence.getSequence());
+            if (sequence.getTraceSequenceAlignment() != null) {
+                info.setTraceSequenceAlignment(sequence.getTraceSequenceAlignment().toDataTransferObject());
+            }
             AccountTransfer accountTransfer = new AccountTransfer();
             Account account = accountController.getByEmail(sequence.getDepositor());
             if (account != null) {
@@ -276,8 +280,8 @@ public class ModelToInfoFactory {
         }
 
         ArrayList<String> links = new ArrayList<>();
-        if(entry.getLinks() != null) {
-            for(Link link : entry.getLinks()){
+        if (entry.getLinks() != null) {
+            for (Link link : entry.getLinks()) {
                 links.add(link.getLink());
             }
         }

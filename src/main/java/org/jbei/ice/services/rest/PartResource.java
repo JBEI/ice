@@ -16,7 +16,7 @@ import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
-import org.jbei.ice.lib.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.entry.EntryController;
@@ -170,7 +170,7 @@ public class PartResource extends RestResource {
             @PathParam("attachmentId") long attachmentId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        if(!attachmentController.delete(userId, partId, attachmentId))
+        if (!attachmentController.delete(userId, partId, attachmentId))
             return Response.notModified().build();    // todo : use 404 ?
         return Response.ok().build();
     }
@@ -178,8 +178,12 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/traces")
-    public ArrayList<SequenceAnalysisInfo> getTraces(@Context UriInfo info, @PathParam("id") long partId,
+    public ArrayList<TraceSequenceAnalysis> getTraces(@Context UriInfo info,
+            @PathParam("id") long partId,
+            @QueryParam("sid") String sessionId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        if (StringUtils.isEmpty(userAgentHeader))
+            userAgentHeader = sessionId;
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         return controller.getTraceSequences(userId, partId);
     }
@@ -213,6 +217,19 @@ public class PartResource extends RestResource {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         return new SequenceController().retrievePartSequence(userId, partId);
     }
+
+//    @GET
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Path("/{id}/sequence/visual")
+//    public String getVisual(@PathParam("id") long partId,
+//            @QueryParam("sid") String sessionId,
+//            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+//        if (StringUtils.isEmpty(userAgentHeader))
+//            userAgentHeader = sessionId;
+//
+//        String userId = getUserIdFromSessionHeader(userAgentHeader);
+//        return new SequenceController().retrievePartSequence(userId, partId);
+//    }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

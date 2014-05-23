@@ -16,7 +16,7 @@ iceDirectives.directive("iceSearchInput", function () {
     }
 });
 
-iceDirectives.directive("addSequence", function() {
+iceDirectives.directive("addSequence", function () {
     return {
         restrict:"AE",
         templateUrl:"/views/entry/sequence/add-sequence.html"
@@ -53,7 +53,7 @@ iceDirectives.directive("iceEntryAttachment", function () {
 iceDirectives.directive("iceEntryPermission", function () {
     return {
         restrict:"E",
-        scope: {
+        scope:{
             entry:'='
         },
         templateUrl:"/views/entry-permission.html",
@@ -243,6 +243,42 @@ iceDirectives.directive("iceVectorViewer", function ($cookieStore) {
                               <embed src="/swf/vv/VectorViewer.swf?entryId=' + id + '&amp;sessionId=' + sid + '" \
                               quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
                               name="VectorEditor" align="middle" play="true" loop="false"  \
+                              type="application/x-shockwave-flash" \
+                              pluginspage="http://www.adobe.com/go/getflashplayer"> \
+                              </object>');
+            }
+        }
+
+        scope.$watch("active", function (value) {
+            id = attrs.entryid;
+            generateObject();
+        });
+    }
+
+    return {
+        restrict:'AE',
+        link:link
+    };
+});
+
+iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
+    function link(scope, element, attrs) {
+
+        var id, sid = $cookieStore.get("sessionId");
+
+        function generateObject() {
+            if (!id) {
+                element.html("<b>Cannot render sequence checker.</b>")
+            } else {
+                element.html('<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002" id="SequenceChecker" width="100%" height="100%" codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"> \
+          <param name="movie" value="SequenceChecker.swf"> \
+              <param name="quality" value="high">  \
+                  <param name="bgcolor" value="#869ca7"> \
+                      <param name="wmode" value="opaque">  \
+                          <param name="allowScriptAccess" value="sameDomain"> \
+                              <embed src="/swf/sc/SequenceChecker.swf?entryId=' + id + '&amp;sessionId=' + sid + '" \
+                              quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
+                              name="SequenceChecker" align="middle" play="true" loop="false"  \
                               type="application/x-shockwave-flash" \
                               pluginspage="http://www.adobe.com/go/getflashplayer"> \
                               </object>');

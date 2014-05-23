@@ -33,7 +33,7 @@ import org.jbei.ice.lib.dto.PartSample;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
-import org.jbei.ice.lib.dto.entry.SequenceAnalysisInfo;
+import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.sample.SampleStorage;
@@ -612,8 +612,7 @@ public class EntryController {
         return true;
     }
 
-
-    public ArrayList<SequenceAnalysisInfo> getTraceSequences(String userId, long entryId) {
+    public ArrayList<TraceSequenceAnalysis> getTraceSequences(String userId, long entryId) {
         Entry entry = dao.get(entryId);
         if (entry == null)
             return null;
@@ -747,8 +746,8 @@ public class EntryController {
 
         // check if there is a parent available
         List<Entry> parents = dao.getParents(entryId);
-        if(parents != null && !parents.isEmpty()) {
-            if(parents.size() > 1) {
+        if (parents != null && !parents.isEmpty()) {
+            if (parents.size() > 1) {
                 Logger.info("Entry " + entryId + " has more than one parent");
             }
 

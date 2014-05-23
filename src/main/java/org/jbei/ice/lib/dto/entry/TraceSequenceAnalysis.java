@@ -5,23 +5,25 @@ import java.util.Date;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 
-public class SequenceAnalysisInfo implements IDataTransferModel {
+public class TraceSequenceAnalysis implements IDataTransferModel {
 
     private long id;
-    private String name;
+    private String filename;
     private AccountTransfer depositor;
     private long created;
     private String fileId;
+    private String sequence;
+    private TraceSequenceAlignmentInfo traceSequenceAlignment;
 
-    public SequenceAnalysisInfo() {
+    public TraceSequenceAnalysis() {
     }
 
-    public String getName() {
-        return name;
+    public String getFilename() {
+        return filename;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFilename(String name) {
+        this.filename = name;
     }
 
     public AccountTransfer getDepositor() {
@@ -58,5 +60,21 @@ public class SequenceAnalysisInfo implements IDataTransferModel {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public TraceSequenceAlignmentInfo getTraceSequenceAlignment() {
+        return traceSequenceAlignment;
+    }
+
+    public void setTraceSequenceAlignment(TraceSequenceAlignmentInfo traceSequenceAlignment) {
+        this.traceSequenceAlignment = traceSequenceAlignment;
+    }
+
+    public String getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
     }
 }
