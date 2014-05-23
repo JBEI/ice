@@ -8,7 +8,7 @@ You can try out the software and use our tools on our [Public Registry](http://p
 
 <b>Documentation</b>
 
-  Read the [Manual](https://public-registry.jbei.org/manual/) for installation and other instructions
+  Read the [Manual](https://public-registry.jbei.org/site/docbkx/html/manual/manual.html) for installation and other instructions
   Read the [Java api docs](https://public-registry.jbei.org/site/apidocs/)
 
 <b>Links</b>
