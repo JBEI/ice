@@ -1660,12 +1660,18 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
             $scope.part.linkedParts[i].selectionMarkers = toStringArray($scope.part.linkedParts[i].selectionMarkers);
         }
 
-        entry.create($scope.part, function (result) {
-            console.log("created entry", result);
-            $location.path('/entry/' + result.id);
-        }, function (error) {
-            console.error(error);
-        });
+        if ($scope.part.id) {
+            entry.update({partId:$scope.part.id}, $scope.part, function (result) {
+                $location.path('/entry/' + result.id);
+            });
+        } else {
+            entry.create($scope.part, function (result) {
+                console.log("created entry", result);
+                $location.path('/entry/' + result.id);
+            }, function (error) {
+                console.error(error);
+            });
+        }
     };
 
     $scope.format = 'MMM d, yyyy h:mm:ss a';
@@ -1761,9 +1767,11 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
         console.log("active scope", $scope.active);
 
         if ($scope.active === undefined || isNaN($scope.active)) {
+            // set main entry id
             $scope.part.id = response.entryId;
             $scope.part.hasSequence = true;
         } else {
+            // set linked parts id
             $scope.part.linkedParts[$scope.active].id = response.entryId;
             $scope.part.linkedParts[$scope.active].hasSequence = true;
         }
