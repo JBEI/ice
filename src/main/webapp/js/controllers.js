@@ -1524,24 +1524,37 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
     };
 
     $scope.addExistingPartLink = function ($item, $model, $label) {
-        var type = $model.type;
-        $scope.selectedFields = getFieldsForType(type);
+        entry.query({partId:$model.id}, function (result) {
+            $scope.activePart = result;
+            $scope.activePart.isExistingPart = true;
+            $scope.addExisting = false;
+            $scope.part.linkedParts.push($scope.activePart);
 
-        var newLink = angular.copy(partDefaults);
-        newLink.recordType = type;
-        $scope.part.linkedParts.push(newLink);
+            $scope.colLength = 11 - $scope.part.linkedParts.length;
+            $scope.active = $scope.part.linkedParts.length - 1;
+        });
 
-        $scope.colLength = 11 - $scope.part.linkedParts.length;
-        $scope.active = $scope.part.linkedParts.length - 1;
-        $scope.activePart = $scope.part.linkedParts[$scope.active];
-        $scope.addExisting = false;
+//        var type = $model.type;
+//        $scope.selectedFields = getFieldsForType(type);
+//
+//        var newLink = angular.copy(partDefaults);
+//        newLink.recordType = type;
+//        $scope.part.linkedParts.push(newLink);
+//
+//        $scope.colLength = 11 - $scope.part.linkedParts.length;
+//        $scope.active = $scope.part.linkedParts.length - 1;
+//        $scope.activePart = $scope.part.linkedParts[$scope.active];
+//        $scope.activePart.isExistingPart = true;
+//        $scope.addExisting = false;
     };
 
     $scope.deleteNewPartLink = function (index) {
+        // todo : not working
         console.log("delete part link at index", index);
         $scope.part.linkedParts.splice(index, 1);
         if ($scope.active === index) {
             // set new active
+            console.log("set new active");
             if (index + 1 < $scope.part.linkedParts.length)
                 $scope.active = index + 1;
             else {

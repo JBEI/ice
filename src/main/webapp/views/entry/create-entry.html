@@ -41,10 +41,13 @@
                 </td>
                 <td ng-show="addExisting" style="padding-left: 12px">
                     <div class="input-group">
-                    <input type="text" ng-class="{'input_box_group':true, 'input_box_error':false}" ng-model="addExistingPartNumber"
-                           placeHolder="Enter Part Number" style="width: 205px;" typeahead-loading="loadingAddExistingData"
-                           typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
-                           typeahead-editable="true" typeahead-on-select="addExistingPartLink($item, $model, $label)">
+                        <input type="text" ng-class="{'input_box_group':true, 'input_box_error':false}"
+                               ng-model="addExistingPartNumber"
+                               placeHolder="Enter Part Number" style="width: 205px;"
+                               typeahead-loading="loadingAddExistingData"
+                               typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
+                               typeahead-editable="true"
+                               typeahead-on-select="addExistingPartLink($item, $model, $label)">
                     <span class="input-group-addon" data-ng-click="addExisting=false" style="padding:3px; background-color:
          #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
                         <i ng-show="loadingAddExistingData" class="fa fa-spinner fa-spin"></i>
@@ -73,14 +76,13 @@
         </span>
     </div>
 
-    <div class="col-md-{{colLength}}" style="border-left: 1px solid #eee; background-color: #f7f7f7; height:23px">
+    <div class="col-md-{{colLength}}" style="border-left: 1px solid #eee; background-color: #f7f7f7; height: 23px">
         &nbsp;
     </div>
-
 </div>
 
-<!--main entry-->
-<div class="row pad-top-5" ng-repeat="field in selectedFields">
+<!--selected entry; selectFields is an array of objects-->
+<div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="!activePart.isExistingPart">
     <div class="col-md-2 text-right">
         <span style="white-space:nowrap" ng-class="{'font-bold':field.edit}">{{field.label}}
             <span ng-if="field.required" class="required">*</span></span>
@@ -210,6 +212,16 @@
         <textarea ng-model="activePart[field.schema]" style="width: 640px; height: 50px;" ng-trim="true"
                   ng-focus="field.edit=true" ng-blur="field.edit=false"
                   ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"></textarea>
+    </div>
+</div>
+
+<!--if existing part is added then this is displayed instead-->
+<div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="activePart.isExistingPart">
+    <div class="col-md-2 entryLabel text-right">
+        <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
+    </div>
+    <div class="col-md-10">
+        <div>{{activePart[field.schema]}}</div>
     </div>
 </div>
 
