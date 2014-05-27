@@ -78,6 +78,11 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             controller:'RegisterController',
             templateUrl:'/views/register.html'
         })
+        .state('forgot-password', {
+            url:'/forgot-password',
+            controller:'ForgotPasswordController',
+            templateUrl:'/views/forgot-password.html'
+        })
         .state('main.folder', {
             url:'folders/:collection',
 //            controller: 'CollectionFolderController',

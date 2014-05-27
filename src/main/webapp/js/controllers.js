@@ -131,11 +131,13 @@ iceControllers.controller('ActionMenuController', function ($http, $scope, $root
 
     $scope.editEntry = function () {
         $location.path('/entry/edit/' + $scope.entry.id);
-    }
+    };
 });
 
 iceControllers.controller('RegisterController', function ($scope, $resource, $location) {
     console.log("RegisterController");
+    $scope.errMsg = undefined;
+
     $scope.submit = function () {
         var User = $resource("/rest/profile");
 
@@ -147,6 +149,15 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
                 $scope.errorMsg = "Could not create account";
         });
     };
+
+    $scope.cancel = function () {
+        $location.path("/login");
+    }
+});
+
+iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location) {
+    console.log("ForgotPasswordController");
+    $scope.errMsg = undefined;
 
     $scope.cancel = function () {
         $location.path("/login");
@@ -625,7 +636,7 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
 
         var fileUploadRenderer = function (instance, td, row, col, prop, value, cellProperties) {
             var escaped = Handsontable.helper.stringify(value);
-            var $up = $('<i class="fa fa-upload pull-left"></i>');
+            var $up = $('<i class="fa fa-upload pull-left opacity_hover opacity_4"></i>');
             $(td).empty().append($up);
             $up.on("click", function (event) {
                 console.log("ey", event);
@@ -1349,14 +1360,26 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
     $scope.submit = function () {
         Authentication.login($scope.userId, $scope.userPassword);
     };
+
+    $scope.goToRegister = function () {
+        $location.path("/register");
+    }
 });
 
 iceControllers.controller('EditEntryController', function ($scope, $location, $cookieStore, $rootScope, $stateParams, Entry) {
     console.log("EditEntryController");
 
-    Entry($cookieStore.get("sessionId")).query({partId:$stateParams.id}, function (result) {
+    var entry = Entry($cookieStore.get("sessionId"));
+
+    entry.query({partId:$stateParams.id}, function (result) {
         $scope.entry = result;
     });
+
+    $scope.editEntry = function () {
+        entry.update($scope.entry, function (result) {
+            $location.path("/entry/" + result.id);
+        });
+    };
 });
 
 iceControllers.controller('CreateEntryController', function ($http, $scope, $modal, $rootScope, $fileUploader, $location, $stateParams, $cookieStore, Entry) {

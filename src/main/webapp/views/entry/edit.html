@@ -4,10 +4,10 @@
 <div class="row entry_general_header_td" style="height: 60px">
 
     <div class="col-md-3">
-        <h4><strong style="color: #888; letter-spacing: -1px;">EDIT {{entry.type}}</strong>
+        <h4><strong style="color: #888;">EDIT {{entry.type}}</strong>
             <strong>{{entry.partId}}</strong><br>
             <small class="font-65em">{{entry.creationTime | date:'medium'}} - <a
-                    href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a></small>
+                    ng-href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a></small>
         </h4>
     </div>
 
@@ -21,6 +21,8 @@
             </ul>
         </div>
     </div>
+
+
 </div>
 
 <div class="row pad-top-5">

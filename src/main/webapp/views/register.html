@@ -8,65 +8,25 @@
         <div class="col-xs-6">
             <form name="registerForm" data-ng-submit="submit()">
                 <div class="form-group">
-                    <br><img src="img/logo.png"><br><br><span data-ng-if="errMsg != undefined">{{errMsg}}</span><br>
+                    <br><img src="img/logo.png"><br>
+                    <br><span data-ng-if="errMsg != undefined">{{errMsg}}</span><br>
                 </div>
 
-                <div class="row pad_top">
-                    <div class="col-md-3 text-right">First Name <span class="required">*</span></div>
-                    <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
-                        <div class="input-group">
-                            <input type="text" ng-model="firstName" class="input_box" maxlength="125"
-                                   style="width: 205px;">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row pad_top">
-                    <div class="col-md-3 text-right">Last Name <span class="required">*</span></div>
-                    <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
-                        <div class="input-group">
-                            <input type="text" ng-model="lastName" class="input_box" maxlength="125"
-                                   style="width: 205px;">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row pad_top">
-                    <div class="col-md-3 text-right">Email <span class="required">*</span></div>
-                    <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
-                        <div class="input-group">
-                            <input type="text" ng-model="email" class="input_box" maxlength="125"
-                                   style="width: 205px;">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row pad_top">
-                    <div class="col-md-3 text-right">Institution <span class="required">*</span></div>
-                    <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
-                        <div class="input-group">
-                            <input type="text" ng-model="institution" class="input_box" maxlength="125"
-                                   style="width: 205px;">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row pad_top">
-                    <div class="col-md-3 text-right">About you</div>
-                    <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
-                        <div class="input-group">
-                            <textarea class="input_box" style="width: 205px; height: 60px;"
-                                      data-ng-model="about"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row pad_top">
-                    <div class="col-md-3"></div>
-                    <div class="col-md-9">
-                        <button type="submit" class="btn btn-primary btn-sm"><b>Submit</b></button>
-                        <button type="button" ng-click="cancel()" class="btn btn-link">Cancel</button>
-                    </div>
+                <div class="form-group">
+                    <input type="text" class="login_input" placeholder="First name" data-ng-model="userId"/>
+                    <br>
+                    <input type="text" class="login_input" placeholder="Last name" data-ng-model="firstName"/>
+                    <br>
+                    <input type="text" ng-model="email" class="login_input" maxlength="125" placeHolder="Email">
+                    <br>
+                    <input type="text" ng-model="institution" class="login_input" maxlength="125"
+                           placeHolder="Institution">
+                    <br>
+                    <textarea class="login_input" style="height: 60px;" placeHolder="About you"
+                              data-ng-model="about"></textarea>
+                    <br>
+                    <button type="submit" class="btn btn-primary btn-sm"><b>Submit</b></button>
+                    <button type="button" ng-click="cancel()" class="btn btn-default btn-sm">Cancel</button>
                 </div>
             </form>
         </div>
