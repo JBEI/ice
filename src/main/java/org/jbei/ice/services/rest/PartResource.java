@@ -267,10 +267,8 @@ public class PartResource extends RestResource {
             @PathParam("id") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             PartData partData) {
-        // tODO : update not create;
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        EntryCreator creator = new EntryCreator();
-        long id = creator.createPart(userId, partData);
+        long id = controller.updatePart(userId, partId, partData);
         PartData data = new PartData();
         data.setId(id);
         return data;

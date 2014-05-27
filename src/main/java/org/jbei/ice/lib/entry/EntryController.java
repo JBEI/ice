@@ -312,9 +312,9 @@ public class EntryController {
         return dao.ownerEntryCount(account, ownerEmail, accountGroups);
     }
 
-    public long updatePart(Account account, PartData part) throws ControllerException {
-        Entry existing = dao.get(part.getId());
-        authorization.expectWrite(account.getEmail(), existing);
+    public long updatePart(String userId, long partId, PartData part) {
+        Entry existing = dao.get(partId);
+        authorization.expectWrite(userId, existing);
 
         Entry entry = InfoToModelFactory.infoToEntry(part, existing);
         entry.getLinkedEntries().clear();
@@ -324,7 +324,7 @@ public class EntryController {
                 if (linked == null)
                     continue;
 
-                if (!authorization.canRead(account.getEmail(), linked)) {
+                if (!authorization.canRead(userId, linked)) {
                     continue;
                 }
 
