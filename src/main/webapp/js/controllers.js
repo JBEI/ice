@@ -2197,6 +2197,13 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         console.log(type, $scope[type], $scope.partIdEditMode);
     };
 
+    $scope.quickEditEntry = function () {
+        console.log("Edit", $scope.entry);
+        for (var i = 0; i < $scope.entryFields.length; i += 1) {
+            $scope.entryFields[i].edit = false;
+        }
+    };
+
     var folders = Folders();
     $scope.nextEntryInContext = function () {
         $scope.context.offset += 1;
@@ -2240,7 +2247,7 @@ iceControllers.controller('EntryAttachmentController', function ($scope, $window
     var attachment = Attachment(sid);
 
     var desc = "";
-    $scope.$watch('attachmentDescription', function() {
+    $scope.$watch('attachmentDescription', function () {
         desc = $scope.attachmentDescription;
     });
 
@@ -2307,20 +2314,20 @@ iceControllers.controller('EntryAttachmentController', function ($scope, $window
         $window.open("/rest/file/attachment/" + attachment.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
     };
 
-    $scope.deleteAttachment = function(index, att) {
+    $scope.deleteAttachment = function (index, att) {
         console.log(att);
-        attachment.delete({partId:$stateParams.id, attachmentId:att.id}, function(result) {
+        attachment.delete({partId:$stateParams.id, attachmentId:att.id}, function (result) {
             confirmObject[index] = false;
             $scope.attachments.splice(index, 1);
         });
     };
 
     var confirmObject = {};
-    $scope.confirmDelete = function(idx) {
+    $scope.confirmDelete = function (idx) {
         return confirmObject[idx];
     };
 
-    $scope.setConfirmDelete = function(idx, value) {
+    $scope.setConfirmDelete = function (idx, value) {
         confirmObject[idx] = value;
     }
 });

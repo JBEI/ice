@@ -15,8 +15,10 @@
                    ng-blur="field.edit=false"
                    ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                    maxlength="125" placeHolder="{{field.placeHolder}}" style="width: 205px;">
-            <span class="input-group-addon" data-ng-click="field.edit=false" style="padding:3px; background-color:
-         #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
+                <span class="input-group-addon" data-ng-click="field.edit=false" style="padding:3px;
+                background-color: #f1f1f1; width: 19px">
+                    <i class="fa fa-times delete_icon"></i>
+                </span>
             &nbsp; <i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
                       tooltip-placement="right"></i>
         </div>
@@ -24,11 +26,13 @@
         <!-- short input field with email -->
         <div ng-if="field.inputType==='withEmail'&&field.edit">
             <input type="text" ng-model="entry[field.schema]" ng-trim="true" ng-focus="field.edit=true"
-                   ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                   ng-blur="field.edit=false"
+                   ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                    maxlength="125" style="width: 205px;">
 
             <input type="text" ng-model="entry[field.schema+'Email']" ng-trim="true" ng-focus="field.edit=true"
-                   ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                   ng-blur="field.edit=false"
+                   ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                    placeholder="Email if known" style="width: 191px;">
         </div>
 
@@ -41,7 +45,8 @@
 
         <!--checkbox-->
         <div ng-if="field.inputType==='bool'&&field.edit">
-            <input type="checkbox" ng-model="entry[field.schema]" ng-focus="field.edit=true" ng-blur="field.edit=false">
+            <input type="checkbox" ng-model="entry[field.schema]" ng-focus="field.edit=true"
+                   ng-blur="field.edit=false">
         </div>
 
         <!--datepicker-->
@@ -145,7 +150,6 @@
         <!--</div>-->
     </div>
 </div>
-
 <div class="row margin-top-10" ng-if="entry.linkedParts.length">
     <div class="col-md-12">
         <div class="entry-details-subheader"><strong style="color: #233559;">CONTAINS / EMBEDS / LINKS</strong></div>
