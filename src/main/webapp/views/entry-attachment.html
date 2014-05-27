@@ -40,11 +40,15 @@
             </div>
 
             <div ng-show="confirmDelete($index)">
-                <i class="fa fa-exclamation-triangle alert_color"></i> <span class="font-90em color_444">Delete?</span>
+                <i class="fa fa-exclamation-triangle alert_color"></i> <span class="font-90em" style="color: #CC3333">Delete?</span>
 
                 <div class="pull-right">
-                    <button stop-event="click" class="btn btn-xs btn-primary" ng-click="deleteAttachment($index, attachment)">Yes</button>
-                    <button stop-event="click" class="btn btn-xs btn-default" ng-click="setConfirmDelete($index, false)">No</button>
+                    <button stop-event="click" class="btn btn-xs btn-primary"
+                            ng-click="deleteAttachment($index, attachment)">Yes
+                    </button>
+                    <button stop-event="click" class="btn btn-xs btn-default"
+                            ng-click="setConfirmDelete($index, false)">No
+                    </button>
                 </div>
                 <br>
                 <span style="color: #999;font-size: 11px">Action is permanent</span>
