@@ -1,31 +1,56 @@
-<div class="row">
-    <div class="col-md-11">
-        <tabset>
-            <tab heading="Entry Defaults">
-                <div class="form-group">
-                    <label for="inputEmail3" class="col-sm-5 control-label">Principal Investigator</label>
+<div class="row pad_top">
+    <tabset>
+        <tab heading="Entry Defaults">
+            <div class="row pad_top" ng-repeat="preference in preferenceEntryDefaults">
+                <div class="col-md-2 entryLabel">
+                    <span ng-class="{'entryEditLabel':field.edit}">{{preference.display}}</span>
+                </div>
 
-                    <div class="col-sm-6">
-                        <input type="text" class="input_box" id="inputEmail3" placeholder="Email">
+                <div class="col-md-10" ng-mouseover="showEdit=true" ng-mouseout="showEdit=false">
+                    <!--not in edit mode-->
+                    <div ng-if="!preference.edit">
+                        <!--if value exists and not in edit mode-->
+                        <span ng-if="preferences[preference.id]">{{preferences[preference.id]}}</span>
+
+                        <!--if no value and not in edit mode-->
+                        <i ng-if="!preferences[preference.id]">None specified</i>
+
+                        <span ng-click="preference.edit=true">
+                            <i ng-show="showEdit" class="fa fa-pencil edit_icon" style="margin-left: 5px"></i>
+                        </span>
+                    </div>
+
+                    <!--if in edit mode-->
+                    <div ng-if="preference.edit">
+                        <input type="text" ng-model="preferences[preference.id]" ng-trim="true"
+                               ng-focus="preference.edit" placeHolder="{{preference.help}}"
+                               ng-blur="preference.edit==false"
+                               ng-class="{'input_box':!preference.invalid, 'input_box_error':preference.invalid}"
+                               maxlength="125" style="width: 205px;">
+
+                        <button type="button" class="btn btn-primary btn-xs" ng-click="savePreference(preference)">
+                            Save
+                        </button>
+                        <button type="button" class="btn btn-default btn-xs"
+                                ng-click="preference.edit=false;preference.invalid=false">Cancel
+                        </button>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="inputPassword3" class="col-sm-5 control-label">Password</label>
+            </div>
+        </tab>
 
-                    <div class="col-sm-6">
-                        <input type="text" class="form-control" id="inputPassword3" placeholder="Password">
-                    </div>
-                </div>
-            </tab>
+        <tab heading="Search Preferences">
+            <alert type="'info'" style="margin-bottom: 10px; margin-top: 10px">
+                <i style="font-size: 18px" class="fa fa-info-circle"></i> Select a value to boost the relevance of the
+                result for that field. 1=least, 5=most
+            </alert>
 
-            <tab heading="Search Preferences">
-                ALIAS<br>
-                BACKBONE<br>
-                KEYWORDS<br>
-                NAME<br>
-                PART ID<br>
-                SUMMARY<br>
-            </tab>
-        </tabset>
-    </div>
+            ALIAS<br>
+            BACKBONE<br>
+            KEYWORDS<br>
+            NAME<br>
+            PART ID<br>
+            SUMMARY<br>
+        </tab>
+    </tabset>
 </div>

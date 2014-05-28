@@ -347,8 +347,27 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     $scope.showChangePassword = false;
     $scope.showEditProfile = false;
     $scope.showSendMessage = false;
+    $scope.preferenceEntryDefaults = [
+        {display:"Principal Investigator", id:"PRINCIPAL_INVESTIGATOR", help:"Enter Email or Name"},
+        {display:"Funding Source", id:"FUNDING_SOURCE"}
+    ];
+    $scope.preferences = {};
+
+    var user = User($cookieStore.get('sessionId'));
     var profileOption = $stateParams.option;
     var profileId = $stateParams.id;
+
+    $scope.savePreference = function (pref) {
+        if (!$scope.preferences[pref.id]) {
+            pref.invalid = true;
+            return;
+        }
+
+        user.updatePreference({userId:profileId, value:$scope.preferences[pref.id]}, {preferenceKey:pref.id},
+            function (result) {
+                pref.edit = false;
+            });
+    };
 
     var menuOptions = $scope.profileMenuOptions = [
         {url:'/views/profile/profile-information.html', display:'Profile', selected:true, icon:'fa-user'},
@@ -387,9 +406,15 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     }
 
     // retrieve profile information from server
-    var user = User($cookieStore.get('sessionId'));
     user.query({userId:profileId}, function (result) {
         $scope.profile = result;
+        user.getPreferences({userId:profileId}, function (prefs) {
+            $scope.profile.preferences = prefs;
+
+            for (var i = 0; i < prefs.preferences.length; i += 1) {
+                $scope.preferences[prefs.preferences[i].key] = prefs.preferences[i].value;
+            }
+        });
     });
 
     $scope.editClick = function (message, profile, password) {
@@ -433,6 +458,9 @@ iceControllers.controller('CollectionController', function ($scope, $state, $loc
     settings.get(function (result) {
         $rootScope.settings = result;
     });
+
+    // retrieve user settings
+
 
     // entry items that can be created
     $scope.items = [
@@ -1383,8 +1411,8 @@ iceControllers.controller('EditEntryController', function ($scope, $location, $c
 });
 
 iceControllers.controller('CreateEntryController', function ($http, $scope, $modal, $rootScope, $fileUploader, $location, $stateParams, $cookieStore, Entry) {
-    console.log("CreateEntryController", $stateParams.type);
-    $scope.createType = $stateParams.type;
+    console.log("CreateEntryController", $stateParams.type, $scope.part);
+//    $scope.createType = $stateParams.type;
     $scope.showMain = true;
 
     var partFields = [

@@ -10,9 +10,12 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.PreferencesDAO;
+import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.search.SearchBoostField;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
+import org.jbei.ice.lib.dto.user.UserPreferences;
 
 /**
  * Controller for managing user preferences.
@@ -40,7 +43,7 @@ public class PreferencesController {
         for (Preference preference : results) {
             PreferenceKey key = PreferenceKey.fromString(preference.getKey());
             // bulk upload preferences are shared with user preferences. user preferences have underscores
-            // bulk upload's do not.
+            // bulk uploads do not.
             if (key == null) {
                 continue;
             }
@@ -48,6 +51,33 @@ public class PreferencesController {
         }
 
         return preferences;
+    }
+
+    public UserPreferences getUserPreferences(String requester, long userId) {
+        AccountDAO accountDAO = DAOFactory.getAccountDAO();
+        Account account = accountDAO.getByEmail(requester);
+        Account requestedAccount = accountDAO.get(userId);
+
+        if (account == null || requestedAccount == null)
+            return null;
+
+        if (account.getType() != AccountType.ADMIN && !requester.equalsIgnoreCase(requestedAccount.getEmail()))
+            return null;
+
+        ArrayList<PreferenceKey> keys = new ArrayList<>();
+        keys.add(PreferenceKey.PRINCIPAL_INVESTIGATOR);
+        keys.add(PreferenceKey.FUNDING_SOURCE);
+
+        ArrayList<Preference> preferences = dao.getAccountPreferences(requestedAccount, keys);
+        if (preferences == null)
+            return null;
+
+        UserPreferences userPreferences = new UserPreferences();
+        userPreferences.setUserId(requestedAccount.getEmail());
+        for (Preference preference : preferences) {
+            userPreferences.getPreferences().add(preference.toDataTransferObject());
+        }
+        return userPreferences;
     }
 
     /**
@@ -95,5 +125,13 @@ public class PreferencesController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public PreferenceInfo updatePreference(String requesterEmail, long userId, String key, String value) {
+        if (value == null)
+            return null;
+        Account account = DAOFactory.getAccountDAO().get(userId);   // todo : check permissions
+        Preference preference = dao.createOrUpdatePreference(account, key, value);
+        return preference.toDataTransferObject();
     }
 }

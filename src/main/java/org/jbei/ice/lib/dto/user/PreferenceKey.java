@@ -13,20 +13,10 @@ package org.jbei.ice.lib.dto.user;
 public enum PreferenceKey {
 
     // entry settings
-    PRINCIPAL_INVESTIGATOR(true),
-    FUNDING_SOURCE(true);
-
-    private boolean editable;
+    PRINCIPAL_INVESTIGATOR(),
+    FUNDING_SOURCE();
 
     PreferenceKey() {
-    }
-
-    PreferenceKey(boolean editable) {
-        this.editable = editable;
-    }
-
-    public boolean isEditable() {
-        return editable;
     }
 
     @Override

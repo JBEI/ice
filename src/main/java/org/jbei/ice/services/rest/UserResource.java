@@ -17,12 +17,15 @@ import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.group.UserGroup;
+import org.jbei.ice.lib.dto.user.UserPreferences;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -40,9 +43,9 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<AccountTransfer> get(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-            String userId = getUserIdFromSessionHeader(userAgentHeader);
-            Logger.info(userId + ": retrieving available accounts");
-            return groupController.getAvailableAccounts(userId);
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        Logger.info(userId + ": retrieving available accounts");
+        return groupController.getAvailableAccounts(userId);
     }
 
     @GET
@@ -50,7 +53,7 @@ public class UserResource extends RestResource {
     @Path("/{id}")
     public AccountTransfer read(@Context UriInfo info, @PathParam("id") long userId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-            return controller.get(userId).toDataTransferObject();
+        return controller.get(userId).toDataTransferObject();
     }
 
     @GET
@@ -78,12 +81,36 @@ public class UserResource extends RestResource {
 
         Account requestAccount = DAOFactory.getAccountDAO().get(userId);
         List<PartData> entries = entryController.retrieveOwnerEntries(userIdString, requestAccount.getEmail(), field,
-                                                                   asc, offset, limit);
+                                                                      asc, offset, limit);
         long count = entryController.getNumberOfOwnerEntries(userIdString, requestAccount.getEmail());
         FolderDetails details = new FolderDetails();
         details.getEntries().addAll(entries);
         details.setCount(count);
         return details;
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/preferences")
+    public UserPreferences getUserPreferences(@Context UriInfo info,
+            @PathParam("id") long userId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userIdString = getUserIdFromSessionHeader(userAgentHeader);
+        PreferencesController preferencesController = new PreferencesController();
+        return preferencesController.getUserPreferences(userIdString, userId);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/preferences/{key}")
+    public PreferenceInfo updatePreference(
+            @PathParam("id") long userId,
+            @PathParam("key") String key,
+            @QueryParam("value") String value,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userIdString = getUserIdFromSessionHeader(userAgentHeader);
+        PreferencesController preferencesController = new PreferencesController();
+        return preferencesController.updatePreference(userIdString, userId, key, value);
     }
 
     @POST
@@ -92,7 +119,7 @@ public class UserResource extends RestResource {
     @Path("/{id}")
     public AccountTransfer update(@Context UriInfo info, @PathParam("id") long userId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader, AccountTransfer transfer) {
-            String user = getUserIdFromSessionHeader(userAgentHeader);
-            return controller.updateAccount(user, userId, transfer);
+        String user = getUserIdFromSessionHeader(userAgentHeader);
+        return controller.updateAccount(user, userId, transfer);
     }
 }

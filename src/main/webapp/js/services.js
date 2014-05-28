@@ -19,7 +19,7 @@ iceServices.factory('Pigeon', function ($http) {
 
 iceServices.factory('User', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/users', {userId:'@userId'}, {
+        return $resource('/rest/users', {userId:'@userId', preferenceKey:'@preferenceKey'}, {
             query:{
                 method:'GET',
                 responseType:"json",
@@ -52,6 +52,20 @@ iceServices.factory('User', function ($resource) {
             getEntries:{
                 method:'GET',
                 url:'/rest/users/:userId/entries',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            getPreferences:{
+                method:'GET',
+                url:'/rest/users/:userId/preferences',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            updatePreference:{
+                method:'POST',
+                url:'/rest/users/:userId/preferences/:preferenceKey',
                 responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
@@ -101,7 +115,7 @@ iceServices.factory('Attachment', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
-            delete: {
+            delete:{
                 method:'DELETE',
                 url:'/rest/part/:partId/attachments/:attachmentId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
