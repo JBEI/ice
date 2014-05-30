@@ -9,18 +9,11 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
  * @author Hector Plahar
  */
 public enum FolderType implements IDataTransferModel {
-    PUBLIC("folders"),
-    PRIVATE("folders"),
-    SHARED("folders"),
-    UPLOAD ("upload");
+    PUBLIC,
+    PRIVATE,
+    SHARED,
+    UPLOAD;
 
-    private final String type;
-
-    FolderType(String type) {
-        this.type = type;
-    }
-
-    public String getType() {
-        return type;
+    FolderType() {
     }
 }

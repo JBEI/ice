@@ -160,10 +160,20 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    public Set<Permission> retrieveEntryPermission(Entry entry) throws DAOException {
+    public Set<Permission> getEntryPermissions(Entry entry) throws DAOException {
         try {
             return new HashSet<Permission>(currentSession().createCriteria(Permission.class)
                                                    .add(Restrictions.eq("entry", entry)).list());
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    public Set<Permission> getFolderPermissions(Folder folder) throws DAOException {
+        try {
+            return new HashSet<Permission>(currentSession().createCriteria(Permission.class)
+                                                   .add(Restrictions.eq("folder", folder)).list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

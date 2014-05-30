@@ -3,7 +3,7 @@
 
         <div class="col-md-12">
             <h4><strong style="color: #888;text-transform: uppercase;">Search Results</strong>
-                <img ng-if="loadingPage" src="/lib/semantic-ui/images/loader-mini.gif"></h4>
+                <img ng-if="loadingPage" src="/img/loader-mini.gif"></h4>
         </div>
     </div>
 
@@ -25,7 +25,7 @@
             </tr>
 
             <tr data-ng-show='!searchResults'>
-                <td colspan="11"><img src="/lib/semantic-ui/images/loader-mini.gif"> Loading...</td>
+                <td colspan="11"><img src="/img/loader-mini.gif"> Loading...</td>
             </tr>
             <tr data-ng-show="searchResults.results.length == 0">
                 <td colspan="11">No results found for your query</td>
@@ -50,17 +50,20 @@
                         {{result.entryInfo.shortDescription}}
                     </div>
                 </td>
-                <td><div style="width:200px;">{{result.alignment}}</div></td>
+                <td>
+                    <div style="width:200px;">{{result.alignment}}</div>
+                </td>
                 <td>{{result.eValue}}</td>
                 <td class="cursor_pointer" ng-click="showDetails=!showDetails">
                     <table cellpadding=0 cellspacing=0 ng-init="stripes=alignmentGraph(result)">
                         <tr>
-                        <td ng-repeat="stripe in stripes">
-                            <hr ng-style="{ 'width': stripe + 'px' }" style="background-color: #ffff00; border: 0; height: 10px">
-                        </td>
+                            <td ng-repeat="stripe in stripes">
+                                <hr ng-style="{ 'width': stripe + 'px' }"
+                                    style="background-color: #ffff00; border: 0; height: 10px">
+                            </td>
                         </tr>
-                        </table>
-                    </td>
+                    </table>
+                </td>
             </tr>
             <tr data-ng-repeat-end ng-if="showDetails">
                 <td colspan="8">
@@ -70,10 +73,11 @@
         </table>
 
         <table cellspacing="0" class="data_table" ng-if="!searchFilters.s" ng-class="{'opacity_4':loadingPage}">
-            <tr>
+            <tr ng-show="searchResults.results.length>0">
                 <th style=" width:28px">
                     <input type="checkbox" ng-model="allSelected"/>
-                    <sup style="font-size: 9px; font-weight: normal" ng-show="selection.length>0">{{selection.length}}</sup>
+                    <sup style="font-size: 9px; font-weight: normal"
+                         ng-show="selection.length>0">{{selection.length}}</sup>
                 </th>
                 <th style="">
                     Relevance
@@ -106,7 +110,7 @@
             </tr>
 
             <tr data-ng-show='!searchResults'>
-                <td colspan="11"><img src="/lib/semantic-ui/images/loader-mini.gif"> Loading...</td>
+                <td colspan="11"><img src="/img/loader-mini.gif"> Loading...</td>
             </tr>
             <tr data-ng-show="searchResults.results.length == 0">
                 <td colspan="11">No results found for your query</td>

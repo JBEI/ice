@@ -1,18 +1,13 @@
 package org.jbei.ice.lib.folder;
 
 import java.util.List;
-import java.util.Set;
 
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 

@@ -326,19 +326,6 @@ html, body {
     margin-top: 10px;
 }
 
-.open_sequence_sub_link {
-    cursor: pointer;
-    display: inline;
-    opacity: 0.8;
-    color: #393939;
-    font-size: 11px;
-    padding-right: 6px;
-}
-
-.open_sequence_sub_link:hover {
-    opacity: 1;
-}
-
 .entry_tooltip_sub_header {
     text-transform: uppercase;
     color: #233559;
@@ -743,6 +730,10 @@ input.cell_input:focus + .cell {
     padding: 5px;
     color: #657B83;
     border-bottom: 1px solid #e1e1e1;
+    font-family: "BebasNeue", sans-serif;
+}
+
+.bebas {
     font-family: "BebasNeue", sans-serif;
 }
 
@@ -2329,4 +2320,46 @@ td.selected i.font-awesome {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: clip;
+}
+
+.slider {
+    position: relative;
+    height: 15px;
+    width: 400px;
+    display: inline-block;
+}
+
+.bar {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: block;
+    background-color: #eee;
+    top: 0;
+}
+
+.pointer {
+    height: 100%;
+    width: 15px;
+    position: absolute;
+    display: block;
+    background: #555;
+    top: 0;
+}
+
+.bubble {
+    position: absolute;
+    top: -100%;
+    display: block;
+    font-size: 0.75em;
+    color: #ccc;
+}
+
+.contained-part {
+    width: 320px;
+    font-size: 0.90em;
+    margin-top: 15px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    background-color: #f5f5f5;
 }

@@ -26,7 +26,6 @@ public class PartFileAdd {
 
     public static void uploadSequenceToEntry(long entryId, String userId, InputStream inputStream, boolean getLinkEntry)
             throws Exception {
-        Account account = new AccountController().getByEmail(userId);
         Entry entry = DAOFactory.getEntryDAO().get(entryId);
 
         // associate with entry
@@ -37,19 +36,18 @@ public class PartFileAdd {
         }
 
         String sequenceString = IOUtils.toString(inputStream);
-        new SequenceController().parseAndSaveSequence(account, entry, sequenceString);
+        new SequenceController().parseAndSaveSequence(userId, entry.getId(), sequenceString);
     }
 
     public static void uploadSequenceToEntry(long entryId, String userId, DNASequence dnaSequence,
             String sequenceUser) throws Exception {
-        Account account = new AccountController().getByEmail(userId);
         Entry entry = DAOFactory.getEntryDAO().get(entryId);
 
         Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(entry);
         if (sequenceUser != null)
             sequence.setSequenceUser(sequenceUser);
-        new SequenceController().save(account, sequence);
+        new SequenceController().save(userId, sequence);
     }
 
     public static void uploadAttachmentToEntry(long entryId, String userId, InputStream inputStream, String fileName,

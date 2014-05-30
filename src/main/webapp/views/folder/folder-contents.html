@@ -5,7 +5,7 @@
             <h4>
                 <strong style="color: #888;text-transform: uppercase;">{{breadCrumb || folder.folderName}}</strong>
                 <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
-                &nbsp;&nbsp;&nbsp;<span folder-actions class="font-95em"></span>
+                &nbsp;&nbsp;&nbsp;<span ng-show="folder.id" folder-actions class="font-95em"></span>
             </h4>
         </div>
     </div>
@@ -63,7 +63,7 @@
 
             <tr data-ng-show='!folder'>
                 <td colspan="10">
-                    <img alt="Loading..." src="/lib/semantic-ui/images/loader-mini.gif"/>
+                    <img alt="Loading..." src="/img/loader-mini.gif"/>
                     Loading...
                 </td>
             </tr>
@@ -106,7 +106,8 @@
             <pagination total-items="folder.count" on-select-page="setPage(page)" page="currentPage" max-size="maxSize"
                         class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
-        <div class="col-md-4" style="margin-top: 20px;"><strong class="small">1-15 of {{folder.count | number}}</strong></div>
+        <div class="col-md-4" style="margin-top: 20px;"><strong class="small">1-15 of {{folder.count | number}}</strong>
+        </div>
         <div class="col-md-2 text-right" style="margin-top: 20px; padding-right: 4px">
             <small>View:</small>
             <button class="btn btn-xs btn-default">15</button>

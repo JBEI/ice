@@ -40,17 +40,21 @@
         </tab>
 
         <tab heading="Search Preferences">
-            <alert type="'info'" style="margin-bottom: 10px; margin-top: 10px">
+            <alert type="'info'" style="margin-bottom: 15px; margin-top: 10px; width: 600px">
                 <i style="font-size: 18px" class="fa fa-info-circle"></i> Select a value to boost the relevance of the
-                result for that field. 1=least, 5=most
+                result for that field.
             </alert>
 
-            ALIAS<br>
-            BACKBONE<br>
-            KEYWORDS<br>
-            NAME<br>
-            PART ID<br>
-            SUMMARY<br>
+            <div class="row pad_top" ng-repeat="searchPreference in searchPreferenceDefaults">
+                <div class="col-md-2 entryLabel">
+                    <span ng-class="{'entryEditLabel':searchPreference.active}">{{searchPreference.display}}</span>
+                </div>
+                <div class="col-md-10">
+                    <slider class="slider" ng-model="searchPreferences[searchPreference.id]" floor="0" ceiling="5"
+                            stretch="1" step="1" ng-mousedown="searchPreference.active=true" translate-fn="translate"
+                            ng-mouseup="searchPreference.active=false"></slider>
+                </div>
+            </div>
         </tab>
     </tabset>
 </div>

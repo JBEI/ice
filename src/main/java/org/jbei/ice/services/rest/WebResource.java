@@ -2,9 +2,11 @@ package org.jbei.ice.services.rest;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
@@ -31,4 +33,8 @@ public class WebResource extends RestResource {
         return null;
     }
 
+    @PUT
+    public Response addPartToWeb(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        return Response.ok().build();
+    }
 }

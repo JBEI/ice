@@ -275,6 +275,23 @@ public class EntryController {
         return dao.sharedEntryCount(account, accountGroups);
     }
 
+    public List<PartData> getEntriesSharedWithUser(String userId, ColumnField field, boolean asc, int start,
+            int limit) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Set<Group> accountGroups = new HashSet<>(account.getGroups());
+        GroupController controller = new GroupController();
+        Group everybodyGroup = controller.createOrRetrievePublicGroup();
+        accountGroups.add(everybodyGroup);
+        List<Entry> entries = dao.sharedWithUserEntries(account, accountGroups);
+
+        ArrayList<PartData> data = new ArrayList<>();
+        for (Entry entry : entries) {
+            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
+            data.add(info);
+        }
+        return data;
+    }
+
     public List<PartData> retrieveOwnerEntries(String userId, String ownerEmail,
             ColumnField sort, boolean asc, int start, int limit) {
         List<Entry> entries;

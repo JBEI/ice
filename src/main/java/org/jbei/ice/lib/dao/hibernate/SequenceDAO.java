@@ -142,7 +142,8 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     public void deleteSequence(Sequence sequence, String pigeonImageFolder) throws DAOException {
         String sequenceHash = sequence.getFwdHash();
         sequence.setEntry(null);
-        sequence.getSequenceFeatures();
+        for (SequenceFeature feature : sequence.getSequenceFeatures()) {
+        }
         super.delete(sequence);
         currentSession().flush();
 

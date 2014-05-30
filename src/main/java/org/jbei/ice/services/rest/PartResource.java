@@ -39,6 +39,7 @@ public class PartResource extends RestResource {
     private EntryRetriever retriever = new EntryRetriever();
     private PermissionsController permissionsController = new PermissionsController();
     private AttachmentController attachmentController = new AttachmentController();
+    private SequenceController sequenceController = new SequenceController();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -242,7 +243,23 @@ public class PartResource extends RestResource {
             userAgentHeader = sessionId;
 
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return new SequenceController().updateSequence(userId, partId, sequence);
+        return sequenceController.updateSequence(userId, partId, sequence);
+    }
+
+    @DELETE
+    @Path("/{id}/sequence")
+    public Response deleteSequence(@PathParam("id") long partId,
+            @QueryParam("sid") String sessionId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        try {
+            if (sequenceController.deleteSequence(userId, partId))
+                return Response.ok().build();
+            return Response.serverError().build();
+        } catch (RuntimeException e) {
+            Logger.error(e);
+            return Response.serverError().build();
+        }
     }
 
     @PUT

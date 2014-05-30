@@ -1,8 +1,10 @@
 <div class="row pad_top" ng-repeat="field in entryFields" data-ng-if="entry[field.schema]">
     <div class="col-md-2 entryLabel">
         <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
+        <img ng-if="field.updating" src="/img/loader-mini.gif">
     </div>
     <div class="col-md-10" ng-mouseover="showEdit=true" ng-mouseout="showEdit=false">
+        <!--todo : also need different display widgets for different types-->
         <div data-ng-if="!field.edit">{{entry[field.schema]}}
             <span ng-click="field.edit=true">
             <i ng-show="showEdit&&field.canEdit!=false" class="fa fa-pencil edit_icon" style="margin-left: 5px;"></i>
@@ -11,11 +13,12 @@
 
         <!--short input field-->
         <div class="input-group" ng-if="field.inputType==='short'&&field.edit">
-            <input type="text" ng-model="entry[field.schema]" ng-trim="true" ng-focus="field.edit=true"
-                   ng-blur="field.edit=false"
+            <input type="text" ng-model="entry[field.schema]" ng-trim="true" focus
+                   ng-blur="quickEditEntry(field)" ng-change="field.dirty=true"
                    ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                    maxlength="125" placeHolder="{{field.placeHolder}}" style="width: 205px;">
-                <span class="input-group-addon" data-ng-click="field.edit=false" style="padding:3px;
+
+                <span class="input-group-addon" ng-click="field.edit=false" style="padding:3px;
                 background-color: #f1f1f1; width: 19px">
                     <i class="fa fa-times delete_icon"></i>
                 </span>
@@ -24,22 +27,27 @@
         </div>
 
         <!-- short input field with email -->
-        <div ng-if="field.inputType==='withEmail'&&field.edit">
-            <input type="text" ng-model="entry[field.schema]" ng-trim="true" ng-focus="field.edit=true"
-                   ng-blur="field.edit=false"
+        <div class="input-group" ng-if="field.inputType==='withEmail'&&field.edit">
+            <input type="text" ng-model="entry[field.schema]" ng-trim="true" focus
+                   ng-blur="quickEditEntry(field)" ng-change="field.dirty=true"
                    ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                    maxlength="125" style="width: 205px;">
 
-            <input type="text" ng-model="entry[field.schema+'Email']" ng-trim="true" ng-focus="field.edit=true"
-                   ng-blur="field.edit=false"
+            <input type="text" ng-model="entry[field.schema+'Email']" ng-trim="true"
+                   ng-blur="quickEditEntry(field)" ng-change="field.dirty=true"
                    ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                    placeholder="Email if known" style="width: 191px;">
+
+            <span class="input-group-addon" ng-click="field.edit=false" style="padding:3px;
+                background-color: #f1f1f1; width: 19px">
+                <i class="fa fa-times delete_icon"></i>
+            </span>
         </div>
 
         <!--options-->
         <div ng-if="field.options&&field.edit">
-            <select ng-focus="field.edit=true" ng-blur="field.edit=false" style="width: 110px" class="pull_down"
-                    ng-model="entry[field.schema]" size="1"
+            <select focus ng-blur="quickEditEntry(field)" style="width: 110px" class="pull_down"
+                    ng-model="entry[field.schema]" size="1" ng-change="field.dirty=true"
                     ng-options="option.value as option.text for option in field.options"></select>
         </div>
 
@@ -54,27 +62,28 @@
             <div class="input-group">
                 <input type="text" ng-model="entry[field.schema]" show-button-bar="false" show-weeks="false"
                        datepicker-popup="yyyy-MM-dd" class="input_box_group" maxlength="125" is-open="opened"
-                       datepicker-options="dateOptions" close-text="Close" style="width: 205px;"
-                       ng-focus="field.edit=true" ng-blur="field.edit=false">
-            <span class="input-group-addon" style="padding:3px; background-color:
-             #f1f1f1;width: 19px"><i class="fa fa-calendar"></i></span>
+                       datepicker-options="dateOptions" close-text="Close" style="width: 205px;" focus
+                       ng-change="field.dirty=true" ng-blur="quickEditEntry(field)">
+                <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1;width: 19px">
+                    <i class="fa fa-calendar"></i>
+                </span>
             </div>
         </div>
 
         <!--medium input-->
         <div ng-if="field.inputType==='medium'&&field.edit">
-            <input type="text" ng-model="entry[field.schema]" maxlength="150" style="width:400px;"
+            <input type="text" ng-model="entry[field.schema]" maxlength="150" style="width:400px;" focus
                    ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-                   ng-focus="field.edit=true" ng-blur="field.edit=false">
+                   ng-change="field.dirty=true" ng-blur="quickEditEntry(field)">
         </div>
 
         <!--autocomplete-->
         <div ng-if="field.inputType==='autoComplete'&&field.edit">
-            <input type="text" ng-model="entry[field.schema]" maxlength="150"
+            <input type="text" ng-model="entry[field.schema]" maxlength="150" focus
                    ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                    placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
                    typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
-                   ng-focus="field.edit=true" ng-blur="field.edit=false">
+                   ng-change="field.dirty=true" ng-blur="quickEditEntry(field)">
             <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
         </div>
 
@@ -138,16 +147,9 @@
         <!--long-->
         <div ng-if="field.inputType==='long'&&field.edit">
             <textarea ng-model="entry[field.schema]" style="width: 640px; height: 50px;" ng-trim="true"
-                      ng-focus="field.edit=true" ng-blur="field.edit=false"
+                      ng-change="field.dirty=true" ng-blur="quickEditEntry(field)" focus
                       ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"></textarea>
         </div>
-
-        <!--<div class="input-group" data-ng-if="field.edit">-->
-        <!--<input type="text" ng-model="entry[field.schema]" class="input_box_group" maxlength="125" placeholder=""-->
-        <!--style="width: 205px;">-->
-        <!--<span class="input-group-addon" data-ng-click="field.edit=false" style="padding:3px; background-color:-->
-        <!--#f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>-->
-        <!--</div>-->
     </div>
 </div>
 <div class="row margin-top-10" ng-if="entry.linkedParts.length">
@@ -155,57 +157,47 @@
         <div class="entry-details-subheader"><strong style="color: #233559;">CONTAINS / EMBEDS / LINKS</strong></div>
 
         <div ng-repeat="part in entry.linkedParts">
-            <span ng-if="$index % 2 == 0">
-                <div class="row">
-                    <div class="col-sm-6" ng-if="entry.linkedParts[$index+0]">
-                        <div style="width: 320px; font-size: 0.90em; margin-top: 8px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); border-radius: 4px;
-                    background-color: #f5f5f5">
-                            <div class="pull-right font-90em" style="padding: .75em .5em;">
-                                <a ng-href="/entry/{{entry.linkedParts[$index+0].id}}"
-                                   class="">{{entry.linkedParts[$index+0].partId}}</a>
-                                <!--Contains-->
-                                <!--{{entry.linkedParts[$index+0].linkedParts.length}}-->
-                                <!--<span ng-if="entry.linkedParts[$index+0].linkedParts.length==1">part</span><span-->
-                                <!--ng-if="entry.linkedParts[$index+0].linkedParts.length>1">parts</span>-->
-                            </div>
-                            <div style="display: block; margin-bottom: .2em;
-                        color: #888; padding: .75em .5em;"><b>{{entry.linkedParts[$index+0].type}} <a
+            <div class="row" ng-if="$index % 2 == 0">
+                <div class="col-md-6" ng-if="entry.linkedParts[$index+0]">
+                    <div class="contained-part">
+                        <div class="pull-right font-90em" style="padding: .75em .5em;">
+                            <a ng-href="/entry/{{entry.linkedParts[$index+0].id}}"
+                               class="">{{entry.linkedParts[$index+0].partId}}</a>
+                        </div>
+                        <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
+                            <b>{{entry.linkedParts[$index+0].type}} <a
                                     ng-href="/entry/{{entry.linkedParts[$index+0].id}}"
                                     style="color: #000">{{entry.linkedParts[$index+0].name}}</a></b>
-                            </div>
-
-                            <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">No
-                                Sequence
-                            </div>
-                            <p style="clear: both; margin: 0; padding: .75em .5em; color: #888;">
-
-                                {{entry.linkedParts[$index+0].shortDescription}}</p>
                         </div>
-                    </div>
 
-                    <div class="col-sm-6" ng-if="entry.linkedParts[$index+1]">
-                        <div style="width: 320px; font-size: 0.90em; margin-top: 8px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); border-radius: 4px;
-                    background-color: #f5f5f5">
-                            <div class="pull-right font-90em" style="padding: .75em .5em;">Contains
-                                {{entry.linkedParts[$index+1].linkedParts.length}}
-                                <span ng-if="entry.linkedParts[$index+1].linkedParts.length==1">part</span><span
-                                        ng-if="entry.linkedParts[$index+1].linkedParts.length>1">parts</span>
-                            </div>
-                            <div style="display: block; margin-bottom: .2em;
-                        color: rgba(0,0,0,.7); padding: .75em .5em;"><b>{{entry.linkedParts[$index+1].type}} <a
-                                    ng-href="/entry/{{entry.linkedParts[$index+1].id}}"
-                                    style="color: #000">{{entry.linkedParts[$index+1].name}}</a></b>
-                            </div>
-
-                            <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">No
-                                Sequence
-                            </div>
-                            <p style="clear: both; margin: 0; color: rgba(0,0,0,.45);padding: .75em .5em;">
-                                {{entry.linkedParts[$index+1].shortDescription}}</p>
+                        <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
+                            No Sequence
                         </div>
+                        <p style="clear: both; margin: 0; padding: .75em .5em; color: #888;">
+                            {{entry.linkedParts[$index+0].shortDescription}}</p>
                     </div>
                 </div>
-            </span>
+
+                <div class="col-md-6" ng-if="entry.linkedParts[$index+1]">
+                    <div class="contained-part">
+                        <div class="pull-right font-90em" style="padding: .75em .5em;">
+                            <a ng-href="/entry/{{entry.linkedParts[$index+1].id}}"
+                               class="">{{entry.linkedParts[$index+1].partId}}</a>
+                        </div>
+                        <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
+                            <b>{{entry.linkedParts[$index+1].type}} <a
+                                    ng-href="/entry/{{entry.linkedParts[$index+1].id}}"
+                                    style="color: #000">{{entry.linkedParts[$index+1].name}}</a></b>
+                        </div>
+
+                        <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
+                            No Sequence
+                        </div>
+                        <p style="clear: both; margin: 0; color: rgba(0,0,0,.45);padding: .75em .5em;">
+                            {{entry.linkedParts[$index+1].shortDescription}}</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -222,22 +214,24 @@
                        target="_blank">Create in VectorEditor
                 </small>
                 <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                <small class="opacity_hover"><i class="fa fa-upload"></i> Upload File</small>
+                <small class="opacity_hover" style="letter-spacing: -1px" ng-click="sequenceUpload('file')">
+                    <i class="fa fa-upload"></i>&nbsp; Upload File
+                </small>
                 <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                <small class="opacity_hover"><i class="fa fa-paste"></i> Paste Sequence</small>
+                <small class="opacity_hover" style="letter-spacing: -1px" ng-click="sequenceUpload('paste')">
+                    <i class="fa fa-paste"></i> Paste Sequence
+                </small>
             </div>
 
             <!--menu if entry sequence exists-->
             <div class="pull-right" ng-if='entry.hasSequence'>
-                <div class="open_sequence_sub_link">Delete</div>
-                <span style="font-weight: normal; color: #ccc">|</span>
-
-                <div class="open_sequence_sub_link" ng-click="open()">Open in VectorEditor <i
-                        class="fa fa-external-link blue"></i></div>
-
-                <span style="font-weight: normal; color: #ccc">|</span>
-
-                <div class="dropdown open_sequence_sub_link">
+                <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete</small>
+                <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                <small class="opacity_hover" ng-click="open()"><i class="fa fa-external-link blue"></i>
+                    Open in VectorEditor
+                </small>
+                <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                <small class="dropdown opacity_hover">
                     <span class="dropdown-toggle">Download <span class="caret"></span></span>
                     <ul class="dropdown-menu">
                         <li class="cursor_pointer font-80em"><a>Original</a></li>
@@ -257,46 +251,46 @@
                             <a ng-click="linkCreateType='seed'"><i>Pigeon Script</i></a>
                         </li>
                     </ul>
-                </div>
+                </small>
+                <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
 
-                <span style="font-weight: normal; color: #ccc">|</span>
-
-                <div class="open_sequence_sub_link" ng-click="sbolShowHide()">
+                <small class="opacity_hover" ng-click="sbolShowHide()">
                     <span ng-show="showSBOL">Hide</span>
                     <span ng-hide="showSBOL">Show</span> Pigeon Image
-                </div>
+                </small>
             </div>
         </div>
 
         <!--area where sequence is when there is no sequence available -->
-        <div class="pad_top font-90em" ng-if='!entry.hasSequence' style="color: #999;">
-            <i style="color: #999">No sequence data provided.</i>
-            <alert type="'info'" style="margin-bottom: 10px; margin-top: 10px">
-                <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats are
-                Genbank, Fasta and SBOL
-            </alert>
-
-            <alert type="'danger'" style="margin-bottom: 10px" ng-if="serverError">
-                <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing file
-            </alert>
+        <div class="pad_top" ng-if='!entry.hasSequence' style="color: #999;">
+            <i style="color: #999" class="font-90em" ng-hide="isFileUpload||isPaste">No sequence data provided.</i>
 
             <!--file upload-->
-            <span ng-if="!isPaste && !processingFile && isFileUpload">
-                <div class="margin-top-20"><input ng-file-select type="file"/></div>
-                <div style="height: 7px; background-color: #f9f9f9;">
+            <span ng-show="isFileUpload">
+                <alert type="'info'" style="margin-bottom: 10px; margin-top: 10px" class="font-90em">
+                    <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats are
+                    Genbank, Fasta and SBOL
+                </alert>
+
+                <alert type="'danger'" style="margin-bottom: 10px" ng-if="serverError" class="font-90em">
+                    <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing file
+                </alert>
+
+                <div class="margin-top-20 font-90em"><input ng-file-select type="file"/></div>
+                <div style="height: 7px; background-color: #f9f9f9;" class="font-90em">
                     <div class="progress-bar" role="progressbar"
                          ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
                 </div>
             </span>
 
             <span ng-if="processingFile">
-                <i class="fa fa-spinner fa-gear"></i> Processing file {{processingFile}}
+                <i class="fa fa-spinner fa-gear font-90em"></i> Processing file {{processingFile}}
             </span>
 
             <!--sequence paste-->
-            <textarea ng-show="isPaste===true &&!processingFile" ng-model="pastedSequence" class="input_box"
-                      placeholder="Paste sequence" rows="14"
-                      style="width: 100%; height: 100%;"></textarea>
+            <textarea ng-show="isPaste" class="input_box"
+                      placeholder="Paste sequence" rows="14" ng-paste="processPastedSequence($event, entry)"
+                      style="width: 100%; height: 100%; color:#111"></textarea>
         </div>
 
         <!--sbol-->
@@ -308,10 +302,18 @@
             </div>
         </div>
 
-        <br>
-
         <div ng-show="entry.hasSequence" style="height: 600px">
             <span ice-flash></span>
         </div>
+    </div>
+</div>
+
+<div class="row margin-top-10">
+    <div class="col-md-12">
+        <div class="entry-details-subheader">
+            <strong style="color: #233559;">NOTES</strong>
+        </div>
+
+        {{entry.longDescription}}
     </div>
 </div>

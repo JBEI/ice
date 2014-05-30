@@ -10,7 +10,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.utils.SequenceUtils;

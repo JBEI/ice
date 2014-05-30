@@ -2,7 +2,6 @@ package org.jbei.ice.lib.bulkupload;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Set;
 
 import org.jbei.ice.ControllerException;
@@ -12,7 +11,6 @@ import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
-import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
@@ -28,7 +26,6 @@ import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.SampleStorage;
-import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -163,28 +160,10 @@ public class BulkUploadController {
         EntryType type = EntryType.nameToType(draft.getImportType().split("\\s+")[0]);
 
         // retrieve the entries associated with the bulk import
-        ArrayList<Entry> contents;
-        try {
-            contents = dao.retrieveDraftEntries(type, id, start, limit);
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
+        ArrayList<Entry> contents = dao.retrieveDraftEntries(type, id, start, limit);
 
         // convert
         draftInfo.getEntryList().addAll(convertParts(account, contents));
-
-        HashMap<PreferenceKey, String> userSaved = null;
-        try {
-            ArrayList<PreferenceKey> keys = new ArrayList<>();
-            keys.add(PreferenceKey.FUNDING_SOURCE);
-            keys.add(PreferenceKey.PRINCIPAL_INVESTIGATOR);
-            userSaved = new PreferencesController().retrieveAccountPreferences(account, keys);
-        } catch (ControllerException ce) {
-            // bulk upload should continue to work in the event of this exception
-            Logger.warn(ce.getMessage());
-        }
-
         return draftInfo;
     }
 
@@ -199,13 +178,11 @@ public class BulkUploadController {
         // retrieve the entries associated with the bulk import
         BulkUploadInfo info = draft.toDataTransferObject();
 
-        long tStart = System.currentTimeMillis();
         ArrayList<Entry> list = dao.retrieveDraftEntries(EntryType.PLASMID, id, offset, limit);
-        for (Entry entry :  list) {
+        for (Entry entry : list) {
             info.getEntryList().add(ModelToInfoFactory.getInfo(entry));
         }
 
-        System.out.println("took " + (System.currentTimeMillis() - tStart));
         info.setCount(dao.retrieveSavedDraftCount(id));
         return info;
     }
@@ -411,7 +388,7 @@ public class BulkUploadController {
         // retrieve draft
         BulkUpload draft = dao.retrieveById(draftId);
         if (draft == null)
-           return false;
+            return false;
 
         // check permissions
         if (!draft.getAccount().equals(account) && !accountController.isAdministrator(account.getEmail()))
@@ -441,7 +418,7 @@ public class BulkUploadController {
                 entryController.update(account, entry);
 
                 // if linked entries
-                for( Entry linked :  entry.getLinkedEntries()) {
+                for (Entry linked : entry.getLinkedEntries()) {
                     linked.setVisibility(Visibility.PENDING.getValue());
                     entryController.update(account, linked);
                 }

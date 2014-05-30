@@ -1,6 +1,6 @@
 'use strict';
 
-var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload']);
+var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload', 'vr.directives.slider']);
 
 iceControllers.controller('WebOfRegistriesController', function ($scope, $modal, $cookieStore, $stateParams, WebOfRegistries) {
     console.log("WebOfRegistriesController");
@@ -351,7 +351,37 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
         {display:"Principal Investigator", id:"PRINCIPAL_INVESTIGATOR", help:"Enter Email or Name"},
         {display:"Funding Source", id:"FUNDING_SOURCE"}
     ];
+    $scope.searchPreferenceDefaults = [
+        {display:"Alias", id:"alias"},
+        {display:"Backbone", id:"backbone"},
+        {display:"Keywords", id:"keywords"},
+        {display:"Name", id:"name"},
+        {display:"Part ID", id:"partId"},
+        {display:"Summary", id:"summary"}
+    ];
+
+    $scope.handleSliderChange = function (model) {
+        console.log("handleSliderChange", model);
+    };
+
+    $scope.translate = function (value) {
+        switch (value) {
+            case "1":
+            default:
+                return "default";
+            case "2":
+                return "low";
+            case "3":
+                return "medium";
+            case "4":
+                return "high";
+            case "5":
+                return "very high";
+        }
+    };
+
     $scope.preferences = {};
+    $scope.searchPreferences = {};
 
     var user = User($cookieStore.get('sessionId'));
     var profileOption = $stateParams.option;
@@ -461,6 +491,15 @@ iceControllers.controller('CollectionController', function ($scope, $state, $loc
 
     // retrieve user settings
 
+
+    // default list of collections
+    $scope.collectionList = [
+        { name:'available', display:'Available', icon:'fa-folder', iconOpen:'fa-folder-open'},
+        { name:'personal', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open'},
+        { name:'shared', display:'Shared', icon:'fa-folder', iconOpen:'fa-folder-open'},
+        { name:'bulkUpload', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit'},
+        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash-o'}
+    ];
 
     // entry items that can be created
     $scope.items = [
@@ -1104,7 +1143,7 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $locati
 
 // deals with sub collections e.g. /folders/:id
 // retrieves the contents of folders
-iceControllers.controller('CollectionFolderController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, $http, Folders, Entry) {
+iceControllers.controller('CollectionFolderController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, $http, Folders, Entry) {
     console.log("CollectionFolderController", $stateParams.collection);
 
     var sessionId = $cookieStore.get("sessionId");
@@ -1113,7 +1152,6 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
 
 //    var currentSelection = $scope.selectedFolder;
     $scope.breadCrumb = "";
-//    console.log("selected folder", $scope.selectedFolder);
 
     // param defaults
     $scope.params = {'asc':false, 'sort':'created'};
@@ -1218,6 +1256,20 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
                 console.error(error);
             });
     };
+
+    // opens a modal that presents user with options to share selected folder
+    $scope.openFolderShareSettings = function () {
+        var modalInstance = $modal.open({
+            templateUrl:'/views/modal/folder-permissions.html',
+            controller:"FolderPermissionsController",
+            backdrop:"static",
+            resolve:{
+                folder:function () {
+                    return $scope.folder;
+                }
+            }
+        });
+    }
 });
 
 // controller for <ice.menu.collections> directive
@@ -1263,6 +1315,9 @@ iceControllers.controller('CollectionMenuController', function ($cookieStore, $s
     // called from collections-menu-details.html when a collection's folder is selected
     // simply changes state to folder and allows the controller for that to handle it
     $scope.selectCollectionFolder = function (folder) {
+
+        console.log($scope.selectedCollectionFolders);
+
         console.log("selectCollectionFolder(TODO)", folder, $scope.selectedFolder);
         console.log("/" + folder.type + "/" + folder.id);
         $location.path("/" + folder.type + "/" + folder.id);
@@ -1287,26 +1342,11 @@ iceControllers.controller('CollectionMenuController', function ($cookieStore, $s
             });
     };
 
-    $scope.collectionList = [
-        { name:'available', display:'Available', icon:'fa-folder', iconOpen:'fa-folder-open'},
-        { name:'personal', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open'},
-        { name:'shared', display:'Shared', icon:'fa-folder', iconOpen:'fa-folder-open'},
-        { name:'bulkUpload', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit'},
-        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash-o'}
-    ];
-
     $scope.currentPath = function (param) {
         if ($stateParams.collection === undefined && param === 'personal')
             return true;
         return $stateParams.collection === param;
     };
-
-//    $scope.openUploadModal = function () {
-//        $modal.open({
-//            templateUrl:'views/modal/file-upload.html',
-//            controller:'EntryFileUploadController'
-//        });
-//    };
 });
 
 iceControllers.controller('EntryFileUploadController', function ($scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType) {
@@ -1412,7 +1452,7 @@ iceControllers.controller('EditEntryController', function ($scope, $location, $c
 
 iceControllers.controller('CreateEntryController', function ($http, $scope, $modal, $rootScope, $fileUploader, $location, $stateParams, $cookieStore, Entry) {
     console.log("CreateEntryController", $stateParams.type, $scope.part);
-//    $scope.createType = $stateParams.type;
+    $scope.createType = $stateParams.type;
     $scope.showMain = true;
 
     var partFields = [
@@ -1775,7 +1815,7 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
 
     uploader.bind('beforeupload', function (event, item) {
         console.info('Before upload', item);
-        item.formData.push({entryType:"plasmid"});
+        item.formData.push({entryType:"plasmid"}); // todo
     });
 
     uploader.bind('progress', function (event, item, progress) {
@@ -1967,8 +2007,6 @@ iceControllers.controller('EntryPermissionController', function ($scope, $cookie
         $scope.readPermissions = [];
         $scope.writePermissions = [];
 
-        console.log($scope.entry.id, result);
-
         angular.forEach(result, function (item) {
             if (item.type === 'WRITE_ENTRY')
                 $scope.writePermissions.push(item);
@@ -2071,20 +2109,70 @@ iceControllers.controller('EntryDetailsController', function ($scope) {
     };
 });
 
-iceControllers.controller('FullScreenFlashController', function ($scope) {
+iceControllers.controller('FullScreenFlashController', function ($scope, $stateParams, $sce) {
     console.log('FullScreenFlashController', $scope);
+
+    console.log($stateParams.sessionId);
+    console.log($stateParams.entryId);
+    $scope.sessionId = $stateParams.sessionId;
+    $scope.entryId = $stateParams.entryId;
+
+    $scope.test = $sce.trustAsHtml('<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002" id="VectorEditor" width="100%" height="100%" codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"> \
+        <param name="movie" value="VectorEditor.swf"> \
+            <param name="quality" value="high">  \
+                <param name="bgcolor" value="#869ca7"> \
+                    <param name="wmode" value="opaque">  \
+                        <param name="allowScriptAccess" value="sameDomain"> \
+                            <embed src="/swf/ve/VectorEditor.swf?entryId=' + $scope.entryId + '&amp;sessionId=' + $scope.sessionId + '" \
+                            quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
+                            name="SequenceChecker" align="middle" play="true" loop="false"  \
+                            type="application/x-shockwave-flash" \
+                            pluginspage="http://www.adobe.com/go/getflashplayer"> \
+                            </object>');
 });
 
-iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $rootScope, Entry, Folders) {
+iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $rootScope, $fileUploader, Entry, Folders) {
     console.log("EntryController", $rootScope.collectionContext);
     $scope.partIdEditMode = false;
     $scope.showSBOL = true;
     $scope.context = undefined;
+    $scope.isFileUpload = false;
+
     var sessionId = $cookieStore.get("sessionId");
     $scope.sessionId = sessionId;
 
     $scope.open = function () {
-        window.open('/views/entry/fullscreen-flash.html');
+        window.open('/static/swf/ve/VectorEditor?entryId=' + $scope.entry.id + '&sessionId=' + sessionId);
+    };
+
+    $scope.sequenceUpload = function (type) {
+        if (type === 'file') {
+            $scope.isFileUpload = true;
+            $scope.isPaste = false;
+        }
+        else {
+            $scope.isPaste = true;
+            $scope.isFileUpload = false;
+        }
+    };
+
+    $scope.processPastedSequence = function (event, part) {
+        var sequenceString = event.originalEvent.clipboardData.getData('text/plain');
+        entry.addSequenceAsString({partId:part.id}, {sequence:sequenceString}, function (result) {
+            part.hasSequence = true;
+        }, function (error) {
+            console.log("error", error);
+        });
+    };
+
+    $scope.deleteSequence = function (part) {
+//        console.log(part, $scope.entry);
+        entry.deleteSequence({partId:part.id}, function (result) {
+            console.log(result);
+            part.hasSequence = false;
+        }, function (error) {
+            console.error(error);
+        })
     };
 
     var partFields = [
@@ -2269,11 +2357,23 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         console.log(type, $scope[type], $scope.partIdEditMode);
     };
 
-    $scope.quickEditEntry = function () {
-        console.log("Edit", $scope.entry);
-        for (var i = 0; i < $scope.entryFields.length; i += 1) {
-            $scope.entryFields[i].edit = false;
+    $scope.quickEditEntry = function (field) {
+        if (!field.dirty) {
+            return;
+//            field.edit = false;
         }
+        field.updating = true;
+
+        entry.update($scope.entry, function (result) {
+            if (field.inputType !== 'withEmail')
+                field.edit = false;
+
+            field.dirty = false;
+            field.updating = false;
+        }, function (error) {
+            console.error(error);
+            field.updating = false;
+        });
     };
 
     var folders = Folders();
@@ -2307,11 +2407,43 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
 
                 $location.path("/entry/" + result.entries[0].id);
             });
-    }
+    };
+
+    // file upload
+    var uploader = $scope.sequenceFileUpload = $fileUploader.create({
+        scope:$scope, // to automatically update the html. Default: $rootScope
+        url:"/rest/file/sequence",
+        method:'POST',
+        removeAfterUpload:true,
+        headers:{"X-ICE-Authentication-SessionId":sessionId},
+        autoUpload:true,
+        queueLimit:1 // can only upload 1 file
+    });
+
+    uploader.bind('progress', function (event, item, progress) {
+        if (progress != "100")  // isUploading is always true until it returns
+            return;
+
+        // upload complete. have processing
+        $scope.processingFile = item.file.name;
+    });
+
+    uploader.bind('success', function (event, xhr, item, response) {
+        $scope.entry.hasSequence = true;
+    });
+
+    uploader.bind('completeall', function (event, items) {
+        $scope.processingFile = undefined;
+    });
+
+    uploader.bind('beforeupload', function (event, item) {
+        item.formData.push({entryType:$scope.entry.type});
+        item.formData.push({entryRecordId:$scope.entry.recordId});
+    });
 });
 
 iceControllers.controller('EntryAttachmentController', function ($scope, $window, $cookieStore, $stateParams, $fileUploader, Attachment) {
-    console.log("EntryAttachmentController", $scope.entry);
+    console.log("EntryAttachmentController");
 
     // create a uploader with options
 
@@ -2387,7 +2519,6 @@ iceControllers.controller('EntryAttachmentController', function ($scope, $window
     };
 
     $scope.deleteAttachment = function (index, att) {
-        console.log(att);
         attachment.delete({partId:$stateParams.id, attachmentId:att.id}, function (result) {
             confirmObject[index] = false;
             $scope.attachments.splice(index, 1);
@@ -2461,10 +2592,76 @@ iceControllers.controller('TraceSequenceController', function ($scope, $window, 
     };
 });
 
-iceControllers.controller('TestController', function ($scope) {
-});
+iceControllers.controller('FolderPermissionsController', function ($scope, $modalInstance, $cookieStore, Folders, User, folder) {
+    console.log("FolderPermissionsController");
 
-iceControllers.controller('SequenceController', function ($scope) {
+    var sessionId = $cookieStore.get("sessionId");
+    var panes = $scope.panes = [];
+    $scope.folder = folder;
+    var user = User(sessionId);
+
+    $scope.activateTab = function (pane) {
+        angular.forEach(panes, function (pane) {
+            pane.selected = false;
+        });
+        pane.selected = true;
+        if (pane.title === 'Read')
+            $scope.activePermissions = angular.copy($scope.readPermissions);
+        else
+            $scope.activePermissions = angular.copy($scope.writePermissions);
+
+        angular.forEach($scope.users, function (item) {
+            for (var i = 0; i < $scope.activePermissions.length; i += 1) {
+                item.selected = (item.id !== undefined && item.id === $scope.activePermissions[i].articleId);
+            }
+        });
+    };
+
+    this.addPane = function (pane) {
+        // activate the first pane that is added
+        if (panes.length == 0)
+            $scope.activateTab(pane);
+        panes.push(pane);
+    };
+
+    $scope.closeModal = function () {
+        $modalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
+    };
+
+    $scope.showAddPermissionOptionsClick = function (pane) {
+        // TODO : instead of retrieving all and filtering, try on the server first
+        user.list(function (result) {
+            $scope.users = result;
+
+            angular.forEach($scope.users, function (item) {
+                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
+                    if (item.id == $scope.activePermissions[i].articleId) {
+                        item.selected = true;
+                        item.permissionId = $scope.activePermissions[i].id;
+                        break;
+                    }
+                }
+            });
+        });
+    };
+
+    // retrieve permissions for folder
+    Folders().permissions({folderId:folder.id}, function (result) {
+        $scope.readPermissions = [];
+        $scope.writePermissions = [];
+
+        angular.forEach(result, function (item) {
+            if (item.type === 'WRITE_ENTRY')
+                $scope.writePermissions.push(item);
+            else
+                $scope.readPermissions.push(item);
+        });
+
+        $scope.panes.push({title:'Read', count:$scope.readPermissions.length, selected:true});
+        $scope.panes.push({title:'Write', count:$scope.writePermissions.length});
+
+        $scope.activePermissions = angular.copy($scope.readPermissions);
+    })
 });
 
 

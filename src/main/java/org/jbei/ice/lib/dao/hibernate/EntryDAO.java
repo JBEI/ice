@@ -331,6 +331,36 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    public List<Entry> sharedWithUserEntries(Account requester, Set<Group> accountGroups) throws DAOException {
+        try {
+            Session session = currentSession();
+            Criteria criteria = session.createCriteria(Permission.class);
+
+            // user owned
+            criteria.setProjection(Projections.property("entry"));
+
+            // expect everyone to at least belong to the everyone group so groups should never be empty
+            criteria.add(Restrictions.disjunction()
+                                     .add(Restrictions.in("group", accountGroups)));
+//                                     .add(Restrictions.eq("account", requester)));
+
+            // should be able to either read or write
+            criteria.add(Restrictions.disjunction()
+                                     .add(Restrictions.eq("canWrite", true))
+                                     .add(Restrictions.eq("canRead", true)));
+
+            Criteria entryCriteria = criteria.createCriteria("entry");
+            entryCriteria.add(Restrictions.disjunction()
+                                          .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                                          .add(Restrictions.isNull("visibility")));
+            entryCriteria.add(Restrictions.ne("ownerEmail", requester.getEmail()));
+            return new ArrayList<Entry>(criteria.list());
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
     // checks permission (does not include pending entries)
     @SuppressWarnings("unchecked")
     public List<Entry> retrieveUserEntries(Account requestor, String user, Set<Group> groups,

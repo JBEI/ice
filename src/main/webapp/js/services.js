@@ -222,6 +222,18 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            deleteSequence:{
+                method:'DELETE',
+                url:'/rest/part/:partId/sequence',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            addSequenceAsString:{
+                method:"POST",
+                url:'/rest/part/:partId/sequence',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             deleteEntries:{
                 method:'DELETE',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
@@ -396,6 +408,14 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
             delete:{
                 method:'DELETE',
                 url:'/rest/folders/:folderId',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            permissions:{
+                method:'GET',
+                responseType:'json',
+                isArray:true,
+                url:'/rest/folders/:folderId/permissions',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });

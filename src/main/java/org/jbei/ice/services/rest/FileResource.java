@@ -138,8 +138,7 @@ public class FileResource extends RestResource {
                 File file = Paths.get(tmpDir, fileId).toFile();
 
                 Response.ResponseBuilder response = Response.ok(file);
-                response.header("Content-Disposition",
-                                "attachment; filename=" + entry.getPartNumber() + ".png");
+                response.header("Content-Disposition", "attachment; filename=" + entry.getPartNumber() + ".png");
                 return response.build();
             } else {
                 URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
@@ -150,8 +149,7 @@ public class FileResource extends RestResource {
                     File file = Paths.get(tmpDir, fileId).toFile();
 
                     Response.ResponseBuilder response = Response.ok(file);
-                    response.header("Content-Disposition",
-                                    "attachment; filename=" + entry.getPartNumber() + ".png");
+                    response.header("Content-Disposition", "attachment; filename=" + entry.getPartNumber() + ".png");
                     return response.build();
                 }
             }
@@ -177,7 +175,6 @@ public class FileResource extends RestResource {
             File file = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
                                   "bulk-import", fileId).toFile();
             FileUtils.copyInputStreamToFile(fileInputStream, file);
-
 
             String userId = getUserIdFromSessionHeader(sessionId);
 

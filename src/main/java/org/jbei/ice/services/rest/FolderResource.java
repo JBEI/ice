@@ -9,9 +9,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.folder.Collection;
 import org.jbei.ice.lib.folder.FolderContentRetriever;
@@ -31,6 +33,7 @@ public class FolderResource extends RestResource {
 
     private FolderController controller = new FolderController();
     private FolderContentRetriever retriever = new FolderContentRetriever();
+    private PermissionsController permissionsController = new PermissionsController();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -124,14 +127,14 @@ public class FolderResource extends RestResource {
             switch (folderId) {
                 case "personal":
                     List<PartData> entries = entryController.retrieveOwnerEntries(userId, userId, field,
-                                                                               asc, offset, limit);
+                                                                                  asc, offset, limit);
                     long count = entryController.getNumberOfOwnerEntries(userId, userId);
                     details.getEntries().addAll(entries);
                     details.setCount(count);
                     return details;
 
                 case "available":
-                case "shared":
+
                     try {
                         FolderDetails retrieved = entryController.retrieveVisibleEntries(userId, field, asc, offset,
                                                                                          limit);
@@ -142,6 +145,12 @@ public class FolderResource extends RestResource {
                         Logger.error(e);
                         return null;
                     }
+
+                case "shared":
+                    List<PartData> data = entryController.getEntriesSharedWithUser(userId, field, asc, offset, limit);
+                    details.setEntries(data);
+                    details.setCount(entryController.getNumberofEntriesSharedWithUser(userId));
+                    return details;
 
                 case "bulkUpload":
                     return retriever.getDraftEntries(userId, field, asc, offset, limit);
@@ -155,5 +164,25 @@ public class FolderResource extends RestResource {
         } catch (ControllerException e) {
             throw new ResourceNotFoundException();
         }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions")
+    public ArrayList<AccessPermission> getFolderPermissions(
+            @PathParam("id") long folderId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        return permissionsController.getSetFolderPermissions(userId, folderId);
+    }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions")
+    public PartData setPermissions(@Context UriInfo info, @PathParam("id") long partId,
+            ArrayList<AccessPermission> permissions,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        return permissionsController.setEntryPermissions(userId, partId, permissions);
     }
 }

@@ -85,7 +85,8 @@
 <div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="!activePart.isExistingPart">
     <div class="col-md-2 text-right">
         <span style="white-space:nowrap" ng-class="{'font-bold':field.edit}">{{field.label}}
-            <span ng-if="field.required" class="required">*</span></span>
+            <span ng-if="field.required" class="required">*</span>
+        </span>
     </div>
 
     <!--short input field-->
@@ -128,8 +129,9 @@
                    datepicker-popup="yyyy-MM-dd" class="input_box_group" maxlength="125" is-open="opened"
                    datepicker-options="dateOptions" close-text="Close" style="width: 205px;"
                    ng-focus="field.edit=true" ng-blur="field.edit=false">
-            <span class="input-group-addon" style="padding:3px; background-color:
-             #f1f1f1;width: 19px"><i class="fa fa-calendar"></i></span>
+            <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1;width: 19px">
+                <i class="fa fa-calendar"></i>
+            </span>
         </div>
     </div>
 
@@ -269,8 +271,7 @@
 
             <!--sequence paste-->
             <textarea ng-show="isPaste===true &&!processingFile" ng-model="pastedSequence" class="input_box"
-                      placeholder="Paste sequence" rows="14"
-                      style="width: 100%; height: 100%;"></textarea>
+                      placeholder="Paste sequence" rows="14" style="width: 100%; height: 100%;"></textarea>
         </div>
 
         <div class="margin-top-10" ng-if="activePart.hasSequence" style="height: 600px">
@@ -290,7 +291,7 @@
 <div class="row pad-top-5">
     <div class="col-md-2"></div>
     <div class="col-md-10">
-        <textarea class="entry_add_notes_input"></textarea>
+        <textarea class="entry_add_notes_input" ng-model="activePart.longDescription"></textarea>
     </div>
 </div>
 </div>

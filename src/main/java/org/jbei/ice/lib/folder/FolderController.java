@@ -273,7 +273,7 @@ public class FolderController {
         folder.setType(FolderType.PRIVATE);
         folder.setCreationTime(new Date(System.currentTimeMillis()));
         folder = dao.create(folder);
-        return new FolderDetails(folder.getId(), folder.getName());
+        return folder.toDataTransferObject();
     }
 
     public FolderDetails createNewFolder(Account account, String name, String description, ArrayList<Long> contents)

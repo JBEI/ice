@@ -163,7 +163,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         .state('flash', {
             url:'/static/swf/:shortHand/:swfName?entryId&sessionId',
             controller:'FullScreenFlashController',
-            templateUrl:'/views/fullscreen-flash.html'
+            templateUrl:'/views/entry/fullscreen-flash.html'
         })
         .state("otherwise", { url:'/'})
     ;

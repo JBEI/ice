@@ -64,7 +64,7 @@ public class SequenceController {
         authorization = new EntryAuthorization();
     }
 
-    public void parseAndSaveSequence(Account account, Entry entry, String sequenceString) throws ControllerException {
+    public boolean parseAndSaveSequence(String userId, long partId, String sequenceString) {
         DNASequence dnaSequence = parse(sequenceString);
 
         if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
@@ -72,14 +72,17 @@ public class SequenceController {
                     + GeneralParser.getInstance().availableParsersToString()
                     + ". "
                     + "If you believe this is an error, please contact the administrator with your file";
-
-            throw new ControllerException(errorMsg);
+            throw new IllegalArgumentException(errorMsg);
         }
 
         Sequence sequence = dnaSequenceToSequence(dnaSequence);
         sequence.setSequenceUser(sequenceString);
+        Entry entry = DAOFactory.getEntryDAO().get(partId);
+        if (entry == null)
+            return false;
+
         sequence.setEntry(entry);
-        save(account, sequence);
+        return save(userId, sequence) != null;
     }
 
     // either or both recordId and entryType has to have a value
@@ -106,7 +109,7 @@ public class SequenceController {
         Sequence sequence = dnaSequenceToSequence(dnaSequence);
         sequence.setSequenceUser(sequenceString);
         sequence.setEntry(entry);
-        SequenceInfo info = save(account, sequence).toDataTransferObject();
+        SequenceInfo info = save(userId, sequence).toDataTransferObject();
         info.setSequence(dnaSequence);
         return info;
     }
@@ -115,14 +118,14 @@ public class SequenceController {
      * Save the given {@link Sequence} into the database, with the option to rebuild the search
      * index.
      *
-     * @param account  account of user saving sequence
+     * @param userId   unique identifier of user saving sequence
      * @param sequence sequence to save
      * @return Saved Sequence
      * @throws AuthorizationException if the user does not have the permission to update the entry associated with
      *                                the sequence
      */
-    public Sequence save(Account account, Sequence sequence) throws AuthorizationException {
-        authorization.expectWrite(account.getEmail(), sequence.getEntry());
+    public Sequence save(String userId, Sequence sequence) throws AuthorizationException {
+        authorization.expectWrite(userId, sequence.getEntry());
         Sequence result = dao.saveSequence(sequence);
         ApplicationController.scheduleBlastIndexRebuildTask(true);
         return result;
@@ -208,6 +211,20 @@ public class SequenceController {
         String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         dao.deleteSequence(sequence, tmpDir);
         ApplicationController.scheduleBlastIndexRebuildTask(true);
+    }
+
+    public boolean deleteSequence(String requester, long partId) {
+        Entry entry = DAOFactory.getEntryDAO().get(partId);
+        authorization.expectWrite(requester, entry);
+
+        Sequence sequence = dao.getByEntry(entry);
+        if (sequence == null)
+            return true;
+
+        String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+        dao.deleteSequence(sequence, tmpDir);
+        ApplicationController.scheduleBlastIndexRebuildTask(true);
+        return true;
     }
 
     /**

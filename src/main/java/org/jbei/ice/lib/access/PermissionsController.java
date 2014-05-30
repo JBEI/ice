@@ -13,6 +13,7 @@ import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
@@ -341,7 +342,7 @@ public class PermissionsController {
      */
     public ArrayList<AccessPermission> retrieveSetEntryPermissions(Entry entry) {
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-        Set<Permission> permissions = dao.retrieveEntryPermission(entry);
+        Set<Permission> permissions = dao.getEntryPermissions(entry);
 
         for (Permission permission : permissions) {
 //            AccessPermission accessPermission = new AccessPermission();
@@ -367,6 +368,33 @@ public class PermissionsController {
 //                accessPermission.setDisplay(permission.getGroup().getLabel());
 //            }
 
+            accessPermissions.add(permission.toDataTransferObject());
+        }
+
+        return accessPermissions;
+    }
+
+    /**
+     * retrieves permissions that have been explicitly set for a specified folder with the
+     * exception of the public group read access. The check for that is a separate
+     * method call
+     *
+     * @param folderId unique identifier for folder whose permissions are being checked
+     * @return list of set permissions
+     */
+    public ArrayList<AccessPermission> getSetFolderPermissions(String userId, long folderId) {
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+        if (folder == null)
+            return null;
+
+        FolderAuthorization folderAuthorization = new FolderAuthorization();
+        if (!folderAuthorization.canWrite(userId, folder))
+            throw new AuthorizationException("User does not have permission to access folder permissions");
+
+        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
+        Set<Permission> permissions = dao.getFolderPermissions(folder);
+
+        for (Permission permission : permissions) {
             accessPermissions.add(permission.toDataTransferObject());
         }
 

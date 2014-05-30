@@ -16,6 +16,15 @@ iceDirectives.directive("iceSearchInput", function () {
     }
 });
 
+iceDirectives.directive('focus', function ($timeout, $rootScope) {
+    return {
+        restrict:'A',
+        link:function ($scope, $element, attrs) {
+            $element[0].focus();
+        }
+    }
+});
+
 iceDirectives.directive("addSequence", function () {
     return {
         restrict:"AE",
@@ -26,10 +35,6 @@ iceDirectives.directive("addSequence", function () {
 
 iceDirectives.directive("folderActions", function () {
     return {
-//        scope: {
-//            filters:"=",
-//            runUserSearch:"&"
-//        },
         restrict:"AE",
         templateUrl:"/views/folder/folder-actions.html"
     }

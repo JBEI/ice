@@ -2,6 +2,7 @@ package org.jbei.ice.lib.dto.folder;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.jbei.ice.lib.account.AccountTransfer;
@@ -23,8 +24,8 @@ public class FolderDetails implements IDataTransferModel, Comparable<FolderDetai
     private long count;
     private String description;
     private boolean propagatePermission;
-    private LinkedList<PartData> entries = new LinkedList<>();
-    private String type;
+    private List<PartData> entries = new LinkedList<>();
+    private FolderType type;
     private AccountTransfer owner;    // owner or person sharing this folder
     private ArrayList<AccessPermission> accessPermissions;
     private boolean publicReadAccess;
@@ -70,23 +71,23 @@ public class FolderDetails implements IDataTransferModel, Comparable<FolderDetai
         this.description = description;
     }
 
-    public LinkedList<PartData> getEntries() {
+    public List<PartData> getEntries() {
         return entries;
     }
 
-    public void setEntries(LinkedList<PartData> entries) {
+    public void setEntries(List<PartData> entries) {
         this.entries = entries;
     }
 
-    public String getType() {
+    public FolderType getType() {
         return type;
     }
 
     public void setType(FolderType type) {
-        if(type == null)
-            this.type = FolderType.PRIVATE.getType();
+        if (type == null)
+            this.type = FolderType.PRIVATE;
         else
-           this.type = type.getType();
+            this.type = type;
     }
 
     public AccountTransfer getOwner() {
