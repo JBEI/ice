@@ -5,7 +5,7 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * Helper class for creating accounts to be used in tests
