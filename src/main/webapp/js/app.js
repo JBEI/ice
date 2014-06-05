@@ -127,11 +127,6 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             controller:'EditEntryController',
             templateUrl:'/views/entry/edit.html'
         })
-//        .state('folders.upload', {
-//            url:'/upload/:type',
-//            controller:'UploadController',
-//            templateUrl:'/views/upload.html'
-//        })
         .state('main.profile', {
             url:'profile/:id',
             templateUrl:'/views/profile.html'
