@@ -198,7 +198,7 @@ public class ModelToInfoFactory {
         }
         data.setHomozygosity(seed.getHomozygosity());
         data.setEcotype(seed.getEcotype());
-        data.setParents(seed.getParents());
+        data.setSeedParents(seed.getParents());
         data.setHarvestDate(seed.getHarvestDate());
         boolean isSent = !(seed.isSentToABRC() == null || !seed.isSentToABRC());
         data.setSentToAbrc(isSent);
@@ -267,6 +267,7 @@ public class ModelToInfoFactory {
         // funding sources
         info.setFundingSource(entry.getFundingSource());
         info.setPrincipalInvestigator(entry.getPrincipalInvestigator());
+        info.setPrincipalInvestigatorEmail(entry.getPrincipalInvestigatorEmail());
 
         // linked entries
         for (Entry linkedEntry : entry.getLinkedEntries()) {
@@ -433,7 +434,7 @@ public class ModelToInfoFactory {
                 view.setGeneration(generation);
                 view.setHomozygosity(seed.getHomozygosity());
                 view.setEcotype(seed.getEcotype());
-                view.setParents(seed.getParents());
+                view.setSeedParents(seed.getParents());
                 view.setHarvestDate(seed.getHarvestDate());
 
                 return view;

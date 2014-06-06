@@ -9,7 +9,7 @@ public class ArabidopsisSeedData extends PartData {
     private String homozygosity;
     private String ecotype;
     private Date harvestDate;
-    private String parents;
+    private String seedParents;
     private Generation generation;
     private PlantType plantType;
     private Boolean sentToAbrc;
@@ -43,12 +43,12 @@ public class ArabidopsisSeedData extends PartData {
         this.harvestDate = harvestDate;
     }
 
-    public String getParents() {
-        return parents;
+    public String getSeedParents() {
+        return seedParents;
     }
 
-    public void setParents(String parents) {
-        this.parents = parents;
+    public void setSeedParents(String parents) {
+        this.seedParents = parents;
     }
 
     public Generation getGeneration() {

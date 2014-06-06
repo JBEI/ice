@@ -124,7 +124,7 @@ public class InfoToModelFactory {
                 String ecoType = seedData.getEcotype() == null ? "" : seedData.getEcotype();
 
                 seed.setEcotype(ecoType);
-                String parents = seedData.getParents() == null ? "" : seedData.getParents();
+                String parents = seedData.getSeedParents() == null ? "" : seedData.getSeedParents();
 
                 seed.setParents(parents);
 
@@ -189,7 +189,7 @@ public class InfoToModelFactory {
                 seed.setHarvestDate(seedData.getHarvestDate());
                 String ecoType = seedData.getEcotype() == null ? "" : seedData.getEcotype();
                 seed.setEcotype(ecoType);
-                String parents = seedData.getParents() == null ? "" : seedData.getParents();
+                String parents = seedData.getSeedParents() == null ? "" : seedData.getSeedParents();
                 seed.setParents(parents);
 
                 if (seedData.getGeneration() != null) {
@@ -270,10 +270,14 @@ public class InfoToModelFactory {
         if (visibility != null)
             entry.setVisibility(visibility.getValue());
 
+        // checking for null instead of blank since it could be cleared
         if (info.getFundingSource() != null)
             entry.setFundingSource(info.getFundingSource());
         if (info.getPrincipalInvestigator() != null)
             entry.setPrincipalInvestigator(info.getPrincipalInvestigator());
+        if(info.getPrincipalInvestigatorEmail() != null)
+            entry.setPrincipalInvestigatorEmail(info.getPrincipalInvestigatorEmail());
+
         if (info.getKeywords() != null)
             entry.setKeywords(info.getKeywords());
 

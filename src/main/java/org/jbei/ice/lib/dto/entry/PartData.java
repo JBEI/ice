@@ -16,7 +16,7 @@ public class PartData implements IDataTransferModel {
     private long id;
     private EntryType type;
     private Visibility visible;
-    private PartData parent;
+    private ArrayList<PartData> parents;
 
     private String recordId;
     private String name;
@@ -63,6 +63,7 @@ public class PartData implements IDataTransferModel {
         this.type = type;
         accessPermissions = new ArrayList<>();
         linkedParts = new ArrayList<>();
+        parents = new ArrayList<>();
     }
 
     public String getRecordId() {
@@ -378,11 +379,7 @@ public class PartData implements IDataTransferModel {
         this.links = links;
     }
 
-    public PartData getParent() {
-        return parent;
-    }
-
-    public void setParent(PartData parent) {
-        this.parent = parent;
+    public ArrayList<PartData> getParents() {
+        return parents;
     }
 }
