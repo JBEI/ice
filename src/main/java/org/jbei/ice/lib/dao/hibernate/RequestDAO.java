@@ -69,9 +69,9 @@ public class RequestDAO extends HibernateRepository<Request> {
             throws DAOException {
         String sql = "from " + Request.class.getName() + " where status=:status and account=:account order by " + sort;
         if (asc)
-            sql = " asc";
+            sql += " asc";
         else
-            sql = " desc";
+            sql += " desc";
 
         Query query = currentSession().createQuery(sql);
         query.setParameter("status", SampleRequestStatus.PENDING);
