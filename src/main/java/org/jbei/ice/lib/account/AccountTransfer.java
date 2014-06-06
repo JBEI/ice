@@ -165,4 +165,17 @@ public class AccountTransfer implements IDataTransferModel {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    @Override
+    public int hashCode() {
+        return this.email.toLowerCase().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o.getClass() != AccountTransfer.class)
+            return false;
+
+        return ((AccountTransfer) o).getEmail().equalsIgnoreCase(this.email);
+    }
 }
