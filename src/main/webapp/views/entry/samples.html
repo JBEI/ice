@@ -12,19 +12,27 @@
     <div class="row pad_top" ng-repeat="sample in samples">
         <div class="col-md-6">
             <table class="entry_sample_panel">
+                <!--<tr>-->
+                    <!--<td colspan="{{Plate96Cols.length+1}}" align="center" class="bg_cc"><b>Name</b></td>-->
+                <!--</tr>-->
                 <tr>
-                    <td colspan="{{Plate96Cols.length}}" align="center" class="bg_cc"><b></b></td>
+                    <td>&nbsp;</td>
+                    <td class="text-center" ng-repeat="col in Plate96Cols"><strong>{{col}}</strong></td>
                 </tr>
                 <tr ng-repeat="row in Plate96Rows">
-                    <td ng-repeat="col in Plate96Cols track by $id(col)" class="border-1">{{row}}<b
-                            style="vertical-align: sub; font-size: 7px">{{col}}</b></td>
+                    <td><strong>{{row}}</strong></td>
+                    <!--<td ng-repeat="col in Plate96Cols track by $id(col)" class="border-1">{{row}}<b-->
+                            <!--style="vertical-align: sub; font-size: 7px">{{col}}</b></td>-->
                     <!--<td class="border-1-selected bg_coral" title="0105793581">H<b-->
                     <!--style="vertical-align: sub; font-size: 7px">7</b></td>-->
+                    <td ng-repeat="col in Plate96Cols track by $id(col)">
+                        <i class="fa fa-circle-thin opacity_hover" style="font-size: 30px"></i>
+                    </td>
                 </tr>
-                <tr>
-                    <td class="bg_cc" colspan="12" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM
-                        by <a href="#page=profile;id=afschlatter@lbl.gov">afschlatter@lbl.gov</a></td>
-                </tr>
+                <!--<tr>-->
+                    <!--<td class="bg_cc" colspan="13" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM-->
+                        <!--by <a href="#page=profile;id=afschlatter@lbl.gov">afschlatter@lbl.gov</a></td>-->
+                <!--</tr>-->
             </table>
         </div>
     </div>
@@ -42,7 +50,7 @@
                     <!--style="vertical-align: sub; font-size: 7px">7</b></td>-->
                 </tr>
                 <tr>
-                    <td class="bg_cc" colspan="12" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM
+                    <td class="bg_cc" colspan="13" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM
                         by <a href="#page=profile;id=afschlatter@lbl.gov">afschlatter@lbl.gov</a></td>
                 </tr>
             </table>
@@ -59,7 +67,7 @@
                     <!--style="vertical-align: sub; font-size: 7px">7</b></td>-->
                 </tr>
                 <tr>
-                    <td class="bg_cc" colspan="12" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM
+                    <td class="bg_cc" colspan="13" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM
                         by <a href="#page=profile;id=afschlatter@lbl.gov">afschlatter@lbl.gov</a></td>
                 </tr>
             </table>

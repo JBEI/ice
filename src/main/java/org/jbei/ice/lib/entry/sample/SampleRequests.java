@@ -35,6 +35,21 @@ public class SampleRequests {
         this.entryDAO = DAOFactory.getEntryDAO();
     }
 
+    public ArrayList<SampleRequest> getUserRequestedSamples(String userId, int offset, int limit) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        if (account == null)
+            return null;
+
+        List<Request> requests = dao.getAccountRequestList(account, offset, limit, "requested", true);
+        if (requests == null)
+            return null;
+
+        ArrayList<SampleRequest> result = new ArrayList<>();
+        for (Request request : requests)
+            result.add(request.toDataTransferObject());
+        return result;
+    }
+
     /**
      * Creates a new sample request for the specified user and specified entry.
      * The default status is "IN CART"
@@ -172,7 +187,7 @@ public class SampleRequests {
             String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
             if (email != null && !email.isEmpty()) {
                 String subject = "Sample request";
-                String body = "A sample request has been received from" + account.getFullName() + " for "
+                String body = "A sample request has been received from " + account.getFullName() + " for "
                         + requests.size() + " samples.\n\n";
                 body += "Please go to the following link to review pending requests.\n\n";
                 body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/#page=admin;id=sample_requests";

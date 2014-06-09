@@ -11,6 +11,20 @@ var iceApp = angular.module('iceApp', [
     'ui.router'
 ]);
 
+iceApp.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
+    var original = $location.path;
+    $location.path = function (path, reload) {
+        if (reload === false) {
+            var lastRoute = $route.current;
+            var un = $rootScope.$on('$locationChangeSuccess', function () {
+                $route.current = lastRoute;
+                un();
+            });
+        }
+        return original.apply($location, [path]);
+    };
+}]);
+
 iceApp.run(function (Authentication, $rootScope) {
     $rootScope.logout = function () {
         Authentication.logout();

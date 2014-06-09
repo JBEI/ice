@@ -763,15 +763,13 @@ public class EntryController {
 
         // check if there is a parent available
         List<Entry> parents = dao.getParents(entryId);
-        if (parents != null && !parents.isEmpty()) {
-            if (parents.size() > 1) {
-                Logger.info("Entry " + entryId + " has more than one parent");
-            }
+        if (parents == null)
+            return partData;
 
-            Entry parent = parents.get(0);
+        for( Entry parent : parents) {
             PartData parentData = new PartData();
             parentData.setId(parent.getId());
-            partData.setParent(parentData);
+            partData.getParents().add(parentData);
         }
 
         return partData;

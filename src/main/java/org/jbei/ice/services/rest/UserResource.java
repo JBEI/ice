@@ -25,8 +25,10 @@ import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.group.UserGroup;
+import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.user.UserPreferences;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.sample.SampleRequests;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 
@@ -38,6 +40,7 @@ public class UserResource extends RestResource {
 
     private AccountController controller = new AccountController();
     private GroupController groupController = new GroupController();
+    private SampleRequests sampleRequests = new SampleRequests();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -50,10 +53,24 @@ public class UserResource extends RestResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/autocomplete")
+    public ArrayList<AccountTransfer> getAutoCompleteForAvailableAccounts(
+            @QueryParam("val") String val,
+            @DefaultValue("8") @QueryParam("limit") int limit,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        return controller.getMatchingAccounts(userId, val, limit);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public AccountTransfer read(@Context UriInfo info, @PathParam("id") long userId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        return controller.get(userId).toDataTransferObject();
+        Account account = controller.get(userId);
+        if(account != null)
+            return account.toDataTransferObject();
+        return null;
     }
 
     @GET
@@ -121,5 +138,16 @@ public class UserResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader, AccountTransfer transfer) {
         String user = getUserIdFromSessionHeader(userAgentHeader);
         return controller.updateAccount(user, userId, transfer);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/samples")
+    public ArrayList<SampleRequest> getRequestedSamples(@PathParam("id") long userId,
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("30") @QueryParam("limit") int limit,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String user = getUserIdFromSessionHeader(userAgentHeader);
+        return sampleRequests.getUserRequestedSamples(user, offset, limit);
     }
 }

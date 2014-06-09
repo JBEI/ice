@@ -34,6 +34,8 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Creates entries for bulk uploads
  *
@@ -93,7 +95,7 @@ public class BulkEntryCreator {
 
     public PartData updateEntry(String userId, long bulkUploadId, long id, PartData data) {
         BulkUpload upload = dao.get(bulkUploadId);
-        authorization.expectRead(userId, upload);
+        authorization.expectWrite(userId, upload);
 
         Entry entry = entryDAO.get(id);
         // todo : check that entry is a part of upload and they are of the same type
@@ -109,29 +111,23 @@ public class BulkEntryCreator {
         return data;
     }
 
-    public BulkUploadInfo bulkUpdate(String userId, BulkUploadInfo info) {
-        Account account = accountController.getByEmail(userId);
-
+    public BulkUploadInfo bulkUpdate(String userId, long id, BulkUploadInfo info) {
         // upload is allowed to be null
-        BulkUpload upload = dao.get(info.getId());
-        if (upload != null)
-            authorization.expectRead(userId, upload);
+        BulkUpload upload = dao.get(id);
+        if (upload == null)
+            return null;
 
+        authorization.expectWrite(userId, upload);
+        Date updateTime = new Date(System.currentTimeMillis());
+        upload.setLastUpdateTime(updateTime);
 
-        for( PartData data : info.getEntryList()) {
-            Entry entry = entryDAO.get(data.getId());
-            // todo : check that entry is a part of upload and they are of the same type
-            entry = InfoToModelFactory.updateEntryField(data, entry);
-            entry.setModificationTime(new Date(System.currentTimeMillis()));
-            entryDAO.update(entry);
-        }
+        if(StringUtils.isNotEmpty(info.getName()))
+            upload.setName(info.getName());
 
-        if(upload != null) {
-            Date updateTime = new Date(System.currentTimeMillis());
-            upload.setLastUpdateTime(updateTime);
-            dao.update(upload);
-            info.setLastUpdate(updateTime);
-        }
+        if(info.getStatus() != null)
+            upload.setStatus(info.getStatus());
+        dao.update(upload);
+        info.setLastUpdate(updateTime);
         return info;
     }
 

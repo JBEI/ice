@@ -76,6 +76,27 @@ public class FolderController {
         return list;
     }
 
+    /**
+     * Retrieves folders that are marked "public"
+     *
+     * @param userId
+     * @return list of public folders on this site
+     */
+    public ArrayList<FolderDetails> getPublicFolders(String userId) {
+        Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+        Set<Folder> folders = DAOFactory.getPermissionDAO().getFolders(publicGroup);
+        ArrayList<FolderDetails> result = new ArrayList<>();
+        for (Folder folder : folders) {
+            FolderDetails details = folder.toDataTransferObject();
+            long folderSize = dao.getFolderSize(folder.getId());
+            details.setCount(folderSize);
+            result.add(details);
+        }
+
+        Collections.sort(result);
+        return result;
+    }
+
     public ArrayList<FolderDetails> getBulkUploadDrafts(String userId) {
         BulkUploadController controller = new BulkUploadController();
         ArrayList<FolderDetails> folders = new ArrayList<>();

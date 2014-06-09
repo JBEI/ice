@@ -1,18 +1,21 @@
 <div class="modal-header">
     <button type="button" class="close" ng-click="cancel()">&times;</button>
-    <h4>Bulk Import File Upload</h4>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-table"></i> &nbsp;Bulk Import File Upload</span>
 </div>
 
 <div class="modal-body">
-    <div style="padding: 6px; border: 1px solid #eee; background-color: #f1f1f1; font-size: 0.90em; border-radius: 3px; ">
-        <i style="font-size:60px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>The
-        first line of your CSV file should contain the header
+    <alert type="'info'" style="padding: 8px">
+        <i style="font-size:60px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
+        <span class="font-90em">The first line of your CSV file should contain the header
         information and must be spelled exactly as it appears in the web
         interface. e.g. <b>"Principal Investigator", </b> etc. If uploading a zip file, make sure there is exactly
-        <b>1</b> csv file contained in it. <br><br>
+        <b>1</b> csv file contained in it.<br><br>
 
-        <div class="text-center"><a href="">Click here to download a CSV template</a> for your selected upload.</div>
-    </div>
+        <div style="margin-left: 62px"> <a href="">Click here to download a {{addType}} CSV upload template</a>.</div>
+        </span>
+    </alert>
+
     <br>
 
     <div ng-if="uploadError" class="alert alert-danger"><i class="fa fa-exclamation-triangle"></i> {{uploadError}}</div>
@@ -29,7 +32,7 @@
 </div>
 
 <div class="modal-footer">
-    <button ng-if="!modalClose && !processing" type="button" ng-click="uploadFile()" class="btn btn-primary"
+    <button class="btn btn-default btn-sm" ng-click="cancel()">{{modalClose || 'Cancel'}}</button>
+    <button ng-if="!modalClose && !processing" type="button" ng-click="uploadFile()" class="btn btn-primary btn-sm"
             ng-disabled="!importUploader.getNotUploadedItems().length">Upload File</button>
-    <button class="btn btn-default" ng-click="cancel()">{{modalClose || 'Cancel'}}</button>
 </div>

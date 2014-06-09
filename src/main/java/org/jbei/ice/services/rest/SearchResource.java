@@ -8,8 +8,6 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -31,7 +29,7 @@ public class SearchResource extends RestResource {
 
     @GET
     @Produces("application/json")
-    public SearchResults search(@Context UriInfo info,
+    public SearchResults search(
             @QueryParam("q") String queryString,
             @DefaultValue("false") @QueryParam("w") boolean searchWeb,
             @DefaultValue("0") @QueryParam("offset") int offset,

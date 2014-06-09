@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 
 import org.hibernate.HibernateException;
@@ -44,7 +45,8 @@ public class AccountDAO extends HibernateRepository<Account> {
                 query.setMaxResults(limit);
 
             return new HashSet<Account>(query.list());
-        } catch (Exception e) {
+        } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException(e);
         }
     }

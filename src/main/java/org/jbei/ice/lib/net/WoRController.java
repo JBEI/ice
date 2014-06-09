@@ -57,27 +57,20 @@ public class WoRController {
         }
     }
 
-    public WebOfRegistries getRegistryPartners() throws ControllerException {
+    public WebOfRegistries getRegistryPartners() {
         String value = new ConfigurationController().getPropertyValue(
                 ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
         WebOfRegistries webOfRegistries = new WebOfRegistries();
         webOfRegistries.setWebEnabled("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
 
         // retrieve actual partners
-        ArrayList<RemotePartner> partners;
-
-        try {
-            partners = dao.retrieveRegistryPartners();
-        } catch (DAOException de) {
-            throw new ControllerException(de);
-        }
+        ArrayList<RemotePartner> partners = dao.retrieveRegistryPartners();
 
         ArrayList<RegistryPartner> registryPartners = new ArrayList<>();
         for (RemotePartner partner : partners)
             registryPartners.add(partner.toDataTransferObject());
 
         webOfRegistries.setPartners(registryPartners);
-
         return webOfRegistries;
     }
 

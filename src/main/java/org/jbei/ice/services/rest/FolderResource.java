@@ -52,6 +52,16 @@ public class FolderResource extends RestResource {
         return controller.createPersonalFolder(sid, folder);
     }
 
+    // TODO : allow api key as well
+    @GET
+    @Path("/public")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<FolderDetails> getPublicFolders(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String sid = getUserIdFromSessionHeader(userAgentHeader);
+        return controller.getPublicFolders(sid);
+    }
+
     @GET
     @Path("/{type}")
     @Produces(MediaType.APPLICATION_JSON)

@@ -283,6 +283,26 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
+    public Set<Folder> getFolders(Group group) throws DAOException {
+        Criterion criterion = Restrictions.disjunction()
+                                          .add(Restrictions.eq("canWrite", true))
+                                          .add(Restrictions.eq("canRead", true));
+        Session session = currentSession();
+        try {
+            List list = session.createCriteria(Permission.class)
+                               .add(Restrictions.isNull("entry"))
+                               .add(Restrictions.eq("group", group))
+                               .add(criterion)
+                               .add(Restrictions.isNotNull("folder"))
+                               .setProjection(Projections.property("folder"))
+                               .list();
+            return new HashSet<Folder>(list);
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
     @Override
     public Permission get(long id) {
         return super.get(Permission.class, id);

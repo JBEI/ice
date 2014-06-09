@@ -1,27 +1,31 @@
 'use strict';
 
-var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload', 'vr.directives.slider']);
+var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload', 'vr.directives.slider', 'angularMoment']);
 
 iceControllers.controller('WebOfRegistriesController', function ($scope, $modal, $cookieStore, $stateParams, WebOfRegistries) {
-    console.log("WebOfRegistriesController");
-
     // retrieve web of registries partners
     $scope.wor = undefined;
     WebOfRegistries().query(function (result) {
         $scope.wor = result;
-        console.log(result);
     });
 });
 
 iceControllers.controller('EntrySampleController', function ($scope, $modal, $cookieStore, $stateParams, Entry) {
-    console.log("EntrySampleController");
-
     $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
     $scope.openAddToCart = function () {
-        $modal.open({
+        var modalInstance = $modal.open({
             templateUrl:'/views/modal/sample-request.html'
+        });
+
+        modalInstance.result.then(function (selected) {
+            console.log("selected", selected);
+            $scope.$emit("SampleTypeSelected", selected);
+            // "liquid" or "streak"
+
+        }, function () {
+            // dismiss callback
         });
     };
 
@@ -29,13 +33,17 @@ iceControllers.controller('EntrySampleController', function ($scope, $modal, $co
     var entry = Entry(sessionId);
     entry.samples({partId:$stateParams.id}, function (result) {
         $scope.samples = result;
-        console.log(result);
     });
 });
 
 iceControllers.controller('ActionMenuController', function ($http, $scope, $rootScope, $location, $cookieStore, Folders, Entry) {
-    console.log("ActionMenuController");
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
+
+    // reset all on state change
+    $rootScope.$on('$stateChangeStart',
+        function (event, toState, toParams, fromState, fromParams) {
+            $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
+        });
 
     var sid = $cookieStore.get("sessionId");
     var folders = Folders();
@@ -127,15 +135,18 @@ iceControllers.controller('ActionMenuController', function ($http, $scope, $root
 
     $rootScope.$on("EntryRetrieved", function (event, data) {
         $scope.entry = data;
+        $scope.editDisabled = !data.canEdit;
+        $scope.deleteDisabled = ($scope.user.email != $scope.entry.ownerEmail && $scope.user.accountType.toLowerCase() !== "admin");
+        // only owners or admins can delete
     });
 
     $scope.editEntry = function () {
         $location.path('/entry/edit/' + $scope.entry.id);
+        $scope.editDisabled = true;
     };
 });
 
 iceControllers.controller('RegisterController', function ($scope, $resource, $location) {
-    console.log("RegisterController");
     $scope.errMsg = undefined;
 
     $scope.submit = function () {
@@ -156,7 +167,6 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
 });
 
 iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location) {
-    console.log("ForgotPasswordController");
     $scope.errMsg = undefined;
 
     $scope.cancel = function () {
@@ -165,7 +175,6 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
 });
 
 iceControllers.controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, Samples) {
-    console.log("AdminSampleRequestController");
     $rootScope.error = undefined;
 
     var samples = Samples($cookieStore.get("sessionId"));
@@ -183,8 +192,6 @@ iceControllers.controller('AdminSampleRequestController', function ($scope, $loc
 
 
 iceControllers.controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {
-    console.log("AdminUserController");
-
     var user = User($cookieStore.get("sessionId"));
     user.list(function (result) {
         $scope.userList = result;
@@ -196,8 +203,6 @@ iceControllers.controller('AdminUserController', function ($rootScope, $scope, $
 });
 
 iceControllers.controller('AdminController', function ($rootScope, $scope, $stateParams, $cookieStore, Settings) {
-    console.log("AdminController");
-
     var generalSettingKeys = [
         'TEMPORARY_DIRECTORY',
         'PROJECT_NAME',
@@ -296,8 +301,6 @@ iceControllers.controller('AdminController', function ($rootScope, $scope, $stat
 });
 
 iceControllers.controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
-    console.log("MessageController");
-
     var message = Message($cookieStore.get('sessionId'));
     message.query(function (result) {
         $scope.messages = result;
@@ -305,14 +308,12 @@ iceControllers.controller('MessageController', function ($scope, $location, $coo
 });
 
 iceControllers.controller('ProfileGroupsController', function ($scope, $location, $cookieStore, $stateParams, User) {
-    console.log("ProfileGroupsController");
     var profileId = $stateParams.id;
     $scope.selectedUsers = [];
 
     var user = User($cookieStore.get('sessionId'));
     user.getGroups({userId:profileId}, function (result) {
         $scope.userGroups = result;
-        console.log(result);
     });
 
     user.list(function (result) {
@@ -328,8 +329,6 @@ iceControllers.controller('ProfileGroupsController', function ($scope, $location
 });
 
 iceControllers.controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, User) {
-    console.log("ProfileEntryController");
-
     $scope.maxSize = 5;
     $scope.currentPage = 1;
 
@@ -342,8 +341,6 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
 });
 
 iceControllers.controller('ProfileController', function ($scope, $location, $cookieStore, $stateParams, User) {
-    console.log("ProfileController");
-
     $scope.showChangePassword = false;
     $scope.showEditProfile = false;
     $scope.showSendMessage = false;
@@ -404,6 +401,7 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
         {id:'prefs', url:'/views/profile/preferences.html', display:'Preferences', selected:false, icon:'fa-cog'},
         {id:'groups', url:'/views/profile/groups.html', display:'Groups', selected:false, icon:'fa-group'},
         {id:'messages', url:'/views/profile/messages.html', display:'Messages', selected:false, icon:'fa-envelope-o'},
+        {id:'samples', url:'/views/profile/samples.html', display:'Requested Samples', selected:false, icon:'fa-shopping-cart'},
         {id:'entries', url:'/views/profile/entries.html', display:'Entries', selected:false, icon:'fa-th-list'}
     ];
 
@@ -638,7 +636,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $loc
     };
 });
 
-iceControllers.controller('ImportController', function ($scope, $modal, $cookieStore, $resource, $stateParams, $http, Upload) {
+iceControllers.controller('ImportController', function ($rootScope, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload) {
     var sid = $cookieStore.get("sessionId");
     var upload = Upload(sid);
 
@@ -651,6 +649,30 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
         $scope.uploadNameEditMode = value;
     };
 
+    var uploader = $fileUploader.create({
+        scope:$scope, // to automatically update the html. Default: $rootScope
+        url:"/rest/file/sequence",
+        method:'POST',
+        removeAfterUpload:true,
+        headers:{"X-ICE-Authentication-SessionId":sid},
+        autoUpload:true,
+        queueLimit:1 // can only upload 1 file
+    });
+
+    uploader.bind('beforeupload', function (event, item) {
+        console.log("beforeupload");
+        item.formData.push({entryType:$scope.importType});
+        item.formData.push({entryRecordId:$scope.bulkUpload.entryIdData[row]});
+    });
+
+    uploader.bind('progress', function (event, item, progress) {
+        if (progress != "100")  // isUploading is always true until it returns
+            return;
+
+        // upload complete. have processing
+        $scope.processingFile = item.file.name;
+    });
+
     $scope.createSheet = function () {
         var availableWidth, availableHeight, $window = $(window), $dataTable = $("#dataTable");
         var plasmidHeaders, strainHeaders, seedHeaders;
@@ -659,6 +681,7 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
         // headers
         // part
         var partHeaders = ["Principal Investigator <span class='required'>*</span>"
+            , "PI Email <i class='pull-right opacity_hover fa fa-question-circle' title='tooltip'></i>"
             , "Funding Source"
             , "Intellectual Property"
             , "BioSafety Level <span class='required'>*</span>"
@@ -669,7 +692,10 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
             , "Notes"
             , "References"
             , "Links"
-            , "Status <span class='required'>*</span>"   // other headers are inserted here
+            , "Status <span class='required'>*</span>"
+            , "Creator <span class='required'>*</span>"
+            , "Creator Email <span class='required'>*</span>"
+            // other headers are inserted here
             , "Sequence FileName"
             , "Attachment FileName"];
 
@@ -677,49 +703,67 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
         switch ($scope.importType) {
             case "strain":
                 strainHeaders = angular.copy(partHeaders);
-                strainHeaders.splice.apply(strainHeaders, [12, 0].concat(["Parental Strain", "Genotype or Phenotype", "Plasmids",
+                strainHeaders.splice.apply(strainHeaders, [15, 0].concat(["Parental Strain", "Genotype or Phenotype", "Plasmids",
                     "Selection Markers"]));
-                dataSchema = {principalInvestigator:null, fundingSource:null, intellectualProperty:null, bioSafetyLevel:null, name:null, alias:null, keywords:null, shortDescription:null, longDescription:null, references:null, links:null, status:null, parentStrain:null, genotypePhenotype:null, plasmids:null, selectionMarkers:null, sequenceFilename:null, attachmentFilename:null};
+                dataSchema = {principalInvestigator:null, principalInvestigatorEmail:null, fundingSource:null, intellectualProperty:null, bioSafetyLevel:null, name:null, alias:null, keywords:null, shortDescription:null, longDescription:null, references:null, links:null, status:null, creator:null, creatorEmail:null, parentStrain:null, genotypePhenotype:null, plasmids:null, selectionMarkers:null, sequenceFilename:null, attachmentFilename:null};
                 break;
 
             case "plasmid":
                 plasmidHeaders = angular.copy(partHeaders);
-                plasmidHeaders.splice.apply(plasmidHeaders, [12, 0].concat(["Circular", "Backbone", "Promoters", "Replicates In",
+                plasmidHeaders.splice.apply(plasmidHeaders, [15, 0].concat(["Circular", "Backbone", "Promoters", "Replicates In",
                     "Origin of Replication", "Selection Markers"]));
-                dataSchema = {principalInvestigator:null, fundingSource:null, intellectualProperty:null, bioSafetyLevel:null, name:null, alias:null, keywords:null, shortDescription:null, longDescription:null, references:null, links:null, status:null, circular:null, backbone:null, promoters:null, replicatesIn:null, originOfReplication:null, selectionMarkers:null, sequenceFilename:null, attachmentFilename:null};
+                dataSchema = {principalInvestigator:null, principalInvestigatorEmail:null, fundingSource:null, intellectualProperty:null, bioSafetyLevel:null, name:null, alias:null, keywords:null, shortDescription:null, longDescription:null, references:null, links:null, status:null, creator:null, creatorEmail:null, circular:null, backbone:null, promoters:null, replicatesIn:null, originOfReplication:null, selectionMarkers:null, sequenceFilename:null, attachmentFilename:null};
                 break;
 
             case "seed":
                 seedHeaders = angular.copy(partHeaders);
-                seedHeaders.splice.apply(seedHeaders, [12, 0].concat(["Homozygosity", "Ecotype", "Harvest Date", "Parents",
+                seedHeaders.splice.apply(seedHeaders, [15, 0].concat(["Homozygosity", "Ecotype", "Harvest Date", "Parents",
                     "Plant Type", "Generation", "Sent to ABRC?"]));
-                dataSchema = {principalInvestigator:null, fundingSource:null, intellectualProperty:null, bioSafetyLevel:null, name:null, alias:null, keywords:null, shortDescription:null, longDescription:null, references:null, links:null, status:null, homozygosity:null, ecotype:null, harvestDate:null, parents:null, plantType:null, generation:null, sentToAbrc:null, sequenceFilename:null, attachmentFilename:null};
+                dataSchema = {principalInvestigator:null, principalInvestigatorEmail:null, fundingSource:null, intellectualProperty:null, bioSafetyLevel:null, name:null, alias:null, keywords:null, shortDescription:null, longDescription:null, references:null, links:null, status:null, creator:null, creatorEmail:null, homozygosity:null, ecotype:null, harvestDate:null, parents:null, plantType:null, generation:null, sentToAbrc:null, sequenceFilename:null, attachmentFilename:null};
                 break;
 
             case "part":
-                dataSchema = {principalInvestigator:null, fundingSource:null, intellectualProperty:null, bioSafetyLevel:null, name:null, alias:null, keywords:null, shortDescription:null, longDescription:null, references:null, links:null, status:null, sequenceFilename:null, attachmentFilename:null};
+                dataSchema = {principalInvestigator:null, principalInvestigatorEmail:null, fundingSource:null, intellectualProperty:null, bioSafetyLevel:null, name:null, alias:null, keywords:null, shortDescription:null, longDescription:null, references:null, links:null, status:null, creator:null, creatorEmail:null, sequenceFilename:null, attachmentFilename:null};
                 break;
         }
 
+
         var fileUploadRenderer = function (instance, td, row, col, prop, value, cellProperties) {
+//            console.log(instance, td, row, col, prop, value, cellProperties);
             var escaped = Handsontable.helper.stringify(value);
-            var $up = $('<i class="fa fa-upload pull-left opacity_hover opacity_4"></i>');
+
+//            var $up = $('<input ng-file-select type="file" />');
+//            var $up = $('<i class="fa fa-upload pull-left opacity_hover opacity_4"></i> <input ng-file-select type="file" />');
+
+            var $up = $('<span class="fileUpload"><i class="fa fa-upload opacity_hover opacity_4"></i> Upload ' +
+                '<input type="file" ng-file-select class="upload" /></span>');
+
             $(td).empty().append($up);
-            $up.on("click", function (event) {
-                console.log("ey", event);
-                $modal.open({
-                    templateUrl:'views/modal/file-upload.html',
-                    controller:'EntryFileUploadController',
-                    backdrop:'static',
-                    resolve:{
-                        addType:function () {
-                            return $stateParams.type;
-                        }
-                    }
-                });
+
+            $(td).on("click", function (event) {
+                $scope.spreadSheet.setDataAtCell(row, col, "click", "setMyData");
+                // last param is source which is used to prevent auto update
+//                $scope.bulkUpload.entryIdData
             });
-//
-//        td.innerHTML = '' + escaped;
+
+//            d.append($('<span style="background-color: blue; height: 10px; width: 130px; display: inline-block;"></span>'));
+//            $up.on("click", function (event) {
+//                console.log("ey", event);
+//                $modal.open({
+//                    templateUrl:'views/modal/file-upload.html',
+//                    controller:InlineFileUploadController,
+//                    backdrop:'static',
+//                    resolve:{
+//                        addType:function () {
+//                            return $stateParams.type;
+//                        }
+//                    }
+//                });
+//            });
+
+            var InlineFileUploadController = function ($scope) {
+
+            };
             return td;
         };
 
@@ -787,7 +831,7 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
                     case "attachmentFilename":
                         object.renderer = fileUploadRenderer;
                         object.type = 'text';
-                        object.readOnly = true;
+                        object.readOnly = true;  // file cells are readonly. all data is set programmatically
                         object.copyable = false; // file cells cannot be copied
                         break;
                 }
@@ -840,6 +884,8 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
             var objectProperty = data[1];
             var value = data[3];
             var entryIdDataIndex = $scope.bulkUpload.entryIdData[row];
+
+            // if no entry associated with row and now data, skip
             if (value.trim() === "" && !entryIdDataIndex)
                 return;
 
@@ -858,11 +904,14 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
                         // create entry.
                         console.log("created new bulk upload", result);
                         $scope.bulkUpload.id = result.id;
+                        $scope.bulkUpload.lastUpdate = result.lastUpdate;
+                        $scope.bulkUpload.name = result.name;
 
                         upload.createEntry({importId:result.id}, object,
                             function (createdEntry) {
                                 $scope.bulkUpload.entryIdData[row] = createdEntry.id;
                                 $scope.saving = false;
+                                console.log("created entry", $scope.bulkUpload);
                             },
                             function (error) {
                                 console.error(error);
@@ -895,6 +944,7 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
                             $scope.saving = false;
                         },
                         function (error) {
+                            // todo : this should revert the change in the ui and display a message
                             console.error(error);
                             $scope.saving = false;
                         });
@@ -921,6 +971,7 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
                     createOrUpdateEntry(change[i]);
                 }
             } else if (source === "paste") {
+                // todo
                 // paste from copy
             }
 //            console.log("change", change, "source", source);
@@ -952,13 +1003,59 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
         $scope.fileUploadModal = function () {
             var modalInstance = $modal.open({
                 templateUrl:'views/modal/file-upload.html',
-                controller:'EntryFileUploadController',
+                controller:'BulkUploadModalController',
                 backdrop:'static',
                 resolve:{
                     addType:function () {
                         return $stateParams.type;
                     }
                 }
+            });
+        };
+
+        $scope.confirmResetFormModal = function () {
+            var resetModalInstance = $modal.open({
+                templateUrl:'views/modal/reset-bulk-upload-sheet.html',
+                controller:'BulkUploadModalController',
+                backdrop:'static',
+                resolve:{
+                    addType:function () {
+                        return $stateParams.type;
+                    }
+                }
+            });
+        };
+
+        $scope.showBulkUploadRenameModal = function () {
+            var modalInstance = $modal.open({
+                templateUrl:'views/modal/rename-bulk-upload-sheet.html',
+                controller:function ($scope, $modalInstance, uploadName) {
+                    $scope.newBulkUploadName = uploadName;
+                },
+                backdrop:'static',
+                resolve:{
+                    uploadName:function () {
+                        return $scope.bulkUpload.name;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (newName) {
+                // update name on the server if a bulk upload has already been created
+                if ($scope.bulkUpload.id) {
+                    var tmp = {id:$scope.bulkUpload.id, name:newName};
+                    console.log($scope.bulkUpload, tmp);
+                    Upload(sid).bulkUpdate({importId:$scope.bulkUpload.id}, tmp, function (result) {
+                        $scope.bulkUpload.name = result.name;
+                        $scope.bulkUpload.lastUpdate = result.lastUpdate;
+                        $rootScope.$broadcast("BulkUploadNameChange", tmp);
+                    });
+                } else {
+                    // just update display name
+                    $scope.bulkUpload.name = newName;
+                }
+            }, function () {
+                // dismiss callback
             });
         };
 
@@ -990,7 +1087,7 @@ iceControllers.controller('ImportController', function ($scope, $modal, $cookieS
                             $scope.createSheet();
                         // else render on append data
                         $scope.bulkUpload.id = result.id;
-                        $scope.bulkUpload.lastUpdate = result.lastUpdate;
+                        $scope.bulkUpload.lastUpdate = new Date(result.lastUpdate);
                         var l = $scope.bulkUpload.entryIdData.length;
 
                         if (result.entryList && result.entryList.length) {
@@ -1315,12 +1412,16 @@ iceControllers.controller('CollectionMenuController', function ($cookieStore, $s
     // called from collections-menu-details.html when a collection's folder is selected
     // simply changes state to folder and allows the controller for that to handle it
     $scope.selectCollectionFolder = function (folder) {
-
         console.log($scope.selectedCollectionFolders);
-
         console.log("selectCollectionFolder(TODO)", folder, $scope.selectedFolder);
         console.log("/" + folder.type + "/" + folder.id);
-        $location.path("/" + folder.type + "/" + folder.id);
+
+        // type on server is PUBLIC, PRIVATE, SHARED, UPLOAD
+        var type = folder.type.toLowerCase();
+        if (type !== "upload")
+            type = "folders";
+
+        $location.path("/" + type + "/" + folder.id);
         $scope.folder = undefined;   // this forces "Loading..." to be shown
     };
 
@@ -1347,10 +1448,28 @@ iceControllers.controller('CollectionMenuController', function ($cookieStore, $s
             return true;
         return $stateParams.collection === param;
     };
+
+    // BulkUploadNameChange handler
+    $scope.$on("BulkUploadNameChange", function (event, data) {
+        if (data === undefined || $scope.selectedFolder !== "bulkUpload" || $scope.selectedCollectionFolders === undefined) // todo : use vars
+            return;
+
+        for (var i = 0; i < $scope.selectedCollectionFolders.length; i += 1) {
+            var subFolder = $scope.selectedCollectionFolders[i];
+            if (subFolder.id !== data.id)
+                continue;
+
+            $scope.selectedCollectionFolders[i].folderName = data.name;
+            break;
+        }
+    });
 });
 
-iceControllers.controller('EntryFileUploadController', function ($scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType) {
+
+iceControllers.controller('BulkUploadModalController', function ($scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType, uploadName) {
     var sid = $cookieStore.get("sessionId");
+    console.log("uploadName", uploadName);
+
     var uploader = $scope.importUploader = $fileUploader.create({
 //        scope: $scope, // to automatically update the html. Default: $rootScope
         url:"/rest/file/bulk-import",
@@ -1670,13 +1789,6 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
 
     var entry = Entry(sid);
 
-    $scope.submitPlasmid = function () {
-        console.log("plasmid", $scope.plasmid);
-        $scope.nameMissing = ($scope.plasmid === undefined || $scope.plasmid.name === undefined);
-        console.log($scope.nameMissing);
-//        $location.path('/folders/personal');
-    };
-
     var toStringArray = function (objArray) {
         var result = [];
         angular.forEach(objArray, function (object) {
@@ -1687,32 +1799,53 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
         return result;
     };
 
-    $scope.submitPart = function () {
+    var validateFields = function (part) {
         var canSubmit = true;
-        angular.forEach($scope.selectedFields, function (field) {
+
+        // main type
+        var mainFields = getFieldsForType(part.type);
+        angular.forEach(mainFields, function (field) {
             if (!field.required)
                 return;
 
             if (field.inputType === 'add' || field.inputType === 'autoCompleteAdd') {
-                if ($scope.part[field.schema].length == 0) {
+                if (part[field.schema].length == 0) {
                     field.invalid = true;
                 }
                 else {
-                    for (var i = 0; i < $scope.part[field.schema].length; i += 1) {
-                        var fieldValue = $scope.part[field.schema][i].value;
+                    for (var i = 0; i < part[field.schema].length; i += 1) {
+                        var fieldValue = part[field.schema][i].value;
                         field.invalid = !fieldValue || fieldValue === '';
                     }
                 }
             } else {
-                field.invalid = (!$scope.part[field.schema] || $scope.part[field.schema] === '');
+                field.invalid = (!part[field.schema] || part[field.schema] === '');
             }
 
             if (canSubmit) {
                 canSubmit = !field.invalid;
             }
         });
+        return canSubmit;
+    };
 
-        console.log($scope.part);
+    $scope.submitPart = function () {
+
+        // validate main
+        var canSubmit = validateFields($scope.part);
+
+        // validate components if any
+        if ($scope.part.linkedParts && $scope.part.linkedParts.length) {
+            for (var idx = 0; idx < $scope.part.linkedParts.length; idx += 1) {
+                var canSubmitLinked = validateFields($scope.part.linkedParts[idx]);
+                if (!canSubmitLinked) {
+                    // show icon in tab
+                    // todo
+                    console.log("not  valid");
+                    canSubmit = canSubmitLinked;
+                }
+            }
+        }
 
         if (!canSubmit) {
             $("body").animate({scrollTop:130}, "slow");
@@ -1972,7 +2105,7 @@ iceControllers.controller('GenericTabsController', function ($scope, $cookieStor
     };
 });
 
-iceControllers.controller('EntryPermissionController', function ($scope, $cookieStore, User, Entry) {
+iceControllers.controller('EntryPermissionController', function ($scope, $cookieStore, User, Entry, filterFilter) {
     console.log("EntryPermissionController");
     var sessionId = $cookieStore.get("sessionId");
     var user = User(sessionId);
@@ -2021,13 +2154,16 @@ iceControllers.controller('EntryPermissionController', function ($scope, $cookie
     });
 
     $scope.showAddPermissionOptionsClick = function (pane) {
-        // TODO : instead of retrieving all and filtering, try on the server first
+        $scope.showPermissionInput = true;
+
+        // TODO : consider, instead of retrieving all and filtering, try on the server first
         user.list(function (result) {
             $scope.users = result;
+            $scope.filteredUsers = angular.copy(result);
 
             angular.forEach($scope.users, function (item) {
                 for (var i = 0; i < $scope.activePermissions.length; i += 1) {
-                    if (item.id == $scope.activePermissions[i].articleId) {
+                    if (item.id == $scope.activePermissions[i].articleId && $scope.activePermissions[i].article === 'ACCOUNT') {
                         item.selected = true;
                         item.permissionId = $scope.activePermissions[i].id;
                         break;
@@ -2037,8 +2173,17 @@ iceControllers.controller('EntryPermissionController', function ($scope, $cookie
         });
     };
 
+    $scope.addEmailUser = function () {
+        console.log($scope.userFilterInput);
+    };
+
+    $scope.watchInput = function () {
+        $scope.filteredUsers = filterFilter($scope.users, $scope.userFilterInput);
+    };
+
     $scope.closePermissionOptions = function () {
         $scope.users = undefined;
+        $scope.showPermissionInput = false;
     };
 
     var removePermission = function (permissionId) {
@@ -2110,10 +2255,6 @@ iceControllers.controller('EntryDetailsController', function ($scope) {
 });
 
 iceControllers.controller('FullScreenFlashController', function ($scope, $stateParams, $sce) {
-    console.log('FullScreenFlashController', $scope);
-
-    console.log($stateParams.sessionId);
-    console.log($stateParams.entryId);
     $scope.sessionId = $stateParams.sessionId;
     $scope.entryId = $stateParams.entryId;
 
@@ -2132,7 +2273,6 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $stateP
 });
 
 iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $rootScope, $fileUploader, Entry, Folders) {
-    console.log("EntryController", $rootScope.collectionContext);
     $scope.partIdEditMode = false;
     $scope.showSBOL = true;
     $scope.context = undefined;
@@ -2352,9 +2492,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     $scope.selection = menuSubDetails[0].url;
 
     $scope.edit = function (type, val) {
-        console.log(type, $scope[type], $scope.partIdEditMode);
         $scope[type] = val;
-        console.log(type, $scope[type], $scope.partIdEditMode);
     };
 
     $scope.quickEditEntry = function (field) {
@@ -2385,7 +2523,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
                 $scope.context.count = result.count;
 
                 if (!result.entries || result.entries.length === 0) {
-                    // tODO : show some error msg
+                    // TODO : show some error msg
                     return;
                 }
 

@@ -1,8 +1,6 @@
 package org.jbei.ice.lib.group;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -289,7 +287,7 @@ public class GroupController {
     }
 
     public ArrayList<AccountTransfer> retrieveGroupMembers(String uuid, boolean includeEntryCounts) {
-        ArrayList<AccountTransfer> result = new ArrayList<>();
+        Set<AccountTransfer> result = new HashSet<>();
         Group group = dao.get(uuid);
         EntryController entryController = new EntryController();
         for (Account account : group.getMembers()) {
@@ -305,7 +303,7 @@ public class GroupController {
             }
             result.add(accountTransfer);
         }
-        return result;
+        return new ArrayList<>(result);
     }
 
     public long retrieveGroupMemberCount(String uuid) throws ControllerException {

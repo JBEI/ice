@@ -30,14 +30,14 @@
     <tr>
         <td>
             <!--user select filter-->
-            <div ng-if="users">
-                <input type="text" placeholder="Filter list" ng-model="filterUser.$"
+            <div ng-show="showPermissionInput">
+                <form ng-submit="addEmailUser()">
+                    <input type="text" placeholder="Enter name or email" ng-model="userFilterInput"
                        style="width: 180px; font-size: 0.80em">
+                </form>
 
                 <div style="overflow: auto; max-height: 120px;" class="font-75em">
-
-                    <!--<pre>{{users | json}}</pre>-->
-                    <div ng-repeat="user in users | filter:filterUser" style="padding-left: 6px; padding-top: 3px">
+                    <div ng-repeat="user in filteredUsers | filter: userFilterInput | orderBy:'email'" style="padding-left: 6px; padding-top: 3px">
                         <span ng-click="addRemovePermission(user)" style="cursor: pointer">
                             <i class="fa"
                                ng-class="{'fa-square-o':!user.selected, 'fa-check-square-o':user.selected}"></i>
@@ -45,8 +45,13 @@
                         </span>
                     </div>
 
+                    <div ng-hide="users" style="opacity: 0.7; padding: 3px 0 3px 0">
+                            <i class="fa fa-gear fa-spin fa-1x"></i> Retrieving visible users...
+                    </div>
                 </div>
-                <div>
+
+                <div style="border-top: 1px solid #e1e1e1; border-bottom: 1px solid #e1e1e1; background-color: #f7f7f7; height: 24px">
+                    <strong class="font-75em opacity_hover"><i class="fa fa-square-o"></i> Remote </strong>
                     <button type="button" class="btn btn-xs btn-default pull-right"
                             ng-click="closePermissionOptions()">Close
                     </button>

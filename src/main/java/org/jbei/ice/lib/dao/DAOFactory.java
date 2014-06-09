@@ -29,6 +29,7 @@ public class DAOFactory {
     private static StorageDAO storageDAO;
     private static TraceSequenceDAO traceSequenceDAO;
     private static AuditDAO auditDAO;
+    private static RemotePermissionDAO remotePermissionDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -160,5 +161,11 @@ public class DAOFactory {
         if (traceSequenceDAO == null)
             traceSequenceDAO = new TraceSequenceDAO();
         return traceSequenceDAO;
+    }
+
+    public static RemotePermissionDAO getRemotePermissionDAO() {
+        if (remotePermissionDAO == null)
+            remotePermissionDAO = new RemotePermissionDAO();
+        return remotePermissionDAO;
     }
 }

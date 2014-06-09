@@ -15,7 +15,7 @@
             <h4>
                 <strong style="color: #888;">{{entry.type}}</strong>
                 <strong>{{entry.name}}</strong>
-                    <small ng-if="entry.visible !== 'OK'" class="label label-danger" style="font-size: 12px; position: relative; top: -4px">{{entry.visible}}</small>
+                    <small ng-if="entry.visible!=='OK'" class="label label-danger" style="font-size: 12px; position: relative; top: -4px">{{entry.visible}}</small>
                     <small style="font-size: 12px; position: relative; top: -4px" tooltip="Available on web of registries" tooltip-placement="right" tooltip-trigger="mouseenter"
                        ng-if="entry.publicRead" class="label label-info cursor_pointer" ><i class="fa fa-globe"></i> Public</small>
                     <a ng-if="entry.parent" ng-href="/entry/{{entry.parent.id}}" style="font-size: 12px; color: white; position: relative; top: -4px" class="small label label-default cursor_pointer"><i class="fa fa-level-up"></i></a>

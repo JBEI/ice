@@ -34,7 +34,7 @@ public class BulkUploadResource extends RestResource {
     private BulkEntryCreator creator = new BulkEntryCreator();
 
     @GET
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public BulkUploadInfo read(@Context UriInfo info, @PathParam("id") long id,
             @DefaultValue("0") @QueryParam("offset") int offset,
@@ -48,6 +48,18 @@ public class BulkUploadResource extends RestResource {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}")
+    public BulkUploadInfo bulkUploadUpdate(
+            @PathParam("id") long id,
+            BulkUploadInfo info,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        Logger.info(userId + ": updating bulk upload draft " + info.getId());
+        return creator.bulkUpdate(userId, id, info);
     }
 
     @PUT
@@ -88,15 +100,6 @@ public class BulkUploadResource extends RestResource {
         String userId = getUserIdFromSessionHeader(sessionId);
         Logger.info(userId + ": creating bulk upload draft");
         return controller.create(userId, info);
-    }
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    public BulkUploadInfo bulkUpdate(BulkUploadInfo info,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
-        Logger.info(userId + ": updating bulk upload draft " + info.getId());
-        return creator.bulkUpdate(userId, info);
     }
 
     @GET

@@ -421,10 +421,12 @@ html, body {
 }
 
 .entry_sample_panel {
-    border: 1px solid #ccc;
-    font-size: 0.7em;
-    border-spacing: 2px;
+    /*border: 1px solid #ccc;*/
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    border-spacing: 1px;
+    padding: 15px;
     border-collapse: separate;
+    width: 390px
 }
 
 .bg_green {
@@ -2362,4 +2364,34 @@ td.selected i.font-awesome {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     border-radius: 4px;
     background-color: #f5f5f5;
+}
+
+.current .fileUpload {
+    opacity: 8;
+}
+
+.fileUpload {
+    position: relative;
+    overflow: hidden;
+    margin: 10px;
+    opacity: 0;
+}
+
+.fileUpload input.upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.bulk_import_name {
+      cursor: pointer;
+}
+
+.bulk_import_name:hover {
+    background-color: #c1c1c1;
 }

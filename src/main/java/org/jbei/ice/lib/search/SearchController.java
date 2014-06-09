@@ -24,7 +24,6 @@ import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
-import org.jbei.ice.services.rest.RestClient;
 
 import com.google.common.base.Splitter;
 
@@ -48,7 +47,7 @@ public class SearchController {
     }
 
     public SearchResults runWebSearch(SearchQuery query) {
-        RestClient client = new RestClient();
+//        RestClient client = new RestClient();
 
         SearchResults results = null;
         // TODO

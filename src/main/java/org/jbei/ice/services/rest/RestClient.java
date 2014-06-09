@@ -17,6 +17,34 @@ import org.glassfish.jersey.client.ClientConfig;
  */
 public class RestClient {
 
+    private static RestClient INSTANCE = new RestClient();
+    private ClientConfig clientConfig;
+
+    public static RestClient getInstance() {
+        return INSTANCE;
+    }
+
+    private RestClient() {
+        clientConfig = new ClientConfig();
+        clientConfig.register(IceAuthenticationFilter.class);
+        clientConfig.register(PartDataJSONHandler.class);
+//        Client client = ClientBuilder.newClient(clientConfig);
+//
+//        WebTarget target = client.target("https://localhost:8443").path("rest/accesstoken");
+//        AccountTransfer resp = target.request(MediaType.APPLICATION_JSON_TYPE)
+//                                     .buildPost(Entity.json(r))
+//                                     .invoke(AccountTransfer.class);  // submit for asynchronous
+    }
+
+    public Object get(String url, String path, Class<?> clazz) {
+        Client client = ClientBuilder.newClient(clientConfig);
+        WebTarget target = client.target("https://" + url).path(path);
+        return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke(clazz);
+    }
+
+
+
+
     public static void main(String[] args) {
         ClientConfig clientConfig = new ClientConfig();
 //        clientConfig.register(IceAuthenticationFilter.class);

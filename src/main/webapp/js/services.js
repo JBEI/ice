@@ -250,7 +250,7 @@ iceServices.factory('Entry', function ($resource) {
 
 iceServices.factory('Upload', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/upload/:importId', {importId:'@id', type:'@type', name:'@name', entryId:'@entryId'}, {
+        return $resource('/rest/upload/:importId', {importId:'@id', type:'@type', entryId:'@entryId'}, {
             get:{
                 method:'GET',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
