@@ -118,11 +118,6 @@
         </dependency>
         <dependency>
             <groupId>org.jbei.ice</groupId>
-            <artifactId>flex-messaging-common</artifactId>
-            <version>SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jbei.ice</groupId>
             <artifactId>libSBOLj</artifactId>
             <version>0.7.0</version>
         </dependency>
