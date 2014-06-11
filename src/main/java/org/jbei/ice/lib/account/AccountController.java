@@ -497,12 +497,18 @@ public class AccountController {
         }
     }
 
-    public Set<Account> getMatchingAccounts(Account account, String query, int limit) throws ControllerException {
-        try {
-            return dao.getMatchingAccounts(account, query, limit);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+    public ArrayList<AccountTransfer> getMatchingAccounts(String userId, String query, int limit) {
+        Account account = getByEmail(userId);
+        Set<Account> matches = dao.getMatchingAccounts(account, query, limit);
+        ArrayList<AccountTransfer> result = new ArrayList<>();
+        for (Account match : matches) {
+            AccountTransfer info = new AccountTransfer();
+            info.setEmail(match.getEmail());
+            info.setFirstName(match.getFirstName());
+            info.setLastName(match.getLastName());
+            result.add(info);
         }
+        return result;
     }
 
 //    public AccountResults retrieveAccounts(Account account, int start, int limit) throws ControllerException {
