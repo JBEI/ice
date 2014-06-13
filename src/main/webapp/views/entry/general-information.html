@@ -48,7 +48,9 @@
         <div ng-if="field.options&&field.edit">
             <select focus ng-blur="quickEditEntry(field)" style="width: 110px" class="pull_down"
                     ng-model="entry[field.schema]" size="1" ng-change="field.dirty=true"
-                    ng-options="option.value as option.text for option in field.options"></select>
+                    ng-options="option.value as option.text for option in field.options">
+                <option value="">Select option</option>
+                    </select>
         </div>
 
         <!--checkbox-->
@@ -209,16 +211,15 @@
 
             <!-- menu if no sequence then [Create in VE | Upload File | Paste -->
             <div class="pull-right" ng-if='!entry.hasSequence'>
-                <i class="fa fa-external-link blue font-75em"></i>
                 <small class="opacity_hover" style="text-decoration: none" ng-click="open()"
-                       target="_blank">Create in VectorEditor
+                       target="_blank"><i class="fa fa-external-link blue"></i> Create in VectorEditor
                 </small>
                 <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                <small class="opacity_hover" style="letter-spacing: -1px" ng-click="sequenceUpload('file')">
+                <small class="opacity_hover" ng-click="sequenceUpload('file')">
                     <i class="fa fa-upload"></i>&nbsp; Upload File
                 </small>
                 <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                <small class="opacity_hover" style="letter-spacing: -1px" ng-click="sequenceUpload('paste')">
+                <small class="opacity_hover" ng-click="sequenceUpload('paste')">
                     <i class="fa fa-paste"></i> Paste Sequence
                 </small>
             </div>
