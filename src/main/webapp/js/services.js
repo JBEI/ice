@@ -234,8 +234,8 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
-            deleteEntries:{
-                method:'DELETE',
+            moveEntriesToTrash:{
+                method:'POST',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 

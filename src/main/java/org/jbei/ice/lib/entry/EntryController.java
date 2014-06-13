@@ -5,12 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.ControllerException;
@@ -694,6 +689,30 @@ public class EntryController {
         statistics.setHistoryCount(historyCount);
 
         return statistics;
+    }
+
+    public boolean moveEntriesToTrash(String userId, ArrayList<PartData> list) {
+        List<Entry> toTrash = new LinkedList<>();
+        for(PartData data : list) {
+            Entry entry = dao.get(data.getId());
+            if (entry == null || !authorization.canWrite(userId, entry))
+                return false;
+
+            toTrash.add(entry);
+        }
+
+        // add to bin
+        try {
+            for (Entry entry : toTrash) {
+                entry.setVisibility(Visibility.DELETED.getValue());
+                dao.update(entry);
+            }
+        } catch(DAOException de) {
+            Logger.error(de);
+            return false;
+        }
+
+        return true;
     }
 
     public PartData retrieveEntryDetails(String userId, long entryId) {

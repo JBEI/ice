@@ -36,7 +36,7 @@ iceControllers.controller('EntrySampleController', function ($scope, $modal, $co
     });
 });
 
-iceControllers.controller('ActionMenuController', function ($http, $scope, $rootScope, $location, $cookieStore, Folders, Entry) {
+iceControllers.controller('ActionMenuController', function ($scope, $rootScope, $location, $cookieStore, Folders, Entry) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
 
     // reset all on state change
@@ -78,28 +78,24 @@ iceControllers.controller('ActionMenuController', function ($http, $scope, $root
         folders.addEntriesToFolders(updateFolders,
             function (result) {
                 // todo : send message to update the counts
+                // emit
             });
     };
 
     $scope.deleteSelectedEntries = function () {
-        $http({
-            method:"DELETE",
-            url:"/rest/part",
-//                data:selectedEntries,
-            headers:{'X-ICE-Authentication-SessionId':sid}
-
-        }).success(function (data, status, headers, config) {
-
-            }).error(function (data, status, headers, config) {
-
-            });
-//        entry.deleteEntries(selectedEntries, function(result){
-//        }, function(error) {
-//
-//        });
+        console.log("deleting", selectedEntries);
+        // todo : consider using post to "move to trash"
+        Entry(sid).moveEntriesToTrash(selectedEntries,
+            function(result) {
+                console.log(result);
+        }, function(error) {
+                console.log(error);
+        })
     };
 
     $scope.$on("EntrySelection", function (event, data) {
+        selectedEntries = [];
+
         // is reading it so can add to any
         if (data.length == 0) {
             $scope.addToDisabled = true;
@@ -109,8 +105,6 @@ iceControllers.controller('ActionMenuController', function ($http, $scope, $root
             // need read permission but assuming it already exists if can read and select it
             $scope.addToDisabled = false;
         }
-
-        console.log(data);
 
         // can delete if all have canEdit=true
         var entryType = 'None';
@@ -130,7 +124,6 @@ iceControllers.controller('ActionMenuController', function ($http, $scope, $root
         }
 
         $scope.editDisabled = $scope.deleteDisabled || entryType === 'None' || entryType === undefined;
-        console.log($scope.deleteDisabled, entryType);
     });
 
     $rootScope.$on("EntryRetrieved", function (event, data) {
@@ -302,6 +295,8 @@ iceControllers.controller('AdminController', function ($rootScope, $scope, $stat
 
 iceControllers.controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
     var message = Message($cookieStore.get('sessionId'));
+    var profileId = $stateParams.id;
+        $location.path("/profile/" + profileId + "/messages", false);
     message.query(function (result) {
         $scope.messages = result;
     });
@@ -309,6 +304,7 @@ iceControllers.controller('MessageController', function ($scope, $location, $coo
 
 iceControllers.controller('ProfileGroupsController', function ($scope, $location, $cookieStore, $stateParams, User) {
     var profileId = $stateParams.id;
+    $location.path("/profile/" + profileId + "/groups", false);
     $scope.selectedUsers = [];
 
     var user = User($cookieStore.get('sessionId'));
@@ -334,6 +330,7 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
 
     var user = User($cookieStore.get("sessionId"));
     var profileId = $stateParams.id;
+        $location.path("/profile/" + profileId + "/entries", false);
 
     user.getEntries({userId:profileId}, function (result) {
         $scope.folder = result;
@@ -411,6 +408,11 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
         });
         menuOptions[index].selected = true;
         $scope.profileOptionSelection = menuOptions[index].url;
+        if(menuOptions[index].id) {
+            $location.path("/profile/" + profileId + "/" + menuOptions[index].id);
+        } else {
+            $location.path("/profile/" + profileId);
+        }
     };
 
     // initialize view
@@ -1333,7 +1335,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
             $scope.selectedEntries.push(entry);
         }
         $scope.allSelected = $scope.selection.length > 0;
-        $rootScope.$broadcast("EntrySelection", $scope.selectedEntries);
+        $scope.$emit("EntrySelection", $scope.selectedEntries);
     };
 
     $scope.showEntryDetails = function (entry, index) {

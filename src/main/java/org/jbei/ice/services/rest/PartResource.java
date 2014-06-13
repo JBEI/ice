@@ -1,5 +1,6 @@
 package org.jbei.ice.services.rest;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Set;
 import javax.ws.rs.*;
@@ -8,6 +9,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -17,6 +21,7 @@ import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.entry.EntryController;
@@ -307,9 +312,17 @@ public class PartResource extends RestResource {
         Logger.info("Deleting part " + id);
     }
 
-    @DELETE
-    public Response deleteEntries(ArrayList<PartData> list,
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response moveToTrash(ArrayList<PartData> list,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        return respond(Response.Status.OK);
+        String userId =  getUserIdFromSessionHeader(userAgentHeader);
+        Type fooType = new TypeToken<ArrayList<PartData>>() {
+        }.getType();
+        Gson gson = new GsonBuilder().create();
+        ArrayList<PartData> data = gson.fromJson(gson.toJsonTree(list), fooType);
+        if(controller.moveEntriesToTrash(userId, data))
+            return respond(Response.Status.OK);
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 }
