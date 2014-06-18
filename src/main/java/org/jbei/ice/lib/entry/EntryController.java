@@ -5,7 +5,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.ControllerException;
@@ -518,9 +524,9 @@ public class EntryController {
 //        }
 //    }
 
-    public PartData retrieveEntryTipDetails(Account account, long entryId) throws ControllerException {
+    public PartData retrieveEntryTipDetails(String userId, long entryId) {
         Entry entry = dao.get(entryId);
-        if (!authorization.canRead(account.getEmail(), entry))
+        if (!authorization.canRead(userId, entry))
             return null;
 
         return ModelToInfoFactory.createTipView(entry);

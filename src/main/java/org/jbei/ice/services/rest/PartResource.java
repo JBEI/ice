@@ -9,9 +9,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -21,7 +18,6 @@ import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
-import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.entry.EntryController;
@@ -32,6 +28,9 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -72,6 +71,15 @@ public class PartResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         return controller.retrieveEntryDetails(userId, partId);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/tooltip")
+    public PartData getTooltipDetails(@PathParam("id") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        return controller.retrieveEntryTipDetails(userId, partId);
     }
 
     @GET
