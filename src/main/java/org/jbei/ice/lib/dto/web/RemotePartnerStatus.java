@@ -13,7 +13,10 @@ public enum RemotePartnerStatus implements IDataTransferModel {
     BLOCKED("Blocked"),
 
     // partner approved to send and receive results from this registry
-    APPROVED("Approved");
+    APPROVED("Approved"),
+
+    // request to partner has been sent and awaiting response
+    PENDING("Pending");
 
     private String display;
 
