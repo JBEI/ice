@@ -18,6 +18,8 @@ public class RegistryPartner implements IDataTransferModel {
     private String apiKey;
     private long sent;
     private long fetched;
+    private long addTime;
+    private long lastContactTime;
 
     public RegistryPartner() {
     }
@@ -76,6 +78,22 @@ public class RegistryPartner implements IDataTransferModel {
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public long getAddTime() {
+        return addTime;
+    }
+
+    public void setAddTime(long addTime) {
+        this.addTime = addTime;
+    }
+
+    public long getLastContactTime() {
+        return lastContactTime;
+    }
+
+    public void setLastContactTime(long lastContactTime) {
+        this.lastContactTime = lastContactTime;
     }
 
     @Override

@@ -152,9 +152,12 @@ public class RemotePartner implements IDataModel {
     @Override
     public RegistryPartner toDataTransferObject() {
         RegistryPartner registryPartner = new RegistryPartner();
-        registryPartner.setId(getId());
-        registryPartner.setName(getName());
-        registryPartner.setUrl(getUrl());
+        registryPartner.setId(this.id);
+        registryPartner.setName(this.name);
+        registryPartner.setAddTime(this.added.getTime());
+        if(this.lastContact != null)
+            registryPartner.setLastContactTime(this.lastContact.getTime());
+        registryPartner.setUrl(this.url);
         registryPartner.setStatus(getPartnerStatus() == null
                                           ? RemotePartnerStatus.APPROVED.name() : getPartnerStatus().name());
         registryPartner.setSent(getSent());
