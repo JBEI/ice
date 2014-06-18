@@ -77,12 +77,13 @@ public class WoRController {
     /**
      * Adds the registry instance specified by the url to the list of existing partners (if not already in there)
      *
+     * @param userId id of user performing action (must have admin privs)
      * @param partnerUrl  unique uniform resource identifier for the registry
      * @param partnerName display name for the registry instance
      * @return list of existing instances
-     * @throws ControllerException
      */
-    public WebOfRegistries addWebPartner(String partnerUrl, String partnerName) throws ControllerException {
+    public WebOfRegistries addWebPartner(String userId, String partnerUrl, String partnerName) {
+        // todo : check for admin privs
         if (partnerUrl == null || partnerUrl.trim().isEmpty())
             return null;
 
@@ -94,7 +95,7 @@ public class WoRController {
         RegistryPartner thisPartner = new RegistryPartner();
         thisPartner.setUrl(myURL);
         thisPartner.setName(myName);
-        thisPartner.setStatus(RemotePartnerStatus.APPROVED.name());
+        thisPartner.setStatus(RemotePartnerStatus.PENDING.name());
 
         ArrayList<RegistryPartner> partnerArrayList = new ArrayList<>(partners.getPartners());
         partnerArrayList.add(thisPartner);
@@ -104,13 +105,8 @@ public class WoRController {
         return partners;
     }
 
-    private void addRegistryPartner(String url, String name) throws ControllerException {
-        RemotePartner partner;
-        try {
-            partner = dao.getByUrl(url);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+    private void addRegistryPartner(String url, String name) {
+        RemotePartner partner = dao.getByUrl(url);
 
         if (partner != null) {
             partner.setName(name);
@@ -118,11 +114,8 @@ public class WoRController {
                 partner.setAuthenticationToken(UUID.randomUUID().toString());
                 partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
             }
-            try {
-                dao.update(partner);
-            } catch (DAOException e) {
-                throw new ControllerException(e);
-            }
+
+            dao.update(partner);
         } else {
             if (name == null || name.trim().isEmpty())
                 name = url;
@@ -133,11 +126,7 @@ public class WoRController {
             partner.setAdded(new Date());
             partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
             partner.setAuthenticationToken(UUID.randomUUID().toString());
-            try {
-                dao.create(partner);
-            } catch (DAOException de) {
-                throw new ControllerException(de);
-            }
+            dao.create(partner);
         }
     }
 
@@ -145,24 +134,14 @@ public class WoRController {
      * Removes the web partner uniquely identified by the url
      *
      * @param partnerUrl url identifier for partner
-     * @throws ControllerException on error removing partner
      */
-    public void removeWebPartner(String partnerUrl) throws ControllerException {
-        RemotePartner partner;
-        try {
-            partner = dao.getByUrl(partnerUrl);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
+    public boolean removeWebPartner(String userId, String partnerUrl)  {
+        RemotePartner partner = dao.getByUrl(partnerUrl);
         if (partner == null)
-            return;
+            return true;
 
-        try {
-            dao.delete(partner);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        dao.delete(partner);
+        return true;
     }
 
     /**

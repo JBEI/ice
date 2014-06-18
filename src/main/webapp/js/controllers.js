@@ -5,9 +5,25 @@ var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'u
 iceControllers.controller('WebOfRegistriesController', function ($scope, $modal, $cookieStore, $stateParams, WebOfRegistries) {
     // retrieve web of registries partners
     $scope.wor = undefined;
-    WebOfRegistries().query(function (result) {
+    var wor = WebOfRegistries();
+    wor.query(function (result) {
         $scope.wor = result;
     });
+
+    $scope.newPartner = undefined;
+    $scope.addPartner = function () {
+        wor.addPartner({}, $scope.newPartner, function (result) {
+            $scope.wor = result;
+            $scope.showAddRegistryForm = false;
+            $scope.newPartner = undefined;
+        });
+    };
+
+    $scope.removePartner = function(partner, index) {
+        wor.removePartner({url: partner.url}, function(result) {
+            $scope.wor.partners.splice(index, 1);
+        });
+    }
 });
 
 iceControllers.controller('EntrySampleController', function ($scope, $modal, $cookieStore, $stateParams, Entry) {
@@ -83,14 +99,13 @@ iceControllers.controller('ActionMenuController', function ($scope, $rootScope, 
     };
 
     $scope.deleteSelectedEntries = function () {
-        console.log("deleting", selectedEntries);
         // todo : consider using post to "move to trash"
         Entry(sid).moveEntriesToTrash(selectedEntries,
-            function(result) {
+            function (result) {
                 console.log(result);
-        }, function(error) {
+            }, function (error) {
                 console.log(error);
-        })
+            })
     };
 
     $scope.$on("EntrySelection", function (event, data) {
@@ -100,8 +115,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $rootScope, 
         if (data.length == 0) {
             $scope.addToDisabled = true;
             $scope.editDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
-        }
-        else {
+        } else {
             // need read permission but assuming it already exists if can read and select it
             $scope.addToDisabled = false;
         }
@@ -195,7 +209,7 @@ iceControllers.controller('AdminUserController', function ($rootScope, $scope, $
     }
 });
 
-iceControllers.controller('AdminController', function ($rootScope, $scope, $stateParams, $cookieStore, Settings) {
+iceControllers.controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore, Settings) {
     var generalSettingKeys = [
         'TEMPORARY_DIRECTORY',
         'PROJECT_NAME',
@@ -218,7 +232,6 @@ iceControllers.controller('AdminController', function ($rootScope, $scope, $stat
 
     // retrieve general setting
     $scope.getSetting = function () {
-
         var sessionId = $cookieStore.get("sessionId");
 
         // retrieve site wide settings
@@ -248,26 +261,53 @@ iceControllers.controller('AdminController', function ($rootScope, $scope, $stat
 //        console.log(type, $scope[type], $scope.partIdEditMode);
     };
 
+    var menuOption = $stateParams.option;
+
     var menuOptions = $scope.profileMenuOptions = [
         {url:'/views/admin/settings.html', display:'Settings', selected:true, icon:'fa-cogs'},
-        {url:'/views/admin/wor.html', display:'Web of Registries', selected:false, icon:'fa-globe'},
-        {url:'/views/admin/users.html', display:'Users', selected:false, icon:'fa-user'},
-        {url:'/views/admin/groups.html', display:'Groups', selected:false, icon:'fa-group'},
-        {url:'/views/admin/transferred.html', display:'Transferred Entries', selected:false, icon:'fa-list'},
-        {url:'/views/admin/sample-requests.html', display:'Sample Requests', selected:false, icon:'fa-shopping-cart'}
+        {id:'web', url:'/views/admin/wor.html', display:'Web of Registries', selected:false, icon:'fa-globe'},
+        {id:'users', url:'/views/admin/users.html', display:'Users', selected:false, icon:'fa-user'},
+        {id:'groups', url:'/views/admin/groups.html', display:'Groups', selected:false, icon:'fa-group'},
+        {id:'transferred', url:'/views/admin/transferred.html', display:'Transferred Entries', selected:false, icon:'fa-list'},
+        {id:'samples', url:'/views/admin/sample-requests.html', display:'Sample Requests', selected:false, icon:'fa-shopping-cart'}
     ];
 
     $scope.showSelection = function (index) {
         angular.forEach(menuOptions, function (details) {
             details.selected = false;
         });
+
         menuOptions[index].selected = true;
         $scope.adminOptionSelection = menuOptions[index].url;
         $scope.selectedDisplay = menuOptions[index].display;
+        if (menuOptions[index].id) {
+            $location.path("/admin/" + menuOptions[index].id);
+        } else {
+            $location.path("/admin");
+        }
     };
 
-    $scope.adminOptionSelection = menuOptions[0].url;
-    $scope.selectedDisplay = menuOptions[0].display;
+    if (menuOption === undefined) {
+        $scope.adminOptionSelection = menuOptions[0].url;
+        menuOptions[0].selected = true;
+        $scope.selectedDisplay = menuOptions[0].display;
+    } else {
+        menuOptions[0].selected = false;
+        for (var i = 1; i < menuOptions.length; i += 1) {
+            if (menuOptions[i].id === menuOption) {
+                $scope.adminOptionSelection = menuOptions[i].url;
+                menuOptions[i].selected = true;
+                $scope.selectedDisplay = menuOptions[i].display;
+                break;
+            }
+        }
+
+        if ($scope.adminOptionSelection === undefined) {
+            $scope.adminOptionSelection = menuOptions[0].url;
+            menuOptions[0].selected = true;
+            $scope.selectedDisplay = menuOptions[0].display;
+        }
+    }
 
     var setting = Settings($cookieStore.get("sessionId"));
 
@@ -296,7 +336,7 @@ iceControllers.controller('AdminController', function ($rootScope, $scope, $stat
 iceControllers.controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
     var message = Message($cookieStore.get('sessionId'));
     var profileId = $stateParams.id;
-        $location.path("/profile/" + profileId + "/messages", false);
+    $location.path("/profile/" + profileId + "/messages", false);
     message.query(function (result) {
         $scope.messages = result;
     });
@@ -330,7 +370,7 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
 
     var user = User($cookieStore.get("sessionId"));
     var profileId = $stateParams.id;
-        $location.path("/profile/" + profileId + "/entries", false);
+    $location.path("/profile/" + profileId + "/entries", false);
 
     user.getEntries({userId:profileId}, function (result) {
         $scope.folder = result;
@@ -408,7 +448,7 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
         });
         menuOptions[index].selected = true;
         $scope.profileOptionSelection = menuOptions[index].url;
-        if(menuOptions[index].id) {
+        if (menuOptions[index].id) {
             $location.path("/profile/" + profileId + "/" + menuOptions[index].id);
         } else {
             $location.path("/profile/" + profileId);
@@ -454,7 +494,6 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     };
 
     $scope.updatePassword = function () {
-
     };
 
     $scope.updateProfile = function () {
@@ -675,6 +714,10 @@ iceControllers.controller('ImportController', function ($rootScope, $scope, $mod
         $scope.processingFile = item.file.name;
     });
 
+    $scope.onFileSelect = function ($files) {
+        console.log("fileSelect");
+    };
+
     $scope.createSheet = function () {
         var availableWidth, availableHeight, $window = $(window), $dataTable = $("#dataTable");
         var plasmidHeaders, strainHeaders, seedHeaders;
@@ -729,43 +772,19 @@ iceControllers.controller('ImportController', function ($rootScope, $scope, $mod
                 break;
         }
 
-
+        // cell renderer for file upload
         var fileUploadRenderer = function (instance, td, row, col, prop, value, cellProperties) {
 //            console.log(instance, td, row, col, prop, value, cellProperties);
             var escaped = Handsontable.helper.stringify(value);
 
-//            var $up = $('<input ng-file-select type="file" />');
-//            var $up = $('<i class="fa fa-upload pull-left opacity_hover opacity_4"></i> <input ng-file-select type="file" />');
+            var $up = $('<span class="fileUpload"><i class="fa fa-upload opacity_hover opacity_4"></i> Upload '
+                + '<input type="file" ng-model="sequenceFiles" ng-file-select="onFileSelect($files)" class="upload" />');
 
-            var $up = $('<span class="fileUpload"><i class="fa fa-upload opacity_hover opacity_4"></i> Upload ' +
-                '<input type="file" ng-file-select class="upload" /></span>');
-
-            $(td).empty().append($up);
-
-            $(td).on("click", function (event) {
-                $scope.spreadSheet.setDataAtCell(row, col, "click", "setMyData");
-                // last param is source which is used to prevent auto update
-//                $scope.bulkUpload.entryIdData
+            $up.on("change", function (event) {
+                console.log("change", $scope.sequenceFiles);
             });
 
-//            d.append($('<span style="background-color: blue; height: 10px; width: 130px; display: inline-block;"></span>'));
-//            $up.on("click", function (event) {
-//                console.log("ey", event);
-//                $modal.open({
-//                    templateUrl:'views/modal/file-upload.html',
-//                    controller:InlineFileUploadController,
-//                    backdrop:'static',
-//                    resolve:{
-//                        addType:function () {
-//                            return $stateParams.type;
-//                        }
-//                    }
-//                });
-//            });
-
-            var InlineFileUploadController = function ($scope) {
-
-            };
+            $(td).empty().append($up);
             return td;
         };
 
@@ -1348,7 +1367,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
 
     $scope.tooltipDetails = function (e) {
         $scope.currentTooltip = undefined;
-        entry.query({partId:e.id},
+        entry.tooltip({partId:e.id},
             function (result) {
                 $scope.currentTooltip = result;
             }, function (error) {
@@ -1468,9 +1487,9 @@ iceControllers.controller('CollectionMenuController', function ($cookieStore, $s
 });
 
 
-iceControllers.controller('BulkUploadModalController', function ($scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType, uploadName) {
+iceControllers.controller('BulkUploadModalController', function ($scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType) {
     var sid = $cookieStore.get("sessionId");
-    console.log("uploadName", uploadName);
+    $scope.addType = addType;
 
     var uploader = $scope.importUploader = $fileUploader.create({
 //        scope: $scope, // to automatically update the html. Default: $rootScope
@@ -1538,14 +1557,13 @@ iceControllers.controller('BulkUploadModalController', function ($scope, $locati
         $scope.processing = true;
         item.remove();
     });
-
 });
 
 iceControllers.controller('UserController', function ($scope, $routeParams, Entry) {
 //    $scope.entry = Entry.query({partId:$routeParams.id});
 });
 
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $rootScope, Authentication) {
+iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication) {
     $scope.submit = function () {
         Authentication.login($scope.userId, $scope.userPassword);
     };
@@ -2803,6 +2821,3 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
         $scope.activePermissions = angular.copy($scope.readPermissions);
     })
 });
-
-
-

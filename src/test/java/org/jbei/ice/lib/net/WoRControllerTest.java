@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.net;
 
+import org.jbei.ice.lib.AccountCreator;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -48,10 +50,11 @@ public class WoRControllerTest {
         WebOfRegistries registries = controller.getRegistryPartners();
         Assert.assertFalse(registries.isWebEnabled());
         Assert.assertTrue(registries.getPartners().isEmpty());
+        Account admin = AccountCreator.createTestAccount("testGetRegistryPartners", true);
 
         // add partners
-        controller.addWebPartner(partner1, partner1);
-        controller.addWebPartner(partner2, partner2);
+        controller.addWebPartner(admin.getEmail(), partner1, partner1);
+        controller.addWebPartner(admin.getEmail(), partner2, partner2);
 
         registries = controller.getRegistryPartners();
         Assert.assertFalse(registries.isWebEnabled());
@@ -60,8 +63,6 @@ public class WoRControllerTest {
 
     @Test
     public void testAddWebPartner() throws Exception {
-        String url = "public-registry.jbei.org";
-        controller.addWebPartner(url, url);
     }
 
     @Test

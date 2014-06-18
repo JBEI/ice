@@ -159,6 +159,16 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
                 // TODO : also is admin
             }
         })
+        .state('main.admin.option', {
+            url:'/:option',
+            templateUrl:'/views/admin/settings.html',
+            resolve:{  // todo : parent resolve suffice?
+                sessionValid:function (Authentication) {
+                    return Authentication.isSessionValid();
+                }
+                // TODO : also is admin
+            }
+        })
         .state('main.upload', {
             url:'upload/:type',
             controller:'ImportController',

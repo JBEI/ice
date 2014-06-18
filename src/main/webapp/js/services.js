@@ -134,6 +134,13 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            tooltip:{
+              method:'GET',
+                responseType:'json',
+                url:"/rest/part/:partId/tooltip",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             create:{
                 method:'PUT',
                 responseType:'json',
@@ -334,10 +341,23 @@ iceServices.factory('Settings', function ($resource) {
 
 iceServices.factory('WebOfRegistries', function ($resource, $cookieStore) {
     return function () {
-        return $resource('/rest/web', {}, {
+        return $resource('/rest/web', {url:'@url'}, {
             query:{
                 method:'GET',
                 responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            addPartner: {
+                method: 'POST',
+                url: '/rest/web/partner',
+                responseType: 'json',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            removePartner: {
+                method: 'DELETE',
+                url: '/rest/web/partner/:url',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });
@@ -422,7 +442,7 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
     }
 });
 
-iceServices.factory('Authentication', function ($resource, $cookieStore, $http, $rootScope, $location) {
+iceServices.factory('Authentication', function ($resource, $cookieStore, $http, $rootScope, $location, $cookies) {
     return {
         // logs in user to ice
         login:function (username, password) {
@@ -441,7 +461,10 @@ iceServices.factory('Authentication', function ($resource, $cookieStore, $http, 
                     $rootScope.user = data;
                     $cookieStore.put('userId', data.email);
                     $cookieStore.put('sessionId', data.sessionId);
-                    $location.path('/');
+                    var loginDestination = $cookies.loginDestination || '/';
+                    console.log("loginDestination", loginDestination);
+                    $cookies.loginDestination = null;
+                    $location.path(loginDestination);
                 }).
                 error(function (data, status, headers, config) {
                     console.log(data, status);
@@ -454,6 +477,8 @@ iceServices.factory('Authentication', function ($resource, $cookieStore, $http, 
         isSessionValid:function () {
             var sid = $cookieStore.get('sessionId');
             if (sid === undefined) {
+                if($location.path() !== '/login')
+                    $cookies.loginDestination = $location.path();
                 $location.path('/login');
                 return;
             }
@@ -464,12 +489,16 @@ iceServices.factory('Authentication', function ($resource, $cookieStore, $http, 
                     if (data.sessionId === undefined) {
                         $cookieStore.remove('userId');
                         $cookieStore.remove('sessionId');
+                        if($location.path() !== '/login')
+                            $cookies.loginDestination = $location.path();
                         $location.path('/login');
                     }
                     $rootScope.user = data;
                 })
                 .error(function (data, status) {
                     if (status === 401) {
+                        if($location.path() !== '/login')
+                            $cookies.loginDestination = $location.path();
                         $location.path('/login');
                     }
                     console.log("ERROR", data);
