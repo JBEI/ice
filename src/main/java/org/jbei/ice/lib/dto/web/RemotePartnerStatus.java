@@ -10,25 +10,14 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
 public enum RemotePartnerStatus implements IDataTransferModel {
 
     // remote partner has been blocked from sending and receiving results from this registry
-    BLOCKED("Blocked"),
+    BLOCKED,
 
     // partner approved to send and receive results from this registry
-    APPROVED("Approved"),
+    APPROVED,
 
     // request to partner has been sent and awaiting response
-    PENDING("Pending");
+    PENDING,
 
-    private String display;
-
-    RemotePartnerStatus() {
-    }
-
-    RemotePartnerStatus(String display) {
-        this.display = display;
-    }
-
-    @Override
-    public String toString() {
-        return display;
-    }
+    // request received; pending admin approval
+    PENDING_APPROVAL
 }

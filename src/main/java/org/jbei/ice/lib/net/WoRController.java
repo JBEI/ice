@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
@@ -17,6 +16,7 @@ import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.services.rest.RestClient;
 
 /**
  * Controller for Web of Registries functionality
@@ -33,7 +33,7 @@ public class WoRController {
 
     /**
      * @return true if the administrator of this registry instance has explicitly
-     * enable the web of registries functionality
+     *         enable the web of registries functionality
      */
     public boolean isWebEnabled() {
         String value = new ConfigurationController().getPropertyValue(
@@ -45,7 +45,7 @@ public class WoRController {
      * @param partnerId unique identifier for web partner
      * @param apiKey    authentication key known only to this partner
      * @return true if partner identified by the id is determined to be a valid
-     * web of registries partner for part transfer based on the status and authentication key
+     *         web of registries partner for part transfer based on the status and authentication key
      */
     public boolean isValidWebPartner(String partnerId, String apiKey) throws ControllerException {
         try {
@@ -57,7 +57,7 @@ public class WoRController {
         }
     }
 
-    public WebOfRegistries getRegistryPartners() {
+    public WebOfRegistries getRegistryPartners(boolean approvedOnly) {
         String value = new ConfigurationController().getPropertyValue(
                 ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
         WebOfRegistries webOfRegistries = new WebOfRegistries();
@@ -67,55 +67,119 @@ public class WoRController {
         ArrayList<RemotePartner> partners = dao.retrieveRegistryPartners();
 
         ArrayList<RegistryPartner> registryPartners = new ArrayList<>();
-        for (RemotePartner partner : partners)
+        for (RemotePartner partner : partners) {
+            if(approvedOnly && partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+                continue;
             registryPartners.add(partner.toDataTransferObject());
+        }
 
         webOfRegistries.setPartners(registryPartners);
         return webOfRegistries;
     }
 
+    // serves the dual purpose of :
+    // please add me as a partner to your list with token
+    // add accepted; use this as the authorization token
+    public boolean addRemoteWebPartner(RegistryPartner request) {
+        Logger.info("Adding remote partner [" + request.toString() + "]");
+
+        String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+        if(request.getUrl().equalsIgnoreCase(myURL))
+            return false;
+
+        // request should contain api key for use to contact third party
+        RemotePartner partner = dao.getByUrl(request.getUrl());
+        if (partner != null) {
+            if (request.getApiKey() == null) {
+                Logger.error("Attempting to add partner (" + request.getUrl() + ") that already exists");
+                return false;
+            }
+
+            // just update the authorization token
+            partner.setApiKey(request.getApiKey());
+            partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
+            dao.update(partner);
+            return true;
+        }
+
+        // check for api key
+        if (request.getApiKey() == null) {
+            Logger.error("No api key found for " + request.toString());
+            return false;
+        }
+
+        // todo : contact request.getUrl() at /rest/accesstoken to validate api key
+
+        // save in db with status pending approval
+        partner = new RemotePartner();
+        partner.setName(request.getName());
+        partner.setUrl(request.getUrl());
+        partner.setApiKey(request.getApiKey());
+        partner.setAdded(new Date());
+        partner.setPartnerStatus(RemotePartnerStatus.PENDING_APPROVAL);
+        partner.setAuthenticationToken(Utils.generateToken());
+        dao.create(partner);
+        return true;
+    }
+
     /**
      * Adds the registry instance specified by the url to the list of existing partners (if not already in there)
      *
-     * @param userId id of user performing action (must have admin privs)
-     * @param partnerUrl  unique uniform resource identifier for the registry
-     * @param partnerName display name for the registry instance
-     * @return list of existing instances
+     * @param userId  id of user performing action (must have admin privs)
+     * @param partner registry partner object that contains unique uniform resource identifier for the registry
+     * @return add partner ofr
      */
-    public WebOfRegistries addWebPartner(String userId, String partnerUrl, String partnerName) {
-        // todo : check for admin privs
-        if (partnerUrl == null || partnerUrl.trim().isEmpty())
+    public RegistryPartner addWebPartner(String userId, RegistryPartner partner) {
+        boolean isAdmin = new AccountController().isAdministrator(userId);
+        if (!isAdmin || partner.getUrl() == null)
             return null;
 
-        addRegistryPartner(partnerUrl, partnerName);
+        // todo check if partner already exists
+        RemotePartner remotePartner = dao.getByUrl(partner.getUrl());
+        if (remotePartner != null) {
+            return null;
+        }
 
-        WebOfRegistries partners = getRegistryPartners();
+        Logger.info("Adding partner [" + partner.getUrl() + "]");
+
         String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
         String myName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
+
         RegistryPartner thisPartner = new RegistryPartner();
         thisPartner.setUrl(myURL);
         thisPartner.setName(myName);
-        thisPartner.setStatus(RemotePartnerStatus.PENDING.name());
+        String apiKey = Utils.generateToken();
+        thisPartner.setApiKey(apiKey);  // key to use in contacting this instance
 
-        ArrayList<RegistryPartner> partnerArrayList = new ArrayList<>(partners.getPartners());
-        partnerArrayList.add(thisPartner);
-        partners.setPartners(partnerArrayList);
+        // send notice to remote for key
+        RestClient client = RestClient.getInstance();
+        try {
+            client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner);
 
-        Logger.info("Returning partners of size " + partnerArrayList.size());
-        return partners;
+            // save
+            remotePartner = new RemotePartner();
+            remotePartner.setName(partner.getName());
+            remotePartner.setUrl(partner.getUrl());
+            remotePartner.setPartnerStatus(RemotePartnerStatus.PENDING);
+            remotePartner.setAuthenticationToken(apiKey);
+            remotePartner.setAdded(new Date());
+            return dao.create(remotePartner).toDataTransferObject();
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
-    private void addRegistryPartner(String url, String name) {
+    private RegistryPartner addRegistryPartner(String url, String name) {
         RemotePartner partner = dao.getByUrl(url);
 
         if (partner != null) {
             partner.setName(name);
             if (partner.getAuthenticationToken() == null) {
-                partner.setAuthenticationToken(UUID.randomUUID().toString());
+                partner.setAuthenticationToken(Utils.generateToken());
                 partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
             }
-
-            dao.update(partner);
+            return dao.update(partner).toDataTransferObject();
         } else {
             if (name == null || name.trim().isEmpty())
                 name = url;
@@ -125,8 +189,8 @@ public class WoRController {
             partner.setName(name);
             partner.setAdded(new Date());
             partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
-            partner.setAuthenticationToken(UUID.randomUUID().toString());
-            dao.create(partner);
+            partner.setAuthenticationToken(Utils.generateToken());
+            return dao.create(partner).toDataTransferObject();
         }
     }
 
@@ -135,13 +199,49 @@ public class WoRController {
      *
      * @param partnerUrl url identifier for partner
      */
-    public boolean removeWebPartner(String userId, String partnerUrl)  {
+    public boolean removeWebPartner(String userId, String partnerUrl) {
         RemotePartner partner = dao.getByUrl(partnerUrl);
         if (partner == null)
             return true;
 
         dao.delete(partner);
         return true;
+    }
+
+    public boolean updateWebPartner(String userId, String url, RegistryPartner partner) {
+        if (!new AccountController().isAdministrator(userId))
+            return false;
+
+        Logger.info(userId + ": updating partner (" + url + ") to " + partner.toString());
+        RemotePartner existing = dao.getByUrl(url);
+        if (existing == null)
+            return false;
+
+        RemotePartnerStatus newStatus = RemotePartnerStatus.APPROVED;
+        if (newStatus == existing.getPartnerStatus())
+            return true;
+
+        // contact remote with new api key that allows them to contact this instance
+        String apiKey = Utils.generateToken();
+        String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+        String myName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
+
+        RegistryPartner thisPartner = new RegistryPartner();
+        thisPartner.setUrl(myURL);
+        thisPartner.setName(myName);
+        thisPartner.setApiKey(apiKey);  // key to use in contacting this instance
+
+        RestClient client = RestClient.getInstance();
+        try {
+            client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner);
+            existing.setPartnerStatus(newStatus);
+            existing.setAuthenticationToken(apiKey);
+            dao.update(existing);
+            return true;
+        } catch (Exception e) {
+            Logger.error(e);
+            return false;
+        }
     }
 
     /**
@@ -155,8 +255,8 @@ public class WoRController {
      * @param url    this site's url
      * @param enable if true, enables WoR; disables it otherwise
      * @return list of received partners if WoR functionality is being enabled, is successful and
-     * this is not the master node, otherwise it just returns an empty list, or null in the event of an
-     * exeption
+     *         this is not the master node, otherwise it just returns an empty list, or null in the event of an
+     *         exeption
      */
     public ArrayList<RegistryPartner> setEnable(String url, boolean enable) throws ControllerException {
         ConfigurationController controller = new ConfigurationController();
@@ -220,7 +320,7 @@ public class WoRController {
                 return token;
 
             // generate authentication token
-            token = UUID.randomUUID().toString();
+            token = Utils.generateToken();
             partner.setAuthenticationToken(token);
             dao.update(partner);
             return token;
@@ -304,22 +404,4 @@ public class WoRController {
         }
     }
 
-    public RegistryPartner setPartnerStatus(Account account, String url, RemotePartnerStatus status)
-            throws ControllerException {
-        if (!new AccountController().isAdministrator(account.getEmail()))
-            return null;
-
-        Logger.info(account.getEmail() + ": setting partner (" + url + ") status to " + status.toString());
-        try {
-            RemotePartner partner = dao.getByUrl(url);
-            if (partner == null)
-                return null;
-
-            partner.setPartnerStatus(status);
-            partner = dao.update(partner);
-            return partner.toDataTransferObject();
-        } catch (DAOException de) {
-            throw new ControllerException(de);
-        }
-    }
 }

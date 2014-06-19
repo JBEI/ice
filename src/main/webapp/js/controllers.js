@@ -6,9 +6,11 @@ iceControllers.controller('WebOfRegistriesController', function ($scope, $modal,
     // retrieve web of registries partners
     $scope.wor = undefined;
     var wor = WebOfRegistries();
-    wor.query(function (result) {
+//    $scope.getPartners = function(approveOnly) {
+    wor.query({approved_only:false}, function (result) {
         $scope.wor = result;
     });
+//    };
 
     $scope.newPartner = undefined;
     $scope.addPartner = function () {
@@ -19,9 +21,16 @@ iceControllers.controller('WebOfRegistriesController', function ($scope, $modal,
         });
     };
 
-    $scope.removePartner = function(partner, index) {
-        wor.removePartner({url: partner.url}, function(result) {
+    $scope.removePartner = function (partner, index) {
+        wor.removePartner({url:partner.url}, function (result) {
             $scope.wor.partners.splice(index, 1);
+        });
+    };
+
+    $scope.approvePartner = function (partner, index) {
+        partner.status = 'APPROVED';
+        wor.updatePartner({url:partner.url}, partner, function (result) {
+
         });
     }
 });

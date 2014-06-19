@@ -1,15 +1,10 @@
 package org.jbei.ice.services.rest;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
@@ -26,12 +21,20 @@ public class WebResource extends RestResource {
     private WoRController controller = new WoRController();
     private RemoteAccessController remoteAccessController = new RemoteAccessController();
 
+    /**
+     * Retrieves information on other ice instances that is in a web of registries
+     * configuration with this instance; also know as registry partners
+     * @param approvedOnly if true, only instances that have been approved are returned; defaults to true
+     * @param userAgentHeader session if for user
+     * @return wrapper around the list of registry partners
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public WebOfRegistries query(
+            @DefaultValue("true") @QueryParam("approved_only") boolean approvedOnly,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.getRegistryPartners();
+        return controller.getRegistryPartners(approvedOnly);
     }
 
     @PUT
@@ -43,12 +46,31 @@ public class WebResource extends RestResource {
     @POST
     @Path("/partner")
     // admin function
-    public Response addWebPartner(
+    public Response addWebPartner(@Context UriInfo info,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             RegistryPartner partner) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        WebOfRegistries registries = controller.addWebPartner(userId, partner.getUrl(), partner.getName());
-        return respond(Response.Status.OK, registries);
+        RegistryPartner registryPartner = controller.addWebPartner(userId, partner);
+        if (registryPartner != null)
+            return respond(Response.Status.OK, registryPartner);
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    @POST
+    @Path("/partner/remote")
+    public Response remoteWebPartnerRequest(RegistryPartner partner) {
+        controller.addRemoteWebPartner(partner);
+        return respond(Response.Status.OK);
+    }
+
+    @PUT
+    @Path("/partner/{url}")
+    public Response updateWebPartner(
+            @PathParam("url") String url, RegistryPartner partner,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        controller.updateWebPartner(userId, url, partner);
+        return respond(Response.Status.OK);
     }
 
     @DELETE

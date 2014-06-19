@@ -33,7 +33,7 @@ public class RemoteAccessController {
 
     public void addPermission(String requester, RemoteAccessPermission permission) {
         RestClient client = RestClient.getInstance();
-        WebOfRegistries registries = webController.getRegistryPartners();
+        WebOfRegistries registries = webController.getRegistryPartners(true);
 
         // search for partners with user
         for (RegistryPartner partner : registries.getPartners()) {

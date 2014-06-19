@@ -154,8 +154,9 @@ public class RemotePartner implements IDataModel {
         RegistryPartner registryPartner = new RegistryPartner();
         registryPartner.setId(this.id);
         registryPartner.setName(this.name);
-        registryPartner.setAddTime(this.added.getTime());
-        if(this.lastContact != null)
+        if(this.added != null)
+            registryPartner.setAddTime(this.added.getTime());
+        if (this.lastContact != null)
             registryPartner.setLastContactTime(this.lastContact.getTime());
         registryPartner.setUrl(this.url);
         registryPartner.setStatus(getPartnerStatus() == null

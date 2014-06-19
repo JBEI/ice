@@ -11,26 +11,30 @@
                 <span style="white-space:nowrap">Registry Name <span class="required">*</span> </span>
             </div>
             <div class="col-md-10 pad-top-5">
-                <input placeholder="Unique display identifier" type="text" class="input_box" ng-model="newPartner.name" maxlength="125" style="width: 235px;">
+                <input placeholder="Unique display identifier" type="text" class="input_box" ng-model="newPartner.name"
+                       maxlength="125" style="width: 235px;">
             </div>
 
             <div class="col-md-2 pad-top-5">
                 <span style="white-space: nowrap">Registry URL <span class="required">*</span></span>
             </div>
             <div class="col-md-10 pad-top-5">
-                <input placeholder="Valid url for remote ice instance" type="text" class="input_box" ng-model="newPartner.url" maxlength="125" style="width: 235px;">
+                <input placeholder="Valid url for remote ice instance" type="text" class="input_box"
+                       ng-model="newPartner.url" maxlength="125" style="width: 235px;">
             </div>
 
             <br>
 
             <div class="col-xs-offset-2 col-md-10 pad_top">
                 <button type="submit" class="btn btn-xs btn-primary">Save</button>
-                <button type="button" ng-click="showAddRegistryForm=false; newPartner=undefined" class="btn btn-xs btn-default">Cancel</button>
+                <button type="button" ng-click="showAddRegistryForm=false; newPartner=undefined"
+                        class="btn btn-xs btn-default">Cancel
+                </button>
             </div>
         </form>
     </div>
 
-    <div class="row pad_top" ng-if="wor">
+    <div class="row pad_top" ng-init="getPartners(true)" ng-if="wor && wor.partners.length">
         <table cellspacing="0" class="table table-condensed table-hover table-striped font-95em">
             <thead>
             <tr>
@@ -48,10 +52,18 @@
                     <b>{{$index+1}}</b>
                 </td>
                 <td><a class="cursor_pointer">{{partner.name}}</a></td>
-                <td><a target="_blank" ng-href="https://{{partner.url}}">{{partner.url}}</a> <i class="fa fa-external-link font-85em"></i></td>
+                <td><a target="_blank" ng-href="https://{{partner.url}}">{{partner.url}}</a> <i
+                        class="fa fa-external-link font-85em"></i></td>
                 <td>{{partner.addTime | date:'MMM d, y, h:mm a'}}</td>
                 <td>{{partner.status}}</td>
-                <td style="font-size:14px"><i class="fa fa-trash-o delete_icon" ng-click="removePartner(partner, $index)"></i></td>
+                <td style="font-size:14px">
+                    <span tooltip="Delete" style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
+                            class="fa fa-trash-o fa-fw delete_icon" ng-click="removePartner(partner, $index)"></i></span>
+                    <span tooltip="Approve" style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
+                            class="fa fa-check fa-fw add_icon" ng-click="approvePartner(partner, $index)"></i></span>
+                    <span tooltip="Block" style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
+                            class="fa fa-ban fa-fw flag_icon" ng-click="removePartner(partner, $index)"></i></span>
+                </td>
             </tr>
             </tbody>
         </table>
