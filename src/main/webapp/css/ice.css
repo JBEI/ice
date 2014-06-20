@@ -2288,7 +2288,7 @@ td.selected i.font-awesome {
     top: 0 !important;
 }
 
-.handsontable table th, .handsontable table td {
+.handsontable table th {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2385,11 +2385,11 @@ td.selected i.font-awesome {
     padding: 0;
     cursor: pointer;
     opacity: 0;
-    filter: alpha(opacity=0);
+    filter: alpha(opacity = 0);
 }
 
 .bulk_import_name {
-      cursor: pointer;
+    cursor: pointer;
 }
 
 .bulk_import_name:hover {

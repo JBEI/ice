@@ -735,7 +735,7 @@ iceControllers.controller('ImportController', function ($rootScope, $scope, $mod
         // headers
         // part
         var partHeaders = ["Principal Investigator <span class='required'>*</span>"
-            , "PI Email <i class='pull-right opacity_hover fa fa-question-circle' title='tooltip'></i>"
+            , "PI Email <i class='opacity_hover fa fa-question-circle' title='tooltip' style='margin-left: 20px'></i>"
             , "Funding Source"
             , "Intellectual Property"
             , "BioSafety Level <span class='required'>*</span>"
@@ -2251,13 +2251,13 @@ iceControllers.controller('EntryPermissionController', function ($scope, $cookie
     };
 
     $scope.enablePublicRead = function (e) {
-        entry.enablePublicRead(e, function(result) {
+        entry.enablePublicRead(e, function (result) {
             $scope.entry.publicRead = true;
         })
     };
 
-    $scope.disablePublicRead = function(e) {
-        entry.disablePublicRead({partId:e.id}, function(result) {
+    $scope.disablePublicRead = function (e) {
+        entry.disablePublicRead({partId:e.id}, function (result) {
             $scope.entry.publicRead = false;
         })
     };
