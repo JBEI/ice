@@ -686,7 +686,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $loc
     };
 });
 
-iceControllers.controller('ImportController', function ($rootScope, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload) {
+iceControllers.controller('ImportController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload) {
     var sid = $cookieStore.get("sessionId");
     var upload = Upload(sid);
 
@@ -916,7 +916,7 @@ iceControllers.controller('ImportController', function ($rootScope, $scope, $mod
             var entryIdDataIndex = $scope.bulkUpload.entryIdData[row];
 
             // if no entry associated with row and now data, skip
-            if (value.trim() === "" && !entryIdDataIndex)
+            if (value === "" && !entryIdDataIndex)
                 return;
 
             var object = {};
@@ -936,6 +936,7 @@ iceControllers.controller('ImportController', function ($rootScope, $scope, $mod
                         $scope.bulkUpload.id = result.id;
                         $scope.bulkUpload.lastUpdate = result.lastUpdate;
                         $scope.bulkUpload.name = result.name;
+                        $location.path("upload/" + result.id, false);
 
                         upload.createEntry({importId:result.id}, object,
                             function (createdEntry) {
