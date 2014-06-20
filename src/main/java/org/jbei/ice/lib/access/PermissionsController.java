@@ -66,22 +66,22 @@ public class PermissionsController {
         }
     }
 
-    public Permission addPermission(Account requestingAccount, AccessPermission access) throws ControllerException {
+    public Permission addPermission(String userId, AccessPermission access) {
         if (access.isEntry()) {
             Entry entry = DAOFactory.getEntryDAO().get(access.getTypeId());
             if (entry == null)
-                throw new ControllerException("Cannot find entry " + access.getTypeId());
+                throw new IllegalArgumentException("Cannot find entry " + access.getTypeId());
 
             EntryAuthorization authorization = new EntryAuthorization();
-            authorization.expectWrite(requestingAccount.getEmail(), entry);
+            authorization.expectWrite(userId, entry);
             return addPermission(access, entry, null);
         }
 
         if (access.isFolder()) {
             Folder folder = folderDAO.get(access.getTypeId());
-            if (!hasWritePermission(requestingAccount, folder)) {
-                throw new ControllerException(
-                        requestingAccount.getEmail() + " not allowed to add " + access.toString());
+            if (!hasWritePermission(userId, folder)) {
+                Logger.error(userId + " not allowed to add " + access.toString());
+                return null;
             }
 
             // propagate permissions
@@ -96,7 +96,7 @@ public class PermissionsController {
         return null;
     }
 
-    protected Permission addPermission(AccessPermission access, Entry entry, Folder folder) throws ControllerException {
+    protected Permission addPermission(AccessPermission access, Entry entry, Folder folder) {
         // account or group
         Account account = null;
         Group group = null;
@@ -133,43 +133,40 @@ public class PermissionsController {
      * Removes permissions that are associated with folder. This is typically for
      * folders that are shared as public folders
      *
-     * @param account  user account. typically an administrator
+     * @param userId   user id. typically an administrator
      * @param folderId unique identifier for folder whose permissions are to be removed
-     * @throws ControllerException
      */
-    public void removeAllFolderPermissions(Account account, long folderId) throws ControllerException {
+    public void removeAllFolderPermissions(String userId, long folderId) {
         Folder folder = folderDAO.get(folderId);
         if (folder == null) {
             Logger.warn("Could not find folder with id " + folderId + " for permission removal");
             return;
         }
 
-        if (!hasWritePermission(account, folder))
-            throw new ControllerException(account.getEmail() + " not allowed to modify folder " + folderId);
-
-        try {
-            dao.clearPermissions(folder);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+        if (!hasWritePermission(userId, folder)) {
+            Logger.error(userId + " not allowed to modify folder " + folderId);
+            return;
         }
+
+        dao.clearPermissions(folder);
     }
 
-    public void removePermission(Account requestingAccount, AccessPermission access) throws ControllerException {
+    public void removePermission(String userId, AccessPermission access) throws ControllerException {
         if (access.isEntry()) {
             Entry entry = DAOFactory.getEntryDAO().get(access.getTypeId());
             if (entry == null)
                 throw new ControllerException("Cannot find entry " + access.getTypeId());
 
             EntryAuthorization authorization = new EntryAuthorization();
-            authorization.expectWrite(requestingAccount.getEmail(), entry);
+            authorization.expectWrite(userId, entry);
 
             // remove permission from entry
             removePermission(access, entry, null);
 
         } else if (access.isFolder()) {
             Folder folder = folderDAO.get(access.getTypeId());
-            if (!hasWritePermission(requestingAccount, folder))
-                throw new ControllerException(requestingAccount.getEmail() + " not allowed to " + access.toString());
+            if (!hasWritePermission(userId, folder))
+                throw new ControllerException(userId + " not allowed to " + access.toString());
 
             // if folder is to be propagated, add removing permission from contained entries
             if (folder.isPropagatePermissions()) {
@@ -267,65 +264,66 @@ public class PermissionsController {
         }
     }
 
-    public boolean hasWritePermission(Account account, Folder folder) throws ControllerException {
-        if (accountController.isAdministrator(account) || folder.getOwnerEmail().equalsIgnoreCase(account.getEmail()))
+    public boolean hasWritePermission(String userId, Folder folder) {
+        if (accountController.isAdministrator(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId))
             return true;
 
+        Account account = accountController.getByEmail(userId);
+        return dao.hasSetWriteFolderPermission(folder, account);
+    }
+
+    public boolean enablePublicReadAccess(String userId, long partId) throws ControllerException {
+        AccessPermission permission = new AccessPermission();
+        permission.setType(AccessPermission.Type.READ_ENTRY);
+        permission.setTypeId(partId);
+        permission.setArticle(AccessPermission.Article.GROUP);
+        permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
+        return addPermission(userId, permission) != null;
+    }
+
+    public boolean disablePublicReadAccess(String userId, long partId) {
         try {
-            return dao.hasSetWriteFolderPermission(folder, account);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public boolean enablePublicReadAccess(Account account, long partId) throws ControllerException {
-        AccessPermission permission = new AccessPermission();
-        permission.setType(AccessPermission.Type.READ_ENTRY);
-        permission.setTypeId(partId);
-        permission.setArticle(AccessPermission.Article.GROUP);
-        permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
-        return addPermission(account, permission) != null;
-    }
-
-    public boolean disablePublicReadAccess(Account account, long partId) throws ControllerException {
-        AccessPermission permission = new AccessPermission();
-        permission.setType(AccessPermission.Type.READ_ENTRY);
-        permission.setTypeId(partId);
-        permission.setArticle(AccessPermission.Article.GROUP);
-        permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
-        removePermission(account, permission);
-        return true;
-    }
-
-    public boolean enableOrDisableFolderPublicAccess(Account account, long folderId, boolean isEnable)
-            throws ControllerException {
-        Folder folder = folderDAO.get(folderId);
-        if (folder == null)
+            AccessPermission permission = new AccessPermission();
+            permission.setType(AccessPermission.Type.READ_ENTRY);
+            permission.setTypeId(partId);
+            permission.setArticle(AccessPermission.Article.GROUP);
+            permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
+            removePermission(userId, permission);
+            return true;
+        } catch (Exception ce) {
             return false;
-
-        if (!hasWritePermission(account, folder))
-            throw new ControllerException(account.getEmail() + " cannot modify folder " + folder.getId());
-
-        // propagate permissions
-        if (folder.isPropagatePermissions()) {
-            for (Entry folderContent : folder.getContents()) {
-                if (isEnable)
-                    enablePublicReadAccess(account, folderContent.getId());
-                else
-                    disablePublicReadAccess(account, folderContent.getId());
-            }
         }
-
-        AccessPermission access = new AccessPermission();
-        access.setArticle(AccessPermission.Article.GROUP);
-        access.setArticleId(groupController.createOrRetrievePublicGroup().getId());
-        access.setType(AccessPermission.Type.READ_FOLDER);
-        access.setTypeId(folderId);
-        if (isEnable)
-            return addPermission(access, null, folder) != null;
-        removePermission(access, null, folder);
-        return true;
     }
+
+//    public boolean enableOrDisableFolderPublicAccess(Account account, long folderId, boolean isEnable)
+//            throws ControllerException {
+//        Folder folder = folderDAO.get(folderId);
+//        if (folder == null)
+//            return false;
+//
+//        if (!hasWritePermission(account, folder))
+//            throw new ControllerException(account.getEmail() + " cannot modify folder " + folder.getId());
+//
+//        // propagate permissions
+//        if (folder.isPropagatePermissions()) {
+//            for (Entry folderContent : folder.getContents()) {
+//                if (isEnable)
+//                    enablePublicReadAccess(account, folderContent.getId());
+//                else
+//                    disablePublicReadAccess(account, folderContent.getId());
+//            }
+//        }
+//
+//        AccessPermission access = new AccessPermission();
+//        access.setArticle(AccessPermission.Article.GROUP);
+//        access.setArticleId(groupController.createOrRetrievePublicGroup().getId());
+//        access.setType(AccessPermission.Type.READ_FOLDER);
+//        access.setTypeId(folderId);
+//        if (isEnable)
+//            return addPermission(access, null, folder) != null;
+//        removePermission(access, null, folder);
+//        return true;
+//    }
 
     public Set<Folder> retrievePermissionFolders(Account account) {
         Set<Group> groups = groupController.getAllGroups(account);
@@ -344,30 +342,10 @@ public class PermissionsController {
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
         Set<Permission> permissions = dao.getEntryPermissions(entry);
 
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
         for (Permission permission : permissions) {
-//            AccessPermission accessPermission = new AccessPermission();
-//            accessPermission.setId(permission.getId());
-//            accessPermission.setTypeId(entry.getId());
-//
-//            if (permission.isCanRead()) {
-//                accessPermission.setType(AccessPermission.Type.READ_ENTRY);
-//            } else if (permission.isCanWrite()) {
-//                accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
-//            } else {
-//                dao.delete(permission);
-//                continue;
-//            }
-//
-//            if (permission.getAccount() != null) {
-//                accessPermission.setArticle(AccessPermission.Article.ACCOUNT);
-//                accessPermission.setArticleId(permission.getAccount().getId());
-//                accessPermission.setDisplay(permission.getAccount().getFullName());
-//            } else if (permission.getGroup() != null) {
-//                accessPermission.setArticle(AccessPermission.Article.GROUP);
-//                accessPermission.setArticleId(permission.getGroup().getId());
-//                accessPermission.setDisplay(permission.getGroup().getLabel());
-//            }
-
+            if (permission.getGroup() != null && permission.getGroup() == publicGroup)
+                continue;
             accessPermissions.add(permission.toDataTransferObject());
         }
 

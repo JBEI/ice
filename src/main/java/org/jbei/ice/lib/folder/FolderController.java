@@ -489,7 +489,7 @@ public class FolderController {
         dao.update(folder);
 
         // remove all permissions for folder
-        permissionsController.removeAllFolderPermissions(account, id);
+        permissionsController.removeAllFolderPermissions(account.getEmail(), id);
         return true;
     }
 

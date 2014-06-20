@@ -9,6 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -89,7 +90,7 @@ public class PartResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         Entry entry = DAOFactory.getEntryDAO().get(partId);
-        return new PermissionsController().retrieveSetEntryPermissions(entry);
+        return permissionsController.retrieveSetEntryPermissions(entry);
     }
 
     @PUT
@@ -101,6 +102,33 @@ public class PartResource extends RestResource {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         return permissionsController.setEntryPermissions(userId, partId, permissions);
     }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions/public")
+    public Response enablePublicAccess(@Context UriInfo info, @PathParam("id") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        try {
+            if(permissionsController.enablePublicReadAccess(userId, partId))
+                return respond(Response.Status.OK);
+        } catch (ControllerException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions/public")
+    public Response disablePublicAccess(@Context UriInfo info, @PathParam("id") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        if(permissionsController.disablePublicReadAccess(userId, partId))
+            return respond(Response.Status.OK);
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

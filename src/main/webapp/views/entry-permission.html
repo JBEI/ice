@@ -59,19 +59,26 @@
             </div>
 
             <div width="160px" class="permission_list" ng-repeat="permission in activePermissions | orderBy:'display'">
-                &nbsp;<i ng-if="permission.article=='GROUP'" class="fa fa-group permission_group"></i><i
-                    ng-if="permission.article=='ACCOUNT'" class="fa fa-user permission_user"></i>
-                <i ng-if="permission.article=='GLOBAL'" class="fa fa-globe blue"></i>
-                {{permission.display}} <i ng-click="deletePermission($index, permission)"
+                &nbsp;
+                <span ng-if="permission.article=='GROUP'"><i class="fa fa-group permission_group"></i> {{permission.display}}</span>
+                <span ng-if="permission.article=='ACCOUNT'"><i class="fa fa-user permission_user"></i> <a ng-href="/profile/{{permission.articleId}}">{{permission.display}}</a></span>
+                <i ng-click="deletePermission($index, permission)" style="padding-top: 3px"
                                           class="fa fa-times pull-right delete_icon"></i>
             </div>
             <div ng-if="activePermissions.length == 0">&nbsp;</div>
+
         </td>
     </tr>
-    <tr ng-if="!entry.publicRead">
-        <td class="permission_footer">
+    <tr>
+        <td class="permission_footer" ng-if="!entry.publicRead">
             <div class="permission_footer_link" ng-click="enablePublicRead(entry)"><i class="fa fa-globe"></i> Enable
                 Public Read Access
+            </div>
+        </td>
+
+        <td class="permission_footer" ng-if="entry.publicRead" style="border-top: 0; border-left: 0; background-color: #fff">
+            <div class="permission_footer_link" ng-click="disablePublicRead(entry)">
+                <i class="fa fa-globe blue"></i> Disable Public Read Access
             </div>
         </td>
     </tr>

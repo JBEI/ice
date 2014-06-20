@@ -734,8 +734,7 @@ public class EntryController {
 
         // permissions
         partData.setCanEdit(authorization.canWrite(userId, entry));
-
-        // viewing permissions is restricted to users who have write access
+        partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
 
         // retrieve cached pigeon image or generate and cache
         String tmpDir = new ConfigurationController()

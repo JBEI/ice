@@ -250,6 +250,18 @@ iceServices.factory('Entry', function ($resource) {
                 method:'DELETE',
                 url:'/rest/part/:partId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            enablePublicRead: {
+                method: 'PUT',
+                url: '/rest/part/:partId/permissions/public',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            disablePublicRead: {
+                method: 'DELETE',
+                url: '/rest/part/:partId/permissions/public',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
     }

@@ -504,10 +504,10 @@ public class BulkUploadController {
                 access.setTypeId(entry.getId());
                 access.setArticleId(permission.getGroup().getId());
                 access.setArticle(AccessPermission.Article.GROUP);
-                permissionsController.addPermission(account, access);
+                permissionsController.addPermission(account.getEmail(), access);
                 if (plasmid != null) {
                     access.setTypeId(plasmid.getId());
-                    permissionsController.addPermission(account, access);
+                    permissionsController.addPermission(account.getEmail(), access);
                 }
             }
             entryController.update(account, entry);

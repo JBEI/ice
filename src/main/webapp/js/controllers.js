@@ -2250,9 +2250,16 @@ iceControllers.controller('EntryPermissionController', function ($scope, $cookie
         }
     };
 
-    $scope.enablePublicRead = function (entry) {
-        $scope.entry.publicRead = true;
-        $scope.activePermissions.splice(0, 0, ({article:'GLOBAL', articleId:user.id, display:"Public"}));
+    $scope.enablePublicRead = function (e) {
+        entry.enablePublicRead(e, function(result) {
+            $scope.entry.publicRead = true;
+        })
+    };
+
+    $scope.disablePublicRead = function(e) {
+        entry.disablePublicRead({partId:e.id}, function(result) {
+            $scope.entry.publicRead = false;
+        })
     };
 
     $scope.deletePermission = function (index, permission) {
