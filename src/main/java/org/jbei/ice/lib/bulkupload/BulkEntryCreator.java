@@ -1,37 +1,27 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.PartSample;
-import org.jbei.ice.lib.dto.StorageInfo;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryEditor;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 
 import org.apache.commons.lang.StringUtils;
@@ -121,10 +111,10 @@ public class BulkEntryCreator {
         Date updateTime = new Date(System.currentTimeMillis());
         upload.setLastUpdateTime(updateTime);
 
-        if(StringUtils.isNotEmpty(info.getName()))
+        if (StringUtils.isNotEmpty(info.getName()))
             upload.setName(info.getName());
 
-        if(info.getStatus() != null)
+        if (info.getStatus() != null)
             upload.setStatus(info.getStatus());
         dao.update(upload);
         info.setLastUpdate(updateTime);
@@ -206,13 +196,6 @@ public class BulkEntryCreator {
             }
 
             entryController.update(account, entry);
-
-            // create Sample
-            try {
-                createSample(account, entry, autoUpdate);
-            } catch (ControllerException ce) {
-                Logger.error("Exception creating sample", ce);
-            }
         } catch (PermissionException e) {
             throw new ControllerException(e);
         }
@@ -228,50 +211,5 @@ public class BulkEntryCreator {
             }
         }
         return autoUpdate;
-    }
-
-    protected void createSample(Account account, Entry entry, BulkUploadAutoUpdate autoUpdate)
-            throws ControllerException {
-        // only supports seed storage default
-        if (!entry.getRecordType().equalsIgnoreCase(EntryType.ARABIDOPSIS.getName()))
-            return;
-
-        String uuid = Utils.getConfigValue(ConfigurationKey.ARABIDOPSIS_STORAGE_DEFAULT);
-        if (uuid == null || uuid.trim().isEmpty())
-            return;
-
-        Storage seedRootStorage = DAOFactory.getStorageDAO().get(uuid);
-        if (seedRootStorage == null)
-            return;
-
-        // fields anticipated
-        String name = autoUpdate.getKeyValue().get(EntryField.SAMPLE_NAME);
-        String notes = autoUpdate.getKeyValue().get(EntryField.SAMPLE_NOTES);
-        String shelf = autoUpdate.getKeyValue().get(EntryField.SAMPLE_SHELF);
-        String box = autoUpdate.getKeyValue().get(EntryField.SAMPLE_BOX);
-        String tubeNumber = autoUpdate.getKeyValue().get(EntryField.SAMPLE_TUBE_NUMBER);
-        String tubeBarcode = autoUpdate.getKeyValue().get(EntryField.SAMPLE_TUBE_BARCODE);
-
-        // expected fields
-        if (name == null || shelf == null || box == null || tubeNumber == null || tubeBarcode == null) {
-            return;
-        }
-
-        PartSample partSample = new PartSample();
-        partSample.setCreationTime(new Date(System.currentTimeMillis()));
-        partSample.setLabel(name);
-        partSample.setNotes(notes == null ? "" : notes);
-        partSample.setDepositor(account.getEmail());
-        partSample.setLocationId(Long.toString(seedRootStorage.getId()));
-
-        // storage list
-        List<StorageInfo> storageList = new ArrayList<>();
-        storageList.add(new StorageInfo(shelf));
-        storageList.add(new StorageInfo(box));
-        storageList.add(new StorageInfo(tubeNumber));
-        storageList.add(new StorageInfo(tubeBarcode));
-
-        SampleStorage sampleStorage = new SampleStorage(partSample, storageList);
-        new SampleController().createSample(account, autoUpdate.getEntryId(), sampleStorage);
     }
 }

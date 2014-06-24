@@ -7,8 +7,6 @@ import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.StorageDAO;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
@@ -225,38 +223,6 @@ public class StorageController {
     public Storage get(long id, boolean fetchChildren) throws ControllerException {
         try {
             return dao.get(id, fetchChildren);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public List<Storage> getStorageSchemesForEntryType(String entryType) throws ControllerException {
-        EntryType type = EntryType.nameToType(entryType);
-        String uuid = null;
-        if (type == null)
-            return null;
-
-        switch (type) {
-            case STRAIN:
-            default:
-                uuid = configurationController.getPropertyValue(ConfigurationKey.STRAIN_STORAGE_ROOT);
-                break;
-
-            case PLASMID:
-                uuid = configurationController.getPropertyValue(ConfigurationKey.PLASMID_STORAGE_ROOT);
-                break;
-
-            case PART:
-                uuid = configurationController.getPropertyValue(ConfigurationKey.PART_STORAGE_ROOT);
-                break;
-
-            case ARABIDOPSIS:
-                uuid = configurationController.getPropertyValue(ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT);
-                break;
-        }
-
-        try {
-            return dao.getStorageSchemesForEntryType(uuid);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

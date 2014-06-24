@@ -11,7 +11,6 @@ import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.executor.IceExecutorService;
-import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 import org.hibernate.SessionFactory;
 
@@ -56,20 +55,12 @@ public class
     protected void init() {
         try {
             HibernateUtil.beginTransaction();
-            PopulateInitialDatabase.initializeDatabase();
             ApplicationController.initialize();
             HibernateUtil.commitTransaction();
-
-            checkBlast();
         } catch (Throwable e) {
             HibernateUtil.rollbackTransaction();
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-    }
-
-    protected void checkBlast() {
-        Logger.info("Checking blast database");
-        ApplicationController.scheduleBlastIndexRebuildTask(false);
     }
 }

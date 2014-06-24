@@ -61,8 +61,7 @@ public class ConfigurationController {
         return settings;
     }
 
-    public void setPropertyValue(ConfigurationKey key, String value) throws ControllerException {
-        // TODO : must be an administrator
+    public void setPropertyValue(ConfigurationKey key, String value) {
         Configuration configuration = dao.get(key);
         if (configuration == null) {
             configuration = new Configuration();
@@ -79,8 +78,8 @@ public class ConfigurationController {
             return null;
 
         ConfigurationKey key = ConfigurationKey.valueOf(setting.getKey());
-        Configuration configuration =  dao.get(key);
-        if(configuration == null) {
+        Configuration configuration = dao.get(key);
+        if (configuration == null) {
             return null;
 //            configuration = new Configuration(setting.getKey(), setting.getValue());
 //            dao.create(configuration.)
@@ -92,13 +91,13 @@ public class ConfigurationController {
     /**
      * Initializes the database on new install
      */
-    public void initPropertyValues() throws ControllerException {
+    public void initPropertyValues() {
         for (ConfigurationKey key : ConfigurationKey.values()) {
             Configuration config = dao.get(key);
             if (config != null || key.getDefaultValue().isEmpty())
                 continue;
 
-            Logger.info("Setting value for " + key.toString() + " to " + key.getDefaultValue());
+            Logger.info("Setting value for " + key.name() + " to " + key.getDefaultValue());
             setPropertyValue(key, key.getDefaultValue());
         }
     }

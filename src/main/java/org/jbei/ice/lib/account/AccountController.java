@@ -227,7 +227,7 @@ public class AccountController {
         return newPassword;
     }
 
-    public Account createAdminAccount() throws ControllerException {
+    public Account createAdminAccount() {
         Account adminAccount = getByEmail(ADMIN_ACCOUNT_EMAIL);
         if (adminAccount != null)
             return adminAccount;
@@ -285,21 +285,12 @@ public class AccountController {
      *
      * @param account
      * @return {@link Account} that has been saved.
-     * @throws ControllerException
      */
-    public Account save(Account account) throws ControllerException {
-        Account result;
-
-        try {
-            account.setModificationTime(Calendar.getInstance().getTime());
-            if (account.getSalt() == null || account.getSalt().isEmpty())
-                account.setSalt(Utils.generateSaltForUserAccount());
-            result = dao.create(account);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return result;
+    public Account save(Account account) {
+        account.setModificationTime(Calendar.getInstance().getTime());
+        if (account.getSalt() == null || account.getSalt().isEmpty())
+            account.setSalt(Utils.generateSaltForUserAccount());
+        return dao.create(account);
     }
 
     public boolean isAdministrator(Account account) {
