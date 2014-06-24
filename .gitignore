@@ -2,10 +2,4 @@ target/
 *~
 .*
 war/
-src/main/webapp/WEB-INF/deploy/
 *.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
