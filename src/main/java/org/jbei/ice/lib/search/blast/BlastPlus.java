@@ -436,7 +436,6 @@ public class BlastPlus {
     /**
      * Retrieve all the sequences from the database, and writes it out to a fasta file on disk.
      *
-     * @param writer filewriter to write to.
      * @throws BlastException
      */
     private static void writeBigFastaFile(BufferedWriter writer) throws BlastException {

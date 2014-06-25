@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.parsers;
 
+import org.jbei.ice.lib.parsers.abi.ABITrace;
 import org.jbei.ice.lib.vo.DNASequence;
 
-import org.biojava.bio.program.abi.ABITrace;
 import org.biojava.bio.symbol.SymbolList;
 
 /**
