@@ -71,9 +71,6 @@ public class BulkUpload implements IDataModel {
     private Set<Permission> permissions = new HashSet<>();
 
 
-    public BulkUpload() {
-    }
-
     public Long getId() {
         return this.id;
     }

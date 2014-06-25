@@ -12,8 +12,5 @@ public enum BulkUploadStatus implements IDataTransferModel {
 
     PENDING_APPROVAL,
 
-    IN_PROGRESS;
-
-    private BulkUploadStatus() {
-    }
+    IN_PROGRESS
 }

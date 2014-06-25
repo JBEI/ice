@@ -275,7 +275,7 @@ public class InfoToModelFactory {
             entry.setFundingSource(info.getFundingSource());
         if (info.getPrincipalInvestigator() != null)
             entry.setPrincipalInvestigator(info.getPrincipalInvestigator());
-        if(info.getPrincipalInvestigatorEmail() != null)
+        if (info.getPrincipalInvestigatorEmail() != null)
             entry.setPrincipalInvestigatorEmail(info.getPrincipalInvestigatorEmail());
 
         if (info.getKeywords() != null)
@@ -340,23 +340,23 @@ public class InfoToModelFactory {
         if (existingLinks == null)
             existingLinks = new HashSet<>();
 
-        if(linkList == null)
+        if (linkList == null)
             return existingLinks;
 
-            for (int i = 0; i < linkList.size(); i++) {
-                String currentItem = linkList.get(i);
-                Link link;
+        for (int i = 0; i < linkList.size(); i++) {
+            String currentItem = linkList.get(i);
+            Link link;
 
-                if (existingLinks.size() > i) {
-                    link = (Link) existingLinks.toArray()[i];
-                } else {
-                    link = new Link();
-                    existingLinks.add(link);
-                }
-                link.setLink(currentItem);
-                link.setEntry(entry);
-                links.add(link);
+            if (existingLinks.size() > i) {
+                link = (Link) existingLinks.toArray()[i];
+            } else {
+                link = new Link();
+                existingLinks.add(link);
             }
+            link.setLink(currentItem);
+            link.setEntry(entry);
+            links.add(link);
+        }
 
         return links;
     }
@@ -376,6 +376,11 @@ public class InfoToModelFactory {
                 entry.setPrincipalInvestigator(value);
                 if (plasmid != null)
                     plasmid.setPrincipalInvestigator(value);
+                break;
+            }
+
+            case PI_EMAIL: {
+                entry.setPrincipalInvestigatorEmail(value);
                 break;
             }
 

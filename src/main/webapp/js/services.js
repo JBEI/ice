@@ -135,7 +135,7 @@ iceServices.factory('Entry', function ($resource) {
             },
 
             tooltip:{
-              method:'GET',
+                method:'GET',
                 responseType:'json',
                 url:"/rest/part/:partId/tooltip",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
@@ -252,15 +252,15 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
-            enablePublicRead: {
-                method: 'PUT',
-                url: '/rest/part/:partId/permissions/public',
+            enablePublicRead:{
+                method:'PUT',
+                url:'/rest/part/:partId/permissions/public',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
-            disablePublicRead: {
-                method: 'DELETE',
-                url: '/rest/part/:partId/permissions/public',
+            disablePublicRead:{
+                method:'DELETE',
+                url:'/rest/part/:partId/permissions/public',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
@@ -280,6 +280,12 @@ iceServices.factory('Upload', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            updateStatus:{
+                method:'PUT',
+                url:'/rest/upload/:importId/status',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             createEntry:{
                 method:'PUT',
                 url:'/rest/upload/:importId/entry',
@@ -292,8 +298,15 @@ iceServices.factory('Upload', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
-            bulkUpdate:{
+            rename:{
+                method:'PUT',
+                url:'/rest/upload/:importId/name',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            fileUpload:{
                 method:'POST',
+                url:'rest/upload/file',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
@@ -360,23 +373,23 @@ iceServices.factory('WebOfRegistries', function ($resource, $cookieStore) {
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 
-            addPartner: {
-                method: 'POST',
-                url: '/rest/web/partner',
-                responseType: 'json',
+            addPartner:{
+                method:'POST',
+                url:'/rest/web/partner',
+                responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 
-            removePartner: {
-                method: 'DELETE',
-                url: '/rest/web/partner/:url',
+            removePartner:{
+                method:'DELETE',
+                url:'/rest/web/partner/:url',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 
-            updatePartner: {
-                method: 'PUT',
-                url: '/rest/web/partner/:url',
-                responseType: 'json',
+            updatePartner:{
+                method:'PUT',
+                url:'/rest/web/partner/:url',
+                responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });
@@ -496,7 +509,7 @@ iceServices.factory('Authentication', function ($resource, $cookieStore, $http, 
         isSessionValid:function () {
             var sid = $cookieStore.get('sessionId');
             if (sid === undefined) {
-                if($location.path() !== '/login')
+                if ($location.path() !== '/login')
                     $cookies.loginDestination = $location.path();
                 $location.path('/login');
                 return;
@@ -508,7 +521,7 @@ iceServices.factory('Authentication', function ($resource, $cookieStore, $http, 
                     if (data.sessionId === undefined) {
                         $cookieStore.remove('userId');
                         $cookieStore.remove('sessionId');
-                        if($location.path() !== '/login')
+                        if ($location.path() !== '/login')
                             $cookies.loginDestination = $location.path();
                         $location.path('/login');
                     }
@@ -516,7 +529,7 @@ iceServices.factory('Authentication', function ($resource, $cookieStore, $http, 
                 })
                 .error(function (data, status) {
                     if (status === 401) {
-                        if($location.path() !== '/login')
+                        if ($location.path() !== '/login')
                             $cookies.loginDestination = $location.path();
                         $location.path('/login');
                     }

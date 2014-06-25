@@ -88,6 +88,18 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
     }
 
     @SuppressWarnings("unchecked")
+    public ArrayList<Long> getEntryIds(long importId) throws DAOException {
+        Query query = currentSession()
+                .createSQLQuery("select entry_id from bulk_upload_entry where bulk_upload_id = " + importId);
+        try {
+            return new ArrayList<Long>(query.list());
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public ArrayList<Entry> retrieveDraftEntries(EntryType type, long id, int start, int limit) throws DAOException {
         Query query = currentSession()
                 .createSQLQuery("select entry_id from bulk_upload_entry where bulk_upload_id = " + id

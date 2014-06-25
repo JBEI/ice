@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
@@ -101,7 +102,10 @@ public class BulkEntryCreator {
         return data;
     }
 
-    public BulkUploadInfo bulkUpdate(String userId, long id, BulkUploadInfo info) {
+    public BulkUploadInfo updateStatus(String userId, long id, BulkUploadStatus status) {
+        if (status == null)
+            return null;
+
         // upload is allowed to be null
         BulkUpload upload = dao.get(id);
         if (upload == null)
@@ -111,14 +115,47 @@ public class BulkEntryCreator {
         Date updateTime = new Date(System.currentTimeMillis());
         upload.setLastUpdateTime(updateTime);
 
-        if (StringUtils.isNotEmpty(info.getName()))
-            upload.setName(info.getName());
+        upload.setStatus(status);
+        if (status == BulkUploadStatus.PENDING_APPROVAL) {
+            ArrayList<Long> list = dao.getEntryIds(id);
+            for (Long l : list) {
+                Entry entry = entryDAO.get(l);
+                if (entry == null)
+                    continue;
 
-        if (info.getStatus() != null)
-            upload.setStatus(info.getStatus());
-        dao.update(upload);
-        info.setLastUpdate(updateTime);
-        return info;
+                entry.setVisibility(Visibility.PENDING.getValue());
+                entryDAO.update(entry);
+            }
+        }
+
+        return dao.update(upload).toDataTransferObject();
+    }
+
+    /**
+     * Renames the bulk upload referenced by the id in the parameter
+     *
+     * @param userId unique identifier of user performing action. Must with be an administrator
+     *               own the bulk upload
+     * @param id     unique identifier referencing the bulk upload
+     * @param name   name to assign to the bulk upload
+     * @return data transfer object for the bulk upload.
+     *         returns null if no
+     * @throws org.jbei.ice.lib.access.AuthorizationException
+     *          is user performing action doesn't have privileges
+     */
+    public BulkUploadInfo renameBulkUpload(String userId, long id, String name) {
+        BulkUpload upload = dao.get(id);
+        if (upload == null)
+            return null;
+
+        authorization.expectWrite(userId, upload);
+
+        if (StringUtils.isEmpty(name))
+            return upload.toDataTransferObject();
+
+        upload.setName(name);
+        upload.setLastUpdateTime(new Date());
+        return dao.update(upload).toDataTransferObject();
     }
 
     /**

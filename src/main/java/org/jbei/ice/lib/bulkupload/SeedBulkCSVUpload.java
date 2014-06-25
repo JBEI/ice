@@ -28,14 +28,6 @@ public class SeedBulkCSVUpload extends PartBulkCSVUpload {
         headerFields.add(EntryField.PLANT_TYPE);
         headerFields.add(EntryField.SELECTION_MARKERS);
         headerFields.add(EntryField.SENT_TO_ABRC);
-
-        // default sample
-        headerFields.add(EntryField.SAMPLE_NAME);
-        headerFields.add(EntryField.SAMPLE_NOTES);
-        headerFields.add(EntryField.SAMPLE_SHELF);
-        headerFields.add(EntryField.SAMPLE_BOX);
-        headerFields.add(EntryField.SAMPLE_TUBE_NUMBER);
-        headerFields.add(EntryField.SAMPLE_TUBE_BARCODE);
     }
 
     @Override

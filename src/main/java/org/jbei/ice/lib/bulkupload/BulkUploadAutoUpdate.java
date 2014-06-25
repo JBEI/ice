@@ -24,18 +24,13 @@ public class BulkUploadAutoUpdate implements IDataTransferModel {
     private int row;
     private EditMode editMode;
 
-    // no arg constructor for serializations
-    private BulkUploadAutoUpdate() {
-        keyValue = new HashMap<EntryField, String>();
-    }
-
     public BulkUploadAutoUpdate(EntryType type) {
         this(type, EditMode.DEFAULT);
     }
 
     public BulkUploadAutoUpdate(EntryType type, EditMode mode) {
         this.type = type;
-        keyValue = new HashMap<EntryField, String>();
+        keyValue = new HashMap<>();
         this.editMode = mode;
     }
 
@@ -85,10 +80,6 @@ public class BulkUploadAutoUpdate implements IDataTransferModel {
 
     public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
-    }
-
-    public int getRow() {
-        return row;
     }
 
     public void setRow(int row) {

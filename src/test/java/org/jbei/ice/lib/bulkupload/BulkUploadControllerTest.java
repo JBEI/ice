@@ -64,8 +64,8 @@ public class BulkUploadControllerTest {
         BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull("Null bulk upload", info);
 
-        Assert.assertTrue("Submitting draft", controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(),
-                                                                               null));
+        Assert.assertTrue("Submitting draft", controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()
+                                                                              ));
 
         // entries associated with bulk upload must be pending
         info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 10);
@@ -233,7 +233,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(info);
 
         // try to submit. should be rejected because the required fields are not present
-        Assert.assertFalse(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
+        Assert.assertFalse(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
 
         // enter information for others
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
@@ -249,7 +249,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
         autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.STRAIN);
 
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
+        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
 
         // entries associated with bulk upload must be pending
         info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 10);
@@ -288,7 +288,7 @@ public class BulkUploadControllerTest {
 
         // try to revert. not submitted
         Assert.assertFalse(controller.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
+        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
         BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull(info);
         Assert.assertTrue(controller.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
@@ -315,7 +315,7 @@ public class BulkUploadControllerTest {
         PreferenceInfo preference = new PreferenceInfo(true, PreferenceKey.FUNDING_SOURCE.toString(), "JBEI");
 
         // submit draft
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
+        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
         Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
 
         // bulk upload should be deleted
@@ -355,7 +355,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
                                   plasmid.getVisibility() == Visibility.DRAFT.getValue());
 
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId(), null));
+        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
         strain = DAOFactory.getEntryDAO().get(id);
         linked = strain.getLinkedEntries();
         plasmid = (Entry) linked.toArray()[0];
@@ -369,26 +369,5 @@ public class BulkUploadControllerTest {
         plasmid = (Entry) linked.toArray()[0];
         Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
                                   plasmid.getVisibility() == Visibility.OK.getValue());
-    }
-
-    @Test
-    public void testRenameDraft() throws Exception {
-        Account account = AccountCreator.createTestAccount("testRenameDraft", false);
-        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
-        autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
-        autoUpdate.getKeyValue().put(EntryField.PI, "test");
-        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "selection");
-        autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
-        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.STRAIN);
-        Assert.assertNotNull(autoUpdate);
-        Assert.assertTrue(autoUpdate.getEntryId() > 0);
-        Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
-        long id = autoUpdate.getBulkUploadId();
-        controller.renameDraft(account, id, "My draft");
-        BulkUploadInfo info = controller.retrieveById(account.getEmail(), id, 0, 1000);
-        Assert.assertNotNull(info);
-        Assert.assertTrue(info.getName().equals("My draft"));
     }
 }

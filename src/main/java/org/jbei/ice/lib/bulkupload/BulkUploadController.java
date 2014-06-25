@@ -10,7 +10,6 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
@@ -18,23 +17,15 @@ import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.PartSample;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
-import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.entry.sample.model.Sample;
-import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.ModelToInfoFactory;
@@ -51,7 +42,6 @@ public class BulkUploadController {
     private final BulkUploadDAO dao;
     private final BulkUploadAuthorization authorization;
     private final AccountController accountController;
-    private final SampleController sampleController;
     private final EntryController entryController;
     private final AttachmentController attachmentController;
 
@@ -59,7 +49,6 @@ public class BulkUploadController {
         dao = DAOFactory.getBulkUploadDAO();
         authorization = new BulkUploadAuthorization();
         accountController = new AccountController();
-        sampleController = new SampleController();
         entryController = new EntryController();
         attachmentController = new AttachmentController();
     }
@@ -211,13 +200,6 @@ public class BulkUploadController {
                 }
             }
 
-//            SampleStorage sampleStorage = retrieveSampleStorage(entry);
-//            if (sampleStorage != null) {
-//                ArrayList<SampleStorage> sampleStorageArrayList = new ArrayList<>();
-//                sampleStorageArrayList.add(sampleStorage);
-//                info.setSampleMap(sampleStorageArrayList);
-//            }
-
             addList.add(info);
         }
 
@@ -238,47 +220,6 @@ public class BulkUploadController {
         BulkUploadInfo bulkUploadInfo = new BulkUploadInfo();
         bulkUploadInfo.getEntryList().addAll(convertParts(account, parts));
         return bulkUploadInfo;
-    }
-
-    protected SampleStorage retrieveSampleStorage(Entry entry) {
-        ArrayList<Sample> samples = null;
-        try {
-            if (!sampleController.hasSample(entry))
-                return null;
-
-//            samples = sampleController.getSamples(entry);
-        } catch (ControllerException e) {
-            return null;
-        }
-
-        if (samples != null && !samples.isEmpty()) {
-            Sample sample = samples.get(0);
-            SampleStorage sampleStorage = new SampleStorage();
-
-            // convert sample to info
-            PartSample partSample = new PartSample();
-            partSample.setCreationTime(sample.getCreationTime());
-            partSample.setLabel(sample.getLabel());
-            partSample.setNotes(sample.getNotes());
-            partSample.setDepositor(sample.getDepositor());
-            sampleStorage.setPartSample(partSample);
-
-            // convert sample to info
-            Storage storage = sample.getStorage();
-
-            while (storage != null) {
-                if (storage.getStorageType() == Storage.StorageType.SCHEME) {
-                    partSample.setLocationId(storage.getId() + "");
-                    partSample.setLocation(storage.getName());
-                    break;
-                }
-
-                sampleStorage.getStorageList().add(ModelToInfoFactory.getStorageInfo(storage));
-                storage = storage.getParent();
-            }
-            return sampleStorage;
-        }
-        return null;
     }
 
     /**
@@ -383,7 +324,7 @@ public class BulkUploadController {
      * @param draftId unique identifier for saved bulk import
      * @return true, if draft was sa
      */
-    public boolean submitBulkImportDraft(Account account, long draftId, ArrayList<UserGroup> readGroups)
+    public boolean submitBulkImportDraft(Account account, long draftId)
             throws ControllerException, PermissionException {
         // retrieve draft
         BulkUpload draft = dao.retrieveById(draftId);
@@ -391,15 +332,7 @@ public class BulkUploadController {
             return false;
 
         // check permissions
-        if (!draft.getAccount().equals(account) && !accountController.isAdministrator(account.getEmail()))
-            throw new PermissionException("User " + account.getEmail()
-                                                  + " does not have permission to update draft " + draftId);
-
-        // update permissions
-        // TODO : this should happen separately
-        if (readGroups != null && !readGroups.isEmpty()) {
-            updatePermissions(draft, readGroups);
-        }
+        authorization.expectWrite(account.getEmail(), draft);
 
         if (!BulkUploadUtil.validate(draft)) {
             Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
@@ -523,68 +456,6 @@ public class BulkUploadController {
         } catch (DAOException e) {
             throw new ControllerException("Could not delete bulk upload " + bulkUpload.getId()
                                                   + ". Contents were approved so please delete manually.", e);
-        }
-    }
-
-    public boolean renameDraft(Account account, long id, String draftName) throws ControllerException {
-        BulkUpload upload;
-
-        try {
-            upload = dao.retrieveById(id);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        if (!upload.getAccount().equals(account) && account.getType() != AccountType.ADMIN)
-            throw new ControllerException("No permissions to rename");
-
-        upload.setName(draftName);
-        try {
-            return dao.update(upload) != null;
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    void updatePermissions(BulkUpload upload, ArrayList<UserGroup> groups) throws ControllerException {
-        try {
-            ArrayList<Permission> existingPermissions = new ArrayList<>(upload.getPermissions());
-            upload.getPermissions().clear();
-
-            // update permissions
-            for (UserGroup userGroup : groups) {
-                Group group = new GroupController().getGroupById(userGroup.getId());
-                if (group == null)
-                    continue;
-
-                long startSize = upload.getPermissions().size();
-
-                // article is not unique to each permission, but the combination will be unique
-                // currently, permissions for bulk upload is restricted to read permissions by groups
-                for (Permission permission : existingPermissions) {
-                    if (permission.getGroup().getId() == group.getId()) {
-                        upload.getPermissions().add(permission);
-                        break;
-                    }
-                }
-
-                // existing permission was found
-                if (upload.getPermissions().size() > startSize)
-                    continue;
-
-                // new permission
-                AccessPermission access = new AccessPermission();
-                access.setArticle(AccessPermission.Article.GROUP);
-                access.setType(AccessPermission.Type.READ_ENTRY);
-                access.setArticleId(group.getId());
-
-                Permission permission = new PermissionsController().recordGroupPermission(access);
-                upload.getPermissions().add(permission);
-            }
-
-            dao.update(upload);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
         }
     }
 }

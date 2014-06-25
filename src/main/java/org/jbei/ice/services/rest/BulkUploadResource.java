@@ -1,17 +1,13 @@
 package org.jbei.ice.services.rest;
 
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.ControllerException;
@@ -19,10 +15,18 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkEntryCreator;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.exception.UnexpectedException;
+
+import org.apache.commons.io.FileUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 /**
  * @author Hector Plahar
@@ -50,16 +54,29 @@ public class BulkUploadResource extends RestResource {
         }
     }
 
-    @POST
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}")
-    public BulkUploadInfo bulkUploadUpdate(
+    @Path("/{id}/name")
+    public Response updateName(@PathParam("id") long id, BulkUploadInfo info,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        Logger.info(userId + ": updating bulk upload name for " + info.getId());
+        BulkUploadInfo result = creator.renameBulkUpload(userId, id, info.getName());
+        if (result == null)
+            return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        return respond(Response.Status.OK, result);
+    }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/status")
+    public BulkUploadInfo updateStatus(
             @PathParam("id") long id,
             BulkUploadInfo info,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
-        Logger.info(userId + ": updating bulk upload draft " + info.getId());
-        return creator.bulkUpdate(userId, id, info);
+        Logger.info(userId + ": updating bulk upload status " + info.getId() + " to " + info.getStatus());
+        return creator.updateStatus(userId, id, info.getStatus());
     }
 
     @PUT
@@ -112,6 +129,32 @@ public class BulkUploadResource extends RestResource {
             return controller.retrieveByUser(account, account);
         } catch (ControllerException e) {
             throw new UnexpectedException(e.getMessage());
+        }
+    }
+
+    @POST
+    @Path("file")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response post(@FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("type") String type,
+            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+        try {
+            String userId = getUserIdFromSessionHeader(sessionId);
+            String fileName = userId + "-" + contentDispositionHeader.getFileName();
+            File file = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
+                                  "bulk-import", fileName).toFile();
+            FileUtils.copyInputStreamToFile(fileInputStream, file);
+
+            EntryType addType = EntryType.valueOf(type.toUpperCase());
+            FileBulkUpload bulkUpload = new FileBulkUpload(userId, file.toPath(), addType);
+            // tODO: this returns a string because it is being used to return a message in case of an error
+            String importId = bulkUpload.process();
+            return Response.status(Response.Status.OK).entity(importId).build();
+        } catch (Exception e) {
+            Logger.error(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 }

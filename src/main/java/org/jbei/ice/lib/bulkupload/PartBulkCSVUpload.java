@@ -37,6 +37,7 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
     protected void populateHeaderFields() {
         headerFields.clear();
         headerFields.add(EntryField.PI);
+        headerFields.add(EntryField.PI_EMAIL);
         headerFields.add(EntryField.FUNDING_SOURCE);
         headerFields.add(EntryField.IP);
         headerFields.add(EntryField.BIOSAFETY_LEVEL);
@@ -48,8 +49,11 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
         headerFields.add(EntryField.REFERENCES);
         headerFields.add(EntryField.LINKS);
         headerFields.add(EntryField.STATUS);
+        headerFields.add(EntryField.CREATOR);
+        headerFields.add(EntryField.CREATOR_EMAIL);
         headerFields.add(EntryField.ATT_FILENAME);
         headerFields.add(EntryField.SEQ_FILENAME);
+        headerFields.add(EntryField.SEQ_TRACE_FILES);
     }
 
     @Override
@@ -60,6 +64,11 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
         requiredFields.add(EntryField.SUMMARY);
     }
 
+    /**
+     * Processes the csv upload
+     *
+     * @return id of created bulk upload or error message
+     */
     @Override
     public String processUpload() {
         // maintains list of fields in the order they are contained in the file
@@ -109,7 +118,7 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
 
                     String[] fieldStrArray = parser.parseLine(line);
                     for (int i = 0; i < fieldStrArray.length; i += 1) {
-                        String fieldStr = fieldStrArray[i];
+                        String fieldStr = fieldStrArray[i].trim();
 
                         // account for "*" that indicates a header is required
                         if (fieldStr.lastIndexOf("*") != -1)
@@ -164,7 +173,7 @@ public class PartBulkCSVUpload extends BulkCSVUpload {
 
     protected String validate(List<BulkUploadAutoUpdate> updates) {
         for (BulkUploadAutoUpdate update : updates) {
-            ArrayList<EntryField> toValidate = new ArrayList<EntryField>(requiredFields);
+            ArrayList<EntryField> toValidate = new ArrayList<>(requiredFields);
 
             for (Map.Entry<EntryField, String> entry : update.getKeyValue().entrySet()) {
                 EntryField entryField = entry.getKey();
