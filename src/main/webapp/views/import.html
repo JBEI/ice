@@ -9,7 +9,7 @@
                             <strong style="color: #888;">{{importType.toUpperCase()}} UPLOAD</strong>
 
                             <strong style="white-space: nowrap" class="bulk_import_name"
-                                ng-click="showBulkUploadRenameModal()">{{bulkUpload.name}}
+                                    ng-click="showBulkUploadRenameModal()">{{bulkUpload.name}}
                             </strong>
                             </span>
 
@@ -38,7 +38,8 @@
                             <span class="caret"></span>
                         </span>
                             <ul class="dropdown-menu">
-                                <li class="cursor_pointer font-80em"><a ng-click="addExisting=true">Existing Entry</a></li>
+                                <li class="cursor_pointer font-80em"><a ng-click="addExisting=true">Existing Entry</a>
+                                </li>
                                 <li class="cursor_pointer font-80em"><a ng-click="addNewPartLink('plasmid')"><i>New
                                     Plasmid</i></a></li>
                                 <li class="cursor_pointer font-80em"><a ng-click="addNewPartLink('strain')"><i>New
@@ -60,9 +61,16 @@
                 </tr>
             </table>
         </div>
-        <div class="col-md-2 pull-right" style="margin-top: 16px">
-            <button type="button" class="btn btn-xs btn-primary">Submit</button>
+        <div class="col-md-2 pull-right" style="margin-top: 16px" ng-if="!submitting&&bulkUpload">
+            <button type="button" class="btn btn-xs btn-primary"
+                    ng-disabled="!bulkUpload||!bulkUpload.entryIdData||!bulkUpload.entryIdData.length"
+                    ng-click="submitImportForApproval()">Submit
+            </button>
             <button type="button" class="btn btn-xs btn-default" ng-click="confirmResetFormModal()">Reset</button>
+        </div>
+
+        <div class="col-md-2 pull-right" style="margin-top: 16px" ng-if="submitting">
+            <i class="fa fa-spin fa-gear blue"></i> <i class="font-95em">Processing...</i>
         </div>
     </div>
 </div>
