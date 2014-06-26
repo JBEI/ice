@@ -8,6 +8,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -28,7 +29,7 @@ public class SearchResource extends RestResource {
     private SearchController controller = new SearchController();
 
     @GET
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     public SearchResults search(
             @QueryParam("q") String queryString,
             @DefaultValue("false") @QueryParam("w") boolean searchWeb,
@@ -37,8 +38,8 @@ public class SearchResource extends RestResource {
             @DefaultValue("relevance") @QueryParam("sort") String sort,
             @DefaultValue("false") @QueryParam("asc") boolean asc,
             @QueryParam("s") String sequence,
-            @QueryParam("sp") BlastProgram blastProgram,
-            @QueryParam("entryTypes") List<String> entryTypes,
+            @QueryParam("b") BlastProgram blastProgram,
+            @QueryParam("t") List<String> entryTypes,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         try {
             String userId = getUserIdFromSessionHeader(userAgentHeader);
@@ -50,7 +51,7 @@ public class SearchResource extends RestResource {
             parameters.setSortAscending(asc);
             parameters.setSortField(ColumnField.valueOf(sort.toUpperCase()));
 
-            if(sequence!= null && !sequence.trim().isEmpty() && blastProgram != null) {
+            if (sequence != null && !sequence.trim().isEmpty() && blastProgram != null) {
                 BlastQuery blastQuery = new BlastQuery();
                 blastQuery.setBlastProgram(blastProgram);
                 blastQuery.setSequence(sequence);
@@ -59,7 +60,7 @@ public class SearchResource extends RestResource {
 
             // set types
             ArrayList<EntryType> types = new ArrayList<>();
-            for(String type : entryTypes) {
+            for (String type : entryTypes) {
                 types.add(EntryType.nameToType(type));
             }
             query.setEntryTypes(types);
@@ -70,25 +71,4 @@ public class SearchResource extends RestResource {
             return null;
         }
     }
-
-//    @GET
-//    @Produces("application/json")
-//    public SearchResults search(@Context UriInfo info,
-//            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-//            @QueryParam("w") boolean searchWeb,
-//            @QueryParam("q") String queryString,
-//            @Context final HttpServletResponse response) { //}, @PathParam("start") int start) {
-//        try {
-//            HibernateHelper.beginTransaction();
-//            String userId = getUserIdFromSessionHeader(userAgentHeader);
-//            SearchQuery query = new SearchQuery();
-//            query.setQueryString(queryString);
-//            return controller.runSearch(userId, query, searchWeb);
-//        } catch (ControllerException ce) {
-//            Logger.error(ce);
-//            return null;
-//        } finally {
-//            HibernateHelper.commitTransaction();
-//        }
-//    }
 }
