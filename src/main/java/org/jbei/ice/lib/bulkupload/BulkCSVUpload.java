@@ -27,15 +27,15 @@ public abstract class BulkCSVUpload {
         this.addType = addType;
         this.account = userId;
         this.csvFilePath = csvFilePath;
-        this.headerFields = new LinkedList<EntryField>();
-        this.requiredFields = new LinkedList<EntryField>();
+        this.headerFields = new LinkedList<>();
+        this.requiredFields = new LinkedList<>();
 
         populateHeaderFields();
         populateRequiredFields();
     }
 
     public List<EntryField> getRequiredFields() {
-        return new ArrayList<EntryField>(requiredFields);
+        return new ArrayList<>(requiredFields);
     }
 
     abstract String processUpload();
@@ -58,11 +58,4 @@ public abstract class BulkCSVUpload {
      * Sets the header fields that are required at a minimum for upload
      */
     abstract void populateRequiredFields();
-
-    /**
-     * Sample support. Override only if the specialized upload supports samples
-     */
-    protected void processSamples() {
-
-    }
 }

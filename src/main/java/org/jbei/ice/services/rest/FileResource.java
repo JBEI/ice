@@ -1,9 +1,11 @@
 package org.jbei.ice.services.rest;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Paths;
 import javax.ws.rs.Consumes;
@@ -14,14 +16,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -96,6 +102,28 @@ public class FileResource extends RestResource {
             Logger.error(e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GET
+    @Path("upload/{type}")
+    public Response getUploadCSV(@PathParam("type") String type,
+            @QueryParam("link") String linkedType) {
+        final EntryType entryAddType = EntryType.nameToType(type);
+        EntryType linked;
+        if (linkedType != null)
+            linked = EntryType.nameToType(linkedType);
+
+        StreamingOutput stream = new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType);
+                ByteArrayInputStream stream = new ByteArrayInputStream(template);
+                IOUtils.copy(stream, output);
+            }
+        };
+
+        return Response.ok(stream).header("Content-Disposition", "attachment;filename="
+                + type.toLowerCase() + "_csv_upload.csv").build();
     }
 
     @GET

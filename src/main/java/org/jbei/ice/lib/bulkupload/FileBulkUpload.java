@@ -66,7 +66,7 @@ public class FileBulkUpload {
             }
 
             sb.append('"');
-            sb.append(headers.get(i).toString());
+            sb.append(headers.get(i).getLabel());
             if (BulkCSVUploadHeaders.isRequired(headers.get(i), addType))
                 sb.append("*");
             sb.append('"');

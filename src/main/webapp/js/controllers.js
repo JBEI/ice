@@ -708,6 +708,11 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
         $scope.uploadNameEditMode = value;
     };
 
+    $scope.addNewPartLink = function (type) {
+        $scope.linkedSelection = type;
+        console.log("selected", type);
+    };
+
     var uploader = $fileUploader.create({
         scope:$scope, // to automatically update the html. Default: $rootScope
         url:"/rest/file/sequence",
@@ -1047,7 +1052,11 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                 backdrop:'static',
                 resolve:{
                     addType:function () {
-                        return $stateParams.type;
+                        return $scope.importType;
+                    },
+
+                    linkedAddType:function () {
+                        return $scope.linkedSelection;
                     }
                 }
             });
@@ -1060,7 +1069,11 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                 backdrop:'static',
                 resolve:{
                     addType:function () {
-                        return $stateParams.type;
+                        return $scope.importType;
+                    },
+
+                    linkedAddType:function () {
+                        return $scope.linkedSelection;
                     }
                 }
             });
@@ -1551,7 +1564,7 @@ iceControllers.controller('CollectionMenuController', function ($cookieStore, $s
 });
 
 
-iceControllers.controller('BulkUploadModalController', function ($scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType) {
+iceControllers.controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType, linkedAddType) {
     var sid = $cookieStore.get("sessionId");
     $scope.addType = addType;
 
@@ -1617,6 +1630,14 @@ iceControllers.controller('BulkUploadModalController', function ($scope, $locati
         $scope.processing = true;
         item.remove();
     });
+
+    $scope.downloadCSVTemplate = function () {
+        console.log($scope.addType, linkedAddType);
+        var url = "/rest/file/upload/" + $scope.addType;
+        if (linkedAddType)
+            url += "?link=" + linkedAddType;
+        $window.open(url, "_self");
+    }
 });
 
 iceControllers.controller('UserController', function ($scope, $routeParams, Entry) {

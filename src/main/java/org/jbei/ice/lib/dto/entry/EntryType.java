@@ -13,9 +13,6 @@ public enum EntryType implements IDataTransferModel {
     private String display;
     public static final long serialVersionUID = 1l;
 
-    EntryType() {
-    }
-
     EntryType(String display, String name) {
         this.display = display;
         this.name = name;
