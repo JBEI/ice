@@ -18,7 +18,6 @@ import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.account.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.entry.EntryController;
 
 /**
@@ -37,7 +36,6 @@ public class AccessTokenResource extends RestResource {
     public AccountTransfer create(@Context UriInfo uriInfo, AccountTransfer transfer) {
         String name = transfer.getEmail();
         String pass = transfer.getPassword();
-        HibernateUtil.beginTransaction();
 
         try {
             AccountController controller = new AccountController();
@@ -56,8 +54,6 @@ public class AccessTokenResource extends RestResource {
             Logger.error(e);
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by " + name);
-        } finally {
-            HibernateUtil.commitTransaction();
         }
         return null;
     }
