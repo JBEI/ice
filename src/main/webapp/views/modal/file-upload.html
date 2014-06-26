@@ -12,15 +12,15 @@
         interface. e.g. <b>"Principal Investigator", </b> etc. If uploading a zip file, make sure there is exactly
         <b>1</b> csv file contained in it.<br><br>
 
-        <div style="margin-left: 62px"> <a href="">Download a {{addType}} CSV upload template</a>.</div>
+        <div style="margin-left: 62px"><a href="">Download a {{addType}} CSV upload template</a>.</div>
         </span>
     </alert>
 
-    <br>
+    <div ng-if="uploadError" class="alert alert-danger font-95em"><i class="fa fa-exclamation-triangle"></i>
+        {{uploadError}}
+    </div>
 
-    <div ng-if="uploadError" class="alert alert-danger"><i class="fa fa-exclamation-triangle"></i> {{uploadError}}</div>
-
-    <input ng-if="!processing && !modalClose" type="file" ng-file-select class="font-90em" >
+    <input ng-if="!processing && !modalClose" type="file" ng-file-select class="font-90em">
 
     <div style="height: 12px; width: 100%" ng-if="!processing && !modalClose">
         <div class="progress-bar" role="progressbar" ng-style="{ 'width': importUploader.progress + '%' }"></div>
@@ -34,5 +34,6 @@
 <div class="modal-footer">
     <button class="btn btn-default btn-sm" ng-click="cancel()">{{modalClose || 'Cancel'}}</button>
     <button ng-if="!modalClose && !processing" type="button" ng-click="uploadFile()" class="btn btn-primary btn-sm"
-            ng-disabled="!importUploader.getNotUploadedItems().length">Upload File</button>
+            ng-disabled="!importUploader.getNotUploadedItems().length">Upload File
+    </button>
 </div>
