@@ -61,7 +61,7 @@ iceControllers.controller('EntrySampleController', function ($scope, $modal, $co
     });
 });
 
-iceControllers.controller('ActionMenuController', function ($scope, $rootScope, $location, $cookieStore, Folders, Entry) {
+iceControllers.controller('ActionMenuController', function ($scope, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
 
     // reset all on state change
@@ -80,7 +80,8 @@ iceControllers.controller('ActionMenuController', function ($scope, $rootScope, 
     $scope.retrieveUserFolders = function () {
         $scope.userFolders = undefined;
         folders.getByType({folderType:"personal"}, function (data) {
-            $scope.userFolders = data;
+            if (data.length)
+                $scope.userFolders = data;
         });
     };
 
@@ -160,6 +161,12 @@ iceControllers.controller('ActionMenuController', function ($scope, $rootScope, 
         $location.path('/entry/edit/' + $scope.entry.id);
         $scope.editDisabled = true;
     };
+
+    $scope.retrieveRegistryPartners = function () {
+        WebOfRegistries().query({}, function (result) {
+            $scope.registryPartners = result;
+        });
+    };
 });
 
 iceControllers.controller('RegisterController', function ($scope, $resource, $location) {
@@ -227,9 +234,9 @@ iceControllers.controller('AdminController', function ($rootScope, $location, $s
         'NEW_REGISTRATION_ALLOWED',
         'PROFILE_EDIT_ALLOWED',
         'PASSWORD_CHANGE_ALLOWED',
-        'JOIN_WEB_OF_REGISTRIES',
         'PART_NUMBER_PREFIX',
-        'URI_PREFIX'
+        'URI_PREFIX',
+        'BLAST_INSTALL_DIR'
     ];
 
     var emailSettingKeys = [
@@ -1057,6 +1064,17 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
             });
         };
 
+        $scope.submitImportForApproval = function () {
+            var tmp = {id:$scope.bulkUpload.id, status:'PENDING_APPROVAL'};
+            $scope.submitting = true;
+            Upload(sid).updateStatus({importId:$scope.bulkUpload.id}, tmp, function (result) {
+                $scope.submitting = false;
+                $location.path('/folders/bulkUpload');
+            }, function (error) {
+                $scope.submitting = false;
+            });
+        };
+
         $scope.showBulkUploadRenameModal = function () {
             var modalInstance = $modal.open({
                 templateUrl:'views/modal/rename-bulk-upload-sheet.html',
@@ -1076,7 +1094,7 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                 if ($scope.bulkUpload.id) {
                     var tmp = {id:$scope.bulkUpload.id, name:newName};
                     console.log($scope.bulkUpload, tmp);
-                    Upload(sid).bulkUpdate({importId:$scope.bulkUpload.id}, tmp, function (result) {
+                    Upload(sid).rename({importId:$scope.bulkUpload.id}, tmp, function (result) {
                         $scope.bulkUpload.name = result.name;
                         $scope.bulkUpload.lastUpdate = result.lastUpdate;
                         $rootScope.$broadcast("BulkUploadNameChange", tmp);
@@ -1503,19 +1521,13 @@ iceControllers.controller('BulkUploadModalController', function ($scope, $locati
 
     var uploader = $scope.importUploader = $fileUploader.create({
 //        scope: $scope, // to automatically update the html. Default: $rootScope
-        url:"/rest/file/bulk-import",
+        url:"/rest/upload/file",
         method:'POST',
 //        removeAfterUpload:true,
         headers:{"X-ICE-Authentication-SessionId":sid},
         formData:[
             { type:addType }
         ]
-//        filters: [
-//            function (item) {                    // user defined filter example
-//                console.info('filter1', item);   // added to queue if it returns true
-//                return true;
-//            }
-//        ]
     });
 
     uploader.bind('success', function (event, xhr, item, response) {
@@ -1527,6 +1539,8 @@ iceControllers.controller('BulkUploadModalController', function ($scope, $locati
         if (!isNaN(response)) {
             $modalInstance.close();
             $location.path("/upload/" + response);
+        } else {
+            $scope.uploadError = response;
         }
     });
 
