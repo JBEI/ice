@@ -1614,9 +1614,39 @@ iceControllers.controller('EditEntryController', function ($scope, $location, $c
 });
 
 iceControllers.controller('CreateEntryController', function ($http, $scope, $modal, $rootScope, $fileUploader, $location, $stateParams, $cookieStore, Entry) {
-    console.log("CreateEntryController", $stateParams.type, $scope.part);
     $scope.createType = $stateParams.type;
     $scope.showMain = true;
+
+    // generate the various link options for selected option
+    switch ($scope.createType.toLowerCase()) {
+        case 'plasmid':
+            $scope.linkOptions = [
+                {type:'part', display:'Part'},
+                {type:'Plasmid', display:'Plasmid'}
+            ];
+            break;
+
+        case 'part':
+            $scope.linkOptions = [
+                {type:'part', display:'Part'}
+            ];
+            break;
+
+        case 'strain':
+            $scope.linkOptions = [
+                {type:'part', display:'Part'},
+                {type:'Plasmid', display:'Plasmid'},
+                {type:'strain', display:'Strain'}
+            ];
+            break;
+
+        case 'seed':
+            $scope.linkOptions = [
+                {type:'part', display:'Part'},
+                {type:'seed', display:'Arabidopsis Seed'}
+            ];
+            break;
+    }
 
     var partFields = [
         {label:"Name", required:true, schema:'name', help:'Help Text', placeHolder:'e.g. JBEI-0001', inputType:'short'},
@@ -1682,6 +1712,7 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
         {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
             autoCompleteField:'SELECTION_MARKERS'}
     ];
+
 
     var strainFields = [
         {label:"Parent Strain", schema:'parentalStrain', placeHolder:"Part Number", inputType:'autoComplete',
