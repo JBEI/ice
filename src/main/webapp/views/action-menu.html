@@ -3,17 +3,31 @@
         <div class="btn-group">
             <button type="button" ng-disabled="addToDisabled" ng-click="retrieveUserFolders()"
                     class="btn btn-default btn-sm subMenuTransfer dropdown-toggle">
-                <i style="font-size: 14px;" class="fa fa-plus blue"></i> Add To <span class="caret"></span></button>
-            <span class="dropdown-menu color-888" ng-if="!userFolders"><i class="fa fa-fw fa-spin fa-spinner"></i> Loading...</span>
+                <i style="font-size: 14px;" class="fa fa-plus blue"></i> Add To <span class="caret"></span>
+            </button>
+            <span class="dropdown-menu color-888" ng-if="!userFolders">
+                <i class="fa fa-fw fa-spin fa-spinner"></i> Loading...
+            </span>
 
             <ul class="dropdown-menu" ng-if="userFolders">
                 <li ng-repeat="folder in userFolders" ng-init="selected=false" stop-event="click"
                     ng-click="selected=!selected; select(folder)" class="font-75em cursor_pointer">&nbsp;
-                    <i class="fa fa-fw" ng-class="{'fa-square-o':selected==false, 'fa-check-square-o':selected==true}"></i> {{folder.folderName}}
+                    <i class="fa fa-fw"
+                       ng-class="{'fa-square-o':selected==false, 'fa-check-square-o':selected==true}"></i>
+                    {{folder.folderName}}
                 </li>
                 <li class="divider"></li>
                 <li style="padding-right: 5px">
-                    <button class="btn btn-xs btn-primary pull-right" ng-disabled="selectedFolders.length===0" ng-click="addEntriesToFolders()">Submit</button>
+                    <button class="btn btn-xs btn-primary pull-right" ng-disabled="selectedFolders.length===0"
+                            ng-click="addEntriesToFolders()">Submit
+                    </button>
+                </li>
+            </ul>
+
+            <!--if no folder available-->
+            <ul class="dropdown-menu" ng-if="!userFolders">
+                <li>&nbsp;
+                    <small><i class="color-888">No folders available</i></small>
                 </li>
             </ul>
         </div>
@@ -23,7 +37,8 @@
         </button>
 
         <div class="btn-group">
-            <button type="button" ng-disabled="moveToDisabled" class="btn btn-default btn-sm subMenuTransfer dropdown-toggle">
+            <button type="button" ng-disabled="moveToDisabled"
+                    class="btn btn-default btn-sm subMenuTransfer dropdown-toggle">
                 <i style="font-size: 14px;" class="fa fa-arrows blue"></i> Move To <span class="caret"></span>
             </button>
             <ul class="dropdown-menu font-80em" stop-event="click">
@@ -49,7 +64,7 @@
         <button type="button" class="btn btn-default btn-sm subMenuExport dropdown-toggle" ng-disabled="exportDisabled">
             <i style="font-size: 14px; opacity:0.85;" class="fa fa-download blue"></i>
             Export As <span class="caret"></span></button>
-        <ul class="dropdown-menu" stop-event="click">
+        <ul class="dropdown-menu font-95em" stop-event="click">
             <li><a class="cursor_pointer">CSV</a></li>
             <li><a class="cursor_pointer">XML</a></li>
         </ul>
@@ -66,21 +81,17 @@
             Loading...</span>
 
         <ul class="dropdown-menu" ng-if="registryPartners">
-            <li ng-repeat="partner in registryPartners" ng-init="selected=false" stop-event="click"
-                ng-click="selected=!selected; selectPartner(folder)" class="font-75em cursor_pointer">&nbsp;
-                <i class="fa fa-fw" ng-class="{'fa-square-o':selected==false, 'fa-check-square-o':selected==true}"></i> {{folder.folderName}}
+            <li ng-repeat="partner in registryPartners.partners" ng-init="selected=false" stop-event="click"
+                ng-click="selected=!selected; selectPartner(partner)" class="font-75em cursor_pointer">&nbsp;
+                <i class="fa fa-fw" ng-class="{'fa-square-o':selected==false, 'fa-check-square-o':selected==true}"></i>
+                {{partner.name}}
             </li>
             <li class="divider"></li>
             <li style="padding-right: 5px">
-                <button class="btn btn-xs btn-primary pull-right" ng-disabled="selectedFolders.length===0" ng-click="addEntriesToFolders()">Submit</button>
+                <button class="btn btn-xs btn-primary pull-right" ng-disabled="selectedPartners.length===0"
+                        ng-click="transferEntriesToRegistry()">Submit
+                </button>
             </li>
         </ul>
-
-        <!--<ul class="dropdown-menu font-80em" stop-event="click">-->
-            <!--<li class="divider"></li>-->
-            <!--<li>-->
-                <!--<button class="btn btn-xs btn-info">Submit</button>-->
-            <!--</li>-->
-        <!--</ul>-->
     </div>
 </div>
