@@ -18,12 +18,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -157,36 +155,6 @@ public class FileResource extends RestResource {
             e.printStackTrace();
         }
         return null;
-    }
-
-    @POST
-    @Path("bulk-import")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response bulkUpload(@FormDataParam("file") InputStream fileInputStream,
-            @FormDataParam("type") String type,
-            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
-        // todo : error checking
-
-        try {
-            String fileName = contentDispositionHeader.getFileName();
-            String ext = fileName.substring(fileName.lastIndexOf("."), fileName.length());
-            String fileId = Utils.generateUUID() + ext;
-            File file = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                                  "bulk-import", fileId).toFile();
-            FileUtils.copyInputStreamToFile(fileInputStream, file);
-
-            String userId = getUserIdFromSessionHeader(sessionId);
-
-            EntryType addType = EntryType.valueOf(type.toUpperCase());
-            FileBulkUpload bulkUpload = new FileBulkUpload(userId, file.toPath(), addType);
-            // tODO: this returns a string because it is being used to return a message in case of an error
-            String importId = bulkUpload.process();
-            return Response.status(Response.Status.OK).entity(importId).build();
-        } catch (Exception e) {
-            Logger.error(e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
     }
 
     // this creates an entry if an id is not specified in the form data
