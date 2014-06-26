@@ -2,28 +2,27 @@
 
 <div class="container-fluid" ng-init="part.creatorEmail=user.email">
 
-    <!--header-->
-    <div class="row entry_general_header_td" style="height: 60px">
-        <div class="col-md-12">
-            <table>
-                <tr>
-                    <td>
-                        <h4>
+<!--header-->
+<div class="row entry_general_header_td" style="height: 60px">
+    <div class="col-md-12">
+        <table>
+            <tr>
+                <td>
+                    <h4>
                         <span style="white-space: nowrap">
                             <strong ng-hide="part.name" class="color-888">CREATE NEW</strong>
                             <strong ng-class="{'color-888':part.name}">{{createType.toUpperCase()}}</strong>
                             <strong ng-show="part.name">{{part.name}}</strong>
                         </span>
-                            <br>
-                            <small style="white-space: nowrap" class="font-65em"><span my-current-time="format"></span>
-                                -
-                                <a ng-href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
-                            </small>
-                        </h4>
-                    </td>
-                    <td style="padding-left: 25px">
-                        <div class="dropdown"
-                        ">
+                        <br>
+                        <small style="white-space: nowrap" class="font-65em"><span my-current-time="format"></span>
+                            -
+                            <a ng-href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
+                        </small>
+                    </h4>
+                </td>
+                <td style="padding-left: 25px">
+                    <div class="dropdown">
                         <span class="opacity_hover dropdown-toggle"><i class="fa fa-link"></i> Link To
                             <span class="caret"></span>
                         </span>
@@ -33,23 +32,23 @@
                                 <a ng-click="addNewPartLink(option.type)"><i>New {{option.display}}</i></a>
                             </li>
                         </ul>
-        </div>
-        </td>
-        <td ng-show="addExisting" style="padding-left: 12px">
-            <div class="input-group">
-                <input type="text" ng-class="{'input_box_group':true, 'input_box_error':false}"
-                       ng-model="addExistingPartNumber"
-                       placeHolder="Enter Part Number" style="width: 205px;"
-                       typeahead-loading="loadingAddExistingData"
-                       typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
-                       typeahead-editable="true"
-                       typeahead-on-select="addExistingPartLink($item, $model, $label)">
+                    </div>
+                </td>
+                <td ng-show="addExisting" style="padding-left: 12px">
+                    <div class="input-group">
+                        <input type="text" ng-class="{'input_box_group':true, 'input_box_error':false}"
+                               ng-model="addExistingPartNumber"
+                               placeHolder="Enter Part Number" style="width: 205px;"
+                               typeahead-loading="loadingAddExistingData"
+                               typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
+                               typeahead-editable="true"
+                               typeahead-on-select="addExistingPartLink($item, $model, $label)">
                     <span class="input-group-addon" data-ng-click="addExisting=false" style="padding:3px; background-color:
          #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
-                <i ng-show="loadingAddExistingData" class="fa fa-spinner fa-spin"></i>
-            </div>
-        </td>
-        </tr>
+                        <i ng-show="loadingAddExistingData" class="fa fa-spinner fa-spin"></i>
+                    </div>
+                </td>
+            </tr>
         </table>
     </div>
 </div>

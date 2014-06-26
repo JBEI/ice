@@ -40,14 +40,8 @@
                             <ul class="dropdown-menu">
                                 <li class="cursor_pointer font-80em"><a ng-click="addExisting=true">Existing Entry</a>
                                 </li>
-                                <li class="cursor_pointer font-80em"><a ng-click="addNewPartLink('plasmid')"><i>New
-                                    Plasmid</i></a></li>
-                                <li class="cursor_pointer font-80em"><a ng-click="addNewPartLink('strain')"><i>New
-                                    Strain</i></a></li>
-                                <li class="cursor_pointer font-80em"><a ng-click="addNewPartLink('part')"><i>New
-                                    Part</i></a></li>
-                                <li class="cursor_pointer font-80em">
-                                    <a ng-click="addNewPartLink('seed')"><i>New Arabidopsis Seed</i></a>
+                                <li class="cursor_pointer font-80em" ng-repeat="option in linkOptions">
+                                    <a ng-click="addNewPartLink(option.type)"><i>New {{option.display}}</i></a>
                                 </li>
                             </ul>
                         </div>

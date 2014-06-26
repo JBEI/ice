@@ -697,6 +697,8 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
     var sid = $cookieStore.get("sessionId");
     var upload = Upload(sid);
 
+    console.log($scope.importType);
+
     $scope.bulkUpload = {};
     $scope.bulkUpload.entryIdData = [];
     $scope.bulkUpload.name = "untitled";
@@ -1124,6 +1126,38 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
     // retrieve
     $scope.uploadEntries = [];
 
+    var generateLinkOptions = function (type) {
+        switch (type) {
+            case 'plasmid':
+                $scope.linkOptions = [
+                    {type:'part', display:'Part'},
+                    {type:'Plasmid', display:'Plasmid'}
+                ];
+                break;
+
+            case 'part':
+                $scope.linkOptions = [
+                    {type:'part', display:'Part'}
+                ];
+                break;
+
+            case 'strain':
+                $scope.linkOptions = [
+                    {type:'part', display:'Part'},
+                    {type:'Plasmid', display:'Plasmid'},
+                    {type:'strain', display:'Strain'}
+                ];
+                break;
+
+            case 'seed':
+                $scope.linkOptions = [
+                    {type:'part', display:'Part'},
+                    {type:'seed', display:'Arabidopsis Seed'}
+                ];
+                break;
+        }
+    };
+
     if (!isNaN($stateParams.type)) {
         asyncLoop({
             functionToLoop:function (loop, start) {
@@ -1132,6 +1166,8 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                     function (result) {
                         $scope.bulkUpload.name = result.name;
                         $scope.importType = result.type.toLowerCase();
+                        generateLinkOptions($scope.importType);
+
                         if (start === 0)
                             $scope.createSheet();
                         // else render on append data
@@ -1142,7 +1178,6 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                         if (result.entryList && result.entryList.length) {
                             for (var i = 0; i < result.entryList.length; i += 1) {
                                 $scope.bulkUpload.entryIdData[l + i] = result.entryList[i].id;    // todo index here is starting from 0 again
-//                                console.log(l+i, $scope.bulkUpload.entryIdData[l+i]);
                                 $scope.uploadEntries.push(result.entryList[i]);
                             }
                         }
@@ -1155,6 +1190,7 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
         });
     } else {
         $scope.importType = $stateParams.type;
+        generateLinkOptions($scope.importType);
         $scope.createSheet();
     }
 });
