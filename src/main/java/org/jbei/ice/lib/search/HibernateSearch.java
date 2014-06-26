@@ -1,6 +1,13 @@
 package org.jbei.ice.lib.search;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountType;
@@ -13,7 +20,6 @@ import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
 import org.jbei.ice.lib.dto.search.SearchResults;
-import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastException;
@@ -44,10 +50,7 @@ import org.hibernate.search.query.dsl.TermContext;
 @SuppressWarnings("unchecked")
 public class HibernateSearch {
 
-    private final EntryAuthorization entryAuthorization;
-
     private HibernateSearch() {
-        entryAuthorization = new EntryAuthorization();
     }
 
     private static class SingletonHolder {
@@ -291,7 +294,7 @@ public class HibernateSearch {
         for (Object object : result) {
             Entry entry = (Entry) object;
             SearchResult info = blastResults.get(entry.getId() + "");
-            if(info == null)
+            if (info == null)
                 continue;
             info.setEntryInfo(ModelToInfoFactory.getInfo(entry));
             filtered.add(info);

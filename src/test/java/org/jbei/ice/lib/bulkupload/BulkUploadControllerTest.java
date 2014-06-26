@@ -8,9 +8,7 @@ import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.shared.BioSafetyOption;
@@ -38,76 +36,6 @@ public class BulkUploadControllerTest {
     @After
     public void tearDown() throws Exception {
         HibernateUtil.commitTransaction();
-    }
-
-    @Test
-    public void testRetrievePendingImports() throws Exception {
-        Account account = AccountCreator.createTestAccount("testRetrievePendingImports", true);
-        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
-        autoUpdate.setRow(0);
-        autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
-        autoUpdate.getKeyValue().put(EntryField.PI, "test");
-        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "select");
-        autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
-        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
-
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.PLASMID);
-        Assert.assertNotNull(autoUpdate);
-        Assert.assertTrue(autoUpdate.getEntryId() > 0);
-        Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
-        Assert.assertTrue(autoUpdate.getLastUpdate() != null);
-
-        // check that the bulk upload has been created
-        BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
-        Assert.assertNotNull("Null bulk upload", info);
-
-        Assert.assertTrue("Submitting draft", controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
-
-        // entries associated with bulk upload must be pending
-        info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 10);
-        Assert.assertNotNull(info);
-        Assert.assertTrue("Invalid entry count", info.getEntryList().size() == 1);
-        Assert.assertTrue(info.getEntryList().get(0).getVisibility() == Visibility.PENDING);
-
-        ArrayList<BulkUploadInfo> pending = controller.retrievePendingImports(account);
-        Assert.assertNotNull("Null pending import", pending);
-        boolean b = false;
-        for (BulkUploadInfo uploadInfo : pending) {
-            if (uploadInfo.getAccount().getEmail().equals(account.getEmail())) {
-                b = true;
-                break;
-            }
-        }
-        Assert.assertTrue(b);
-    }
-
-    @Test
-    public void testRetrieveById() throws Exception {
-        Account account = AccountCreator.createTestAccount("testRetrieveById", false);
-        Assert.assertNull(controller.retrieveById(account.getEmail(), 100l, 0, 1));
-
-        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
-        autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
-        autoUpdate.getKeyValue().put(EntryField.PI, "test");
-        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "select");
-        autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
-        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
-
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.PLASMID);
-        Assert.assertNotNull(autoUpdate);
-        Assert.assertTrue(autoUpdate.getEntryId() > 0);
-        Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
-        Assert.assertTrue(autoUpdate.getLastUpdate() != null);
-
-        // check that the bulk upload has been created
-        BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
-        Assert.assertNotNull(info);
-        Assert.assertEquals(0, info.getEntryList().size());
-        info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 10);
-        Assert.assertNotNull(info);
-        Assert.assertEquals(1, info.getEntryList().size());
     }
 
     @Test
@@ -205,63 +133,6 @@ public class BulkUploadControllerTest {
 
         entry = dao.get(entryId);
         Assert.assertNotNull(entry);
-    }
-
-    @Test
-    public void testSubmitBulkImportDraft() throws Exception {
-        Account account = AccountCreator.createTestAccount("testSubmitBulkImportDraft", false);
-        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
-        autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.STRAIN);
-        Assert.assertNotNull(autoUpdate);
-        Assert.assertTrue(autoUpdate.getEntryId() > 0);
-        Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
-        Assert.assertTrue(autoUpdate.getLastUpdate() != null);
-
-        // check that the entry has been created and has visibility of draft
-        Entry entry = DAOFactory.getEntryDAO().get(autoUpdate.getEntryId());
-        Assert.assertNotNull(entry);
-        Assert.assertEquals("JBEI-0001", entry.getName());
-        Assert.assertTrue(entry.getVisibility().equals(Integer.valueOf(Visibility.DRAFT.getValue())));
-
-
-        // check that the bulk upload has been created
-        BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
-        Assert.assertNotNull(info);
-
-        // try to submit. should be rejected because the required fields are not present
-        Assert.assertFalse(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
-
-        // enter information for others
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
-        autoUpdate.getKeyValue().put(EntryField.PI, "test");
-        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "select");
-
-        // use preference for the status
-        PreferenceInfo preference = new PreferenceInfo();
-        preference.setAdd(true);
-        preference.setKey(EntryField.STATUS.toString());
-        preference.setValue("Complete");
-
-        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.STRAIN);
-
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
-
-        // entries associated with bulk upload must be pending
-        info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 10);
-        Assert.assertNotNull(info);
-        Assert.assertTrue(info.getEntryList().size() == 1);
-        Assert.assertTrue(info.getEntryList().get(0).getVisibility().equals(Visibility.PENDING));
-
-        // check the data associated with it
-        PartData entryInfo = info.getEntryList().get(0);
-        Assert.assertEquals(entryInfo.getName(), "JBEI-0001");
-        Assert.assertEquals(entryInfo.getShortDescription(), "this is a test");
-        Assert.assertEquals(entryInfo.getPrincipalInvestigator(), "test");
-        Assert.assertTrue(entryInfo.getSelectionMarkers().contains("select"));
-        Assert.assertEquals(entryInfo.getBioSafetyLevel(), new Integer(BioSafetyOption.LEVEL_TWO.getValue()));
-        Assert.assertEquals(entryInfo.getStatus(), "Complete");
     }
 
     @Test
