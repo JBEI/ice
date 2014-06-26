@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
@@ -13,7 +12,6 @@ import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
@@ -64,8 +62,7 @@ public class BulkUploadControllerTest {
         BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull("Null bulk upload", info);
 
-        Assert.assertTrue("Submitting draft", controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()
-                                                                              ));
+        Assert.assertTrue("Submitting draft", controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
 
         // entries associated with bulk upload must be pending
         info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 10);
@@ -262,7 +259,7 @@ public class BulkUploadControllerTest {
         Assert.assertEquals(entryInfo.getName(), "JBEI-0001");
         Assert.assertEquals(entryInfo.getShortDescription(), "this is a test");
         Assert.assertEquals(entryInfo.getPrincipalInvestigator(), "test");
-        Assert.assertEquals(entryInfo.getSelectionMarkers(), "select");
+        Assert.assertTrue(entryInfo.getSelectionMarkers().contains("select"));
         Assert.assertEquals(entryInfo.getBioSafetyLevel(), new Integer(BioSafetyOption.LEVEL_TWO.getValue()));
         Assert.assertEquals(entryInfo.getStatus(), "Complete");
     }
@@ -302,6 +299,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
         autoUpdate.getKeyValue().put(EntryField.PI, "test");
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "select");
+        autoUpdate.getKeyValue().put(EntryField.FUNDING_SOURCE, "JBEI");
         autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
         autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
 
@@ -310,9 +308,6 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
         Assert.assertTrue(autoUpdate.getLastUpdate() != null);
-
-        // set a preference for funding source
-        PreferenceInfo preference = new PreferenceInfo(true, PreferenceKey.FUNDING_SOURCE.toString(), "JBEI");
 
         // submit draft
         Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
@@ -331,43 +326,5 @@ public class BulkUploadControllerTest {
         Assert.assertEquals("test", entry.getPrincipalInvestigator());
         Assert.assertEquals("JBEI", entry.getFundingSource());
         Assert.assertEquals("JBEI-0001", entry.getName());
-
-        // test strain with plasmid
-        autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
-        autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0002");
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "strain for plasmid");
-        autoUpdate.getKeyValue().put(EntryField.PI, "nathan hillson");
-        autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.IN_PROGRESS.toString());
-        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_ONE.getValue());
-
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.STRAIN);
-        Assert.assertNotNull(autoUpdate);
-        Assert.assertTrue(autoUpdate.getEntryId() > 0);
-        Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
-        Assert.assertTrue(autoUpdate.getLastUpdate() != null);
-
-        long id = autoUpdate.getEntryId();
-        Entry strain = DAOFactory.getEntryDAO().get(id);
-        Set<Entry> linked = strain.getLinkedEntries();
-        Assert.assertEquals(1, linked.size());
-
-        Entry plasmid = (Entry) linked.toArray()[0];
-        Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
-                                  plasmid.getVisibility() == Visibility.DRAFT.getValue());
-
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
-        strain = DAOFactory.getEntryDAO().get(id);
-        linked = strain.getLinkedEntries();
-        plasmid = (Entry) linked.toArray()[0];
-        Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
-                                  plasmid.getVisibility() == Visibility.PENDING.getValue());
-
-        Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
-
-        strain = DAOFactory.getEntryDAO().get(id);
-        linked = strain.getLinkedEntries();
-        plasmid = (Entry) linked.toArray()[0];
-        Assert.assertTrue(strain.getVisibility().intValue() == plasmid.getVisibility().intValue() &&
-                                  plasmid.getVisibility() == Visibility.OK.getValue());
     }
 }
