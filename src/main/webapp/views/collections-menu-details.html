@@ -22,10 +22,10 @@
                  ng-click="selectCollectionFolder(folder)">
                 <i class="fa fa-folder-o fa-fw"
                    style="font-size: 12px; color: #a1a0a0; padding-left: 9px"></i> &nbsp;&nbsp;
-                <span class="font-85em">{{folder.folderName | limitTo:25}}</span>&nbsp;
+                <span class="font-85em" style="font-size: 12px">{{folder.folderName | limitTo:25}}</span>&nbsp;
                 <span ng-show="!showSubMenu" class="menu_count">{{folder.count | number}}</span>
                 <i class="fa fa-times menu_count delete_icon" ng-show="showSubMenu" ng-init="showSubMenu=false"
-                   ng-click="folder.deleteRequested=true" style="font-size: 14px;" ng-click="" stop-event="click"></i>
+                   ng-click="folder.deleteRequested=true" style="font-size: 14px;" stop-event="click"></i>
             </div>
 
             <div style="border-top: 1px solid #F2F2F2; color: #233559; line-height: 90%; padding: 4px;

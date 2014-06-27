@@ -21,11 +21,11 @@
                 <th style="width: 400px">Summary</th>
                 <th style=" width: 200px">Alignment</th>
                 <th style="width: 50px">E-Value</th>
-                <th style="width: 160px">Hits Alignment</th>
+                <!--<th style="width: 160px">Hits Alignment</th>-->
             </tr>
 
             <tr data-ng-show='!searchResults'>
-                <td colspan="11"><img src="/img/loader-mini.gif"> Loading...</td>
+                <td colspan="11"><i class="fa fa-gear fa-spin"></i> Loading...</td>
             </tr>
             <tr data-ng-show="searchResults.results.length == 0">
                 <td colspan="11">No results found for your query</td>
@@ -54,16 +54,16 @@
                     <div style="width:200px;">{{result.alignment}}</div>
                 </td>
                 <td>{{result.eValue}}</td>
-                <td class="cursor_pointer" ng-click="showDetails=!showDetails">
-                    <table cellpadding=0 cellspacing=0 ng-init="stripes=alignmentGraph(result)">
-                        <tr>
-                            <td ng-repeat="stripe in stripes">
-                                <hr ng-style="{ 'width': stripe + 'px' }"
-                                    style="background-color: #ffff00; border: 0; height: 10px">
-                            </td>
-                        </tr>
-                    </table>
-                </td>
+                <!--<td class="cursor_pointer" ng-click="showDetails=!showDetails">-->
+                <!--<table cellpadding=0 cellspacing=0 ng-init="stripes=alignmentGraph(result)">-->
+                <!--<tr>-->
+                <!--<td ng-repeat="stripe in stripes">-->
+                <!--<hr ng-style="{ 'width': stripe + 'px' }"-->
+                <!--style="background-color: #ffff00; border: 0; height: 10px">-->
+                <!--</td>-->
+                <!--</tr>-->
+                <!--</table>-->
+                <!--</td>-->
             </tr>
             <tr data-ng-repeat-end ng-if="showDetails">
                 <td colspan="8">

@@ -115,7 +115,7 @@ public class HibernateSearch {
     public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery, String projectName,
             String projectURL) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
-        if (entryTypes == null) {
+        if (entryTypes == null || entryTypes.isEmpty()) {
             entryTypes = new ArrayList<>();
             entryTypes.addAll(Arrays.asList(EntryType.values()));
         }
@@ -142,7 +142,7 @@ public class HibernateSearch {
 
         // visibility
         Query visibilityQuery = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
-        booleanQuery.add(visibilityQuery, BooleanClause.Occur.SHOULD);
+        booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST);
 
         // exclude deleted
         Query deletedQuery = qb.keyword().onField("ownerEmail").matching("system").createQuery();
@@ -217,45 +217,49 @@ public class HibernateSearch {
         return results;
     }
 
-    // filter based on permissions since the blast query runs against all sequences regardless
-    // so this causes it to be filtered
+    /**
+     * Intended to be called after running a blast search to filter the results. Blast search runs
+     * on a fasta file which contains all the sequences. Hibernate search has a security filter for permissions
+     * and is therefore used to filter out the blast results, as well as to filter based on the entry
+     * attributes not handled by blast; such as "has sequence" and "biosafety level"
+     *
+     * @param account      Account of user performing search
+     * @param blastResults unfiltered blast result
+     * @param searchQuery  Search Query
+     * @return wrapper around list of filtered results
+     */
     public SearchResults runSearchFilter(Account account, HashMap<String, SearchResult> blastResults,
-            SearchQuery.Parameters searchParameters) {
+            SearchQuery searchQuery) {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         FullTextSession fullTextSession = Search.getFullTextSession(session);
 
-        Class<?>[] classes = new Class<?>[EntryType.values().length];
-        int i = 0;
-        for (EntryType type : EntryType.values()) {
-            classes[i] = SearchFieldFactory.entryClass(type);
-            i += 1;
+        if (searchQuery.getEntryTypes() == null || searchQuery.getEntryTypes().isEmpty()) {
+            searchQuery.setEntryTypes(Arrays.asList(EntryType.values()));
         }
 
+        int queryTypesSize = searchQuery.getEntryTypes().size();
+        Class<?>[] classes = new Class<?>[queryTypesSize];
         BooleanQuery booleanQuery = new BooleanQuery();
+        int i = 0;
 
-        for (EntryType type : EntryType.values()) {
+        for (EntryType type : searchQuery.getEntryTypes()) {
+            classes[i] = SearchFieldFactory.entryClass(searchQuery.getEntryTypes().get(i));
+            i += 1;
+
             QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(
                     SearchFieldFactory.entryClass(type)).get();
             org.apache.lucene.search.Query query = qb.keyword().onField("recordType").ignoreFieldBridge()
                                                      .matching(type.getName().toLowerCase()).createQuery();
-//
+
             booleanQuery.add(query, BooleanClause.Occur.SHOULD);
-//
-//            // exclude "pending" visibility
+
+            // set visibility
             org.apache.lucene.search.Query visibilityQuery = qb.keyword()
                                                                .onField("visibility")
                                                                .ignoreFieldBridge()
-                                                               .matching(Visibility.PENDING.getValue())
+                                                               .matching(Visibility.OK.getValue())
                                                                .createQuery();
-            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
-
-            // draft visibility
-            org.apache.lucene.search.Query visibilityDraftQuery = qb.keyword()
-                                                                    .onField("visibility")
-                                                                    .ignoreFieldBridge()
-                                                                    .matching(Visibility.DRAFT.getValue())
-                                                                    .createQuery();
-            booleanQuery.add(visibilityDraftQuery, BooleanClause.Occur.MUST_NOT);
+            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST);
         }
 
         // wrap Lucene query in a org.hibernate.Query
@@ -283,7 +287,7 @@ public class HibernateSearch {
         // TODO : sort and then retrieve based on count
         // get sorting values
 
-        // if not a blast sort then the sort can happen on this side
+        // if not a blast sort (e.g. alignment) then the sort can happen on this side
         // recordType, creationTime
 //        Sort sort = getSort(searchParameters.isSortAscending(), searchParameters.getSortField());
 //        fullTextQuery.setSort(sort);
@@ -291,33 +295,29 @@ public class HibernateSearch {
 //        List subList = result.subList(searchParameters.getStart(),
 //                                      searchParameters.getStart() + searchParameters.getRetrieveCount());
 
+        String userId = account == null ? null : account.getEmail();
         for (Object object : result) {
             Entry entry = (Entry) object;
             SearchResult info = blastResults.get(entry.getId() + "");
             if (info == null)
                 continue;
-            info.setEntryInfo(ModelToInfoFactory.getInfo(entry));
+
+            info.setEntryInfo(ModelToInfoFactory.createTableViewData(userId, entry, true));
             filtered.add(info);
         }
 
-//        Collections.sort(filtered, new Comparator<SearchResult>() {
-//            @Override
-//            public int compare(SearchResult o1, SearchResult o2) {
-//                return Double.valueOf(o2.getScore()).compareTo((double) o1.getScore());
-//            }
-//        });
-
         SearchResults results = new SearchResults();
         results.setResultCount(result.size());
+        SearchResults.sort(searchQuery.getParameters().getSortField(), filtered);
         results.setResults(filtered);
         return results;
     }
 
-    public SearchResults executeSearch(Account account, Iterator<String> terms, SearchQuery searchQuery,
+    public SearchResults executeSearch(Account account, Iterable<String> terms, SearchQuery searchQuery,
             String projectName, String projectURL, HashMap<String, Float> userBoost) {
         // types for which we are searching
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
-        if (entryTypes == null) {
+        if (entryTypes == null || entryTypes.isEmpty()) {
             entryTypes = new ArrayList<>();
             entryTypes.addAll(Arrays.asList(EntryType.values()));
         }
@@ -334,8 +334,8 @@ public class HibernateSearch {
         }
 
         // generate queries for terms
-        while (terms.hasNext()) {
-            String term = cleanQuery(terms.next());
+        for (String term : terms) {
+            term = cleanQuery(term);
             if (term.trim().isEmpty() || StandardAnalyzer.STOP_WORDS_SET.contains(term))
                 continue;
 

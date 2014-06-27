@@ -51,7 +51,9 @@ public class SearchResource extends RestResource {
             parameters.setSortAscending(asc);
             parameters.setSortField(ColumnField.valueOf(sort.toUpperCase()));
 
-            if (sequence != null && !sequence.trim().isEmpty() && blastProgram != null) {
+            if (sequence != null && !sequence.trim().isEmpty()) {
+                if (blastProgram == null)
+                    blastProgram = BlastProgram.BLAST_N;
                 BlastQuery blastQuery = new BlastQuery();
                 blastQuery.setBlastProgram(blastProgram);
                 blastQuery.setSequence(sequence);

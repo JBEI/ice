@@ -2,6 +2,7 @@ package org.jbei.ice.lib.dto.search;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -25,7 +26,7 @@ public class SearchQuery implements IDataTransferModel {
      * set the query default values
      */
     public SearchQuery() {
-        entryTypes = new ArrayList<EntryType>(Arrays.asList(EntryType.values()));
+        entryTypes = new ArrayList<>(Arrays.asList(EntryType.values()));
         parameters = new Parameters();
     }
 
@@ -61,8 +62,9 @@ public class SearchQuery implements IDataTransferModel {
         return entryTypes;
     }
 
-    public void setEntryTypes(ArrayList<EntryType> entryTypes) {
-        this.entryTypes = entryTypes;
+    public void setEntryTypes(List<EntryType> entryTypes) {
+        this.entryTypes = new ArrayList<>();
+        this.entryTypes.addAll(entryTypes);
     }
 
     public Parameters getParameters() {

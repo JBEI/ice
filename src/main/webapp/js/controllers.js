@@ -228,6 +228,7 @@ iceControllers.controller('AdminUserController', function ($rootScope, $scope, $
 iceControllers.controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore, Settings) {
     var generalSettingKeys = [
         'TEMPORARY_DIRECTORY',
+        'DATA_DIRECTORY',
         'PROJECT_NAME',
         'PART_NUMBER_DIGITAL_SUFFIX',
         'PART_NUMBER_DELIMITER',
@@ -1267,12 +1268,12 @@ iceControllers.controller('SearchInputController', function ($scope, $rootScope,
         $scope.searchFilters.s = $scope.sequenceText;
         $scope.searchFilters.sort = 'relevance';
         $scope.searchFilters.asc = false;
-        $scope.searchFilters.entryTypes = [];
+        $scope.searchFilters.t = [];
         $scope.searchFilters.sp = "BLAST_N";
         for (var type in $scope.searchTypes) {
             if ($scope.searchTypes.hasOwnProperty(type) && type !== 'all') {
                 if ($scope.searchTypes[type])
-                    $scope.searchFilters.entryTypes.push(type);
+                    $scope.searchFilters.t.push(type);
             }
         }
 
@@ -1299,8 +1300,8 @@ iceControllers.controller('SearchController', function ($scope, $http, $cookieSt
         $scope.searchFilters.sort = 'relevance';
         $scope.searchFilters.asc = false;
         $scope.searchFilters.limit = 15;
-        $scope.searchFilters.entryTypes = ['strain', 'plasmid', 'arabidopsis', 'part'];
-        $scope.searchFilters.sp = "BLAST_N";
+        $scope.searchFilters.t = ['strain', 'plasmid', 'arabidopsis', 'part'];
+        $scope.searchFilters.b = "BLAST_N";
         $scope.runUserSearch();
     }
 

@@ -2,7 +2,6 @@ package org.jbei.ice.lib.search;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -122,7 +121,7 @@ public class SearchController {
                 HashMap<String, SearchResult> results = BlastPlus.runBlast(account, query.getBlastQuery());
                 if (results.isEmpty())
                     return new SearchResults();
-                return HibernateSearch.getInstance().runSearchFilter(account, results, query.getParameters());
+                return HibernateSearch.getInstance().runSearchFilter(account, results, query);
             } catch (BlastException e) {
                 throw new ControllerException(e);
             }
@@ -130,7 +129,6 @@ public class SearchController {
 
         // text query (may also include blast)
         // no filter type indicates a term or phrase query
-        Iterator<String> iterable;
         HibernateSearch hibernateSearch = HibernateSearch.getInstance();
         List<SearchBoostField> boostFields = Arrays.asList(SearchBoostField.values());
         HashMap<String, String> results = new PreferencesController().retrieveUserPreferenceList(account, boostFields);
@@ -145,7 +143,7 @@ public class SearchController {
         }
 
         if (queryString != null && !queryString.isEmpty()) {
-            iterable = Splitter.on(" ").omitEmptyStrings().split(queryString).iterator();
+            Iterable<String> iterable = Splitter.on("\\s+").omitEmptyStrings().split(queryString);
             return hibernateSearch.executeSearch(account, iterable, query, projectName, projectURI, mapping);
         } else {
             return hibernateSearch.executeSearchNoTerms(account, query, projectName, projectURI);
