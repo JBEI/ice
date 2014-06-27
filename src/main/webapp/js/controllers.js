@@ -552,7 +552,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $loc
     $scope.collectionList = [
         { name:'available', display:'Available', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
         { name:'personal', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
-        { name:'shared', display:'Shared', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:false},
+        { name:'shared', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt', alwaysVisible:false},
         { name:'bulkUpload', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit', alwaysVisible:false},
         { name:'pending', display:'Pending Approval', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:false},
         { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash-o', alwaysVisible:false}
@@ -1246,7 +1246,6 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
 });
 
 iceControllers.controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
-    console.log("SearchInputController", $scope.searchFilters);
     $scope.searchTypes = {all:true, strain:true, plasmid:true, part:true, arabidopsis:true};
 
     $scope.check = function (selection) {
@@ -1262,14 +1261,16 @@ iceControllers.controller('SearchInputController', function ($scope, $rootScope,
     };
 
     $scope.search = function () {
-        console.log("searching");
-
         $scope.searchFilters.q = $scope.queryText;
         $scope.searchFilters.s = $scope.sequenceText;
         $scope.searchFilters.sort = 'relevance';
         $scope.searchFilters.asc = false;
         $scope.searchFilters.t = [];
-        $scope.searchFilters.sp = "BLAST_N";
+        $scope.searchFilters.b = $scope.blastSearchType;
+        $scope.searchFilters.hasSample = $scope.hasSample;
+        $scope.searchFilters.hasSequence = $scope.hasSequence;
+        $scope.searchFilters.hasAttachment = $scope.hasAttachment;
+
         for (var type in $scope.searchTypes) {
             if ($scope.searchTypes.hasOwnProperty(type) && type !== 'all') {
                 if ($scope.searchTypes[type])
@@ -1285,6 +1286,14 @@ iceControllers.controller('SearchInputController', function ($scope, $rootScope,
     };
 
     $scope.reset = function () {
+        $scope.sequenceText = "";
+        $scope.queryText = "";
+        $location.url($location.path());
+        $scope.blastSearchType = "";
+        $scope.bioSafetyLevelOption = "";
+        $scope.hasSample = false;
+        $scope.hasSequence = false;
+        $scope.hasAttachment = false;
     };
 });
 

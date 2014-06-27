@@ -474,15 +474,15 @@ public class HibernateSearch {
 
         ArrayList<String> terms = new ArrayList<>();
 
-        if (parameters.getHasSample() != null && parameters.getHasSample()) {
+        if (parameters.getHasSample()) {
             terms.add("hasSample");
         }
 
-        if (parameters.getHasAttachment() != null && parameters.getHasAttachment()) {
+        if (parameters.getHasAttachment()) {
             terms.add("hasAttachment");
         }
 
-        if (parameters.getHasSequence() != null && parameters.getHasSequence()) {
+        if (parameters.getHasSequence()) {
             terms.add("hasSequence");
         }
 

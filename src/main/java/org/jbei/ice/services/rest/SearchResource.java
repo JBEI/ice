@@ -33,6 +33,9 @@ public class SearchResource extends RestResource {
     public SearchResults search(
             @QueryParam("q") String queryString,
             @DefaultValue("false") @QueryParam("w") boolean searchWeb,
+            @DefaultValue("false") @QueryParam("hasSample") boolean hasSample,
+            @DefaultValue("false") @QueryParam("hasSequence") boolean hasSequence,
+            @DefaultValue("false") @QueryParam("hasAttachment") boolean hasAttachment,
             @DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("15") @QueryParam("limit") int limit,
             @DefaultValue("relevance") @QueryParam("sort") String sort,
@@ -50,6 +53,9 @@ public class SearchResource extends RestResource {
             parameters.setStart(offset);
             parameters.setSortAscending(asc);
             parameters.setSortField(ColumnField.valueOf(sort.toUpperCase()));
+            parameters.setHasAttachment(hasAttachment);
+            parameters.setHasSample(hasSample);
+            parameters.setHasSequence(hasSequence);
 
             if (sequence != null && !sequence.trim().isEmpty()) {
                 if (blastProgram == null)

@@ -97,7 +97,7 @@ public class SearchController {
      *
      * @param userId
      * @param query
-     * @return
+     * @return wrapper around the list of search results
      * @throws ControllerException
      */
     public SearchResults runLocalSearch(String userId, SearchQuery query, boolean isAPISearch)

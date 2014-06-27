@@ -79,9 +79,9 @@ public class SearchQuery implements IDataTransferModel {
         private boolean sortAscending;
         private int start;
         private int retrieveCount;
-        private Boolean hasSequence;
-        private Boolean hasAttachment;
-        private Boolean hasSample;
+        private boolean hasSequence;
+        private boolean hasAttachment;
+        private boolean hasSample;
 
         public Parameters() {
             start = 0;
@@ -90,27 +90,27 @@ public class SearchQuery implements IDataTransferModel {
             sortAscending = false;
         }
 
-        public Boolean getHasSequence() {
+        public boolean getHasSequence() {
             return hasSequence;
         }
 
-        public void setHasSequence(Boolean hasSequence) {
+        public void setHasSequence(boolean hasSequence) {
             this.hasSequence = hasSequence;
         }
 
-        public Boolean getHasAttachment() {
+        public boolean getHasAttachment() {
             return hasAttachment;
         }
 
-        public void setHasAttachment(Boolean hasAttachment) {
+        public void setHasAttachment(boolean hasAttachment) {
             this.hasAttachment = hasAttachment;
         }
 
-        public Boolean getHasSample() {
+        public boolean getHasSample() {
             return hasSample;
         }
 
-        public void setHasSample(Boolean hasSample) {
+        public void setHasSample(boolean hasSample) {
             this.hasSample = hasSample;
         }
 

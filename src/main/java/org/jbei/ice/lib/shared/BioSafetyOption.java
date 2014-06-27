@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.shared;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
@@ -20,9 +18,6 @@ public enum BioSafetyOption implements IDataTransferModel {
     BioSafetyOption(String name, String value) {
         this.displayName = name;
         this.value = value;
-    }
-
-    BioSafetyOption() {
     }
 
     public String getDisplayName() {
@@ -62,22 +57,6 @@ public enum BioSafetyOption implements IDataTransferModel {
             if (option.displayName.equalsIgnoreCase(value) || option.getValue().equals(value)) {
                 return Integer.valueOf(option.getValue());
             }
-        }
-        return null;
-    }
-
-    public static ArrayList<String> getDisplayList() {
-        ArrayList<String> list = new ArrayList<String>();
-        for (BioSafetyOption option : BioSafetyOption.values()) {
-            list.add(option.displayName);
-        }
-        return list;
-    }
-
-    public static BioSafetyOption displayToEnum(String value) {
-        for (BioSafetyOption option : BioSafetyOption.values()) {
-            if (value.equalsIgnoreCase(option.getDisplayName()))
-                return option;
         }
         return null;
     }
