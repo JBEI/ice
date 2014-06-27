@@ -549,11 +549,12 @@ iceControllers.controller('CollectionController', function ($scope, $state, $loc
 
     // default list of collections
     $scope.collectionList = [
-        { name:'available', display:'Available', icon:'fa-folder', iconOpen:'fa-folder-open'},
-        { name:'personal', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open'},
-        { name:'shared', display:'Shared', icon:'fa-folder', iconOpen:'fa-folder-open'},
-        { name:'bulkUpload', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit'},
-        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash-o'}
+        { name:'available', display:'Available', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
+        { name:'personal', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
+        { name:'shared', display:'Shared', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:false},
+        { name:'bulkUpload', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit', alwaysVisible:false},
+        { name:'pending', display:'Pending Approval', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:false},
+        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash-o', alwaysVisible:false}
     ];
 
     // entry items that can be created
@@ -571,7 +572,6 @@ iceControllers.controller('CollectionController', function ($scope, $state, $loc
 //        // url/folder/personal is accessed, this code is still executed (stateParams do not help here)
 //        // so that causes personal folder to be retrieved twice
 //        $scope.folder = undefined; // should already be undefined
-//        console.log("CC - retrieving personal entries");
 //
 //        var folders = Folders;
 //        folders.folder({folderId:'personal'}, function (result) {
