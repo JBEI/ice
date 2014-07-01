@@ -73,11 +73,16 @@ public class BulkEntryCreator {
     public PartData createEntry(String userId, long bulkUploadId, PartData data) {
         BulkUpload upload = dao.get(bulkUploadId);
         authorization.expectRead(userId, upload);
+
         data.setType(EntryType.nameToType(upload.getImportType()));
         Entry entry = InfoToModelFactory.infoToEntry(data);
         entry.setVisibility(Visibility.DRAFT.getValue());
+        Account account = accountController.getByEmail(userId);
+        entry.setOwner(account.getFullName());
+        entry.setOwnerEmail(account.getEmail());
         entry = entryDAO.create(entry);
-        upload.getContents().add(entry);  // todo : performance ; add manually instead of loading
+
+        upload.getContents().add(entry);
         dao.update(upload);
         data.setId(entry.getId());
         data.setModificationTime(entry.getModificationTime().getTime());
