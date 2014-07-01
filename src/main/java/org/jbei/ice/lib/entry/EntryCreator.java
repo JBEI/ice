@@ -21,6 +21,8 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * @author Hector Plahar
  */
@@ -91,31 +93,35 @@ public class EntryCreator {
 
         entry = dao.create(entry);
 
+        // check for pi
+        String piEmail = entry.getPrincipalInvestigatorEmail();
+        if (StringUtils.isNotEmpty(piEmail)) {
+            Account pi = DAOFactory.getAccountDAO().getByEmail(piEmail);
+            if (pi != null) {
+                // add write permission for the PI
+                addWritePermission(pi, entry);
+            }
+        }
+
         // add write permissions for owner
-        Permission permission = new Permission();
-        permission.setCanWrite(true);
-        permission.setEntry(entry);
-        permission.setAccount(account);
-        permissionDAO.create(permission);
+        addWritePermission(account, entry);
 
         // add read permission for all public groups
         ArrayList<Group> groups = new GroupController().getAllPublicGroupsForAccount(account);
         for (Group group : groups) {
-            Permission groupPermission = new Permission();
-            groupPermission.setGroup(group);
-            groupPermission.setEntry(entry);
-            groupPermission.setCanRead(true);
-            permissionDAO.create(groupPermission);
+            addReadPermission(null, group, entry);
         }
 
         if (accessPermissions != null) {
             for (AccessPermission accessPermission : accessPermissions) {
                 if (accessPermission.getArticle() == AccessPermission.Article.ACCOUNT) {
-                    // TODO
-                    // add account permission
-
+                    Account accessAccount = DAOFactory.getAccountDAO().get(accessPermission.getArticleId());
+                    // add account read permission
+                    addReadPermission(accessAccount, null, entry);
                 } else {
-                    // add group permission
+                    // add group read permission
+                    Group group = DAOFactory.getGroupDAO().get(accessPermission.getArticleId());
+                    addReadPermission(null, group, entry);
                 }
             }
         }
@@ -126,6 +132,28 @@ public class EntryCreator {
         }
 
         return entry;
+    }
+
+    protected void addReadPermission(Account account, Group group, Entry entry) {
+        Permission permission = new Permission();
+        if (group != null)
+            permission.setGroup(group);
+        else if (account != null)
+            permission.setAccount(account);
+        else
+            return; // either group or account required
+
+        permission.setEntry(entry);
+        permission.setCanRead(true);
+        permissionDAO.create(permission);
+    }
+
+    protected void addWritePermission(Account account, Entry entry) {
+        Permission permission = new Permission();
+        permission.setCanWrite(true);
+        permission.setEntry(entry);
+        permission.setAccount(account);
+        permissionDAO.create(permission);
     }
 
     public long createPart(String userId, PartData part) {
