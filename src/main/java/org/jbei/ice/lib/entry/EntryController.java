@@ -635,6 +635,8 @@ public class EntryController {
         if (entry == null)
             return null;
 
+        authorization.expectRead(userId, entry);
+
         List<TraceSequence> sequences = DAOFactory.getTraceSequenceDAO().getByEntry(entry);
         return ModelToInfoFactory.getSequenceAnalysis(sequences);
     }
@@ -643,6 +645,8 @@ public class EntryController {
         Entry entry = dao.get(entryId);
         if (entry == null)
             return null;
+
+        authorization.expectRead(userId, entry);
 
         // samples
         ArrayList<Sample> samples = new SampleController().getSamples(entry);
@@ -684,6 +688,7 @@ public class EntryController {
             return null;
 
         authorization.expectRead(userId, entry);
+
         PartStatistics statistics = new PartStatistics();
         statistics.setEntryId(entryId);
         statistics.setCommentCount(commentDAO.getCommentCount(entry));
@@ -699,7 +704,7 @@ public class EntryController {
 
     public boolean moveEntriesToTrash(String userId, ArrayList<PartData> list) {
         List<Entry> toTrash = new LinkedList<>();
-        for(PartData data : list) {
+        for (PartData data : list) {
             Entry entry = dao.get(data.getId());
             if (entry == null || !authorization.canWrite(userId, entry))
                 return false;
@@ -713,7 +718,7 @@ public class EntryController {
                 entry.setVisibility(Visibility.DELETED.getValue());
                 dao.update(entry);
             }
-        } catch(DAOException de) {
+        } catch (DAOException de) {
             Logger.error(de);
             return false;
         }
@@ -725,6 +730,8 @@ public class EntryController {
         Entry entry = dao.get(entryId);
         if (entry == null)
             return null;
+
+        authorization.expectRead(userId, entry);
 
         PartData partData = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
@@ -790,7 +797,7 @@ public class EntryController {
         if (parents == null)
             return partData;
 
-        for( Entry parent : parents) {
+        for (Entry parent : parents) {
             PartData parentData = new PartData();
             parentData.setId(parent.getId());
             partData.getParents().add(parentData);
