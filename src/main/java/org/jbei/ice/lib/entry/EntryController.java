@@ -796,6 +796,7 @@ public class EntryController {
             EntryType type = EntryType.nameToType(entry.getRecordType());
             PartData parentData = new PartData(type);
             parentData.setId(parent.getId());
+            parentData.setName(parent.getName());
             partData.getParents().add(parentData);
         }
 
