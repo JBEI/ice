@@ -1,15 +1,13 @@
 package org.jbei.ice.lib.dto.entry;
 
-public class StrainData extends PartData {
+import org.jbei.ice.lib.dao.IDataTransferModel;
+
+public class StrainData implements IDataTransferModel {
 
     private static final long serialVersionUID = 1L;
 
     private String host;
     private String genotypePhenotype;
-
-    public StrainData() {
-        super(EntryType.STRAIN);
-    }
 
     public String getHost() {
         return host;

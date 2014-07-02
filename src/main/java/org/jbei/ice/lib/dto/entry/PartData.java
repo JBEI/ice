@@ -1,14 +1,10 @@
 package org.jbei.ice.lib.dto.entry;
 
 import java.util.ArrayList;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
 
 import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 
-@XmlRootElement
-@XmlSeeAlso({StrainData.class, PlasmidData.class, ArabidopsisSeedData.class})
 public class PartData implements IDataTransferModel {
 
     private static final long serialVersionUID = 1l;
@@ -55,9 +51,9 @@ public class PartData implements IDataTransferModel {
     private boolean publicRead;
     private ArrayList<PartData> linkedParts;
 
-    public PartData() {
-        this(EntryType.PART);
-    }
+    private StrainData strainData;
+    private PlasmidData plasmidData;
+    private ArabidopsisSeedData arabidopsisSeedData;
 
     public PartData(EntryType type) {
         this.type = type;
@@ -314,7 +310,7 @@ public class PartData implements IDataTransferModel {
 
     /**
      * @return the url for the SBOL Visual image or the actual pigeon script if being retrieved from
-     * another registry
+     *         another registry
      */
     public String getSbolVisualURL() {
         return sbolVisualURL;
@@ -381,5 +377,29 @@ public class PartData implements IDataTransferModel {
 
     public ArrayList<PartData> getParents() {
         return parents;
+    }
+
+    public StrainData getStrainData() {
+        return strainData;
+    }
+
+    public void setStrainData(StrainData strainData) {
+        this.strainData = strainData;
+    }
+
+    public PlasmidData getPlasmidData() {
+        return plasmidData;
+    }
+
+    public void setPlasmidData(PlasmidData plasmidData) {
+        this.plasmidData = plasmidData;
+    }
+
+    public ArabidopsisSeedData getArabidopsisSeedData() {
+        return arabidopsisSeedData;
+    }
+
+    public void setArabidopsisSeedData(ArabidopsisSeedData arabidopsisSeedData) {
+        this.arabidopsisSeedData = arabidopsisSeedData;
     }
 }

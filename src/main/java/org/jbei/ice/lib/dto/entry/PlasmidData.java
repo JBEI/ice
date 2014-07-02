@@ -1,16 +1,14 @@
 package org.jbei.ice.lib.dto.entry;
 
-public class PlasmidData extends PartData {
+import org.jbei.ice.lib.dao.IDataTransferModel;
+
+public class PlasmidData implements IDataTransferModel {
 
     private String backbone;
     private String originOfReplication;
     private String promoters;
-    private Boolean circular;
+    private boolean circular;
     private String replicatesIn;
-
-    public PlasmidData() {
-        super(EntryType.PLASMID);
-    }
 
     public String getBackbone() {
         return backbone;
@@ -36,11 +34,11 @@ public class PlasmidData extends PartData {
         this.promoters = promoters;
     }
 
-    public Boolean getCircular() {
+    public boolean getCircular() {
         return circular;
     }
 
-    public void setCircular(Boolean circular) {
+    public void setCircular(boolean circular) {
         this.circular = circular;
     }
 

@@ -30,17 +30,16 @@ public class EntryRetriever {
 
     // return list of part data with only partId and id filled in
     public ArrayList<PartData> getMatchingPartNumber(String token, int limit) {
-        if(token == null)
+        if (token == null)
             return new ArrayList<>();
 
         token = token.replaceAll("'", "");
         ArrayList<PartData> dataList = new ArrayList<>();
         for (Entry entry : dao.getMatchingEntryPartNumbers(token, limit)) {
-            PartData partData = new PartData();
+            EntryType type = EntryType.nameToType(entry.getRecordType());
+            PartData partData = new PartData(type);
             partData.setId(entry.getId());
             partData.setPartId(entry.getPartNumber());
-            EntryType type = EntryType.nameToType(entry.getRecordType());
-            partData.setType(type);
             dataList.add(partData);
         }
         return dataList;

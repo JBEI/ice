@@ -5,7 +5,6 @@ import java.util.Calendar;
 
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.access.Permission;
-import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
@@ -36,19 +35,6 @@ public class EntryCreator {
         dao = DAOFactory.getEntryDAO();
         permissionDAO = DAOFactory.getPermissionDAO();
         sequenceDAO = DAOFactory.getSequenceDAO();
-    }
-
-    /**
-     * creates entry and assigns read permissions to all public groups that user creating the entry is a member of
-     *
-     * @param account account for user creating entry
-     * @param entry   entry being created
-     * @return created entry
-     */
-    public Entry createEntry(Account account, Entry entry) {
-        PermissionsController permissionsController = new PermissionsController();
-        ArrayList<AccessPermission> accessPermissions = permissionsController.getDefaultPermissions(account);
-        return createEntry(account, entry, accessPermissions);
     }
 
     /**

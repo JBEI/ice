@@ -20,8 +20,7 @@ import org.hibernate.SessionFactory;
  *
  * @author Hector Plahar
  */
-public class
-        IceServletContextListener implements ServletContextListener {
+public class IceServletContextListener implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent event) {
         init();

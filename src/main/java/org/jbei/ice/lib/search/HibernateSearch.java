@@ -86,21 +86,12 @@ public class HibernateSearch {
                 }
             }
 
-            // pending visibility
+            // visibility
             Query visibilityQuery = qb.keyword().onField("visibility")
-                                      .matching(Visibility.PENDING.getValue()).createQuery();
-            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
+                                      .matching(Visibility.OK.getValue()).createQuery();
+            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST);
 
-            // draft visibility
-            Query visibilityDraftQuery = qb.keyword().onField("visibility")
-                                           .matching(Visibility.DRAFT.getValue()).createQuery();
-            booleanQuery.add(visibilityDraftQuery, BooleanClause.Occur.MUST_NOT);
-
-            // exclude deleted ???
-//            Query deletedQuery = qb.keyword().onField("ownerEmail").matching("system").createQuery();
-//            booleanQuery.add(deletedQuery, BooleanClause.Occur.MUST_NOT);
-
-            // biosafety
+            // bio-safety level
             if (option != null) {
                 TermContext levelContext = qb.keyword();
                 org.apache.lucene.search.Query biosafetyQuery =

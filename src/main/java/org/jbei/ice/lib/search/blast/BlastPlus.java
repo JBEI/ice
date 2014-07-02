@@ -30,11 +30,8 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.entry.ArabidopsisSeedData;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.PlasmidData;
-import org.jbei.ice.lib.dto.entry.StrainData;
 import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
@@ -122,26 +119,7 @@ public class BlastPlus {
             name = idLineFields[2];
             partNumber = idLineFields[3];
 
-            PartData view;
-            switch (recordType) {
-                case PART:
-                default:
-                    view = new PartData();
-                    break;
-
-                case ARABIDOPSIS:
-                    view = new ArabidopsisSeedData();
-                    break;
-
-                case PLASMID:
-                    view = new PlasmidData();
-                    break;
-
-                case STRAIN:
-                    view = new StrainData();
-                    break;
-            }
-
+            PartData view = new PartData(recordType);
             view.setId(id);
             view.setPartId(partNumber);
             view.setName(name);

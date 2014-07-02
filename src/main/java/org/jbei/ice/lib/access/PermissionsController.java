@@ -12,6 +12,7 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
@@ -484,8 +485,10 @@ public class PermissionsController {
     public PartData setEntryPermissions(String userId, long partId, ArrayList<AccessPermission> permissions) {
         Entry entry = DAOFactory.getEntryDAO().get(partId);
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        PartData data = new PartData();
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        PartData data = new PartData(type);
 
+        // TODO :
         if (entry == null) {
             partId = new EntryCreator().createPart(userId, data);
             entry = DAOFactory.getEntryDAO().get(partId);
@@ -526,7 +529,8 @@ public class PermissionsController {
      */
     public AccessPermission createPermission(String userId, long partId, AccessPermission access) {
         Entry entry = DAOFactory.getEntryDAO().get(partId);
-        PartData data = new PartData();
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        PartData data = new PartData(type);
 
         if (entry == null) {
             partId = new EntryCreator().createPart(userId, data);

@@ -331,7 +331,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public List<Entry> sharedWithUserEntries(Account requester, Set<Group> accountGroups) throws DAOException {
+    public List<Entry> sharedWithUserEntries(Account requester, Set<Group> accountGroups, ColumnField sort,
+            boolean asc, int start, int limit) throws DAOException {
         try {
             Session session = currentSession();
             Criteria criteria = session.createCriteria(Permission.class);
@@ -354,6 +355,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
                                           .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
                                           .add(Restrictions.isNull("visibility")));
             entryCriteria.add(Restrictions.ne("ownerEmail", requester.getEmail()));
+
+            // sort and paging
+            entryCriteria.setFirstResult(start);
+            entryCriteria.setMaxResults(limit);
+            String sortString = columnFieldToString(sort);
+            Order order = asc ? Order.asc(sortString) : Order.desc(sortString);
+            entryCriteria.addOrder(order);
+
             return new ArrayList<Entry>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);

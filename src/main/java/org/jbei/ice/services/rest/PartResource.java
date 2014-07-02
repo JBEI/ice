@@ -110,7 +110,7 @@ public class PartResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         try {
-            if(permissionsController.enablePublicReadAccess(userId, partId))
+            if (permissionsController.enablePublicReadAccess(userId, partId))
                 return respond(Response.Status.OK);
         } catch (ControllerException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -124,7 +124,7 @@ public class PartResource extends RestResource {
     public Response disablePublicAccess(@Context UriInfo info, @PathParam("id") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        if(permissionsController.disablePublicReadAccess(userId, partId))
+        if (permissionsController.disablePublicReadAccess(userId, partId))
             return respond(Response.Status.OK);
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
@@ -312,9 +312,8 @@ public class PartResource extends RestResource {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         EntryCreator creator = new EntryCreator();
         long id = creator.createPart(userId, partData);
-        PartData data = new PartData();
-        data.setId(id);
-        return data;
+        partData.setId(id);
+        return partData;
     }
 
     @PUT
@@ -327,9 +326,8 @@ public class PartResource extends RestResource {
             PartData partData) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         long id = controller.updatePart(userId, partId, partData);
-        PartData data = new PartData();
-        data.setId(id);
-        return data;
+        partData.setId(id);
+        return partData;
     }
 
 //    @Path("/{id}")
@@ -352,12 +350,12 @@ public class PartResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response moveToTrash(ArrayList<PartData> list,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId =  getUserIdFromSessionHeader(userAgentHeader);
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
         Type fooType = new TypeToken<ArrayList<PartData>>() {
         }.getType();
         Gson gson = new GsonBuilder().create();
         ArrayList<PartData> data = gson.fromJson(gson.toJsonTree(list), fooType);
-        if(controller.moveEntriesToTrash(userId, data))
+        if (controller.moveEntriesToTrash(userId, data))
             return respond(Response.Status.OK);
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }

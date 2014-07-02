@@ -5,6 +5,7 @@ import javax.persistence.*;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
@@ -109,8 +110,8 @@ public class Request implements IDataModel {
         sampleRequest.setId(getId());
         sampleRequest.setRequestType(getType());
         sampleRequest.setStatus(getStatus());
-        PartData data = new PartData();
-        Entry entry = getEntry();
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        PartData data = new PartData(type);
         data.setId(entry.getId());
         data.setPartId(entry.getPartNumber());
         sampleRequest.setPartData(data);

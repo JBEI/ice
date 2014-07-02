@@ -2,15 +2,7 @@ package org.jbei.ice.services.rest;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -68,7 +60,7 @@ public class UserResource extends RestResource {
     public AccountTransfer read(@Context UriInfo info, @PathParam("id") long userId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         Account account = controller.get(userId);
-        if(account != null)
+        if (account != null)
             return account.toDataTransferObject();
         return null;
     }
@@ -80,6 +72,16 @@ public class UserResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userIdString = getUserIdFromSessionHeader(userAgentHeader);
         return groupController.retrieveUserGroups(userIdString, userId, false);
+    }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/groups")
+    public UserGroup createGroup(@PathParam("id") long userId,
+            UserGroup userGroup,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userIdString = getUserIdFromSessionHeader(userAgentHeader);
+        return groupController.createGroup(userIdString, userGroup);
     }
 
     @GET

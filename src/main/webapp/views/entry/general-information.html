@@ -162,7 +162,7 @@
 </div>
 <div class="row margin-top-10" ng-if="entry.linkedParts.length">
     <div class="col-md-12">
-        <div class="entry-details-subheader"><strong style="color: #233559;">CONTAINS / EMBEDS / LINKS</strong></div>
+        <div class="entry-details-subheader"><strong style="color: #233559;">CONTAINS</strong></div>
 
         <div ng-repeat="part in entry.linkedParts">
             <div class="row" ng-if="$index % 2 == 0">
@@ -270,7 +270,7 @@
 
         <!--area where sequence is when there is no sequence available -->
         <div class="pad_top" ng-if='!entry.hasSequence' style="color: #999;">
-            <i style="color: #999" class="font-90em" ng-hide="isFileUpload||isPaste">No sequence data provided.</i>
+            <i style="color: #999" class="font-90em" ng-hide="isFileUpload||isPaste">No sequence data provided</i>
 
             <!--file upload-->
             <span ng-show="isFileUpload">
@@ -315,12 +315,11 @@
     </div>
 </div>
 
-<div class="row margin-top-10">
+<div class="row margin-top-10" ng-if="entry.longDescription">
     <div class="col-md-12">
         <div class="entry-details-subheader">
             <strong style="color: #233559;">NOTES</strong>
         </div>
-
         {{entry.longDescription}}
     </div>
 </div>

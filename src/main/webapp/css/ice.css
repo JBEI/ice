@@ -2188,11 +2188,11 @@ td.selected i.font-awesome {
 }
 
 .hover_icon_visible>i {
-    display: none;
+    opacity: 0.3
 }
 
 .hover_icon_visible:hover>i {
-    display: block;
+    opacity: 0.9
 }
 
 .permission_footer {

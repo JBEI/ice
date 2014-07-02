@@ -33,21 +33,10 @@
         <listener-class>org.jbei.ice.servlet.IceServletContextListener</listener-class>
     </listener>
 
-    <!-- main ice servlet -->
-    <servlet>
-        <servlet-name>IceServlet</servlet-name>
-        <servlet-class>org.jbei.ice.servlet.IceServlet</servlet-class>
-    </servlet>
-
     <servlet>
         <servlet-name>FileDownloadServlet</servlet-name>
         <servlet-class>org.jbei.ice.servlet.FileDownloadServlet</servlet-class>
     </servlet>
-
-    <servlet-mapping>
-        <servlet-name>IceServlet</servlet-name>
-        <url-pattern>/ice</url-pattern>
-    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>FileDownloadServlet</servlet-name>

@@ -46,7 +46,7 @@ public class GroupControllerTest {
         UserGroup userGroup = new UserGroup();
         userGroup.setLabel("test Group");
         userGroup.setDescription("test");
-        userGroup = controller.createGroup(account, userGroup);
+        userGroup = controller.createGroup(account.getEmail(), userGroup);
         Assert.assertNotNull(userGroup);
         Group group = controller.getGroupByUUID(userGroup.getUuid());
         Assert.assertNotNull(group);
@@ -59,7 +59,7 @@ public class GroupControllerTest {
         userGroup1.setDescription("test1");
         userGroup1.setType(GroupType.PRIVATE);
         userGroup1.setLabel("label1");
-        long id = controller.createGroup(account, userGroup1).getId();
+        long id = controller.createGroup(account.getEmail(), userGroup1).getId();
         Assert.assertNotNull(controller.getGroupById(id));
     }
 
@@ -79,7 +79,7 @@ public class GroupControllerTest {
         UserGroup userGroup = new UserGroup();
         userGroup.setLabel("test Group");
         userGroup.setDescription("test");
-        userGroup = controller.createGroup(account, userGroup);
+        userGroup = controller.createGroup(account.getEmail(), userGroup);
         Assert.assertNotNull(userGroup);
     }
 
@@ -96,7 +96,7 @@ public class GroupControllerTest {
         UserGroup g1 = new UserGroup();
         g1.setDescription("desc");
         g1.setLabel("label");
-        g1 = controller.createGroup(account, g1);
+        g1 = controller.createGroup(account.getEmail(), g1);
         Assert.assertNotNull(g1);
 
         Group group1 = controller.getGroupById(g1.getId());
@@ -106,7 +106,7 @@ public class GroupControllerTest {
         UserGroup g2 = new UserGroup();
         g2.setDescription("desc");
         g2.setLabel("myg2");
-        g2 = controller.createGroup(account, g2);
+        g2 = controller.createGroup(account.getEmail(), g2);
         Assert.assertNotNull(g2);
         Group group2 = controller.getGroupById(g2.getId());
         Assert.assertNotNull(group2);
@@ -119,7 +119,7 @@ public class GroupControllerTest {
         UserGroup g3 = new UserGroup();
         g3.setDescription("desc");
         g3.setLabel("myg3");
-        Assert.assertNotNull(controller.createGroup(account2, g3));
+        Assert.assertNotNull(controller.createGroup(account2.getEmail(), g3));
 
         Set<Group> groups = controller.getMatchingGroups(account, "myg", 10);
         Assert.assertNotNull(groups);
@@ -138,7 +138,7 @@ public class GroupControllerTest {
         user.setType(GroupType.PRIVATE);
 
         // create group
-        user = controller.createGroup(a1, user);
+        user = controller.createGroup(a1.getEmail(), user);
         Assert.assertNotNull(user);
 
         ArrayList<AccountTransfer> infos = new ArrayList<>();
@@ -165,7 +165,7 @@ public class GroupControllerTest {
         user.setType(GroupType.PRIVATE);
 
         // create group
-        user = controller.createGroup(a1, user);
+        user = controller.createGroup(a1.getEmail(), user);
         Assert.assertNotNull(user);
 
         ArrayList<AccountTransfer> infos = new ArrayList<>();

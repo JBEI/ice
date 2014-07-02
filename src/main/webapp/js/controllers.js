@@ -359,13 +359,24 @@ iceControllers.controller('MessageController', function ($scope, $location, $coo
     });
 });
 
-iceControllers.controller('ProfileGroupsController', function ($scope, $location, $cookieStore, $stateParams, User) {
+iceControllers.controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User, Group) {
     var profileId = $stateParams.id;
     $location.path("/profile/" + profileId + "/groups", false);
     $scope.selectedUsers = [];
+    $scope.myGroups = [];
+    $scope.groupsIBelong = [];
 
     var user = User($cookieStore.get('sessionId'));
-    user.getGroups({userId:profileId}, function (result) {
+    var group = Group();
+
+    group.getUserGroups({userId:profileId}, function (result) {
+        angular.forEach(result, function (item) {
+            if (item.ownerEmail && item.ownerEmail === $rootScope.user.email)
+                $scope.myGroups.push(item);
+            else
+                $scope.groupsIBelong.push(item);
+        });
+
         $scope.userGroups = result;
     });
 
@@ -374,11 +385,23 @@ iceControllers.controller('ProfileGroupsController', function ($scope, $location
     });
 
     $scope.selectUser = function (user) {
-        $scope.selectedUsers.push(user);
-        var index = $scope.users.indexOf(user);
-        if (index != -1)
-            $scope.users.splice(index, 1);
-    }
+        var index = $scope.selectedUsers.indexOf(user);
+        if (index == -1)
+            $scope.selectedUsers.push(user);
+        else
+            $scope.selectedUsers.splice(index, 1);
+    };
+
+    $scope.resetSelectedUsers = function () {
+        $scope.selectedUsers = [];
+    };
+
+    $scope.createGroup = function () {
+        $scope.newGroup = {label:$scope.groupName, description:$scope.groupDescription};
+        user.createGroup({userId:profileId}, $scope.newGroup, function (result) {
+            $scope.myGroups.splice(0, 0, result);
+        })
+    };
 });
 
 iceControllers.controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, User) {
@@ -1113,7 +1136,7 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                     Upload(sid).rename({importId:$scope.bulkUpload.id}, tmp, function (result) {
                         $scope.bulkUpload.name = result.name;
                         $scope.bulkUpload.lastUpdate = result.lastUpdate;
-                        $rootScope.$broadcast("BulkUploadNameChange", tmp);
+                        $scope.$emit("BulkUploadNameChange", tmp);
                     });
                 } else {
                     // just update display name
@@ -1504,18 +1527,26 @@ iceControllers.controller('CollectionMenuController', function ($cookieStore, $s
         });
 
     console.log("CMC - retrieving folder counts");
-    folders.query(function (result) {
-        if (result === undefined || $scope.collectionList === undefined)
-            return;
+    var updateCounts = function () {
+        folders.query(function (result) {
+            if (result === undefined || $scope.collectionList === undefined)
+                return;
 
-        for (var i = 0; i < $scope.collectionList.length; i += 1) {
-            var item = $scope.collectionList[i];
-            item.count = result[item.name];
-        }
-    });
+            for (var i = 0; i < $scope.collectionList.length; i += 1) {
+                var item = $scope.collectionList[i];
+                item.count = result[item.name];
+            }
+        });
+    };
+    updateCounts();
     //
     // end initialize
     //
+
+    // Menu count change handler
+    $scope.$on("UpdateCollectionCounts", function (event) {
+        updateCounts();
+    });
 
     // called from collections-menu-details.html when a collection's folder is selected
     // simply changes state to folder and allows the controller for that to handle it
@@ -1780,7 +1811,6 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
             autoCompleteField:'SELECTION_MARKERS'}
     ];
 
-
     var strainFields = [
         {label:"Parent Strain", schema:'parentalStrain', placeHolder:"Part Number", inputType:'autoComplete',
             autoCompleteField:'PLASMID_PART_NUMBER'},
@@ -2010,6 +2040,7 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
         } else {
             entry.create($scope.part, function (result) {
                 console.log("created entry", result);
+                $scope.$emit("UpdateCollectionCounts");
                 $location.path('/entry/' + result.id);
             }, function (error) {
                 console.error(error);

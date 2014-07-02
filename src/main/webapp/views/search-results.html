@@ -2,8 +2,15 @@
     <div class="row entry_general_header_td">
 
         <div class="col-md-12">
-            <h4><strong style="color: #888;text-transform: uppercase;">Search Results</strong>
-                <img ng-if="loadingPage" src="/img/loader-mini.gif"></h4>
+            <h4>
+                <strong style="color: #888;"><i class="fa fa-fw fa-search" style="color: #444"></i> LOCAL
+                    RESULTS</strong>
+                <img ng-if="loadingPage" src="/img/loader-mini.gif">
+
+                <small class="edit_icon font-70em pad_left" ng-click="searchWebOfRegistries()">
+                    <i style="color: #555" class="fa fa-globe"></i> Search other registries
+                </small>
+            </h4>
         </div>
     </div>
 

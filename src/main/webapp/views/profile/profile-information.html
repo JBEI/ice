@@ -15,7 +15,7 @@
 <div class="row pad_top" ng-show="!showChangePassword && !showEditProfile && !showSendMessage"><i style="color: #999;">{{profile.description
     || 'No profile description provided.'}}</i></div>
 
-<div class="row margin-top-10 panel panel-default font-95em " ng-if="showEditProfile" ng-init="switchtoEditMode()">
+<div class="row margin-top-10 panel panel-default font-95em" ng-if="showEditProfile" ng-init="switchtoEditMode()">
     <form class="panel-body" role="form" ng-submit="updateProfile()">
         <div class="col-md-2 pad-top-5">
             <span style="white-space:nowrap">First name <span class="required">*</span> </span>

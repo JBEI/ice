@@ -16,6 +16,22 @@ iceServices.factory('Pigeon', function ($http) {
         }
     }
 });
+iceServices.factory('Group', function ($resource, $cookieStore) {
+    return function () {
+
+        var sessionId = $cookieStore.get("sessionId");
+
+        return $resource('/rest/groups', {userId:'@userId'}, {
+            getUserGroups:{
+                method:'GET',
+                responseType:"json",
+                isArray:true,
+                url:"/rest/groups/:userId",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            }
+        });
+    }
+});
 
 iceServices.factory('User', function ($resource) {
     return function (sessionId) {
@@ -46,6 +62,13 @@ iceServices.factory('User', function ($resource) {
                 url:"/rest/users/:userId/groups",
                 responseType:'json',
                 isArray:true,
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            createGroup:{
+                method:'PUT',
+                url:"/rest/users/:userId/groups",
+                responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -87,11 +110,19 @@ iceServices.factory('Message', function ($resource) {
 
 iceServices.factory('Samples', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/samples', {}, {
+        return $resource('/rest/samples', {userId:'@userId'}, {
             requests:{
                 method:'GET',
                 responseType:'json',
                 url:"/rest/samples/requests",
+                isArray:true,
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            userRequests:{
+                method:'GET',
+                responseType:'json',
+                url:"/rest/samples/requests/:userId",
                 isArray:true,
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }

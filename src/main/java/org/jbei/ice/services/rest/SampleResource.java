@@ -9,7 +9,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
-import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.SampleRequests;
 
 /**
@@ -18,7 +17,6 @@ import org.jbei.ice.lib.entry.sample.SampleRequests;
 @Path("/samples")
 public class SampleResource extends RestResource {
 
-    private SampleController sampleController = new SampleController();
     private SampleRequests sampleRequests = new SampleRequests();
 
     @GET
@@ -26,9 +24,19 @@ public class SampleResource extends RestResource {
     @Path("/requests")
     public ArrayList<SampleRequest> getRequests(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-            String userId = getUserIdFromSessionHeader(userAgentHeader);
-            Logger.info(userId + ": pending samples");
-            return sampleRequests.getPendingRequests(userId);
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        Logger.info(userId + ": retrieving all sample requests");
+        return sampleRequests.getPendingRequests(userId);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/requests/:userId")
+    public ArrayList<SampleRequest> getUserRequests(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        Logger.info(userId + ": retrieving sample requests for user");
+        return sampleRequests.getPendingRequests(userId);
     }
 
 //    @GET

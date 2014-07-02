@@ -32,6 +32,7 @@ import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.PartSample;
 import org.jbei.ice.lib.dto.comment.UserComment;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
@@ -88,21 +89,15 @@ public class EntryController {
         auditDAO = DAOFactory.getAuditDAO();
     }
 
-    public FeaturedDNASequence getPublicSequence(String recordId) throws ControllerException {
-        Entry entry;
-        try {
-            entry = dao.getByRecordId(recordId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
+    public FeaturedDNASequence getPublicSequence(String recordId) {
+        Entry entry = dao.getByRecordId(recordId);
         if (entry == null)
             return null;
 
         if (!permissionsController.isPubliclyVisible(entry)) {
             String errMsg = "Entry " + recordId + " is not public";
             Logger.warn(errMsg);
-            throw new ControllerException(errMsg);
+            return null;
         }
         return sequenceController.sequenceToDNASequence(sequenceDAO.getByEntry(entry));
     }
@@ -283,7 +278,7 @@ public class EntryController {
         GroupController controller = new GroupController();
         Group everybodyGroup = controller.createOrRetrievePublicGroup();
         accountGroups.add(everybodyGroup);
-        List<Entry> entries = dao.sharedWithUserEntries(account, accountGroups);
+        List<Entry> entries = dao.sharedWithUserEntries(account, accountGroups, field, asc, start, limit);
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : entries) {
@@ -798,7 +793,8 @@ public class EntryController {
             return partData;
 
         for (Entry parent : parents) {
-            PartData parentData = new PartData();
+            EntryType type = EntryType.nameToType(entry.getRecordType());
+            PartData parentData = new PartData(type);
             parentData.setId(parent.getId());
             partData.getParents().add(parentData);
         }

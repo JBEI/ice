@@ -25,8 +25,8 @@ public class UserGroup implements IDataTransferModel {
     private String ownerEmail;
 
     public UserGroup() {
-        children = new ArrayList<UserGroup>();
-        members = new ArrayList<AccountTransfer>();
+        children = new ArrayList<>();
+        members = new ArrayList<>();
     }
 
     public String getUuid() {

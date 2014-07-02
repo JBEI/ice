@@ -72,32 +72,6 @@ public class GroupController {
         return userGroups;
     }
 
-    public ArrayList<UserGroup> retrieveGroups(Account account, GroupType type) throws ControllerException {
-        ArrayList<UserGroup> userGroups = new ArrayList<>();
-
-        ArrayList<Group> result;
-        switch (type) {
-            default:
-            case PRIVATE:
-                result = dao.retrieveGroups(account, type);
-                break;
-
-            case PUBLIC:
-                if (account.getType() != AccountType.ADMIN)
-                    throw new ControllerException("Cannot retrieve public groups without admin privileges");
-
-                result = dao.retrievePublicGroups();
-                break;
-        }
-
-        for (Group group : result) {
-            UserGroup user = group.toDataTransferObject();
-            user.setMemberCount(retrieveGroupMemberCount(group.getUuid()));
-            userGroups.add(user);
-        }
-        return userGroups;
-    }
-
     public Set<String> retrieveAccountGroupUUIDs(Account account) throws ControllerException {
         Set<String> uuids = new HashSet<>();
         if (account != null) {
@@ -117,15 +91,17 @@ public class GroupController {
     }
 
     // create group without parent
-    public UserGroup createGroup(Account account, UserGroup info) throws ControllerException {
-        if (info.getType() == GroupType.PUBLIC && !accountController.isAdministrator(account.getEmail())) {
-            String errMsg = "Non admin " + account.getEmail() + " attempting to create public group";
+    public UserGroup createGroup(String userId, UserGroup info) {
+        if (info.getType() == GroupType.PUBLIC && !accountController.isAdministrator(userId)) {
+            String errMsg = "Non admin " + userId + " attempting to create public group";
             Logger.error(errMsg);
-            throw new ControllerException(errMsg);
+            return null;
         }
 
         if (info.getType() == null)
             info.setType(GroupType.PRIVATE);
+
+        Account account = accountController.getByEmail(userId);
 
         Group group = new Group();
         group.setLabel(info.getLabel());

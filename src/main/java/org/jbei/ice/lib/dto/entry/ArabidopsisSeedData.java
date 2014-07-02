@@ -2,7 +2,9 @@ package org.jbei.ice.lib.dto.entry;
 
 import java.util.Date;
 
-public class ArabidopsisSeedData extends PartData {
+import org.jbei.ice.lib.dao.IDataTransferModel;
+
+public class ArabidopsisSeedData implements IDataTransferModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -13,10 +15,6 @@ public class ArabidopsisSeedData extends PartData {
     private Generation generation;
     private PlantType plantType;
     private Boolean sentToAbrc;
-
-    public ArabidopsisSeedData() {
-        super(EntryType.ARABIDOPSIS);
-    }
 
     // getters and setters
     public String getHomozygosity() {

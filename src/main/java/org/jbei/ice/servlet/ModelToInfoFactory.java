@@ -27,7 +27,7 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 
 /**
- * Factory for converting {@link Entry}s to their corresponding {@link org.jbei.ice.lib.dto.entry.PartData}
+ * Factory for converting {@link Entry}s to a {@link org.jbei.ice.lib.dto.entry.PartData}
  * data transfer objects
  *
  * @author Hector Plahar
@@ -37,85 +37,31 @@ public class ModelToInfoFactory {
     private static EntryAuthorization authorization = new EntryAuthorization();
 
     public static PartData getInfo(Entry entry) {
-        PartData info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
             return null;
 
+        PartData part = getCommon(type, entry);
+
         switch (type) {
             case PLASMID:
-                info = plasmidInfo(entry);
+                part.setPlasmidData(plasmidInfo(entry));
                 break;
 
             case STRAIN:
-                info = strainInfo(entry);
+                part.setStrainData(strainInfo(entry));
                 break;
 
             case ARABIDOPSIS:
-                info = seedInfo(entry);
-                break;
-
-            case PART:
-                info = partInfo(entry);
+                part.setArabidopsisSeedData(seedInfo(entry));
                 break;
 
             default:
-                Logger.error("Do not know how to handle entry type " + type);
-                return null;
+            case PART:
+                return part;
         }
-        return info;
+        return part;
     }
-
-//    public static ArrayList<SampleStorage> getSamples(Map<Sample, LinkedList<Storage>> samples) {
-//        ArrayList<SampleStorage> samplesList = new ArrayList<>();
-//        if (samples == null)
-//            return samplesList;
-//
-//        for (Map.Entry<Sample, LinkedList<Storage>> sample : samples.entrySet()) {
-//            PartSample key = getSampleInfo(sample.getKey());
-//            Storage storage = sample.getKey().getStorage();
-//            if (storage != null) {
-//                key.setLocationId(String.valueOf(storage.getId()));
-//                key.setLocation(storage.getIndex());
-//            }
-//
-//            SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(sample.getValue()));
-//            samplesList.add(sampleStorage);
-//        }
-//        return samplesList;
-//    }
-
-//    private static PartSample getSampleInfo(Sample sample) {
-//        PartSample part = new PartSample();
-//        if (sample == null)
-//            return part;
-//
-//        part.setSampleId(Long.toString(sample.getId()));
-//        part.setCreationTime(sample.getCreationTime());
-//        part.setLabel(sample.getLabel());
-//        part.setNotes(sample.getNotes());
-//        part.setDepositor(sample.getDepositor());
-//
-//        Storage storage = sample.getStorage(); // specific storage to this sample. e.g. Tube
-//        if (storage != null) {
-//            part.setLocationId(String.valueOf(storage.getId()));
-//            part.setLocation(storage.getIndex());
-//        }
-//        return part;
-//    }
-
-//    private static LinkedList<StorageInfo> getStorageListInfo(LinkedList<Storage> storageList) {
-//        LinkedList<StorageInfo> info = new LinkedList<>();
-//
-//        if (storageList == null)
-//            return info;
-//
-//        for (Storage storage : storageList) {
-//            info.add(getStorageInfo(storage));
-//        }
-//
-//        return info;
-//    }
 
     public static ArrayList<AttachmentInfo> getAttachments(List<Attachment> attachments) {
         ArrayList<AttachmentInfo> infos = new ArrayList<>();
@@ -175,14 +121,8 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static PartData partInfo(Entry entry) {
-        PartData info = new PartData();
-        return getCommon(info, entry);
-    }
-
     private static ArabidopsisSeedData seedInfo(Entry entry) {
         ArabidopsisSeedData data = new ArabidopsisSeedData();
-        data = (ArabidopsisSeedData) getCommon(data, entry);
 
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -207,7 +147,6 @@ public class ModelToInfoFactory {
 
     private static StrainData strainInfo(Entry entry) {
         StrainData data = new StrainData();
-        data = (StrainData) getCommon(data, entry);
 
         // strain specific
         Strain strain = (Strain) entry;
@@ -218,7 +157,6 @@ public class ModelToInfoFactory {
 
     private static PlasmidData plasmidInfo(Entry entry) {
         PlasmidData data = new PlasmidData();
-        data = (PlasmidData) getCommon(data, entry);
         Plasmid plasmid = (Plasmid) entry;
 
         // plasmid specific fields
@@ -230,7 +168,8 @@ public class ModelToInfoFactory {
         return data;
     }
 
-    private static PartData getCommon(PartData info, Entry entry) {
+    private static PartData getCommon(EntryType type, Entry entry) {
+        PartData info = new PartData(type);
         info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
         info.setPartId(entry.getPartNumber());
@@ -271,9 +210,8 @@ public class ModelToInfoFactory {
 
         // linked entries
         for (Entry linkedEntry : entry.getLinkedEntries()) {
-            PartData data = new PartData();
-//            EntryType linkedType = EntryType.nameToType(linkedEntry.getRecordType());
-//            data.setType(linkedType);
+            EntryType linkedType = EntryType.nameToType(entry.getRecordType());
+            PartData data = new PartData(linkedType);
             data.setId(linkedEntry.getId());
 //            data.setPartId(linkedEntry.getPartNumber());
 //            data.setName(linkedEntry.getName());
@@ -307,7 +245,9 @@ public class ModelToInfoFactory {
         return info;
     }
 
-    private static void getTipViewCommon(PartData view, Entry entry) {
+    private static PartData getTipViewCommon(Entry entry) {
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        PartData view = new PartData(type);
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
         view.setPartId(entry.getPartNumber());
@@ -335,24 +275,23 @@ public class ModelToInfoFactory {
         view.setBioSafetyLevel(entry.getBioSafetyLevel());
         view.setFundingSource(entry.getFundingSource());
         view.setPrincipalInvestigator(entry.getPrincipalInvestigator());
+        return view;
 
-        for (Entry linkedEntry : entry.getLinkedEntries()) {
-            PartData data = new PartData();
-            EntryType linkedType = EntryType.nameToType(linkedEntry.getRecordType());
-            data.setType(linkedType);
-            data.setId(linkedEntry.getId());
-            data.setPartId(linkedEntry.getPartNumber());
-            data.setName(linkedEntry.getName());
-            view.getLinkedParts().add(data);
-        }
+//        for (Entry linkedEntry : entry.getLinkedEntries()) {
+//            EntryType linkedType = EntryType.nameToType(linkedEntry.getRecordType());
+//            PartData data = new PartData(linkedType);
+//            data.setId(linkedEntry.getId());
+//            data.setPartId(linkedEntry.getPartNumber());
+//            data.setName(linkedEntry.getName());
+//            view.getLinkedParts().add(data);
+//        }
     }
 
     public static PartData createTableViewData(String userId, Entry entry, boolean includeOwnerInfo) {
         if (entry == null)
             return null;
         EntryType type = EntryType.nameToType(entry.getRecordType());
-        PartData view = new PartData();
-        view.setType(type);
+        PartData view = new PartData(type);
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
         view.setPartId(entry.getPartNumber());
@@ -407,59 +346,50 @@ public class ModelToInfoFactory {
 
     public static PartData createTipView(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
+        PartData part = getTipViewCommon(entry);
+
         switch (type) {
-
-            case STRAIN: {
-                StrainData view = new StrainData();
-
-                // common
-                getTipViewCommon(view, entry);
+            case STRAIN:
+                StrainData strainData = new StrainData();
 
                 // strain specific
                 Strain strain = (Strain) entry;
-                view.setHost(strain.getHost());
-                view.setGenotypePhenotype(strain.getGenotypePhenotype());
-                return view;
-            }
+                strainData.setHost(strain.getHost());
+                strainData.setGenotypePhenotype(strain.getGenotypePhenotype());
+                part.setStrainData(strainData);
+                break;
 
-            case ARABIDOPSIS: {
-                ArabidopsisSeedData view = new ArabidopsisSeedData();
-                getTipViewCommon(view, entry);
-
+            case ARABIDOPSIS:
+                ArabidopsisSeedData seedData = new ArabidopsisSeedData();
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
                 PlantType plantType = PlantType.fromString(seed.getPlantType().toString());
-                view.setPlantType(plantType);
+                seedData.setPlantType(plantType);
 
                 Generation generation = Generation.fromString(seed.getGeneration().toString());
-                view.setGeneration(generation);
-                view.setHomozygosity(seed.getHomozygosity());
-                view.setEcotype(seed.getEcotype());
-                view.setSeedParents(seed.getParents());
-                view.setHarvestDate(seed.getHarvestDate());
-
-                return view;
-            }
-
-            case PART: {
-                PartData view = new PartData();
-                getTipViewCommon(view, entry);
-                return view;
-            }
-
-            case PLASMID: {
-                PlasmidData view = new PlasmidData();
-                getTipViewCommon(view, entry);
-
-                Plasmid plasmid = (Plasmid) entry;
-                view.setBackbone(plasmid.getBackbone());
-                view.setOriginOfReplication(plasmid.getOriginOfReplication());
-                view.setPromoters(plasmid.getPromoters());
-                view.setReplicatesIn(plasmid.getReplicatesIn());
-                return view;
-            }
+                seedData.setGeneration(generation);
+                seedData.setHomozygosity(seed.getHomozygosity());
+                seedData.setEcotype(seed.getEcotype());
+                seedData.setSeedParents(seed.getParents());
+                seedData.setHarvestDate(seed.getHarvestDate());
+                part.setArabidopsisSeedData(seedData);
+                break;
 
             default:
-                return null;
+            case PART:
+                return part;
+
+            case PLASMID:
+                PlasmidData plasmidData = new PlasmidData();
+
+                Plasmid plasmid = (Plasmid) entry;
+                plasmidData.setBackbone(plasmid.getBackbone());
+                plasmidData.setOriginOfReplication(plasmid.getOriginOfReplication());
+                plasmidData.setPromoters(plasmid.getPromoters());
+                plasmidData.setReplicatesIn(plasmid.getReplicatesIn());
+                part.setPlasmidData(plasmidData);
+                break;
         }
+
+        return part;
     }
 }

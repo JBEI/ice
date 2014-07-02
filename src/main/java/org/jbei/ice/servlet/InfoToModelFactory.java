@@ -82,7 +82,7 @@ public class InfoToModelFactory {
         switch (type) {
             case PLASMID:
                 Plasmid plasmid = (Plasmid) entry;
-                PlasmidData plasmidData = (PlasmidData) data;
+                PlasmidData plasmidData = data.getPlasmidData();
                 if (plasmidData.getBackbone() != null)
                     plasmid.setBackbone(plasmidData.getBackbone());
 
@@ -95,13 +95,13 @@ public class InfoToModelFactory {
                 if (plasmidData.getReplicatesIn() != null)
                     plasmid.setReplicatesIn(plasmidData.getReplicatesIn());
 
-                if (plasmidData.getCircular() != null)
+                if (plasmidData.getCircular())
                     plasmid.setCircular(plasmidData.getCircular());
                 break;
 
             case STRAIN:
                 Strain strain = (Strain) entry;
-                StrainData strainData = (StrainData) data;
+                StrainData strainData = data.getStrainData();
 
                 if (strainData.getHost() != null)
                     strain.setHost(strainData.getHost());
@@ -115,7 +115,7 @@ public class InfoToModelFactory {
 
             case ARABIDOPSIS:
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-                ArabidopsisSeedData seedData = (ArabidopsisSeedData) data;
+                ArabidopsisSeedData seedData = data.getArabidopsisSeedData();
 
                 if (seedData.getHomozygosity() != null)
                     seed.setHomozygosity(seedData.getHomozygosity());
@@ -163,7 +163,7 @@ public class InfoToModelFactory {
         switch (type) {
             case PLASMID:
                 Plasmid plasmid = (Plasmid) entry;
-                PlasmidData plasmidData = (PlasmidData) info;
+                PlasmidData plasmidData = info.getPlasmidData();
                 plasmid.setBackbone(plasmidData.getBackbone());
                 plasmid.setOriginOfReplication(plasmidData.getOriginOfReplication());
                 plasmid.setPromoters(plasmidData.getPromoters());
@@ -173,7 +173,7 @@ public class InfoToModelFactory {
 
             case STRAIN:
                 Strain strain = (Strain) entry;
-                StrainData strainData = (StrainData) info;
+                StrainData strainData = info.getStrainData();
                 strain.setHost(strainData.getHost());
                 strain.setGenotypePhenotype(strainData.getGenotypePhenotype());
                 break;
@@ -183,7 +183,7 @@ public class InfoToModelFactory {
 
             case ARABIDOPSIS:
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-                ArabidopsisSeedData seedData = (ArabidopsisSeedData) info;
+                ArabidopsisSeedData seedData = info.getArabidopsisSeedData();
                 String homozygosity = seedData.getHomozygosity() == null ? "" : seedData.getHomozygosity();
                 seed.setHomozygosity(homozygosity);
                 seed.setHarvestDate(seedData.getHarvestDate());
