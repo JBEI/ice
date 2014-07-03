@@ -17,6 +17,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
@@ -306,5 +307,30 @@ public class PermissionDAO extends HibernateRepository<Permission> {
     @Override
     public Permission get(long id) {
         return super.get(Permission.class, id);
+    }
+
+    public Set<Entry> getPublicEntries(Group publicGroup) {
+        Criterion criterion = Restrictions.disjunction()
+                                          .add(Restrictions.eq("canWrite", true))
+                                          .add(Restrictions.eq("canRead", true));
+        Session session = currentSession();
+        try {
+            Criteria criteria = session.createCriteria(Permission.class)
+                                       .add(Restrictions.isNull("folder"))
+                                       .add(Restrictions.eq("group", publicGroup))
+                                       .add(criterion)
+                                       .add(Restrictions.isNotNull("entry"))
+                                       .setProjection(Projections.property("entry"));
+
+            Criteria entryCriteria = criteria.createCriteria("entry");
+            entryCriteria.setFirstResult(0);
+            entryCriteria.addOrder(Order.desc("creationTime"));
+            entryCriteria.setMaxResults(15);
+            List list = entryCriteria.list();
+            return new HashSet<Entry>(list);
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 }
