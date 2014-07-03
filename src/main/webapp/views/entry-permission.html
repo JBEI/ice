@@ -33,11 +33,12 @@
             <div ng-show="showPermissionInput">
                 <form ng-submit="addEmailUser()">
                     <input type="text" placeholder="Enter name or email" ng-model="userFilterInput"
-                       style="width: 180px; font-size: 0.80em">
+                           style="width: 180px; font-size: 0.80em">
                 </form>
 
                 <div style="overflow: auto; max-height: 120px;" class="font-75em">
-                    <div ng-repeat="user in filteredUsers | filter: userFilterInput | orderBy:'email'" style="padding-left: 6px; padding-top: 3px">
+                    <div ng-repeat="user in filteredUsers | filter: userFilterInput | orderBy:'email'"
+                         style="padding-left: 6px; padding-top: 3px">
                         <span ng-click="addRemovePermission(user)" style="cursor: pointer">
                             <i class="fa"
                                ng-class="{'fa-square-o':!user.selected, 'fa-check-square-o':user.selected}"></i>
@@ -45,13 +46,21 @@
                         </span>
                     </div>
 
+                    <div ng-repeat="group in filteredGroups | orderBy:'label'" style="padding-left: 6px">
+                        <span ng-click="addRemoveGroupPermission(group)" style="cursor: pointer">
+                            <i class="fa"
+                               ng-class="{'fa-square-o':!group.selected, 'fa-check-square-o':group.selected}"></i>
+                            <i class="fa fa-group permission_group"></i> {{group.label}}
+                        </span>
+                    </div>
+
                     <div ng-hide="users" style="opacity: 0.7; padding: 3px 0 3px 0">
-                            <i class="fa fa-gear fa-spin fa-1x"></i> Retrieving visible users...
+                        <i class="fa fa-gear fa-spin fa-1x"></i> Retrieving visible users and groups...
                     </div>
                 </div>
 
                 <div style="border-top: 1px solid #e1e1e1; border-bottom: 1px solid #e1e1e1; background-color: #f7f7f7; height: 24px">
-                    <strong class="font-75em opacity_hover"><i class="fa fa-square-o"></i> Remote </strong>
+                    <!--<strong class="font-75em opacity_hover"><i class="fa fa-square-o"></i> Remote </strong>-->
                     <button type="button" class="btn btn-xs btn-default pull-right"
                             ng-click="closePermissionOptions()">Close
                     </button>
@@ -61,9 +70,10 @@
             <div width="160px" class="permission_list" ng-repeat="permission in activePermissions | orderBy:'display'">
                 &nbsp;
                 <span ng-if="permission.article=='GROUP'"><i class="fa fa-group permission_group"></i> {{permission.display}}</span>
-                <span ng-if="permission.article=='ACCOUNT'"><i class="fa fa-user permission_user"></i> <a ng-href="/profile/{{permission.articleId}}">{{permission.display}}</a></span>
+                <span ng-if="permission.article=='ACCOUNT'"><i class="fa fa-user permission_user"></i> <a
+                        ng-href="/profile/{{permission.articleId}}">{{permission.display}}</a></span>
                 <i ng-click="deletePermission($index, permission)" style="padding-top: 3px"
-                                          class="fa fa-times pull-right delete_icon"></i>
+                   class="fa fa-times pull-right delete_icon"></i>
             </div>
             <div ng-if="activePermissions.length == 0">&nbsp;</div>
 
@@ -76,7 +86,8 @@
             </div>
         </td>
 
-        <td class="permission_footer" ng-if="entry.publicRead" style="border-top: 0; border-left: 0; background-color: #fff">
+        <td class="permission_footer" ng-if="entry.publicRead"
+            style="border-top: 0; border-left: 0; background-color: #fff">
             <div class="permission_footer_link" ng-click="disablePublicRead(entry)">
                 <i class="fa fa-globe blue"></i> Disable Public Read Access
             </div>

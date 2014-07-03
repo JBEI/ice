@@ -25,6 +25,7 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryController;
@@ -79,23 +80,38 @@ public class FolderController {
     /**
      * Retrieves folders that are marked "public"
      *
-     * @param userId
      * @return list of public folders on this site
      */
-    public ArrayList<FolderDetails> getPublicFolders(String userId) {
-        Group publicGroup = new GroupController().createOrRetrievePublicGroup();
-        Set<Folder> folders = DAOFactory.getPermissionDAO().getFolders(publicGroup);
-        ArrayList<FolderDetails> result = new ArrayList<>();
+    public FolderWrapper getPublicFolders() {
+        List<Folder> folders = dao.getFoldersByType(FolderType.PUBLIC);
+//        ArrayList<FolderDetails> result = new ArrayList<>();
+        FolderWrapper result = new FolderWrapper();
         for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
             long folderSize = dao.getFolderSize(folder.getId());
             details.setCount(folderSize);
-            result.add(details);
+            result.getFolders().add(details);
         }
 
-        Collections.sort(result);
+        result.sort();
         return result;
     }
+
+    public FolderDetails getPublicEntries() {
+        Set<Entry> entries = permissionDAO.getPublicEntries(new GroupController().createOrRetrievePublicGroup());
+        FolderDetails details = new FolderDetails();
+
+        for (Entry entry : entries) {
+            try {
+                PartData info = ModelToInfoFactory.createTableViewData(null, entry, false);
+                details.getEntries().add(info);
+            } catch (Exception e) {
+                Logger.error(e);
+            }
+        }
+        return details;
+    }
+
 
     public ArrayList<FolderDetails> getBulkUploadDrafts(String userId) {
         BulkUploadController controller = new BulkUploadController();
@@ -131,15 +147,6 @@ public class FolderController {
         return folder;
     }
 
-    /**
-     * @return folders that are shared with everyone on the site. These are listed under "Collections".
-     * @throws ControllerException
-     */
-    protected List<Folder> getPublicFolders() throws ControllerException {
-        Set<Folder> folders = new HashSet<>();
-        folders.addAll(dao.getFoldersByType(FolderType.PUBLIC));
-        return new ArrayList<>(folders);
-    }
 
     protected boolean canReadFolderContents(Account account, Folder folder) throws ControllerException {
         if (folder.getType() == FolderType.PUBLIC)
@@ -420,51 +427,52 @@ public class FolderController {
     }
 
     // available folders
-    public ArrayList<FolderDetails> retrieveFoldersForUser(String userId) throws ControllerException {
-        ArrayList<FolderDetails> results = new ArrayList<>();
-        Account account = getAccount(userId);
-        if (account == null)
-            throw new IllegalArgumentException("Invalid user id \"" + userId + "\"");
-
-        // publicly visible collections are owned by the system
-        List<Folder> folders = getPublicFolders();
-        for (Folder folder : folders) {
-            long id = folder.getId();
-            FolderDetails details = new FolderDetails(id, folder.getName());
-            long folderSize = dao.getFolderSize(id);
-            details.setCount(folderSize);
-            details.setDescription(folder.getDescription());
-            details.setType(FolderType.PUBLIC);
-            if (account.getType() == AccountType.ADMIN) {
-                ArrayList<AccessPermission> accesses = permissionsController.retrieveSetFolderPermission(folder, false);
-                details.setAccessPermissions(accesses);
-            }
-            details.setPropagatePermission(folder.isPropagatePermissions());
-            results.add(details);
-        }
-
-        // get user folders
-        List<Folder> userFolders = dao.getFoldersByOwner(account);
-        if (userFolders != null) {
-            for (Folder folder : userFolders) {
-                long id = folder.getId();
-                FolderDetails details = new FolderDetails(id, folder.getName());
-                long folderSize = dao.getFolderSize(id);
-                details.setCount(folderSize);
-                details.setType(FolderType.PRIVATE);
-                details.setDescription(folder.getDescription());
-                ArrayList<AccessPermission> accesses = permissionsController.retrieveSetFolderPermission(folder,
-                                                                                                         false);
-                details.setAccessPermissions(accesses);
-                details.setPropagatePermission(folder.isPropagatePermissions());
-                details.setPublicReadAccess(permissionsController.isPublicVisible(folder));
-                results.add(details);
-            }
-        }
-
-
-        return results;
-    }
+//    public ArrayList<FolderDetails> retrieveFoldersForUser(String userId) throws ControllerException {
+//        ArrayList<FolderDetails> results = new ArrayList<>();
+//        Account account = getAccount(userId);
+//        if (account == null)
+//            throw new IllegalArgumentException("Invalid user id \"" + userId + "\"");
+//
+//        // publicly visible collections are owned by the system
+//        List<Folder> folders = getPublicFolders();
+//        for (Folder folder : folders) {
+//            long id = folder.getId();
+//            FolderDetails details = new FolderDetails(id, folder.getName());
+//            long folderSize = dao.getFolderSize(id);
+//            details.setCount(folderSize);
+//            details.setDescription(folder.getDescription());
+//            details.setType(FolderType.PUBLIC);
+//            if (account.getType() == AccountType.ADMIN) {
+//                ArrayList<AccessPermission> accesses = permissionsController.retrieveSetFolderPermission(folder,
+// false);
+//                details.setAccessPermissions(accesses);
+//            }
+//            details.setPropagatePermission(folder.isPropagatePermissions());
+//            results.add(details);
+//        }
+//
+//        // get user folders
+//        List<Folder> userFolders = dao.getFoldersByOwner(account);
+//        if (userFolders != null) {
+//            for (Folder folder : userFolders) {
+//                long id = folder.getId();
+//                FolderDetails details = new FolderDetails(id, folder.getName());
+//                long folderSize = dao.getFolderSize(id);
+//                details.setCount(folderSize);
+//                details.setType(FolderType.PRIVATE);
+//                details.setDescription(folder.getDescription());
+//                ArrayList<AccessPermission> accesses = permissionsController.retrieveSetFolderPermission(folder,
+//                                                                                                         false);
+//                details.setAccessPermissions(accesses);
+//                details.setPropagatePermission(folder.isPropagatePermissions());
+//                details.setPublicReadAccess(permissionsController.isPublicVisible(folder));
+//                results.add(details);
+//            }
+//        }
+//
+//
+//        return results;
+//    }
 
     /**
      * "Promote"s a collection into a system collection. This allows it to be categorised under "Collections"

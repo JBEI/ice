@@ -61,7 +61,8 @@
     </div>
 
     <div class="btn-group" style="margin-left: 12px">
-        <button type="button" class="btn btn-default btn-sm subMenuExport dropdown-toggle" ng-disabled="exportDisabled">
+        <button type="button" class="btn btn-default btn-sm subMenuTransfer dropdown-toggle"
+                ng-disabled="addToDisabled">
             <i style="font-size: 14px; opacity:0.85;" class="fa fa-download blue"></i>
             Export As <span class="caret"></span></button>
         <ul class="dropdown-menu font-95em" stop-event="click">
@@ -71,11 +72,11 @@
     </div>
 
     <div class="btn-group" style="margin-left: 12px">
-        <button type="button" class="btn btn-default btn-sm subMenuTransfer dropdown-toggle"
+        <button type="button" class="btn btn-default btn-sm subMenuTransfer dropdown-toggle" ng-disabled="addToDisabled"
                 ng-click="retrieveRegistryPartners()">
             <i style="font-size: 14px; opacity:0.85;" class="fa fa-share-square blue"></i>
-            Transfer
-            <span class="caret"></span></button>
+            Transfer <span class="caret"></span>
+        </button>
 
         <span class="dropdown-menu color-888" ng-if="!registryPartners"><i class="fa fa-fw fa-spin fa-spinner"></i>
             Loading...</span>

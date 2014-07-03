@@ -3,7 +3,6 @@ package org.jbei.ice.lib.dto.folder;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dao.IDataTransferModel;
@@ -16,7 +15,6 @@ import org.jbei.ice.lib.dto.permission.AccessPermission;
  * @author Hector Plahar
  */
 
-@XmlRootElement
 public class FolderDetails implements IDataTransferModel, Comparable<FolderDetails> {
 
     private long id;

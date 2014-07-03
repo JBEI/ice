@@ -330,16 +330,6 @@ public class PartResource extends RestResource {
         return partData;
     }
 
-//    @Path("/{id}")
-//    @POST
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    public Response update(@PathParam("id") long id, PartTransfer partTransfer) {
-//        return Response.ok().build();
-//    }
-
-    // can also have a create method that returns Response object with the location of the created object
-    // Response.created(uri).entity(resource).build()
-
     @DELETE
     @Path("/{id}")
     public void delete(@PathParam("id") long id) {

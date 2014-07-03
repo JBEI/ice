@@ -25,6 +25,8 @@ import org.jbei.ice.lib.net.RemotePartner;
 
 public class RemotePermission implements IDataModel {
 
+    private static final long serialVersionUID = 1L;
+
     private Account account;    // local account performing the share
 
     @OneToOne(fetch = FetchType.EAGER)
@@ -37,8 +39,6 @@ public class RemotePermission implements IDataModel {
 
     @Enumerated(value = EnumType.STRING)
     private AccessType accessType; //read or write
-
-    private static final long serialVersionUID = 1L;
 
     @Override
     public IDataTransferModel toDataTransferObject() {

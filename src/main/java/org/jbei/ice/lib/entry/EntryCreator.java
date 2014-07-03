@@ -11,6 +11,7 @@ import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
@@ -162,6 +163,11 @@ public class EntryCreator {
 
                     // TODO : may contain new information e.g. if the sequence is uploaded before
                     // TODO : this entry was created then the general information is added here
+                    linked = InfoToModelFactory.infoToEntry(data, linked);
+
+                    linked.setVisibility(Visibility.OK.getValue());
+
+
                     if (authorization.canWrite(userId, linked)) {
                         // then update
                     }

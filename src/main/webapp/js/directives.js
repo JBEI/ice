@@ -150,6 +150,14 @@ iceDirectives.directive("iceCollectionContents", function () {
     }
 });
 
+iceDirectives.directive("ice-wor-contents", function () {
+    return {
+        restrict:"AE",
+        templateUrl:"/views/wor/wor-contents.html",
+        controller:"WorContentController"
+    }
+});
+
 iceDirectives.directive("iceBulkUploadContents", function () {
     return {
         scope:{
@@ -189,6 +197,17 @@ iceDirectives.directive("ice.menu.wor", function () {
         templateUrl:"/views/web-of-registries-menu.html",
         controller:"WebOfRegistriesController"
     }
+});
+
+iceDirectives.directive("ice.menu.wor.details", function () {
+    return {
+        restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
+        templateUrl:"/views/web-of-registries-menu-details.html",
+        controller:"WebOfRegistriesDetailController"
+//        link: function ( scope, element, attributes ){
+//            element.bind( "click", function)
+//        }
+    };
 });
 
 // tags menu directive

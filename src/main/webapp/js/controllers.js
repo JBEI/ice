@@ -2,39 +2,6 @@
 
 var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload', 'vr.directives.slider', 'angularMoment']);
 
-iceControllers.controller('WebOfRegistriesController', function ($scope, $modal, $cookieStore, $stateParams, WebOfRegistries) {
-    // retrieve web of registries partners
-    $scope.wor = undefined;
-    var wor = WebOfRegistries();
-//    $scope.getPartners = function(approveOnly) {
-    wor.query({approved_only:false}, function (result) {
-        $scope.wor = result;
-    });
-//    };
-
-    $scope.newPartner = undefined;
-    $scope.addPartner = function () {
-        wor.addPartner({}, $scope.newPartner, function (result) {
-            $scope.wor = result;
-            $scope.showAddRegistryForm = false;
-            $scope.newPartner = undefined;
-        });
-    };
-
-    $scope.removePartner = function (partner, index) {
-        wor.removePartner({url:partner.url}, function (result) {
-            $scope.wor.partners.splice(index, 1);
-        });
-    };
-
-    $scope.approvePartner = function (partner, index) {
-        partner.status = 'APPROVED';
-        wor.updatePartner({url:partner.url}, partner, function (result) {
-
-        });
-    }
-});
-
 iceControllers.controller('EntrySampleController', function ($scope, $modal, $cookieStore, $stateParams, Entry) {
     $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
@@ -359,15 +326,19 @@ iceControllers.controller('MessageController', function ($scope, $location, $coo
     });
 });
 
-iceControllers.controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User, Group) {
+iceControllers.controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User, Group, WebOfRegistries, Remote) {
     var profileId = $stateParams.id;
     $location.path("/profile/" + profileId + "/groups", false);
     $scope.selectedUsers = [];
+    $scope.selectedRemoteUsers = [];
     $scope.myGroups = [];
     $scope.groupsIBelong = [];
+    $scope.enteredUser = undefined;
+    $scope.showCreateGroup = false;
 
     var user = User($cookieStore.get('sessionId'));
     var group = Group();
+    var wor = WebOfRegistries();
 
     group.getUserGroups({userId:profileId}, function (result) {
         angular.forEach(result, function (item) {
@@ -382,6 +353,16 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
 
     user.list(function (result) {
         $scope.users = result;
+        $scope.activeUsers = result;
+    });
+
+    // fetch list of registry partners
+    $scope.registryPartners = undefined;
+    wor.query({}, function (result) {
+        console.log(result);
+        if (result) {
+            $scope.registryPartners = result.partners;
+        }
     });
 
     $scope.selectUser = function (user) {
@@ -392,14 +373,34 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
             $scope.selectedUsers.splice(index, 1);
     };
 
+    $scope.selectRemoteUser = function (enteredUser, selectedRegistry) {
+        Remote().getUser({id:selectedRegistry, email:enteredUser}, function (result) {
+            if (result) {
+                result.isRemote = true;
+                $scope.selectedRemoteUsers.push(result);
+                $scope.enteredUser = undefined;
+            }
+        });
+    };
+
+    $scope.selectedRegistryChange = function (selected) {
+        if (selected) {
+            $scope.activeUsers = $scope.selectedRemoteUsers;
+            return;
+        }
+
+        $scope.activeUsers = $scope.users;
+    };
+
     $scope.resetSelectedUsers = function () {
         $scope.selectedUsers = [];
     };
 
-    $scope.createGroup = function () {
-        $scope.newGroup = {label:$scope.groupName, description:$scope.groupDescription};
+    $scope.createGroup = function (groupName, groupDescription) {
+        $scope.newGroup = {label:groupName, description:groupDescription};
         user.createGroup({userId:profileId}, $scope.newGroup, function (result) {
             $scope.myGroups.splice(0, 0, result);
+            $scope.showCreateGroup = false;
         })
     };
 });
@@ -586,7 +587,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $loc
         {name:"Plasmid", type:"plasmid"},
         {name:"Strain", type:"strain"},
         {name:"Part", type:"part"},
-        {name:"Arabidopsis Seed", type:"seed"}
+        {name:"Arabidopsis Seed", type:"arabidopsis"}
     ];
 
     if ($location.path() === "/") {
@@ -618,7 +619,6 @@ iceControllers.controller('CollectionController', function ($scope, $state, $loc
             function (result) {
                 $scope.searchResults = result;
                 $scope.loadingPage = false;
-                console.log(result);
             },
             function (error) {
                 $scope.loadingPage = false;
@@ -807,7 +807,7 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                 dataSchema = {principalInvestigator:null, principalInvestigatorEmail:null, fundingSource:null, intellectualProperty:null, bioSafetyLevel:null, name:null, alias:null, keywords:null, shortDescription:null, longDescription:null, references:null, links:null, status:null, creator:null, creatorEmail:null, circular:null, backbone:null, promoters:null, replicatesIn:null, originOfReplication:null, selectionMarkers:null, sequenceFilename:null, attachmentFilename:null};
                 break;
 
-            case "seed":
+            case "arabidopsis":
                 seedHeaders = angular.copy(partHeaders);
                 seedHeaders.splice.apply(seedHeaders, [15, 0].concat(["Homozygosity", "Ecotype", "Harvest Date", "Parents",
                     "Plant Type", "Generation", "Sent to ABRC?"]));
@@ -919,7 +919,7 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                 case "part":
                     return partHeaders[index];
 
-                case "seed":
+                case "arabidopsis":
                     return seedHeaders[index];
             }
         };
@@ -974,7 +974,7 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                         $scope.bulkUpload.id = result.id;
                         $scope.bulkUpload.lastUpdate = result.lastUpdate;
                         $scope.bulkUpload.name = result.name;
-                        $location.path("upload/" + result.id, false);
+//                        $location.path("/upload/" + result.id, false);
 
                         upload.createEntry({importId:result.id}, object,
                             function (createdEntry) {
@@ -1000,7 +1000,7 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                         });
                 } else {
                     // update entry for existing upload
-                    object.recordType = $scope.importType;
+                    object.type = $scope.importType;
 
                     upload.updateEntry({importId:$scope.bulkUpload.id, entryId:object.id}, object,
                         function (updatedEntry) {
@@ -1186,10 +1186,10 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
                 ];
                 break;
 
-            case 'seed':
+            case 'arabidopsis':
                 $scope.linkOptions = [
                     {type:'part', display:'Part'},
-                    {type:'seed', display:'Arabidopsis Seed'}
+                    {type:'arabidopsis', display:'Arabidopsis Seed'}
                 ];
                 break;
         }
@@ -1266,6 +1266,28 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
             }
         });
     }
+});
+
+iceControllers.controller('WebOfRegistriesDetailController', function ($scope, $cookieStore, $location, $stateParams) {
+    var sessionId = $cookieStore.get("sessionId");
+
+    $scope.selectRemotePartnerFolder = function (folder) {
+        console.log(folder, $stateParams.partner);
+        $scope.partnerId = $stateParams.partner;
+        $location.path('/web/' + $stateParams.partner + "/folder/" + folder.id);
+    };
+});
+
+iceControllers.controller('WorFolderContentController', function ($scope, $stateParams, Remote) {
+    var id;
+    if ($stateParams.folderId === undefined)
+        id = $scope.partnerId;
+    else
+        id = $stateParams.folderId;
+
+    Remote().getFolderEntries({folderId:id, id:$stateParams.partner}, function (result) {
+        $scope.selectedPartnerFolder = result;
+    });
 });
 
 iceControllers.controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
@@ -1367,6 +1389,69 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $locati
     $scope.entryId = $location.search().entryId;
     $scope.sessionId = $location.search().sessionId;
     $scope.entry = {'recordId':$scope.entryId};
+});
+
+iceControllers.controller('WebOfRegistriesController', function ($scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote) {
+    console.log("WebOfRegistriesController");
+
+    // retrieve web of registries partners
+    $scope.wor = undefined;
+    var wor = WebOfRegistries();
+//    $scope.getPartners = function(approveOnly) {
+    wor.query({approved_only:false}, function (result) {
+        $scope.wor = result;
+    });
+//    };
+
+    $scope.newPartner = undefined;
+    $scope.addPartner = function () {
+        wor.addPartner({}, $scope.newPartner, function (result) {
+            $scope.wor = result;
+            $scope.showAddRegistryForm = false;
+            $scope.newPartner = undefined;
+        });
+    };
+
+    $scope.removePartner = function (partner, index) {
+        wor.removePartner({url:partner.url}, function (result) {
+            $scope.wor.partners.splice(index, 1);
+        });
+    };
+
+    $scope.approvePartner = function (partner, index) {
+        partner.status = 'APPROVED';
+        wor.updatePartner({url:partner.url}, partner, function (result) {
+
+        });
+    };
+
+    $scope.selectPartner = function (partner) {
+        $location.path("/web/" + partner.id);
+        $scope.selectedPartner = partner.id;
+        var remote = Remote();
+        remote.publicFolders({id:partner.id}, function (result) {
+            console.log(result);
+            $scope.selectedPartnerFolders = result;
+        });
+    }
+});
+
+iceControllers.controller('WorContentController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, Remote) {
+    console.log("WorContentController");
+
+    $scope.selectedPartner = $stateParams.partner;
+    console.log("wor", $scope.selectedPartner);
+    $scope.loadingPage = true;
+
+    Remote().publicEntries({id:$stateParams.partner}, function (result) {
+        $scope.loadingPage = false;
+        result.count = 894;
+        $scope.selectedPartnerEntries = result;
+    });
+
+    $scope.tooltipDetails = function (entry) {
+        $scope.currentTooltip = entry;
+    };
 });
 
 // deals with sub collections e.g. /folders/:id
@@ -1527,6 +1612,7 @@ iceControllers.controller('CollectionMenuController', function ($cookieStore, $s
         });
 
     console.log("CMC - retrieving folder counts");
+
     var updateCounts = function () {
         folders.query(function (result) {
             if (result === undefined || $scope.collectionList === undefined)
@@ -1738,10 +1824,10 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
             ];
             break;
 
-        case 'seed':
+        case 'arabidopsis':
             $scope.linkOptions = [
                 {type:'part', display:'Part'},
-                {type:'seed', display:'Arabidopsis Seed'}
+                {type:'arabidopsis', display:'Arabidopsis Seed'}
             ];
             break;
     }
@@ -1769,14 +1855,13 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
     ];
 
     var plasmidFields = [
-        {label:"Backbone", schema:'backbone', inputType:'medium'},
+        {label:"Backbone", schema:'backbone', subSchema:'plasmidData', inputType:'medium'},
         {label:"Origin of Replication", schema:'originOfReplication', inputType:'autoComplete',
             autoCompleteField:'ORIGIN_OF_REPLICATION'},
         {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
             autoCompleteField:'SELECTION_MARKERS'},
-        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER'},
-        {label:"Promoters", schema:'promoters', inputType:'autoComplete', autoCompleteField:'PROMOTERS'},
-        {label:"Replicates In", schema:'replicatesIn', inputType:'autoComplete', autoCompleteField:'REPLICATES_IN'}
+        {label:"Promoters", schema:'promoters', subSchema:'plasmidData', inputType:'autoComplete', autoCompleteField:'PROMOTERS'},
+        {label:"Replicates In", schema:'replicatesIn', subSchema:'plasmidData', inputType:'autoComplete', autoCompleteField:'REPLICATES_IN'}
     ];
 
     var seedFields = [
@@ -1812,16 +1897,13 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
     ];
 
     var strainFields = [
-        {label:"Parent Strain", schema:'parentalStrain', placeHolder:"Part Number", inputType:'autoComplete',
-            autoCompleteField:'PLASMID_PART_NUMBER'},
-        {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
-            autoCompleteField:'SELECTION_MARKERS'},
-        {label:"Genotype/Phenotype", schema:'genotypePhenotype', inputType:'long'},
-        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER'}
+        {label:"Selection Markers", required:true, schema:'selectionMarkers',
+            inputType:'autoCompleteAdd', autoCompleteField:'SELECTION_MARKERS'},
+        {label:"Genotype/Phenotype", schema:'genotypePhenotype', subSchema:'strainData', inputType:'long'}
     ];
 
     var partDefaults = {
-        recordType:$scope.createType,
+        type:$scope.createType,
         links:[
             {}
         ],
@@ -1845,7 +1927,7 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
                 fields.splice.apply(fields, [7, 0].concat(strainFields));
                 return fields;
 
-            case 'seed':
+            case 'arabidopsis':
                 fields.splice.apply(fields, [7, 0].concat(seedFields));
                 return fields;
 
@@ -1874,7 +1956,7 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
         $scope.selectedFields = getFieldsForType(type);
 
         var newLink = angular.copy(partDefaults);
-        newLink.recordType = type;
+        newLink.type = type.toUpperCase();
         $scope.part.linkedParts.push(newLink);
 
         $scope.colLength = 11 - $scope.part.linkedParts.length;
@@ -1892,19 +1974,6 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
             $scope.colLength = 11 - $scope.part.linkedParts.length;
             $scope.active = $scope.part.linkedParts.length - 1;
         });
-
-//        var type = $model.type;
-//        $scope.selectedFields = getFieldsForType(type);
-//
-//        var newLink = angular.copy(partDefaults);
-//        newLink.recordType = type;
-//        $scope.part.linkedParts.push(newLink);
-//
-//        $scope.colLength = 11 - $scope.part.linkedParts.length;
-//        $scope.active = $scope.part.linkedParts.length - 1;
-//        $scope.activePart = $scope.part.linkedParts[$scope.active];
-//        $scope.activePart.isExistingPart = true;
-//        $scope.addExisting = false;
     };
 
     $scope.deleteNewPartLink = function (index) {
@@ -1936,7 +2005,7 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
             $scope.activePart = $scope.part;
         else
             $scope.activePart = $scope.part.linkedParts[index];
-        $scope.selectedFields = getFieldsForType($scope.activePart.recordType);
+        $scope.selectedFields = getFieldsForType($scope.activePart.type);
     };
 
     var sid = $cookieStore.get("sessionId");
@@ -1972,6 +2041,8 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
     };
 
     var validateFields = function (part) {
+        console.log(part);
+
         var canSubmit = true;
 
         // main type
@@ -2005,6 +2076,7 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
 
         // validate main
         var canSubmit = validateFields($scope.part);
+        $scope.part.type = $scope.part.type.toUpperCase();
 
         // validate components if any
         if ($scope.part.linkedParts && $scope.part.linkedParts.length) {
@@ -2120,8 +2192,7 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
     });
 
     uploader.bind('beforeupload', function (event, item) {
-        console.info('Before upload', item);
-        item.formData.push({entryType:"plasmid"}); // todo
+        item.formData.push({entryType:$scope.part.linkedParts[$scope.active].type}); // todo check that active is actually valid
     });
 
     uploader.bind('progress', function (event, item, progress) {
@@ -2278,10 +2349,11 @@ iceControllers.controller('GenericTabsController', function ($scope, $cookieStor
     };
 });
 
-iceControllers.controller('EntryPermissionController', function ($scope, $cookieStore, User, Entry, filterFilter) {
+iceControllers.controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group, filterFilter) {
     console.log("EntryPermissionController");
     var sessionId = $cookieStore.get("sessionId");
     var user = User(sessionId);
+    var group = Group();
     var entry = Entry(sessionId);
     var panes = $scope.panes = [];
 
@@ -2344,6 +2416,21 @@ iceControllers.controller('EntryPermissionController', function ($scope, $cookie
                 }
             });
         });
+
+        group.getUserGroups({userId:$rootScope.user.id}, function (result) {
+            console.log(result, $scope.activePermissions);
+            $scope.filteredGroups = angular.copy(result);
+
+            angular.forEach($scope.filteredGroups, function (item) {
+                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
+                    if (item.id == $scope.activePermissions[i].articleId && $scope.activePermissions[i].article === 'GROUP') {
+                        item.selected = true;
+                        item.permissionId = $scope.activePermissions[i].id;
+                        break;
+                    }
+                }
+            });
+        });
     };
 
     $scope.addEmailUser = function () {
@@ -2370,6 +2457,14 @@ iceControllers.controller('EntryPermissionController', function ($scope, $cookie
                     break;
                 }
             });
+    };
+
+    $scope.addRemoveGroupPermission = function (group) {
+        group.selected = !group.selected;
+        if (group.selected) {
+            $scope.activePermissions.push({article:'GROUP', type:"READ_ENTRY", typeId:group.id, display:group.label});
+            console.log($scope.activePermissions);
+        }
     };
 
     // when user clicks on the check box
@@ -2571,7 +2666,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     ];
 
     var partDefaults = {
-        recordType:$scope.createType,
+        type:$scope.createType,
         links:[
             {}
         ],
@@ -2593,7 +2688,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
                 fields.splice.apply(fields, [7, 0].concat(strainFields));
                 return fields;
 
-            case 'seed':
+            case 'arabidopsis':
                 fields.splice.apply(fields, [7, 0].concat(seedFields));
                 return fields;
 

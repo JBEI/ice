@@ -10,9 +10,11 @@ import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.folder.Collection;
@@ -56,10 +58,9 @@ public class FolderResource extends RestResource {
     @GET
     @Path("/public")
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<FolderDetails> getPublicFolders(
+    public FolderWrapper getPublicFolders(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String sid = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.getPublicFolders(sid);
+        return controller.getPublicFolders();
     }
 
     @GET
@@ -123,7 +124,7 @@ public class FolderResource extends RestResource {
 
         try {
             FolderController folderController = new FolderController();
-            String userId = getUserIdFromSessionHeader(userAgentHeader);
+            String userId = SessionHandler.getUserIdBySession(userAgentHeader);
             ColumnField field = ColumnField.valueOf(sort.toUpperCase());
 
             try {
@@ -144,8 +145,8 @@ public class FolderResource extends RestResource {
                     return details;
 
                 case "available":
-
                     try {
+                        Logger.info("Retrieving " + folderId + " entries");
                         FolderDetails retrieved = entryController.retrieveVisibleEntries(userId, field, asc, offset,
                                                                                          limit);
                         details.setEntries(retrieved.getEntries());

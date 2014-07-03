@@ -107,6 +107,26 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
                 }
             }
         })
+        .state('main.web', {
+            url:'web/:partner',
+            templateUrl:'/views/wor/wor-contents.html',
+            controller:'WorContentController',
+            resolve:{
+                sessionValid:function (Authentication) {
+                    return Authentication.isSessionValid();
+                }
+            }
+        })
+        .state('main.web_folder', {
+            url:'web/:partner/folder/:folderId',
+            templateUrl:'/views/wor/wor-folder-contents.html',
+            controller:'WorFolderContentController',
+            resolve:{
+                sessionValid:function (Authentication) {
+                    return Authentication.isSessionValid();
+                }
+            }
+        })
         .state('main.search', {
             url:'search?q&w',
             templateUrl:'/views/search-results.html',

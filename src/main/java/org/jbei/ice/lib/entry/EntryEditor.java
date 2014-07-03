@@ -20,7 +20,6 @@ public class EntryEditor {
         dao.generateNextStrainNameForEntry(entry, prefix);
     }
 
-
     public void setStrainPlasmids(Account account, Strain strain, String plasmids) {
         strain.getLinkedEntries().clear();
         if (plasmids != null && !plasmids.isEmpty()) {

@@ -1,15 +1,17 @@
-<table cellspacing="0" cellpadding="0" width="224px" ng-if="wor">
+<table cellspacing="0" cellpadding="0" width="224px" ng-if="wor&&wor.partners.length">
     <tr>
         <td class="collections_header">
             WEB OF REGISTRIES
         </td>
     </tr>
     <tr ng-repeat="partner in wor.partners">
-        <td>
-            <div class="system_collection_user_menu_row">
+        <td ng-class="{bg_f1:partner.url.toLowerCase()===selectedPartner}">
+            <div class="system_collection_user_menu_row" ng-click="selectPartner(partner)">
                 <i class="fa fa-dot-circle-o color_444" style="font-size: 14px"></i>
                 <span class="collection_user_menu">{{partner.name}}</span>
             </div>
+
+            <ice.menu.wor.details ng-show="selectedPartner===partner.id"></ice.menu.wor.details>
         </td>
     </tr>
 </table>

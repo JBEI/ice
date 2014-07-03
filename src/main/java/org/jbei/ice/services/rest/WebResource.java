@@ -9,7 +9,6 @@ import javax.ws.rs.core.UriInfo;
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
-import org.jbei.ice.lib.net.RemoteAccessController;
 import org.jbei.ice.lib.net.WoRController;
 
 /**
@@ -19,12 +18,12 @@ import org.jbei.ice.lib.net.WoRController;
 public class WebResource extends RestResource {
 
     private WoRController controller = new WoRController();
-    private RemoteAccessController remoteAccessController = new RemoteAccessController();
 
     /**
      * Retrieves information on other ice instances that is in a web of registries
      * configuration with this instance; also know as registry partners
-     * @param approvedOnly if true, only instances that have been approved are returned; defaults to true
+     *
+     * @param approvedOnly    if true, only instances that have been approved are returned; defaults to true
      * @param userAgentHeader session if for user
      * @return wrapper around the list of registry partners
      */

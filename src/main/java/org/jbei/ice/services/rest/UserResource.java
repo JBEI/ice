@@ -57,9 +57,14 @@ public class UserResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public AccountTransfer read(@Context UriInfo info, @PathParam("id") long userId,
+    public AccountTransfer read(@Context UriInfo info, @PathParam("id") String userId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        Account account = controller.get(userId);
+        Account account;
+        if (userId.matches("\\d+(\\.\\d+)?"))
+            account = controller.get(Long.decode(userId));
+        else
+            account = controller.getByEmail(userId);
+
         if (account != null)
             return account.toDataTransferObject();
         return null;

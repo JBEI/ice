@@ -38,6 +38,8 @@ public class PartData implements IDataTransferModel {
     private String principalInvestigatorEmail;
     private ArrayList<String> selectionMarkers;
     private String fundingSource;
+    private long basePairCount;
+    private long featureCount;
 
     private boolean hasAttachment;
     private boolean hasSample;
@@ -401,5 +403,21 @@ public class PartData implements IDataTransferModel {
 
     public void setArabidopsisSeedData(ArabidopsisSeedData arabidopsisSeedData) {
         this.arabidopsisSeedData = arabidopsisSeedData;
+    }
+
+    public long getBasePairCount() {
+        return basePairCount;
+    }
+
+    public void setBasePairCount(long basePairCount) {
+        this.basePairCount = basePairCount;
+    }
+
+    public long getFeatureCount() {
+        return featureCount;
+    }
+
+    public void setFeatureCount(long featureCount) {
+        this.featureCount = featureCount;
     }
 }

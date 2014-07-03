@@ -214,6 +214,10 @@ public class EntryController {
 
     public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit)
             throws ControllerException {
+        if (userId == null) {
+            return new FolderController().getPublicEntries();
+        }
+
         Set<Entry> results;
         FolderDetails details = new FolderDetails();
         Account account = accountController.getByEmail(userId);
@@ -730,6 +734,7 @@ public class EntryController {
 
         PartData partData = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
+
         partData.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
         partData.setHasOriginalSequence(hasOriginalSequence);
@@ -781,6 +786,12 @@ public class EntryController {
             for (PartData link : partData.getLinkedParts()) {
                 Entry linkedEntry = dao.get(link.getId());
                 link = ModelToInfoFactory.createTipView(linkedEntry);
+                Sequence sequence = sequenceDAO.getByEntry(linkedEntry);
+                if (sequence != null) {
+                    link.setBasePairCount(sequence.getSequence().length());
+                    link.setFeatureCount(sequence.getSequenceFeatures().size());
+                }
+
                 newLinks.add(link);
             }
             partData.getLinkedParts().clear();

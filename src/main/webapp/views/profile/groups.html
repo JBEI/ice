@@ -7,7 +7,7 @@
     </div>
 
     <div class="row margin-top-10 panel panel-default" ng-if="showCreateGroup" style="background-color: #ededed">
-        <form class="panel-body" ng-submit="createGroup()">
+        <form class="panel-body" ng-submit="createGroup(groupName, groupDescription)">
             <div class="col-md-4 pad-top-5 form-group">
                 <input type="text" class="login_input" placeholder="Group Name" size="35" maxlength="35"
                        ng-model="groupName"/>
@@ -19,32 +19,39 @@
             <div class="col-md-8 pad-top-5">
                 <b class="font-75em">SELECT OR ADD USERS</b><br>
                 <input class="input_box" type="text" ng-model="enteredUser" placeHolder="Enter Email or Name"/>
-                <select class="input_box" ng-model="selectedRegistry">
-                    <option value="">Select Registry</option>
-                    <option value="registry.jbei.org">JBEI Registry</option>
+                <select class="input_box" ng-model="selectedRegistry"
+                        ng-change="selectedRegistryChange(selectedRegistry)"
+                        ng-options="option.id as option.name for option in registryPartners">
+                    <option value="">This Registry</option>
                 </select>
-                <button class="btn btn-success btn-xs" ng-disabled="!enteredUser" ng-if="selectedRegistry">
+
+                <button type="button" class="btn btn-success btn-xs" ng-disabled="!enteredUser" ng-if="selectedRegistry"
+                        ng-click="selectRemoteUser(enteredUser, selectedRegistry)">
                     <i class="fa fa-check"></i> Add
                 </button>
 
                 <br><br>
 
+                <small style="margin-top: 15px; color: #777"><i class="fa fa-fw fa-square-o bg_white"></i> Show selected
+                    users only
+                </small>
                 <div style="background-color: #fff; height: 200px; overflow: auto; width: 400px">
                     <table class="table table-condensed striped table-hover">
-                        <tr ng-repeat="user in users | orderBy:'firstName' | filter:enteredUser">
+                        <tr ng-repeat="user in activeUsers | orderBy:'firstName' | filter:enteredUser">
                             <td ng-click="selectUser(user)" class="font-85em no_wrap hover_icon_visible cursor_pointer">
                                 <i class="fa"
-                                   ng-class="{'fa-circle-o': selectedUsers.indexOf(user) == -1, 'fa-circle green': selectedUsers.indexOf(user)!=-1}"
-                                   style="font-size: 14px"></i>&nbsp; {{user.firstName}}
-                                {{user.lastName}}
+                                   ng-class="{'fa-circle-o': selectedUsers.indexOf(user) == -1 && selectedRemoteUsers.indexOf(user) == -1, 'fa-circle green': selectedUsers.indexOf(user)!=-1||selectedRemoteUsers.indexOf(user)!=-1}"
+                                   style="font-size: 14px"></i>&nbsp; {{user.firstName}} {{user.lastName}}
                                 <small class="opacity_4 pad-left-8">{{user.email}}</small>
                             </td>
                         </tr>
                     </table>
                 </div>
-                <small ng-if="selectedUsers.length" style="margin-top: 15px; color: #777">{{selectedUsers.length}}
-                    selected (5 local, 6 remote)
-                    <button ng-click="resetSelectedUsers()" class="btn-xs btn-link"><i class="fa fa-fw fa-times"></i>Reset
+                <small ng-if="(selectedUsers.length+selectedRemoteUsers.length) > 0"
+                       style="margin-top: 15px; color: #777">{{selectedUsers.length+selectedRemoteUsers.length}}
+                    selected ({{selectedUsers.length}} local, {{selectedRemoteUsers.length}} remote)
+                    <button ng-click="resetSelectedUsers()" class="btn-xs btn-link">
+                        <i class="fa fa-fw fa-times"></i>Reset
                     </button>
                 </small>
                 <small ng-if="!selectedUsers.length" style="margin-top: 15px; color: #777">0 users selected</small>
@@ -57,7 +64,7 @@
         </form>
     </div>
 
-    <div class="row">
+    <div class="row" ng-if="myGroups.length">
         <div class="general_sub_header">Groups you created</div>
         <table class="table striped table-hover">
             <tr ng-repeat="group in myGroups | orderBy:'id'">
@@ -66,7 +73,7 @@
 
                     <div style="color: #777; font-size: 11px;"><span
                             ng-if="group.description">{{group.description}} |</span>
-                        <b style="color: #222">{{group.memberCount}}</b> members
+                        <b style="color: #222">{{group.memberCount || 3}}</b> members
                     </div>
                 </td>
                 <td width="90px">

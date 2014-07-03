@@ -179,7 +179,8 @@
                         </div>
 
                         <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
-                            No Sequence
+                            Sequence with {{entry.linkedParts[$index+0].basePairCount | number}} base pairs <span
+                                ng-if="entry.linkedParts[$index+0].featureCount">& {{entry.linkedParts[$index+0].featureCount}} features</span>
                         </div>
                         <p style="clear: both; margin: 0; padding: .75em .5em; color: #888;">
                             {{entry.linkedParts[$index+0].shortDescription}}</p>
@@ -199,7 +200,8 @@
                         </div>
 
                         <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
-                            No Sequence
+                            Sequence with {{entry.linkedParts[$index+1].basePairCount | number}} base pairs <span
+                                ng-if="entry.linkedParts[$index+1].featureCount">& {{entry.linkedParts[$index+1].featureCount}} features</span>
                         </div>
                         <p style="clear: both; margin: 0; color: rgba(0,0,0,.45);padding: .75em .5em;">
                             {{entry.linkedParts[$index+1].shortDescription}}</p>

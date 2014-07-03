@@ -395,6 +395,41 @@ iceServices.factory('Settings', function ($resource) {
     }
 });
 
+iceServices.factory('Remote', function ($resource, $cookieStore) {
+    return function () {
+        return $resource('/rest/remote/:id', {id:'@id', email:'@email', folderId:'@folderId'}, {
+            publicFolders:{
+                method:'GET',
+                responseType:'json',
+                url:'/rest/remote/:id/available',
+                isArray:true,
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            publicEntries:{
+                method:'GET',
+                responseType:'json',
+                url:'/rest/remote/:id/entries',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            getUser:{
+                method:'GET',
+                responseType:'json',
+                url:'/rest/remote/:id/users/:email',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            getFolderEntries:{
+                method:'GET',
+                responseType:'json',
+                url:'/rest/remote/:id/folders/:folderId',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            }
+        });
+    }
+});
+
 iceServices.factory('WebOfRegistries', function ($resource, $cookieStore) {
     return function () {
         return $resource('/rest/web', {url:'@url'}, {
