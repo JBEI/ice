@@ -158,8 +158,8 @@ public class IceGenbankParser extends AbstractParser {
 
         // see if first two lines contain the "LOCUS" keyword. If not, don't even bother
 
-        if (lines.length >= 1 && lines[0].indexOf("LOCUS") == -1) {
-            if (lines.length == 1 || lines[1].indexOf("LOCUS") == -1) {
+        if (lines.length >= 1 && !lines[0].contains("LOCUS")) {
+            if (lines.length == 1 || !lines[1].contains("LOCUS")) {
                 throw new InvalidFormatParserException("Not a valid Genbank format: No Locus line.");
             }
         }

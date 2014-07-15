@@ -30,6 +30,8 @@ import org.jbei.ice.lib.entry.EntryController;
 @Path("/accesstoken")
 public class AccessTokenResource extends RestResource {
 
+    private final AccountController accountController = new AccountController();
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -38,14 +40,13 @@ public class AccessTokenResource extends RestResource {
         String pass = transfer.getPassword();
 
         try {
-            AccountController controller = new AccountController();
-            AccountTransfer info = controller.authenticate(name, pass);
+            AccountTransfer info = accountController.authenticate(name, pass);
             if (info == null) {
                 return null;
             }
 
             Logger.info("User by login '" + name + "' successfully logged in");
-            Account account = controller.getByEmail(info.getEmail());
+            Account account = accountController.getByEmail(info.getEmail());
             EntryController entryController = new EntryController();
             long visibleEntryCount = entryController.getNumberOfVisibleEntries(account.getEmail());
             info.setVisibleEntryCount(visibleEntryCount);
@@ -67,11 +68,9 @@ public class AccessTokenResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public AccountTransfer get(@HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
-        AccountController controller = new AccountController();
-
         try {
             if (AccountController.isAuthenticated(sessionId)) {
-                Account account = controller.getAccountBySessionKey(sessionId);
+                Account account = accountController.getAccountBySessionKey(sessionId);
 //                User info = Account.toDTO(account);
 //                long entryCount = entryController.getNumberOfOwnerEntries(account, account.getEmail());
 //                info.setUserEntryCount(entryCount);

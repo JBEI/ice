@@ -22,6 +22,7 @@ public class SearchResults implements IDataTransferModel {
     private SearchQuery query;
 
     public SearchResults() {
+        results = new LinkedList<>();
     }
 
     public LinkedList<SearchResult> getResults() {

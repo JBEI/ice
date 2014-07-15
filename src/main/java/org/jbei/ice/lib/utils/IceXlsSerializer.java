@@ -41,6 +41,7 @@ public class IceXlsSerializer {
 
     private static HashSet<String> getHeaders(String type) {
         HashSet<String> headers = new HashSet<>();
+
         switch (type.toUpperCase().trim()) {
             case PLASMID_TYPE:
                 headers.add("Circular");

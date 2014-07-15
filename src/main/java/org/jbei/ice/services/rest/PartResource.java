@@ -1,6 +1,10 @@
 package org.jbei.ice.services.rest;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Set;
 import javax.ws.rs.*;
@@ -12,7 +16,7 @@ import javax.ws.rs.core.UriInfo;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
@@ -25,14 +29,17 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 /**
  * @author Hector Plahar
@@ -65,32 +72,41 @@ public class PartResource extends RestResource {
         return retriever.getMatchingPartNumber(token, limit);
     }
 
+    /**
+     * Retrieves a part using any of the unique identifiers. e.g. Part number, synthetic id, or global unique
+     * identifier
+     *
+     * @param info
+     * @param id
+     * @param userAgentHeader
+     * @return
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public PartData read(@Context UriInfo info, @PathParam("id") long partId,
+    public PartData read(@Context UriInfo info,
+            @PathParam("id") String id,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.retrieveEntryDetails(userId, partId);
+        return controller.retrieveEntryDetails(userId, id);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/tooltip")
-    public PartData getTooltipDetails(@PathParam("id") long partId,
+    public PartData getTooltipDetails(@PathParam("id") String id,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.retrieveEntryTipDetails(userId, partId);
+        return controller.retrieveEntryTipDetails(userId, id);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public ArrayList<AccessPermission> getPermissions(@Context UriInfo info, @PathParam("id") long partId,
+    public ArrayList<AccessPermission> getPermissions(@Context UriInfo info, @PathParam("id") String id,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        Entry entry = DAOFactory.getEntryDAO().get(partId);
-        return permissionsController.retrieveSetEntryPermissions(entry);
+        return retriever.getEntryPermissions(userId, id);
     }
 
     @PUT
@@ -100,6 +116,7 @@ public class PartResource extends RestResource {
             ArrayList<AccessPermission> permissions,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
+
         return permissionsController.setEntryPermissions(userId, partId, permissions);
     }
 
@@ -230,9 +247,33 @@ public class PartResource extends RestResource {
         return controller.getTraceSequences(userId, partId);
     }
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/traces")
+    public void addTraceSequence(@PathParam("id") long partId,
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+            @QueryParam("sid") String sessionId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        if (StringUtils.isEmpty(userAgentHeader))
+            userAgentHeader = sessionId;
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        String fileName = contentDispositionHeader.getFileName();
+        String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+        File file = Paths.get(tmpDir, fileName).toFile();
+        try {
+            FileUtils.copyInputStreamToFile(fileInputStream, file);
+        } catch (IOException e) {
+            Logger.error(e);
+            return;
+        }
+        controller.addTraceSequence(userId, partId, file, fileName);
+    }
+
     @DELETE
     @Path("/{id}/traces/{traceId}")
-    public void deleteTrace(@Context UriInfo info, @PathParam("id") long partId, @PathParam("traceId") long traceId,
+    public void deleteTrace(@Context UriInfo info, @PathParam("id") long partId,
+            @PathParam("traceId") long traceId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         controller.deleteTraceSequence(userId, partId, traceId);

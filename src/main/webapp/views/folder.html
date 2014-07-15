@@ -17,7 +17,6 @@
 
                 <!-- very top of header. Account and logout links -->
                 <tr>
-                    <!-- search -->
                     <td style="background-color: #f1f1f1; padding:6px" colspan="6">
 
                         <!-- table for search, menu, and profile and other options (e.g. logout) -->
@@ -30,27 +29,29 @@
 
                                 <!-- links -->
                                 <td colspan="2" style="text-align: right;" class="font-90em">
-                            <span style="vertical-align: top;"><a
-                                    ng-href="/profile/{{user.id}}">{{user.email}}</a></span>
+                                    <span style="vertical-align: top;">
+                                        <a ng-href="/profile/{{user.id}}">{{user.email}}</a>
+                                    </span>
                                     &nbsp;
-                    <span style="vertical-align: top;" class="form-group">
-                        <button style="background: transparent; border: none !important;" title=""
-                                data-placement="bottom"
-                                data-content="contents" data-template="/views/popover.html" data-trigger="focus"
-                                bs-popover>
-                            <i class="fa fa-bell" style="color: #757575; font-size: 14px"></i><sup
-                                class="count-badge">4</sup></button>  </span>
+                                    <span style="vertical-align: top;" class="form-group">
+                                        <button style="background: transparent; border: none !important;" title=""
+                                                data-placement="bottom" data-content="contents"
+                                                data-template="/views/popover.html" data-trigger="focus" bs-popover>
+                                            <i class="fa fa-bell" style="color: #757575; font-size: 14px"></i><sup
+                                                class="count-badge">4</sup></button>  </span>
                                     &nbsp;
-                    <span style="vertical-align: top;"><i class="fa fa-envelope"
-                                                          style="color: #757575; font-size: 14px"></i><sup
+                    <span style="vertical-align: top;" class="cursor_pointer"><i class="fa fa-envelope"
+                                                                                 style="color: #757575; font-size: 14px"></i><sup
                             class="count-badge">8</sup></span>
                                     &nbsp;
-                    <span style="vertical-align: top;"><i class="fa fa-shopping-cart"
-                                                          style="color: #757575; font-size: 14px"></i><sup
+                    <span style="vertical-align: top;" class="cursor_pointer"><i class="fa fa-shopping-cart"
+                                                                                 style="color: #757575; font-size: 14px"></i><sup
                             class="count-badge">5</sup></span>
                                     &nbsp;
-                            <span><i class="fa fa-sign-out" style="color: #757575; font-size: 20px"
-                                     data-ng-click="logout()"></i></span>
+                            <span class="cursor_pointer">
+                                <i class="fa fa-sign-out" style="color: #757575; font-size: 20px"
+                                   data-ng-click="logout()"></i>
+                            </span>
                                     &nbsp;
                                 </td>
                             </tr>

@@ -16,6 +16,7 @@ iceServices.factory('Pigeon', function ($http) {
         }
     }
 });
+
 iceServices.factory('Group', function ($resource, $cookieStore) {
     return function () {
 
@@ -70,6 +71,10 @@ iceServices.factory('User', function ($resource) {
                 url:"/rest/users/:userId/groups",
                 responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            createUser:{
+
             },
 
             getEntries:{
@@ -250,6 +255,12 @@ iceServices.factory('Entry', function ($resource) {
                 method:'DELETE',
                 responseType:'json',
                 url:'/rest/part/:partId/traces/:traceId',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            addTraceSequence:{
+                method:'POST',
+                url:'/rest/part/:partId/traces',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -547,7 +558,7 @@ iceServices.factory('Authentication', function ($resource, $cookieStore, $http, 
             return $http({
                 url:"/rest/accesstoken",
                 method:"POST",
-                data:"{email:" + username + ", password:" + password + "}",
+                data:"{email:" + username + ", password:\'" + password + "\'}",
                 dataType:"json" }).
                 success(function (data, status, headers, config) {
                     if (data.length == 0) {

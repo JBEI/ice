@@ -196,6 +196,9 @@ public class FileResource extends RestResource {
             @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
             @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
+            if (entryType == null)
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+
             String fileName = contentDispositionHeader.getFileName();
             String userId = super.getUserIdFromSessionHeader(sessionId);
             String sequence = IOUtils.toString(fileInputStream);

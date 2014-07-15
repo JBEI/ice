@@ -1,6 +1,10 @@
 package org.jbei.ice.lib.entry;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -12,6 +16,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.ControllerException;
@@ -43,7 +49,6 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.folder.FolderController;
@@ -56,7 +61,8 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
+import org.jbei.ice.servlet.ByteHolder;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
@@ -75,7 +81,6 @@ public class EntryController {
     private AuditDAO auditDAO;
     private PermissionsController permissionsController;
     private AccountController accountController;
-    private SequenceController sequenceController;
     private final EntryAuthorization authorization;
 
     public EntryController() {
@@ -83,83 +88,9 @@ public class EntryController {
         commentDAO = DAOFactory.getCommentDAO();
         permissionsController = new PermissionsController();
         accountController = new AccountController();
-        sequenceController = new SequenceController();
         authorization = new EntryAuthorization();
         sequenceDAO = DAOFactory.getSequenceDAO();
         auditDAO = DAOFactory.getAuditDAO();
-    }
-
-    public FeaturedDNASequence getPublicSequence(String recordId) {
-        Entry entry = dao.getByRecordId(recordId);
-        if (entry == null)
-            return null;
-
-        if (!permissionsController.isPubliclyVisible(entry)) {
-            String errMsg = "Entry " + recordId + " is not public";
-            Logger.warn(errMsg);
-            return null;
-        }
-        return sequenceController.sequenceToDNASequence(sequenceDAO.getByEntry(entry));
-    }
-
-    public PartData getPublicEntryByRecordId(String recordId) throws ControllerException {
-        Entry entry;
-
-        try {
-            entry = dao.getByRecordId(recordId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        if (entry == null)
-            return null;
-
-        if (!permissionsController.isPubliclyVisible(entry)) {
-            String errMsg = "Entry " + recordId + " is not public";
-            Logger.warn(errMsg);
-            throw new ControllerException(errMsg);
-        }
-
-        PartData info = ModelToInfoFactory.getInfo(entry);
-        boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
-        info.setHasSequence(hasSequence);
-        boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
-        info.setHasOriginalSequence(hasOriginalSequence);
-        return info;
-    }
-
-    public PartData getPublicEntryById(long id) throws ControllerException {
-        Entry entry;
-
-        try {
-            entry = dao.get(id);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        if (entry == null)
-            return null;
-
-        if (!permissionsController.isPubliclyVisible(entry)) {
-            String errMsg = "Entry " + id + " is not public";
-            Logger.warn(errMsg);
-            throw new ControllerException(errMsg);
-        }
-
-        PartData info = ModelToInfoFactory.getInfo(entry);
-        boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
-        info.setHasSequence(hasSequence);
-        boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
-        info.setHasOriginalSequence(hasOriginalSequence);
-        info.setOwnerId(0);
-        info.setCreatorId(0);
-
-        if (hasSequence) {
-            String script = PigeonSBOLv.generatePigeonScript(sequenceDAO.getByEntry(entry));
-            info.setSbolVisualURL(script);
-        }
-
-        return info;
     }
 
     /**
@@ -429,6 +360,8 @@ public class EntryController {
         if (entry == null)
             return;
 
+        authorization.expectWrite(account.getEmail(), entry);
+
         if (schedule) {
             Sequence sequence = sequenceDAO.getByEntry(entry);
             if (sequence != null) {
@@ -483,7 +416,6 @@ public class EntryController {
      * @param account user account
      * @param ids     list of entry ids
      * @return List of Entry ids.
-     * @throws ControllerException
      */
     List<Long> filterEntriesByPermission(Account account, List<Long> ids) {
         ArrayList<Long> result = new ArrayList<>();
@@ -523,8 +455,11 @@ public class EntryController {
 //        }
 //    }
 
-    public PartData retrieveEntryTipDetails(String userId, long entryId) {
-        Entry entry = dao.get(entryId);
+    public PartData retrieveEntryTipDetails(String userId, String id) {
+        Entry entry = getEntry(id);
+        if (entry == null)
+            return null;
+
         if (!authorization.canRead(userId, entry))
             return null;
 
@@ -725,13 +660,74 @@ public class EntryController {
         return true;
     }
 
-    public PartData retrieveEntryDetails(String userId, long entryId) {
-        Entry entry = dao.get(entryId);
+    protected Entry getEntry(String id) {
+        Entry entry = null;
+
+        // check if numeric
+        try {
+            entry = dao.get(Long.decode(id));
+        } catch (NumberFormatException nfe) {
+            // fine to ignore
+        }
+
+        // check for part Id
+        if (entry == null)
+            entry = dao.getByPartNumber(id);
+
+        // check for global unique id
+        if (entry == null)
+            dao.getByRecordId(id);
+
+        return entry;
+    }
+
+//    public PartData setPermissions(String userId, String id, ArrayList<AccessPermission> permissions) {
+//        Entry entry = getEntry(id);
+//        if (entry == null)
+//            return null;
+//
+//        EntryType type = EntryType.nameToType(entry.getRecordType());
+//        PartData data = new PartData(type);
+//
+//        // TODO :
+//        if (entry == null) {
+//            partId = new EntryCreator().createPart(userId, data);
+//            entry = DAOFactory.getEntryDAO().get(partId);
+//        } else {
+//            EntryAuthorization authorization = new EntryAuthorization();
+//            authorization.expectWrite(userId, entry);
+//            dao.clearPermissions(entry);
+//        }
+//
+//        data.setId(partId);
+//
+//        if (permissions == null)
+//            return data;
+//
+//        for (AccessPermission access : permissions) {
+//            Permission permission = new Permission();
+//            permission.setEntry(entry);
+//            entry.getPermissions().add(permission);
+//            permission.setAccount(account);
+//            permission.setCanRead(access.isCanRead());
+//            permission.setCanWrite(access.isCanWrite());
+//            dao.create(permission);
+//        }
+//
+//        return data;
+//    }
+
+    public PartData retrieveEntryDetails(String userId, String id) {
+        Entry entry = getEntry(id);
         if (entry == null)
             return null;
 
+        // user must be able to read
         authorization.expectRead(userId, entry);
+        return retrieveEntryDetails(userId, entry);
+    }
 
+    protected PartData retrieveEntryDetails(String userId, Entry entry) {
         PartData partData = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
 
@@ -799,7 +795,7 @@ public class EntryController {
         }
 
         // check if there is a parent available
-        List<Entry> parents = dao.getParents(entryId);
+        List<Entry> parents = dao.getParents(entry.getId());
         if (parents == null)
             return partData;
 
@@ -812,5 +808,90 @@ public class EntryController {
         }
 
         return partData;
+    }
+
+    public boolean addTraceSequence(String userId, long partId, File file, String uploadFileName) {
+        Entry entry = dao.get(partId);
+        if (entry == null)
+            return false;
+
+        authorization.expectWrite(userId, entry);
+
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        DNASequence dnaSequence;
+
+        ArrayList<ByteHolder> byteHolders = new ArrayList<>();
+        FileInputStream inputStream;
+        try {
+            inputStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            Logger.error(e);
+            return false;
+        }
+
+        if (uploadFileName.toLowerCase().endsWith(".zip")) {
+            try (ZipInputStream zis = new ZipInputStream(inputStream)) {
+                ZipEntry zipEntry;
+                while (true) {
+                    zipEntry = zis.getNextEntry();
+
+                    if (zipEntry != null) {
+                        if (!zipEntry.isDirectory() && !zipEntry.getName().startsWith("__MACOSX")) {
+                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                            int c;
+                            while ((c = zis.read()) != -1) {
+                                byteArrayOutputStream.write(c);
+                            }
+                            ByteHolder byteHolder = new ByteHolder();
+                            byteHolder.setBytes(byteArrayOutputStream.toByteArray());
+                            byteHolder.setName(zipEntry.getName());
+                            byteHolders.add(byteHolder);
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                String errMsg = ("Could not parse zip file.");
+                Logger.error(errMsg);
+                return false;
+            }
+        } else {
+            ByteHolder byteHolder = new ByteHolder();
+            try {
+                byteHolder.setBytes(IOUtils.toByteArray(inputStream));
+            } catch (IOException e) {
+                Logger.error(e);
+                return false;
+            }
+            byteHolder.setName(uploadFileName);
+            byteHolders.add(byteHolder);
+        }
+
+        String currentFileName = "";
+        try {
+            for (ByteHolder byteHolder : byteHolders) {
+                currentFileName = byteHolder.getName();
+                dnaSequence = sequenceAnalysisController.parse(byteHolder.getBytes());
+                if (dnaSequence == null || dnaSequence.getSequence() == null) {
+                    String errMsg = ("Could not parse \"" + currentFileName
+                            + "\". Only Fasta, GenBank & ABI files are supported.");
+                    Logger.error(errMsg);
+                    return false;
+                }
+
+                sequenceAnalysisController.uploadTraceSequence(entry, byteHolder.getName(),
+                                                               userId,
+                                                               dnaSequence.getSequence().toLowerCase(),
+                                                               new ByteArrayInputStream(byteHolder.getBytes()));
+            }
+            sequenceAnalysisController.rebuildAllAlignments(entry);
+            return true;
+        } catch (ControllerException e) {
+            String errMsg = ("Could not parse \"" + currentFileName
+                    + "\". Only Fasta, GenBank & ABI files are supported.");
+            Logger.error(errMsg);
+            return false;
+        }
     }
 }

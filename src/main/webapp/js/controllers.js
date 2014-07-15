@@ -140,9 +140,9 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
     $scope.errMsg = undefined;
 
     $scope.submit = function () {
+        // todo move this to User.createUser({})
         var User = $resource("/rest/profile");
 
-        // todo User.get first to ensure email does not exist
         User.save({email:$scope.email, firstName:$scope.firstName, lastName:$scope.lastName, institution:$scope.institution, description:$scope.about}, function (data) {
             if (data.length != 0)
                 $location.path("/login");
@@ -1785,7 +1785,6 @@ iceControllers.controller('EditEntryController', function ($scope, $location, $c
     console.log("EditEntryController");
 
     var entry = Entry($cookieStore.get("sessionId"));
-
     entry.query({partId:$stateParams.id}, function (result) {
         $scope.entry = result;
     });
@@ -1899,7 +1898,8 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
     var strainFields = [
         {label:"Selection Markers", required:true, schema:'selectionMarkers',
             inputType:'autoCompleteAdd', autoCompleteField:'SELECTION_MARKERS'},
-        {label:"Genotype/Phenotype", schema:'genotypePhenotype', subSchema:'strainData', inputType:'long'}
+        {label:"Genotype/Phenotype", schema:'genotypePhenotype', subSchema:'strainData', inputType:'long'},
+        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER'}
     ];
 
     var partDefaults = {
@@ -2192,7 +2192,12 @@ iceControllers.controller('CreateEntryController', function ($http, $scope, $mod
     });
 
     uploader.bind('beforeupload', function (event, item) {
-        item.formData.push({entryType:$scope.part.linkedParts[$scope.active].type}); // todo check that active is actually valid
+        var entryTypeForm;
+        if ($scope.active === 'main')
+            entryTypeForm = {entryType:$scope.part.type.toUpperCase()};
+        else
+            entryTypeForm = {entryType:$scope.part.linkedParts[$scope.active].type};
+        item.formData.push(entryTypeForm);
     });
 
     uploader.bind('progress', function (event, item, progress) {
@@ -2971,12 +2976,26 @@ iceControllers.controller('EntryCommentController', function ($scope, $cookieSto
     };
 });
 
-iceControllers.controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, Entry) {
+iceControllers.controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, $fileUploader, Entry) {
     var entryId = $stateParams.id;
-    var entry = Entry($cookieStore.get("sessionId"));
+    var sid = $cookieStore.get("sessionId");
+    var entry = Entry(sid);
 
     entry.traceSequences({partId:entryId}, function (result) {
         $scope.traceSequences = result;
+    });
+
+    var uploader = $scope.traceSequenceUploader = $fileUploader.create({
+        scope:$scope, // to automatically update the html. Default: $rootScope
+        url:"/rest/part/" + entryId + "/traces",
+        method:'POST',
+        removeAfterUpload:true,
+        headers:{"X-ICE-Authentication-SessionId":sid},
+        autoUpload:true,
+        queueLimit:1, // can only upload 1 file
+        formData:[
+            { entryId:entryId}
+        ]
     });
 
     $scope.deleteTraceSequenceFile = function (fileId) {

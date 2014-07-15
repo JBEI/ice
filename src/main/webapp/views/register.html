@@ -8,8 +8,11 @@
         <div class="col-xs-6">
             <form name="registerForm" data-ng-submit="submit()">
                 <div class="form-group">
-                    <br><img src="img/logo.png"><br>
-                    <br><span data-ng-if="errMsg != undefined">{{errMsg}}</span><br>
+                    <br><img src="img/logo.png"><br><br>
+                    <alert type="'danger'" style="width: 250px; padding: 8px" ng-if="errMsg">
+                        <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
+                        <span class="font-90em">{{errMsg}}</span>
+                    </alert>
                 </div>
 
                 <div class="form-group">

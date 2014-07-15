@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -12,7 +13,10 @@ import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
 /**
@@ -26,6 +30,49 @@ public class EntryRetriever {
     public EntryRetriever() {
         this.dao = DAOFactory.getEntryDAO();
         authorization = new EntryAuthorization();
+    }
+
+    protected Entry getEntry(String id) {
+        Entry entry = null;
+
+        // check if numeric
+        try {
+            entry = dao.get(Long.decode(id));
+        } catch (NumberFormatException nfe) {
+            // fine to ignore
+        }
+
+        // check for part Id
+        if (entry == null)
+            entry = dao.getByPartNumber(id);
+
+        // check for global unique id
+        if (entry == null)
+            dao.getByRecordId(id);
+
+        return entry;
+    }
+
+    public ArrayList<AccessPermission> getEntryPermissions(String userId, String id) {
+        Entry entry = getEntry(id);
+        if (entry == null)
+            return null;
+
+        // viewing permissions requires write permissions
+        authorization.expectWrite(userId, entry);
+
+        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
+        Set<Permission> permissions = DAOFactory.getPermissionDAO().getEntryPermissions(entry);
+
+        GroupController groupController = new GroupController();
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        for (Permission permission : permissions) {
+            if (permission.getGroup() != null && permission.getGroup() == publicGroup)
+                continue;
+            accessPermissions.add(permission.toDataTransferObject());
+        }
+
+        return accessPermissions;
     }
 
     // return list of part data with only partId and id filled in
