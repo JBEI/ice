@@ -53,7 +53,7 @@ public class LblLdapAuthentication implements IAuthentication {
     }
 
     @Override
-    public boolean authenticates(String loginId, String password) throws AuthenticationException {
+    public String authenticates(String loginId, String password) throws AuthenticationException {
         if (loginId == null || password == null || loginId.isEmpty() || password.isEmpty()) {
             throw new AuthenticationException("Username and Password are mandatory!");
         }
@@ -65,15 +65,17 @@ public class LblLdapAuthentication implements IAuthentication {
                 boolean authenticated = authenticateWithLDAP(loginId, password);
                 if (!authenticated) {
                     Logger.warn("Authentication failed for user " + loginId);
-                    return false;
+                    return null;
                 }
             } catch (AuthenticationException ae) {
                 Logger.warn("Authentication failed for user " + loginId);
-                return false;
+                return null;
             }
 
-            checkCreateAccount(loginId);
-            return true;
+            Account account = checkCreateAccount(loginId);
+            if (account == null)
+                return null;
+            return account.getEmail();
         } else {
             LocalAuthentication localBackend = new LocalAuthentication();
             return localBackend.authenticates(loginId, password);
@@ -100,7 +102,7 @@ public class LblLdapAuthentication implements IAuthentication {
      *
      * @param loginId unique login identifier
      */
-    private void checkCreateAccount(String loginId) throws AuthenticationException {
+    private Account checkCreateAccount(String loginId) throws AuthenticationException {
         AccountController retriever = new AccountController();
         Account account = retriever.getByEmail(loginId);
 
@@ -111,23 +113,28 @@ public class LblLdapAuthentication implements IAuthentication {
             account = new Account();
             account.setCreationTime(currentTime);
 
-            account.setEmail(getEmail());
+            account.setEmail(getEmail().toLowerCase());
             account.setFirstName(getGivenName());
             account.setLastName(getSirName());
             account.setDescription(getDescription());
             account.setPassword("");
+            account.setInitials("");
+            account.setIp("");
+            account.setInstitution("Lawrence Berkeley Laboratory");
             account.setModificationTime(currentTime);
 
             if (group != null)
                 account.getGroups().add(group);
 
-            DAOFactory.getAccountDAO().create(account);
+            account = DAOFactory.getAccountDAO().create(account);
         } else {
             if (group != null && !account.getGroups().contains(group)) {
                 account.getGroups().add(group);
                 DAOFactory.getAccountDAO().update(account);
             }
         }
+
+        return account;
     }
 
     /**

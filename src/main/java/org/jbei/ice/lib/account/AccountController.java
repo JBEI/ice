@@ -319,7 +319,7 @@ public class AccountController {
      * @return True if correct password.
      * @throws ControllerException
      */
-    public Boolean isValidPassword(Account account, String password) throws ControllerException {
+    public boolean isValidPassword(Account account, String password) throws ControllerException {
         if (account == null) {
             throw new ControllerException("Failed to verify password for null Account!");
         }
@@ -360,29 +360,31 @@ public class AccountController {
      * @throws InvalidCredentialsException
      * @throws ControllerException
      */
-    public boolean authenticate(String login, String password, String ip)
+    public String authenticate(String login, String password, String ip)
             throws InvalidCredentialsException, ControllerException {
         IAuthentication authentication = new LocalAuthentication();
+        String email;
 
         try {
-            if (!authentication.authenticates(login.trim(), password)) {
+            email = authentication.authenticates(login.trim(), password);
+            if (email == null) {
                 try {
                     Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password brute force hacking
                 } catch (InterruptedException ie) {
                     Logger.warn(ie.getMessage());
                 }
-                return false;
+                return null;
             }
         } catch (AuthenticationException e2) {
             try {
                 Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password brute force hacking
             } catch (InterruptedException ie) {
-                throw new ControllerException(ie);
+                Logger.warn(ie.getMessage());
             }
-            throw new ControllerException(e2);
+            return null;
         }
 
-        Account account = dao.getByEmail(login);
+        Account account = dao.getByEmail(email);
         if (account != null) {
             AccountPreferences accountPreferences = getAccountPreferences(account);
 
@@ -396,9 +398,10 @@ public class AccountController {
             account.setLastLoginTime(Calendar.getInstance().getTime());
             save(account);
             SessionHandler.createNewSessionForUser(account.getEmail());
+            return email;
         }
 
-        return true;
+        return null;
     }
 
     /**
@@ -417,19 +420,20 @@ public class AccountController {
      */
     public AccountTransfer authenticate(String login, String password)
             throws InvalidCredentialsException, ControllerException {
-        if (!authenticate(login, password, ""))
+        String email = authenticate(login, password, "");
+        if (email == null)
             return null;
 
-        Account account = dao.getByEmail(login);
-        AccountTransfer info = account.toDataTransferObject();
-        if (info == null)
-            return info;
+        Account account = dao.getByEmail(email);
+        if (account == null)
+            return null;
 
+        AccountTransfer info = account.toDataTransferObject();
         info.setLastLogin(account.getLastLoginTime().getTime());
         info.setId(account.getId());
-        boolean isAdmin = isAdministrator(login);
+        boolean isAdmin = isAdministrator(email);
         info.setAdmin(isAdmin);
-        info.setSessionId(SessionHandler.createNewSessionForUser(login));
+        info.setSessionId(SessionHandler.createNewSessionForUser(email));
         return info;
     }
 

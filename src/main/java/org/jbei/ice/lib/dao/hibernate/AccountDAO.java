@@ -22,8 +22,6 @@ public class AccountDAO extends HibernateRepository<Account> {
     /**
      * Retrieve {@link Account} by id from the database.
      *
-     *
-     *
      * @param id unique local identifier for object
      * @return Account
      * @throws DAOException
@@ -62,14 +60,15 @@ public class AccountDAO extends HibernateRepository<Account> {
         Account account = null;
         Session session = currentSession();
         try {
-            Query query = session.createQuery("from " + Account.class.getName() + " where email = :email");
-            query.setParameter("email", email);
+            Query query = session.createQuery("from " + Account.class.getName() + " where LOWER(email) = :email");
+            query.setParameter("email", email.toLowerCase());
             Object result = query.uniqueResult();
 
             if (result != null) {
                 account = (Account) result;
             }
         } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException("Failed to retrieve Account by email: " + email, e);
         }
         return account;

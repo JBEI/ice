@@ -10,10 +10,11 @@ public interface IAuthentication {
     /**
      * Authenticates a user's name and password against the system's stored credentials
      *
-     * @param email    user email
+     * @param loginId  user login Identifier
      * @param password user password
-     * @return true on successful authentication with the credentials provided, false otherwise
+     * @return the account identifier (usually email) on successful authentication with the credentials provided,
+     *         null otherwise
      * @throws AuthenticationException on exception authenticating
      */
-    boolean authenticates(String email, String password) throws AuthenticationException;
+    String authenticates(String loginId, String password) throws AuthenticationException;
 }
