@@ -59,11 +59,12 @@ public class LblLdapAuthentication implements IAuthentication {
         }
 
         loginId = loginId.toLowerCase().trim();
+        String authenticatedEmail;
 
         if (isWikiUser(loginId)) {
             try {
-                boolean authenticated = authenticateWithLDAP(loginId, password);
-                if (!authenticated) {
+                authenticatedEmail = authenticateWithLDAP(loginId, password);
+                if (authenticatedEmail == null) {
                     Logger.warn("Authentication failed for user " + loginId);
                     return null;
                 }
@@ -72,7 +73,7 @@ public class LblLdapAuthentication implements IAuthentication {
                 return null;
             }
 
-            Account account = checkCreateAccount(loginId);
+            Account account = checkCreateAccount(authenticatedEmail);
             if (account == null)
                 return null;
             return account.getEmail();
@@ -142,9 +143,9 @@ public class LblLdapAuthentication implements IAuthentication {
      *
      * @param userName
      * @param passWord
-     * @return True if successfully authenticated.
+     * @return valid email if successfully authenticated, null otherwise
      */
-    public boolean authenticateWithLDAP(String userName, String passWord) throws AuthenticationException {
+    public String authenticateWithLDAP(String userName, String passWord) throws AuthenticationException {
         DirContext authContext = null;
 
         try {
@@ -184,7 +185,6 @@ public class LblLdapAuthentication implements IAuthentication {
 
             authContext.close();
             dirContext.close(); //because authentication should be the last step
-            authenticated = true;
         } catch (NamingException e) {
             throw new AuthenticationException("Got LDAP NamingException", e);
         } finally {
@@ -202,7 +202,7 @@ public class LblLdapAuthentication implements IAuthentication {
             }
         }
 
-        return authenticated;
+        return email;
     }
 
     /**
