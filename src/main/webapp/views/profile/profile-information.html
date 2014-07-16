@@ -1,8 +1,10 @@
 <div class="row pad_top">
-    <button type="button" ng-click="editClick(true, false, false)" class="ice-button">
-        <i style="font-size: 14px" class="blue fa fa-envelope"></i> Send Message
-    </button>
-    &nbsp;
+    <span ng-if="user.email!==profile.email">
+        <button type="button" ng-click="editClick(true, false, false)" class="ice-button">
+            <i style="font-size: 14px" class="blue fa fa-envelope"></i> Send Message
+        </button>
+        &nbsp;
+    </span>
     <button type="button" ng-click="editClick(false, true, false)" class="ice-button">
         <i style="font-size: 14px" class="blue fa fa-edit"></i> Edit Profile
     </button>
