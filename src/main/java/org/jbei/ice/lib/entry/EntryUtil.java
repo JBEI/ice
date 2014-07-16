@@ -7,6 +7,7 @@ import java.util.Set;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
@@ -14,6 +15,8 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.utils.Utils;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Utility class for operating on entries
@@ -58,12 +61,50 @@ public class EntryUtil {
 
     public static ArrayList<String> getSelectionMarkersAsList(Set<SelectionMarker> markers) {
         ArrayList<String> selectionMarkers = new ArrayList<>();
-        if(markers == null)
+        if (markers == null)
             return selectionMarkers;
 
-        for(SelectionMarker marker : markers) {
+        for (SelectionMarker marker : markers) {
             selectionMarkers.add(marker.getName());
         }
         return selectionMarkers;
+    }
+
+    public static boolean validates(PartData partData) {
+        if (partData.getType() == null)
+            return false;
+
+        switch (partData.getType()) {
+            case PLASMID:
+            case STRAIN:
+            case ARABIDOPSIS:
+                if (partData.getSelectionMarkers().isEmpty())
+                    return false;
+
+                // deliberately not breaking here since to fall into part
+
+            case PART:
+                if (StringUtils.isEmpty(partData.getName()))
+                    return false;
+
+                if (partData.getBioSafetyLevel() == null)
+                    return false;
+
+                if (StringUtils.isEmpty(partData.getStatus()))
+                    return false;
+
+                if (StringUtils.isEmpty(partData.getCreator()))
+                    return false;
+
+                if (StringUtils.isEmpty(partData.getCreatorEmail()))
+                    return false;
+
+                if (StringUtils.isEmpty(partData.getShortDescription()))
+                    return false;
+
+                break;
+        }
+
+        return true;
     }
 }

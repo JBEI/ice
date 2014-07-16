@@ -281,7 +281,8 @@ public class EntryController {
         }
 
         entry.setModificationTime(Calendar.getInstance().getTime());
-        entry.setVisibility(Visibility.OK.getValue());
+        Visibility visibility = EntryUtil.validates(part) ? Visibility.OK : Visibility.DRAFT;
+        entry.setVisibility(visibility.getValue());
         dao.update(entry);
 
         return entry.getId();
@@ -295,17 +296,13 @@ public class EntryController {
         authorization.expectWrite(account.getEmail(), entry);
         boolean scheduleRebuild = sequenceDAO.hasSequence(entry.getId());
 
-        try {
-            entry.setModificationTime(Calendar.getInstance().getTime());
-            if (entry.getVisibility() == null)
-                entry.setVisibility(Visibility.OK.getValue());
-            dao.update(entry);
+        entry.setModificationTime(Calendar.getInstance().getTime());
+        if (entry.getVisibility() == null)
+            entry.setVisibility(Visibility.OK.getValue());
+        dao.update(entry);
 
-            if (scheduleRebuild) {
-                ApplicationController.scheduleBlastIndexRebuildTask(true);
-            }
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+        if (scheduleRebuild) {
+            ApplicationController.scheduleBlastIndexRebuildTask(true);
         }
     }
 

@@ -18,11 +18,14 @@
                 <small ng-if="entry.visible!=='OK'" class="label label-danger"
                        style="font-size: 12px; position: relative; top: -4px">{{entry.visible}}
                 </small>
-                <small style="font-size: 12px; position: relative; top: -4px" tooltip="Available on web of registries"
-                       tooltip-placement="right" tooltip-trigger="mouseenter"
-                       ng-if="entry.publicRead" class="label label-info cursor_pointer"><i class="fa fa-globe"></i>
-                    Public
-                </small>
+                <span ng-if="entry.publicRead">&nbsp;
+                    <small style="font-size: 12px; position: relative; top: -4px"
+                           tooltip="Available on web of registries"
+                           tooltip-placement="right" tooltip-trigger="mouseenter"
+                           class="label label-info cursor_pointer"><i class="fa fa-globe"></i>
+                        Public
+                    </small>
+                </span>
                 <span ng-repeat="parent in entry.parents">
                 &nbsp;<a ng-href="/entry/{{parent.id}}" tooltip="{{parent.name}}"
                          tooltip-placement="right" tooltip-trigger="mouseenter"
