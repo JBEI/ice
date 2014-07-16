@@ -9,7 +9,11 @@ var iceApp = angular.module('iceApp', [
     'iceApp.directives',
     'iceApp.controllers',
     'ui.router'
+//    'ice.dependencies'
 ]);
+
+// dependencies for the ice application defined in a separate module
+//angular.module('ice.dependencies');
 
 iceApp.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
     var original = $location.path;

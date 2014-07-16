@@ -27,16 +27,18 @@
         <div class="comment margin-top-20"
              ng-repeat="comment in (comments = (entryComments | orderBy: 'id':true))">
             <span class="close pull-left">{{entryComments.length - $index}}</span>
-            <span style="color: #999;"
-                  class="attachment_small_text pull-right">{{comment.commentDate | uppercase}}</span>
+            <small class="attachment_small_text pull-right">{{comment.commentDate | uppercase}}</small>
             <br>
-            <br>{{comment.message}} {{comment.accountTransfer.}}
+            <br>{{comment.message}}
             <br><br>
 
             <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
-            <div class="pull-left"><a ng-ref="/profile/{{comment.accountTransfer.id}}">{{comment.accountTransfer.firstName}}
+            <div class="pull-left"><a ng-href="/profile/{{comment.accountTransfer.id}}">{{comment.accountTransfer.firstName}}
                 {{comment.accountTransfer.lastName}}</a></div>
-            <div class="pull-right delete_icon"><i class="fa fa-trash-o"></i></div>
+            <span ng-if="user.email===comment.accountTransfer.email||user.isAdmin"></span>
+
+            <div class="pull-right"><i class="fa fa-edit edit_icon"></i> | <i class="fa fa-trash-o delete_icon"></i>
+            </div>
         </div>
     </div>
 </div>

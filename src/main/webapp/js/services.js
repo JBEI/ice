@@ -3,6 +3,155 @@
 /* Services */
 var iceServices = angular.module('iceApp.services', ['ngCookies', 'ngResource']);
 
+iceServices.factory('Util', function () {
+    return {
+    }
+});
+
+
+iceServices.factory('EntryService', function () {
+    var toStringArray = function (objArray) {
+        var result = [];
+        angular.forEach(objArray, function (object) {
+            if (!object || !object.value || object.value === "")
+                return;
+            result.push(object.value);
+        });
+        return result;
+    };
+    var partFields = [
+        {label:"Name", required:true, schema:'name', help:'Help Text', placeHolder:'e.g. JBEI-0001', inputType:'short'},
+        {label:"Alias", schema:'alias', inputType:'short'},
+        {label:"Principal Investigator", required:true, schema:'principalInvestigator', inputType:'withEmail', bothRequired:'false'},
+        {label:"Funding Source", schema:'fundingSource', inputType:'short'},
+        {label:"Status", schema:'status', options:[
+            {value:"Complete", text:"Complete"},
+            {value:"In Progress", text:"In Progress"},
+            {value:"Abandoned", text:"Abandoned"},
+            {value:"Planned", text:"Planned"}
+        ]},
+        {label:"Bio Safety Level", schema:'bioSafetyLevel', options:[
+            {value:"1", text:"Level 1"},
+            {value:"2", text:"Level 2"}
+        ]},
+        {label:"Creator", required:true, schema:'creator', inputType:'withEmail', bothRequired:'true'},
+        {label:"Links", schema:'links', inputType:'add'},
+        {label:"Summary", required:true, schema:'shortDescription', inputType:'long'},
+        {label:"References", schema:'references', inputType:'long'},
+        {label:"Intellectual Property", schema:'intellectualProperty', inputType:'long'}
+    ];
+
+    var plasmidFields = [
+        {label:"Backbone", schema:'backbone', subSchema:'plasmidData', inputType:'medium'},
+        {label:"Origin of Replication", schema:'originOfReplication', inputType:'autoComplete',
+            autoCompleteField:'ORIGIN_OF_REPLICATION'},
+        {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
+            autoCompleteField:'SELECTION_MARKERS'},
+        {label:"Promoters", schema:'promoters', subSchema:'plasmidData', inputType:'autoComplete', autoCompleteField:'PROMOTERS'},
+        {label:"Replicates In", schema:'replicatesIn', subSchema:'plasmidData', inputType:'autoComplete', autoCompleteField:'REPLICATES_IN'}
+    ];
+
+    var seedFields = [
+        {label:"Sent To ABRC", schema:'sentToABRC', help:"Help Text", inputType:'bool'},
+        {label:"Plant Type", schema:'plantType', options:[
+            {value:"EMS", text:"EMS"},
+            {value:"OVER_EXPRESSION", text:"Over Expression"},
+            {value:"RNAI", text:"RNAi"},
+            {value:"REPORTER", text:"Reporter"},
+            {value:"T_DNA", text:"T-DNA"},
+            {value:"OTHER", text:"Other"}
+        ]},
+        {label:"Generation", schema:'generation', options:[
+            {value:"UNKNOWN", text:"UNKNOWN"},
+            {value:"F1", text:"F1"},
+            {value:"F2", text:"F2"},
+            {value:"F3", text:"F3"},
+            {value:"M0", text:"M0"},
+            {value:"M1", text:"M1"},
+            {value:"M2", text:"M2"},
+            {value:"T0", text:"T0"},
+            {value:"T1", text:"T1"},
+            {value:"T2", text:"T2"},
+            {value:"T3", text:"T3"},
+            {value:"T4", text:"T4"},
+            {value:"T5", text:"T5"}
+        ]},
+        {label:"Harvest Date", schema:'harvestDate', inputType:'date'},
+        {label:"Homozygosity", schema:'backbone', inputType:'medium'},
+        {label:"Ecotype", schema:'backbone', inputType:'medium'},
+        {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
+            autoCompleteField:'SELECTION_MARKERS'}
+    ];
+
+    var strainFields = [
+        {label:"Selection Markers", required:true, schema:'selectionMarkers',
+            inputType:'autoCompleteAdd', autoCompleteField:'SELECTION_MARKERS'},
+        {label:"Genotype/Phenotype", schema:'genotypePhenotype', subSchema:'strainData', inputType:'long'},
+        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER'}
+    ];
+
+    var generateLinkOptions = function (type) {
+        switch (type.toLowerCase()) {
+            case 'plasmid':
+                return [
+                    {type:'part', display:'Part'},
+                    {type:'plasmid', display:'Plasmid'}
+                ];
+
+            case 'part':
+                return [
+                    {type:'part', display:'Part'}
+                ];
+
+            case 'strain':
+                return [
+                    {type:'part', display:'Part'},
+                    {type:'plasmid', display:'Plasmid'},
+                    {type:'strain', display:'Strain'}
+                ];
+
+            case 'arabidopsis':
+                return [
+                    {type:'part', display:'Part'},
+                    {type:'arabidopsis', display:'Arabidopsis Seed'}
+                ];
+        }
+    };
+
+    return {
+        toStringArray:function (obj) {
+            return toStringArray(obj);
+        },
+
+        linkOptions:function (type) {
+            return generateLinkOptions(type);
+        },
+
+        getFieldsForType:function (type) {
+            var fields = angular.copy(partFields);
+            type = type.toLowerCase();
+            switch (type) {
+                case 'strain':
+                    fields.splice.apply(fields, [7, 0].concat(strainFields));
+                    return fields;
+
+                case 'arabidopsis':
+                    fields.splice.apply(fields, [7, 0].concat(seedFields));
+                    return fields;
+
+                case 'plasmid':
+                    fields.splice.apply(fields, [7, 0].concat(plasmidFields));
+                    return fields;
+
+                case 'part':
+                default:
+                    return fields;
+
+            }
+        }
+    }
+});
+
 iceServices.factory('Pigeon', function ($http) {
     return {
         fetch:function (script) {

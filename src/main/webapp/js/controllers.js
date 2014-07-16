@@ -1781,475 +1781,369 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
     }
 });
 
-iceControllers.controller('EditEntryController', function ($scope, $location, $cookieStore, $rootScope, $stateParams, Entry) {
-    console.log("EditEntryController");
+iceControllers.controller('EditEntryController',
+    function ($scope, $location, $cookieStore, $rootScope, $stateParams, Entry, EntryService) {
 
-    var entry = Entry($cookieStore.get("sessionId"));
-    entry.query({partId:$stateParams.id}, function (result) {
-        $scope.entry = result;
+        var entry = Entry($cookieStore.get("sessionId"));
+        entry.query({partId:$stateParams.id}, function (result) {
+            $scope.entry = result;
+            console.log(result);
+            if (!result.selectionMarkers || !result.selectionMarkers.length) {
+                $scope.entry.selectionMarkers = [
+                    {}
+                ];
+            }
+            if (!result.links || !result.links.length) {
+                $scope.entry.links = [
+                    {}
+                ];
+            }
+            if (result.bioSafetyLevel)
+                $scope.entry.bioSafetyLevel = "Level " + result.bioSafetyLevel;
+            $scope.linkOptions = EntryService.linkOptions(result.type);
+            $scope.selectedFields = EntryService.getFieldsForType(result.type);
+            $scope.activePart = $scope.entry;
+        });
+
+        $scope.editEntry = function () {
+            if ($scope.activePart.bioSafetyLevel === 'Level 1')
+                $scope.activePart.bioSafetyLevel = 1;
+            else
+                $scope.activePart.bioSafetyLevel = 2;
+
+            // convert arrays of objects to array strings
+            $scope.activePart.links = EntryService.toStringArray($scope.activePart.links);
+            $scope.activePart.selectionMarkers = EntryService.toStringArray($scope.activePart.selectionMarkers);
+
+            entry.update($scope.activePart, function (result) {
+                $location.path("/entry/" + result.id);
+            });
+        };
     });
 
-    $scope.editEntry = function () {
-        entry.update($scope.entry, function (result) {
-            $location.path("/entry/" + result.id);
-        });
-    };
-});
+iceControllers.controller('CreateEntryController',
+    function ($http, $scope, $modal, $rootScope, $fileUploader, $location, $stateParams, $cookieStore, Entry, EntryService) {
+        $scope.createType = $stateParams.type;
+        $scope.showMain = true;
 
-iceControllers.controller('CreateEntryController', function ($http, $scope, $modal, $rootScope, $fileUploader, $location, $stateParams, $cookieStore, Entry) {
-    $scope.createType = $stateParams.type;
-    $scope.showMain = true;
+        // generate the various link options for selected option
+        $scope.linkOptions = EntryService.linkOptions($scope.createType.toLowerCase());
 
-    // generate the various link options for selected option
-    switch ($scope.createType.toLowerCase()) {
-        case 'plasmid':
-            $scope.linkOptions = [
-                {type:'part', display:'Part'},
-                {type:'Plasmid', display:'Plasmid'}
-            ];
-            break;
+        var partDefaults = {
+            type:$scope.createType,
+            links:[
+                {}
+            ],
+            selectionMarkers:[
+                {}
+            ],
+            bioSafetyLevel:'1',
+            status:'Complete',
+            creator:$scope.user.firstName + ' ' + $scope.user.lastName,
+            creatorEmail:$scope.user.email
+        };
 
-        case 'part':
-            $scope.linkOptions = [
-                {type:'part', display:'Part'}
-            ];
-            break;
+        $scope.part = angular.copy(partDefaults);
+        $scope.part.linkedParts = [];
+        $scope.activePart = $scope.part;
+        $scope.selectedFields = EntryService.getFieldsForType($scope.createType);
 
-        case 'strain':
-            $scope.linkOptions = [
-                {type:'part', display:'Part'},
-                {type:'Plasmid', display:'Plasmid'},
-                {type:'strain', display:'Strain'}
-            ];
-            break;
+        $scope.addLink = function (schema, index) {
+            $scope.part[schema].splice(index + 1, 0, {value:''});
+        };
 
-        case 'arabidopsis':
-            $scope.linkOptions = [
-                {type:'part', display:'Part'},
-                {type:'arabidopsis', display:'Arabidopsis Seed'}
-            ];
-            break;
-    }
+        $scope.removeLink = function (schema, index) {
+            $scope.part[schema].splice(index, 1);
+            $scope.colLength = 11 - $scope.part.linkedParts.length;
+        };
 
-    var partFields = [
-        {label:"Name", required:true, schema:'name', help:'Help Text', placeHolder:'e.g. JBEI-0001', inputType:'short'},
-        {label:"Alias", schema:'alias', inputType:'short'},
-        {label:"Principal Investigator", required:true, schema:'principalInvestigator', inputType:'withEmail', bothRequired:'false'},
-        {label:"Funding Source", schema:'fundingSource', inputType:'short'},
-        {label:"Status", schema:'status', options:[
-            {value:"Complete", text:"Complete"},
-            {value:"In Progress", text:"In Progress"},
-            {value:"Abandoned", text:"Abandoned"},
-            {value:"Planned", text:"Planned"}
-        ]},
-        {label:"Bio Safety Level", schema:'bioSafetyLevel', options:[
-            {value:"1", text:"Level 1"},
-            {value:"2", text:"Level 2"}
-        ]},
-        {label:"Creator", required:true, schema:'creator', inputType:'withEmail', bothRequired:'true'},
-        {label:"Links", schema:'links', inputType:'add'},
-        {label:"Summary", required:true, schema:'shortDescription', inputType:'long'},
-        {label:"References", schema:'references', inputType:'long'},
-        {label:"Intellectual Property", schema:'intellectualProperty', inputType:'long'}
-    ];
+        $scope.addNewPartLink = function (type) {
+            $scope.selectedFields = EntryService.getFieldsForType(type);
 
-    var plasmidFields = [
-        {label:"Backbone", schema:'backbone', subSchema:'plasmidData', inputType:'medium'},
-        {label:"Origin of Replication", schema:'originOfReplication', inputType:'autoComplete',
-            autoCompleteField:'ORIGIN_OF_REPLICATION'},
-        {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
-            autoCompleteField:'SELECTION_MARKERS'},
-        {label:"Promoters", schema:'promoters', subSchema:'plasmidData', inputType:'autoComplete', autoCompleteField:'PROMOTERS'},
-        {label:"Replicates In", schema:'replicatesIn', subSchema:'plasmidData', inputType:'autoComplete', autoCompleteField:'REPLICATES_IN'}
-    ];
-
-    var seedFields = [
-        {label:"Sent To ABRC", schema:'sentToABRC', help:"Help Text", inputType:'bool'},
-        {label:"Plant Type", schema:'plantType', options:[
-            {value:"EMS", text:"EMS"},
-            {value:"OVER_EXPRESSION", text:"Over Expression"},
-            {value:"RNAI", text:"RNAi"},
-            {value:"REPORTER", text:"Reporter"},
-            {value:"T_DNA", text:"T-DNA"},
-            {value:"OTHER", text:"Other"}
-        ]},
-        {label:"Generation", schema:'generation', options:[
-            {value:"UNKNOWN", text:"UNKNOWN"},
-            {value:"F1", text:"F1"},
-            {value:"F2", text:"F2"},
-            {value:"F3", text:"F3"},
-            {value:"M0", text:"M0"},
-            {value:"M1", text:"M1"},
-            {value:"M2", text:"M2"},
-            {value:"T0", text:"T0"},
-            {value:"T1", text:"T1"},
-            {value:"T2", text:"T2"},
-            {value:"T3", text:"T3"},
-            {value:"T4", text:"T4"},
-            {value:"T5", text:"T5"}
-        ]},
-        {label:"Harvest Date", schema:'harvestDate', inputType:'date'},
-        {label:"Homozygosity", schema:'backbone', inputType:'medium'},
-        {label:"Ecotype", schema:'backbone', inputType:'medium'},
-        {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
-            autoCompleteField:'SELECTION_MARKERS'}
-    ];
-
-    var strainFields = [
-        {label:"Selection Markers", required:true, schema:'selectionMarkers',
-            inputType:'autoCompleteAdd', autoCompleteField:'SELECTION_MARKERS'},
-        {label:"Genotype/Phenotype", schema:'genotypePhenotype', subSchema:'strainData', inputType:'long'},
-        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER'}
-    ];
-
-    var partDefaults = {
-        type:$scope.createType,
-        links:[
-            {}
-        ],
-        selectionMarkers:[
-            {}
-        ],
-        bioSafetyLevel:'1',
-        status:'Complete',
-        creator:$scope.user.firstName + ' ' + $scope.user.lastName,
-        creatorEmail:$scope.user.email
-    };
-
-    $scope.part = angular.copy(partDefaults);
-    $scope.part.linkedParts = [];
-    $scope.activePart = $scope.part;
-
-    var getFieldsForType = function (type) {
-        var fields = angular.copy(partFields);
-        switch (type) {
-            case 'strain':
-                fields.splice.apply(fields, [7, 0].concat(strainFields));
-                return fields;
-
-            case 'arabidopsis':
-                fields.splice.apply(fields, [7, 0].concat(seedFields));
-                return fields;
-
-            case 'plasmid':
-                fields.splice.apply(fields, [7, 0].concat(plasmidFields));
-                return fields;
-
-            case 'part':
-            default:
-                return fields;
-        }
-    };
-
-    $scope.selectedFields = getFieldsForType($scope.createType);
-
-    $scope.addLink = function (schema, index) {
-        $scope.part[schema].splice(index + 1, 0, {value:''});
-    };
-
-    $scope.removeLink = function (schema, index) {
-        $scope.part[schema].splice(index, 1);
-        $scope.colLength = 11 - $scope.part.linkedParts.length;
-    };
-
-    $scope.addNewPartLink = function (type) {
-        $scope.selectedFields = getFieldsForType(type);
-
-        var newLink = angular.copy(partDefaults);
-        newLink.type = type.toUpperCase();
-        $scope.part.linkedParts.push(newLink);
-
-        $scope.colLength = 11 - $scope.part.linkedParts.length;
-        $scope.active = $scope.part.linkedParts.length - 1;
-        $scope.activePart = $scope.part.linkedParts[$scope.active];
-    };
-
-    $scope.addExistingPartLink = function ($item, $model, $label) {
-        entry.query({partId:$model.id}, function (result) {
-            $scope.activePart = result;
-            $scope.activePart.isExistingPart = true;
-            $scope.addExisting = false;
-            $scope.part.linkedParts.push($scope.activePart);
+            var newLink = angular.copy(partDefaults);
+            newLink.type = type.toUpperCase();
+            $scope.part.linkedParts.push(newLink);
 
             $scope.colLength = 11 - $scope.part.linkedParts.length;
             $scope.active = $scope.part.linkedParts.length - 1;
-        });
-    };
+            $scope.activePart = $scope.part.linkedParts[$scope.active];
+        };
 
-    $scope.deleteNewPartLink = function (index) {
-        // todo : not working
-        console.log("delete part link at index", index);
-        $scope.part.linkedParts.splice(index, 1);
-        if ($scope.active === index) {
-            // set new active
-            console.log("set new active");
-            if (index + 1 < $scope.part.linkedParts.length)
-                $scope.active = index + 1;
-            else {
-                if ($scope.part.linkedParts.length === 0)
-                // not really needed since when main will not be shown if no other tabs present
-                    $scope.active = 'main';
-                else
-                    $scope.active = index - 1;
-            }
-        }
-    };
+        $scope.addExistingPartLink = function ($item, $model, $label) {
+            entry.query({partId:$model.id}, function (result) {
+                $scope.activePart = result;
+                $scope.activePart.isExistingPart = true;
+                $scope.addExisting = false;
+                $scope.part.linkedParts.push($scope.activePart);
 
-    $scope.active = 'main';
-    $scope.setActive = function (index) {
-        if (!isNaN(index) && $scope.part.linkedParts.length <= index)
-            return;
-
-        $scope.active = index;
-        if (isNaN(index))
-            $scope.activePart = $scope.part;
-        else
-            $scope.activePart = $scope.part.linkedParts[index];
-        $scope.selectedFields = getFieldsForType($scope.activePart.type);
-    };
-
-    var sid = $cookieStore.get("sessionId");
-
-    $scope.getLocation = function (inputField, val) {
-        return $http.get('/rest/part/autocomplete', {
-            headers:{'X-ICE-Authentication-SessionId':sid},
-            params:{
-                val:val,
-                field:inputField
-            }
-        }).then(function (res) {
-                return res.data;
+                $scope.colLength = 11 - $scope.part.linkedParts.length;
+                $scope.active = $scope.part.linkedParts.length - 1;
             });
-    };
+        };
 
-    $scope.nameMissing = false;
-    $scope.creatorMissing = false;
-    $scope.creatorEmailMissing = false;
-    $scope.principalInvestigatorMissing = false;
-    $scope.summaryMissing = false;
-
-    var entry = Entry(sid);
-
-    var toStringArray = function (objArray) {
-        var result = [];
-        angular.forEach(objArray, function (object) {
-            if (!object || !object.value || object.value === "")
-                return;
-            result.push(object.value);
-        });
-        return result;
-    };
-
-    var validateFields = function (part) {
-        console.log(part);
-
-        var canSubmit = true;
-
-        // main type
-        var mainFields = getFieldsForType(part.type);
-        angular.forEach(mainFields, function (field) {
-            if (!field.required)
-                return;
-
-            if (field.inputType === 'add' || field.inputType === 'autoCompleteAdd') {
-                if (part[field.schema].length == 0) {
-                    field.invalid = true;
-                }
+        $scope.deleteNewPartLink = function (index) {
+            // todo : not working
+            console.log("delete part link at index", index);
+            $scope.part.linkedParts.splice(index, 1);
+            if ($scope.active === index) {
+                // set new active
+                console.log("set new active");
+                if (index + 1 < $scope.part.linkedParts.length)
+                    $scope.active = index + 1;
                 else {
-                    for (var i = 0; i < part[field.schema].length; i += 1) {
-                        var fieldValue = part[field.schema][i].value;
-                        field.invalid = !fieldValue || fieldValue === '';
+                    if ($scope.part.linkedParts.length === 0)
+                    // not really needed since when main will not be shown if no other tabs present
+                        $scope.active = 'main';
+                    else
+                        $scope.active = index - 1;
+                }
+            }
+        };
+
+        $scope.active = 'main';
+        $scope.setActive = function (index) {
+            if (!isNaN(index) && $scope.part.linkedParts.length <= index)
+                return;
+
+            $scope.active = index;
+            if (isNaN(index))
+                $scope.activePart = $scope.part;
+            else
+                $scope.activePart = $scope.part.linkedParts[index];
+            $scope.selectedFields = EntryService.getFieldsForType($scope.activePart.type);
+        };
+
+        var sid = $cookieStore.get("sessionId");
+
+        $scope.getLocation = function (inputField, val) {
+            return $http.get('/rest/part/autocomplete', {
+                headers:{'X-ICE-Authentication-SessionId':sid},
+                params:{
+                    val:val,
+                    field:inputField
+                }
+            }).then(function (res) {
+                    return res.data;
+                });
+        };
+
+        $scope.nameMissing = false;
+        $scope.creatorMissing = false;
+        $scope.creatorEmailMissing = false;
+        $scope.principalInvestigatorMissing = false;
+        $scope.summaryMissing = false;
+
+        var entry = Entry(sid);
+        var validateFields = function (part) {
+            console.log(part);
+
+            var canSubmit = true;
+
+            // main type
+            var mainFields = EntryService.getFieldsForType(part.type);
+            angular.forEach(mainFields, function (field) {
+                if (!field.required)
+                    return;
+
+                if (field.inputType === 'add' || field.inputType === 'autoCompleteAdd') {
+                    if (part[field.schema].length == 0) {
+                        field.invalid = true;
+                    }
+                    else {
+                        for (var i = 0; i < part[field.schema].length; i += 1) {
+                            var fieldValue = part[field.schema][i].value;
+                            field.invalid = !fieldValue || fieldValue === '';
+                        }
+                    }
+                } else {
+                    field.invalid = (!part[field.schema] || part[field.schema] === '');
+                }
+
+                if (canSubmit) {
+                    canSubmit = !field.invalid;
+                }
+            });
+            return canSubmit;
+        };
+
+        $scope.submitPart = function () {
+
+            // validate main
+            var canSubmit = validateFields($scope.part);
+            $scope.part.type = $scope.part.type.toUpperCase();
+
+            // validate components if any
+            if ($scope.part.linkedParts && $scope.part.linkedParts.length) {
+                for (var idx = 0; idx < $scope.part.linkedParts.length; idx += 1) {
+                    var canSubmitLinked = validateFields($scope.part.linkedParts[idx]);
+                    if (!canSubmitLinked) {
+                        // show icon in tab
+                        // todo
+                        console.log("not  valid");
+                        canSubmit = canSubmitLinked;
                     }
                 }
+            }
+
+            if (!canSubmit) {
+                $("body").animate({scrollTop:130}, "slow");
+                return;
+            }
+
+            // convert arrays of objects to array strings
+            $scope.part.links = EntryService.toStringArray($scope.part.links);
+            $scope.part.selectionMarkers = EntryService.toStringArray($scope.part.selectionMarkers);
+
+            for (var i = 0; i < $scope.part.linkedParts.length; i += 1) {
+                $scope.part.linkedParts[i].links = EntryService.toStringArray($scope.part.linkedParts[i].links);
+                $scope.part.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.part.linkedParts[i].selectionMarkers);
+            }
+
+            if ($scope.part.id) {
+                entry.update({partId:$scope.part.id}, $scope.part, function (result) {
+                    $location.path('/entry/' + result.id);
+                });
             } else {
-                field.invalid = (!part[field.schema] || part[field.schema] === '');
+                entry.create($scope.part, function (result) {
+                    console.log("created entry", result);
+                    $scope.$emit("UpdateCollectionCounts");
+                    $location.path('/entry/' + result.id);
+                }, function (error) {
+                    console.error(error);
+                });
             }
+        };
 
-            if (canSubmit) {
-                canSubmit = !field.invalid;
-            }
-        });
-        return canSubmit;
-    };
+        $scope.format = 'MMM d, yyyy h:mm:ss a';
 
-    $scope.submitPart = function () {
-
-        // validate main
-        var canSubmit = validateFields($scope.part);
-        $scope.part.type = $scope.part.type.toUpperCase();
-
-        // validate components if any
-        if ($scope.part.linkedParts && $scope.part.linkedParts.length) {
-            for (var idx = 0; idx < $scope.part.linkedParts.length; idx += 1) {
-                var canSubmitLinked = validateFields($scope.part.linkedParts[idx]);
-                if (!canSubmitLinked) {
-                    // show icon in tab
-                    // todo
-                    console.log("not  valid");
-                    canSubmit = canSubmitLinked;
+        $scope.getEntriesByPartNumber = function (val) {
+            return $http.get('/rest/part/autocomplete/partid', {
+                headers:{'X-ICE-Authentication-SessionId':sid},
+                params:{
+                    token:val
                 }
-            }
-        }
+            }).then(function (res) {
+                    return res.data;
+                });
+        };
 
-        if (!canSubmit) {
-            $("body").animate({scrollTop:130}, "slow");
-            return;
-        }
-
-        // convert arrays of objects to array strings
-        $scope.part.links = toStringArray($scope.part.links);
-        $scope.part.selectionMarkers = toStringArray($scope.part.selectionMarkers);
-
-        for (var i = 0; i < $scope.part.linkedParts.length; i += 1) {
-            $scope.part.linkedParts[i].links = toStringArray($scope.part.linkedParts[i].links);
-            $scope.part.linkedParts[i].selectionMarkers = toStringArray($scope.part.linkedParts[i].selectionMarkers);
-        }
-
-        if ($scope.part.id) {
-            entry.update({partId:$scope.part.id}, $scope.part, function (result) {
-                $location.path('/entry/' + result.id);
-            });
-        } else {
-            entry.create($scope.part, function (result) {
-                console.log("created entry", result);
-                $scope.$emit("UpdateCollectionCounts");
-                $location.path('/entry/' + result.id);
-            }, function (error) {
-                console.error(error);
-            });
-        }
-    };
-
-    $scope.format = 'MMM d, yyyy h:mm:ss a';
-
-    $scope.getEntriesByPartNumber = function (val) {
-        return $http.get('/rest/part/autocomplete/partid', {
-            headers:{'X-ICE-Authentication-SessionId':sid},
-            params:{
-                token:val
-            }
-        }).then(function (res) {
-                return res.data;
-            });
-    };
-
-    // for the date picker TODO : make it a directive ???
-    $scope.today = function () {
-        $scope.dt = new Date();
-    };
-    $scope.today();
+        // for the date picker TODO : make it a directive ???
+        $scope.today = function () {
+            $scope.dt = new Date();
+        };
+        $scope.today();
 
 //    $scope.showWeeks = true;
 //    $scope.toggleWeeks = function () {
 //        $scope.showWeeks = ! $scope.showWeeks;
 //    };
 
-    $scope.clear = function () {
-        $scope.dt = null;
-    };
+        $scope.clear = function () {
+            $scope.dt = null;
+        };
 
-    $scope.dateOptions = {
-        'year-format':"'yy'",
-        'starting-day':1
-    };
+        $scope.dateOptions = {
+            'year-format':"'yy'",
+            'starting-day':1
+        };
 
-    $scope.cancelEntryCreate = function () {
-        $location.path("/folders/personal");
-    };
+        $scope.cancelEntryCreate = function () {
+            $location.path("/folders/personal");
+        };
 
-    // file upload
-    var uploader = $scope.sequenceFileUpload = $fileUploader.create({
-        scope:$scope, // to automatically update the html. Default: $rootScope
-        url:"/rest/file/sequence",
-        method:'POST',
+        // file upload
+        var uploader = $scope.sequenceFileUpload = $fileUploader.create({
+            scope:$scope, // to automatically update the html. Default: $rootScope
+            url:"/rest/file/sequence",
+            method:'POST',
 //        formData:[{entryType:type}],
-        removeAfterUpload:true,
-        headers:{"X-ICE-Authentication-SessionId":sid},
-        autoUpload:true,
-        queueLimit:1 // can only upload 1 file
+            removeAfterUpload:true,
+            headers:{"X-ICE-Authentication-SessionId":sid},
+            autoUpload:true,
+            queueLimit:1 // can only upload 1 file
+        });
+
+        $scope.uploadFile = function () {
+            if (!$scope.isPaste) {
+                uploader.queue[0].upload();
+            } else {
+                console.log($scope.pastedSequence);
+            }
+        };
+
+        // REGISTER HANDLERS
+        uploader.bind('afteraddingfile', function (event, item) {
+            console.info('After adding a file', item);
+            $scope.serverError = false;
+        });
+
+        uploader.bind('whenaddingfilefailed', function (event, item) {
+            console.info('When adding a file failed', item);
+        });
+
+        uploader.bind('afteraddingall', function (event, items) {
+            console.info('After adding all files', items);
+        });
+
+        uploader.bind('beforeupload', function (event, item) {
+            var entryTypeForm;
+            if ($scope.active === 'main')
+                entryTypeForm = {entryType:$scope.part.type.toUpperCase()};
+            else
+                entryTypeForm = {entryType:$scope.part.linkedParts[$scope.active].type};
+            item.formData.push(entryTypeForm);
+        });
+
+        uploader.bind('progress', function (event, item, progress) {
+            console.info('Progress: ' + progress, item);
+            console.log("process", item.file.name);
+
+            if (progress != "100")  // isUploading is always true until it returns
+                return;
+
+            console.log("process", progress == "100");
+
+            // upload complete. have processing
+            $scope.processingFile = item.file.name;
+        });
+
+        uploader.bind('success', function (event, xhr, item, response) {
+            console.log("active scope", $scope.active);
+
+            if ($scope.active === undefined || isNaN($scope.active)) {
+                // set main entry id
+                $scope.part.id = response.entryId;
+                $scope.part.hasSequence = true;
+            } else {
+                // set linked parts id
+                $scope.part.linkedParts[$scope.active].id = response.entryId;
+                $scope.part.linkedParts[$scope.active].hasSequence = true;
+            }
+
+            $scope.activePart.hasSequence = true;
+        });
+
+        uploader.bind('cancel', function (event, xhr, item) {
+            console.info('Cancel', xhr, item);
+        });
+
+        uploader.bind('error', function (event, xhr, item, response) {
+            console.info('Error', xhr, item, response);
+            item.remove();
+            $scope.serverError = true;
+        });
+
+        uploader.bind('complete', function (event, xhr, item, response) {
+            console.info('Complete', xhr, item, response);
+        });
+
+        uploader.bind('progressall', function (event, progress) {
+        });
+
+        uploader.bind('completeall', function (event, items) {
+            $scope.processingFile = undefined;
+        });
     });
-
-    $scope.uploadFile = function () {
-        if (!$scope.isPaste) {
-            uploader.queue[0].upload();
-        } else {
-            console.log($scope.pastedSequence);
-        }
-    };
-
-    // REGISTER HANDLERS
-    uploader.bind('afteraddingfile', function (event, item) {
-        console.info('After adding a file', item);
-        $scope.serverError = false;
-    });
-
-    uploader.bind('whenaddingfilefailed', function (event, item) {
-        console.info('When adding a file failed', item);
-    });
-
-    uploader.bind('afteraddingall', function (event, items) {
-        console.info('After adding all files', items);
-    });
-
-    uploader.bind('beforeupload', function (event, item) {
-        var entryTypeForm;
-        if ($scope.active === 'main')
-            entryTypeForm = {entryType:$scope.part.type.toUpperCase()};
-        else
-            entryTypeForm = {entryType:$scope.part.linkedParts[$scope.active].type};
-        item.formData.push(entryTypeForm);
-    });
-
-    uploader.bind('progress', function (event, item, progress) {
-        console.info('Progress: ' + progress, item);
-        console.log("process", item.file.name);
-
-        if (progress != "100")  // isUploading is always true until it returns
-            return;
-
-        console.log("process", progress == "100");
-
-        // upload complete. have processing
-        $scope.processingFile = item.file.name;
-    });
-
-    uploader.bind('success', function (event, xhr, item, response) {
-        console.log("active scope", $scope.active);
-
-        if ($scope.active === undefined || isNaN($scope.active)) {
-            // set main entry id
-            $scope.part.id = response.entryId;
-            $scope.part.hasSequence = true;
-        } else {
-            // set linked parts id
-            $scope.part.linkedParts[$scope.active].id = response.entryId;
-            $scope.part.linkedParts[$scope.active].hasSequence = true;
-        }
-
-        $scope.activePart.hasSequence = true;
-    });
-
-    uploader.bind('cancel', function (event, xhr, item) {
-        console.info('Cancel', xhr, item);
-    });
-
-    uploader.bind('error', function (event, xhr, item, response) {
-        console.info('Error', xhr, item, response);
-        item.remove();
-        $scope.serverError = true;
-    });
-
-    uploader.bind('complete', function (event, xhr, item, response) {
-        console.info('Complete', xhr, item, response);
-    });
-
-    uploader.bind('progressall', function (event, progress) {
-    });
-
-    uploader.bind('completeall', function (event, items) {
-        $scope.processingFile = undefined;
-    });
-});
 
 iceControllers.controller('SequenceFileUploadController', function ($scope, $cookieStore, $modal, $modalInstance, $fileUploader, type, paste) {
     console.log("SequenceFileUploadController");
@@ -2552,7 +2446,7 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $stateP
                             </object>');
 });
 
-iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $rootScope, $fileUploader, Entry, Folders) {
+iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $rootScope, $fileUploader, Entry, Folders, EntryService) {
     $scope.partIdEditMode = false;
     $scope.showSBOL = true;
     $scope.context = undefined;
@@ -2686,27 +2580,6 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
 
     $scope.part = angular.copy(partDefaults);
 
-    var getFieldsForType = function (type) {
-        var fields = angular.copy(partFields);
-        switch (type) {
-            case 'strain':
-                fields.splice.apply(fields, [7, 0].concat(strainFields));
-                return fields;
-
-            case 'arabidopsis':
-                fields.splice.apply(fields, [7, 0].concat(seedFields));
-                return fields;
-
-            case 'plasmid':
-                fields.splice.apply(fields, [7, 0].concat(plasmidFields));
-                return fields;
-
-            case 'part':
-            default:
-                return fields;
-        }
-    };
-
     $scope.sbolShowHide = function () {
         $scope.showSBOL = !$scope.showSBOL;
     };
@@ -2743,7 +2616,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         function (result) {
             $rootScope.$broadcast("EntryRetrieved", result);
             $scope.entry = result;
-            $scope.entryFields = getFieldsForType(result.type.toLowerCase());
+            $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
 
             entry.statistics({partId:$stateParams.id}, function (stats) {
                 $scope.entryStatistics = stats;
