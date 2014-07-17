@@ -230,10 +230,11 @@ public class InfoToModelFactory {
         if (StringUtils.isBlank(entry.getPartNumber()))
             entry.setPartNumber(info.getPartId());
 
+        Date currentTime = new Date();
         if (entry.getCreationTime() == null)
-            entry.setCreationTime(new Date(info.getCreationTime()));
+            entry.setCreationTime(currentTime);
 
-        entry.setModificationTime(new Date(System.currentTimeMillis()));
+        entry.setModificationTime(currentTime);
 
         if (info.getOwnerEmail() != null) {
             entry.setOwner(info.getOwner());

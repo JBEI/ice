@@ -97,16 +97,11 @@ public class PreferencesController {
         }
     }
 
-    public HashMap<String, String> retrieveUserPreferenceList(Account account, List<SearchBoostField> fields)
-            throws ControllerException {
-        try {
-            HashSet<String> values = new HashSet<>();
-            for (SearchBoostField field : fields)
-                values.add("BOOST_" + field.name());
-            return dao.retrievePreferenceValues(account, values);
-        } catch (DAOException de) {
-            throw new ControllerException(de);
-        }
+    public HashMap<String, String> retrieveUserPreferenceList(Account account, List<SearchBoostField> fields) {
+        HashSet<String> values = new HashSet<>();
+        for (SearchBoostField field : fields)
+            values.add("BOOST_" + field.name());
+        return dao.retrievePreferenceValues(account, values);
     }
 
     // really an update

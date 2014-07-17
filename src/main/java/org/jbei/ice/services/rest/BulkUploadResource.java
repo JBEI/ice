@@ -60,7 +60,7 @@ public class BulkUploadResource extends RestResource {
     public Response updateName(@PathParam("id") long id, BulkUploadInfo info,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
-        Logger.info(userId + ": updating bulk upload name for " + info.getId());
+        Logger.info(userId + ": updating bulk upload name for " + info.getId() + " with value " + info.getName());
         BulkUploadInfo result = creator.renameBulkUpload(userId, id, info.getName());
         if (result == null)
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
@@ -75,7 +75,7 @@ public class BulkUploadResource extends RestResource {
             BulkUploadInfo info,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
-        Logger.info(userId + ": updating bulk upload status " + info.getId() + " to " + info.getStatus());
+        Logger.info(userId + ": updating bulk upload status for " + info.getId() + " to " + info.getStatus());
         return creator.updateStatus(userId, id, info.getStatus());
     }
 

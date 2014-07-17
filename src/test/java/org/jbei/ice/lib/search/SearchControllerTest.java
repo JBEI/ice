@@ -26,6 +26,10 @@ public class SearchControllerTest {
     }
 
     @Test
+    public void testParseQueryString() throws Exception {
+    }
+
+    @Test
     public void testRunSearch() throws Exception {
 //        Account account = AccountCreator.createTestAccount("testRunSearch", false);
 //        Assert.assertNotNull(account);

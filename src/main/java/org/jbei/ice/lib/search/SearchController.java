@@ -24,7 +24,8 @@ import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 
-import com.google.common.base.Splitter;
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.search.BooleanClause;
 
 /**
  * Controller for running searches on the ice platform
@@ -39,12 +40,19 @@ public class SearchController {
         dao = DAOFactory.getSearchDAO();
     }
 
-    public SearchResults runSearch(String userId, SearchQuery query, boolean searchWeb) throws ControllerException {
+    public SearchResults runSearch(String userId, SearchQuery query, boolean searchWeb) {
         if (searchWeb)
             return runWebSearch(query);
         return runLocalSearch(userId, query, false);
     }
 
+    /**
+     * Searches all registries in the web of registries configuration with this
+     * registry
+     *
+     * @param query
+     * @return
+     */
     public SearchResults runWebSearch(SearchQuery query) {
 //        RestClient client = new RestClient();
 
@@ -98,10 +106,8 @@ public class SearchController {
      * @param userId
      * @param query
      * @return wrapper around the list of search results
-     * @throws ControllerException
      */
-    public SearchResults runLocalSearch(String userId, SearchQuery query, boolean isAPISearch)
-            throws ControllerException {
+    public SearchResults runLocalSearch(String userId, SearchQuery query, boolean isAPISearch) {
         String projectName = "";
         String projectURI = "";
         if (isAPISearch) {
@@ -111,8 +117,6 @@ public class SearchController {
         }
 
         String queryString = query.getQueryString();
-        // TODO : split on \" first for phrase query  e.g. this "little piggy"
-
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
         // blast query only
@@ -123,7 +127,7 @@ public class SearchController {
                     return new SearchResults();
                 return HibernateSearch.getInstance().runSearchFilter(account, results, query);
             } catch (BlastException e) {
-                throw new ControllerException(e);
+                return null;
             }
         }
 
@@ -142,21 +146,21 @@ public class SearchController {
             }
         }
 
-        if (queryString != null && !queryString.isEmpty()) {
-            Iterable<String> iterable = Splitter.on("\\s+").omitEmptyStrings().split(queryString);
-            return hibernateSearch.executeSearch(account, iterable, query, projectName, projectURI, mapping);
+        if (!StringUtils.isEmpty(queryString)) {
+            HashMap<String, BooleanClause.Occur> terms = parseQueryString(queryString);
+            return hibernateSearch.executeSearch(account, terms, query, projectName, projectURI, mapping);
         } else {
             return hibernateSearch.executeSearchNoTerms(account, query, projectName, projectURI);
         }
     }
 
     public boolean rebuildIndexes(Account account, IndexType type) {
-        Logger.info(account.getEmail() + ": rebuilding search indexes");
         if (account.getType() != AccountType.ADMIN) {
-            Logger.warn(account.getEmail() + " does not have privileges to complete action");
+            Logger.warn(account.getEmail() + " attempting to rebuild search index " + type + " without admin privs");
             return false;
         }
 
+        Logger.info(account.getEmail() + ": rebuilding search index " + type);
         if (type == IndexType.LUCENE)
             IceExecutorService.getInstance().runTask(new RebuildLuceneIndexTask());
         else if (type == IndexType.BLAST) {
@@ -169,6 +173,51 @@ public class SearchController {
         } else
             return false;
         return true;
+    }
+
+    HashMap<String, BooleanClause.Occur> parseQueryString(String queryString) {
+        HashMap<String, BooleanClause.Occur> terms = new HashMap<>();
+
+        if (queryString == null || queryString.trim().length() == 0)
+            return terms;
+
+        StringBuilder builder = new StringBuilder();
+        boolean startedPhrase = false;
+        for (int i = 0; i < queryString.trim().length(); i += 1) {
+            char c = queryString.charAt(i);
+            if (c == '\"' || c == '\'') {
+                if (startedPhrase) {
+                    terms.put(builder.toString(), BooleanClause.Occur.MUST);
+                    builder = new StringBuilder();
+                    startedPhrase = false;
+                } else {
+                    startedPhrase = true;
+                }
+                continue;
+            }
+
+            // check for space
+            if (c == ' ') {
+                if (builder.length() == 0)
+                    continue;
+
+                if (!startedPhrase) {
+                    terms.put(builder.toString(), BooleanClause.Occur.SHOULD);
+                    builder = new StringBuilder();
+                    continue;
+                }
+            }
+
+            builder.append(c);
+        }
+        if(builder.length() > 0) {
+            if(startedPhrase)
+                terms.put(builder.toString(), BooleanClause.Occur.MUST);
+            else
+                terms.put(builder.toString(), BooleanClause.Occur.SHOULD);
+        }
+
+        return terms;
     }
 
     public void initHibernateSearch() throws ControllerException {

@@ -57,22 +57,22 @@ public class SearchFieldFactory {
     }
 
     public static HashSet<String> getCommonFields() {
-        return commonFields;
+        return new HashSet<>(commonFields);
     }
 
     public static HashSet<String> entryFields(EntryType type) {
         switch (type) {
             case STRAIN:
-                return strainFields;
+                return new HashSet<>(strainFields);
 
             case PLASMID:
-                return plasmidFields;
+                return new HashSet<>(plasmidFields);
 
             case ARABIDOPSIS:
-                return seedFields;
+                return new HashSet<>(seedFields);
 
             default:
-                return commonFields;
+                return new HashSet<>(commonFields);
         }
     }
 

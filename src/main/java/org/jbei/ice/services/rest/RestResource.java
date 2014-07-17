@@ -7,7 +7,7 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.services.exception.UnauthorizedException;
 
 /**
- * Parent class for all rest resource object
+ * Parent class for all rest resource objects
  *
  * @author Hector Plahar
  */

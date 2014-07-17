@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.ControllerException;
@@ -29,6 +30,7 @@ import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -66,30 +68,33 @@ public class HibernateSearch {
         return SingletonHolder.INSTANCE;
     }
 
-    protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, ArrayList<EntryType> entryTypes,
-            BooleanQuery booleanQuery, String term, BioSafetyOption option, HashMap<String, Float> userBoost) {
-        for (EntryType type : entryTypes) {
-            Class<?> clazz = SearchFieldFactory.entryClass(type);
+    protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
+            BooleanQuery booleanQuery, String term, BooleanClause.Occur occur, BioSafetyOption option,
+            HashMap<String, Float> userBoost) {
+        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
+        if (!StringUtils.isEmpty(term)) {
+            // generate term queries for each search term
+            for (String field : fields) {
+                Query query;
 
-            QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(clazz).get();
-            if (term != null && !term.isEmpty()) {
-                HashSet<String> commonFields = SearchFieldFactory.getCommonFields();
-                commonFields.addAll(SearchFieldFactory.entryFields(type));
-                for (String field : commonFields) {
-                    // TODO ignoreFieldBridges only for enums only (e.g. plantType, generation) etc
-                    Query fieldQuery = qb.keyword().fuzzy().withThreshold(0.8f)
-                                         .onField(field).ignoreFieldBridge().matching(term).createQuery();
-                    Float boost = userBoost.get(field);
-                    if (boost != null)
-                        fieldQuery.setBoost(boost);
-                    booleanQuery.add(fieldQuery, BooleanClause.Occur.SHOULD);
-                }
+                if (occur == BooleanClause.Occur.MUST)
+                    query = qb.phrase().onField(field).sentence(term).createQuery();
+                else
+                    query = qb.keyword().fuzzy().withThreshold(0.8f).onField(field).ignoreFieldBridge().matching(
+                            term).createQuery();
+
+                Float boost = userBoost.get(field);
+                if (boost != null)
+                    query.setBoost(boost);
+
+                booleanQuery.add(query, BooleanClause.Occur.SHOULD);
             }
 
-            // visibility
+            // visibility (using must not because "must for visibility ok" adds it as the query and affects the match
+            // the security filter takes care of other values not to be included such as "transferred" and "deleted"
             Query visibilityQuery = qb.keyword().onField("visibility")
-                                      .matching(Visibility.OK.getValue()).createQuery();
-            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST);
+                                      .matching(Visibility.DRAFT.getValue()).createQuery();
+            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
 
             // bio-safety level
             if (option != null) {
@@ -132,12 +137,8 @@ public class HibernateSearch {
         booleanQuery.add(recordTypeQuery, BooleanClause.Occur.MUST);
 
         // visibility
-        Query visibilityQuery = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
-        booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST);
-
-        // exclude deleted
-        Query deletedQuery = qb.keyword().onField("ownerEmail").matching("system").createQuery();
-        booleanQuery.add(deletedQuery, BooleanClause.Occur.MUST_NOT);
+        Query visibilityQuery = qb.keyword().onField("visibility").matching(Visibility.DRAFT.getValue()).createQuery();
+        booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
 
         // biosafety
         BioSafetyOption option = searchQuery.getBioSafetyOption();
@@ -248,9 +249,9 @@ public class HibernateSearch {
             org.apache.lucene.search.Query visibilityQuery = qb.keyword()
                                                                .onField("visibility")
                                                                .ignoreFieldBridge()
-                                                               .matching(Visibility.OK.getValue())
+                                                               .matching(Visibility.DRAFT.getValue())
                                                                .createQuery();
-            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST);
+            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
         }
 
         // wrap Lucene query in a org.hibernate.Query
@@ -304,7 +305,8 @@ public class HibernateSearch {
         return results;
     }
 
-    public SearchResults executeSearch(Account account, Iterable<String> terms, SearchQuery searchQuery,
+    public SearchResults executeSearch(Account account, HashMap<String, BooleanClause.Occur> terms,
+            SearchQuery searchQuery,
             String projectName, String projectURL, HashMap<String, Float> userBoost) {
         // types for which we are searching
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
@@ -320,18 +322,23 @@ public class HibernateSearch {
 
         // get classes for search
         Class<?>[] classes = new Class<?>[EntryType.values().length];
+        HashSet<String> fields = new HashSet<>();
+        fields.addAll(SearchFieldFactory.getCommonFields());
+
         for (int i = 0; i < entryTypes.size(); i += 1) {
-            classes[i] = SearchFieldFactory.entryClass(entryTypes.get(i));
+            EntryType type = entryTypes.get(i);
+            classes[i] = SearchFieldFactory.entryClass(type);
+            fields.addAll(SearchFieldFactory.entryFields(type));
         }
 
         // generate queries for terms
-        for (String term : terms) {
-            term = cleanQuery(term);
+        for (Map.Entry<String, BooleanClause.Occur> entry : terms.entrySet()) {
+            String term = cleanQuery(entry.getKey());
             if (term.trim().isEmpty() || StandardAnalyzer.STOP_WORDS_SET.contains(term))
                 continue;
 
             BioSafetyOption safetyOption = searchQuery.getBioSafetyOption();
-            booleanQuery = generateQueriesForType(fullTextSession, entryTypes, booleanQuery, term,
+            booleanQuery = generateQueriesForType(fullTextSession, fields, booleanQuery, term, entry.getValue(),
                                                   safetyOption, userBoost);
         }
 
