@@ -10,10 +10,12 @@
 
     <tr ng-show="showAttachmentInput">
         <td style="background-color: #f1f1f1; padding: 5px;">
-            <input type="file" ng-file-select class="font-70em" style="width: 170px">
+            <form ng-submit="uploader.uploadAll()">
+                <input type="file" ng-file-select class="font-70em" style="width: 170px">
 
-            <input type="text" style="width: 170px" ng-model="attachmentDescription" class="font-75em"
-                   placeholder="Optional file description">
+                <input type="text" style="width: 170px" ng-model="attachmentDescription" class="font-75em"
+                       placeholder="Optional file description">
+            </form>
 
             <div style="height: 5px; width: 170px; background-color: #f5f5f5;">
                 <div class="progress-bar" role="progressbar" ng-style="{ 'width': uploader.progress + '%' }"></div>
