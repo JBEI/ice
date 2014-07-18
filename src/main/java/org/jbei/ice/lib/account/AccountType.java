@@ -9,17 +9,11 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
  */
 public enum AccountType implements IDataTransferModel {
 
-    @Deprecated
-    SYSTEM("System"),
-
     ADMIN("Administrator"),
     PRINCIPAL_INVESTIGATOR("Principal Investigator"),
     NORMAL("Regular");
 
     private String display;
-
-    AccountType() {
-    }
 
     AccountType(String display) {
         this.display = display;
