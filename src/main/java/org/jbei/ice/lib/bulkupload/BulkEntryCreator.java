@@ -124,8 +124,8 @@ public class BulkEntryCreator {
         upload.setStatus(status);
         if (status == BulkUploadStatus.PENDING_APPROVAL) {
             ArrayList<Long> list = dao.getEntryIds(id);
-            for (Long l : list) {
-                Entry entry = entryDAO.get(l);
+            for (Number l : list) {
+                Entry entry = entryDAO.get(l.longValue());
                 if (entry == null)
                     continue;
 
