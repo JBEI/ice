@@ -273,10 +273,12 @@ public class AccountController {
         return account.getId();
     }
 
-    public Account getAccountBySessionKey(String sessionKey) throws ControllerException {
+    public Account getAccountBySessionKey(String sessionKey) {
         String userId = SessionHandler.getUserIdBySession(sessionKey);
-        if (userId == null)
-            throw new ControllerException("Could not retrieve user id for session " + sessionKey);
+        if (userId == null) {
+            Logger.warn("Could not retrieve user id for session " + sessionKey);
+            return null;
+        }
         return dao.getByEmail(userId);
     }
 
@@ -415,12 +417,16 @@ public class AccountController {
      * @param login
      * @param password
      * @return {@link AccountTransfer}
-     * @throws InvalidCredentialsException
-     * @throws ControllerException
      */
-    public AccountTransfer authenticate(String login, String password)
-            throws InvalidCredentialsException, ControllerException {
-        String email = authenticate(login, password, "");
+    public AccountTransfer authenticate(String login, String password) {
+        String email;
+        try {
+            email = authenticate(login, password, "");
+        } catch (InvalidCredentialsException | ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+
         if (email == null)
             return null;
 
