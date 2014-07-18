@@ -6,7 +6,7 @@
                 <strong style="color: #888;">
                     <i class="fa fa-fw fa-search" style="color: #444"></i> LOCAL RESULTS
                 </strong>
-                <img ng-if="loadingPage" src="/img/loader-mini.gif">
+                <img ng-if="loadingSearchResults" src="/img/loader-mini.gif">
 
                 <small class="edit_icon font-70em pad_left" ng-click="searchWebOfRegistries()">
                     <i style="color: #555" class="fa fa-globe"></i> Search other registries
@@ -16,7 +16,7 @@
     </div>
 
     <div class="row">
-        <table cellspacing="0" class="data_table" ng-if="searchFilters.s" ng-class="{'opacity_4':loadingPage}">
+        <table cellspacing="0" class="data_table" ng-if="searchFilters.s" ng-class="{'opacity_4':loadingSearchResults}">
             <tr data-ng-show="searchResults.results.length>0">
                 <th style="width: 12px">
                     <input type="checkbox" ng-model="allSelected"/>
@@ -80,7 +80,8 @@
             </tr>
         </table>
 
-        <table cellspacing="0" class="data_table" ng-if="!searchFilters.s" ng-class="{'opacity_4':loadingPage}">
+        <table cellspacing="0" class="data_table" ng-if="!searchFilters.s"
+               ng-class="{'opacity_4':loadingSearchResults}">
             <tr ng-show="searchResults.results.length>0">
                 <th style=" width:28px">
                     <input type="checkbox" ng-model="allSelected"/>
@@ -173,7 +174,9 @@
                         class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
         <div class="col-md-7" style="margin: 22px 0;">
-            <strong class="small">{{pageCounts(currentPage, searchResults.resultCount)}}</strong>
+            <strong class="small">
+                <i ng-show="loadingSearchResults" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+                searchResults.resultCount)}}</strong>
         </div>
 
     </div>

@@ -10,7 +10,6 @@ import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionsController;
-import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
@@ -123,13 +122,12 @@ public class FolderResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
 
         try {
-            FolderController folderController = new FolderController();
-            String userId = SessionHandler.getUserIdBySession(userAgentHeader);
+            String userId = getUserIdFromSessionHeader(userAgentHeader);
             ColumnField field = ColumnField.valueOf(sort.toUpperCase());
 
             try {
                 long id = Long.decode(folderId);
-                return folderController.retrieveFolderContents(userId, id, field, asc, offset, limit);
+                return controller.retrieveFolderContents(userId, id, field, asc, offset, limit);
             } catch (NumberFormatException nfe) {
             }
 

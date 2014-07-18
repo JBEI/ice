@@ -106,7 +106,10 @@
                         class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
         <div class="col-md-7" style="margin-top: 25px;">
-            <strong class="small">{{pageCounts(currentPage, folder.count)}}</strong>
+            <strong class="small">
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+                folder.count)}}
+            </strong>
         </div>
     </div>
 </div>

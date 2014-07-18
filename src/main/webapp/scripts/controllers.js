@@ -569,7 +569,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     $scope.pageCounts = function (currentPage, resultCount) {
         var maxPageCount = 15;
-        var pageNum = ((currentPage - 1) * maxPageCount) + currentPage;
+        var pageNum = ((currentPage - 1) * maxPageCount) + 1;
 
         // number on this page
         var pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
@@ -620,15 +620,16 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
         console.log("running", $scope.searchFilters);
 
-        $scope.loading = true;
-        $scope.searchResults = undefined;
+        $scope.loadingSearchResults = true;
+//        $scope.searchResults = undefined;
         search.runSearch($scope.searchFilters,
             function (result) {
                 $scope.searchResults = result;
-                $scope.loadingPage = false;
+                $scope.loadingSearchResults = false;
             },
             function (error) {
-                $scope.loadingPage = false;
+                $scope.loadingSearchResults = false;
+                $scope.searchResults = undefined;
             }
         );
     };
