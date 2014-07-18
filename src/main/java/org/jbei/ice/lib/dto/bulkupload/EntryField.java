@@ -10,45 +10,47 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
  */
 public enum EntryField implements IDataTransferModel {
 
-    PI("Principal Investigator"),
-    PI_EMAIL("Principal Investigator Email"),
-    FUNDING_SOURCE("Funding Source"),
-    IP("Intellectual Property"),
-    BIOSAFETY_LEVEL("BioSafety Level"),
-    NAME("Name"),
-    ALIAS("Alias"),
-    KEYWORDS("Keywords"),
-    SUMMARY("Summary"),
-    NOTES("Notes"),
-    REFERENCES("References"),
-    LINKS("Links"),
-    STATUS("Status"),
-    CREATOR("Creator"),
-    CREATOR_EMAIL("Creator Email"),
-    SEQ_FILENAME("Sequence File"),
-    ATT_FILENAME("Attachment File"),
-    SEQ_TRACE_FILES("Sequence Trace File(s)"),
-    SELECTION_MARKERS("Selection Markers"),
-    PARENTAL_STRAIN("Parent Strain"),
-    GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype"),
-    PLASMIDS("Plasmids"),
-    CIRCULAR("Circular"),
-    BACKBONE("Backbone"),
-    PROMOTERS("Promoters"),
-    REPLICATES_IN("Replicates In"),
-    ORIGIN_OF_REPLICATION("Origin of Replication"),
-    HOMOZYGOSITY("Homozygosity"),
-    ECOTYPE("Ecotype"),
-    HARVEST_DATE("Harvest Date"),
-    GENERATION("Generation"),
-    SENT_TO_ABRC("Sent to ABRC?"),
-    PLANT_TYPE("Plant Type"),
-    PARENTS("Parents");
+    PI("Principal Investigator", true),
+    PI_EMAIL("Principal Investigator Email", false),
+    FUNDING_SOURCE("Funding Source", false),
+    IP("Intellectual Property", false),
+    BIOSAFETY_LEVEL("BioSafety Level", true),
+    NAME("Name", true),
+    ALIAS("Alias", false),
+    KEYWORDS("Keywords", false),
+    SUMMARY("Summary", true),
+    NOTES("Notes", false),
+    REFERENCES("References", false),
+    LINKS("Links", false),
+    STATUS("Status", true),
+    CREATOR("Creator", true),
+    CREATOR_EMAIL("Creator Email", true),
+    SEQ_FILENAME("Sequence File", false),
+    ATT_FILENAME("Attachment File", false),
+    SEQ_TRACE_FILES("Sequence Trace File(s)", false),
+    SELECTION_MARKERS("Selection Markers", true),
+    PARENTAL_STRAIN("Parent Strain", false),
+    GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false),
+    PLASMIDS("Plasmids", false),
+    CIRCULAR("Circular", false),
+    BACKBONE("Backbone", false),
+    PROMOTERS("Promoters", false),
+    REPLICATES_IN("Replicates In", false),
+    ORIGIN_OF_REPLICATION("Origin of Replication", false),
+    HOMOZYGOSITY("Homozygosity", false),
+    ECOTYPE("Ecotype", false),
+    HARVEST_DATE("Harvest Date", false),
+    GENERATION("Generation", false),
+    SENT_TO_ABRC("Sent to ABRC?", false),
+    PLANT_TYPE("Plant Type", false),
+    PARENTS("Parents", false);
 
     private String label;
+    private boolean required;
 
-    EntryField(String label) {
+    EntryField(String label, boolean required) {
         this.label = label;
+        this.required = required;
     }
 
     public static EntryField fromString(String label) {
@@ -66,5 +68,9 @@ public enum EntryField implements IDataTransferModel {
 
     public String getLabel() {
         return this.label;
+    }
+
+    public boolean isRequired() {
+        return this.required;
     }
 }

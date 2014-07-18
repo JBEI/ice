@@ -2,13 +2,13 @@ package org.jbei.ice.lib.bulkupload;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 
 /**
- * Bulk upload via files
+ * Processes bulk uploads. Supported file formats are "csv", "zip" and "xml", with the latter being for SBOL
  *
  * @author Hector Plahar
  */
@@ -55,7 +55,7 @@ public class FileBulkUpload {
      * @return byte array of the template or null if the headers for the type cannot be retrieved/is unsupported
      */
     public static byte[] getCSVTemplateBytes(EntryType addType) {
-        ArrayList<EntryField> headers = BulkCSVUploadHeaders.getHeadersForType(addType);
+        List<EntryField> headers = BulkCSVUploadHeaders.getHeadersForType(addType);
         if (headers == null)
             return null;
 
@@ -66,8 +66,9 @@ public class FileBulkUpload {
             }
 
             sb.append('"');
-            sb.append(headers.get(i).getLabel());
-            if (BulkCSVUploadHeaders.isRequired(headers.get(i), addType))
+            EntryField header = headers.get(i);
+            sb.append(header.getLabel());
+            if (header.isRequired())
                 sb.append("*");
             sb.append('"');
         }
