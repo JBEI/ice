@@ -550,9 +550,7 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
 });
 
 // main controller.
-iceControllers.controller('CollectionController', function ($scope, $state, $location, $cookieStore, $rootScope, Folders, Settings, sessionValid, Search) {
-    console.log("CollectionController");
-
+iceControllers.controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope, Folders, Settings, sessionValid, Search) {
     // todo : set on all
     // $location.search('q', null);
 
@@ -568,6 +566,15 @@ iceControllers.controller('CollectionController', function ($scope, $state, $loc
     settings.get(function (result) {
         $rootScope.settings = result;
     });
+
+    $scope.pageCounts = function (currentPage, resultCount) {
+        var maxPageCount = 15;
+        var pageNum = ((currentPage - 1) * maxPageCount) + currentPage;
+
+        // number on this page
+        var pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
+        return pageNum + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
+    };
 
     // retrieve user settings
 
@@ -721,7 +728,7 @@ iceControllers.controller('ImportController', function ($rootScope, $location, $
     var sid = $cookieStore.get("sessionId");
     var upload = Upload(sid);
 
-    if(!$scope.importType && $stateParams.type)
+    if (!$scope.importType && $stateParams.type)
         $scope.importType = $stateParams.type;
 
     $scope.bulkUpload = {};

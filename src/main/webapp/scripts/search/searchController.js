@@ -39,7 +39,7 @@ angular.module('ice.search', [])
             if (relScore < 30)
                 return 'danger';
             return 'info';
-        }
+        };
     })
     .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
         $scope.searchTypes = {all:true, strain:true, plasmid:true, part:true, arabidopsis:true};

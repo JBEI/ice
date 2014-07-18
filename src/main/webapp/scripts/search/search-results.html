@@ -153,7 +153,7 @@
                 </td>
                 <td>
                     <div style="width:150px"><a
-                            href="/profile/{{result.entryInfo.ownerId}}">{{result.entryInfo.owner}}</a>
+                            ng-href="/profile/{{result.entryInfo.ownerId}}">{{result.entryInfo.owner}}</a>
                     </div>
                 </td>
                 <td><i ng-show="{{result.entryInfo.hasAttachment}}" class="fa fa-paperclip fa-fw"
@@ -172,8 +172,8 @@
                         page="currentPage" max-size="maxSize"
                         class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
-        <div class="col-md-7" style="margin: 20px 0;">
-            <strong>{{currentPage*15}} / {{searchResults.resultCount}}</strong>
+        <div class="col-md-7" style="margin: 22px 0;">
+            <strong class="small">{{pageCounts(currentPage, searchResults.resultCount)}}</strong>
         </div>
 
     </div>

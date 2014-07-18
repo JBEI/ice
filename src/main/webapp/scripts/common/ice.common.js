@@ -8,5 +8,4 @@ angular.module('ice.dependencies', ['ngRoute',
     'iceApp.directives',
     'iceApp.controllers',
     'ui.router',
-    'ice.search',
     'ice.search.service']);

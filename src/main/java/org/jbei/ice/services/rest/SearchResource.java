@@ -34,7 +34,8 @@ public class SearchResource extends RestResource {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public SearchResults search(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+    public SearchResults search(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             @DefaultValue("false") @QueryParam("w") boolean searchWeb,
             SearchQuery query) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
