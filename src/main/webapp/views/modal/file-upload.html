@@ -7,14 +7,14 @@
 <div class="modal-body">
     <alert type="'info'" style="padding: 8px">
         <i style="font-size:60px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
-        <span class="font-90em">The first line of your CSV file should contain the header
-        information and must be spelled exactly as it appears in the web
-        interface. e.g. <b>"Principal Investigator", </b> etc. If uploading a zip file, make sure there is exactly
-        <b>1</b> csv file contained in it.<br><br>
-
-        <div style="margin-left: 62px"><a class="cursor_pointer" ng-click="downloadCSVTemplate()">Download a {{addType}}
-            CSV upload template</a>.
-        </div>
+        <span class="font-90em">Supported file formats for bulk upload are:
+            <ul style="margin-left: 62px">
+                <li><b>CSV file</b>
+                    (<a class="cursor_pointer" ng-click="downloadCSVTemplate()">Download template</a>)
+                </li>
+                <li><b>Zip Archive</b> (must contain exactly 1 CSV file)</li>
+                <li><b>SBOL XML</b></li>
+            </ul>
         </span>
     </alert>
 
