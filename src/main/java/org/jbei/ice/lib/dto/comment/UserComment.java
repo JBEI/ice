@@ -7,7 +7,7 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
  * DTO for {@link org.jbei.ice.lib.models.Comment}. Comments are tied to specific entries
- * and the entryId field is used to uniquely identify the
+ * and the entryId field is used to uniquely identify the entry this comment is tied to
  *
  * @author Hector Plahar
  */
