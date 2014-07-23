@@ -79,7 +79,9 @@ public class HibernateSearch {
 
                 if (occur == BooleanClause.Occur.MUST)
                     query = qb.phrase().onField(field).sentence(term).createQuery();
-                else
+                else if (term.endsWith("*")) {
+                    query = qb.keyword().wildcard().onField(field).ignoreFieldBridge().matching(term).createQuery();
+                } else
                     query = qb.keyword().fuzzy().withThreshold(0.8f).onField(field).ignoreFieldBridge().matching(
                             term).createQuery();
 
@@ -389,10 +391,7 @@ public class HibernateSearch {
 
         // execute search
         result = fullTextQuery.list();
-        String email = "Anon";
-        if (account != null)
-            email = account.getEmail();
-        Logger.info(email + ": obtained " + resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
+        Logger.info(resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
 
         LinkedList<SearchResult> searchResults = new LinkedList<>();
         Iterator<Object[]> iterator = result.iterator();
