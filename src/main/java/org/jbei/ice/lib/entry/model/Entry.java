@@ -334,10 +334,20 @@ public class Entry implements IDataModel {
         return selectionMarkers;
     }
 
+    public String getSelectionMarkersAsString() {
+        String result;
+        ArrayList<String> markers = new ArrayList<>();
+        for (SelectionMarker marker : this.selectionMarkers) {
+            markers.add(marker.getName());
+        }
+        result = org.jbei.ice.lib.utils.Utils.join(", ", markers);
+
+        return result;
+    }
+
     public void setSelectionMarkers(Set<SelectionMarker> inputSelectionMarkers) {
         if (inputSelectionMarkers == null) {
             selectionMarkers.clear();
-
             return;
         }
 

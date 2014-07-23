@@ -41,7 +41,7 @@ public class BulkUploadControllerTest {
     @Test
     public void testRetrieveByUser() throws Exception {
         Account account = AccountCreator.createTestAccount("testRetrieveByUser", false);
-        ArrayList<BulkUploadInfo> results = controller.retrieveByUser(account, account);
+        ArrayList<BulkUploadInfo> results = controller.retrieveByUser("testRetrieveByUser", "testRetrieveByUser");
         Assert.assertEquals(0, results.size());
 
         // create strain with plasmid
@@ -55,7 +55,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "strain selection markers");
         autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.STRAIN);
         Assert.assertNotNull(autoUpdate);
-        ArrayList<BulkUploadInfo> userUpload = controller.retrieveByUser(account, account);
+        ArrayList<BulkUploadInfo> userUpload = controller.retrieveByUser(account.getEmail(), account.getEmail());
         Assert.assertNotNull(userUpload);
         Assert.assertEquals(1, userUpload.size());
 
@@ -73,9 +73,9 @@ public class BulkUploadControllerTest {
                 Assert.assertNotNull(controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate,
                                                                      EntryType.PART));
         }
-        userUpload = controller.retrieveByUser(account2, account2);
+        userUpload = controller.retrieveByUser(account2.getEmail(), account2.getEmail());
         Assert.assertEquals(count / 2, userUpload.size());
-        userUpload = controller.retrieveByUser(account, account);
+        userUpload = controller.retrieveByUser(account.getEmail(), account.getEmail());
         Assert.assertEquals(count / 2 + 1, userUpload.size());
     }
 

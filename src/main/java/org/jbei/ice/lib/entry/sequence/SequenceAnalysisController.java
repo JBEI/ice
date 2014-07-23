@@ -11,6 +11,7 @@ import java.util.List;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -67,17 +68,17 @@ public class SequenceAnalysisController {
      * @throws ControllerException
      */
     public TraceSequence importTraceSequence(Entry entry, String filename, String depositor, String sequence,
-            String uuid, Date date, InputStream inputStream) throws ControllerException {
+            String uuid, Date date, InputStream inputStream) {
         if (entry == null) {
-            throw new ControllerException("Failed to save trace sequence with null entry!");
+            throw new IllegalArgumentException("Failed to save trace sequence with null entry!");
         }
 
         if (filename == null || filename.isEmpty()) {
-            throw new ControllerException("Failed to save trace sequence without filename!");
+            throw new IllegalArgumentException("Failed to save trace sequence without filename!");
         }
 
         if (sequence == null || sequence.isEmpty()) {
-            throw new ControllerException("Failed to save trace sequence without sequence!");
+            throw new IllegalArgumentException("Failed to save trace sequence without sequence!");
         }
 
         TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence, date);
@@ -97,10 +98,9 @@ public class SequenceAnalysisController {
      * @param sequence
      * @param inputStream
      * @return Saved traceSequence
-     * @throws ControllerException
      */
     public TraceSequence uploadTraceSequence(Entry entry, String filename, String depositor,
-            String sequence, InputStream inputStream) throws ControllerException {
+            String sequence, InputStream inputStream) {
         return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(), new Date(), inputStream);
     }
 
@@ -175,7 +175,7 @@ public class SequenceAnalysisController {
      * @return Parsed Sequence as {@link DNASequence}.
      * @throws ControllerException
      */
-    public DNASequence parse(byte[] bytes) throws ControllerException {
+    public DNASequence parse(byte[] bytes) {
         if (bytes.length == 0) {
             return null;
         }
@@ -251,11 +251,10 @@ public class SequenceAnalysisController {
      *
      * @param traceSequence traceSequence
      * @param sequence      sequence
-     * @throws ControllerException
      */
-    public void buildOrRebuildAlignment(TraceSequence traceSequence, Sequence sequence) throws ControllerException {
+    public void buildOrRebuildAlignment(TraceSequence traceSequence, Sequence sequence) {
         if (traceSequence == null) {
-            throw new ControllerException("Failed to rebuild alignment for null trace sequence!");
+            throw new IllegalArgumentException("Failed to rebuild alignment for null trace sequence!");
         }
 
         // if sequence is null => delete alignment
@@ -277,10 +276,9 @@ public class SequenceAnalysisController {
         String bl2seqOutput;
         try {
             bl2seqOutput = BlastPlus.runBlast2Seq(entrySequenceString, traceSequenceString);
-        } catch (BlastException e) {
-            throw new ControllerException(e);
-        } catch (ProgramTookTooLongException e) {
-            throw new ControllerException(e);
+        } catch (BlastException | ProgramTookTooLongException e) {
+            Logger.error(e);
+            return;
         }
 
         if (bl2seqOutput == null || bl2seqOutput.isEmpty()) {
@@ -357,7 +355,7 @@ public class SequenceAnalysisController {
                 }
             }
         } catch (Bl2SeqException e) {
-            throw new ControllerException(e);
+            Logger.error(e);
         }
     }
 

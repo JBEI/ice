@@ -117,18 +117,14 @@ public class FolderController {
         BulkUploadController controller = new BulkUploadController();
         ArrayList<FolderDetails> folders = new ArrayList<>();
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        try {
-            ArrayList<BulkUploadInfo> list = controller.retrieveByUser(account, account);
-            for (BulkUploadInfo info : list) {
-                FolderDetails details = new FolderDetails();
-                details.setName(info.getName());
-                details.setCount(info.getCount());
-                details.setId(info.getId());
-                details.setType(FolderType.UPLOAD);
-                folders.add(details);
-            }
-        } catch (ControllerException e) {
-            Logger.error(e);
+        ArrayList<BulkUploadInfo> list = controller.retrieveByUser(userId, userId);
+        for (BulkUploadInfo info : list) {
+            FolderDetails details = new FolderDetails();
+            details.setName(info.getName());
+            details.setCount(info.getCount());
+            details.setId(info.getId());
+            details.setType(FolderType.UPLOAD);
+            folders.add(details);
         }
         return folders;
     }

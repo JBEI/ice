@@ -261,12 +261,14 @@ public class ModelToInfoFactory {
         view.setSelectionMarkers(EntryUtil.getSelectionMarkersAsList(entry.getSelectionMarkers()));
 
         AccountController accountController = new AccountController();
-        Account account1;
-        if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
-            view.setOwnerId(account1.getId());
+        Account account;
+        String ownerEmail = entry.getOwnerEmail();
+        if (ownerEmail != null && (account = accountController.getByEmail(ownerEmail)) != null)
+            view.setOwnerId(account.getId());
 
-        if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
-            view.setCreatorId(account1.getId());
+        String creatorEmail = entry.getCreatorEmail();
+        if (creatorEmail != null && (account = accountController.getByEmail(creatorEmail)) != null)
+            view.setCreatorId(account.getId());
 
         view.setKeywords(entry.getKeywords());
         view.setShortDescription(entry.getShortDescription());
@@ -276,15 +278,6 @@ public class ModelToInfoFactory {
         view.setFundingSource(entry.getFundingSource());
         view.setPrincipalInvestigator(entry.getPrincipalInvestigator());
         return view;
-
-//        for (Entry linkedEntry : entry.getLinkedEntries()) {
-//            EntryType linkedType = EntryType.nameToType(linkedEntry.getRecordType());
-//            PartData data = new PartData(linkedType);
-//            data.setId(linkedEntry.getId());
-//            data.setPartId(linkedEntry.getPartNumber());
-//            data.setName(linkedEntry.getName());
-//            view.getLinkedParts().add(data);
-//        }
     }
 
     public static PartData createTableViewData(String userId, Entry entry, boolean includeOwnerInfo) {
@@ -311,10 +304,12 @@ public class ModelToInfoFactory {
 
             AccountController accountController = new AccountController();
             Account account1;
-            if ((account1 = accountController.getByEmail(entry.getOwnerEmail())) != null)
+            if (entry.getOwnerEmail() != null && (account1 = accountController.getByEmail(
+                    entry.getOwnerEmail())) != null)
                 view.setOwnerId(account1.getId());
 
-            if ((account1 = accountController.getByEmail(entry.getCreatorEmail())) != null)
+            if (entry.getCreatorEmail() != null && (account1 = accountController.getByEmail(
+                    entry.getCreatorEmail())) != null)
                 view.setCreatorId(account1.getId());
         }
 
@@ -326,6 +321,7 @@ public class ModelToInfoFactory {
         } catch (ControllerException e) {
             Logger.error(e);
         }
+
         view.setHasAttachment(hasAttachment);
 
         // has sample

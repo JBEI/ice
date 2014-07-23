@@ -24,7 +24,7 @@ angular.module('ice.search', [])
             $scope.runUserSearch();
         };
 
-        // tODO : sort
+        // TODO : sort
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
         $scope.currentPage = 1;
 
@@ -41,7 +41,7 @@ angular.module('ice.search', [])
             return 'info';
         };
     })
-    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
+    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location, Search) {
         $scope.searchTypes = {all:true, strain:true, plasmid:true, part:true, arabidopsis:true};
 
         $scope.check = function (selection) {
@@ -57,28 +57,53 @@ angular.module('ice.search', [])
         };
 
         $scope.search = function (isAdvancedSearch) {
-            $scope.searchFilters.q = $scope.queryText;
-            $scope.searchFilters.s = $scope.sequenceText;
-            $scope.searchFilters.sort = 'relevance';
-            $scope.searchFilters.asc = false;
-            $scope.searchFilters.t = [];
-            $scope.searchFilters.b = $scope.blastSearchType;
-            $scope.searchFilters.hasSample = $scope.hasSample;
-            $scope.searchFilters.hasSequence = $scope.hasSequence;
-            $scope.searchFilters.hasAttachment = $scope.hasAttachment;
-
-            for (var type in $scope.searchTypes) {
-                if ($scope.searchTypes.hasOwnProperty(type) && type !== 'all') {
-                    if ($scope.searchTypes[type])
-                        $scope.searchFilters.t.push(type);
+            if (isAdvancedSearch) {
+                console.log("advanced search");
+                $scope.loadingSearchResults = true;
+                $location.path('/search');
+                var search = Search();
+                var searchQuery = {};
+                searchQuery.queryString = $scope.queryText;
+                var blastType = $scope.blastSearchType === undefined ? "BLAST_N" : $scope.blastSearchType.toUpperCase();
+                searchQuery.blastQuery = {blastProgram:blastType, sequence:$scope.sequenceText};
+                searchQuery.entryTypes = [];
+                for (var searchType in $scope.searchTypes) {
+                    if ($scope.searchTypes.hasOwnProperty(searchType) && searchType !== 'all') {
+                        if ($scope.searchTypes[searchType])
+                            searchQuery.entryTypes.push(searchType.toUpperCase());
+                    }
                 }
+
+                search.runAdvancedSearch(searchQuery, function (result) {
+                    $scope.loadingSearchResults = false;
+                    $scope.searchResults = result;
+                }, function (error) {
+                    $scope.loadingSearchResults = false;
+                    $scope.searchResults = undefined;
+                });
+            } else {
+                $scope.searchFilters.q = $scope.queryText;
+                $scope.searchFilters.s = $scope.sequenceText;
+                $scope.searchFilters.sort = 'relevance';
+                $scope.searchFilters.asc = false;
+                $scope.searchFilters.t = [];
+                $scope.searchFilters.b = $scope.blastSearchType;
+                $scope.searchFilters.hasSample = $scope.hasSample;
+                $scope.searchFilters.hasSequence = $scope.hasSequence;
+                $scope.searchFilters.hasAttachment = $scope.hasAttachment;
+
+                for (var type in $scope.searchTypes) {
+                    if ($scope.searchTypes.hasOwnProperty(type) && type !== 'all') {
+                        if ($scope.searchTypes[type])
+                            $scope.searchFilters.t.push(type);
+                    }
+                }
+
+                $scope.loadingPage = true;
+                $location.path('/search');
+                $location.search('q', $scope.queryText);
+                $scope.runUserSearch();
             }
-
-            $scope.loadingPage = true;
-            $location.path('/search');
-            $location.search('q', $scope.queryText);
-
-            $scope.runUserSearch();
         };
 
         $scope.reset = function () {

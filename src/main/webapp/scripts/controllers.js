@@ -617,11 +617,8 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
     // search
     $scope.runUserSearch = function () {
         var search = Search();
-
-        console.log("running", $scope.searchFilters);
-
         $scope.loadingSearchResults = true;
-//        $scope.searchResults = undefined;
+
         search.runSearch($scope.searchFilters,
             function (result) {
                 $scope.searchResults = result;
@@ -630,6 +627,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
             function (error) {
                 $scope.loadingSearchResults = false;
                 $scope.searchResults = undefined;
+                console.log(error);
             }
         );
     };
@@ -1391,6 +1389,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
 
         // retrieve contents of main folder (e,g, "personal")
         folders.folder($scope.params, function (result) {
+            $scope.loadingPage = false;
             $scope.folder = result;
             if (result.folderName) {
                 if ($scope.breadCrumb)

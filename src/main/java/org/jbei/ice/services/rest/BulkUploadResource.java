@@ -4,20 +4,19 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.jbei.ice.ControllerException;
-import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.access.AuthorizationException;
 import org.jbei.ice.lib.bulkupload.BulkEntryCreator;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -51,6 +50,19 @@ public class BulkUploadResource extends RestResource {
             return controller.getBulkImport(userId, id, offset, limit);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/pending")
+    public Response getPendingUploads(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        try {
+            String userId = getUserIdFromSessionHeader(userAgentHeader);
+            HashMap<String, ArrayList<BulkUploadInfo>> pending = controller.getPendingImports(userId);
+            return Response.status(Response.Status.OK).entity(pending).build();
+        } catch (AuthorizationException ae) {
+            return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -124,12 +136,7 @@ public class BulkUploadResource extends RestResource {
     public ArrayList<BulkUploadInfo> query(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
         Logger.info(userId + ": retrieving bulk upload drafts");
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        try {
-            return controller.retrieveByUser(account, account);
-        } catch (ControllerException e) {
-            throw new UnexpectedException(e.getMessage());
-        }
+        return controller.retrieveByUser(userId, userId);
     }
 
     @POST

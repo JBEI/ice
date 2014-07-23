@@ -2,6 +2,7 @@ package org.jbei.ice.lib.bulkupload;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.jbei.ice.ControllerException;
@@ -70,30 +71,26 @@ public class BulkUploadController {
      * all bulk imports that are submitted by non-admins and indicates that it is pending approval.
      * <p>Administrative privileges are required for making this call
      *
-     * @param account account for user making call. expected to be an administrator
+     * @param userId account for user making request; expected to be an administrator
      * @return list of bulk imports pending verification
-     * @throws ControllerException
      */
-    public ArrayList<BulkUploadInfo> retrievePendingImports(Account account) throws ControllerException {
+    public HashMap<String, ArrayList<BulkUploadInfo>> getPendingImports(String userId) {
         // check for admin privileges
-        authorization.expectAdmin(account.getEmail());
+        authorization.expectAdmin(userId);
 
-        ArrayList<BulkUploadInfo> infoList = new ArrayList<>();
+        HashMap<String, ArrayList<BulkUploadInfo>> infoList = new HashMap<>();
         ArrayList<BulkUpload> results;
 
-        try {
-            results = dao.retrieveByStatus(BulkUploadStatus.PENDING_APPROVAL);
-            if (results == null || results.isEmpty())
-                return infoList;
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        results = dao.retrieveByStatus(BulkUploadStatus.PENDING_APPROVAL);
+        if (results == null || results.isEmpty())
+            return infoList;
 
         for (BulkUpload draft : results) {
             BulkUploadInfo info = new BulkUploadInfo();
             Account draftAccount = draft.getAccount();
+            String userEmail = draftAccount.getEmail();
             AccountTransfer accountTransfer = new AccountTransfer();
-            accountTransfer.setEmail(draftAccount.getEmail());
+            accountTransfer.setEmail(userEmail);
             accountTransfer.setFirstName(draftAccount.getFirstName());
             accountTransfer.setLastName(draftAccount.getLastName());
             info.setAccount(accountTransfer);
@@ -106,7 +103,13 @@ public class BulkUploadController {
             info.setCreated(draft.getCreationTime());
             info.setName(draft.getName());
 
-            infoList.add(info);
+            // add to list
+            ArrayList<BulkUploadInfo> userList = infoList.get(userEmail);
+            if (userList == null) {
+                userList = new ArrayList<>();
+                infoList.put(userEmail, userList);
+            }
+            userList.add(info);
         }
 
         return infoList;
@@ -225,29 +228,20 @@ public class BulkUploadController {
     /**
      * Retrieves list of user saved bulk imports
      *
-     * @param account     account of requesting user
-     * @param userAccount account whose saved drafts are being requested
+     * @param requesterId   account of requesting user
+     * @param userAccountId account identifier for user whose saved drafts are being requested
      * @return list of draft infos representing saved drafts.
-     * @throws ControllerException
      */
-    public ArrayList<BulkUploadInfo> retrieveByUser(Account account, Account userAccount)
-            throws ControllerException {
-
-        ArrayList<BulkUpload> results;
-
-        try {
-            results = dao.retrieveByAccount(userAccount);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
+    public ArrayList<BulkUploadInfo> retrieveByUser(String requesterId, String userAccountId) {
+        Account userAccount = accountController.getByEmail(userAccountId);
+        ArrayList<BulkUpload> results = dao.retrieveByAccount(userAccount);
         ArrayList<BulkUploadInfo> infoArrayList = new ArrayList<>();
 
         for (BulkUpload draft : results) {
             Account draftAccount = draft.getAccount();
 
-            boolean isOwner = account.equals(draftAccount);
-            boolean isAdmin = accountController.isAdministrator(account.getEmail());
+            boolean isOwner = userAccountId.equals(requesterId);
+            boolean isAdmin = accountController.isAdministrator(requesterId);
             if (!isOwner && !isAdmin)
                 continue;
 
