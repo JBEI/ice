@@ -14,7 +14,6 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.entry.EntryController;
 
 /**
  * API for access tokens (also session id for the user interface)
@@ -47,10 +46,6 @@ public class AccessTokenResource extends RestResource {
         }
 
         Logger.info("User by login '" + name + "' successfully logged in");
-        Account account = accountController.getByEmail(info.getEmail());
-        EntryController entryController = new EntryController();
-        long visibleEntryCount = entryController.getNumberOfVisibleEntries(account.getEmail());
-        info.setVisibleEntryCount(visibleEntryCount);
         return info;
     }
 
@@ -81,6 +76,7 @@ public class AccessTokenResource extends RestResource {
 
             AccountTransfer transfer = account.toDataTransferObject();
             transfer.setSessionId(sessionId);
+            transfer.setAdmin(accountController.isAdministrator(account));
             return transfer;
         }
 

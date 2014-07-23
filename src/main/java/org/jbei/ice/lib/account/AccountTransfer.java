@@ -110,8 +110,8 @@ public class AccountTransfer implements IDataTransferModel {
         return isAdmin;
     }
 
-    public void setAdmin(boolean isModerator) {
-        this.isAdmin = isModerator;
+    public void setAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
     }
 
     public String getInitials() {
