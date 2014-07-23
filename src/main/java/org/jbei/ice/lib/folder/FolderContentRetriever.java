@@ -32,6 +32,7 @@ public class FolderContentRetriever {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
             folderDetails.getEntries().add(info);
         }
+        folderDetails.setCount(entryDAO.getByVisibilityCount(userId, Visibility.DELETED));
         return folderDetails;
     }
 

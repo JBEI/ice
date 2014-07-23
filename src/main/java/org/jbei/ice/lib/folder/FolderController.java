@@ -336,6 +336,8 @@ public class FolderController {
         collection.setPersonal(entryController.getNumberOfOwnerEntries(userId, userId));
         collection.setShared(entryController.getNumberofEntriesSharedWithUser(userId));
         collection.setBulkUpload(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT));
+        if (account.getType() == AccountType.ADMIN)
+            collection.setPending(entryDAO.getPendingCount());
         return collection;
     }
 

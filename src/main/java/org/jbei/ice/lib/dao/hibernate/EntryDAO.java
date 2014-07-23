@@ -545,18 +545,17 @@ public class EntryDAO extends HibernateRepository<Entry> {
     public List<Entry> getByVisibility(String ownerEmail, Visibility visibility, ColumnField field, boolean asc,
             int start, int limit) throws DAOException {
         try {
-            Criteria entryCriteria = currentSession().createCriteria(Entry.class);
-            entryCriteria.add(Restrictions.eq("visibility", visibility.getValue()))
-                         .add(Restrictions.eq("ownerEmail", ownerEmail));
-
-            // sort
             String fieldName = columnFieldToString(field);
-
-            entryCriteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
-            entryCriteria.setFirstResult(start);
-            entryCriteria.setMaxResults(limit);
-            entryCriteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-            return new LinkedList<Entry>(entryCriteria.list());
+            Session session = currentSession();
+            String orderSuffix = (" ORDER BY e." + fieldName + " " + (asc ? "ASC" : "DESC"));
+            String queryString = "from " + Entry.class.getName() + " e where owner_email = :oe "
+                    + "AND visibility = " + visibility.getValue() + orderSuffix;
+            Query query = session.createQuery(queryString);
+            query.setParameter("oe", ownerEmail);
+            query.setMaxResults(limit);
+            query.setFirstResult(start);
+            List list = query.list();
+            return new LinkedList<Entry>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -567,6 +566,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
         Criteria criteria = currentSession().createCriteria(Entry.class)
                 .add(Restrictions.eq("ownerEmail", ownerEmail))
                 .add(Restrictions.eq("visibility", visibility.getValue()));
+        return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
+    }
+
+    public long getPendingCount() throws DAOException {
+        Criteria criteria = currentSession().createCriteria(Entry.class)
+                .add(Restrictions.eq("visibility", Visibility.PENDING.getValue()));
         return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 

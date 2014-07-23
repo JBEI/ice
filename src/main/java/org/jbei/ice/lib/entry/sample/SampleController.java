@@ -76,7 +76,6 @@ public class SampleController {
      *
      * @param entry
      * @return ArrayList of {@link Sample}s.
-     * @throws ControllerException
      */
     public ArrayList<Sample> getSamples(Entry entry) {
         return dao.getSamplesByEntry(entry);
@@ -92,14 +91,6 @@ public class SampleController {
     public ArrayList<Sample> getSamplesByStorage(Storage storage) throws ControllerException {
         try {
             return dao.getSamplesByStorage(storage);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public Sample getSampleById(long id) throws ControllerException {
-        try {
-            return dao.get(id);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

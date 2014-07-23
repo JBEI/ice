@@ -3,6 +3,8 @@ package org.jbei.ice.lib.folder;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
+ * Wrapper around counts for collections
+ *
  * @author Hector Plahar
  */
 public class Collection implements IDataTransferModel {
@@ -12,6 +14,7 @@ public class Collection implements IDataTransferModel {
     private long shared;
     private long deleted;
     private long bulkUpload;
+    private long pending;
 
     public long getAvailable() {
         return available;
@@ -52,5 +55,13 @@ public class Collection implements IDataTransferModel {
 
     public void setBulkUpload(long bulkUpload) {
         this.bulkUpload = bulkUpload;
+    }
+
+    public long getPending() {
+        return this.pending;
+    }
+
+    public void setPending(long pending) {
+        this.pending = pending;
     }
 }
