@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.List;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.bulkupload.BulkCSVUploadHeaders;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
@@ -13,16 +12,15 @@ import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 
 import org.apache.commons.lang.StringUtils;
 
 /**
- * Serializer for entry -> xls conversion
+ * ICE to CSV format
  *
- * @author Hector Plahar, Tim Ham
+ * @author Hector Plahar
  */
-public class IceXlsSerializer {
+public class IceCSVSerializer {
 
     protected static Object escapeCSVValue(Object value) {
         if (value != null) {
@@ -45,8 +43,7 @@ public class IceXlsSerializer {
         return headers;
     }
 
-    public static String serialize(Entry entry) throws ControllerException {
-
+    public static String serialize(Entry entry) {
         final EntryType type = EntryType.nameToType(entry.getRecordType());
         List<EntryField> fields = BulkCSVUploadHeaders.getHeadersForType(type);
 
@@ -61,7 +58,6 @@ public class IceXlsSerializer {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
         SampleController sampleController = new SampleController();
-        SequenceController sequenceController = new SequenceController();
         AttachmentController attachmentController = new AttachmentController();
 
         stringBuilder.append(escapeCSVValue(entry.getRecordType())).append(",");
@@ -71,7 +67,7 @@ public class IceXlsSerializer {
         stringBuilder.append(escapeCSVValue(entry.getCreator())).append(",");
         stringBuilder.append(escapeCSVValue(entry.getAlias())).append(",");
         stringBuilder.append(escapeCSVValue(entry.getKeywords())).append(",");
-        stringBuilder.append(escapeCSVValue("")).append(","); //TODO entry.getSelectionMarkersAsString())
+        stringBuilder.append(escapeCSVValue(entry.getSelectionMarkersAsString())).append(",");
         stringBuilder.append(escapeCSVValue(entry.getLinksAsString())).append(",");
         stringBuilder.append(escapeCSVValue(entry.getStatus())).append(",");
         stringBuilder.append(escapeCSVValue(entry.getShortDescription())).append(",");

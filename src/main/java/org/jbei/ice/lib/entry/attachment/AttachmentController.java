@@ -99,7 +99,7 @@ public class AttachmentController {
         if (attachment == null)
             return false;
 
-        if(attachment.getEntry().getId() != partId)
+        if (attachment.getEntry().getId() != partId)
             return false;
 
         entryAuthorization.expectWrite(userId, attachment.getEntry());
@@ -164,7 +164,7 @@ public class AttachmentController {
         return ModelToInfoFactory.getAttachments(dao.getByEntry(entry));
     }
 
-    public boolean hasAttachment(Entry entry) throws ControllerException {
+    public boolean hasAttachment(Entry entry) {
         return dao.hasAttachment(entry);
     }
 

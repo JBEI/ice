@@ -16,7 +16,6 @@ import org.jbei.ice.lib.dto.PartSample;
 import org.jbei.ice.lib.dto.StorageInfo;
 import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryEditor;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
@@ -106,12 +105,8 @@ public class SampleController {
         }
     }
 
-    public boolean hasSample(Entry entry) throws ControllerException {
-        try {
-            return dao.hasSample(entry);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+    public boolean hasSample(Entry entry) {
+        return dao.hasSample(entry);
     }
 
     // mainly used by the api to create a strain sample record

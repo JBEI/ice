@@ -314,23 +314,13 @@ public class ModelToInfoFactory {
         }
 
         // attachments
-        boolean hasAttachment = false;
-        try {
-            AttachmentController attachmentController = new AttachmentController();
-            hasAttachment = attachmentController.hasAttachment(entry);
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
-
+        AttachmentController attachmentController = new AttachmentController();
+        boolean hasAttachment = attachmentController.hasAttachment(entry);
         view.setHasAttachment(hasAttachment);
 
         // has sample
-        try {
-            SampleController sampleController = new SampleController();
-            view.setHasSample(sampleController.hasSample(entry));
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
+        SampleController sampleController = new SampleController();
+        view.setHasSample(sampleController.hasSample(entry));
 
         // has sequence
         SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
