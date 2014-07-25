@@ -2584,21 +2584,30 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     };
 
     $scope.quickEditEntry = function (field) {
+        // dirty is used to flag that the field's value has been modified to
+        // prevent saving unchanged values on blur
+
+        field.errorUpdating = false;
+
         if (!field.dirty) {
             return;
 //            field.edit = false;
         }
+
         field.updating = true;
 
         entry.update($scope.entry, function (result) {
-            if (field.inputType !== 'withEmail')
-                field.edit = false;
+            field.edit = false;
+
+            if (result)
+                $scope.entry = result;
 
             field.dirty = false;
             field.updating = false;
         }, function (error) {
             console.error(error);
             field.updating = false;
+            field.errorUpdating = true;
         });
     };
 

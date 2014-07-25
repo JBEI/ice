@@ -3,7 +3,8 @@
 
     <div class="col-md-2 entryLabel">
         <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
-        <img ng-if="field.updating" src="/img/loader-mini.gif">
+        <img ng-if="field.updating && !field.errorUpdating" src="/img/loader-mini.gif">
+        <i ng-if="!field.updating && field.errorUpdating" class="red fa fa-exclamation-circle"></i>
     </div>
 
     <div class="col-md-10" ng-mouseover="showEdit=true" ng-mouseout="showEdit=false">
@@ -43,19 +44,24 @@
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        placeholder="Email if known" style="width: 191px;">
 
-            <span class="input-group-addon" ng-click="field.edit=false" style="padding:3px;
-                background-color: #f1f1f1; width: 19px">
-                <i class="fa fa-times delete_icon"></i>
-            </span>
+                <span class="input-group-addon" ng-click="field.edit=false" style="padding:3px;
+                    background-color: #f1f1f1; width: 19px">
+                    <i class="fa fa-times delete_icon"></i>
+                </span>
             </div>
 
             <!--options-->
-            <div ng-if="field.options&&field.edit">
+            <div class="input-group" ng-if="field.options&&field.edit">
                 <select focus ng-blur="quickEditEntry(field)" style="width: 110px" class="pull_down"
                         ng-model="entry[field.schema]" size="1" ng-change="field.dirty=true"
                         ng-options="option.value as option.text for option in field.options">
                     <option value="">Select option</option>
                 </select>
+
+                <span class="input-group-addon" ng-click="field.edit=false" style="padding:3px;
+                    background-color: #f1f1f1; width: 19px">
+                    <i class="fa fa-times delete_icon"></i>
+                </span>
             </div>
 
             <!--checkbox-->
@@ -94,7 +100,7 @@
                 <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
             </div>
 
-            <!--add-->
+            <!--add todo : use full edit -->
             <div ng-if="field.inputType==='add'&&field.edit">
         <span ng-repeat="link in entry[field.schema]">
             <div ng-if="!$index">
@@ -151,11 +157,16 @@
         </span>
             </div>
 
-            <!--long-->
+            <!--long todo : use full edit-->
             <div ng-if="field.inputType==='long'&&field.edit">
                 <textarea ng-model="entry[field.schema]" style="width: 640px; height: 50px;" ng-trim="true"
                           ng-change="field.dirty=true" ng-blur="quickEditEntry(field)" focus
                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"></textarea>
+                <br>
+                <span style="padding-top:5px;">
+                    <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-link btn-xs" ng-click="field.edit=false">Cancel</a>
+                </span>
             </div>
         </form>
     </div>
