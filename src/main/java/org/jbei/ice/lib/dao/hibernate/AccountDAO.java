@@ -77,6 +77,7 @@ public class AccountDAO extends HibernateRepository<Account> {
         return account;
     }
 
+    @SuppressWarnings("unchecked")
     public List<Account> getAccounts(int offset, int limit, String sort, boolean asc) {
         Criteria criteria = currentSession().createCriteria(Account.class.getName());
         Order order = asc ? Order.asc(sort) : Order.desc(sort);
