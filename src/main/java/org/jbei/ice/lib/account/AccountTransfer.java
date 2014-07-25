@@ -22,6 +22,7 @@ public class AccountTransfer implements IDataTransferModel {
     private String institution;
     private String description;
     private long lastLogin;
+    private long registerDate;
     private long userEntryCount;
     private long visibleEntryCount;
     private boolean isAdmin;
@@ -164,6 +165,14 @@ public class AccountTransfer implements IDataTransferModel {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public long getRegisterDate() {
+        return registerDate;
+    }
+
+    public void setRegisterDate(long registerDate) {
+        this.registerDate = registerDate;
     }
 
     @Override

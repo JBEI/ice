@@ -13,10 +13,10 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
 public class AccountResults implements IDataTransferModel {
 
     private long resultCount;
-    private LinkedList<AccountTransfer> infos;
+    private LinkedList<AccountTransfer> users;
 
     public AccountResults() {
-        infos = new LinkedList<AccountTransfer>();
+        users = new LinkedList<>();
     }
 
     public void setResultCount(long count) {
@@ -31,7 +31,7 @@ public class AccountResults implements IDataTransferModel {
     }
 
     public LinkedList<AccountTransfer> getResults() {
-        return this.infos;
+        return this.users;
     }
 }
 

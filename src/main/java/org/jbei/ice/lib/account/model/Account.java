@@ -233,6 +233,8 @@ public class Account implements IDataModel {
         if (lastLoginTime != null)
             info.setLastLogin(lastLoginTime.getTime());
         info.setAccountType(this.type);
+        if (this.creationTime != null)
+            info.setRegisterDate(this.creationTime.getTime());
         info.setId(getId());
         return info;
     }

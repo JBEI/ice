@@ -155,7 +155,6 @@ iceServices.factory('EntryService', function () {
                 case 'part':
                 default:
                     return fields;
-
             }
         }
     }
@@ -164,7 +163,7 @@ iceServices.factory('EntryService', function () {
 iceServices.factory('Pigeon', function ($http) {
     return {
         fetch:function (script) {
-            $http.post("cidar1.bu.edu:5801/pigeon.php", {"desc":script})
+            $http.post("cidar1.bu.edu:5801/pigeon.php", {"specification":script})
                 .success(function (data, status, headers, config) {
                     console.log("SUCCESS", data, status);
                 })
@@ -212,7 +211,6 @@ iceServices.factory('User', function ($resource) {
             list:{
                 method:'GET',
                 responseType:'json',
-                isArray:true,
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 

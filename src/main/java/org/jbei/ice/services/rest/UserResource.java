@@ -13,6 +13,7 @@ import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
@@ -25,6 +26,8 @@ import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 
 /**
+ * REST Resource for users
+ *
  * @author Hector Plahar
  */
 @Path("/users")
@@ -34,13 +37,24 @@ public class UserResource extends RestResource {
     private GroupController groupController = new GroupController();
     private SampleRequests sampleRequests = new SampleRequests();
 
+    /**
+     * Retrieves list of users that are available to user making request. Availability is
+     * defined by being in the same group if the user does not have admin privileges.
+     *
+     * @param userAgentHeader
+     * @return
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<AccountTransfer> get(
+    public AccountResults get(
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("15") @QueryParam("limit") int limit,
+            @DefaultValue("lastName") @QueryParam("sort") String sort,
+            @DefaultValue("true") @QueryParam("asc") boolean asc,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         Logger.info(userId + ": retrieving available accounts");
-        return groupController.getAvailableAccounts(userId);
+        return groupController.getAvailableAccounts(userId, offset, limit, asc, sort);
     }
 
     @GET

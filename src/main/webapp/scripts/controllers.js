@@ -180,12 +180,24 @@ iceControllers.controller('AdminSampleRequestController', function ($scope, $loc
     });
 });
 
-
 iceControllers.controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {
+    $scope.maxSize = 5;
+    $scope.currentPage = 1;
+
     var user = User($cookieStore.get("sessionId"));
+
     user.list(function (result) {
         $scope.userList = result;
     });
+
+    $scope.setUserListPage = function (pageNo) {
+        $scope.loadingPage = true;
+        var offset = (pageNo - 1) * 15; // TODO : make sure it is a number
+        user.list({offset:offset}, function (result) {
+            $scope.userList = result;
+            $scope.loadingPage = false;
+        });
+    };
 
     $scope.createProfile = function () {
         console.log("create profile");

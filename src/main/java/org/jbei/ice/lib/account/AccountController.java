@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.ControllerException;
@@ -18,7 +19,9 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.AccountPreferencesDAO;
+import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.Emailer;
@@ -513,47 +516,30 @@ public class AccountController {
         return result;
     }
 
-//    public AccountResults retrieveAccounts(Account account, int start, int limit) throws ControllerException {
-//        if (!isAdministrator(account)) {
-//            Logger.warn(account.getEmail() + " attempting to retrieve all user accounts without admin privileges");
-//            return null;
-//        }
-//
-//        try {
-//            AccountResults results = new AccountResults();
-//            EntryController entryController = new EntryController();
-//            LinkedList<Account> accounts = dao.retrieveAccounts(start, limit);
-//
-//            ArrayList<AccountTransfer> infos = new ArrayList<>();
-//            for (Account userAccount : accounts) {
-//                AccountTransfer info = new AccountTransfer();
-//                long count;
-//                try {
-//                    count = entryController.getNumberOfOwnerEntries(userAccount, userAccount.getEmail());
-//                    info.setUserEntryCount(count);
-//                } catch (ControllerException e) {
-//                    Logger.error("Error retrieving entry count for user " + userAccount.getEmail());
-//                    info.setUserEntryCount(-1);
-//                }
-//
-//                info.setEmail(userAccount.getEmail());
-//                info.setAdmin(isAdministrator(userAccount));
-//                info.setFirstName(userAccount.getFirstName());
-//                info.setLastName(userAccount.getLastName());
-//                info.setLastLogin(userAccount.getLastLoginTime());
-//                info.setId(userAccount.getId());
-//                info.setAccountType(userAccount.getType());
-//                infos.add(info);
-//            }
-//            results.getResults().addAll(infos);
-//            int count = dao.retrieveAllNonSystemAccountCount();
-//            results.setResultCount(count);
-//            return results;
-//
-//        } catch (DAOException e) {
-//            throw new ControllerException(e);
-//        }
-//    }
+    public AccountResults retrieveAccounts(String userId, int start, int limit, String sort, boolean asc) {
+        if (!isAdministrator(userId)) {
+            Logger.warn(userId + " attempting to retrieve all user accounts without admin privileges");
+            return null;
+        }
+
+        AccountResults results = new AccountResults();
+        EntryController entryController = new EntryController();
+        List<Account> accounts = dao.getAccounts(start, limit, sort, asc);
+
+        ArrayList<AccountTransfer> infos = new ArrayList<>();
+        for (Account userAccount : accounts) {
+            AccountTransfer info = userAccount.toDataTransferObject();
+            long count = entryController.getNumberOfOwnerEntries(userId, userAccount.getEmail());
+            info.setUserEntryCount(count);
+            info.setAdmin(isAdministrator(userAccount.getEmail()));
+            infos.add(info);
+        }
+
+        results.getResults().addAll(infos);
+        long count = dao.getAccountsCount();
+        results.setResultCount(count);
+        return results;
+    }
 
     public void removeMemberFromGroup(long id, String email) throws ControllerException {
         Account account = getByEmail(email);

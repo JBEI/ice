@@ -8,9 +8,12 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 
 /**
  * DAO to manipulate {@link Account} objects in the database.
@@ -74,7 +77,21 @@ public class AccountDAO extends HibernateRepository<Account> {
         return account;
     }
 
-    public List<Account> getAll() {
-        return super.getAll(Account.class);
+    public List<Account> getAccounts(int offset, int limit, String sort, boolean asc) {
+        Criteria criteria = currentSession().createCriteria(Account.class.getName());
+        Order order = asc ? Order.asc(sort) : Order.desc(sort);
+        criteria = criteria.setFirstResult(offset).setMaxResults(limit).addOrder(order);
+        try {
+            return criteria.list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    public long getAccountsCount() {
+        Number itemCount = (Number) currentSession().createCriteria(Account.class.getName())
+                .setProjection(Projections.countDistinct("id")).uniqueResult();
+        return itemCount.longValue();
     }
 }

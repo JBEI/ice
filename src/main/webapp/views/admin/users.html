@@ -6,20 +6,22 @@
     </div>
 
     <div class="row margin-top-10 panel panel-default font-95em" ng-show="showCreateProfile">
-        <form class="panel-body" role="form" ng-submit="createProfile()" >
+        <form class="panel-body" role="form" ng-submit="createProfile()">
             <div class="col-md-2 pad-top-5 text-right">
                 <span style="white-space:nowrap">First name <span class="required">*</span> </span>
             </div>
 
             <div class="col-md-10 pad-top-5">
-                <input type="text" class="input_box" ng-model="newProfile.firstName" maxlength="125" style="width: 235px;">
+                <input type="text" class="input_box" ng-model="newProfile.firstName" maxlength="125"
+                       style="width: 235px;">
             </div>
             <div class="col-md-2 pad-top-5 text-right">
                 Last name <span class="required">*</span>
             </div>
 
             <div class="col-md-10 pad-top-5">
-                <input type="text" class="input_box" ng-model="newProfile.lastName" maxlength="125" style="width: 235px;">
+                <input type="text" class="input_box" ng-model="newProfile.lastName" maxlength="125"
+                       style="width: 235px;">
             </div>
 
             <div class="col-md-2 pad-top-5 text-right">
@@ -34,21 +36,24 @@
                 <span style="white-space:nowrap">Institution</span>
             </div>
             <div class="col-md-10 pad-top-5">
-                <input type="text" class="input_box" ng-model="newProfile.institution" maxlength="125" style="width: 235px;">
+                <input type="text" class="input_box" ng-model="newProfile.institution" maxlength="125"
+                       style="width: 235px;">
             </div>
 
             <div class="col-md-2 pad-top-5 text-right">
                 <span style="white-space:nowrap">About</span>
             </div>
             <div class="col-md-10 pad-top-5">
-                <textarea rows="3" cols="30" ng-model="newProfile.description" class="input_box" placeholder="Enter profile description"></textarea>
+                <textarea rows="3" cols="30" ng-model="newProfile.description" class="input_box"
+                          placeholder="Enter profile description"></textarea>
             </div>
 
             <br>
 
             <div class="col-xs-offset-2 col-md-10 pad_top">
                 <button type="submit" class="btn btn-xs btn-primary">Save</button>
-                <button type="button" ng-click="showCreateProfile=undefined" class="btn btn-xs btn-default">Cancel</button>
+                <button type="button" ng-click="showCreateProfile=undefined" class="btn btn-xs btn-default">Cancel
+                </button>
             </div>
         </form>
     </div>
@@ -57,42 +62,70 @@
         <table width="100%" cellspacing="0" cellpadding="0">
             <tr>
                 <td>
-                    <table cellspacing="0" class="data_table">
+                    <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
                         <tr data-ng-show='!userList'>
                             <td colspan="10">Loading...</td>
                         </tr>
 
-                        <tr data-ng-if='userList && userList.length > 0'>
+                        <tr data-ng-if='userList && userList.users.length > 0'>
                             <th ng-click="sort('type')" style="width: 85px">
-                                <span class="cursor_pointer">FirstName</span> <i ng-show="params.sort=='type'" class="fa"
-                                                                            ng-class="{'fa-caret-down':params.asc==true, 'fa-caret-up':params.asc==false}"></i>
+                                <span class="cursor_pointer">FirstName</span> <i ng-show="params.sort=='type'"
+                                                                                 class="fa"
+                                                                                 ng-class="{'fa-caret-down':params.asc==true, 'fa-caret-up':params.asc==false}"></i>
                             </th>
                             <th style="width: 110px">LastName</th>
                             <th data-ng-click="sort('name')" style="width:230px">
                                 <span class="cursor_pointer">Email</span> <i ng-show="params.sort=='name'" class="fa"
-                                                                            ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
+                                                                             ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
                             </th>
                             <th ng-click="sort('summary')">AccountType</th>
                             <th ng-click="sort('status')">
-                                <span class="cursor_pointer"># Entries</span> <i ng-show="params.sort=='status'" class="fa"
-                                                                              ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
+                                <span class="cursor_pointer"># Entries</span> <i ng-show="params.sort=='status'"
+                                                                                 class="fa"
+                                                                                 ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
                             </th>
+                            <th ng-click="sort('summary')">Registered</th>
                             <th ng-click="sort('summary')">Last Login</th>
                         </tr>
-                        <tr data-ng-show=" userList.length == 0">
+                        <tr data-ng-show=" userList.users.length == 0">
                             <td colspan="10">No user accounts available</td>
                         </tr>
-                        <tr data-ng-repeat="user in userList">
-                            <td>{{user.firstName}}</td>
-                            <td>{{user.lastName}}</td>
-                            <td>{{user.email}}</td>
-                            <td style="width:160px; white-space:nowrap">{{user.accountType | capitalize}}</td>
+                        <tr data-ng-repeat="user in userList.users">
+                            <td class="white-space:nowrap">{{user.firstName}}</td>
+                            <td class="no_wrap">{{user.lastName}}</td>
+                            <td><a ng-href="/profile/{{user.id}}">{{user.email}}</a></td>
+                            <td style="width:160px; white-space:nowrap" ng-if="user.isAdmin">
+                                <small class="label label-danger"
+                                       style="font-size: 12px; position: relative; top: -4px">{{user.accountType |
+                                    capitalize}}
+                                </small>
+                            </td>
+                            <td style="width:160px; white-space:nowrap" ng-if="!user.isAdmin">{{user.accountType ||
+                                "Normal" | capitalize}}
+                            </td>
                             <td style="width:90px; white-space:nowrap">{{user.userEntryCount | number}}</td>
+                            <td style="width:160px; white-space:nowrap">{{user.registerDate | date:'MMM d, yyyy'}}</td>
                             <td style="width:160px; white-space:nowrap">{{user.lastLogin | date:'MMM d, yyyy'}}</td>
                         </tr>
                     </table>
                 </td>
             </tr>
         </table>
+    </div>
+
+    <div class="row" ng-if="userList && userList.users.length > 0">
+        <div class="col-md-5" style="padding-left: 0">
+            <pagination total-items="userList.resultCount" on-select-page="setUserListPage(page)" page="currentPage"
+                        max-size="maxSize"
+                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+        </div>
+
+        <div class="col-md-7" style="margin-top: 25px;">
+            <strong class="small">
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+                userList.resultCount)}}
+            </strong>
+        </div>
+
     </div>
 </div>
