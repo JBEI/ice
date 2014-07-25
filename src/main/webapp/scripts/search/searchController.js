@@ -58,7 +58,6 @@ angular.module('ice.search', [])
 
         $scope.search = function (isAdvancedSearch) {
             if (isAdvancedSearch) {
-                console.log("advanced search");
                 $scope.loadingSearchResults = true;
                 $location.path('/search');
                 var search = Search();
@@ -75,6 +74,7 @@ angular.module('ice.search', [])
                 }
 
                 search.runAdvancedSearch(searchQuery, function (result) {
+                    $scope.searchFilters = searchQuery;
                     $scope.loadingSearchResults = false;
                     $scope.searchResults = result;
                 }, function (error) {
@@ -115,5 +115,10 @@ angular.module('ice.search', [])
             $scope.hasSample = false;
             $scope.hasSequence = false;
             $scope.hasAttachment = false;
+            for (var searchType in $scope.searchTypes) {
+                if ($scope.searchTypes.hasOwnProperty(searchType)) {
+                    $scope.searchTypes[searchType] = true;
+                }
+            }
         };
     });
