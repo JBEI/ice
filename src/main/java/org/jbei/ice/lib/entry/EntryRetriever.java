@@ -17,6 +17,7 @@ import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.utils.IceCSVSerializer;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
 /**
@@ -30,6 +31,24 @@ public class EntryRetriever {
     public EntryRetriever() {
         this.dao = DAOFactory.getEntryDAO();
         authorization = new EntryAuthorization();
+    }
+
+    public String getAsCSV(String userId, String id) {
+        Entry entry = getEntry(id);
+        if (entry == null)
+            return null;
+
+        authorization.expectRead(userId, entry);
+        return IceCSVSerializer.serialize(entry);
+    }
+
+    public String getPartNumber(String userId, String id) {
+        Entry entry = getEntry(id);
+        if (entry == null)
+            return null;
+
+        authorization.expectRead(userId, entry);
+        return entry.getPartNumber();
     }
 
     protected Entry getEntry(String id) {
