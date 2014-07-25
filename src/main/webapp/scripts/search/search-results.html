@@ -16,7 +16,8 @@
     </div>
 
     <div class="row">
-        <table cellspacing="0" class="data_table" ng-if="searchFilters.s" ng-class="{'opacity_4':loadingSearchResults}">
+        <table cellspacing="0" class="data_table" ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
+               ng-class="{'opacity_4':loadingSearchResults}">
             <tr data-ng-show="searchResults.results.length>0">
                 <th style="width: 12px">
                     <input type="checkbox" ng-model="allSelected"/>
@@ -80,7 +81,8 @@
             </tr>
         </table>
 
-        <table cellspacing="0" class="data_table" ng-if="!searchFilters.s"
+        <table cellspacing="0" class="data_table"
+               ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <tr ng-show="searchResults.results.length>0">
                 <th style=" width:28px">
