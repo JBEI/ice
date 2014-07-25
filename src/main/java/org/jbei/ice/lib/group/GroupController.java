@@ -13,6 +13,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.GroupDAO;
+import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.entry.EntryController;
@@ -286,20 +287,27 @@ public class GroupController {
         return dao.getMemberCount(uuid);
     }
 
-    public ArrayList<AccountTransfer> getAvailableAccounts(String userId) {
+    public AccountResults getAvailableAccounts(String userId, int offset, int limit, boolean asc, String sort) {
         Account account = accountController.getByEmail(userId);
-        Set<Group> groups = getAllGroups(account);
         Set<AccountTransfer> accounts = new HashSet<>();
 
-        for (Group group : groups) {
-            if (group.getType() == GroupType.PRIVATE)
-                continue;
+        if (accountController.isAdministrator(account)) {
+            return accountController.retrieveAccounts(userId, offset, limit, sort, asc);
+        } else {
+            Set<Group> groups = getAllGroups(account);
+            AccountResults results = new AccountResults();
 
-            ArrayList<AccountTransfer> members = retrieveGroupMembers(group.getUuid(), false);
-            accounts.addAll(members);
+            for (Group group : groups) {
+                if (group.getType() == GroupType.PRIVATE)
+                    continue;
+
+                ArrayList<AccountTransfer> members = retrieveGroupMembers(group.getUuid(), false);
+                accounts.addAll(members);
+            }
+
+            results.getResults().addAll(accounts);
+            return results;
         }
-
-        return new ArrayList<>(accounts);
     }
 
     public ArrayList<AccountTransfer> setGroupMembers(Account account, UserGroup info,
@@ -344,13 +352,9 @@ public class GroupController {
             accounts.add(memberAccount);
         }
 
-        try {
-            group.getMembers().clear();
-            group.getMembers().addAll(accounts);
-            dao.update(group);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        group.getMembers().clear();
+        group.getMembers().addAll(accounts);
+        dao.update(group);
 
         members.clear();
         for (Account addedAccount : accounts) {

@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -91,6 +90,34 @@ public class PartResource extends RestResource {
         return controller.retrieveEntryDetails(userId, id);
     }
 
+    /**
+     * Retrieves a comma separated value representation of the part referenced by the path parameter identifier
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/csv")
+    public Response getCSV(
+            @PathParam("id") String id,
+            @QueryParam("sid") String sid,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        if (StringUtils.isEmpty(sessionId))
+            sessionId = sid;
+
+        String userId = getUserIdFromSessionHeader(sessionId);
+        String csv = retriever.getAsCSV(userId, id);
+        if (csv != null) {
+            String name = retriever.getPartNumber(userId, id);
+            if (name == null)
+                name = "entry.csv";
+            else
+                name += ".csv";
+            Response.ResponseBuilder response = Response.ok(csv);
+            response.header("Content-Disposition", "attachment; filename=\"" + name + "\"");
+            return response.build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/tooltip")
@@ -126,12 +153,8 @@ public class PartResource extends RestResource {
     public Response enablePublicAccess(@Context UriInfo info, @PathParam("id") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        try {
-            if (permissionsController.enablePublicReadAccess(userId, partId))
-                return respond(Response.Status.OK);
-        } catch (ControllerException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+        if (permissionsController.enablePublicReadAccess(userId, partId))
+            return respond(Response.Status.OK);
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 

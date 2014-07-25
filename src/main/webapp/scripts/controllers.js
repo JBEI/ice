@@ -28,13 +28,15 @@ iceControllers.controller('EntrySampleController', function ($scope, $modal, $co
     });
 });
 
-iceControllers.controller('ActionMenuController', function ($scope, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries) {
+iceControllers.controller('ActionMenuController', function ($scope, $window, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
+    $scope.entrySelected = false;
 
     // reset all on state change
     $rootScope.$on('$stateChangeStart',
         function (event, toState, toParams, fromState, fromParams) {
             $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
+            $scope.entrySelected = false;
         });
 
     var sid = $cookieStore.get("sessionId");
@@ -88,6 +90,8 @@ iceControllers.controller('ActionMenuController', function ($scope, $rootScope, 
     $scope.$on("EntrySelection", function (event, data) {
         selectedEntries = [];
 
+        $scope.entrySelected = data.length > 0;
+
         // is reading it so can add to any
         if (data.length == 0) {
             $scope.addToDisabled = true;
@@ -120,6 +124,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $rootScope, 
     $rootScope.$on("EntryRetrieved", function (event, data) {
         $scope.entry = data;
         $scope.editDisabled = !data.canEdit;
+        $scope.entrySelected = true;
         $scope.deleteDisabled = ($scope.user.email != $scope.entry.ownerEmail && $scope.user.accountType.toLowerCase() !== "admin");
         // only owners or admins can delete
     });
@@ -134,6 +139,11 @@ iceControllers.controller('ActionMenuController', function ($scope, $rootScope, 
             $scope.registryPartners = result;
         });
     };
+
+    $scope.csvExport = function () {
+        // todo : if selectedEntries.length?
+        $window.open("/rest/part/" + $scope.entry.id + "/csv?sid=" + $cookieStore.get("sessionId"), "_self");
+    }
 });
 
 iceControllers.controller('RegisterController', function ($scope, $resource, $location) {

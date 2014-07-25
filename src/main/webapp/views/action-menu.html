@@ -62,7 +62,7 @@
 
     <div class="btn-group" style="margin-left: 12px">
         <button type="button" class="btn btn-default btn-sm subMenuTransfer dropdown-toggle"
-                ng-disabled="addToDisabled">
+                ng-disabled="!entrySelected" ng-click="csvExport()">
             <i style="font-size: 14px; opacity:0.85;" class="fa fa-download blue"></i>
             CSV Export
         </button>
