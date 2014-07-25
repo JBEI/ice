@@ -79,8 +79,10 @@ public class HibernateSearch {
 
                 if (occur == BooleanClause.Occur.MUST)
                     query = qb.phrase().onField(field).sentence(term).createQuery();
-                else if (term.endsWith("*")) {
-                    query = qb.keyword().wildcard().onField(field).ignoreFieldBridge().matching(term).createQuery();
+                else if (term.contains("*")) {
+                    if (!field.equals("name"))
+                        continue;
+                    query = qb.keyword().wildcard().onField(field).matching(term).createQuery();
                 } else
                     query = qb.keyword().fuzzy().withThreshold(0.8f).onField(field).ignoreFieldBridge().matching(
                             term).createQuery();
@@ -518,16 +520,16 @@ public class HibernateSearch {
         cleanedQuery = cleanedQuery.replace("+", "\\+");
         cleanedQuery = cleanedQuery.replace("-", "\\-");
         cleanedQuery = cleanedQuery.replace("'", "\\'");
-        cleanedQuery = cleanedQuery.replace("\"", "\\\"");
+//        cleanedQuery = cleanedQuery.replace("\"", "\\\"");
         cleanedQuery = cleanedQuery.replace("^", "\\^");
         cleanedQuery = cleanedQuery.replace("&", "\\&");
 
         cleanedQuery = cleanedQuery.endsWith("'") ? cleanedQuery.substring(0, cleanedQuery.length() - 1) : cleanedQuery;
         cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
                                                                              cleanedQuery.length() - 1) : cleanedQuery);
-        if (cleanedQuery.startsWith("*") || cleanedQuery.startsWith("?")) {
-            cleanedQuery = cleanedQuery.substring(1);
-        }
+//        if (cleanedQuery.startsWith("*") || cleanedQuery.startsWith("?")) {
+//            cleanedQuery = cleanedQuery.substring(1);
+//        }
         return cleanedQuery;
     }
 }
