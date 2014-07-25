@@ -13,7 +13,7 @@
         <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
             <tr data-ng-if='folder && folder.entries.length > 0'>
                 <th style="width:28px">
-                    <i class="fa"
+                    <i class="fa cursor_pointer"
                        ng-class="{'fa-square-o':allSelected == false, 'fa-check-square-o': allSelected == true}"
                        style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
                     <sup style="font-size: 9px; font-weight: normal; display: inherit"
@@ -71,7 +71,7 @@
             </tr>
             <tr data-ng-repeat="entry in folder.entries">
                 <td width="10px">
-                    <i class="fa" ng-class="{'fa-square-o':selection.indexOf(entry.id)==-1||selection===undefined,
+                    <i class="fa cursor_pointer" ng-class="{'fa-square-o':selection.indexOf(entry.id)==-1||selection===undefined,
                        'fa-check-square-o':selection.indexOf(entry.id)>-1}"
                        style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>
                 </td>
