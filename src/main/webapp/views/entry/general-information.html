@@ -190,8 +190,13 @@
                         </div>
 
                         <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
+                            <span ng-if="entry.linkedParts[$index+0].basePairCount">
                             Sequence with {{entry.linkedParts[$index+0].basePairCount | number}} base pairs <span
-                                ng-if="entry.linkedParts[$index+0].featureCount">& {{entry.linkedParts[$index+0].featureCount}} features</span>
+                                    ng-if="entry.linkedParts[$index+0].featureCount">& {{entry.linkedParts[$index+0].featureCount}} features</span>
+                                </span>
+                            <span ng-if="!entry.linkedParts[$index+0].basePairCount">
+                                <i>No sequence data</i>
+                                </span>
                         </div>
                         <p style="clear: both; margin: 0; padding: .75em .5em; color: #888;">
                             {{entry.linkedParts[$index+0].shortDescription}}</p>
