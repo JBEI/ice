@@ -125,7 +125,8 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         $scope.entry = data;
         $scope.editDisabled = !data.canEdit;
         $scope.entrySelected = true;
-        $scope.deleteDisabled = ($scope.user.email != $scope.entry.ownerEmail && $scope.user.accountType && $scope.user.accountType.toLowerCase() !== "admin");
+        var isAdmin = $scope.user.accountType === undefined ? false : $scope.user.accountType.toLowerCase() === "admin";
+        $scope.deleteDisabled = ($scope.user.email != $scope.entry.ownerEmail && !isAdmin);
         // only owners or admins can delete
     });
 
