@@ -3,3 +3,9 @@ target/
 .*
 war/
 *.class
+
+# ignoring generated directories in source tree
+src/main/gwt-unitCache/
+src/main/webapp/WEB-INF/deploy/
+src/main/webapp/gwt_ice/
+

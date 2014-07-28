@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 /**
  * Parse output of bl2seq sequence comparison program.
- *
+ * 
  * @author Zinovii Dmytriv
  */
 public class Bl2SeqParser {
@@ -16,17 +16,17 @@ public class Bl2SeqParser {
     private static Pattern SEQ_REGEXP_PATTERN = Pattern.compile("(\\d+)\\s+([a-zA-Z-]+)\\s+(\\d+)");
     private static Pattern LAMBDA_REGEXP_PATTERN = Pattern.compile("^Lambda.+");
 
-    public static ArrayList<Bl2SeqResult> parse(String input) throws Bl2SeqException {
+    public static ArrayList<Bl2SeqResult> parse(final String input) throws Bl2SeqException {
         if (input == null || input.isEmpty()) {
             throw new Bl2SeqException("bl2seq parser input is empty!");
         }
 
-        StringTokenizer stringTokenizer = new StringTokenizer(input, "\n");
+        final StringTokenizer stringTokenizer = new StringTokenizer(input, "\n");
         if (stringTokenizer.countTokens() == 0) {
             throw new Bl2SeqException("bl2seq parser input is empty!");
         }
 
-        ArrayList<Bl2SeqResult> results = new ArrayList<>();
+        final ArrayList<Bl2SeqResult> results = new ArrayList<>();
 
         try {
             boolean isFirstRun = true;
@@ -38,11 +38,13 @@ public class Bl2SeqParser {
             while (stringTokenizer.hasMoreTokens()) {
                 String line = stringTokenizer.nextToken();
 
-                Matcher scoreMatcher = SCORE_REGEXP_PATTERN.matcher(line);
+                final Matcher scoreMatcher = SCORE_REGEXP_PATTERN.matcher(line);
                 if (scoreMatcher.find()) {
                     if (!isFirstRun) {
-                        if (queryDataSequence != null && score >= MIN_SCORE) {
-                            Bl2SeqResult bl2seqResult = new Bl2SeqResult(
+                        if (queryDataSequence != null && subjectDataSequence != null
+                                && score >= MIN_SCORE) {
+                            //@formatter:off
+                            final Bl2SeqResult bl2seqResult = new Bl2SeqResult(
                                     score,
                                     new Integer(queryDataSequence.get(0)),
                                     new Integer(queryDataSequence.get(1)),
@@ -51,7 +53,7 @@ public class Bl2SeqParser {
                                     new Integer(subjectDataSequence.get(1)),
                                     subjectDataSequence.get(2),
                                     orientation);
-
+                            //@formatter:on
                             results.add(bl2seqResult);
                         }
 
@@ -73,14 +75,15 @@ public class Bl2SeqParser {
                     continue;
                 }
 
-                Matcher queryMatcher = SEQ_REGEXP_PATTERN.matcher(line);
+                final Matcher queryMatcher = SEQ_REGEXP_PATTERN.matcher(line);
                 if (queryMatcher.find()) {
                     // get query sequence
                     if (queryDataSequence == null) {
                         queryDataSequence = parseSequenceLine(line);
                     } else {
-                        ArrayList<String> queryDataSequencePartial = parseSequenceLine(line);
-                        queryDataSequence.set(2, queryDataSequence.get(2).concat(queryDataSequencePartial.get(2)));
+                        final ArrayList<String> queryDataSequencePartial = parseSequenceLine(line);
+                        queryDataSequence.set(2,
+                                queryDataSequence.get(2).concat(queryDataSequencePartial.get(2)));
                         queryDataSequence.set(1, queryDataSequencePartial.get(1));
                     }
 
@@ -90,43 +93,48 @@ public class Bl2SeqParser {
                     if (subjectDataSequence == null) {
                         subjectDataSequence = parseSequenceLine(line);
                     } else {
-                        ArrayList<String> subjectDataSequencePartial = parseSequenceLine(line);
-
-                        subjectDataSequence.set(2,
-                                                subjectDataSequence.get(2).concat(subjectDataSequencePartial.get(2)));
+                        final ArrayList<String> subjectDataSequencePartial = parseSequenceLine(line);
+                        final String partial = subjectDataSequencePartial.get(2);
+                        subjectDataSequence.set(2, subjectDataSequence.get(2).concat(partial));
                         subjectDataSequence.set(1, subjectDataSequencePartial.get(1));
                     }
 
                     continue;
                 }
 
-                Matcher lambdaMatcher = LAMBDA_REGEXP_PATTERN.matcher(line);
+                final Matcher lambdaMatcher = LAMBDA_REGEXP_PATTERN.matcher(line);
                 if (lambdaMatcher.find()) {
-                    if (queryDataSequence != null && score >= MIN_SCORE) {
-                        Bl2SeqResult bl2seqResult = new Bl2SeqResult(score, new Integer(
-                                queryDataSequence.get(0)), new Integer(queryDataSequence.get(1)),
-                                                                     queryDataSequence.get(2), new Integer(
-                                subjectDataSequence.get(0)), new Integer(subjectDataSequence.get(1)),
-                                                                     subjectDataSequence.get(2), orientation);
-
+                    if (queryDataSequence != null && subjectDataSequence != null
+                            && score >= MIN_SCORE) {
+                        //@formatter:off
+                        final Bl2SeqResult bl2seqResult = new Bl2SeqResult(
+                                score, 
+                                new Integer(queryDataSequence.get(0)),
+                                new Integer(queryDataSequence.get(1)),
+                                queryDataSequence.get(2),
+                                new Integer(subjectDataSequence.get(0)),
+                                new Integer(subjectDataSequence.get(1)),
+                                subjectDataSequence.get(2),
+                                orientation);
+                        //@formatter:on
                         results.add(bl2seqResult);
                     }
 
                     break;
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Bl2SeqException(e);
         }
 
         return results;
     }
 
-    private static ArrayList<String> parseSequenceLine(String sequenceLine) {
-        //returns start, stop, sequence
-        ArrayList<String> result = new ArrayList<>(3);
+    private static ArrayList<String> parseSequenceLine(final String sequenceLine) {
+        // returns start, stop, sequence
+        final ArrayList<String> result = new ArrayList<>(3);
 
-        Matcher matcher = SEQ_REGEXP_PATTERN.matcher(sequenceLine);
+        final Matcher matcher = SEQ_REGEXP_PATTERN.matcher(sequenceLine);
         if (matcher.find()) {
             result.add(matcher.group(1));
             result.add(matcher.group(3));
