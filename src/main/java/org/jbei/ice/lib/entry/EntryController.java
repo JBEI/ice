@@ -24,6 +24,7 @@ import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
@@ -45,6 +46,7 @@ import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.sample.SampleStorage;
+import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.model.Sample;
@@ -716,6 +718,10 @@ public class EntryController {
 //    }
 
     public PartData retrieveEntryDetails(String userId, String id) {
+        EntryType type = EntryType.nameToType(id);
+        if (type != null)
+            return getPartDefaults(userId, type);
+
         Entry entry = getEntry(id);
         if (entry == null)
             return null;
@@ -723,6 +729,39 @@ public class EntryController {
         // user must be able to read
         authorization.expectRead(userId, entry);
         return retrieveEntryDetails(userId, entry);
+    }
+
+    protected PartData getPartDefaults(String userId, EntryType type) {
+        PartData partData = new PartData(type);
+        PreferencesController preferencesController = new PreferencesController();
+
+        // pi defaults
+        String value = preferencesController.getPreferenceValue(userId, PreferenceKey.PRINCIPAL_INVESTIGATOR.name());
+        if (value != null) {
+            Account piAccount = accountController.getByEmail(value);
+            if (piAccount == null) {
+                partData.setPrincipalInvestigator(value);
+            } else {
+                partData.setPrincipalInvestigator(piAccount.getFullName());
+                partData.setPrincipalInvestigatorEmail(piAccount.getEmail());
+            }
+        }
+
+        // funding source defaults
+        value = preferencesController.getPreferenceValue(userId, PreferenceKey.FUNDING_SOURCE.name());
+        if (value != null) {
+            partData.setFundingSource(value);
+        }
+
+        Account account = accountController.getByEmail(userId);
+        if (account != null) {
+            partData.setOwner(account.getFullName());
+            partData.setOwnerEmail(account.getEmail());
+            partData.setCreator(partData.getOwner());
+            partData.setCreatorEmail(partData.getOwnerEmail());
+        }
+
+        return partData;
     }
 
     protected PartData retrieveEntryDetails(String userId, Entry entry) {
