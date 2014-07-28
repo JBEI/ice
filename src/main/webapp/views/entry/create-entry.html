@@ -87,7 +87,8 @@
     <div class="col-md-10" ng-if="field.inputType==='short'">
         <input type="text" ng-model="activePart[field.schema]" ng-trim="true" ng-focus="field.edit=true"
                ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-               maxlength="125" placeHolder="{{field.placeHolder}}" style="width: 205px;">
+               ng-change="field.invalid=false" maxlength="125" placeHolder="{{field.placeHolder}}"
+               style="width: 205px;">
         <i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
            tooltip-placement="right"></i>
     </div>
@@ -96,11 +97,11 @@
     <div class="col-md-10" ng-if="field.inputType==='withEmail'">
         <input type="text" ng-model="activePart[field.schema]" ng-trim="true" ng-focus="field.edit=true"
                ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-               maxlength="125" style="width: 205px;">
+               ng-change="field.invalid=false" maxlength="125" style="width: 205px;">
 
         <input type="text" ng-model="activePart[field.schema+'Email']" ng-trim="true" ng-focus="field.edit=true"
                ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-               placeholder="Email if known" style="width: 191px;">
+               ng-change="field.invalid=false" placeholder="Email if known" style="width: 191px;">
     </div>
 
     <!--options-->
@@ -133,7 +134,7 @@
     <div class="col-md-10" ng-if="field.inputType==='medium'">
         <input type="text" ng-model="activePart[field.schema]" maxlength="150" style="width:400px;"
                ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-               ng-focus="field.edit=true" ng-blur="field.edit=false">
+               ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
     </div>
 
     <!--auto complete-->
@@ -142,7 +143,7 @@
                ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
                typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
-               ng-focus="field.edit=true" ng-blur="field.edit=false">
+               ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
         <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
     </div>
 
@@ -151,7 +152,7 @@
         <span ng-repeat="link in activePart[field.schema]">
             <div ng-if="!$index">
                 <input ng-model="activePart[field.schema][$index].value" type="text" maxlength="500"
-                       style="width: 400px;"
+                       ng-change="field.invalid=false" style="width: 400px;"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        ng-focus="field.edit=true" ng-blur="field.edit=false">
                 <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
@@ -162,7 +163,7 @@
 
             <div ng-if="$index" class="input-group pad-top-5">
                 <input type="text" ng-model="activePart[field.schema][$index].value" maxlength="125"
-                       style="width: 400px;"
+                       ng-change="field.invalid=false" style="width: 400px;"
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                        ng-focus="field.edit=true" ng-blur="field.edit=false">
                 <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px; background-color:
@@ -180,7 +181,7 @@
         <!--show if there is a sub schema-->
         <span ng-repeat="link in activePart[field.subSchema][field.schema]" ng-if="field.subSchema">
             <div ng-if="!$index">
-                <input ng-model="link.value" type="text" typeahead-loading="loadingData"
+                <input ng-model="link.value" type="text" typeahead-loading="loadingData" ng-change="field.invalid=false"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
@@ -195,6 +196,7 @@
                 <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                        ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
+                       ng-change="field.invalid=false"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
                 <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px; background-color:
                  #f1f1f1;width: 19px; border-left: 0">
@@ -209,6 +211,7 @@
             <div ng-if="!$index">
                 <input ng-model="link.value" type="text" typeahead-loading="loadingData"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                       ng-change="field.invalid=false"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
                 <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
@@ -221,6 +224,7 @@
             <div ng-if="$index" class="input-group pad-top-5">
                 <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
+                       ng-change="field.invalid=false"
                        ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
                 <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px; background-color:
@@ -235,7 +239,7 @@
     <!--long-->
     <div class="col-md-10" ng-if="field.inputType==='long'">
         <textarea ng-model="activePart[field.schema]" style="width: 640px; height: 50px;" ng-trim="true"
-                  ng-focus="field.edit=true" ng-blur="field.edit=false"
+                  ng-focus="field.edit=true" ng-blur="field.edit=false" ng-change="field.invalid=false"
                   ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"></textarea>
     </div>
 </div>

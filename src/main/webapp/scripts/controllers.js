@@ -1910,13 +1910,13 @@ iceControllers.controller('CreateEntryController',
 
 
         var validateFields = function (part) {
-            console.log(part);
+            if (!$scope.selectedFields.length)
+                return false;
 
             var canSubmit = true;
 
             // main type
-            var mainFields = EntryService.getFieldsForType(part.type);
-            angular.forEach(mainFields, function (field) {
+            angular.forEach($scope.selectedFields, function (field) {
                 if (!field.required)
                     return;
 
@@ -1931,7 +1931,7 @@ iceControllers.controller('CreateEntryController',
                         }
                     }
                 } else {
-                    field.invalid = (!part[field.schema] || part[field.schema] === '');
+                    field.invalid = (part[field.schema] === undefined || part[field.schema] === '');
                 }
 
                 if (canSubmit) {
