@@ -62,6 +62,8 @@ public class PartData implements IDataTransferModel {
         accessPermissions = new ArrayList<>();
         linkedParts = new ArrayList<>();
         parents = new ArrayList<>();
+        status = "Complete";
+        bioSafetyLevel = 1;
     }
 
     public String getRecordId() {
