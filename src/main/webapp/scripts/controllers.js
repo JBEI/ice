@@ -544,6 +544,8 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
         $scope.profile = result;
         user.getPreferences({userId:profileId}, function (prefs) {
             $scope.profile.preferences = prefs;
+            if (prefs.preferences == undefined)
+                return;
 
             for (var i = 0; i < prefs.preferences.length; i += 1) {
                 $scope.preferences[prefs.preferences[i].key] = prefs.preferences[i].value;
@@ -559,6 +561,10 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
 
     $scope.updatePassword = function () {
     };
+
+    $scope.canChangePassword = function () {
+        return false;
+    }
 
     $scope.updateProfile = function () {
         user.update({userId:profileId}, $scope.editProfile, function (result) {
@@ -583,11 +589,16 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     var sessionId = $cookieStore.get("sessionId");
     $scope.searchFilters = {};
+    $rootScope.settings = {};
 
     // retrieve site wide settings
     var settings = Settings(sessionId);
     settings.get(function (result) {
-        $rootScope.settings = result;
+
+        for (var i = 0; i < result.length; i += 1) {
+            $rootScope.settings[result[i].key] = result[i].value;
+        }
+        console.log($rootScope.settings);
     });
 
     $scope.pageCounts = function (currentPage, resultCount) {
