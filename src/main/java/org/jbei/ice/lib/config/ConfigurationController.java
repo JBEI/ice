@@ -35,10 +35,6 @@ public class ConfigurationController {
         dao.create(configuration);
     }
 
-    public Configuration getConfiguration(ConfigurationKey key) throws ControllerException {
-        return dao.get(key);
-    }
-
     public String getPropertyValue(ConfigurationKey key) {
         Configuration config = dao.get(key);
         if (config == null)
@@ -46,11 +42,11 @@ public class ConfigurationController {
         return config.getValue();
     }
 
-    public String getPropertyValue(String key) throws ControllerException {
+    public Setting getPropertyValue(String key) {
         Configuration config = dao.get(key);
         if (config == null)
-            throw new ControllerException("Could not retrieve config with key " + key);
-        return config.getValue();
+            return null;
+        return config.toDataTransferObject();
     }
 
     public ArrayList<Setting> retrieveSystemSettings() {

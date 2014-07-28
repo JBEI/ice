@@ -598,7 +598,6 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         for (var i = 0; i < result.length; i += 1) {
             $rootScope.settings[result[i].key] = result[i].value;
         }
-        console.log($rootScope.settings);
     });
 
     $scope.pageCounts = function (currentPage, resultCount) {
@@ -1718,14 +1717,27 @@ iceControllers.controller('UserController', function ($scope, $routeParams, Entr
 //    $scope.entry = Entry.query({partId:$routeParams.id});
 });
 
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication) {
+iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication, Settings) {
     $scope.submit = function () {
         Authentication.login($scope.userId, $scope.userPassword);
     };
 
     $scope.goToRegister = function () {
         $location.path("/register");
-    }
+    };
+
+    $scope.canCreateAccount = false;
+    $scope.canChangePassword = false;
+
+    Settings().getSetting({key:'NEW_REGISTRATION_ALLOWED'}, function (result) {
+        $scope.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
+            && (result.value === 'yes' || result.value === 'true'));
+    });
+
+    Settings().getSetting({key:'PASSWORD_CHANGE_ALLOWED'}, function (result) {
+        $scope.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
+            && (result.value === 'yes' || result.value === 'true'));
+    });
 });
 
 iceControllers.controller('EditEntryController',

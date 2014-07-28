@@ -513,11 +513,18 @@ iceServices.factory('Upload', function ($resource) {
 
 iceServices.factory('Settings', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/config', {}, {
+        return $resource('/rest/config', {key:'@key'}, {
             get:{
                 method:'GET',
                 isArray:true,
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            getSetting:{
+                method:'GET',
+                url:'/rest/config/:key'
+                // this does not require authentication
+//                headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             getGeneralSettings:{
