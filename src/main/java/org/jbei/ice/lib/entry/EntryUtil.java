@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
 
-import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -153,11 +152,9 @@ public class EntryUtil {
         return "";
     }
 
-    public static String getNextPartNumber() {
-        return DAOFactory.getEntryDAO().generateNextPartNumber(
-                Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX),
-                Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DELIMITER),
-                Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DIGITAL_SUFFIX));
+    public static String getPartNumberPrefix() {
+        return Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX) +
+                Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DELIMITER);
     }
 
     public static ArrayList<String> getSelectionMarkersAsList(Set<SelectionMarker> markers) {

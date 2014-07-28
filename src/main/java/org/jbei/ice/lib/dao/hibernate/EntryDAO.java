@@ -14,6 +14,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
@@ -444,53 +445,21 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    /**
-     * Generate the next PartNumber available in the database.
-     *
-     * @param prefix    Part number prefix. For example, "JBx".
-     * @param delimiter Character between the prefix and the part number, For example, "_".
-     * @param suffix    Example digits, for example "000000" to represent a six digit part number.
-     * @return New part umber string, for example "JBx_000001".
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    public synchronized String generateNextPartNumber(String prefix, String delimiter, String suffix)
-            throws DAOException {
-        Session session = currentSession();
+    @Override
+    public Entry create(Entry entry) throws DAOException {
         try {
-            String queryString = "from " + Entry.class.getName() + " where partNumber LIKE '"
-                    + prefix + "%' ORDER BY partNumber DESC";
-            Query query = session.createQuery(queryString);
-            query.setMaxResults(2);
+            entry = super.create(entry);
+            if (entry == null)
+                throw new DAOException("Could not save entry");
 
-            ArrayList<Entry> tempList = new ArrayList<Entry>(query.list());
-            Entry entryPartNumber = null;
-            if (tempList.size() > 0) {
-                entryPartNumber = tempList.get(0);
-            }
-
-            String nextPartNumber;
-            if (entryPartNumber == null) {
-                nextPartNumber = prefix + delimiter + suffix;
-            } else {
-                String[] parts = entryPartNumber.getPartNumber().split(prefix + delimiter);
-
-                if (parts != null && parts.length == 2) {
-                    try {
-                        int value = Integer.valueOf(parts[1]);
-                        value++;
-                        nextPartNumber = prefix + delimiter + String.format("%0" + suffix.length() + "d", value);
-                    } catch (Exception e) {
-                        throw new DAOException("Couldn't parse partNumber", e);
-                    }
-                } else {
-                    throw new DAOException("Couldn't parse partNumber");
-                }
-            }
-
-            return nextPartNumber;
-        } catch (HibernateException e) {
-            throw new DAOException("Couldn't retrieve Entry by partNumber", e);
+            // partNumber
+            String partNumberPrefix = EntryUtil.getPartNumberPrefix();
+            String formatted = String.format("%06d", entry.getId());
+            entry.setPartNumber(partNumberPrefix + formatted);
+            return update(entry);
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
     }
 

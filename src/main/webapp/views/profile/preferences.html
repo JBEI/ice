@@ -22,18 +22,18 @@
 
                     <!--if in edit mode-->
                     <div ng-if="preference.edit">
-                        <input type="text" ng-model="preferences[preference.id]" ng-trim="true"
-                               ng-focus="preference.edit" placeHolder="{{preference.help}}"
-                               ng-blur="preference.edit==false"
-                               ng-class="{'input_box':!preference.invalid, 'input_box_error':preference.invalid}"
-                               maxlength="125" style="width: 205px;">
+                        <form ng-submit="savePreference(preference)">
+                            <input type="text" ng-model="preferences[preference.id]" ng-trim="true"
+                                   ng-focus="preference.edit" placeHolder="{{preference.help}}"
+                                   ng-blur="preference.edit==false" ng-change="preference.invalid=false"
+                                   ng-class="{'input_box':!preference.invalid, 'input_box_error':preference.invalid}"
+                                   maxlength="125" style="width: 205px;">
 
-                        <button type="button" class="btn btn-primary btn-xs" ng-click="savePreference(preference)">
-                            Save
-                        </button>
-                        <button type="button" class="btn btn-default btn-xs"
-                                ng-click="preference.edit=false;preference.invalid=false">Cancel
-                        </button>
+                            <button type="submit" class="btn btn-primary btn-xs">Save</button>
+                            <button type="button" class="btn btn-default btn-xs"
+                                    ng-click="preference.edit=false;preference.invalid=false">Cancel
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

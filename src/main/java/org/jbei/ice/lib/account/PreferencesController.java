@@ -25,9 +25,11 @@ import org.jbei.ice.lib.dto.user.UserPreferences;
 public class PreferencesController {
 
     private final PreferencesDAO dao;
+    private final AccountDAO accountDAO;
 
     public PreferencesController() {
         dao = DAOFactory.getPreferencesDAO();
+        accountDAO = DAOFactory.getAccountDAO();
     }
 
     public HashMap<PreferenceKey, String> retrieveAccountPreferences(Account account, ArrayList<PreferenceKey> keys)
@@ -80,21 +82,16 @@ public class PreferencesController {
         return userPreferences;
     }
 
-    /**
-     * Retrieves preference with the exact key value pair for specified account
-     *
-     * @param account owning account
-     * @param key     unique key identifier. Typically one of {@link PreferenceKey}
-     * @param value   value associated with key
-     * @return retrieved preference object
-     * @throws ControllerException
-     */
-    public Preference retrievePreference(Account account, String key, String value) throws ControllerException {
-        try {
-            return dao.retrievePreference(account, key, value);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+    public String getPreferenceValue(String userId, String preferenceKey) {
+        Account account = accountDAO.getByEmail(userId);
+        if (account == null)
+            return null;
+
+        Preference preference = dao.getPreference(account, preferenceKey);
+        if (preference == null)
+            return null;
+
+        return preference.getValue();
     }
 
     public HashMap<String, String> retrieveUserPreferenceList(Account account, List<SearchBoostField> fields) {

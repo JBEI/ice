@@ -125,7 +125,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         $scope.entry = data;
         $scope.editDisabled = !data.canEdit;
         $scope.entrySelected = true;
-        $scope.deleteDisabled = ($scope.user.email != $scope.entry.ownerEmail && $scope.user.accountType.toLowerCase() !== "admin");
+        $scope.deleteDisabled = ($scope.user.email != $scope.entry.ownerEmail && $scope.user.accountType && $scope.user.accountType.toLowerCase() !== "admin");
         // only owners or admins can delete
     });
 
@@ -1763,25 +1763,43 @@ iceControllers.controller('CreateEntryController',
 
         // generate the various link options for selected option
         $scope.linkOptions = EntryService.linkOptions($scope.createType.toLowerCase());
+        var sid = $cookieStore.get("sessionId");
+        var entry = Entry(sid);
 
-        var partDefaults = {
-            type:$scope.createType,
-            links:[
+//        var partDefaults = function () {
+        entry.query({partId:$scope.createType}, function (result) {
+            console.log(result);
+            $scope.part = result;
+            $scope.part.bioSafetyLevel = '1';
+            $scope.part.linkedParts = [];
+            $scope.part.links = [
                 {}
-            ],
-            selectionMarkers:[
+            ];
+            $scope.part.selectionMarker = [
                 {}
-            ],
-            bioSafetyLevel:'1',
-            status:'Complete',
-            creator:$scope.user.firstName + ' ' + $scope.user.lastName,
-            creatorEmail:$scope.user.email
-        };
+            ];
+            $scope.activePart = $scope.part;
+            $scope.selectedFields = EntryService.getFieldsForType($scope.createType);
+        }, function (error) {
+            console.log("Error: " + error);
+        });
 
-        $scope.part = angular.copy(partDefaults);
-        $scope.part.linkedParts = [];
-        $scope.activePart = $scope.part;
-        $scope.selectedFields = EntryService.getFieldsForType($scope.createType);
+        // todo fetch the defaults from the server
+//            return {
+//                type:$scope.createType,
+//                links:[
+//                    {}
+//                ],
+//                selectionMarkers:[
+//                    {}
+//                ],
+//                bioSafetyLevel:'1',
+//                status:'Complete',
+//                creator:$scope.user.firstName + ' ' + $scope.user.lastName,
+//                creatorEmail:$scope.user.email
+//            }
+//        };
+
 
         $scope.addLink = function (schema, index) {
             $scope.part[schema].splice(index + 1, 0, {value:''});
@@ -1848,8 +1866,6 @@ iceControllers.controller('CreateEntryController',
             $scope.selectedFields = EntryService.getFieldsForType($scope.activePart.type);
         };
 
-        var sid = $cookieStore.get("sessionId");
-
         $scope.getLocation = function (inputField, val) {
             return $http.get('/rest/part/autocomplete', {
                 headers:{'X-ICE-Authentication-SessionId':sid},
@@ -1868,7 +1884,7 @@ iceControllers.controller('CreateEntryController',
         $scope.principalInvestigatorMissing = false;
         $scope.summaryMissing = false;
 
-        var entry = Entry(sid);
+
         var validateFields = function (part) {
             console.log(part);
 

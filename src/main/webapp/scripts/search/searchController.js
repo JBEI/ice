@@ -57,6 +57,7 @@ angular.module('ice.search', [])
         };
 
         $scope.search = function (isAdvancedSearch) {
+            $scope.searchResults = undefined;
             if (isAdvancedSearch) {
                 $scope.loadingSearchResults = true;
                 $location.path('/search');

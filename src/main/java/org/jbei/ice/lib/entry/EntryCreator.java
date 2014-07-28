@@ -50,7 +50,6 @@ public class EntryCreator {
      * @return entry that was saved in the database.
      */
     public Entry createEntry(Account account, Entry entry, ArrayList<AccessPermission> accessPermissions) {
-        entry.setPartNumber(EntryUtil.getNextPartNumber());
         if (entry.getRecordId() == null) {
             entry.setRecordId(Utils.generateUUID());
             entry.setVersionId(entry.getRecordId());

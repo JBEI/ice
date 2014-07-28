@@ -15,6 +15,7 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.SearchDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.IndexType;
 import org.jbei.ice.lib.dto.search.SearchBoostField;
 import org.jbei.ice.lib.dto.search.SearchQuery;
@@ -121,6 +122,9 @@ public class SearchController {
 
         // blast query only
         if (query.hasBlastQuery() && (queryString == null || queryString.isEmpty())) {
+            if (query.getBlastQuery().getBlastProgram() == null)
+                query.getBlastQuery().setBlastProgram(BlastProgram.BLAST_N);
+
             try {
                 HashMap<String, SearchResult> results = BlastPlus.runBlast(account, query.getBlastQuery());
                 if (results.isEmpty())
@@ -210,8 +214,8 @@ public class SearchController {
 
             builder.append(c);
         }
-        if(builder.length() > 0) {
-            if(startedPhrase)
+        if (builder.length() > 0) {
+            if (startedPhrase)
                 terms.put(builder.toString(), BooleanClause.Occur.MUST);
             else
                 terms.put(builder.toString(), BooleanClause.Occur.SHOULD);

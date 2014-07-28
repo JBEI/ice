@@ -70,9 +70,9 @@ public class PreferencesControllerTest {
         Account account = AccountCreator.createTestAccount("testRetrievePreference", false);
         Assert.assertNotNull(controller.createPreference(account, PreferenceKey.FUNDING_SOURCE.name(),
                                                          "Joint BioEnergy Institute"));
-        Preference preference = controller.retrievePreference(account, PreferenceKey.FUNDING_SOURCE.name(),
-                                                              "Joint BioEnergy Institute");
+        String preference = controller.getPreferenceValue(account.getEmail(), PreferenceKey.FUNDING_SOURCE.name());
         Assert.assertNotNull(preference);
+        Assert.assertEquals(preference, "Joint BioEnergy Institute");
     }
 
     @Test

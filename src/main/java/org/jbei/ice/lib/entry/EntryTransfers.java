@@ -156,7 +156,6 @@ public class EntryTransfers {
             for (SequencePartTransfer part : parts) {
                 Entry entry = InfoToModelFactory.infoToEntry(part.getPart());
                 entry.setVisibility(Visibility.TRANSFERRED.getValue());
-                entry.setPartNumber(EntryUtil.getNextPartNumber());
 
                 // always assign new record id to uploaded part and maintain any existing as legacy version
                 String newRecordId = Utils.generateUUID();

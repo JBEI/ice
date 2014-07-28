@@ -35,7 +35,6 @@
                     <input type="text" placeholder="Enter name or email" ng-model="userFilterInput"
                            style="width: 180px; font-size: 0.80em">
                 </form>
-
                 <div style="overflow: auto; max-height: 120px;" class="font-75em">
                     <div ng-repeat="user in filteredUsers | filter: userFilterInput | orderBy:'email'"
                          style="padding-left: 6px; padding-top: 3px">
@@ -66,6 +65,7 @@
                     </button>
                 </div>
             </div>
+            <!--<div ng-if="activePermissions.length==0" class="permission_user">No permissions</div>-->
 
             <div width="160px" class="permission_list" ng-repeat="permission in activePermissions | orderBy:'display'">
                 &nbsp;

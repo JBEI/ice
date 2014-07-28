@@ -80,7 +80,6 @@ public class BulkEntryCreator {
         Account account = accountController.getByEmail(userId);
         entry.setOwner(account.getFullName());
         entry.setOwnerEmail(account.getEmail());
-        entry.setPartNumber(EntryUtil.getNextPartNumber());
         entry = entryDAO.create(entry);
 
         upload.getContents().add(entry);

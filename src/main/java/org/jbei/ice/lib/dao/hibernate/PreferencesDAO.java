@@ -42,12 +42,11 @@ public class PreferencesDAO extends HibernateRepository<Preference> {
         }
     }
 
-    public Preference retrievePreference(Account account, String key, String value) throws DAOException {
+    public Preference getPreference(Account account, String key) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Preference.class)
                                    .add(Restrictions.eq("account", account))
-                                   .add(Restrictions.eq("key", key.toUpperCase()))
-                                   .add(Restrictions.eq("value", value));
+                                   .add(Restrictions.eq("key", key.toUpperCase()));
         try {
             return (Preference) criteria.uniqueResult();
         } catch (HibernateException he) {
