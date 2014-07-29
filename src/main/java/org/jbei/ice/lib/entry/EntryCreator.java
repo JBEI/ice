@@ -162,7 +162,7 @@ public class EntryCreator {
 
                     // TODO : may contain new information e.g. if the sequence is uploaded before
                     // TODO : this entry was created then the general information is added here
-                    linked = InfoToModelFactory.infoToEntry(data, linked);
+                    linked = InfoToModelFactory.updateEntryField(data, linked);
 
                     linked.setVisibility(Visibility.OK.getValue());
 

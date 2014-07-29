@@ -97,31 +97,6 @@ public class EntryController {
     }
 
     /**
-     * Retrieve {@link Entry} from the database by part number.
-     * <p/>
-     * Throws exception if multiple entries have the same part number.
-     *
-     * @param partNumber entry part number
-     * @return entry retrieved from the database.
-     * @throws ControllerException
-     * @throws PermissionException
-     */
-    public PartData getByPartNumber(String accountId, String partNumber) throws ControllerException,
-            PermissionException {
-        Entry entry = dao.getByPartNumber(partNumber);
-        if (entry == null)
-            return null;
-
-        authorization.expectRead(accountId, entry);
-        PartData info = ModelToInfoFactory.getInfo(entry);
-        boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
-        info.setHasSequence(hasSequence);
-        boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
-        info.setHasOriginalSequence(hasOriginalSequence);
-        return info;
-    }
-
-    /**
      * Retrieve {@link Entry} from the database by name.
      * <p/>
      * Throws exception if multiple entries have the same name.
@@ -267,7 +242,7 @@ public class EntryController {
         Entry existing = dao.get(partId);
         authorization.expectWrite(userId, existing);
 
-        Entry entry = InfoToModelFactory.infoToEntry(part, existing);
+        Entry entry = InfoToModelFactory.updateEntryField(part, existing);
         entry.getLinkedEntries().clear();
         if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
             for (PartData data : part.getLinkedParts()) {

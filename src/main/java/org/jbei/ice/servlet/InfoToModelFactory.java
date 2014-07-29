@@ -73,6 +73,11 @@ public class InfoToModelFactory {
         return entry;
     }
 
+    /**
+     * @param info  PartData object to converted to Entry
+     * @param entry if null, a new entry is created otherwise entry is used
+     * @return converted PartData object
+     */
     // sets the corresponding fields in data only if they are not null
     public static Entry updateEntryField(PartData data, Entry entry) {
         EntryType type = data.getType();
@@ -83,6 +88,9 @@ public class InfoToModelFactory {
             case PLASMID:
                 Plasmid plasmid = (Plasmid) entry;
                 PlasmidData plasmidData = data.getPlasmidData();
+                if (plasmidData == null)
+                    break;
+
                 if (plasmidData.getBackbone() != null)
                     plasmid.setBackbone(plasmidData.getBackbone());
 
@@ -102,6 +110,8 @@ public class InfoToModelFactory {
             case STRAIN:
                 Strain strain = (Strain) entry;
                 StrainData strainData = data.getStrainData();
+                if (strainData == null)
+                    break;
 
                 if (strainData.getHost() != null)
                     strain.setHost(strainData.getHost());
@@ -116,6 +126,8 @@ public class InfoToModelFactory {
             case ARABIDOPSIS:
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
                 ArabidopsisSeedData seedData = data.getArabidopsisSeedData();
+                if (seedData == null)
+                    break;
 
                 if (seedData.getHomozygosity() != null)
                     seed.setHomozygosity(seedData.getHomozygosity());
@@ -149,70 +161,6 @@ public class InfoToModelFactory {
         }
 
         entry = setCommon(entry, data);
-        return entry;
-    }
-
-    /**
-     * @param info  PartData object to converted to Entry
-     * @param entry if null, a new entry is created otherwise entry is used
-     * @return converted PartData object
-     */
-    public static Entry infoToEntry(PartData info, Entry entry) {
-        EntryType type = info.getType();
-
-        switch (type) {
-            case PLASMID:
-                Plasmid plasmid = (Plasmid) entry;
-                PlasmidData plasmidData = info.getPlasmidData();
-                plasmid.setBackbone(plasmidData.getBackbone());
-                plasmid.setOriginOfReplication(plasmidData.getOriginOfReplication());
-                plasmid.setPromoters(plasmidData.getPromoters());
-                plasmid.setReplicatesIn(plasmidData.getReplicatesIn());
-                plasmid.setCircular(plasmidData.getCircular());
-                break;
-
-            case STRAIN:
-                Strain strain = (Strain) entry;
-                StrainData strainData = info.getStrainData();
-                strain.setHost(strainData.getHost());
-                strain.setGenotypePhenotype(strainData.getGenotypePhenotype());
-                break;
-
-            case PART:
-                break;
-
-            case ARABIDOPSIS:
-                ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-                ArabidopsisSeedData seedData = info.getArabidopsisSeedData();
-                String homozygosity = seedData.getHomozygosity() == null ? "" : seedData.getHomozygosity();
-                seed.setHomozygosity(homozygosity);
-                seed.setHarvestDate(seedData.getHarvestDate());
-                String ecoType = seedData.getEcotype() == null ? "" : seedData.getEcotype();
-                seed.setEcotype(ecoType);
-                String parents = seedData.getSeedParents() == null ? "" : seedData.getSeedParents();
-                seed.setParents(parents);
-
-                if (seedData.getGeneration() != null) {
-                    Generation generation = Generation.fromString(seedData.getGeneration().name());
-                    seed.setGeneration(generation);
-                } else {
-                    seed.setGeneration(Generation.UNKNOWN);
-                }
-
-                if (seedData.getPlantType() != null) {
-                    PlantType plantType = PlantType.fromString(seedData.getPlantType().name());
-                    seed.setPlantType(plantType);
-                } else {
-                    seed.setPlantType(PlantType.NULL);
-                }
-                seed.setSentToABRC(seedData.isSentToAbrc());
-                break;
-
-            default:
-                return null;
-        }
-
-        entry = setCommon(entry, info);
         return entry;
     }
 
