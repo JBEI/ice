@@ -118,6 +118,7 @@ public class BulkUploadResource extends RestResource {
             Logger.info(userId + ": updating entry \"" + entryId + "\" for upload \"" + uploadId + "\"");
             return creator.updateEntry(userId, uploadId, entryId, data);
         } catch (Exception e) {
+            Logger.error(e);
             throw new UnexpectedException(e.getMessage());
         }
     }
