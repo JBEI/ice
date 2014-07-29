@@ -183,8 +183,8 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.upload', {
             url:'upload/:type',
-            controller:'ImportController',
-            templateUrl:'/views/import.html',
+            controller:'UploadController',
+            templateUrl:'/views/upload/import.html',
             resolve:{
                 sessionValid:function (Authentication) {
                     return Authentication.isSessionValid();
