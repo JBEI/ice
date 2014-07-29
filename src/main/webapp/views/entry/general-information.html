@@ -1,3 +1,9 @@
+<!--hardcoding part number-->
+<div class="row pad_top">
+    <div class="col-md-2 entryLabel">Part ID</div>
+    <div class="col-md-10">{{entry.partId}}</div>
+</div>
+
 <div class="row pad_top" ng-repeat="field in entryFields"
      ng-if="entry[field.schema]&&entry[field.schema].toString().length!==0">
 
