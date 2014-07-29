@@ -13,7 +13,7 @@ public class Collection implements IDataTransferModel {
     private long personal;
     private long shared;
     private long deleted;
-    private long bulkUpload;
+    private long drafts;
     private long pending;
 
     public long getAvailable() {
@@ -50,11 +50,11 @@ public class Collection implements IDataTransferModel {
     }
 
     public long getBulkUpload() {
-        return bulkUpload;
+        return drafts;
     }
 
-    public void setBulkUpload(long bulkUpload) {
-        this.bulkUpload = bulkUpload;
+    public void setDrafts(long drafts) {
+        this.drafts = drafts;
     }
 
     public long getPending() {

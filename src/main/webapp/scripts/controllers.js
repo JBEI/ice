@@ -617,7 +617,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         { name:'available', display:'Available', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
         { name:'personal', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
         { name:'shared', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt', alwaysVisible:false},
-        { name:'bulkUpload', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit', alwaysVisible:false},
+        { name:'drafts', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit', alwaysVisible:false},
         { name:'pending', display:'Pending Approval', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:false},
         { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash-o', alwaysVisible:false}
     ];
@@ -1790,40 +1790,44 @@ iceControllers.controller('CreateEntryController',
         var sid = $cookieStore.get("sessionId");
         var entry = Entry(sid);
 
-//        var partDefaults = function () {
-        entry.query({partId:$scope.createType}, function (result) {
-            console.log(result);
-            $scope.part = result;
-            $scope.part.bioSafetyLevel = '1';
-            $scope.part.linkedParts = [];
-            $scope.part.links = [
-                {}
-            ];
-            $scope.part.selectionMarker = [
-                {}
-            ];
-            $scope.activePart = $scope.part;
-            $scope.selectedFields = EntryService.getFieldsForType($scope.createType);
-        }, function (error) {
-            console.log("Error: " + error);
-        });
+        // retrieves the defaults for the specified type. Note that $scope.part is the main part
+        var getPartDefaults = function (type, isMain) {
+            entry.query({partId:type}, function (result) {
+                if (isMain) { // or if !$scope.part
+                    $scope.part = result;
+                    $scope.part.bioSafetyLevel = '1';
+                    $scope.part.linkedParts = [];
+                    $scope.part.links = [
+                        {}
+                    ];
+                    $scope.part.selectionMarkers = [
+                        {}
+                    ];
+                    $scope.activePart = $scope.part;
+                    $scope.selectedFields = EntryService.getFieldsForType($scope.createType);
+                } else {
+                    var newPart = result;
+                    newPart.links = [
+                        {}
+                    ];
+                    newPart.selectionMarkers = [
+                        {}
+                    ];
+                    newPart.bioSafetyLevel = '1';
 
-        // todo fetch the defaults from the server
-//            return {
-//                type:$scope.createType,
-//                links:[
-//                    {}
-//                ],
-//                selectionMarkers:[
-//                    {}
-//                ],
-//                bioSafetyLevel:'1',
-//                status:'Complete',
-//                creator:$scope.user.firstName + ' ' + $scope.user.lastName,
-//                creatorEmail:$scope.user.email
-//            }
-//        };
+                    $scope.selectedFields = EntryService.getFieldsForType(type);
+                    $scope.part.linkedParts.push(newPart);
 
+                    $scope.colLength = 11 - $scope.part.linkedParts.length;
+                    $scope.active = $scope.part.linkedParts.length - 1;
+                    $scope.activePart = $scope.part.linkedParts[$scope.active];
+                }
+            }, function (error) {
+                console.log("Error: " + error);
+            });
+        };
+
+        getPartDefaults($scope.createType, true);
 
         $scope.addLink = function (schema, index) {
             $scope.part[schema].splice(index + 1, 0, {value:''});
@@ -1835,15 +1839,7 @@ iceControllers.controller('CreateEntryController',
         };
 
         $scope.addNewPartLink = function (type) {
-            $scope.selectedFields = EntryService.getFieldsForType(type);
-
-            var newLink = angular.copy(partDefaults);
-            newLink.type = type.toUpperCase();
-            $scope.part.linkedParts.push(newLink);
-
-            $scope.colLength = 11 - $scope.part.linkedParts.length;
-            $scope.active = $scope.part.linkedParts.length - 1;
-            $scope.activePart = $scope.part.linkedParts[$scope.active];
+            getPartDefaults(type, false);
         };
 
         $scope.addExistingPartLink = function ($item, $model, $label) {

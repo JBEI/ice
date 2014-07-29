@@ -66,7 +66,7 @@ public class FolderResource extends RestResource {
     @Path("/{type}")
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<FolderDetails> getSubFolders(
-            @PathParam("type") String folderType,   // todo : default of personal
+            @DefaultValue("personal") @PathParam("type") String folderType,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String sid = getUserIdFromSessionHeader(userAgentHeader);
 
@@ -77,7 +77,7 @@ public class FolderResource extends RestResource {
             case "available":
                 return controller.getAvailableFolders(sid);
 
-            case "bulkUpload":
+            case "drafts":
                 return controller.getBulkUploadDrafts(sid);
 
             case "shared":
@@ -161,7 +161,7 @@ public class FolderResource extends RestResource {
                     details.setCount(entryController.getNumberofEntriesSharedWithUser(userId));
                     return details;
 
-                case "bulkUpload":
+                case "drafts":
                     return retriever.getDraftEntries(userId, field, asc, offset, limit);
 
                 case "deleted":
