@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('ice.upload.service', ['ngCookies', 'ngResource'])
-    .factory('UploadUtil', function ($resource, $cookieStore) {
+angular.module('ice.upload.service', [])
+    .factory('UploadUtil', function () {
         var plasmidHeaders, strainHeaders, seedHeaders;
 
         // headers

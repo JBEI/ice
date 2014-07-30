@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ice.search', [])
+angular.module('ice.search.controller', [])
     .controller('SearchController', function ($scope, $http, $cookieStore, $location) {
         console.log("SearchController", $scope.searchFilters);
         var sessionId = $cookieStore.get("sessionId");

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ice.upload', ['ice.upload.service'])
+angular.module('ice.upload.controller', [])
     .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload, UploadUtil) {
         var sid = $cookieStore.get("sessionId");
         var upload = Upload(sid);
