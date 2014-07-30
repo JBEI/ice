@@ -448,6 +448,7 @@ angular.module('ice.upload', ['ice.upload.service'])
         };
 
         if (!isNaN($stateParams.type)) {
+            $scope.importType = undefined;
             asyncLoop({
                 functionToLoop:function (loop, start) {
                     upload.get(
