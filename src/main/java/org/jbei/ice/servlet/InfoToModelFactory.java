@@ -74,7 +74,7 @@ public class InfoToModelFactory {
     }
 
     /**
-     * @param info  PartData object to converted to Entry
+     * @param data  PartData object to converted to Entry
      * @param entry if null, a new entry is created otherwise entry is used
      * @return converted PartData object
      */
@@ -200,7 +200,8 @@ public class InfoToModelFactory {
         } else
             entry.setStatus(info.getStatus());
 
-        entry.setAlias(info.getAlias());
+        if (info.getAlias() != null)
+            entry.setAlias(info.getAlias());
 
         if (info.getBioSafetyLevel() == null) {
             if (entry.getBioSafetyLevel() == null)
@@ -208,9 +209,12 @@ public class InfoToModelFactory {
         } else
             entry.setBioSafetyLevel(info.getBioSafetyLevel());
 
-        entry.setShortDescription(info.getShortDescription());
-        entry.setLongDescription(info.getLongDescription());
-        entry.setIntellectualProperty(info.getIntellectualProperty());
+        if (info.getShortDescription() != null)
+            entry.setShortDescription(info.getShortDescription());
+        if (info.getLongDescription() != null)
+            entry.setLongDescription(info.getLongDescription());
+        if (info.getIntellectualProperty() != null)
+            entry.setIntellectualProperty(info.getIntellectualProperty());
 
         Set<Link> links = getLinks(info.getLinks(), entry);
         entry.setLinks(links);
