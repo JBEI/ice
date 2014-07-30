@@ -28,6 +28,8 @@ iceServices.factory('EntryService', function () {
         });
         return result;
     };
+
+    // commons fields to all the different types of parts supported by the system
     var partFields = [
         {label:"Name", required:true, schema:'name', help:'Help Text', placeHolder:'e.g. JBEI-0001', inputType:'short'},
         {label:"Alias", schema:'alias', inputType:'short'},
@@ -50,6 +52,7 @@ iceServices.factory('EntryService', function () {
         {label:"Intellectual Property", schema:'intellectualProperty', inputType:'long'}
     ];
 
+    // fields peculiar to plasmids
     var plasmidFields = [
         {label:"Backbone", schema:'backbone', subSchema:'plasmidData', inputType:'medium'},
         {label:"Origin of Replication", schema:'originOfReplication', inputType:'autoComplete',
@@ -60,6 +63,7 @@ iceServices.factory('EntryService', function () {
         {label:"Replicates In", schema:'replicatesIn', subSchema:'plasmidData', inputType:'autoComplete', autoCompleteField:'REPLICATES_IN'}
     ];
 
+    // fields peculiar to arabidopsis seeds
     var seedFields = [
         {label:"Sent To ABRC", schema:'sentToABRC', help:"Help Text", inputType:'bool'},
         {label:"Plant Type", schema:'plantType', options:[
@@ -92,6 +96,7 @@ iceServices.factory('EntryService', function () {
             autoCompleteField:'SELECTION_MARKERS'}
     ];
 
+    // fields peculiar to seeds
     var strainFields = [
         {label:"Selection Markers", required:true, schema:'selectionMarkers',
             inputType:'autoCompleteAdd', autoCompleteField:'SELECTION_MARKERS'},
@@ -127,6 +132,57 @@ iceServices.factory('EntryService', function () {
         }
     };
 
+    var validateFields = function (part, fields) {
+        var canSubmit = true;
+
+        // main type
+        angular.forEach(fields, function (field) {
+            if (!field.required)
+                return;
+
+            if (field.inputType === 'add' || field.inputType === 'autoCompleteAdd') {
+                if (part[field.schema].length == 0) {
+                    field.invalid = true;
+                }
+                else {
+                    for (var i = 0; i < part[field.schema].length; i += 1) {
+                        var fieldValue = part[field.schema][i].value;
+                        field.invalid = !fieldValue || fieldValue === '';
+                    }
+                }
+            } else {
+                field.invalid = (part[field.schema] === undefined || part[field.schema] === '');
+            }
+
+            if (canSubmit) {
+                canSubmit = !field.invalid;
+            }
+        });
+        return canSubmit;
+    };
+
+    var getFieldsForType = function (type) {
+        var fields = angular.copy(partFields);
+        type = type.toLowerCase();
+        switch (type) {
+            case 'strain':
+                fields.splice.apply(fields, [7, 0].concat(strainFields));
+                return fields;
+
+            case 'arabidopsis':
+                fields.splice.apply(fields, [7, 0].concat(seedFields));
+                return fields;
+
+            case 'plasmid':
+                fields.splice.apply(fields, [7, 0].concat(plasmidFields));
+                return fields;
+
+            case 'part':
+            default:
+                return fields;
+        }
+    };
+
     return {
         toStringArray:function (obj) {
             return toStringArray(obj);
@@ -137,25 +193,26 @@ iceServices.factory('EntryService', function () {
         },
 
         getFieldsForType:function (type) {
-            var fields = angular.copy(partFields);
-            type = type.toLowerCase();
-            switch (type) {
-                case 'strain':
-                    fields.splice.apply(fields, [7, 0].concat(strainFields));
-                    return fields;
+            return getFieldsForType(type);
+        },
 
-                case 'arabidopsis':
-                    fields.splice.apply(fields, [7, 0].concat(seedFields));
-                    return fields;
+        // converts to a form that the backend can work with
+        getTypeData:function (entry) {
+            var type = entry.type.toLowerCase();
+            var fields = getFieldsForType(type);
+            angular.forEach(fields, function (field) {
+                if (field.subSchema) {
+                    if (entry[field.subSchema] === undefined)
+                        entry[field.subSchema] = {};
+                    entry[field.subSchema][field.schema] = entry[field.schema];
+                }
+            });
 
-                case 'plasmid':
-                    fields.splice.apply(fields, [7, 0].concat(plasmidFields));
-                    return fields;
+            return entry;
+        },
 
-                case 'part':
-                default:
-                    return fields;
-            }
+        validateFields:function (part, fields) {
+            return validateFields(part, fields);
         }
     }
 });

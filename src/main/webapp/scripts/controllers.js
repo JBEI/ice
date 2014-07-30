@@ -674,23 +674,41 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
         var started = false;
         var matchDetails = searchResult.matchDetails;
+        $scope.headers = {};
+        $scope.sequences = {}; //setup scope for query alignment
 
         for (var i = 0; i < matchDetails.length; i++) {
             var line = matchDetails[i].replace(/"/g, ' ').trim();
 
+            //parse Query for score, gaps, & strand data
             if (line.lastIndexOf("Query", 0) === 0) {
+                $scope.headers.score = e;
+                var s = matchDetails[1].split(",");
+                var c = s[0];
+                var o = c.split("=");
+                var e = o[1].trim(); //score data
+                $scope.headers.gaps = d;
+                var g = matchDetails[2].split(",");
+                var a = g[1];
+                var p = a.split("=");
+                var d = p[1].trim();//gaps data
+                $scope.headers.strand = r;
+                var t = matchDetails[3].split("=");
+                var r = (t[1]); //strand data
+            }
+
+            if (line.lastIndexOf("Strand", 0) === 0) {
                 started = true;
-                var l = [];
-                l = line.split(" ");
-                var tmp = (l[2]);
-                if (tmp < start)
+                var l = []; //empty array filled with the following contents
+                l = line.split(" "); //separate Query alignment by spaces;
+                var tmp = (l[2]); //last nucleotide location for Query alignment
+                if (tmp < start) //tmp will always be less than MAX_NUMBER
                     start = tmp;
 
-                // check end
-                tmp = (l[l.length - 1]);
+                tmp = (l[l.length - 1]); //nucleotide bases
                 if (tmp > end)
                     end = tmp;
-            } else if (line.lastIndexOf("Score", 0) === 0) { // starting a new line
+            } else if (line.lastIndexOf("Score", 0) === 0) {
                 if (started) {
                     stripes[start] = end;
                     start = Number.MAX_VALUE;
@@ -751,6 +769,8 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         }
 
         html += "</tr></table>";
+
+//        $scope.stripes = stripes;
 
         return results;
     };
@@ -1121,83 +1141,6 @@ iceControllers.controller('CollectionMenuController', function ($cookieStore, $s
     });
 });
 
-
-iceControllers.controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType, linkedAddType) {
-    var sid = $cookieStore.get("sessionId");
-    $scope.addType = addType;
-
-    var uploader = $scope.importUploader = $fileUploader.create({
-//        scope: $scope, // to automatically update the html. Default: $rootScope
-        url:"/rest/upload/file",
-        method:'POST',
-//        removeAfterUpload:true,
-        headers:{"X-ICE-Authentication-SessionId":sid},
-        formData:[
-            { type:addType }
-        ]
-    });
-
-    uploader.bind('success', function (event, xhr, item, response) {
-        var info = response;
-        console.log("success", response);
-        $scope.modalClose = "Close";
-        $scope.processing = false;
-//
-        if (!isNaN(response)) {
-            $modalInstance.close();
-            $location.path("/upload/" + response);
-        } else {
-            $scope.uploadError = response;
-        }
-    });
-
-    uploader.bind('error', function (event, xhr, item, response) {
-        console.info('Error', xhr, item, response);
-        $scope.uploadError = response;
-        $scope.processing = false;
-    });
-
-    uploader.bind('complete', function (event, xhr, item, response) {
-        console.info('Complete', xhr, item, response);
-        $scope.processing = false;
-    });
-
-    $scope.ok = function () {
-        $modalInstance.close($scope.selected.item);
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
-    };
-
-    $scope.uploadFile = function () {
-        uploader.uploadAll();
-    };
-
-    // example of event binding
-    uploader.bind('afteraddingfile', function (event, item) {
-        console.info('After adding a file', item);
-//        item.upload();
-    });
-
-    uploader.bind('progress', function (event, item, progress) {
-        console.info('progress', item, progress);
-        if (progress !== '100')
-            return;
-
-        $scope.processing = true;
-        item.remove();
-    });
-
-    $scope.downloadCSVTemplate = function () {
-        console.log($scope.addType, linkedAddType);
-        var url = "/rest/file/upload/" + $scope.addType;
-        if (linkedAddType)
-            url += "?link=" + linkedAddType;
-        $window.open(url, "_self");
-    }
-});
-
 iceControllers.controller('UserController', function ($scope, $routeParams, Entry) {
 //    $scope.entry = Entry.query({partId:$routeParams.id});
 });
@@ -1389,53 +1332,19 @@ iceControllers.controller('CreateEntryController',
         $scope.principalInvestigatorMissing = false;
         $scope.summaryMissing = false;
 
-
-        var validateFields = function (part) {
-            if (!$scope.selectedFields.length)
-                return false;
-
-            var canSubmit = true;
-
-            // main type
-            angular.forEach($scope.selectedFields, function (field) {
-                if (!field.required)
-                    return;
-
-                if (field.inputType === 'add' || field.inputType === 'autoCompleteAdd') {
-                    if (part[field.schema].length == 0) {
-                        field.invalid = true;
-                    }
-                    else {
-                        for (var i = 0; i < part[field.schema].length; i += 1) {
-                            var fieldValue = part[field.schema][i].value;
-                            field.invalid = !fieldValue || fieldValue === '';
-                        }
-                    }
-                } else {
-                    field.invalid = (part[field.schema] === undefined || part[field.schema] === '');
-                }
-
-                if (canSubmit) {
-                    canSubmit = !field.invalid;
-                }
-            });
-            return canSubmit;
-        };
-
         $scope.submitPart = function () {
-
-            // validate main
-            var canSubmit = validateFields($scope.part);
+            // validate main part
+            var canSubmit = EntryService.validateFields($scope.part, $scope.selectedFields);
             $scope.part.type = $scope.part.type.toUpperCase();
 
-            // validate components if any
+            // validate contained parts, if any
             if ($scope.part.linkedParts && $scope.part.linkedParts.length) {
                 for (var idx = 0; idx < $scope.part.linkedParts.length; idx += 1) {
-                    var canSubmitLinked = validateFields($scope.part.linkedParts[idx]);
+                    var canSubmitLinked = EntryService.validateFields($scope.part.linkedParts[idx], $scope.selectedFields);
                     if (!canSubmitLinked) {
                         // show icon in tab
                         // todo
-                        console.log("not  valid");
+                        console.log("linked entry at idx " + idx + " is not valid");
                         canSubmit = canSubmitLinked;
                     }
                 }
@@ -1455,6 +1364,10 @@ iceControllers.controller('CreateEntryController',
                 $scope.part.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.part.linkedParts[i].selectionMarkers);
             }
 
+            // convert the part to a form the server can work with
+            $scope.part = EntryService.getTypeData($scope.part);
+
+            // create or update the part depending on whether there is a current part id
             if ($scope.part.id) {
                 entry.update({partId:$scope.part.id}, $scope.part, function (result) {
                     $location.path('/entry/' + result.id);

@@ -9,4 +9,5 @@ angular.module('ice.dependencies', ['ngRoute',
     'iceApp.controllers',
     'ui.router',
     'ice.search.service',
-    'ice.upload']);
+    'ice.upload'
+]);
