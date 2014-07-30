@@ -242,9 +242,9 @@ public class Entry implements IDataModel {
     private Sequence sequence;
 
     public Entry() {
-        setStatus("Complete");
+//        setStatus("Complete");
         longDescriptionType = "text";
-        setBioSafetyLevel(1);
+//        setBioSafetyLevel(1);
     }
 
     @XmlTransient

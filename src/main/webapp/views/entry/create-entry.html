@@ -42,8 +42,10 @@
                                typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
                                typeahead-editable="true"
                                typeahead-on-select="addExistingPartLink($item, $model, $label)">
-                    <span class="input-group-addon" data-ng-click="addExisting=false" style="padding:3px; background-color:
-         #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
+                        <span class="input-group-addon" data-ng-click="addExisting=false" style="padding:3px;
+                        background-color: #f1f1f1;width: 19px">
+                            <i class="fa fa-times delete_icon"></i>
+                        </span>
                         <i ng-show="loadingAddExistingData" class="fa fa-spinner fa-spin"></i>
                     </div>
                 </td>
@@ -54,7 +56,6 @@
 
 <!--tabs created when someone clicks on link--  -->
 <div class="row" ng-if="part.linkedParts.length" style="margin-bottom: 14px; height: 23px; border-top: 1px solid #eee">
-
     <div class="cursor_pointer col-md-1" style="padding-right: 4px; padding-left: 4px;"
          ng-click="setActive('main')"
          ng-class="{new_entry_tab_inactive:active!=='main', new_entry_tab_active:active==='main'}">
@@ -75,7 +76,7 @@
     </div>
 </div>
 
-<!--selected entry; selectFields is an array of objects-->
+<!-- selected entry; selectedFields is an array of objects -->
 <div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="!activePart.isExistingPart">
     <div class="col-md-2 text-right">
         <span style="white-space:nowrap" ng-class="{'font-bold':field.edit}">{{field.label}}
@@ -175,39 +176,9 @@
         </span>
     </div>
 
-    <!-- autocompleteAdd with a sub-schema-->
+    <!-- autocompleteAdd -->
     <div class="col-md-10" ng-if="field.inputType==='autoCompleteAdd'">
-
-        <!--show if there is a sub schema-->
-        <span ng-repeat="link in activePart[field.subSchema][field.schema]" ng-if="field.subSchema">
-            <div ng-if="!$index">
-                <input ng-model="link.value" type="text" typeahead-loading="loadingData" ng-change="field.invalid=false"
-                       ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-                       maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
-                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
-                      ng-click="addLink(field.schema, $index)"><i ng-show="loadingData"
-                                                                  class="fa fa-spinner fa-spin"></i>
-                    <i class="fa fa-plus green opacity_hover"></i>
-                </span>
-            </div>
-
-            <div ng-if="$index" class="input-group pad-top-5">
-                <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
-                       ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
-                       ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
-                       ng-change="field.invalid=false"
-                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)"
-                      style="padding:3px; background-color: #f1f1f1;width: 19px; border-left: 0">
-                    <i class="fa fa-minus delete_icon"></i>
-                </span>&nbsp;
-                <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
-            </div>
-        </span>
-
-        <!--no sub schema-->
-        <span ng-repeat="link in activePart[field.schema]" ng-if="!field.subSchema">
+        <span ng-repeat="link in activePart[field.schema]">
             <div ng-if="!$index">
                 <input ng-model="link.value" type="text" typeahead-loading="loadingData"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
@@ -245,7 +216,7 @@
 </div>
 
 <!--if existing part is added then this is displayed instead-->
-<div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="activePart.isExistingPart">
+<div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="activePart.isExistingPart&&selectedFields">
     <div class="col-md-2 entryLabel text-right">
         <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
     </div>
@@ -254,7 +225,8 @@
     </div>
 </div>
 
-<div class="row pad-top-5">
+<!--sequence and notes -->
+<div class="row pad-top-5" ng-if="selectedFields">
     <div class="col-md-12">
         <div class="entry-details-subheader">
             <strong style="color: #233559">SEQUENCE</strong>
@@ -304,7 +276,7 @@
     </div>
 </div>
 
-<div class="row pad-top-5">
+<div class="row pad-top-5" ng-if="selectedFields">
     <div class="col-md-12">
         <div class="entry-details-subheader">
             <strong style="color: #233559">NOTES</strong>
@@ -312,10 +284,13 @@
     </div>
 </div>
 
-<div class="row pad-top-5">
-    <div class="col-md-2"></div>
-    <div class="col-md-10">
+<div class="row pad-top-5" ng-if="selectedFields">
+    <div class="col-md-2" ng-if="!activePart.isExistingPart"></div>
+    <div class="col-md-10" ng-if="!activePart.isExistingPart">
         <textarea class="entry_add_notes_input" ng-model="activePart.longDescription"></textarea>
+    </div>
+    <div class="col-md-12" ng-if="activePart.isExistingPart">
+        {{activePart.longDescription}}
     </div>
 </div>
 </div>

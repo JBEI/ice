@@ -310,8 +310,7 @@ public class FolderController {
         folder = dao.create(folder);
         FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
         if (contents != null && !contents.isEmpty()) {
-            ArrayList<Entry> entrys = new ArrayList<>(new EntryController().getEntriesByIdSet(
-                    account, contents));
+            ArrayList<Entry> entrys = new ArrayList<>(new EntryController().getEntriesByIdSet(account, contents));
             dao.addFolderContents(folder, entrys);
             details.setCount(contents.size());
         } else {
