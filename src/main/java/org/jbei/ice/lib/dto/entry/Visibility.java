@@ -16,10 +16,6 @@ public enum Visibility {
 
     private final int value;
 
-    Visibility() {
-        this.value = 9;
-    }
-
     Visibility(int value) {
         this.value = value;
     }

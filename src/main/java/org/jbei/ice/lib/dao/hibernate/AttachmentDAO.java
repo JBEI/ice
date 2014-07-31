@@ -18,8 +18,6 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 /**
- * Manager to manipulate {@link org.jbei.ice.lib.entry.attachment.Attachment} objects in the database.
- *
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
 public class AttachmentDAO extends HibernateRepository<Attachment> {
@@ -58,7 +56,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      * @return ArrayList of Attachments.
      * @throws DAOException
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked, rawtypes")
     public ArrayList<Attachment> getByEntry(Entry entry) throws DAOException {
         ArrayList<Attachment> attachments = null;
 
@@ -69,7 +67,6 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
 
             Query query = session.createQuery(queryString);
             query.setEntity("entry", entry);
-            @SuppressWarnings("rawtypes")
             List list = query.list();
             if (list != null) {
                 attachments = (ArrayList<Attachment>) list;
