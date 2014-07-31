@@ -4,8 +4,7 @@
         <div class="col-md-12">
             <h4><strong style="color: #888;">PROFILE</strong>
                 <strong>{{profile.firstName}} {{profile.lastName}}</strong><br>
-                <small class="font-65em" ng-if="profile.institution">{{profile.institution}}</small>
-                <small class="font-65em" ng-if="!profile.institution"><i>No institution information provided</i></small>
+                <small class="font-65em">{{profile.institution || 'No institution information provided'}}</small>
             </h4>
         </div>
     </div>

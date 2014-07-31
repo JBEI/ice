@@ -13,6 +13,7 @@ import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
@@ -91,13 +92,20 @@ public class FolderResource extends RestResource {
         }
     }
 
+    /**
+     * @param folderId
+     * @param folderType      Type of folder being deleted as defined in {@link org.jbei.ice.lib.dto.folder.FolderType}
+     * @param userAgentHeader
+     * @return
+     */
     @DELETE
     @Path("/{id}")
     public FolderDetails deleteFolder(@PathParam("id") long folderId,
             @QueryParam("type") String folderType,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.delete(userId, folderId, folderType);
+        FolderType type = FolderType.valueOf(folderType);
+        return controller.delete(userId, folderId, type);
     }
 
     @POST

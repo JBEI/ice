@@ -27,6 +27,7 @@ public class FolderDetails implements IDataTransferModel, Comparable<FolderDetai
     private AccountTransfer owner;    // owner or person sharing this folder
     private ArrayList<AccessPermission> accessPermissions;
     private boolean publicReadAccess;
+    private boolean canEdit;
     private FolderDetails parent;
 
     public FolderDetails() {
@@ -130,5 +131,13 @@ public class FolderDetails implements IDataTransferModel, Comparable<FolderDetai
 
     public void setParent(FolderDetails parent) {
         this.parent = parent;
+    }
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
     }
 }

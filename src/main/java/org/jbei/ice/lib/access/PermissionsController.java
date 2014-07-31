@@ -17,7 +17,6 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
@@ -198,7 +197,7 @@ public class PermissionsController {
         dao.removePermission(entry, folder, account, group, access.isCanRead(), access.isCanWrite());
     }
 
-    public boolean accountHasReadPermission(Account account, Entry entry) throws ControllerException {
+    public boolean accountHasReadPermission(Account account, Entry entry) {
         try {
             return dao.hasPermission(entry, null, account, null, true, false);
         } catch (DAOException dao) {
@@ -207,7 +206,7 @@ public class PermissionsController {
         return false;
     }
 
-    public boolean accountHasReadPermission(Account account, Set<Folder> folders) throws ControllerException {
+    public boolean accountHasReadPermission(Account account, Set<Folder> folders) {
         try {
             return dao.hasPermissionMulti(null, folders, account, null, true, false);
         } catch (DAOException dao) {
@@ -216,7 +215,7 @@ public class PermissionsController {
         return false;
     }
 
-    public boolean accountHasWritePermission(Account account, Set<Folder> folders) throws ControllerException {
+    public boolean accountHasWritePermission(Account account, Set<Folder> folders) {
         try {
             return dao.hasPermissionMulti(null, folders, account, null, false, true);
         } catch (DAOException dao) {
@@ -226,7 +225,7 @@ public class PermissionsController {
     }
 
     // checks if there is a set permission with write user
-    public boolean groupHasWritePermission(Set<Group> groups, Set<Folder> folders) throws ControllerException {
+    public boolean groupHasWritePermission(Set<Group> groups, Set<Folder> folders) {
         if (groups.isEmpty())
             return false;
 
@@ -249,15 +248,11 @@ public class PermissionsController {
         return groupHasReadPermission(groups, folders);
     }
 
-    public boolean groupHasReadPermission(Set<Group> groups, Set<Folder> folders) throws ControllerException {
+    public boolean groupHasReadPermission(Set<Group> groups, Set<Folder> folders) {
         if (groups.isEmpty() || folders.isEmpty())
             return false;
 
-        try {
-            return dao.hasPermissionMulti(null, folders, null, groups, true, false);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return dao.hasPermissionMulti(null, folders, null, groups, true, false);
     }
 
     public boolean hasWritePermission(String userId, Folder folder) {
@@ -479,15 +474,9 @@ public class PermissionsController {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData data = new PartData(type);
 
-        // TODO :
-        if (entry == null) {
-            partId = new EntryCreator().createPart(userId, data);
-            entry = DAOFactory.getEntryDAO().get(partId);
-        } else {
-            EntryAuthorization authorization = new EntryAuthorization();
-            authorization.expectWrite(userId, entry);
-            dao.clearPermissions(entry);
-        }
+        EntryAuthorization authorization = new EntryAuthorization();
+        authorization.expectWrite(userId, entry);
+        dao.clearPermissions(entry);
 
         data.setId(partId);
 
@@ -519,22 +508,16 @@ public class PermissionsController {
      * @return created permission if successful, null otherwise
      */
     public AccessPermission createPermission(String userId, long partId, AccessPermission access) {
+        if (access == null)
+            return null;
+
         Entry entry = DAOFactory.getEntryDAO().get(partId);
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData data = new PartData(type);
-
-        if (entry == null) {
-            partId = new EntryCreator().createPart(userId, data);
-            entry = DAOFactory.getEntryDAO().get(partId);
-        } else {
-            EntryAuthorization authorization = new EntryAuthorization();
-            authorization.expectWrite(userId, entry);
-        }
+        EntryAuthorization authorization = new EntryAuthorization();
+        authorization.expectWrite(userId, entry);
 
         data.setId(partId);
-
-        if (access == null)
-            return null;
 
         Permission permission = new Permission();
         permission.setEntry(entry);

@@ -8,7 +8,7 @@ iceControllers.controller('EntrySampleController', function ($scope, $modal, $co
 
     $scope.openAddToCart = function () {
         var modalInstance = $modal.open({
-            templateUrl:'/views/modal/sample-request.html'
+            templateUrl: '/views/modal/sample-request.html'
         });
 
         modalInstance.result.then(function (selected) {
@@ -1858,81 +1858,6 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         })
     };
 
-    var partFields = [
-        {label:"Part ID", required:true, schema:'partId', canEdit:false, help:''},
-        {label:"Name", required:true, schema:'name', help:'Help Text', placeHolder:'e.g. JBEI-0001', inputType:'short'},
-        {label:"Alias", schema:'alias', inputType:'short'},
-        {label:"Principal Investigator", required:true, schema:'principalInvestigator', inputType:'withEmail', bothRequired:'false'},
-        {label:"Funding Source", schema:'fundingSource', inputType:'short'},
-        {label:"Status", schema:'status', options:[
-            {value:"Complete", text:"Complete"},
-            {value:"In Progress", text:"In Progress"},
-            {value:"Abandoned", text:"Abandoned"},
-            {value:"Planned", text:"Planned"}
-        ]},
-        {label:"Bio Safety Level", schema:'bioSafetyLevel', options:[
-            {value:"1", text:"Level 1"},
-            {value:"2", text:"Level 2"}
-        ]},
-        {label:"Creator", required:true, schema:'creator', inputType:'withEmail', bothRequired:'true'},
-        {label:"Links", schema:'links', inputType:'add'},
-        {label:"Summary", required:true, schema:'shortDescription', inputType:'long'},
-        {label:"References", schema:'references', inputType:'long'},
-        {label:"Intellectual Property", schema:'intellectualProperty', inputType:'long'}
-    ];
-
-    var plasmidFields = [
-        {label:"Backbone", schema:'backbone', inputType:'medium'},
-        {label:"Origin of Replication", schema:'originOfReplication', inputType:'autoComplete',
-            autoCompleteField:'ORIGIN_OF_REPLICATION'},
-        {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
-            autoCompleteField:'SELECTION_MARKERS'},
-        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER'},
-        {label:"Promoters", schema:'promoters', inputType:'autoComplete', autoCompleteField:'PROMOTERS'},
-        {label:"Replicates In", schema:'replicatesIn', inputType:'autoComplete', autoCompleteField:'REPLICATES_IN'}
-    ];
-
-    var seedFields = [
-        {label:"Sent To ABRC", schema:'sentToABRC', help:"Help Text", inputType:'bool'},
-        {label:"Plant Type", schema:'plantType', options:[
-            {value:"EMS", text:"EMS"},
-            {value:"OVER_EXPRESSION", text:"Over Expression"},
-            {value:"RNAI", text:"RNAi"},
-            {value:"REPORTER", text:"Reporter"},
-            {value:"T_DNA", text:"T-DNA"},
-            {value:"OTHER", text:"Other"}
-        ]},
-        {label:"Generation", schema:'generation', options:[
-            {value:"UNKNOWN", text:"UNKNOWN"},
-            {value:"F1", text:"F1"},
-            {value:"F2", text:"F2"},
-            {value:"F3", text:"F3"},
-            {value:"M0", text:"M0"},
-            {value:"M1", text:"M1"},
-            {value:"M2", text:"M2"},
-            {value:"T0", text:"T0"},
-            {value:"T1", text:"T1"},
-            {value:"T2", text:"T2"},
-            {value:"T3", text:"T3"},
-            {value:"T4", text:"T4"},
-            {value:"T5", text:"T5"}
-        ]},
-        {label:"Harvest Date", schema:'harvestDate', inputType:'date'},
-        {label:"Homozygosity", schema:'backbone', inputType:'medium'},
-        {label:"Ecotype", schema:'backbone', inputType:'medium'},
-        {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
-            autoCompleteField:'SELECTION_MARKERS'}
-    ];
-
-    var strainFields = [
-        {label:"Parent Strain", schema:'parentalStrain', placeHolder:"Part Number", inputType:'autoComplete',
-            autoCompleteField:'PLASMID_PART_NUMBER'},
-        {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
-            autoCompleteField:'SELECTION_MARKERS'},
-        {label:"Genotype/Phenotype", schema:'genotypePhenotype', inputType:'long'},
-        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER'}
-    ];
-
     var partDefaults = {
         type:$scope.createType,
         links:[
@@ -1996,11 +1921,11 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
 
     var menuSubDetails = $scope.subDetails = [
         {url:'/views/entry/general-information.html', display:'General Information', selected:true, icon:'fa-exclamation-circle'},
-        {url:'/views/entry/sequence-analysis.html', display:'Sequence Analysis', selected:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
-        {url:'/views/entry/comments.html', display:'Comments', selected:false, countName:'commentCount', icon:'fa-comments-o'},
-        {url:'/views/entry/samples.html', display:'Samples', selected:false, countName:'sampleCount', icon:'fa-flask'},
-        {url:'/views/entry/history.html', display:'History', selected:false, countName:'historyCount', icon:'fa-history'},
-        {url:'/views/entry/experiments.html', display:'Experimental Data', selected:false, count:'eddCount', icon:'fa-magic'}
+        {id:'sequences', url:'/views/entry/sequence-analysis.html', display:'Sequence Analysis', selected:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
+        {id:'comments', url:'/views/entry/comments.html', display:'Comments', selected:false, countName:'commentCount', icon:'fa-comments-o'},
+        {id:'samples', url:'/views/entry/samples.html', display:'Samples', selected:false, countName:'sampleCount', icon:'fa-flask'},
+        {id:'history', url:'/views/entry/history.html', display:'History', selected:false, countName:'historyCount', icon:'fa-history'},
+        {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', selected:false, count:'eddCount', icon:'fa-magic'}
     ];
 
     $scope.showSelection = function (index) {
@@ -2009,9 +1934,35 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         });
         menuSubDetails[index].selected = true;
         $scope.selection = menuSubDetails[index].url;
+        if (menuSubDetails[index].id) {
+            $location.path("/entry/" + $stateParams.id + "/" + menuSubDetails[index].id);
+        } else {
+            $location.path("/entry/" + $stateParams.id);
+        }
     };
 
-    $scope.selection = menuSubDetails[0].url;
+    // check if a selection has been made
+    var menuOption = $stateParams.option;
+    console.log($stateParams);
+
+    if (menuOption === undefined) {
+        $scope.selection = menuSubDetails[0].url;
+        menuSubDetails[0].selected = true;
+    } else {
+        menuSubDetails[0].selected = false;
+        for (var i = 1; i < menuSubDetails.length; i += 1) {
+            if (menuSubDetails[i].id === menuOption) {
+                $scope.selection = menuSubDetails[i].url;
+                menuSubDetails[i].selected = true;
+                break;
+            }
+        }
+
+        if ($scope.selection === undefined) {
+            $scope.selection = menuSubDetails[0].url;
+            menuSubDetails[0].selected = true;
+        }
+    }
 
     $scope.edit = function (type, val) {
         $scope[type] = val;

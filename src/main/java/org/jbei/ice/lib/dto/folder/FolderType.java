@@ -16,4 +16,12 @@ public enum FolderType implements IDataTransferModel {
 
     FolderType() {
     }
+
+    public static FolderType fromString(String name) {
+        for (FolderType type : FolderType.values()) {
+            if (type.name().equalsIgnoreCase(name))
+                return type;
+        }
+        return null;
+    }
 }

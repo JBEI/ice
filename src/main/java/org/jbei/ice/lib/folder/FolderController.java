@@ -23,11 +23,11 @@ import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
-import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
@@ -46,6 +46,7 @@ public class FolderController {
     private final PermissionsController permissionsController;
     private final BulkUploadController bulkUploadController;
     private final AccountDAO accountDAO;
+    private final FolderAuthorization authorization;
 
     public FolderController() {
         dao = DAOFactory.getFolderDAO();
@@ -54,6 +55,7 @@ public class FolderController {
         permissionsController = new PermissionsController();
         bulkUploadController = new BulkUploadController();
         accountDAO = DAOFactory.getAccountDAO();
+        authorization = new FolderAuthorization();
     }
 
     /**
@@ -66,6 +68,7 @@ public class FolderController {
     public ArrayList<FolderDetails> getAvailableFolders(String userId) {
         Set<Folder> folders = new HashSet<>();
         folders.addAll(dao.getFoldersByType(FolderType.PUBLIC));
+        boolean isAdmin = accountController.isAdministrator(userId);
 
         ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
@@ -73,6 +76,7 @@ public class FolderController {
             long folderSize = dao.getFolderSize(folder.getId());
             details.setCount(folderSize);
             details.setType(FolderType.PUBLIC);
+            details.setCanEdit(isAdmin);
             list.add(details);
         }
         Collections.sort(list);
@@ -86,7 +90,6 @@ public class FolderController {
      */
     public FolderWrapper getPublicFolders() {
         List<Folder> folders = dao.getFoldersByType(FolderType.PUBLIC);
-//        ArrayList<FolderDetails> result = new ArrayList<>();
         FolderWrapper result = new FolderWrapper();
         for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
@@ -163,27 +166,7 @@ public class FolderController {
     }
 
 
-    protected boolean canReadFolderContents(Account account, Folder folder) throws ControllerException {
-        if (folder.getType() == FolderType.PUBLIC)
-            return true;
 
-        if (account.getType() == AccountType.ADMIN)
-            return true;
-
-        if (account.getEmail().equals(folder.getOwnerEmail()))
-            return true;
-
-        // now check actual permissions
-        Set<Folder> folders = new HashSet<>();
-        folders.add(folder);
-        PermissionsController controller = new PermissionsController();
-        if (controller.groupHasReadPermission(account.getGroups(), folders)
-                || controller.groupHasWritePermission(account.getGroups(), folders))
-            return true;
-
-        return controller.accountHasReadPermission(account, folders)
-                || controller.accountHasWritePermission(account, folders);
-    }
 
     public FolderDetails retrieveFolderContents(String userId, long folderId, ColumnField sort, boolean asc,
             int start, int limit) throws ControllerException {
@@ -194,7 +177,7 @@ public class FolderController {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
         // should have permission to read folder (folder should be public, you should be an admin, or owner)
-        if (!canReadFolderContents(account, folder)) {
+        if (!authorization.canRead(userId, folder)) {
             Logger.warn(account.getEmail() + ": does not have permissions to read folder " + folder.getId());
             return null;
         }
@@ -210,7 +193,6 @@ public class FolderController {
         Account owner = accountController.getByEmail(folder.getOwnerEmail());
         if (owner != null)
             details.setOwner(owner.toDataTransferObject());
-        EntryAuthorization entryAuthorization = new EntryAuthorization();
 
         ArrayList<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit);
         for (Entry entry : results) {
@@ -220,11 +202,10 @@ public class FolderController {
         return details;
     }
 
-    public FolderDetails delete(String userId, long folderId, String folderType) {
+    public FolderDetails delete(String userId, long folderId, FolderType type) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
-        if ("upload".equalsIgnoreCase(folderType)) {
-
+        if (type == FolderType.UPLOAD) {
             // delete bulk upload
             BulkUploadController controller = new BulkUploadController();
             try {
@@ -232,24 +213,20 @@ public class FolderController {
                 FolderDetails details = new FolderDetails();
                 details.setId(info.getId());
                 return details;
-            } catch (ControllerException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                return null;
-            } catch (PermissionException e) {
+            } catch (ControllerException | PermissionException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 return null;
             }
         }
 
         Folder folder = dao.get(folderId);
-
         if (folder == null)
             return null;
 
-
         if (account.getType() != AccountType.ADMIN && !folder.getOwnerEmail().equalsIgnoreCase(account.getEmail())) {
-            String errorMsg = account.getEmail() + ": does not have sufficient permissions to delete folder";
+            String errorMsg = account.getEmail() + ": insufficient permissions to delete folder " + folderId;
             Logger.warn(errorMsg);
+            return null;
         }
 
         FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
@@ -370,8 +347,9 @@ public class FolderController {
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
             long folderSize = dao.getFolderSize(folder.getId());
             details.setCount(folderSize);
-            folderDetails.add(details);
             details.setType(FolderType.PRIVATE);
+            details.setCanEdit(true);
+            folderDetails.add(details);
         }
         return folderDetails;
     }
