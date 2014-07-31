@@ -80,6 +80,9 @@ public class FolderResource extends RestResource {
             case "drafts":
                 return controller.getBulkUploadDrafts(sid);
 
+            case "pending":
+                return controller.getPendingBulkUploads(sid);
+
             case "shared":
                 return controller.getSharedUserFolders(sid);
 
@@ -166,6 +169,9 @@ public class FolderResource extends RestResource {
 
                 case "deleted":
                     return retriever.getDeletedEntries(userId, field, asc, offset, limit);
+
+                case "pending":
+                    return retriever.getPendingEntries(userId, field, asc, offset, limit);
 
                 default:
                     return null;

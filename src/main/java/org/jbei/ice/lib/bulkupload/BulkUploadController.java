@@ -245,22 +245,25 @@ public class BulkUploadController {
             if (!isOwner && !isAdmin)
                 continue;
 
-            BulkUploadInfo draftInfo = new BulkUploadInfo();
-            draftInfo.setCreated(draft.getCreationTime());
-            draftInfo.setLastUpdate(draft.getLastUpdateTime());
-            draftInfo.setId(draft.getId());
-
-            draftInfo.setName(draft.getName());
-            draftInfo.setType(draft.getImportType());
+            BulkUploadInfo draftInfo = draft.toDataTransferObject();
             draftInfo.setCount(dao.retrieveSavedDraftCount(draft.getId()));
-
-            // set the account info
-            AccountTransfer accountTransfer = new AccountTransfer();
-            accountTransfer.setEmail(draftAccount.getEmail());
-            accountTransfer.setFirstName(draftAccount.getFirstName());
-            accountTransfer.setLastName(draftAccount.getLastName());
-            draftInfo.setAccount(accountTransfer);
             infoArrayList.add(draftInfo);
+        }
+
+        return infoArrayList;
+    }
+
+    public ArrayList<BulkUploadInfo> getPendingUploads(String userId) {
+        if (!accountController.isAdministrator(userId))
+            return null;
+
+        ArrayList<BulkUpload> results = dao.retrieveByStatus(BulkUploadStatus.PENDING_APPROVAL);
+        ArrayList<BulkUploadInfo> infoArrayList = new ArrayList<>();
+
+        for (BulkUpload draft : results) {
+            BulkUploadInfo info = draft.toDataTransferObject();
+            info.setCount(dao.retrieveSavedDraftCount(draft.getId()));
+            infoArrayList.add(info);
         }
 
         return infoArrayList;

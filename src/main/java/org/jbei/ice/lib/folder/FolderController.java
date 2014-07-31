@@ -44,6 +44,7 @@ public class FolderController {
     private final AccountController accountController;
     private final PermissionDAO permissionDAO;
     private final PermissionsController permissionsController;
+    private final BulkUploadController bulkUploadController;
     private final AccountDAO accountDAO;
 
     public FolderController() {
@@ -51,6 +52,7 @@ public class FolderController {
         accountController = new AccountController();
         permissionDAO = DAOFactory.getPermissionDAO();
         permissionsController = new PermissionsController();
+        bulkUploadController = new BulkUploadController();
         accountDAO = DAOFactory.getAccountDAO();
     }
 
@@ -112,12 +114,29 @@ public class FolderController {
         return details;
     }
 
-
     public ArrayList<FolderDetails> getBulkUploadDrafts(String userId) {
-        BulkUploadController controller = new BulkUploadController();
         ArrayList<FolderDetails> folders = new ArrayList<>();
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        ArrayList<BulkUploadInfo> list = controller.retrieveByUser(userId, userId);
+        ArrayList<BulkUploadInfo> list = bulkUploadController.retrieveByUser(userId, userId);
+        for (BulkUploadInfo info : list) {
+            FolderDetails details = new FolderDetails();
+            details.setName(info.getName());
+            details.setCount(info.getCount());
+            details.setId(info.getId());
+            details.setType(FolderType.UPLOAD);
+            folders.add(details);
+        }
+        return folders;
+    }
+
+    /**
+     * Retrieves information about submitted bulk uploads that have status "PENDING". Administrator only function
+     *
+     * @param userId unique identifier for user performing action. Must have admin privileges
+     * @return list of information about pending bulk uploads is user has administrative privileges, null otherwise
+     */
+    public ArrayList<FolderDetails> getPendingBulkUploads(String userId) {
+        ArrayList<FolderDetails> folders = new ArrayList<>();
+        ArrayList<BulkUploadInfo> list = bulkUploadController.getPendingUploads(userId);
         for (BulkUploadInfo info : list) {
             FolderDetails details = new FolderDetails();
             details.setName(info.getName());

@@ -517,10 +517,15 @@ public class EntryDAO extends HibernateRepository<Entry> {
             String fieldName = columnFieldToString(field);
             Session session = currentSession();
             String orderSuffix = (" ORDER BY e." + fieldName + " " + (asc ? "ASC" : "DESC"));
-            String queryString = "from " + Entry.class.getName() + " e where owner_email = :oe "
-                    + "AND visibility = " + visibility.getValue() + orderSuffix;
+            String queryString = "from " + Entry.class.getName() + " e where ";
+            if (ownerEmail != null)
+                queryString += " owner_email = :oe AND";
+
+            queryString += " visibility = " + visibility.getValue() + orderSuffix;
             Query query = session.createQuery(queryString);
-            query.setParameter("oe", ownerEmail);
+            if (ownerEmail != null)
+                query.setParameter("oe", ownerEmail);
+
             query.setMaxResults(limit);
             query.setFirstResult(start);
             List list = query.list();
@@ -532,9 +537,10 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     public long getByVisibilityCount(String ownerEmail, Visibility visibility) throws DAOException {
-        Criteria criteria = currentSession().createCriteria(Entry.class)
-                .add(Restrictions.eq("ownerEmail", ownerEmail))
-                .add(Restrictions.eq("visibility", visibility.getValue()));
+        Criteria criteria = currentSession().createCriteria(Entry.class);
+        if (ownerEmail != null)
+            criteria = criteria.add(Restrictions.eq("ownerEmail", ownerEmail));
+        criteria.add(Restrictions.eq("visibility", visibility.getValue()));
         return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 

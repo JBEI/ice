@@ -46,4 +46,15 @@ public class FolderContentRetriever {
         folderDetails.setCount(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT));
         return folderDetails;
     }
+
+    public FolderDetails getPendingEntries(String userId, ColumnField sort, boolean asc, int start, int limit) {
+        FolderDetails folderDetails = new FolderDetails();
+        List<Entry> entries = entryDAO.getByVisibility(null, Visibility.PENDING, sort, asc, start, limit);
+        for (Entry entry : entries) {
+            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
+            folderDetails.getEntries().add(info);
+        }
+        folderDetails.setCount(entryDAO.getByVisibilityCount(null, Visibility.PENDING));
+        return folderDetails;
+    }
 }
