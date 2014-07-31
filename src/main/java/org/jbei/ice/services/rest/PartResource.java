@@ -16,6 +16,7 @@ import javax.ws.rs.core.UriInfo;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
@@ -255,6 +256,19 @@ public class PartResource extends RestResource {
         if (!attachmentController.delete(userId, partId, attachmentId))
             return Response.notModified().build();    // todo : use 404 ?
         return Response.ok().build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/history")
+    public ArrayList<History> getHistory(@Context UriInfo info,
+            @PathParam("id") long partId,
+            @QueryParam("sid") String sessionId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        if (StringUtils.isEmpty(userAgentHeader))
+            userAgentHeader = sessionId;
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        return controller.getHistory(userId, partId);
     }
 
     @GET

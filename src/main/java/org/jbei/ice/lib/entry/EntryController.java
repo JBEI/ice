@@ -37,6 +37,7 @@ import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.PartSample;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -548,6 +549,24 @@ public class EntryController {
 
         List<TraceSequence> sequences = DAOFactory.getTraceSequenceDAO().getByEntry(entry);
         return ModelToInfoFactory.getSequenceAnalysis(sequences);
+    }
+
+    public ArrayList<History> getHistory(String userId, long entryId) {
+        Entry entry = dao.get(entryId);
+        if (entry == null)
+            return null;
+
+        authorization.expectWrite(userId, entry);
+        List<Audit> list = auditDAO.getAuditsForEntry(entry);
+        ArrayList<History> result = new ArrayList<>();
+        for (Audit audit : list) {
+            History history = audit.toDataTransferObject();
+            if (history.isLocalUser()) {
+                history.setAccount(accountController.getByEmail(history.getUserId()).toDataTransferObject());
+            }
+            result.add(history);
+        }
+        return result;
     }
 
     public ArrayList<SampleStorage> retrieveEntrySamples(String userId, long entryId) {

@@ -2227,6 +2227,20 @@ iceControllers.controller('EntryCommentController', function ($scope, $cookieSto
     };
 });
 
+iceControllers.controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Entry) {
+    var entryId = $stateParams.id;
+    var sid = $cookieStore.get("sessionId");
+    var entry = Entry(sid);
+
+    entry.history({partId:entryId}, function (result) {
+        $scope.history = result;
+    });
+
+    $scope.deleteHistory = function (history) {
+        // todo : delete
+    }
+});
+
 iceControllers.controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, $fileUploader, Entry) {
     var entryId = $stateParams.id;
     var sid = $cookieStore.get("sessionId");

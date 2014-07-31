@@ -464,6 +464,14 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            history:{
+                method:'GET',
+                responseType:'json',
+                isArray:true,
+                url:'/rest/part/:partId/history',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             deleteTraceSequence:{
                 method:'DELETE',
                 responseType:'json',

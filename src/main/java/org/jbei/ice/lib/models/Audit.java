@@ -126,6 +126,11 @@ public class Audit implements IDataModel {
 
     @Override
     public History toDataTransferObject() {
-        return null;
+        History history = new History();
+        history.setAction(action);
+        history.setTime(time.getTime());
+        history.setLocalUser(localUser);
+        history.setUserId(userId);
+        return history;
     }
 }
