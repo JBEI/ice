@@ -1,6 +1,7 @@
 'use strict';
 
-var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload', 'vr.directives.slider', 'angularMoment', 'ice.search']);
+var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload',
+    'vr.directives.slider', 'angularMoment']);
 
 iceControllers.controller('EntrySampleController', function ($scope, $modal, $cookieStore, $stateParams, Entry) {
     $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -8,7 +9,7 @@ iceControllers.controller('EntrySampleController', function ($scope, $modal, $co
 
     $scope.openAddToCart = function () {
         var modalInstance = $modal.open({
-            templateUrl: '/views/modal/sample-request.html'
+            templateUrl:'/views/modal/sample-request.html'
         });
 
         modalInstance.result.then(function (selected) {
@@ -1231,6 +1232,7 @@ iceControllers.controller('CreateEntryController',
                     $scope.part.selectionMarkers = [
                         {}
                     ];
+                    $scope.part.status = 'Complete';
                     $scope.activePart = $scope.part;
                     $scope.selectedFields = EntryService.getFieldsForType($scope.createType);
                 } else {
@@ -1242,6 +1244,7 @@ iceControllers.controller('CreateEntryController',
                         {}
                     ];
                     newPart.bioSafetyLevel = '1';
+                    newPart.status = 'Complete';
 
                     $scope.selectedFields = EntryService.getFieldsForType(type);
                     $scope.part.linkedParts.push(newPart);
@@ -1282,22 +1285,31 @@ iceControllers.controller('CreateEntryController',
             });
         };
 
-        $scope.deleteNewPartLink = function (index) {
-            // todo : not working
-            console.log("delete part link at index", index);
-            $scope.part.linkedParts.splice(index, 1);
-            if ($scope.active === index) {
+        $scope.deleteNewPartLink = function (linkedPart) {
+            var indexOf = $scope.part.linkedParts.indexOf(linkedPart);
+            if (indexOf < 0 || indexOf >= $scope.part.linkedParts.length)
+                return;
+
+            console.log("delete", linkedPart, "at", indexOf);
+            $scope.part.linkedParts.splice(indexOf, 1);
+
+            // todo: will need to actually delete it if has an id (linkedPart.id)
+
+            // remove from array of linked parts
+            if ($scope.active === indexOf) {
+                var newActive;
                 // set new active
-                console.log("set new active");
-                if (index + 1 < $scope.part.linkedParts.length)
-                    $scope.active = index + 1;
+                console.log("set new active", $scope.part.linkedParts.length);
+                if (indexOf + 1 < $scope.part.linkedParts.length)
+                    newActive = indexOf + 1;
                 else {
                     if ($scope.part.linkedParts.length === 0)
                     // not really needed since when main will not be shown if no other tabs present
-                        $scope.active = 'main';
+                        newActive = 'main';
                     else
-                        $scope.active = index - 1;
+                        newActive = indexOf - 1;
                 }
+                $scope.setActive(newActive);
             }
         };
 

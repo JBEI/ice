@@ -66,7 +66,7 @@
          ng-class="{new_entry_tab_inactive:active!==$index, new_entry_tab_active:active===$index}"
          style="padding-right:3px; padding-left: 6px">
         <small class="fluid_no_wrap">{{linkedPart.name || 'Linked ' + linkedPart.type | capitalize}}</small>
-        <span ng-click="deleteNewPartLink($index)" class="pull-right opacity_hover opacity_4" stop-event="click">
+        <span ng-click="deleteNewPartLink(linkedPart)" class="pull-right opacity_hover opacity_4" stop-event="click">
             <i class="fa fa-times delete_icon font-70em"></i>
         </span>
     </div>
