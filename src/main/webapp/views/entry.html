@@ -56,7 +56,8 @@
         <!--right menu-->
         <div class="col-md-2" style="padding-right: 0">
             <table cellpadding="0" cellspacing="0" class="entry_detail_submenu pull-right">
-                <tr ng-repeat="subMenu in subDetails">
+                <tr ng-repeat="subMenu in subDetails"
+                    ng-if="(subMenu.isPrivileged&&entry.ownerEmail===user.email) || !subMenu.isPrivileged || user.isAdmin">
                     <td ng-class="{selected:subMenu.selected}" ng-click="showSelection($index)">
                         <i class="fa {{subMenu.icon}}" style="font-size: 14px;"></i> &nbsp;{{subMenu.display}}
                         <span ng-if="subMenu.countName" style="float: right; color: #999;">{{entryStatistics[(subMenu.countName)] || 0}}</span>

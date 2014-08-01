@@ -1928,12 +1928,12 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         });
 
     var menuSubDetails = $scope.subDetails = [
-        {url:'/views/entry/general-information.html', display:'General Information', selected:true, icon:'fa-exclamation-circle'},
-        {id:'sequences', url:'/views/entry/sequence-analysis.html', display:'Sequence Analysis', selected:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
-        {id:'comments', url:'/views/entry/comments.html', display:'Comments', selected:false, countName:'commentCount', icon:'fa-comments-o'},
-        {id:'samples', url:'/views/entry/samples.html', display:'Samples', selected:false, countName:'sampleCount', icon:'fa-flask'},
-        {id:'history', url:'/views/entry/history.html', display:'History', selected:false, countName:'historyCount', icon:'fa-history'},
-        {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', selected:false, count:'eddCount', icon:'fa-magic'}
+        {url:'/views/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
+        {id:'sequences', url:'/views/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
+        {id:'comments', url:'/views/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
+        {id:'samples', url:'/views/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'},
+        {id:'history', url:'/views/entry/history.html', display:'History', isPrivileged:true, countName:'historyCount', icon:'fa-history'},
+        {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', isPrivileged:false, count:'eddCount', icon:'fa-magic'}
     ];
 
     $scope.showSelection = function (index) {
