@@ -417,14 +417,14 @@ public class AccountController {
      * the
      * user, and return the sessionData
      *
-     * @param login
-     * @param password
+     * @param transfer user information containing the email and password to be used for authentication
+     *                 If the sessionId field is set, it may or may not be used as the user's session id
      * @return {@link AccountTransfer}
      */
-    public AccountTransfer authenticate(String login, String password) {
+    public AccountTransfer authenticate(AccountTransfer transfer) {
         String email;
         try {
-            email = authenticate(login, password, "");
+            email = authenticate(transfer.getEmail(), transfer.getPassword(), "");
         } catch (InvalidCredentialsException | ControllerException e) {
             Logger.error(e);
             return null;
@@ -442,7 +442,7 @@ public class AccountController {
         info.setId(account.getId());
         boolean isAdmin = isAdministrator(email);
         info.setAdmin(isAdmin);
-        info.setSessionId(SessionHandler.createNewSessionForUser(email));
+        info.setSessionId(SessionHandler.createSessionForUser(email, transfer.getSessionId()));
         return info;
     }
 
