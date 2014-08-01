@@ -462,8 +462,6 @@ angular.module('ice.upload.controller', [])
                     upload.get(
                         {importId:$stateParams.type, offset:start, limit:40},
                         function (result) {
-                            console.log(result);
-
                             $scope.bulkUpload.name = result.name;
                             $scope.bulkUpload.status = result.status;
                             $scope.importType = result.type.toLowerCase();
@@ -474,7 +472,7 @@ angular.module('ice.upload.controller', [])
 
                             // else render on append data
                             $scope.bulkUpload.id = result.id;
-                            $scope.bulkUpload.lastUpdate = new Date(result.lastUpdate);
+                            $scope.bulkUpload.lastUpdate = result.lastUpdate;
                             var l = $scope.bulkUpload.entryIdData.length;    // number of existing entries
 
                             if (result.entryList && result.entryList.length) {
