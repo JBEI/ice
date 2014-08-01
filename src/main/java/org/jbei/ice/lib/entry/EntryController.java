@@ -267,7 +267,7 @@ public class EntryController {
         return entry.getId();
     }
 
-    public void update(Account account, Entry entry) throws ControllerException, PermissionException {
+    public void update(Account account, Entry entry) {
         if (entry == null) {
             return;
         }

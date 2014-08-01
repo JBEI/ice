@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.Map;
 
 import org.jbei.ice.ControllerException;
-import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -119,21 +118,29 @@ public class BulkEntryCreator {
         authorization.expectWrite(userId, upload);
         Date updateTime = new Date(System.currentTimeMillis());
         upload.setLastUpdateTime(updateTime);
-
         upload.setStatus(status);
-        if (status == BulkUploadStatus.PENDING_APPROVAL) {
-            ArrayList<Long> list = dao.getEntryIds(id);
-            for (Number l : list) {
-                Entry entry = entryDAO.get(l.longValue());
-                if (entry == null)
-                    continue;
 
-                entry.setVisibility(Visibility.PENDING.getValue());
-                entryDAO.update(entry);
-            }
+        switch (status) {
+            case PENDING_APPROVAL:
+            default:
+                ArrayList<Long> list = dao.getEntryIds(id);
+                for (Number l : list) {
+                    Entry entry = entryDAO.get(l.longValue());
+                    if (entry == null)
+                        continue;
+
+                    entry.setVisibility(Visibility.PENDING.getValue());
+                    entryDAO.update(entry);
+                }
+                return dao.update(upload).toDataTransferObject();
+
+            // approved by an administrator
+            case APPROVED:
+                Account account = accountController.getByEmail(userId);
+                if (new BulkUploadController().approveBulkImport(account, id))
+                    return upload.toDataTransferObject();
+                return null;
         }
-
-        return dao.update(upload).toDataTransferObject();
     }
 
     /**
@@ -202,45 +209,41 @@ public class BulkEntryCreator {
             }
         }
 
-        try {
-            // now update the values (for strain with plasmid, some values are for both
-            for (Map.Entry<EntryField, String> set : autoUpdate.getKeyValue().entrySet()) {
-                String value = set.getValue();
-                EntryField field = set.getKey();
+        // now update the values (for strain with plasmid, some values are for both
+        for (Map.Entry<EntryField, String> set : autoUpdate.getKeyValue().entrySet()) {
+            String value = set.getValue();
+            EntryField field = set.getKey();
 
-                Entry[] ret = InfoToModelFactory.infoToEntryForField(entry, otherEntry, value, field);
-                entry = ret[0];
+            Entry[] ret = InfoToModelFactory.infoToEntryForField(entry, otherEntry, value, field);
+            entry = ret[0];
 
-                if (ret.length == 2) {
-                    otherEntry = ret[1];
-                }
+            if (ret.length == 2) {
+                otherEntry = ret[1];
             }
-
-            if (draft != null && draft.getStatus() != BulkUploadStatus.PENDING_APPROVAL) {
-                if (otherEntry != null && autoUpdate.getEditMode() != EditMode.BULK_EDIT) {
-                    if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
-                        otherEntry.setVisibility(Visibility.DRAFT.getValue());
-
-                    entryController.update(account, otherEntry);
-                }
-
-                if ((entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
-                        && autoUpdate.getEditMode() != EditMode.BULK_EDIT)
-                    entry.setVisibility(Visibility.DRAFT.getValue());
-            }
-
-            EntryEditor editor = new EntryEditor();
-            // set the plasmids and update
-            if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())
-                    && entry.getLinkedEntries().isEmpty()) {
-                Strain strain = (Strain) entry;
-                editor.setStrainPlasmids(account, strain, strain.getPlasmids());
-            }
-
-            entryController.update(account, entry);
-        } catch (PermissionException e) {
-            throw new ControllerException(e);
         }
+
+        if (draft != null && draft.getStatus() != BulkUploadStatus.PENDING_APPROVAL) {
+            if (otherEntry != null && autoUpdate.getEditMode() != EditMode.BULK_EDIT) {
+                if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
+                    otherEntry.setVisibility(Visibility.DRAFT.getValue());
+
+                entryController.update(account, otherEntry);
+            }
+
+            if ((entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
+                    && autoUpdate.getEditMode() != EditMode.BULK_EDIT)
+                entry.setVisibility(Visibility.DRAFT.getValue());
+        }
+
+        EntryEditor editor = new EntryEditor();
+        // set the plasmids and update
+        if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())
+                && entry.getLinkedEntries().isEmpty()) {
+            Strain strain = (Strain) entry;
+            editor.setStrainPlasmids(account, strain, strain.getPlasmids());
+        }
+
+        entryController.update(account, entry);
 
         // update bulk upload. even if no new entry was created, entries belonging to it was updated
         if (draft != null) {

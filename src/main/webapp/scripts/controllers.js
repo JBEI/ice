@@ -1227,22 +1227,18 @@ iceControllers.controller('CreateEntryController',
                     $scope.part.bioSafetyLevel = '1';
                     $scope.part.linkedParts = [];
                     $scope.part.links = [
-                        {}
+                        {value:''}
                     ];
                     $scope.part.selectionMarkers = [
-                        {}
+                        {value:''}
                     ];
                     $scope.part.status = 'Complete';
                     $scope.activePart = $scope.part;
                     $scope.selectedFields = EntryService.getFieldsForType($scope.createType);
                 } else {
                     var newPart = result;
-                    newPart.links = [
-                        {}
-                    ];
-                    newPart.selectionMarkers = [
-                        {}
-                    ];
+                    newPart.links = [];
+                    newPart.selectionMarkers = [];
                     newPart.bioSafetyLevel = '1';
                     newPart.status = 'Complete';
 
@@ -1260,13 +1256,13 @@ iceControllers.controller('CreateEntryController',
 
         getPartDefaults($scope.createType, true);
 
-        $scope.addLink = function (schema, index) {
-            $scope.part[schema].splice(index + 1, 0, {value:''});
+        $scope.addLink = function (schema) {
+            $scope.part[schema].push({value:''});
         };
 
         $scope.removeLink = function (schema, index) {
             $scope.part[schema].splice(index, 1);
-            $scope.colLength = 11 - $scope.part.linkedParts.length;
+//            $scope.colLength = 11 - $scope.part.linkedParts.length;
         };
 
         $scope.addNewPartLink = function (type) {

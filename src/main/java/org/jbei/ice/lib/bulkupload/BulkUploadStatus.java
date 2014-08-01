@@ -10,7 +10,7 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
  */
 public enum BulkUploadStatus implements IDataTransferModel {
 
+    APPROVED,
     PENDING_APPROVAL,
-
     IN_PROGRESS
 }

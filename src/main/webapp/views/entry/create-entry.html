@@ -150,9 +150,9 @@
 
     <!--add-->
     <div class="col-md-10" ng-if="field.inputType==='add'">
-        <span ng-repeat="link in activePart[field.schema]">
+        <span ng-repeat="link in activePart[field.schema] track by $index">
             <div ng-if="!$index">
-                <input ng-model="activePart[field.schema][$index].value" type="text" maxlength="500"
+                <input ng-model="activePart[field.schema][$index].value" type="text" maxlength="125"
                        ng-change="field.invalid=false" style="width: 400px;"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        ng-focus="field.edit=true" ng-blur="field.edit=false">
@@ -178,9 +178,9 @@
 
     <!-- autocompleteAdd -->
     <div class="col-md-10" ng-if="field.inputType==='autoCompleteAdd'">
-        <span ng-repeat="link in activePart[field.schema]">
+        <span ng-repeat="link in activePart[field.schema] track by $index">
             <div ng-if="!$index">
-                <input ng-model="link.value" type="text" typeahead-loading="loadingData"
+                <input ng-model="activePart[field.schema].value" type="text" typeahead-loading="loadingData"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        ng-change="field.invalid=false"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
@@ -296,7 +296,7 @@
 </div>
 
 <!--submit buttons-->
-<div class="row pad-top-5">
+<div class="row pad-top-5" ng-if="selectedFields">
     <div class="col-md-2"></div>
 
     <div class="col-md-10">

@@ -23,6 +23,7 @@
                 </span>
             </div>
 
+            <!--start field edit section-->
             <!--short input field-->
             <div class="input-group" ng-if="field.inputType==='short'&&field.edit">
                 <input type="text" ng-model="entry[field.schema]" ng-trim="true" focus
@@ -110,7 +111,7 @@
             <div ng-if="field.inputType==='add'&&field.edit">
         <span ng-repeat="link in entry[field.schema]">
             <div ng-if="!$index">
-                <input ng-model="entry[field.schema][$index].value" type="text" maxlength="500"
+                <input ng-model="entry[field.schema][$index].value" type="text" maxlength="125"
                        style="width: 400px;"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        ng-focus="field.edit=true" ng-blur="field.edit=false">
@@ -175,6 +176,8 @@
                 </span>
             </div>
         </form>
+        <!--end field edit section-->
+
     </div>
 </div>
 <div class="row margin-top-10" ng-if="entry.linkedParts.length">

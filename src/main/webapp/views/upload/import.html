@@ -59,9 +59,14 @@
         <div class="col-md-2 pull-right" style="margin-top: 16px" ng-if="!submitting&&bulkUpload">
             <button type="button" class="btn btn-xs btn-primary"
                     ng-disabled="!bulkUpload||!bulkUpload.entryIdData||!bulkUpload.entryIdData.length"
-                    ng-click="submitImportForApproval()">Submit
+                    ng-click="submitImportForApproval()">
+                <span ng-if="!bulkUpload.status || bulkUpload.status='IN_PROGRESS'">Submit</span>
+                <span ng-if="bulkUpload.status='PENDING_APPROVAL'">Approve</span>
             </button>
-            <button type="button" class="btn btn-xs btn-default" ng-click="confirmResetFormModal()">Reset</button>
+            <button type="button" class="btn btn-xs btn-default" ng-click="confirmResetFormModal()">
+                <span ng-if="!bulkUpload.status || bulkUpload.status='IN_PROGRESS'">Reset</span>
+                <span ng-if="bulkUpload.status='PENDING_APPROVAL'">Reject</span>
+            </button>
         </div>
 
         <div class="col-md-2 pull-right" style="margin-top: 16px" ng-if="submitting">

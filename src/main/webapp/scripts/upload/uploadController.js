@@ -354,13 +354,21 @@ angular.module('ice.upload.controller', [])
 
             $scope.submitImportForApproval = function () {
                 $scope.submitting = true;
+                var requiresApproval = $scope.bulkUpload.status && $scope.bulkUpload.status == 'PENDING_APPROVAL';
 
                 // validate the contents;
-                var tmp = {id:$scope.bulkUpload.id, status:'PENDING_APPROVAL'};
+                var tmp = {id:$scope.bulkUpload.id};
+                if (requiresApproval)
+                    tmp.status = 'APPROVED';
+                else
+                    tmp.status = 'PENDING_APPROVAL';
 
                 Upload(sid).updateStatus({importId:$scope.bulkUpload.id}, tmp, function (result) {
                     $scope.submitting = false;
-                    $location.path('/folders/personal');
+                    if (requiresApproval)
+                        $location.path('/folders/personal');
+                    else
+                        $location.path('/folders/pending');
                 }, function (error) {
                     $scope.submitting = false;
                 });
@@ -454,7 +462,10 @@ angular.module('ice.upload.controller', [])
                     upload.get(
                         {importId:$stateParams.type, offset:start, limit:40},
                         function (result) {
+                            console.log(result);
+
                             $scope.bulkUpload.name = result.name;
+                            $scope.bulkUpload.status = result.status;
                             $scope.importType = result.type.toLowerCase();
                             generateLinkOptions($scope.importType);
 

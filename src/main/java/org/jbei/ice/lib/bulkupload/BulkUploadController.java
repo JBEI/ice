@@ -397,21 +397,18 @@ public class BulkUploadController {
         return true;
     }
 
-    public boolean approveBulkImport(Account account, long id) throws ControllerException, PermissionException {
+    public boolean approveBulkImport(Account account, long id) {
         // only admins allowed
         if (!accountController.isAdministrator(account.getEmail())) {
-            throw new PermissionException("Only administrators can approve bulk imports");
+            Logger.warn("Only administrators can approve bulk imports");
+            return false;
         }
 
         // retrieve bulk upload in question (at this point it is owned by system)
-        BulkUpload bulkUpload;
-
-        try {
-            bulkUpload = dao.retrieveById(id);
-            if (bulkUpload == null)
-                throw new ControllerException("Could not retrieve bulk upload with id \"" + id + "\" for approval");
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+        BulkUpload bulkUpload = dao.retrieveById(id);
+        if (bulkUpload == null) {
+            Logger.error("Could not retrieve bulk upload with id \"" + id + "\" for approval");
+            return false;
         }
 
         // go through passed contents
@@ -446,13 +443,8 @@ public class BulkUploadController {
         }
 
         // when done approving, delete the bulk upload record but not the entries associated with it.
-        try {
-            bulkUpload.getContents().clear();
-            dao.delete(bulkUpload);
-            return true;
-        } catch (DAOException e) {
-            throw new ControllerException("Could not delete bulk upload " + bulkUpload.getId()
-                                                  + ". Contents were approved so please delete manually.", e);
-        }
+        bulkUpload.getContents().clear();
+        dao.delete(bulkUpload);
+        return true;
     }
 }
