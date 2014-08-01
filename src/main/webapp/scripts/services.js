@@ -419,6 +419,14 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            experiments:{
+                method:'GET',
+                responseType:'json',
+                isArray:true,
+                url:'/rest/part/:partId/experiments',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             permissions:{
                 method:'GET',
                 responseType:'json',
@@ -445,6 +453,13 @@ iceServices.factory('Entry', function ($resource) {
                 method:'POST',
                 responseType:'json',
                 url:'/rest/part/:partId/comments',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            createExperiment:{
+                method:'POST',
+                responseType:'json',
+                url:'/rest/part/:partId/experiments',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 

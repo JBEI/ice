@@ -162,7 +162,7 @@ public class PartResource extends RestResource {
         return respond(Response.Status.OK, studies);
     }
 
-    @PUT
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
     public Response getPartExperiments(@PathParam("id") long partId,

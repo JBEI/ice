@@ -11,6 +11,7 @@ public class Study implements IDataTransferModel {
 
     private long id;
     private String partId;
+    private String label;
     private String url;
     private long created;
 
@@ -28,6 +29,22 @@ public class Study implements IDataTransferModel {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getPartId() {
+        return partId;
+    }
+
+    public void setPartId(String partId) {
+        this.partId = partId;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public long getCreated() {

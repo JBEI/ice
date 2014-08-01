@@ -626,7 +626,8 @@ public class EntryController {
         statistics.setSampleCount(sampleCount);
         int historyCount = DAOFactory.getAuditDAO().getHistoryCount(entry);
         statistics.setHistoryCount(historyCount);
-
+        int eddCount = DAOFactory.getExperimentDAO().getExperimentCount(entryId);
+        statistics.setExperimentalDataCount(eddCount);
         return statistics;
     }
 

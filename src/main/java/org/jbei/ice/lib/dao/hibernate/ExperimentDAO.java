@@ -1,10 +1,10 @@
-package org.jbei.ice.lib.experiment;
+package org.jbei.ice.lib.dao.hibernate;
 
 import java.util.List;
 
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.experiment.Experiment;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -31,13 +31,13 @@ public class ExperimentDAO extends HibernateRepository<Experiment> {
         }
     }
 
-    public long getExperimentCount(long entryId) throws DAOException {
+    public int getExperimentCount(long entryId) throws DAOException {
         try {
             String sql = "SELECT count(*) FROM experiment_entry WHERE entry_id=:id";
             SQLQuery query = currentSession().createSQLQuery(sql);
             query.setLong("id", entryId);
             Number result = (Number) query.uniqueResult();
-            return result.longValue();
+            return result.intValue();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

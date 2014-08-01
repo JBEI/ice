@@ -28,6 +28,9 @@ public class Experiment implements IDataModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
+    @Column(name = "label", length = 128)
+    private String label;
+
     @Column(name = "url", length = 512)
     private String url;
 
@@ -42,6 +45,14 @@ public class Experiment implements IDataModel {
 
     public long getId() {
         return id;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public String getUrl() {
@@ -72,6 +83,7 @@ public class Experiment implements IDataModel {
         Study study = new Study();
         study.setId(id);
         study.setCreated(creationTime.getTime());
+        study.setLabel(label);
         study.setUrl(url);
         return study;
     }

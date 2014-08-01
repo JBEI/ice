@@ -1933,7 +1933,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         {id:'comments', url:'/views/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
         {id:'samples', url:'/views/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'},
         {id:'history', url:'/views/entry/history.html', display:'History', isPrivileged:true, countName:'historyCount', icon:'fa-history'},
-        {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', isPrivileged:false, count:'eddCount', icon:'fa-magic'}
+        {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', isPrivileged:false, countName:'experimentalDataCount', icon:'fa-magic'}
     ];
 
     $scope.showSelection = function (index) {
@@ -2182,6 +2182,33 @@ iceControllers.controller('EntryCommentController', function ($scope, $cookieSto
             $scope.entryStatistics.commentCount = $scope.entryComments.length;
         }, function (error) {
             console.error("comment create error", error);
+        });
+    };
+});
+
+iceControllers.controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Entry) {
+    var entryId = $stateParams.id;
+    var entry = Entry($cookieStore.get("sessionId"));
+    $scope.experiment = {};
+    $scope.addExperiment = false;
+
+    entry.experiments({partId:entryId}, function (result) {
+        $scope.entryExperiments = result;
+    });
+
+    $scope.createExperiment = function () {
+        if ($scope.experiment === undefined || $scope.experiment.url === undefined || $scope.experiment.url === ''
+            || $scope.experiment.url.lastIndexOf('http', 0) !== 0) {
+            $scope.urlMissing = true;
+            return;
+        }
+
+        entry.createExperiment({partId:entryId}, $scope.experiment, function (result) {
+            $scope.entryExperiments.splice(0, 0, result);
+            $scope.addExperiment = false;
+            $scope.entryStatistics.experimentalDataCount = $scope.entryExperiments.length;
+        }, function (error) {
+            console.error("experiment create error", error);
         });
     };
 });

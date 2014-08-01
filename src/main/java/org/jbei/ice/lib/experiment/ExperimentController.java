@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
+import org.jbei.ice.lib.dao.hibernate.ExperimentDAO;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.model.Entry;
 
@@ -61,10 +62,7 @@ public class ExperimentController {
         experiment.getSubjects().add(entry);
         experiment.setCreationTime(new Date());
         experiment.setUrl(study.getUrl());
+        experiment.setLabel(study.getLabel());
         return dao.create(experiment).toDataTransferObject();
-    }
-
-    public long getPartStudiesCount(String userId, long partId) {
-        return dao.getExperimentCount(partId);
     }
 }
