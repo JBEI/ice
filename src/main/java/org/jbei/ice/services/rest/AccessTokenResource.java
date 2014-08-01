@@ -40,7 +40,7 @@ public class AccessTokenResource extends RestResource {
         String name = transfer.getEmail();
         String pass = transfer.getPassword();
 
-        AccountTransfer info = accountController.authenticate(name, pass);
+        AccountTransfer info = accountController.authenticate(transfer);
         if (info == null) {
             return null;
         }

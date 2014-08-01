@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Handler for user sessions.
  *
@@ -33,6 +35,23 @@ public class SessionHandler {
         String newSession = UUID.randomUUID().toString();
         userSessionMap.put(userId, newSession);
         return newSession;
+    }
+
+    /**
+     * Uses the session id passed in the parameter and sets it as the session id for the
+     * user as long as it meets a specified criteria (currently must be at least 5 xters long)
+     *
+     * @param userId    unique user identifier
+     * @param sessionId optional session id to set for that user
+     * @return session id set for specified user. It will be the same as that passed in the parameter if
+     *         it meets the criteria
+     */
+    public static String createSessionForUser(String userId, String sessionId) {
+        if (StringUtils.isEmpty(sessionId) || sessionId.length() < 5)
+            return createNewSessionForUser(userId);
+
+        userSessionMap.put(userId, sessionId);
+        return sessionId;
     }
 
     public static boolean isValidSession(String sid) {

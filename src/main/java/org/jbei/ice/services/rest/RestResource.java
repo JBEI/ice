@@ -3,7 +3,6 @@ package org.jbei.ice.services.rest;
 import javax.ws.rs.core.Response;
 
 import org.jbei.ice.lib.account.SessionHandler;
-import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.services.exception.UnauthorizedException;
 
 /**
@@ -20,7 +19,10 @@ public class RestResource {
         return userId;
     }
 
-    protected Response respond(Response.Status status, IDataTransferModel obj) {
+    protected Response respond(Response.Status status, Object obj) {
+        if (obj == null)
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+
         return Response.status(status).entity(obj).build();
     }
 

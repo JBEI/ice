@@ -30,6 +30,8 @@ import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.experiment.ExperimentController;
+import org.jbei.ice.lib.experiment.Study;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
@@ -52,6 +54,7 @@ public class PartResource extends RestResource {
     private PermissionsController permissionsController = new PermissionsController();
     private AttachmentController attachmentController = new AttachmentController();
     private SequenceController sequenceController = new SequenceController();
+    private ExperimentController experimentController = new ExperimentController();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -144,8 +147,30 @@ public class PartResource extends RestResource {
             ArrayList<AccessPermission> permissions,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-
         return permissionsController.setEntryPermissions(userId, partId, permissions);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/experiments")
+    public Response getPartExperiments(@PathParam("id") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        ArrayList<Study> studies = experimentController.getPartStudies(userId, partId);
+        if (studies == null)
+            return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        return respond(Response.Status.OK, studies);
+    }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/experiments")
+    public Response getPartExperiments(@PathParam("id") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            Study study) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        study = experimentController.createStudy(userId, partId, study);
+        return respond(Response.Status.OK, study);
     }
 
     @PUT

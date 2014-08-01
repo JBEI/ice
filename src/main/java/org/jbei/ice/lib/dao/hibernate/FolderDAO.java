@@ -37,8 +37,6 @@ public class FolderDAO extends HibernateRepository<Folder> {
     /**
      * Retrieves stored folder by identifier
      *
-     *
-     *
      * @param id unique identifier for folder
      * @return retrieved folder
      * @throws DAOException
@@ -70,7 +68,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
 
     /**
      * Retrieves the count of the number of contents in the folder.
-     * If the folder contains other folders, the it returns the number of sub-folders
+     * If the folder contains other folders, then it returns the number of sub-folders
      *
      * @param id unique folder identifier
      * @return number of child contents in the folder

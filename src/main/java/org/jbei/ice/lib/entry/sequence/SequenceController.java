@@ -139,7 +139,7 @@ public class SequenceController {
         EntryRetriever retriever = new EntryRetriever();
 
         try {
-            Entry entry = retriever.get(account, entryId);
+            Entry entry = retriever.get(userId, entryId);
             if (entry == null) {
                 return null;
             }

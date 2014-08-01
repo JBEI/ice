@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.dao;
 
 import org.jbei.ice.lib.dao.hibernate.*;
+import org.jbei.ice.lib.experiment.ExperimentDAO;
 
 /**
  * @author Hector Plahar
@@ -30,6 +31,7 @@ public class DAOFactory {
     private static TraceSequenceDAO traceSequenceDAO;
     private static AuditDAO auditDAO;
     private static RemotePermissionDAO remotePermissionDAO;
+    private static ExperimentDAO experimentDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -167,5 +169,11 @@ public class DAOFactory {
         if (remotePermissionDAO == null)
             remotePermissionDAO = new RemotePermissionDAO();
         return remotePermissionDAO;
+    }
+
+    public static ExperimentDAO getExperimentDAO() {
+        if (experimentDAO == null)
+            experimentDAO = new ExperimentDAO();
+        return experimentDAO;
     }
 }

@@ -128,7 +128,7 @@ public class AccountControllerTest {
     public void testGetAccountBySessionKey() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetAccountBySessionKey", false);
         controller.updatePassword(account.getEmail(), "p4ssw0rd");
-        AccountTransfer info = controller.authenticate(account.getEmail(), "p4ssw0rd");
+        AccountTransfer info = controller.authenticate(new AccountTransfer(account.getEmail(), "p4ssw0rd"));
         Assert.assertNotNull(info);
         Assert.assertFalse(info.getSessionId().isEmpty());
         Account sessIdAccount = controller.getAccountBySessionKey(info.getSessionId());

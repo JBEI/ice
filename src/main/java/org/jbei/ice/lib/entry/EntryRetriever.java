@@ -156,17 +156,16 @@ public class EntryRetriever {
     /**
      * Retrieve {@link Entry} from the database by id.
      *
-     * @param account account of user performing action
-     * @param id      unique local identifier for entry
+     * @param userId account identifier of user performing action
+     * @param id     unique local identifier for entry
      * @return entry retrieved from the database.
-     * @throws ControllerException
      */
-    public Entry get(Account account, long id) throws ControllerException {
+    public Entry get(String userId, long id) {
         Entry entry = dao.get(id);
         if (entry == null)
             return null;
 
-        authorization.expectRead(account.getEmail(), entry);
+        authorization.expectRead(userId, entry);
         return entry;
     }
 

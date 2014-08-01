@@ -87,5 +87,6 @@
         <mapping class="org.jbei.ice.lib.net.RemotePartner"/>
         <mapping class="org.jbei.ice.lib.entry.sample.model.Request"/>
         <mapping class="org.jbei.ice.lib.models.Audit"/>
+        <mapping class="org.jbei.ice.lib.experiment.Experiment"/>
     </session-factory>
 </hibernate-configuration>

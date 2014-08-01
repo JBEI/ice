@@ -1,7 +1,7 @@
 ICE
 ===
 
-Inventory for Composable Elements (ICE) is being developed by the [Joint BioEnergy Institute](http://www.jbei.org/) as an open source Registry software for biological parts. It is a web application and software platform that can be used by laboratories to track and search their constructs.
+Inventory of Composable Elements (ICE) is being developed by the [Joint BioEnergy Institute](http://www.jbei.org/) as an open source Registry software for biological parts. It is a web application and software platform that can be used by laboratories to track and search their constructs.
 It can be run as a stand-alone server software, or can be used as an application programming interface (<a href="https://public-registry.jbei.org/api">SOAP API</a>) to build other software tools to manipulate biological parts.
 
 You can try out the software and use our tools on our [Public Registry](http://public-registry.jbei.org).
