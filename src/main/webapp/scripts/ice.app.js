@@ -59,11 +59,6 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
 
     // angular ui
     $stateProvider
-        .state('test', {
-            url:'/test',
-            templateUrl:'/views/test.html',
-            controller:'TestController'
-        })
         .state('main', {
             url:'/',
             templateUrl:'/views/folder.html',
@@ -129,6 +124,11 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
                 }
             }
         })
+        .state('main.edit', {
+            url:'entry/edit/:id',
+            controller:'EditEntryController',
+            templateUrl:'/views/entry/edit.html'
+        })
         .state('main.entry', {
             url:'entry/:id',
             controller:'EntryController',
@@ -141,25 +141,18 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.entry.option', {
             url:'/:option',
-            templateUrl:'/views/entry/sequence-analysis.html',
-            controller:function(sessionValid) {
-                console.log("sessionValid", sessionValid);
-            }
+            templateUrl:'/views/entry/sequence-analysis.html'
         })
         .state('main.create', {
             url:'create/:type',
-            controller: 'CreateEntryController',
+            controller:'CreateEntryController',
             templateUrl:'/views/entry/create-entry.html'
             // illustrates using parameter for
 //            templateUrl: function (stateParams) {
 //                return '/views/entry/create-' + stateParams.type + '.html';
 //            }
         })
-        .state('main.edit', {
-            url:'entry/edit/:id',
-            controller:'EditEntryController',
-            templateUrl:'/views/entry/edit.html'
-        })
+
         .state('main.profile', {
             url:'profile/:id',
             templateUrl:'/views/profile.html'
@@ -167,7 +160,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         .state('main.profile.option', {
             url:'/:option',
             templateUrl:'/views/profile/groups.html',
-            controller: function(sessionValid) {
+            controller:function (sessionValid) {
                 console.log("profile", sessionValid);
             }
         })

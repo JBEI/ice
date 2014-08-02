@@ -1914,18 +1914,21 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
 
     $scope.entryFields = undefined;
     $scope.entry = undefined;
-    entry.query({partId:$stateParams.id},
-        function (result) {
-            $rootScope.$broadcast("EntryRetrieved", result);
-            $scope.entry = result;
-            $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
 
-            entry.statistics({partId:$stateParams.id}, function (stats) {
-                $scope.entryStatistics = stats;
+    if (!isNaN($stateParams.id)) {
+        entry.query({partId:$stateParams.id},
+            function (result) {
+                $rootScope.$broadcast("EntryRetrieved", result);
+                $scope.entry = result;
+                $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+
+                entry.statistics({partId:$stateParams.id}, function (stats) {
+                    $scope.entryStatistics = stats;
+                });
+            }, function (error) {
+                console.error(error);
             });
-        }, function (error) {
-            console.error(error);
-        });
+    }
 
     var menuSubDetails = $scope.subDetails = [
         {url:'/views/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
