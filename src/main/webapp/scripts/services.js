@@ -521,6 +521,7 @@ iceServices.factory('Entry', function ($resource) {
 
             moveEntriesToTrash:{
                 method:'POST',
+                url:'/rest/part/trash',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 

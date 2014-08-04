@@ -440,6 +440,7 @@ public class PartResource extends RestResource {
     }
 
     @POST
+    @Path("/trash")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response moveToTrash(ArrayList<PartData> list,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {

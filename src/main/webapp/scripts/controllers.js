@@ -3,32 +3,6 @@
 var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload',
     'vr.directives.slider', 'angularMoment']);
 
-iceControllers.controller('EntrySampleController', function ($scope, $modal, $cookieStore, $stateParams, Entry) {
-    $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-    $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-
-    $scope.openAddToCart = function () {
-        var modalInstance = $modal.open({
-            templateUrl:'/views/modal/sample-request.html'
-        });
-
-        modalInstance.result.then(function (selected) {
-            console.log("selected", selected);
-            $scope.$emit("SampleTypeSelected", selected);
-            // "liquid" or "streak"
-
-        }, function () {
-            // dismiss callback
-        });
-    };
-
-    var sessionId = $cookieStore.get("sessionId");
-    var entry = Entry(sessionId);
-    entry.samples({partId:$stateParams.id}, function (result) {
-        $scope.samples = result;
-    });
-});
-
 iceControllers.controller('ActionMenuController', function ($scope, $window, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
     $scope.entrySelected = false;
@@ -79,10 +53,10 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     };
 
     $scope.deleteSelectedEntries = function () {
-        // todo : consider using post to "move to trash"
         Entry(sid).moveEntriesToTrash(selectedEntries,
             function (result) {
                 console.log(result);
+                $location.path($location.path());
             }, function (error) {
                 console.log(error);
             })
@@ -1173,19 +1147,39 @@ iceControllers.controller('EditEntryController',
     function ($scope, $location, $cookieStore, $rootScope, $stateParams, Entry, EntryService) {
 
         var entry = Entry($cookieStore.get("sessionId"));
+        $scope.entry = undefined;
         entry.query({partId:$stateParams.id}, function (result) {
             $scope.entry = result;
-            console.log(result);
-            if (!result.selectionMarkers || !result.selectionMarkers.length) {
+
+            // convert selection markers from array of strings to array of objects for the ui
+            var arrayLength = result.selectionMarkers.length;
+            if (arrayLength) {
+                var tmp = [];
+                for (var i = 0; i < arrayLength; i++) {
+                    tmp.push({value:result.selectionMarkers[i]});
+                }
+                angular.copy(tmp, $scope.entry.selectionMarkers);
+            } else {
                 $scope.entry.selectionMarkers = [
                     {}
                 ];
             }
-            if (!result.links || !result.links.length) {
+
+            // convert links from array of strings to array of objects for the ui
+            var linkLength = result.links.length;
+
+            if (linkLength) {
+                var tmpLinkObjectArray = [];
+                for (var j = 0; j < linkLength; j++) {
+                    tmpLinkObjectArray.push({value:result.links[j]});
+                }
+                angular.copy(tmpLinkObjectArray, $scope.entry.links);
+            } else {
                 $scope.entry.links = [
                     {}
                 ];
             }
+
             if (result.bioSafetyLevel)
                 $scope.entry.bioSafetyLevel = "Level " + result.bioSafetyLevel;
             $scope.linkOptions = EntryService.linkOptions(result.type);
@@ -2071,122 +2065,6 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         item.formData.push({entryType:$scope.entry.type});
         item.formData.push({entryRecordId:$scope.entry.recordId});
     });
-});
-
-iceControllers.controller('EntryAttachmentController', function ($scope, $window, $cookieStore, $stateParams, $fileUploader, Attachment) {
-    console.log("EntryAttachmentController");
-
-    // create a uploader with options
-
-    var sid = $cookieStore.get("sessionId");
-    var attachment = Attachment(sid);
-
-    var desc = "";
-    $scope.$watch('attachmentDescription', function () {
-        desc = $scope.attachmentDescription;
-    });
-
-    var uploader = $scope.uploader = $fileUploader.create({
-        scope:$scope, // to automatically update the html. Default: $rootScope
-        url:"/rest/file/attachment",
-        method:'POST',
-        removeAfterUpload:true,
-        headers:{"X-ICE-Authentication-SessionId":sid}
-//        formData:[
-//            { description:desc}
-//        ]
-//        filters:[
-//            function (item) {                    // user defined filter example
-//                console.info('filter1', item);   // added to queue if it returns true
-//                console.info('filter1', $scope.attachmentDescription);   // added to queue if it returns true
-//                return true;
-//            }
-//        ]
-    });
-
-//    uploader.bind('beforeupload', function (event, item) {
-//        item.uploader.url = item.url = 'upload?type=attachment&eid=' + $scope.entry.id;
-//    });
-
-    // example of event binding
-//    uploader.bind('afteraddingfile', function (event, item) {
-//        console.info('After adding a file', item);
-//    });
-
-    uploader.bind('success', function (event, xhr, item, response) {
-        response.description = desc;
-        attachment.create({partId:$stateParams.id}, response,
-            function (result) {
-                $scope.attachments.push(result);
-                $scope.cancel();
-            });
-    });
-
-    uploader.bind('error', function (event, xhr, item, response) {
-        console.error('Error', xhr, item, response);
-    });
-
-//    uploader.bind('complete', function (event, xhr, item, response) {
-//        console.info('Complete', xhr, item, response);
-//    });
-
-//    uploader.bind('cancel', function (event, xhr, item) {
-//        console.info('cancel', xhr, item);
-//    });
-
-    $scope.cancel = function () {
-        $scope.uploader.cancelAll();
-        $scope.uploader.clearQueue();
-        $scope.showAttachmentInput = false;
-        $scope.attachmentDescription = undefined;
-    };
-
-    attachment.get({partId:$stateParams.id}, function (result) {
-        $scope.attachments = result;
-    });
-
-    $scope.downloadAttachment = function (attachment) {
-        $window.open("/rest/file/attachment/" + attachment.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
-    };
-
-    $scope.deleteAttachment = function (index, att) {
-        attachment.delete({partId:$stateParams.id, attachmentId:att.id}, function (result) {
-            confirmObject[index] = false;
-            $scope.attachments.splice(index, 1);
-        });
-    };
-
-    var confirmObject = {};
-    $scope.confirmDelete = function (idx) {
-        return confirmObject[idx];
-    };
-
-    $scope.setConfirmDelete = function (idx, value) {
-        confirmObject[idx] = value;
-    }
-});
-
-iceControllers.controller('EntryCommentController', function ($scope, $cookieStore, $stateParams, Entry) {
-    var entryId = $stateParams.id;
-    var entry = Entry($cookieStore.get("sessionId"));
-
-    entry.comments({partId:entryId}, function (result) {
-        $scope.entryComments = result;
-    });
-
-    entry.samples({partId:entryId}, function (result) {
-        $scope.entrySamples = result;
-    });
-
-    $scope.createComment = function () {
-        entry.createComment({partId:entryId}, $scope.newComment, function (result) {
-            $scope.entryComments.splice(0, 0, result);
-            $scope.addComment = false;
-            $scope.entryStatistics.commentCount = $scope.entryComments.length;
-        }, function (error) {
-            console.error("comment create error", error);
-        });
-    };
 });
 
 iceControllers.controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Entry) {
