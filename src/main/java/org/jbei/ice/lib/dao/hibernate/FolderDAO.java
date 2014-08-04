@@ -11,6 +11,7 @@ import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
@@ -20,7 +21,6 @@ import org.jbei.ice.lib.shared.ColumnField;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
@@ -75,14 +75,15 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * @throws DAOException on any exception retrieving the folder or its contents
      */
     public Long getFolderSize(long id) throws DAOException {
-        Session session = currentSession();
         try {
-            SQLQuery query = session.createSQLQuery("select count(*) from folder_entry where folder_id = :id ");
-            query.setLong("id", id);
-            Number result = ((Number) query.uniqueResult());
-            return result.longValue();
-
+            Criteria criteria = currentSession().createCriteria(Entry.class);
+            criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            criteria.createAlias("folders", "f");
+            criteria.add(Restrictions.eq("f.id", id));
+            Number number = (Number) criteria.setProjection(Projections.rowCount()).uniqueResult();
+            return number.longValue();
         } catch (HibernateException he) {
+            Logger.error(he);
             throw new DAOException(he);
         }
     }
@@ -123,10 +124,12 @@ public class FolderDAO extends HibernateRepository<Folder> {
             }
 
             String ascString = asc ? " asc" : " desc";
-            Query query = session.createQuery("select distinct e from Entry e "
-                                                      + "join e.folders f where f.id = :id order by e."
-                                                      + sortString + ascString);
+            String queryString = "select distinct e from Entry e join e.folders f where f.id = :id "
+                    + "AND e.visibility=:v order by e." + sortString + ascString;
+
+            Query query = session.createQuery(queryString);
             query.setLong("id", folderId);
+            query.setInteger("v", Visibility.OK.getValue());
             query.setFirstResult(start);
             query.setMaxResults(limit);
             List list = query.list();
