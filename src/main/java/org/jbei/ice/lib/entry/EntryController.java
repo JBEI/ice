@@ -122,8 +122,7 @@ public class EntryController {
         return info;
     }
 
-    public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit)
-            throws ControllerException {
+    public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit) {
         if (userId == null) {
             return new FolderController().getPublicEntries();
         }

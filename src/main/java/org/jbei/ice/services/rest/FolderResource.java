@@ -8,7 +8,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -21,7 +20,6 @@ import org.jbei.ice.lib.folder.Collection;
 import org.jbei.ice.lib.folder.FolderContentRetriever;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.services.exception.ResourceNotFoundException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -92,12 +90,6 @@ public class FolderResource extends RestResource {
         }
     }
 
-    /**
-     * @param folderId
-     * @param folderType      Type of folder being deleted as defined in {@link org.jbei.ice.lib.dto.folder.FolderType}
-     * @param userAgentHeader
-     * @return
-     */
     @DELETE
     @Path("/{id}")
     public FolderDetails deleteFolder(@PathParam("id") long folderId,
@@ -132,60 +124,50 @@ public class FolderResource extends RestResource {
             @DefaultValue("false") @QueryParam("asc") boolean asc,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
 
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        ColumnField field = ColumnField.valueOf(sort.toUpperCase());
+
         try {
-            String userId = getUserIdFromSessionHeader(userAgentHeader);
-            ColumnField field = ColumnField.valueOf(sort.toUpperCase());
+            long id = Long.decode(folderId);
+            return controller.retrieveFolderContents(userId, id, field, asc, offset, limit);
+        } catch (NumberFormatException nfe) {
+        }
 
-            try {
-                long id = Long.decode(folderId);
-                return controller.retrieveFolderContents(userId, id, field, asc, offset, limit);
-            } catch (NumberFormatException nfe) {
-            }
+        EntryController entryController = new EntryController();
+        FolderDetails details = new FolderDetails();
+        switch (folderId) {
+            case "personal":
+                List<PartData> entries = entryController.retrieveOwnerEntries(userId, userId, field,
+                                                                              asc, offset, limit);
+                long count = entryController.getNumberOfOwnerEntries(userId, userId);
+                details.getEntries().addAll(entries);
+                details.setCount(count);
+                return details;
 
-            EntryController entryController = new EntryController();
-            FolderDetails details = new FolderDetails();
-            switch (folderId) {
-                case "personal":
-                    List<PartData> entries = entryController.retrieveOwnerEntries(userId, userId, field,
-                                                                                  asc, offset, limit);
-                    long count = entryController.getNumberOfOwnerEntries(userId, userId);
-                    details.getEntries().addAll(entries);
-                    details.setCount(count);
-                    return details;
+            case "available":
+                Logger.info("Retrieving " + folderId + " entries");
+                FolderDetails retrieved = entryController.retrieveVisibleEntries(userId, field, asc, offset, limit);
+                details.setEntries(retrieved.getEntries());
+                details.setCount(entryController.getNumberOfVisibleEntries(userId));
+                return details;
 
-                case "available":
-                    try {
-                        Logger.info("Retrieving " + folderId + " entries");
-                        FolderDetails retrieved = entryController.retrieveVisibleEntries(userId, field, asc, offset,
-                                                                                         limit);
-                        details.setEntries(retrieved.getEntries());
-                        details.setCount(entryController.getNumberOfVisibleEntries(userId));
-                        return details;
-                    } catch (ControllerException e) {
-                        Logger.error(e);
-                        return null;
-                    }
+            case "shared":
+                List<PartData> data = entryController.getEntriesSharedWithUser(userId, field, asc, offset, limit);
+                details.setEntries(data);
+                details.setCount(entryController.getNumberOfEntriesSharedWithUser(userId));
+                return details;
 
-                case "shared":
-                    List<PartData> data = entryController.getEntriesSharedWithUser(userId, field, asc, offset, limit);
-                    details.setEntries(data);
-                    details.setCount(entryController.getNumberOfEntriesSharedWithUser(userId));
-                    return details;
+            case "drafts":
+                return retriever.getDraftEntries(userId, field, asc, offset, limit);
 
-                case "drafts":
-                    return retriever.getDraftEntries(userId, field, asc, offset, limit);
+            case "deleted":
+                return retriever.getDeletedEntries(userId, field, asc, offset, limit);
 
-                case "deleted":
-                    return retriever.getDeletedEntries(userId, field, asc, offset, limit);
+            case "pending":
+                return retriever.getPendingEntries(userId, field, asc, offset, limit);
 
-                case "pending":
-                    return retriever.getPendingEntries(userId, field, asc, offset, limit);
-
-                default:
-                    return null;
-            }
-        } catch (ControllerException e) {
-            throw new ResourceNotFoundException();
+            default:
+                return null;
         }
     }
 

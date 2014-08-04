@@ -55,8 +55,10 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     $scope.deleteSelectedEntries = function () {
         Entry(sid).moveEntriesToTrash(selectedEntries,
             function (result) {
-                console.log(result);
-                $location.path($location.path());
+                console.log("moving", selectedEntries.length, "entries to trash");
+//                console.log(result);
+                $scope.$broadcast("RefreshAfterDeletion");
+//                $location.path($location.path());
             }, function (error) {
                 console.log(error);
             })
@@ -539,7 +541,7 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
 
     $scope.canChangePassword = function () {
         return false;
-    }
+    };
 
     $scope.updateProfile = function () {
         user.update({userId:profileId}, $scope.editProfile, function (result) {
@@ -921,16 +923,24 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
     $scope.maxSize = 5;  // number of clickable pages to show in pagination
 
     $scope.setPage = function (pageNo) {
+        if (pageNo == undefined)
+            pageNo = 1;
+
         $scope.loadingPage = true;
         if ($scope.params.folderId === undefined)
             $scope.params.folderId = 'personal';
         $scope.params.offset = (pageNo - 1) * 15; // TODO : make sure it is a number
         console.log("page#", pageNo, "queryParams", $scope.params);
         folders.folder($scope.params, function (result) {
+            console.log("folder', result");
             $scope.folder = result;
             $scope.loadingPage = false;
         });
     };
+
+    $scope.$on("RefreshAfterDeletion", function (event, data) {
+        $scope.setPage(1);
+    });
 
     $scope.sort = function (sortType) {
         $scope.folder = null;
@@ -1948,8 +1958,6 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
 
     // check if a selection has been made
     var menuOption = $stateParams.option;
-    console.log($stateParams);
-
     if (menuOption === undefined) {
         $scope.selection = menuSubDetails[0].url;
         menuSubDetails[0].selected = true;
@@ -2065,95 +2073,6 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         item.formData.push({entryType:$scope.entry.type});
         item.formData.push({entryRecordId:$scope.entry.recordId});
     });
-});
-
-iceControllers.controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Entry) {
-    var entryId = $stateParams.id;
-    var entry = Entry($cookieStore.get("sessionId"));
-    $scope.experiment = {};
-    $scope.addExperiment = false;
-
-    entry.experiments({partId:entryId}, function (result) {
-        $scope.entryExperiments = result;
-    });
-
-    $scope.createExperiment = function () {
-        if ($scope.experiment === undefined || $scope.experiment.url === undefined || $scope.experiment.url === ''
-            || $scope.experiment.url.lastIndexOf('http', 0) !== 0) {
-            $scope.urlMissing = true;
-            return;
-        }
-
-        entry.createExperiment({partId:entryId}, $scope.experiment, function (result) {
-            $scope.entryExperiments.splice(0, 0, result);
-            $scope.addExperiment = false;
-            $scope.entryStatistics.experimentalDataCount = $scope.entryExperiments.length;
-        }, function (error) {
-            console.error("experiment create error", error);
-        });
-    };
-});
-
-iceControllers.controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Entry) {
-    var entryId = $stateParams.id;
-    var sid = $cookieStore.get("sessionId");
-    var entry = Entry(sid);
-
-    entry.history({partId:entryId}, function (result) {
-        $scope.history = result;
-    });
-
-    $scope.deleteHistory = function (history) {
-        // todo : delete
-    }
-});
-
-iceControllers.controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, $fileUploader, Entry) {
-    var entryId = $stateParams.id;
-    var sid = $cookieStore.get("sessionId");
-    var entry = Entry(sid);
-
-    entry.traceSequences({partId:entryId}, function (result) {
-        $scope.traceSequences = result;
-    });
-
-    var uploader = $scope.traceSequenceUploader = $fileUploader.create({
-        scope:$scope, // to automatically update the html. Default: $rootScope
-        url:"/rest/part/" + entryId + "/traces",
-        method:'POST',
-        removeAfterUpload:true,
-        headers:{"X-ICE-Authentication-SessionId":sid},
-        autoUpload:true,
-        queueLimit:1, // can only upload 1 file
-        formData:[
-            { entryId:entryId}
-        ]
-    });
-
-    $scope.deleteTraceSequenceFile = function (fileId) {
-        var foundTrace = undefined;
-        var foundIndex = undefined;
-
-        for (var i = 0; i < $scope.traceSequences.length; i++) {
-            var trace = $scope.traceSequences[i];
-            if (trace.fileId === fileId && trace.fileId != undefined) {
-                foundTrace = trace;
-                foundIndex = i;
-                break;
-            }
-        }
-
-        if (foundTrace != undefined) {
-            entry.deleteTraceSequence({partId:entryId, traceId:foundTrace.id}, function (result) {
-                $scope.traceSequences.splice(foundIndex, 1);
-                $scope.entryStatistics.traceSequenceCount = $scope.traceSequences.length;
-            });
-        }
-    };
-
-    $scope.downloadTraceFile = function (trace) {
-        $window.open("/rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
-    };
 });
 
 iceControllers.controller('FolderPermissionsController', function ($scope, $modalInstance, $cookieStore, Folders, User, folder) {

@@ -239,7 +239,7 @@ public class PermissionsController {
         return dao.hasPermissionMulti(entry, null, null, groups, true, false);
     }
 
-    public boolean isPublicVisible(Folder folder) throws ControllerException {
+    public boolean isPublicVisible(Folder folder) {
         Group publicGroup = groupController.createOrRetrievePublicGroup();
         Set<Group> groups = new HashSet<>();
         groups.add(publicGroup);

@@ -167,7 +167,7 @@ public class FolderController {
 
 
     public FolderDetails retrieveFolderContents(String userId, long folderId, ColumnField sort, boolean asc,
-            int start, int limit) throws ControllerException {
+            int start, int limit) {
         Folder folder = dao.get(folderId);
         if (folder == null)
             return null;
