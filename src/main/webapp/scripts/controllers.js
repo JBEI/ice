@@ -55,10 +55,8 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     $scope.deleteSelectedEntries = function () {
         Entry(sid).moveEntriesToTrash(selectedEntries,
             function (result) {
-                console.log("moving", selectedEntries.length, "entries to trash");
-//                console.log(result);
                 $scope.$broadcast("RefreshAfterDeletion");
-//                $location.path($location.path());
+                $scope.$broadcast("UpdateCollectionCounts");
             }, function (error) {
                 console.log(error);
             })
