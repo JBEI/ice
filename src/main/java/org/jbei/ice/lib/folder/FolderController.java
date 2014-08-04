@@ -166,8 +166,6 @@ public class FolderController {
     }
 
 
-
-
     public FolderDetails retrieveFolderContents(String userId, long folderId, ColumnField sort, boolean asc,
             int start, int limit) throws ControllerException {
         Folder folder = dao.get(folderId);
@@ -329,7 +327,7 @@ public class FolderController {
         collection.setAvailable(entryController.getNumberOfVisibleEntries(userId));
         collection.setDeleted(entryDAO.getDeletedCount(userId));
         collection.setPersonal(entryController.getNumberOfOwnerEntries(userId, userId));
-        collection.setShared(entryController.getNumberofEntriesSharedWithUser(userId));
+        collection.setShared(entryController.getNumberOfEntriesSharedWithUser(userId));
         collection.setDrafts(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT));
         if (account.getType() == AccountType.ADMIN)
             collection.setPending(entryDAO.getPendingCount());

@@ -176,7 +176,7 @@ public class EntryController {
         return dao.visibleEntryCount(account, accountGroups);
     }
 
-    public long getNumberofEntriesSharedWithUser(String userId) {
+    public long getNumberOfEntriesSharedWithUser(String userId) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         Set<Group> accountGroups = new HashSet<>(account.getGroups());
         GroupController controller = new GroupController();

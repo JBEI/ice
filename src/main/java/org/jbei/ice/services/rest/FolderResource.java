@@ -169,7 +169,7 @@ public class FolderResource extends RestResource {
                 case "shared":
                     List<PartData> data = entryController.getEntriesSharedWithUser(userId, field, asc, offset, limit);
                     details.setEntries(data);
-                    details.setCount(entryController.getNumberofEntriesSharedWithUser(userId));
+                    details.setCount(entryController.getNumberOfEntriesSharedWithUser(userId));
                     return details;
 
                 case "drafts":
