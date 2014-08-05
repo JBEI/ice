@@ -10,7 +10,6 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
-import org.jbei.ice.lib.dto.StorageInfo;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryUtil;
@@ -23,7 +22,6 @@ import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 
 /**
@@ -78,17 +76,6 @@ public class ModelToInfoFactory {
         }
 
         return infos;
-    }
-
-    public static StorageInfo getStorageInfo(Storage storage) {
-        StorageInfo info = new StorageInfo();
-        if (storage == null)
-            return info;
-
-        info.setDisplay(storage.getIndex());
-        info.setId(storage.getId());
-        info.setType(storage.getStorageType().name());
-        return info;
     }
 
     public static ArrayList<TraceSequenceAnalysis> getSequenceAnalysis(List<TraceSequence> sequences) {

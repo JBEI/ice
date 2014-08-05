@@ -1,74 +1,74 @@
-<div ng-controller="EntrySampleController">
+<div ng-controller="EntrySampleController" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
     <div class="row pad_top">
         <button type="button" class="ice-button"><i style="font-size: 14px; color: #007dbc" class="fa fa-plus"></i>Add
             Sample
         </button>
         &nbsp;
-        <button ng-click="openAddToCart()" type="button" class="ice-button"><i
-                style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Add to Cart
+        <button ng-click="openAddToCart()" type="button" class="ice-button">
+            <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Add to Cart
         </button>
     </div>
 
     <div class="row pad_top" ng-repeat="sample in samples">
-        <div class="col-md-6">
+        <div class="col-md-6" ng-if="sample.type==='PLATE96'">
             <table class="entry_sample_panel">
-                <!--<tr>-->
-                    <!--<td colspan="{{Plate96Cols.length+1}}" align="center" class="bg_cc"><b>Name</b></td>-->
-                <!--</tr>-->
                 <tr>
                     <td>&nbsp;</td>
                     <td class="text-center" ng-repeat="col in Plate96Cols"><strong>{{col}}</strong></td>
                 </tr>
                 <tr ng-repeat="row in Plate96Rows">
-                    <td><strong>{{row}}</strong></td>
-                    <!--<td ng-repeat="col in Plate96Cols track by $id(col)" class="border-1">{{row}}<b-->
-                            <!--style="vertical-align: sub; font-size: 7px">{{col}}</b></td>-->
-                    <!--<td class="border-1-selected bg_coral" title="0105793581">H<b-->
-                    <!--style="vertical-align: sub; font-size: 7px">7</b></td>-->
+                    <td><strong>{{row}}</strong>&nbsp;</td>
                     <td ng-repeat="col in Plate96Cols track by $id(col)">
-                        <i class="fa fa-circle-thin opacity_hover" style="font-size: 30px"></i>
+                        <i class="fa fa-circle-thin opacity_hover" style="font-size: 30px"
+                           ng-if="row + (10+col+'').slice(-2) !== sample.well.display"></i>
+                        <i class="fa fa-circle" ng-class="{'green':sample.tube, 'alert_color':!sample.tube}"
+                           style="font-size: 30px" ng-if="row + (10+col+'').slice(-2) === sample.well.display"
+                           title="{{sample.tube.display}}"></i>
                     </td>
                 </tr>
-                <!--<tr>-->
-                    <!--<td class="bg_cc" colspan="13" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM-->
-                        <!--by <a href="#page=profile;id=afschlatter@lbl.gov">afschlatter@lbl.gov</a></td>-->
-                <!--</tr>-->
+                <tr>
+                    <td colspan="{{Plate96Cols.length+1}}" class="font-75em">
+                        <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+                        <strong>{{sample.label}}</strong><br>
+                        <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
+                            ng-href="/profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
+                        {{sample.depositor.lastName}}</a>
+                    </td>
+                </tr>
             </table>
         </div>
-    </div>
 
-    <div class="row pad_top">
-        <div class="col-md-6">
-        <table class="entry_sample_panel">
-                <tr>
-                    <td colspan="{{Plate96Cols.length}}" align="center" class="bg_cc"><b> PLATE 000000000090</b></td>
-                </tr>
-                <tr ng-repeat="row in Plate96Rows">
-                    <td ng-repeat="col in Plate96Cols track by $id(col)" class="border-1">{{row}}<b
-                            style="vertical-align: sub; font-size: 7px">{{col}}</b></td>
-                    <!--<td class="border-1-selected bg_coral" title="0105793581">H<b-->
-                    <!--style="vertical-align: sub; font-size: 7px">7</b></td>-->
-                </tr>
-                <tr>
-                    <td class="bg_cc" colspan="13" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM
-                        by <a href="#page=profile;id=afschlatter@lbl.gov">afschlatter@lbl.gov</a></td>
-                </tr>
-            </table>
-        </div>
-        <div class="col-md-6 text-center">
+        <div class="col-md-6" ng-if="sample.type==='SHELF'">
             <table class="entry_sample_panel">
                 <tr>
-                    <td colspan="{{Plate96Cols.length}}" align="center" class="bg_cc"><b> PLATE 000000000090</b></td>
-                </tr>
-                <tr ng-repeat="row in Plate96Rows">
-                    <td ng-repeat="col in Plate96Cols track by $id(col)" class="border-1">{{row}}<b
-                            style="vertical-align: sub; font-size: 7px">{{col}}</b></td>
-                    <!--<td class="border-1-selected bg_coral" title="0105793581">H<b-->
-                    <!--style="vertical-align: sub; font-size: 7px">7</b></td>-->
+                    <td colspan="4"><strong style="color: #a52a2a;">SHELF {{sample.main.display}} </strong></td>
                 </tr>
                 <tr>
-                    <td class="bg_cc" colspan="13" align="center"><b>Keio Working Copy</b> - <br>Apr 06, 2011 11:10 AM
-                        by <a href="#page=profile;id=afschlatter@lbl.gov">afschlatter@lbl.gov</a></td>
+                    <td>&nbsp;</td>
+                    <td class="pad-8">
+                        <h3 class="text-center">Box
+                            <small>{{sample.box.display}}</small>
+                        </h3>
+                    </td>
+                    <td class="pad-8">
+                        <h2 class="text-center">Well
+                            <small>{{sample.well.display}}</small>
+                        </h2>
+                    </td>
+                    <td class="pad-8">
+                        <h1>Tube
+                            <small>{{sample.tube.display}}</small>
+                        </h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="{{Plate96Cols.length+1}}" class="font-75em">
+                        <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+                        <strong>{{sample.label}}</strong><br>
+                        <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
+                            ng-href="/profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
+                        {{sample.depositor.lastName}}</a>
+                    </td>
                 </tr>
             </table>
         </div>

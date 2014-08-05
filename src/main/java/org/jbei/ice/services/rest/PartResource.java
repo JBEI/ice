@@ -24,11 +24,12 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
-import org.jbei.ice.lib.dto.sample.SampleStorage;
+import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
+import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.experiment.ExperimentController;
 import org.jbei.ice.lib.experiment.Study;
@@ -344,10 +345,11 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public ArrayList<SampleStorage> getSamples(@Context UriInfo info, @PathParam("id") long partId,
+    public ArrayList<PartSample> getSamples(@Context UriInfo info, @PathParam("id") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.retrieveEntrySamples(userId, partId);
+        SampleController sampleController = new SampleController();
+        return sampleController.retrieveEntrySamples(userId, partId);
     }
 
     @GET

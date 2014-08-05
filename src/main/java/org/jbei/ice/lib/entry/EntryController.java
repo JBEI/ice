@@ -38,7 +38,6 @@ import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.History;
-import org.jbei.ice.lib.dto.PartSample;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -46,11 +45,8 @@ import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
-import org.jbei.ice.lib.dto.sample.SampleStorage;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.sample.SampleController;
-import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.folder.Folder;
@@ -61,7 +57,6 @@ import org.jbei.ice.lib.models.Audit;
 import org.jbei.ice.lib.models.AuditType;
 import org.jbei.ice.lib.models.Comment;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.vo.DNASequence;
@@ -566,47 +561,6 @@ public class EntryController {
             result.add(history);
         }
         return result;
-    }
-
-    public ArrayList<SampleStorage> retrieveEntrySamples(String userId, long entryId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return null;
-
-        authorization.expectRead(userId, entry);
-
-        // samples
-        ArrayList<Sample> samples = new SampleController().getSamples(entry);
-        ArrayList<SampleStorage> sampleStorages = new ArrayList<>();
-        if (samples != null && !samples.isEmpty()) {
-            for (Sample sample : samples) {
-                SampleStorage sampleStorage = new SampleStorage();
-
-                // convert sample to info
-                PartSample partSample = new PartSample();
-                partSample.setCreationTime(sample.getCreationTime());
-                partSample.setLabel(sample.getLabel());
-                partSample.setNotes(sample.getNotes());
-                partSample.setDepositor(sample.getDepositor());
-                sampleStorage.setPartSample(partSample);
-
-                // convert sample to info
-                Storage storage = sample.getStorage();
-
-                while (storage != null) {
-                    if (storage.getStorageType() == Storage.StorageType.SCHEME) {
-                        partSample.setLocationId(storage.getId() + "");
-                        partSample.setLocation(storage.getName());
-                        break;
-                    }
-
-                    sampleStorage.getStorageList().add(ModelToInfoFactory.getStorageInfo(storage));
-                    storage = storage.getParent();
-                }
-                sampleStorages.add(sampleStorage);
-            }
-        }
-        return sampleStorages;
     }
 
     public PartStatistics retrieveEntryStatistics(String userId, long entryId) {

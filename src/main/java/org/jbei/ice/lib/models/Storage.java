@@ -6,7 +6,7 @@ import java.util.Set;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IDataModel;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.StorageInfo;
 
 /**
  * Store sample storage location information as well as the hierarchical structure information.
@@ -63,11 +63,6 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
 public class Storage implements IDataModel {
 
     private static final long serialVersionUID = 1L;
-
-    @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
 
     public enum StorageType {
         GENERIC, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, PLATE81, WELL, TUBE, SCHEME
@@ -199,6 +194,15 @@ public class Storage implements IDataModel {
 
     public ArrayList<Storage> getSchemes() {
         return schemes;
+    }
+
+    @Override
+    public StorageInfo toDataTransferObject() {
+        StorageInfo info = new StorageInfo();
+        info.setDisplay(getIndex());
+        info.setId(getId());
+        info.setType(getStorageType().name());
+        return info;
     }
 
     @Override
