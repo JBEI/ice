@@ -1997,13 +1997,9 @@ td.selected i.font-awesome {
 
 .entry_detail_submenu {
     width: 180px;
-    color: #0082C0;
+    color: #4482C0;
     font-size: 0.9em;
     background-color: #f7f7f7;
-}
-
-.entry_detail_submenu i {
-    color: #999;
 }
 
 .profile_menu:hover, .entry_detail_submenu:hover {
