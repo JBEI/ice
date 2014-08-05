@@ -82,8 +82,8 @@ public class AccountControllerTest {
         info.setEmail("testCreateNewAccount");
         info.setFirstName("Test");
         info.setLastName("Test");
-        String password = controller.createNewAccount(info, false);
-        Assert.assertNotNull(password);
+        info = controller.createNewAccount(info, false);
+        Assert.assertNotNull(info.getPassword());
     }
 
     @Test

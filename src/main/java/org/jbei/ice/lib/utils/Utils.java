@@ -158,4 +158,12 @@ public class Utils {
             return value;
         return key.getDefaultValue();
     }
+
+    public static boolean canRegister() {
+        String value = getConfigValue(ConfigurationKey.NEW_REGISTRATION_ALLOWED);
+        if (value == null)
+            return false;
+
+        return value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true");
+    }
 }

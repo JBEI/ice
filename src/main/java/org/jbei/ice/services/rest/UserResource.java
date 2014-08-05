@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.account.AccountController;
@@ -159,6 +160,16 @@ public class UserResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader, AccountTransfer transfer) {
         String user = getUserIdFromSessionHeader(userAgentHeader);
         return controller.updateAccount(user, userId, transfer);
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createNewUser(AccountTransfer accountTransfer) {
+        accountTransfer = controller.createNewAccount(accountTransfer, true);
+        if (accountTransfer == null)
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR);
+        return super.respond(Response.Status.OK, accountTransfer);
     }
 
     @GET

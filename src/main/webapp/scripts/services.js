@@ -287,7 +287,10 @@ iceServices.factory('User', function ($resource) {
             },
 
             createUser:{
-
+                method:'PUT',
+                url:'/rest/users/',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             getEntries:{

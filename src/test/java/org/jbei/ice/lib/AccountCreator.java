@@ -26,9 +26,9 @@ public class AccountCreator {
         accountTransfer.setFirstName("TEST_FNAME");
         accountTransfer.setLastName("TEST");
         accountTransfer.setEmail(email);
-        String pass = accountController.createNewAccount(accountTransfer, false);
+        accountTransfer = accountController.createNewAccount(accountTransfer, false);
 
-        Assert.assertNotNull(pass);
+        Assert.assertNotNull(accountTransfer.getPassword());
         account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
 

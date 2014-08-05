@@ -1022,6 +1022,10 @@ ul#indented li a:hover {
 }
 
 .login_input_error {
+    width: 250px;
+    padding: 8px;
+    margin-bottom: 10px;
+    font-size: 0.9em;
     border: 1px solid #CC3333;
     background: #FCC;
     color: #f08080;
