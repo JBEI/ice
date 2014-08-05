@@ -150,16 +150,17 @@ public class AccountController {
      * @param accountTransfer account dto for validation
      * @throws ControllerException if validation fails
      */
-    private void validateRequiredAccountFields(AccountTransfer accountTransfer) throws ControllerException {
+    private boolean validateRequiredAccountFields(AccountTransfer accountTransfer) {
         if (accountTransfer.getFirstName() == null || accountTransfer.getFirstName().trim().isEmpty())
-            throw new ControllerException("Account first name is required");
+            return false;
 
         if (accountTransfer.getLastName() == null || accountTransfer.getLastName().trim().isEmpty())
-            throw new ControllerException("Account last name is required");
+            return false;
 
-        if (accountTransfer.getEmail() == null || accountTransfer.getEmail().trim().isEmpty()) {
-            throw new ControllerException("Cannot create account without user id");
-        }
+        if (accountTransfer.getEmail() == null || accountTransfer.getEmail().trim().isEmpty())
+            return false;
+
+        return true;
     }
 
     /**
@@ -169,15 +170,18 @@ public class AccountController {
      * @param info      contains information needed to create account
      * @param sendEmail whether to send account information (including password by email)
      * @return generated password
-     * @throws ControllerException in the event email is already assigned to another user or is empty
      */
-    public String createNewAccount(AccountTransfer info, boolean sendEmail) throws ControllerException {
+    public AccountTransfer createNewAccount(AccountTransfer info, boolean sendEmail) {
+        if (!Utils.canRegister())
+            return null;
+
         // validate fields required by the database
         validateRequiredAccountFields(info);
 
         String email = info.getEmail().trim();
         if (getByEmail(email) != null) {
-            throw new ControllerException("Account with id \"" + email + "\" already exists");
+            Logger.error("Account with id \"" + email + "\" already exists");
+            return null;
         }
 
         // generate salt and encrypt password before storing
@@ -191,8 +195,10 @@ public class AccountController {
         account.setCreationTime(Calendar.getInstance().getTime());
         save(account);
 
-        if (!sendEmail)
-            return newPassword;
+        if (!sendEmail) {
+            info.setPassword(newPassword);
+            return info;
+        }
 
         String subject = "Account created successfully";
         StringBuilder stringBuilder = new StringBuilder();
@@ -227,7 +233,8 @@ public class AccountController {
         }
         stringBuilder.append("\nPlease remember to change your password by going to your profile page.\n\n");
         Emailer.send(info.getEmail(), subject, stringBuilder.toString());
-        return newPassword;
+        info.setPassword(newPassword);
+        return info;
     }
 
     public Account createAdminAccount() {

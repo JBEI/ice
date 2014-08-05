@@ -6,6 +6,7 @@ import org.jbei.ice.lib.access.Authorization;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
+import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
@@ -28,7 +29,7 @@ public class EntryAuthorization extends Authorization<Entry> {
     public boolean canRead(String userId, Entry entry) {
 
         // super checks for owner or admin
-        if (super.canRead(userId, entry))
+        if (super.canRead(userId, entry) || super.canWrite(userId, entry))
             return true;
 
         Account account = getAccount(userId);
@@ -41,7 +42,7 @@ public class EntryAuthorization extends Authorization<Entry> {
         if (permissionDAO.hasPermissionMulti(entry, null, null, accountGroups, true, false))
             return true;
 
-        if (permissionDAO.hasPermissionMulti(entry, null, null, accountGroups, true, false))
+        if (permissionDAO.hasPermissionMulti(entry, null, null, accountGroups, false, true))
             return true;
 
         // check explicit read permission
@@ -49,6 +50,12 @@ public class EntryAuthorization extends Authorization<Entry> {
             return true;
 
         Set<Folder> entryFolders = entry.getFolders();
+
+        // is in a public folder
+        for (Folder folder : entryFolders) {
+            if (folder.getType() == FolderType.PUBLIC)
+                return true;
+        }
 
         // can any group that account belongs to read any folder that entry is contained in?
         if (permissionDAO.hasPermissionMulti(null, entryFolders, null, accountGroups, true, false))
