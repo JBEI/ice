@@ -195,7 +195,7 @@ iceDirectives.directive("ice.menu.wor", function () {
     return {
         restrict:"E",
         templateUrl:"/views/web-of-registries-menu.html",
-        controller:"WebOfRegistriesController"
+        controller:"WebOfRegistriesMenuController"
     }
 });
 

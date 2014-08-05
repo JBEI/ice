@@ -850,50 +850,93 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $locati
     $scope.entry = {'recordId':$scope.entryId};
 });
 
-iceControllers.controller('WebOfRegistriesController', function ($scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote) {
-    console.log("WebOfRegistriesController");
+iceControllers.controller('WebOfRegistriesController',
+    function ($scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote) {
+        console.log("WebOfRegistriesController");
 
-    // retrieve web of registries partners
-    $scope.wor = undefined;
-    var wor = WebOfRegistries();
+        // retrieve web of registries partners
+        $scope.wor = undefined;
+        var wor = WebOfRegistries();
 //    $scope.getPartners = function(approveOnly) {
-    wor.query({approved_only:false}, function (result) {
-        $scope.wor = result;
-    });
+        wor.query({approved_only:false}, function (result) {
+            $scope.wor = result;
+        });
 //    };
 
-    $scope.newPartner = undefined;
-    $scope.addPartner = function () {
-        wor.addPartner({}, $scope.newPartner, function (result) {
+        $scope.newPartner = undefined;
+        $scope.addPartner = function () {
+            wor.addPartner({}, $scope.newPartner, function (result) {
+                $scope.wor = result;
+                $scope.showAddRegistryForm = false;
+                $scope.newPartner = undefined;
+            });
+        };
+
+        $scope.removePartner = function (partner, index) {
+            wor.removePartner({url:partner.url}, function (result) {
+                $scope.wor.partners.splice(index, 1);
+            });
+        };
+
+        $scope.approvePartner = function (partner, index) {
+            partner.status = 'APPROVED';
+            wor.updatePartner({url:partner.url}, partner, function (result) {
+
+            });
+        };
+
+        $scope.selectPartner = function (partner) {
+            $location.path("/web/" + partner.id);
+            $scope.selectedPartner = partner.id;
+            var remote = Remote();
+            remote.publicFolders({id:partner.id}, function (result) {
+                console.log(result);
+                $scope.selectedPartnerFolders = result;
+            });
+        }
+    });
+
+iceControllers.controller('WebOfRegistriesMenuController',
+    function ($scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote) {
+        // retrieve web of registries partners
+        $scope.wor = undefined;
+        var wor = WebOfRegistries();
+        wor.query({approved_only:true}, function (result) {
             $scope.wor = result;
-            $scope.showAddRegistryForm = false;
-            $scope.newPartner = undefined;
         });
-    };
 
-    $scope.removePartner = function (partner, index) {
-        wor.removePartner({url:partner.url}, function (result) {
-            $scope.wor.partners.splice(index, 1);
-        });
-    };
+//        $scope.newPartner = undefined;
+//        $scope.addPartner = function () {
+//            wor.addPartner({}, $scope.newPartner, function (result) {
+//                $scope.wor = result;
+//                $scope.showAddRegistryForm = false;
+//                $scope.newPartner = undefined;
+//            });
+//        };
+//
+//        $scope.removePartner = function (partner, index) {
+//            wor.removePartner({url:partner.url}, function (result) {
+//                $scope.wor.partners.splice(index, 1);
+//            });
+//        };
+//
+//        $scope.approvePartner = function (partner, index) {
+//            partner.status = 'APPROVED';
+//            wor.updatePartner({url:partner.url}, partner, function (result) {
+//
+//            });
+//        };
 
-    $scope.approvePartner = function (partner, index) {
-        partner.status = 'APPROVED';
-        wor.updatePartner({url:partner.url}, partner, function (result) {
-
-        });
-    };
-
-    $scope.selectPartner = function (partner) {
-        $location.path("/web/" + partner.id);
-        $scope.selectedPartner = partner.id;
-        var remote = Remote();
-        remote.publicFolders({id:partner.id}, function (result) {
-            console.log(result);
-            $scope.selectedPartnerFolders = result;
-        });
-    }
-});
+        $scope.selectPartner = function (partner) {
+            $location.path("/web/" + partner.id);
+            $scope.selectedPartner = partner.id;
+            var remote = Remote();
+            remote.publicFolders({id:partner.id}, function (result) {
+                console.log(result);
+                $scope.selectedPartnerFolders = result;
+            });
+        }
+    });
 
 iceControllers.controller('WorContentController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, Remote) {
     console.log("WorContentController");
