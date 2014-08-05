@@ -29,6 +29,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         });
     };
 
+    // select a folder in the pull down
     $scope.select = function (folder) {
         var i = $scope.selectedFolders.indexOf(folder);
         if (i == -1) {
@@ -105,6 +106,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         // only owners or admins can delete
     });
 
+    // function that handles "edit" click
     $scope.editEntry = function () {
         $location.path('/entry/edit/' + $scope.entry.id);
         $scope.editDisabled = true;
@@ -122,18 +124,50 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     }
 });
 
-iceControllers.controller('RegisterController', function ($scope, $resource, $location) {
+iceControllers.controller('RegisterController', function ($scope, $resource, $location, User) {
     $scope.errMsg = undefined;
+    $scope.newUser = {firstName:undefined, lastName:undefined, institution:undefined, email:undefined, about:undefined};
 
     $scope.submit = function () {
-        // todo move this to User.createUser({})
-        var User = $resource("/rest/profile");
+        var validates = true;
+        // validate
+        console.log($scope.newUser);
 
-        User.save({email:$scope.email, firstName:$scope.firstName, lastName:$scope.lastName, institution:$scope.institution, description:$scope.about}, function (data) {
+        if (!$scope.newUser.firstName) {
+            $scope.firstNameError = true;
+            validates = false;
+        }
+
+        if (!$scope.newUser.lastName) {
+            $scope.lastNameError = true;
+            validates = false;
+        }
+
+        if (!$scope.newUser.email) {
+            $scope.emailError = true;
+            validates = false;
+        }
+
+        if (!$scope.newUser.institution) {
+            $scope.institutionError = true;
+            validates = false;
+        }
+
+        if (!$scope.newUser.about) {
+            $scope.aboutError = true;
+            validates = false;
+        }
+
+        if (!validates)
+            return;
+
+        User().createUser($scope.newUser, function (data) {
             if (data.length != 0)
                 $location.path("/login");
             else
-                $scope.errorMsg = "Could not create account";
+                $scope.errMsg = "Could not create account";
+        }, function (error) {
+            $scope.errMsg = "Error creating account";
         });
     };
 
@@ -1019,111 +1053,6 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
     }
 });
 
-// controller for <ice.menu.collections> directive
-iceControllers.controller('CollectionMenuController', function ($cookieStore, $scope, $modal, $rootScope, $location, $stateParams, Folders) {
-    var sessionId = $cookieStore.get("sessionId");
-    var folders = Folders();
-
-    // default is personal folder
-    console.log("CollectionMenuController");
-    console.log("selected collection", $stateParams.collection);
-
-    //
-    // initialize
-    //
-
-    // folders contained in the selected folder (default selected to personal)
-    $scope.selectedCollectionFolders = undefined;
-    $scope.selectedFolder = $stateParams.collection === undefined ? 'personal' : $stateParams.collection;
-
-    // retrieve collections contained in the selected folder
-    console.log("retrieving sub collections", $scope.selectedFolder);
-    folders.getByType({folderType:$scope.selectedFolder},
-        function (result) {
-            $scope.selectedCollectionFolders = result;
-        }, function (error) {
-            console.error(error);
-        });
-
-    console.log("CMC - retrieving folder counts");
-
-    var updateCounts = function () {
-        folders.query(function (result) {
-            if (result === undefined || $scope.collectionList === undefined)
-                return;
-
-            for (var i = 0; i < $scope.collectionList.length; i += 1) {
-                var item = $scope.collectionList[i];
-                item.count = result[item.name];
-            }
-        });
-    };
-    updateCounts();
-    //
-    // end initialize
-    //
-
-    // Menu count change handler
-    $scope.$on("UpdateCollectionCounts", function (event) {
-        updateCounts();
-    });
-
-    // called from collections-menu-details.html when a collection's folder is selected
-    // simply changes state to folder and allows the controller for that to handle it
-    $scope.selectCollectionFolder = function (folder) {
-        console.log($scope.selectedCollectionFolders);
-        console.log("selectCollectionFolder(TODO)", folder, $scope.selectedFolder);
-        console.log("/" + folder.type + "/" + folder.id);
-
-        // type on server is PUBLIC, PRIVATE, SHARED, UPLOAD
-        var type = folder.type.toLowerCase();
-        if (type !== "upload")
-            type = "folders";
-
-        $location.path("/" + type + "/" + folder.id);
-        $scope.folder = undefined;   // this forces "Loading..." to be shown
-    };
-
-    // called when a collection is selected. Collections are pre-defined ['Available', 'Deleted', etc]
-    // and some allow folders and when that is selected then the selectCollectionFolder() is called
-    $scope.selectCollection = function (name) {
-        console.log("selectCollection()", name);
-        $location.path("/folders/" + name);
-        $scope.selectedFolder = name;
-        $scope.selectedCollectionFolders = undefined;
-
-        // retrieve sub folders for selected collection
-        folders.getByType({folderType:$scope.selectedFolder, folderId:name},
-            function (result) {
-                $scope.selectedCollectionFolders = result;
-            },
-            function (error) {
-                console.error(error);
-            });
-    };
-
-    $scope.currentPath = function (param) {
-        if ($stateParams.collection === undefined && param === 'personal')
-            return true;
-        return $stateParams.collection === param;
-    };
-
-    // BulkUploadNameChange handler
-    $scope.$on("BulkUploadNameChange", function (event, data) {
-        if (data === undefined || $scope.selectedFolder !== "bulkUpload" || $scope.selectedCollectionFolders === undefined) // todo : use vars
-            return;
-
-        for (var i = 0; i < $scope.selectedCollectionFolders.length; i += 1) {
-            var subFolder = $scope.selectedCollectionFolders[i];
-            if (subFolder.id !== data.id)
-                continue;
-
-            $scope.selectedCollectionFolders[i].folderName = data.name;
-            break;
-        }
-    });
-});
-
 iceControllers.controller('UserController', function ($scope, $routeParams, Entry) {
 //    $scope.entry = Entry.query({partId:$routeParams.id});
 });
@@ -1139,6 +1068,7 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
 
     $scope.canCreateAccount = false;
     $scope.canChangePassword = false;
+    $scope.errMsg = undefined;
 
     Settings().getSetting({key:'NEW_REGISTRATION_ALLOWED'}, function (result) {
         $scope.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
